@@ -28,11 +28,27 @@ fi
 
 # Create release notes
 cat > release_notes.md << EOF
-This is the latest set of releases that you can use with your agent of choice. We recommend using the Specify CLI to scaffold your projects, however you can download these independently and manage them yourself.
+# Mark Hazleton's Spec Kit Fork
+
+This is a fork of the GitHub Spec Kit with additional features and enhancements.
+
+## Fork-Specific Features
+
+- **PR Review Command**: Enhanced constitution-based pull request review workflow
+- **Extended Agent Support**: Additional integrations and customizations
+- **Custom Templates**: Tailored templates for specific development workflows
+
+## Using This Release
+
+You can use these releases with your agent of choice. We recommend using the Specify CLI to scaffold your projects, however you can download these independently and manage them yourself.
 
 ## Changelog
 
 $COMMITS
+
+---
+
+*Based on upstream GitHub Spec Kit. This fork is maintained independently and may contain features not yet available in the upstream project.*
 
 EOF
 
