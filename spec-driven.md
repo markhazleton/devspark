@@ -102,6 +102,35 @@ After a plan is created, this command analyzes the plan and related design docum
 3. **Parallelization**: Marks independent tasks `[P]` and outlines safe parallel groups
 4. **Output**: Writes `tasks.md` in the feature directory, ready for execution by a Task agent
 
+### The `/speckit.pr-review` Command
+
+This command provides constitution-based code review for any GitHub Pull Request in the repository:
+
+1. **Constitution-Driven**: Evaluates PR changes against project principles defined in `/memory/constitution.md`
+2. **Repository-Wide**: Works for any PR, not limited to feature branches or spec-driven development
+3. **Automated Analysis**: Reviews code quality, security, testing coverage, and documentation
+4. **Persistent Reports**: Saves comprehensive reviews to `/specs/pr-review/pr-{number}.md` with commit tracking
+5. **Update Support**: Re-reviews updated PRs and maintains review history with timestamps
+
+**Key Features**:
+- Only requires constitution (no spec/plan/tasks needed)
+- Works on main, develop, or any branch
+- Categorizes findings by severity (Critical/High/Medium/Low)
+- Provides line-specific, actionable recommendations
+- Includes approval recommendation (Approve/Request Changes/Reject)
+
+**Usage**:
+```bash
+# Auto-detect PR from current branch
+/speckit.pr-review
+
+# Review specific PR
+/speckit.pr-review #123
+
+# Re-review after changes
+/speckit.pr-review #123
+```
+
 ### Example: Building a Chat Feature
 
 Here's how these commands transform the traditional development workflow:

@@ -14,6 +14,38 @@ The toolkit supports multiple AI coding assistants, allowing teams to use their 
 
 - Any changes to `__init__.py` for the Specify CLI require a version rev in `pyproject.toml` and addition of entries to `CHANGELOG.md`.
 
+## PR Review Command
+
+The `/speckit.pr-review` command is a special command that works independently of the spec-driven development workflow:
+
+### Unique Characteristics
+
+1. **Constitution-Only**: Requires only `/memory/constitution.md` - no spec, plan, or tasks needed
+2. **Repository-Wide**: Works for any PR in any branch (main, develop, feature, etc.)
+3. **Persistent Storage**: Reviews saved to `/specs/pr-review/pr-{id}.md` with metadata
+4. **Version Tracking**: Tracks commit SHA and timestamp for each review
+5. **Update Logic**: Handles multiple reviews of same PR with history
+6. **GitHub Integration**: Uses GitHub CLI (`gh`) for PR data extraction
+
+### Implementation Notes
+
+- **Script**: Uses dedicated `get-pr-context.{sh,ps1}` scripts (not `check-prerequisites`)
+- **No Feature Context**: Doesn't require feature branch or spec directory
+- **JSON Output**: Scripts return PR metadata including commit SHA, files changed, diff availability
+- **Error Handling**: Graceful degradation when constitution missing or GitHub CLI unavailable
+
+### Agent Integration
+
+When adding new agents, include `/speckit.pr-review` following the same pattern as other commands:
+- Markdown format for most agents
+- TOML format for Gemini/Qwen
+- Script placeholders: `{SCRIPT}` replaced with `get-pr-context` script path
+- Argument placeholder: `$ARGUMENTS` for PR number
+
+See `templates/commands/pr-review.md` for the canonical template.
+
+---
+
 ## Adding New Agent Support
 
 This section explains how to add support for new AI agents/assistants to the Specify CLI. Use this guide as a reference when integrating new AI tools into the Spec-Driven Development workflow.

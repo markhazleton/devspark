@@ -134,6 +134,45 @@ Use **`/speckit.implement`** to execute all tasks and build your feature accordi
 
 For detailed step-by-step instructions, see our [comprehensive guide](./spec-driven.md).
 
+### Pull Request Review
+
+Use the **`/speckit.pr-review`** command to perform constitution-based code reviews on any GitHub Pull Request:
+
+```bash
+# Review current PR (auto-detect from branch)
+/speckit.pr-review
+
+# Review specific PR by number
+/speckit.pr-review #123
+
+# Re-review after changes
+/speckit.pr-review #123
+```
+
+**Key Features**:
+- **Works for any PR** - not limited to feature branches or spec-driven development
+- **Only requires constitution** - no spec, plan, or tasks needed
+- **Branch-agnostic** - review PRs targeting main, develop, or any branch
+- **Persistent reviews** - saves reports to `/specs/pr-review/pr-{number}.md`
+- **Tracks changes** - monitors commit SHA and review timestamps
+- **Update handling** - appends new reviews when PR changes, preserves history
+
+**Review Output**:
+- Constitution compliance evaluation (principle-by-principle)
+- Security analysis and checklist
+- Code quality assessment
+- Testing coverage validation
+- Categorized findings (Critical/High/Medium/Low)
+- Actionable recommendations with file:line references
+- Approval recommendation (Approve/Request Changes/Reject)
+
+**Prerequisites**:
+- Project constitution at `/memory/constitution.md`
+- [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
+- GitHub repository with pull requests
+
+For complete usage guide, see [PR Review Documentation](./docs/pr-review-usage.md).
+
 ## 📽️ Video Overview
 
 Want to see Spec Kit in action? Watch our [video overview](https://www.youtube.com/watch?v=a9eR1xsfvHg&pp=0gcJCckJAYcqIYzv)!
@@ -257,6 +296,7 @@ Essential commands for the Spec-Driven Development workflow:
 | `/speckit.plan`         | Create technical implementation plans with your chosen tech stack        |
 | `/speckit.tasks`        | Generate actionable task lists for implementation                        |
 | `/speckit.implement`    | Execute all tasks to build the feature according to the plan             |
+| `/speckit.pr-review`    | Review pull requests against constitution (works for any PR)             |
 
 #### Optional Commands
 
@@ -267,6 +307,8 @@ Additional commands for enhanced quality and validation:
 | `/speckit.clarify`   | Clarify underspecified areas (recommended before `/speckit.plan`; formerly `/quizme`)                                                |
 | `/speckit.analyze`   | Cross-artifact consistency & coverage analysis (run after `/speckit.tasks`, before `/speckit.implement`)                             |
 | `/speckit.checklist` | Generate custom quality checklists that validate requirements completeness, clarity, and consistency (like "unit tests for English") |
+
+**Note**: `/speckit.pr-review` can be used independently at any time to review any PR in your repository. It only requires a constitution and works on any branch.
 
 ### Environment Variables
 
@@ -290,6 +332,7 @@ Spec-Driven Development is a structured process that emphasizes:
 | **0-to-1 Development** ("Greenfield")    | Generate from scratch    | <ul><li>Start with high-level requirements</li><li>Generate specifications</li><li>Plan implementation steps</li><li>Build production-ready applications</li></ul> |
 | **Creative Exploration**                 | Parallel implementations | <ul><li>Explore diverse solutions</li><li>Support multiple technology stacks & architectures</li><li>Experiment with UX patterns</li></ul>                         |
 | **Iterative Enhancement** ("Brownfield") | Brownfield modernization | <ul><li>Add features iteratively</li><li>Modernize legacy systems</li><li>Adapt processes</li></ul>                                                                |
+| **Code Review & Quality**                | Constitution-based review | <ul><li>Automated PR review against principles</li><li>Security and quality checks</li><li>Track review history</li></ul>                                          |
 
 ## 🎯 Experimental Goals
 
@@ -612,6 +655,38 @@ The `/speckit.implement` command will:
 > The AI agent will execute local CLI commands (such as `dotnet`, `npm`, etc.) - make sure you have the required tools installed on your machine.
 
 Once the implementation is complete, test the application and resolve any runtime errors that may not be visible in CLI logs (e.g., browser console errors). You can copy and paste such errors back to your AI agent for resolution.
+
+### **STEP 8:** Review Pull Request
+
+Before merging your changes, run a constitution-based code review:
+
+```text
+/speckit.pr-review
+```
+
+Or for a specific PR:
+
+```text
+/speckit.pr-review #123
+```
+
+The PR review command will:
+- Evaluate your changes against the project constitution
+- Check for security issues and code quality concerns
+- Verify testing coverage and documentation
+- Generate a detailed review report in `/specs/pr-review/pr-{number}.md`
+- Provide actionable recommendations categorized by severity
+
+**Key Features**:
+- Works for **any PR** in the repository, not just feature branches
+- Only requires a constitution (no spec/plan/tasks needed)
+- Can be used on main branch, develop, or any other branch
+- Stores review history with commit tracking
+- Updates existing reviews when PR changes
+
+Address critical and high-priority issues before merging. Re-run the review after fixes to verify improvements.
+
+For detailed usage, see the [PR Review Guide](docs/pr-review-usage.md).
 
 </details>
 
