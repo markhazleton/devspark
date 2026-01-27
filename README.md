@@ -306,6 +306,7 @@ Additional commands for enhanced quality and validation:
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `/speckit.clarify`   | Clarify underspecified areas (recommended before `/speckit.plan`; formerly `/quizme`)                                                |
 | `/speckit.analyze`   | Cross-artifact consistency & coverage analysis (run after `/speckit.tasks`, before `/speckit.implement`)                             |
+| `/speckit.critic`    | Adversarial risk analysis identifying technical flaws and failure modes (run after `/speckit.tasks`, before `/speckit.implement`)    |
 | `/speckit.checklist` | Generate custom quality checklists that validate requirements completeness, clarity, and consistency (like "unit tests for English") |
 
 **Note**: `/speckit.pr-review` can be used independently at any time to review any PR in your repository. It only requires a constitution and works on any branch.
