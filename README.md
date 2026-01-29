@@ -134,6 +134,87 @@ Use **`/speckit.implement`** to execute all tasks and build your feature accordi
 
 For detailed step-by-step instructions, see our [comprehensive guide](./spec-driven.md).
 
+## Constitution-Powered Commands
+
+These commands leverage your project constitution but are **independent of the Spec-Driven Development workflow**. They don't require any spec, plan, or tasks—just a constitution. Use them on any codebase, anytime.
+
+### Site Audit
+
+Use the **`/speckit.site-audit`** command to perform a comprehensive codebase audit against your project constitution and standards:
+
+```bash
+# Full audit (default - all checks)
+/speckit.site-audit
+
+# Constitution compliance only
+/speckit.site-audit --scope=constitution
+
+# Package/dependency analysis only
+/speckit.site-audit --scope=packages
+
+# Code quality metrics only
+/speckit.site-audit --scope=quality
+
+# Unused code/dependencies detection
+/speckit.site-audit --scope=unused
+
+# Duplicate code detection
+/speckit.site-audit --scope=duplicate
+```
+
+**Key Features**:
+- **Constitution-Driven Analysis** - Evaluates codebase against project principles
+- **Security Scanning** - Detects hardcoded secrets, insecure patterns, missing validation
+- **Dependency Auditing** - Identifies outdated, vulnerable, or unused packages
+- **Code Quality Metrics** - Measures complexity, duplication, and maintainability
+- **Automated Reports** - Saves detailed audit results to `/docs/copilot/audit/YYYY-MM-DD_results.md`
+- **Trend Tracking** - Compares results against previous audits for improvement trends
+
+**Prerequisites**:
+- Project constitution at `/memory/constitution.md`
+- PowerShell 7+ (for script execution)
+- pip-audit (optional, for Python security scanning)
+
+For complete audit details, see the generated report in `/docs/copilot/audit/`.
+
+### Critic (Adversarial Risk Analysis)
+
+Use the **`/speckit.critic`** command to perform adversarial risk analysis identifying technical flaws, implementation hazards, and failure modes:
+
+```bash
+# Run critic analysis after tasks are generated
+/speckit.critic
+
+# Focus on specific concerns
+/speckit.critic Focus on scalability and security risks
+```
+
+**Key Features**:
+- **Pre-mortem Analysis** - Imagines project failure in production and explains why
+- **Stack-Specific Risks** - Detects framework-specific hazards (Python async, Node.js, Go, etc.)
+- **Showstopper Detection** - Identifies issues that will cause production outages or security breaches
+- **Go/No-Go Recommendation** - Provides clear verdict on whether to proceed with implementation
+- **Constitution Violations** - Flags any deviations from project principles as showstoppers
+
+**Severity Levels**:
+- **SHOWSTOPPER** - Will cause production outage, data loss, or security breach (blocks implementation)
+- **CRITICAL** - Will cause major user-facing issues or costly rework
+- **HIGH** - Will cause technical debt or operational burden
+- **MEDIUM** - Will slow development or cause minor issues
+
+**When to Use**:
+- After `/speckit.tasks` and before `/speckit.implement`
+- When you want a skeptical review of your implementation plan
+- To identify risks the team may have overlooked
+
+**Key Distinction from `/speckit.analyze`**:
+- `/speckit.analyze` = Consistency & completeness checking (are artifacts aligned?)
+- `/speckit.critic` = Adversarial risk analysis (what will fail in production?)
+
+**Prerequisites**:
+- Project constitution at `/memory/constitution.md`
+- Completed spec.md, plan.md, and tasks.md in the feature directory (this command is part of the spec workflow)
+
 ### Pull Request Review
 
 Use the **`/speckit.pr-review`** command to perform constitution-based code reviews on any GitHub Pull Request:
@@ -296,20 +377,29 @@ Essential commands for the Spec-Driven Development workflow:
 | `/speckit.plan`         | Create technical implementation plans with your chosen tech stack        |
 | `/speckit.tasks`        | Generate actionable task lists for implementation                        |
 | `/speckit.implement`    | Execute all tasks to build the feature according to the plan             |
-| `/speckit.pr-review`    | Review pull requests against constitution (works for any PR)             |
 
-#### Optional Commands
+#### Constitution-Powered Commands (No Spec Required)
 
-Additional commands for enhanced quality and validation:
+These commands only require a constitution and work independently of the spec workflow:
+
+| Command               | Description                                                              |
+| --------------------- | ------------------------------------------------------------------------ |
+| `/speckit.pr-review`  | Review pull requests against constitution (works for any PR, any branch) |
+| `/speckit.site-audit` | Comprehensive codebase audit for security, quality, and compliance       |
+
+#### Spec Workflow Commands
+
+Additional commands for the spec-driven development workflow:
 
 | Command              | Description                                                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `/speckit.clarify`   | Clarify underspecified areas (recommended before `/speckit.plan`; formerly `/quizme`)                                                |
 | `/speckit.analyze`   | Cross-artifact consistency & coverage analysis (run after `/speckit.tasks`, before `/speckit.implement`)                             |
-| `/speckit.critic`    | Adversarial risk analysis identifying technical flaws and failure modes (run after `/speckit.tasks`, before `/speckit.implement`)    |
+| `/speckit.critic`    | Adversarial risk analysis identifying showstoppers, security flaws, and production failure modes (run after `/speckit.tasks`)        |
+| `/speckit.site-audit`| Comprehensive codebase audit against constitution for security, quality, dependencies, and compliance issues                         |
 | `/speckit.checklist` | Generate custom quality checklists that validate requirements completeness, clarity, and consistency (like "unit tests for English") |
 
-**Note**: `/speckit.pr-review` can be used independently at any time to review any PR in your repository. It only requires a constitution and works on any branch.
+**Note**: `/speckit.pr-review` and `/speckit.site-audit` can be used at any time on any codebase—they only require a constitution and work independently of any spec workflow. `/speckit.critic` requires completed spec.md, plan.md, and tasks.md files.
 
 ### Environment Variables
 
@@ -688,6 +778,47 @@ The PR review command will:
 Address critical and high-priority issues before merging. Re-run the review after fixes to verify improvements.
 
 For detailed usage, see the [PR Review Guide](docs/pr-review-usage.md).
+
+### **STEP 9:** Ongoing Code Quality
+
+Throughout development, use these commands to maintain code quality:
+
+**Site Audit** - Run comprehensive codebase audits:
+
+```bash
+# Full audit covering all categories
+/speckit.site-audit
+
+# Focus on specific areas
+/speckit.site-audit --scope=constitution  # Constitution compliance
+/speckit.site-audit --scope=packages      # Dependency analysis
+/speckit.site-audit --scope=quality       # Code quality metrics
+```
+
+The site audit produces detailed compliance reports saved to `/docs/copilot/audit/YYYY-MM-DD_results.md`, including:
+- Constitution compliance scores
+- Security vulnerability detection
+- Unused code and dependency identification
+- Code quality metrics and trends
+
+For detailed usage, see the [Site Audit Guide](docs/site-audit-usage.md).
+
+**Critic (Pre-Implementation)** - Run adversarial risk analysis before implementing:
+
+```bash
+# Run after /speckit.tasks, before /speckit.implement
+/speckit.critic
+
+# Focus on specific concerns
+/speckit.critic Focus on scalability and security
+```
+
+The critic command identifies showstoppers and provides a Go/No-Go recommendation:
+- **STOP** - Showstoppers present, cannot proceed
+- **CONDITIONAL** - Fix critical risks first
+- **PROCEED WITH CAUTION** - Document acknowledged risks
+
+For detailed usage, see the [Critic Guide](docs/critic-usage.md).
 
 </details>
 

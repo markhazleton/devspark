@@ -104,13 +104,14 @@ After a plan is created, this command analyzes the plan and related design docum
 
 ### The `/speckit.pr-review` Command
 
-This command provides constitution-based code review for any GitHub Pull Request in the repository:
+This command provides constitution-based code review for any GitHub Pull Request in the repository. **Unlike the spec workflow commands above, this command is independent of the Spec-Driven Development workflow**—it only requires a constitution and works for any PR in any repository:
 
 1. **Constitution-Driven**: Evaluates PR changes against project principles defined in `/memory/constitution.md`
 2. **Repository-Wide**: Works for any PR, not limited to feature branches or spec-driven development
-3. **Automated Analysis**: Reviews code quality, security, testing coverage, and documentation
-4. **Persistent Reports**: Saves comprehensive reviews to `/specs/pr-review/pr-{number}.md` with commit tracking
-5. **Update Support**: Re-reviews updated PRs and maintains review history with timestamps
+3. **No Spec Required**: Does not need spec.md, plan.md, or tasks.md—just a constitution
+4. **Automated Analysis**: Reviews code quality, security, testing coverage, and documentation
+5. **Persistent Reports**: Saves comprehensive reviews to `/specs/pr-review/pr-{number}.md` with commit tracking
+6. **Update Support**: Re-reviews updated PRs and maintains review history with timestamps
 
 **Key Features**:
 - Only requires constitution (no spec/plan/tasks needed)
@@ -129,6 +130,83 @@ This command provides constitution-based code review for any GitHub Pull Request
 
 # Re-review after changes
 /speckit.pr-review #123
+```
+
+### The `/speckit.site-audit` Command
+
+This command performs comprehensive codebase audits against your project constitution and development standards. **Like PR review, this command is independent of the Spec-Driven Development workflow**—it only requires a constitution and works on any codebase at any time:
+
+1. **Constitution-Driven**: Evaluates codebase against principles defined in `/memory/constitution.md`
+2. **No Spec Required**: Does not need spec.md, plan.md, or tasks.md—just a constitution
+3. **Security Scanning**: Detects hardcoded secrets, insecure patterns, missing validation
+4. **Dependency Analysis**: Identifies outdated, vulnerable, or unused packages
+5. **Code Quality Metrics**: Measures complexity, duplication, and maintainability indicators
+6. **Compliance Scoring**: Calculates percentage scores for each audit category
+7. **Trend Tracking**: Compares results against previous audits for improvement tracking
+
+**Key Features**:
+- Scoped audits for focused analysis
+- Automated reports saved to `/docs/copilot/audit/YYYY-MM-DD_results.md`
+- Historical comparison with previous audits
+- Severity-based categorization (Critical/High/Medium/Low)
+- Actionable recommendations with file:line references
+
+**Scope Options**:
+- `--scope=full` (default) - Complete audit
+- `--scope=constitution` - Constitution compliance only
+- `--scope=packages` - Package/dependency analysis
+- `--scope=quality` - Code quality metrics
+- `--scope=unused` - Unused code detection
+- `--scope=duplicate` - Duplicate code detection
+
+**Usage**:
+```bash
+# Full audit
+/speckit.site-audit
+
+# Constitution compliance only
+/speckit.site-audit --scope=constitution
+
+# Dependency analysis
+/speckit.site-audit --scope=packages
+```
+
+### The `/speckit.critic` Command
+
+This command performs adversarial risk analysis identifying technical flaws, implementation hazards, and failure modes. **Unlike PR review and site audit, this command is part of the Spec-Driven Development workflow**—it requires spec.md, plan.md, and tasks.md to analyze:
+
+1. **Pre-mortem Analysis**: Imagines project failure in production and explains why
+2. **Spec Workflow Required**: Analyzes your spec.md, plan.md, and tasks.md files
+3. **Stack Detection**: Automatically identifies technology stack and applies stack-specific risk heuristics
+4. **Showstopper Detection**: Identifies issues that will cause production outages or security breaches
+5. **Go/No-Go Recommendation**: Provides clear verdict on whether to proceed with implementation
+6. **Constitution Enforcement**: Flags any deviations from project principles as showstoppers
+
+**Key Features**:
+- Adversarial mindset (assumes Murphy's Law)
+- Framework-specific risk checklists (Python, Node.js, Go, Java, etc.)
+- Severity classification (Showstopper/Critical/High/Medium)
+- Architecture risk analysis (async/concurrency, scale, distributed systems)
+- Security & compliance risk detection
+- Operational hazard identification
+- Missing task detection
+
+**When to Use**:
+- After `/speckit.tasks` and before `/speckit.implement`
+- When you want a skeptical review of your implementation plan
+- To identify risks the team may have overlooked
+
+**Key Distinction from `/speckit.analyze`**:
+- `/speckit.analyze` = Consistency & completeness checking (are artifacts aligned?)
+- `/speckit.critic` = Adversarial risk analysis (what will fail in production?)
+
+**Usage**:
+```bash
+# Run critic analysis
+/speckit.critic
+
+# Focus on specific concerns
+/speckit.critic Focus on scalability and security risks
 ```
 
 ### Example: Building a Chat Feature

@@ -12,8 +12,26 @@
     - name: Upgrade
       href: upgrade.md
 
+# SDD Methodology
+- name: Methodology
+  items:
+    - name: Spec-Driven Development
+      href: spec-driven-development.md
+
 # Development workflows
 - name: Development
   items:
     - name: Local Development
       href: local-development.md
+
+# Quality & Review commands
+- name: Constitution-Powered Commands
+  items:
+    - name: Constitution Guide
+      href: constitution-guide.md
+    - name: PR Review Guide
+      href: pr-review-usage.md
+    - name: Site Audit Guide
+      href: site-audit-usage.md
+    - name: Critic Guide (Spec Workflow)
+      href: critic-usage.md

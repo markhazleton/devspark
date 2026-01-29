@@ -941,7 +941,7 @@ Authenticate with GitHub CLI: `gh auth login`
 
 ---
 
-For more information, see the [Spec-Driven Development Guide](../spec-driven.md).
+For more information, see the [Spec-Driven Development Guide](https://github.com/github/spec-kit/blob/main/spec-driven.md).
 ```
 
 ### 4.3 Update AGENTS.md

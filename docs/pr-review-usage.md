@@ -4,6 +4,8 @@
 
 The `/speckit.pr-review` command performs automated, constitution-driven code reviews for GitHub Pull Requests. It evaluates code changes against your project's established principles and generates detailed feedback reports stored in your repository.
 
+> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/speckit.specify`, `/speckit.plan`, and `/speckit.tasks`, PR review does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/memory/constitution.md`) and works for any PR in any repository—whether or not you're using spec-driven development.
+
 ## Prerequisites
 
 - **Required**: Project constitution at `/memory/constitution.md`
@@ -547,10 +549,11 @@ Critical issues found that must be resolved before merge.
 
 ## Additional Resources
 
-- [Spec-Driven Development Guide](../spec-driven.md)
-- [Constitution Guide](../docs/constitution-guide.md) *(if exists)*
+- [Constitution Guide](constitution-guide.md)
+- [Site Audit Guide](site-audit-usage.md)
+- [Critic Guide](critic-usage.md)
 - [GitHub CLI Documentation](https://cli.github.com/manual/)
-- [Spec Kit README](../README.md)
+- [Spec Kit on GitHub](https://github.com/github/spec-kit)
 
 ## Support
 

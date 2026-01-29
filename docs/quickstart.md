@@ -75,6 +75,12 @@ Optionally, validate the plan with `/speckit.analyze`:
 /speckit.analyze
 ```
 
+For adversarial risk analysis, run `/speckit.critic` to identify potential failure modes:
+
+```markdown
+/speckit.critic
+```
+
 Then, use the `/speckit.implement` slash command to execute the plan.
 
 ```markdown
@@ -156,9 +162,38 @@ Finally, implement the solution:
 - **Iterate and refine** your specifications before implementation
 - **Validate** the plan before coding begins
 - **Let the AI agent handle** the implementation details
+- **Review and audit** code regularly for constitution compliance
+
+## Constitution-Powered Commands (No Spec Required)
+
+These commands only need a constitution—no specs required. Use them on any codebase:
+
+### PR Review
+
+Review any GitHub Pull Request against your constitution:
+
+```bash
+/speckit.pr-review #123
+```
+
+### Site Audit
+
+Perform comprehensive codebase audit:
+
+```bash
+/speckit.site-audit
+```
+
+### Critic (Spec Workflow Only)
+
+Run adversarial risk analysis (requires spec.md, plan.md, and tasks.md):
+
+```bash
+/speckit.critic
+```
 
 ## Next Steps
 
-- Read the [complete methodology](../spec-driven.md) for in-depth guidance
-- Check out [more examples](../templates) in the repository
+- Read the [complete methodology](https://github.com/github/spec-kit/blob/main/spec-driven.md) for in-depth guidance
+- Check out [more examples](https://github.com/github/spec-kit/tree/main/templates) in the repository
 - Explore the [source code on GitHub](https://github.com/github/spec-kit)

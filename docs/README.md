@@ -28,6 +28,12 @@ To build the documentation locally:
 - `toc.yml` - Table of contents configuration
 - `installation.md` - Installation guide
 - `quickstart.md` - Quick start guide
+- `upgrade.md` - Upgrade instructions
+- `local-development.md` - Local development setup
+- `constitution-guide.md` - Constitution creation and usage guide
+- `pr-review-usage.md` - PR review command guide
+- `site-audit-usage.md` - Site audit command guide  
+- `critic-usage.md` - Critic command guide
 - `_site/` - Generated documentation output (ignored by git)
 
 ## Deployment

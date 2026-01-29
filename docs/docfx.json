@@ -6,16 +6,6 @@
           "*.md",
           "toc.yml"
         ]
-      },
-      {
-        "files": [
-          "../README.md",
-          "../CONTRIBUTING.md",
-          "../CODE_OF_CONDUCT.md",
-          "../SECURITY.md",
-          "../SUPPORT.md"
-        ],
-        "dest": "."
       }
     ],
     "resource": [
@@ -26,22 +16,13 @@
       },
       {
         "files": [
-          "../media/**"
+          "media/**"
         ],
+        "src": "..",
         "dest": "media"
       }
     ],
-    "overwrite": [
-      {
-        "files": [
-          "apidoc/**.md"
-        ],
-        "exclude": [
-          "obj/**",
-          "_site/**"
-        ]
-      }
-    ],
+    "overwrite": [],
     "dest": "_site",
     "globalMetadataFiles": [],
     "fileMetadataFiles": [],

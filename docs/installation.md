@@ -66,9 +66,26 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <project_name
 
 After initialization, you should see the following commands available in your AI agent:
 
+### Core Spec Workflow Commands
+
+These commands are used for the Spec-Driven Development process:
+
+- `/speckit.constitution` - Create project principles
 - `/speckit.specify` - Create specifications
 - `/speckit.plan` - Generate implementation plans  
 - `/speckit.tasks` - Break down into actionable tasks
+- `/speckit.implement` - Execute the implementation plan
+- `/speckit.critic` - Adversarial risk analysis (requires spec, plan, tasks)
+- `/speckit.analyze` - Cross-artifact consistency and coverage analysis
+- `/speckit.checklist` - Generate quality validation checklists
+- `/speckit.clarify` - Clarify underspecified areas
+
+### Constitution-Powered Commands (No Spec Required)
+
+These commands only need a constitution and work independently on any codebase:
+
+- `/speckit.pr-review` - Review pull requests against constitution
+- `/speckit.site-audit` - Comprehensive codebase audit for security, quality, and compliance
 
 The `.specify/scripts` directory will contain both `.sh` and `.ps1` scripts.
 
