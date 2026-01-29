@@ -532,7 +532,7 @@ The project constitution defines audit criteria. Create one first:
 2. Define your project's core principles
 3. Then retry: /speckit.site-audit
 
-Learn more: https://github.com/github/spec-kit
+Learn more: https://github.com/MarkHazleton/spec-kit
 ```
 
 **If no issues found**:

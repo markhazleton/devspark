@@ -1,4 +1,3 @@
-````markdown
 # Site Audit Command Guide
 
 ## Overview
@@ -378,11 +377,9 @@ Integrate audit into your pipeline to catch issues early.
 
 If you encounter issues:
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [Spec Kit Issues](https://github.com/github/spec-kit/issues)
+- Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
 
 ---
 
 *Part of the Spec Kit - Spec-Driven Development Toolkit*  
-*For more information: https://github.com/github/spec-kit*
-
-````
+*For more information: https://github.com/MarkHazleton/spec-kit*

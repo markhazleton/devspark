@@ -1,4 +1,3 @@
-````markdown
 # Critic Command Guide
 
 ## Overview
@@ -430,11 +429,9 @@ Use recurring findings to improve your constitution and planning process.
 
 If you encounter issues:
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [Spec Kit Issues](https://github.com/github/spec-kit/issues)
+- Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
 
 ---
 
 *Part of the Spec Kit - Spec-Driven Development Toolkit*  
-*For more information: https://github.com/github/spec-kit*
-
-````
+*For more information: https://github.com/MarkHazleton/spec-kit*

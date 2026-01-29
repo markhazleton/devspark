@@ -1,4 +1,3 @@
-````markdown
 # Constitution Guide
 
 ## Overview
@@ -221,5 +220,3 @@ The constitution is the source of truth. If the team disagrees with a finding, u
 ---
 
 *The constitution is your project's DNA. Invest time in making it clear, specific, and actionable.*
-
-````

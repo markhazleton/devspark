@@ -4,6 +4,44 @@
 
 **An effort to allow organizations to focus on product scenarios rather than writing undifferentiated code with the help of Spec-Driven Development.**
 
+---
+
+## About This Fork
+
+> **Important**: This is **Spec Kit - Mark Hazleton Edition**, a community fork that extends the original project.
+>
+> Looking for the original? Visit the official GitHub Spec Kit at: **[github.com/github/spec-kit](https://github.com/github/spec-kit)**
+
+### Why This Fork Exists
+
+The original Spec Kit project established an excellent foundation for Spec-Driven Development. This fork builds upon that great work by adding **constitution-powered commands** that help teams get more value from the effort invested in creating a well-crafted project constitution.
+
+### What's Different
+
+| Feature | Original Spec Kit | This Fork |
+|---------|-------------------|-----------|
+| Core SDD Workflow | ✅ Full support | ✅ Full support |
+| `/speckit.pr-review` | ❌ Not included | ✅ **Added** - Constitution-based PR review |
+| `/speckit.site-audit` | ❌ Not included | ✅ **Added** - Full codebase auditing |
+| `/speckit.critic` | ❌ Not included | ✅ **Added** - Adversarial risk analysis |
+| `/speckit.constitution` | ❌ Not included | ✅ **Added** - Constitution creation helper |
+| Multi-agent support | Limited | ✅ **Expanded** - 17+ AI agents supported |
+
+### Philosophy
+
+When you invest time writing a thorough project constitution—defining your security standards, testing requirements, code quality expectations, and governance rules—that document should work hard for you. This fork introduces commands that continuously leverage your constitution to:
+
+- **Review every PR** against your established principles
+- **Audit your entire codebase** for compliance violations
+- **Identify risks** before they become production issues
+- **Maintain consistency** across your team's work
+
+### Credit & Attribution
+
+Full credit goes to the GitHub team for creating the Spec-Driven Development methodology and the original Spec Kit toolkit. This fork is an extension of their work, not a replacement. If you're looking for the official, GitHub-maintained version, please visit [github.com/github/spec-kit](https://github.com/github/spec-kit).
+
+---
+
 ## What is Spec-Driven Development?
 
 Spec-Driven Development **flips the script** on traditional software development. For decades, code has been king — specifications were just scaffolding we built and discarded once the "real work" of coding began. Spec-Driven Development changes this: **specifications become executable**, directly generating working implementations rather than just guiding them.
@@ -107,8 +145,8 @@ Perform adversarial risk analysis identifying technical flaws, implementation ha
 
 ## Contributing
 
-Please see our [Contributing Guide](https://github.com/github/spec-kit/blob/main/CONTRIBUTING.md) for information on how to contribute to this project.
+Please see our [Contributing Guide](https://github.com/MarkHazleton/spec-kit/blob/main/CONTRIBUTING.md) for information on how to contribute to this project.
 
 ## Support
 
-For support, please check our [Support Guide](https://github.com/github/spec-kit/blob/main/SUPPORT.md) or open an issue on GitHub.
+For support, please check our [Support Guide](https://github.com/MarkHazleton/spec-kit/blob/main/SUPPORT.md) or open an issue on GitHub.

@@ -553,16 +553,16 @@ Critical issues found that must be resolved before merge.
 - [Site Audit Guide](site-audit-usage.md)
 - [Critic Guide](critic-usage.md)
 - [GitHub CLI Documentation](https://cli.github.com/manual/)
-- [Spec Kit on GitHub](https://github.com/github/spec-kit)
+- [Spec Kit on GitHub](https://github.com/MarkHazleton/spec-kit)
 
 ## Support
 
 If you encounter issues or have questions:
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [Spec Kit Issues](https://github.com/github/spec-kit/issues)
+- Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
 - Consult [GitHub CLI Manual](https://cli.github.com/manual/)
 
 ---
 
 *Part of the Spec Kit - Spec-Driven Development Toolkit*  
-*For more information: https://github.com/github/spec-kit*
+*For more information: https://github.com/MarkHazleton/spec-kit*
