@@ -37,9 +37,9 @@
     "cleanupCacheHistory": false,
     "disableGitFeatures": false,
     "globalMetadata": {
-      "_appTitle": "Spec Kit - Mark Hazleton Edition",
-      "_appName": "Spec Kit",
-      "_appFooter": "Spec Kit (Mark Hazleton Fork) - Extended specification-driven development toolkit",
+      "_appTitle": "Spec Kit Spark",
+      "_appName": "Spec Kit Spark",
+      "_appFooter": "Spec Kit Spark - Constitution-powered specification-driven development toolkit",
       "_enableSearch": true,
       "_disableContribution": false,
       "_gitContribute": {

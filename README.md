@@ -1,11 +1,11 @@
 <div align="center">
     <img src="./media/logo_large.webp" alt="Spec Kit Logo" width="200" height="200"/>
-    <h1>🌱 Spec Kit - Mark Hazleton Edition</h1>
+    <h1>🌱 Spec Kit Spark</h1>
     <h3><em>Build high-quality software faster.</em></h3>
 </div>
 
 <p align="center">
-    <strong>An extended fork of the original Spec Kit, adding constitution-powered commands for PR review, site auditing, and risk analysis.</strong>
+    <strong>A community extension of Spec Kit, adding constitution-powered commands for PR review, site auditing, and risk analysis. Part of the WebSpark suite.</strong>
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
     <a href="https://markhazleton.github.io/spec-kit/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
-> **Note**: This is a community fork maintained by [Mark Hazleton](https://github.com/MarkHazleton).
+> **Note**: Spec Kit Spark is a community extension, part of the [WebSpark](https://github.com/MarkHazleton?tab=repositories&q=webspark) demonstration suite.
 > Looking for the original? Visit [github.com/github/spec-kit](https://github.com/github/spec-kit)
 
 ---
@@ -60,17 +60,18 @@ uv tool install specify-cli --from git+https://github.com/MarkHazleton/spec-kit.
 Then use the tool directly:
 
 ```bash
-# Create new project
+# Greenfield: Create new project from scratch
 specify init <PROJECT_NAME>
 
-# Or initialize in existing project
-specify init . --ai claude
-# or
+# Brownfield: Add to existing project
+cd /path/to/your-existing-project
 specify init --here --ai claude
 
 # Check installed tools
 specify check
 ```
+
+> **Brownfield Tip**: Use `/speckit.discover-constitution` after initialization to analyze existing code patterns and draft a constitution.
 
 To upgrade Specify, see the [Upgrade Guide](./docs/upgrade.md) for detailed instructions. Quick upgrade:
 
@@ -83,7 +84,12 @@ uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/s
 Run directly without installing:
 
 ```bash
+# Greenfield: New project
 uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME>
+
+# Brownfield: Existing project
+cd /path/to/your-existing-project
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
 ```
 
 **Benefits of persistent installation:**

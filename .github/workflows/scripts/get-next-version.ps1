@@ -5,7 +5,7 @@
     Calculate the next version based on the latest git tag
 .DESCRIPTION
     Get-next-version.ps1 - Calculate the next version and output GitHub Actions variables
-    Fork-specific: Uses v1.0.0-markhazleton.X versioning to distinguish from upstream
+    Spec Kit Spark: Uses v1.0.0-spark.X versioning to distinguish from upstream
 .EXAMPLE
     .\get-next-version.ps1
 #>
@@ -25,18 +25,18 @@ if ($env:GITHUB_OUTPUT) {
 }
 Write-Host "Latest tag: $latestTag"
 
-# Check if this is a markhazleton fork version
-if ($latestTag -match '^v(\d+)\.(\d+)\.(\d+)-markhazleton\.(\d+)$') {
-    # Increment the fork version number
+# Check if this is a Spark version
+if ($latestTag -match '^v(\d+)\.(\d+)\.(\d+)-spark\.(\d+)$') {
+    # Increment the Spark version number
     $major = $matches[1]
     $minor = $matches[2]
     $patch = $matches[3]
-    $forkVersion = [int]$matches[4]
-    $forkVersion++
-    $newVersion = "v$major.$minor.$patch-markhazleton.$forkVersion"
+    $sparkVersion = [int]$matches[4]
+    $sparkVersion++
+    $newVersion = "v$major.$minor.$patch-spark.$sparkVersion"
 } else {
-    # First fork release or upstream version - start with v1.0.0-markhazleton.1
-    $newVersion = "v1.0.0-markhazleton.1"
+    # First Spark release or upstream version - start with v1.0.0-spark.1
+    $newVersion = "v1.0.0-spark.1"
 }
 
 if ($env:GITHUB_OUTPUT) {

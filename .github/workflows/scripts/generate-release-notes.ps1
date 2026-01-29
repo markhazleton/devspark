@@ -42,15 +42,17 @@ if ($LastTag -eq "v0.0.0") {
 
 # Create release notes
 $releaseNotes = @"
-# Mark Hazleton's Spec Kit Fork
+# Spec Kit Spark
 
-This is a fork of the GitHub Spec Kit with additional features and enhancements.
+A community extension of GitHub Spec Kit with constitution-powered commands for enhanced development workflows. Part of the WebSpark demonstration suite.
 
-## Fork-Specific Features
+## Spark-Specific Features
 
-- **PR Review Command**: Enhanced constitution-based pull request review workflow
-- **Extended Agent Support**: Additional integrations and customizations
-- **Custom Templates**: Tailored templates for specific development workflows
+- **Discover Constitution**: Analyze existing codebases to reverse-engineer project principles
+- **PR Review Command**: Constitution-based pull request review workflow
+- **Site Audit**: Comprehensive codebase auditing against constitution principles
+- **Critic Command**: Adversarial risk analysis for spec artifacts
+- **Extended Agent Support**: 17+ AI coding assistants supported
 
 ## Using This Release
 
@@ -62,7 +64,7 @@ $commits
 
 ---
 
-*Based on upstream GitHub Spec Kit. This fork is maintained independently and may contain features not yet available in the upstream project.*
+*Based on upstream GitHub Spec Kit. Spec Kit Spark is a community extension that may contain features not yet available in the upstream project.*
 "@
 
 # Write to file

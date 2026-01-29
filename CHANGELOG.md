@@ -7,6 +7,18 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.24] - 2026-01-29
+
+### Added
+
+- **New `/speckit.discover-constitution` command**: For brownfield projects, analyzes existing codebase to discover implicit patterns and conventions, then guides users through interactive questions to build a constitution. Detects testing frameworks, security patterns, architecture conventions, and code quality standards. Generates draft constitution at `/memory/constitution-draft.md` for team review.
+
+### Changed
+
+- Rebranded as Spec Kit Spark, a community extension part of the WebSpark demonstration suite
+- Enhanced constitution guide with guidance on writing auditable principles and integrating with AI agent instruction files
+- All repository references updated to point to MarkHazleton/spec-kit
+
 ## [0.0.23] - 2026-01-27
 
 ### Added

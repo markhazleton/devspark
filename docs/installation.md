@@ -10,21 +10,38 @@
 
 ## Installation
 
-### Initialize a New Project
+Spec Kit supports two installation scenarios:
 
-The easiest way to get started is to initialize a new project:
+| Scenario | Description | Command |
+|----------|-------------|--------|
+| **Greenfield** | Starting a brand new project from scratch | `specify init <PROJECT_NAME>` |
+| **Brownfield** | Adding Spec Kit to an existing codebase | `specify init --here` or `specify init .` |
+
+### Greenfield: Initialize a New Project
+
+Starting fresh? Create a new project directory with all Spec Kit scaffolding:
 
 ```bash
 uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME>
 ```
 
-Or initialize in the current directory:
+This creates a new directory with the complete Spec Kit structure ready for development.
+
+### Brownfield: Add to Existing Project
+
+Already have a codebase? Navigate to your project root and initialize in place:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init .
-# or use the --here flag
+cd /path/to/your-existing-project
 uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
+# or equivalently
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init .
 ```
+
+This adds the Spec Kit structure (`.specify/`, `/memory/`, templates, scripts) to your existing project without disrupting your current files.
+
+> [!TIP]
+> **Brownfield Tip**: After initialization, use the `/speckit.discover-constitution` command to help create a constitution from your existing codebase patterns. This analyzes your code conventions, architecture decisions, and established practices to draft a constitution that reflects how your project already works.
 
 ### Specify AI Agent
 

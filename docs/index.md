@@ -1,44 +1,45 @@
-# Spec Kit
+# Spec Kit Spark
 
 *Build high-quality software faster.*
 
-**An effort to allow organizations to focus on product scenarios rather than writing undifferentiated code with the help of Spec-Driven Development.**
+**A community extension of Spec Kit, adding constitution-powered commands that help teams get more value from their project principles.**
 
 ---
 
-## About This Fork
+## About Spec Kit Spark
 
-> **Important**: This is **Spec Kit - Mark Hazleton Edition**, a community fork that extends the original project.
+> **Important**: This is **Spec Kit Spark**, a community extension that builds upon the original Spec Kit project.
 >
-> Looking for the original? Visit the official GitHub Spec Kit at: **[github.com/github/spec-kit](https://github.com/github/spec-kit)**
+> Part of the [WebSpark](https://github.com/MarkHazleton?tab=repositories&q=webspark) demonstration suite. Looking for the original? Visit **[github.com/github/spec-kit](https://github.com/github/spec-kit)**
 
-### Why This Fork Exists
+### Why Spec Kit Spark Exists
 
-The original Spec Kit project established an excellent foundation for Spec-Driven Development. This fork builds upon that great work by adding **constitution-powered commands** that help teams get more value from the effort invested in creating a well-crafted project constitution.
+The original Spec Kit project established an excellent foundation for Spec-Driven Development. Spec Kit Spark builds upon that great work by adding **constitution-powered commands** that help teams get more value from the effort invested in creating a well-crafted project constitution.
 
 ### What's Different
 
-| Feature | Original Spec Kit | This Fork |
-|---------|-------------------|-----------|
+| Feature | Original Spec Kit | Spec Kit Spark |
+|---------|-------------------|----------------|
 | Core SDD Workflow | ✅ Full support | ✅ Full support |
+| `/speckit.constitution` | ✅ Included | ✅ Included |
+| `/speckit.discover-constitution` | ❌ Not included | ✅ **Added** - Brownfield codebase discovery |
 | `/speckit.pr-review` | ❌ Not included | ✅ **Added** - Constitution-based PR review |
 | `/speckit.site-audit` | ❌ Not included | ✅ **Added** - Full codebase auditing |
 | `/speckit.critic` | ❌ Not included | ✅ **Added** - Adversarial risk analysis |
-| `/speckit.constitution` | ❌ Not included | ✅ **Added** - Constitution creation helper |
 | Multi-agent support | Limited | ✅ **Expanded** - 17+ AI agents supported |
 
 ### Philosophy
 
-When you invest time writing a thorough project constitution—defining your security standards, testing requirements, code quality expectations, and governance rules—that document should work hard for you. This fork introduces commands that continuously leverage your constitution to:
+The original Spec Kit included the constitution concept to define project principles. Spec Kit Spark extends that investment by adding commands that **continuously leverage your constitution** beyond just the spec workflow:
 
-- **Review every PR** against your established principles
-- **Audit your entire codebase** for compliance violations
-- **Identify risks** before they become production issues
-- **Maintain consistency** across your team's work
+- **Discover principles** from existing codebases (`/speckit.discover-constitution`)
+- **Review every PR** against your established principles (`/speckit.pr-review`)
+- **Audit your entire codebase** for compliance violations (`/speckit.site-audit`)
+- **Identify risks** before they become production issues (`/speckit.critic`)
 
 ### Credit & Attribution
 
-Full credit goes to the GitHub team for creating the Spec-Driven Development methodology and the original Spec Kit toolkit. This fork is an extension of their work, not a replacement. If you're looking for the official, GitHub-maintained version, please visit [github.com/github/spec-kit](https://github.com/github/spec-kit).
+Full credit goes to the GitHub team for creating the Spec-Driven Development methodology and the original Spec Kit toolkit. Spec Kit Spark is an extension of their work, not a replacement. If you're looking for the official, GitHub-maintained version, please visit [github.com/github/spec-kit](https://github.com/github/spec-kit).
 
 ---
 
@@ -48,10 +49,31 @@ Spec-Driven Development **flips the script** on traditional software development
 
 ## Getting Started
 
-- [Installation Guide](installation.md)
-- [Quick Start Guide](quickstart.md)
-- [Upgrade Guide](upgrade.md)
-- [Local Development](local-development.md)
+### Greenfield (New Projects)
+
+Starting fresh? Initialize a new project with full Spec Kit scaffolding:
+
+```bash
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME>
+```
+
+### Brownfield (Existing Projects)
+
+Adding Spec Kit to an existing codebase? Initialize in your project directory:
+
+```bash
+cd /path/to/your-existing-project
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
+```
+
+After initialization, use `/speckit.discover-constitution` to analyze your existing code patterns and draft a constitution that reflects your established conventions.
+
+### Guides
+
+- [Installation Guide](installation.md) - Detailed setup for all scenarios
+- [Quick Start Guide](quickstart.md) - 6-step process walkthrough
+- [Upgrade Guide](upgrade.md) - Updating to latest version
+- [Local Development](local-development.md) - Contributing to Spec Kit
 
 ## Core Philosophy
 
@@ -100,6 +122,22 @@ Our research and experimentation focus on:
 ## Constitution-Powered Commands (Independent of Spec Workflow)
 
 Spec Kit provides powerful commands that leverage your project constitution for quality assurance. These commands are **independent of the Spec-Driven Development workflow**—they don't require any spec, plan, or tasks to exist. They only need a constitution and can be used on any codebase.
+
+### Discover Constitution (`/speckit.discover-constitution`) - NEW
+
+**For brownfield projects**: Analyze your existing codebase to discover implicit patterns and conventions, then interactively build a constitution through guided questions.
+
+- **Usage**: `/speckit.discover-constitution` or with focus: `/speckit.discover-constitution Focus on security and testing`
+- **Output**: Draft constitution at `/memory/constitution-draft.md`
+- **Key Features**: Pattern detection, interactive questioning, gap analysis, draft generation
+
+**How it works**:
+1. Scans codebase for patterns (testing, security, architecture, code quality)
+2. Reports high-confidence patterns (>80% consistent) vs. inconsistent areas
+3. Asks 8-10 targeted questions to validate findings and fill gaps
+4. Generates draft constitution for team review
+
+**Ideal for**: Teams adopting Spec Kit on existing projects where principles exist in code but aren't documented.
 
 ### Pull Request Review (`/speckit.pr-review`)
 

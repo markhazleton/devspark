@@ -12,17 +12,29 @@ This guide will help you get started with Spec-Driven Development using Spec Kit
 
 ### Step 1: Install Specify
 
-**In your terminal**, run the `specify` CLI command to initialize your project:
+**In your terminal**, run the `specify` CLI command to initialize your project.
+
+#### Greenfield (New Project)
+
+Starting fresh? Create a new project directory:
 
 ```bash
-# Create a new project directory
 uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME>
-
-# OR initialize in the current directory
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init .
 ```
 
-Pick script type explicitly (optional):
+#### Brownfield (Existing Project)
+
+Adding Spec Kit to an existing codebase? Navigate to your project and initialize in place:
+
+```bash
+cd /path/to/your-existing-project
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
+```
+
+> [!TIP]
+> **Brownfield Tip**: After initialization, use `/speckit.discover-constitution` to analyze your existing codebase and draft a constitution based on established patterns.
+
+#### Optional: Pick script type explicitly
 
 ```bash
 uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME> --script ps  # Force PowerShell

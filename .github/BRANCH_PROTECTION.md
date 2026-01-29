@@ -84,12 +84,12 @@ After setting up protection rules:
 
 ## Current Versioning Strategy
 
-This fork uses custom versioning to distinguish from upstream:
-- Format: `v1.0.0-markhazleton.X`
-- First release: `v1.0.0-markhazleton.1`
+Spec Kit Spark uses custom versioning to distinguish from upstream:
+- Format: `v1.0.0-spark.X`
+- First release: `v1.0.0-spark.1`
 - Subsequent releases increment the fourth number
 
-The versioning script automatically handles this format and distinguishes fork releases from upstream releases.
+The versioning script automatically handles this format and distinguishes Spark releases from upstream releases.
 
 ---
 
