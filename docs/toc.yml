@@ -35,3 +35,9 @@
       href: site-audit-usage.md
     - name: Critic Guide (Spec Workflow)
       href: critic-usage.md
+
+# About This Fork
+- name: About Spec Kit Spark
+  items:
+    - name: Why I Forked Spec Kit
+      href: why-i-forked-spec-kit.md
