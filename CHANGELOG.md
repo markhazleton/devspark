@@ -7,6 +7,23 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.25] - 2026-01-30
+
+### Added
+
+- **New `/speckit.pr-review` command**: Constitution-aware pull request review with actionable feedback for any PR in the repository. Reviews stored in `/specs/pr-review/pr-{id}.md` with metadata.
+- **New `/speckit.site-audit` command**: Comprehensive codebase audit against project constitution/standards, producing structured compliance reports. Supports multiple scopes (full, constitution, packages, quality, unused, duplicate).
+
+### Changed
+
+- **Spec Kit Spark Branding**: Release packages now use `spec-kit-spark-template-*` naming convention to differentiate from upstream github/spec-kit
+- **Repository References**: All references now point to `MarkHazleton/spec-kit` instead of `github/spec-kit`
+- Release title changed to "Spec Kit Spark Templates" to reflect fork identity
+
+### Enhanced
+
+- `/speckit.critic` command now included in all template packages
+
 ## [0.0.24] - 2026-01-29
 
 ### Added

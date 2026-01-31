@@ -37,8 +37,8 @@ $agents = @(
 # Build the list of files to upload
 $files = @()
 foreach ($agent in $agents) {
-    $files += ".genreleases/spec-kit-template-$agent-sh-$Version.zip"
-    $files += ".genreleases/spec-kit-template-$agent-ps-$Version.zip"
+    $files += ".genreleases/spec-kit-spark-template-$agent-sh-$Version.zip"
+    $files += ".genreleases/spec-kit-spark-template-$agent-ps-$Version.zip"
 }
 
 # Check if release_notes.md exists
@@ -51,7 +51,8 @@ if (-not (Test-Path "release_notes.md")) {
 Write-Host "Creating release $Version..."
 gh release create $Version `
     $files `
-    --title "Spec Kit Templates - $versionNoV" `
+    --repo MarkHazleton/spec-kit `
+    --title "Spec Kit Spark Templates - $versionNoV" `
     --notes-file release_notes.md
 
 if ($LASTEXITCODE -eq 0) {
