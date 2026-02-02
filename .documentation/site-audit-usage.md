@@ -58,6 +58,7 @@ Evaluates codebase against each principle in your constitution.
 ```
 
 Analyzes dependencies for:
+
 - Outdated packages
 - Security vulnerabilities
 - Unused dependencies
@@ -71,6 +72,7 @@ Analyzes dependencies for:
 ```
 
 Measures:
+
 - Lines of code and file sizes
 - Cyclomatic complexity
 - Deep nesting occurrences
@@ -84,6 +86,7 @@ Measures:
 ```
 
 Identifies:
+
 - Functions/methods never called
 - Classes never instantiated
 - Variables assigned but never read
@@ -97,6 +100,7 @@ Identifies:
 ```
 
 Finds:
+
 - Exact duplicate blocks (>10 lines)
 - Near-duplicate blocks (>80% similarity)
 - Copy-paste patterns across files
@@ -112,6 +116,7 @@ Audit reports are saved to: `/.documentation/copilot/audit/YYYY-MM-DD_results.md
 Each audit report contains:
 
 #### 1. Audit Metadata
+
 - Audit date/time
 - Scope executed
 - Constitution version
@@ -135,6 +140,7 @@ Each audit report contains:
 #### 3. Constitution Compliance
 
 Principle-by-principle evaluation with:
+
 - ✅ PASS - Fully compliant
 - ❌ FAIL - Violates principle
 - ⚠️ PARTIAL - Partial compliance
@@ -144,6 +150,7 @@ Principle-by-principle evaluation with:
 #### 4. Security Findings
 
 Categorized security issues:
+
 - Hardcoded secrets/credentials
 - Insecure patterns (eval, exec, SQL concatenation)
 - Missing input validation
@@ -152,6 +159,7 @@ Categorized security issues:
 #### 5. Package Analysis
 
 Dependency health report:
+
 - Vulnerable packages with CVE references
 - Outdated packages with current vs. latest versions
 - Unused packages safe to remove
@@ -160,6 +168,7 @@ Dependency health report:
 #### 6. Code Quality Metrics
 
 Quantitative measurements:
+
 - Total lines of code
 - Average file size
 - High complexity function count
@@ -169,6 +178,7 @@ Quantitative measurements:
 #### 7. Recommendations
 
 Prioritized action items:
+
 - **Immediate Actions** (CRITICAL severity)
 - **High Priority** (this sprint)
 - **Medium Priority** (next sprint)
@@ -290,6 +300,7 @@ This helps track improvement over time.
 **Problem**: `/.documentation/memory/constitution.md` doesn't exist
 
 **Solution**:
+
 ```bash
 /speckit.constitution Create project principles
 ```
@@ -299,6 +310,7 @@ This helps track improvement over time.
 **Problem**: PowerShell script cannot execute
 
 **Solutions**:
+
 1. Ensure PowerShell 7+ is installed
 2. Check execution policy: `Get-ExecutionPolicy`
 3. Run from repository root directory
@@ -308,6 +320,7 @@ This helps track improvement over time.
 **Problem**: Python security scanning skipped
 
 **Solution**:
+
 ```bash
 pip install pip-audit
 ```
@@ -317,6 +330,7 @@ pip install pip-audit
 **Problem**: Full audit is slow on large codebase
 
 **Mitigation**:
+
 - Use specific scope flags to focus on areas of interest
 - Run comprehensive audits less frequently (weekly)
 - Run focused audits more frequently (daily)
@@ -324,26 +338,31 @@ pip install pip-audit
 ## Best Practices
 
 ### 1. Regular Audits
+
 - Run full audit weekly or before releases
 - Run constitution audit after major changes
 - Run security audit before deployments
 
 ### 2. Address Critical Issues First
+
 - Fix all CRITICAL issues immediately
 - HIGH issues should be addressed within the sprint
 - MEDIUM/LOW can be scheduled
 
 ### 3. Track Trends
+
 - Keep audit history in `/.documentation/copilot/audit/`
 - Compare scores over time
 - Celebrate improvements
 
 ### 4. Improve Your Constitution
+
 - If audits miss important issues, enhance constitution
 - Add new principles based on incidents
 - Keep principles specific and measurable
 
 ### 5. Automate
+
 - Consider running audits in CI/CD pipelines
 - Set up alerts for critical regressions
 - Generate reports automatically
@@ -376,10 +395,11 @@ Integrate audit into your pipeline to catch issues early.
 ## Support
 
 If you encounter issues:
+
 - Check [Troubleshooting](#troubleshooting) section above
 - Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
 
 ---
 
 *Part of the Spec Kit - Spec-Driven Development Toolkit*  
-*For more information: https://github.com/MarkHazleton/spec-kit*
+*For more information: <https://github.com/MarkHazleton/spec-kit>*

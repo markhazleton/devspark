@@ -29,7 +29,8 @@ This directory contains PowerShell versions of the GitHub Actions workflow scrip
 ```
 
 **Expected output:**
-```
+
+```text
 Latest tag: v0.0.90
 New version will be: v1.0.0-markhazleton.1
 ```
@@ -128,16 +129,19 @@ When running locally vs in GitHub Actions:
 
 ## Troubleshooting
 
-**"execution of scripts is disabled on this system"**
+### "execution of scripts is disabled on this system"
+
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
-**"gh: command not found"**
-- Install GitHub CLI: `winget install GitHub.cli`
-- Or download from: https://cli.github.com/
+### "gh: command not found"
 
-**"Git tag not found"**
+- Install GitHub CLI: `winget install GitHub.cli`
+- Or download from: <https://cli.github.com/>
+
+### "Git tag not found"
+
 - Ensure you have at least one commit
 - The script will default to `v0.0.0` if no tags exist
 - For fork versioning, any non-fork tag triggers `v1.0.0-markhazleton.1`

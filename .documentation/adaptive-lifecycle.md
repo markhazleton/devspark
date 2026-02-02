@@ -1,6 +1,6 @@
 # Adaptive System Life Cycle Development
 
-*An AI-Agent Driven Approach to Software Development Life Cycle Management*
+> An AI-Agent Driven Approach to Software Development Life Cycle Management
 
 ---
 
@@ -72,7 +72,7 @@ Systems and documentation must evolve together:
 
 The constitution serves as the foundational document defining system architecture, coding standards, and development guidelines.
 
-```
+```text
 Constitution Lifecycle:
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
@@ -89,6 +89,7 @@ Constitution Lifecycle:
 ```
 
 **Key Commands:**
+
 - `/speckit.constitution` - Create or update constitution
 - `/speckit.discover-constitution` - Generate from existing codebase (brownfield)
 - `/speckit.evolve-constitution` - Propose amendments based on findings
@@ -97,7 +98,7 @@ Constitution Lifecycle:
 
 The toolkit provides workflows scaled to task complexity:
 
-```
+```text
 Task Complexity Routing:
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
@@ -130,6 +131,7 @@ Task Complexity Routing:
 ```
 
 **Full Spec Workflow:**
+
 ```bash
 /speckit.specify    # Define requirements
 /speckit.plan       # Technical planning
@@ -139,6 +141,7 @@ Task Complexity Routing:
 ```
 
 **Lightweight Workflow:**
+
 ```bash
 /speckit.quickfix   # Create, validate, implement, complete
 ```
@@ -147,7 +150,7 @@ Task Complexity Routing:
 
 PRs serve dual purposes: code review and constitution evolution triggers.
 
-```
+```text
 PR Review Flow:
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
@@ -183,7 +186,7 @@ PR Review Flow:
 
 Documentation lifecycle management ensures artifacts remain current:
 
-```
+```text
 Documentation Lifecycle:
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
@@ -214,6 +217,7 @@ Documentation Lifecycle:
 ```
 
 **Key Principle**: Development artifacts (specs, plans, tasks) are working documents. At release boundaries, they are:
+
 1. Archived with the release version
 2. Key decisions extracted as ADRs
 3. Summarized in release notes
@@ -277,7 +281,7 @@ Documentation Lifecycle:
 
 ### Workflow Selection Guide
 
-```
+```text
 Should I use full spec workflow or quickfix?
 ─────────────────────────────────────────────
 
@@ -333,7 +337,7 @@ Site audits produce compliance scores:
 
 Each site audit is saved with a timestamp, enabling trend analysis:
 
-```
+```text
 Technical Debt Trend:
 ┌─────────────────────────────────────────────────────────────────┐
 │ Compliance %                                                    │

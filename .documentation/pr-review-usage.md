@@ -55,6 +55,7 @@ If you're working on a PR branch, simply run:
 ```
 
 The command will:
+
 1. Auto-detect the PR associated with your current branch
 2. Fetch PR metadata and changes from GitHub
 3. Evaluate changes against constitution principles
@@ -76,6 +77,7 @@ or without the # symbol:
 ```
 
 This works for:
+
 - Your own PRs
 - Team member PRs
 - PRs targeting any branch (main, develop, feature branches)
@@ -90,6 +92,7 @@ When a PR is updated with new commits:
 ```
 
 The command will:
+
 - Detect that the commit SHA has changed
 - Generate a fresh review for the new commit
 - Append it to the existing review file
@@ -109,6 +112,7 @@ Example: `/.documentation/specs/pr-review/pr-123.md`
 Each review contains:
 
 #### 1. Review Metadata
+
 - PR number, title, author
 - Source and target branches
 - Commit SHA being reviewed
@@ -116,7 +120,9 @@ Each review contains:
 - Constitution version used
 
 #### 2. Executive Summary
+
 Quick overview with pass/fail status:
+
 - Constitution compliance (X/Y principles)
 - Security issues count
 - Code quality recommendations
@@ -126,39 +132,47 @@ Quick overview with pass/fail status:
 
 #### 3. Issue Categories
 
-**Critical Issues (Blocking)**
+##### Critical Issues (Blocking)
+
 - Violates mandatory (MUST) constitution principles
 - Security vulnerabilities
 - Breaking changes to production
 - Must be fixed before merge
 
-**High Priority Issues**
+##### High Priority Issues
+
 - Violates recommended (SHOULD) principles
 - Significant quality concerns
 - Creates technical debt
 - Should be fixed before merge
 
-**Medium Priority Suggestions**
+##### Medium Priority Suggestions
+
 - Partial compliance with principles
 - Improvement opportunities
 - Maintainability concerns
 - Recommended to address
 
-**Low Priority Improvements**
+##### Low Priority Improvements
+
 - Style preferences
 - Minor optimizations
 - Optional enhancements
 - Nice to have
 
 #### 4. Constitution Alignment
+
 Principle-by-principle evaluation:
+
 - ✅ Pass - Fully complies
 - ❌ Fail - Violates principle
 - ⚠️ Partial - Partially complies
 - ⏭️ N/A - Not applicable
 
 #### 5. Security Checklist
+
 Automated checks for:
+
 - Hardcoded secrets/credentials
 - Input validation
 - Authentication/authorization
@@ -167,14 +181,18 @@ Automated checks for:
 - Dependency security
 
 #### 6. Detailed Findings
+
 File-by-file breakdown with:
+
 - Exact line numbers
 - Code snippets showing issues
 - Constitution principle violated
 - Specific actionable recommendations
 
 #### 7. Next Steps
+
 Prioritized action items:
+
 - Immediate actions (required)
 - Recommended improvements
 - Future considerations (optional)
@@ -182,9 +200,11 @@ Prioritized action items:
 ## Understanding Severity Levels
 
 ### Critical (Blocking)
-```
+
+```text
 ❌ Must be resolved before merge
 ```
+
 - Violates MUST principle in constitution
 - Security vulnerabilities
 - Will break production
@@ -193,9 +213,11 @@ Prioritized action items:
 **Example**: Missing tests when TDD is mandatory
 
 ### High Priority
-```
+
+```text
 ⚠️ Strongly recommended to fix
 ```
+
 - Violates SHOULD principle significantly
 - Creates significant technical debt
 - Quality concerns
@@ -204,9 +226,11 @@ Prioritized action items:
 **Example**: Poor error handling, missing documentation
 
 ### Medium Priority
-```
+
+```text
 ℹ️ Improvement opportunity
 ```
+
 - Partial compliance with principles
 - Code could be cleaner
 - Maintainability concern
@@ -215,9 +239,11 @@ Prioritized action items:
 **Example**: Code duplication, naming improvements
 
 ### Low Priority
-```
+
+```text
 💡 Optional enhancement
 ```
+
 - Style preferences
 - Minor optimizations
 - Nice to have
@@ -285,25 +311,32 @@ ls specs/pr-review/
 ## Review Updates and History
 
 ### First Review
+
 When you first review a PR, a new file is created:
-```
+
+```text
 specs/pr-review/pr-123.md
 ```
 
 ### Subsequent Reviews (Same Commit)
+
 If you re-review the same commit:
+
 - File is updated in place
 - "Last Updated" timestamp changes
 - Review date shows when first created
 
 ### Updates (New Commits)
+
 When PR has new commits:
+
 - New review appears at top of file
 - Previous review moves to "Previous Review History" section
 - Each review tracks its own commit SHA
 - Easy to see what changed between reviews
 
 Example structure:
+
 ```markdown
 # Pull Request Review: Add Authentication
 
@@ -347,6 +380,7 @@ The review is entirely driven by your constitution. The quality and relevance of
 ```
 
 This produces specific, actionable reviews:
+
 - "Violates Test-First (MANDATORY): src/api.ts has no corresponding test"
 - "Security violation: config.js:12 contains hardcoded API key"
 
@@ -360,6 +394,7 @@ This produces specific, actionable reviews:
 ```
 
 This produces vague reviews:
+
 - "Code quality could be better"
 - "Consider adding tests"
 
@@ -372,6 +407,7 @@ This produces vague reviews:
 **Problem**: `/.documentation/memory/constitution.md` doesn't exist
 
 **Solution**:
+
 ```bash
 /speckit.constitution Create project principles
 ```
@@ -381,6 +417,7 @@ This produces vague reviews:
 **Problem**: Cannot access PR data
 
 **Solutions**:
+
 1. Verify PR number: `gh pr list`
 2. Check authentication: `gh auth status`
 3. Re-authenticate if needed: `gh auth login`
@@ -397,6 +434,7 @@ This produces vague reviews:
 **Problem**: Not on a PR branch and no number provided
 
 **Solution**: Provide PR number explicitly:
+
 ```bash
 /speckit.pr-review #123
 ```
@@ -406,6 +444,7 @@ This produces vague reviews:
 **Problem**: Constitution lacks specific principles
 
 **Solution**: Enhance your constitution with:
+
 - Specific MUST/SHOULD requirements
 - Measurable criteria
 - Clear examples
@@ -418,6 +457,7 @@ Then re-run: `/speckit.pr-review #123`
 **Problem**: PR with 100+ files is slow to review
 
 **Mitigation**:
+
 - Break large PRs into smaller ones
 - Focus on critical files first
 - Consider reviewing incrementally as commits are added
@@ -425,37 +465,44 @@ Then re-run: `/speckit.pr-review #123`
 ## Best Practices
 
 ### 1. Review Early and Often
+
 - Run review when PR is first created
 - Re-review after addressing each round of feedback
 - Don't wait until just before merge
 
 ### 2. Address Critical Issues First
+
 - Fix all CRITICAL issues before requesting re-review
 - High priority issues should be addressed before merge
 - Medium/Low can be addressed or deferred with justification
 
 ### 3. Keep Reviews as Historical Records
+
 - Don't delete review files from `/.documentation/specs/pr-review/`
 - They provide valuable history and patterns
 - Use for onboarding and pattern recognition
 
 ### 4. Improve Your Constitution
+
 - If reviews miss important issues, enhance constitution
 - Add new principles as project evolves
 - Keep principles specific and measurable
 
 ### 5. Use Reviews in Team Discussions
+
 - Share review reports in PR comments
 - Use specific finding IDs (C1, H2, etc.) in discussions
 - Link to review file: `/.documentation/specs/pr-review/pr-123.md`
 
 ### 6. Review All PRs Consistently
+
 - Main branch merges
 - Feature branch merges
 - Hotfix PRs
 - Dependency updates
 
 ### 7. Learn from Patterns
+
 - Periodically review multiple PR reviews
 - Identify common issues
 - Update constitution to prevent recurring problems
@@ -466,13 +513,17 @@ Then re-run: `/speckit.pr-review #123`
 If using the full spec-kit workflow:
 
 ### Feature PRs
+
 When PR branch matches a feature (e.g., `001-user-auth`):
+
 - Review will reference feature spec if available
 - Can cross-check implementation against spec requirements
 - Links implementation to original requirements
 
 ### Non-Feature PRs
+
 For refactoring, fixes, or maintenance:
+
 - Review works perfectly without any spec
 - Constitution-only review is comprehensive
 - No feature context needed
@@ -558,6 +609,7 @@ Critical issues found that must be resolved before merge.
 ## Support
 
 If you encounter issues or have questions:
+
 - Check [Troubleshooting](#troubleshooting) section above
 - Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
 - Consult [GitHub CLI Manual](https://cli.github.com/manual/)
@@ -565,4 +617,4 @@ If you encounter issues or have questions:
 ---
 
 *Part of the Spec Kit - Spec-Driven Development Toolkit*  
-*For more information: https://github.com/MarkHazleton/spec-kit*
+*For more information: <https://github.com/MarkHazleton/spec-kit>*

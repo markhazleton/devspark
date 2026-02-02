@@ -1,6 +1,6 @@
 # Spec Kit Spark Roadmap
 
-*Future plans and development direction for the Adaptive System Life Cycle Development Toolkit*
+> Future plans and development direction for the Adaptive System Life Cycle Development Toolkit
 
 ---
 
@@ -21,6 +21,7 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 ### What's Implemented
 
 #### Core Spec-Driven Development
+
 - ✅ `/speckit.constitution` - Create and manage project principles
 - ✅ `/speckit.specify` - Feature specification creation
 - ✅ `/speckit.plan` - Technical implementation planning
@@ -31,17 +32,20 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 - ✅ `/speckit.analyze` - Artifact consistency checking
 
 #### Constitution-Powered Commands
+
 - ✅ `/speckit.discover-constitution` - Brownfield constitution discovery
 - ✅ `/speckit.pr-review` - Constitution-based PR review
 - ✅ `/speckit.site-audit` - Codebase compliance auditing
 - ✅ `/speckit.critic` - Adversarial risk analysis
 
 #### Adaptive Lifecycle Commands (NEW)
+
 - ✅ `/speckit.quickfix` - Lightweight workflow for bug fixes
 - ✅ `/speckit.release` - Release documentation and archival
 - ✅ `/speckit.evolve-constitution` - Constitution amendment proposals
 
 #### Platform Support
+
 - ✅ 17+ AI agent integrations
 - ✅ Cross-platform scripts (Bash + PowerShell)
 - ✅ Greenfield and brownfield support
@@ -218,7 +222,7 @@ We welcome contributions in all areas! Here's how to get involved:
 
 Spec Kit Spark follows semantic versioning with Spark-specific extensions:
 
-```
+```text
 v{MAJOR}.{MINOR}.{PATCH}-spark.{BUILD}
 
 Examples:
@@ -257,4 +261,4 @@ Examples:
 
 ---
 
-*Last updated: February 2026*
+> Last updated: February 2026

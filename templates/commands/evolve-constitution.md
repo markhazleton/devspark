@@ -107,7 +107,7 @@ To apply this amendment to the constitution:
 The constitution command will detect approved proposals and offer to apply them.
 ```
 
-6. Stop execution
+1. Stop execution
 
 #### Action: `reject`
 
@@ -130,7 +130,7 @@ The proposal has been archived in:
 /.documentation/memory/proposals/rejected/{CAP_ID}.md
 ```
 
-8. Stop execution
+1. Stop execution
 
 #### Action: `suggest`
 

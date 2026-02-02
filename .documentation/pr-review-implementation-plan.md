@@ -43,7 +43,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Overview
+## Command Overview
 
 This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are stored in `/.documentation/specs/pr-review/pr-{id}.md` for historical reference.
 
@@ -60,12 +60,14 @@ This command reviews GitHub Pull Requests against the project constitution. It w
 ### 1. Initialize Review Context
 
 Run repository detection and PR context extraction:
+
 - Detect if running in GitHub PR environment
 - Extract PR number from user input or GitHub context
 - Verify constitution exists at `/.documentation/memory/constitution.md`
 - Create `/.documentation/specs/pr-review/` directory if it doesn't exist
 
 **PR Number Detection Priority**:
+
 1. User explicitly provides PR number: `/speckit.pr-review #123` or `/speckit.pr-review 123`
 2. GitHub environment variables: `GITHUB_PR_NUMBER`, `PR_NUMBER`
 3. Current branch PR detection via `gh` CLI
@@ -74,6 +76,7 @@ Run repository detection and PR context extraction:
 ### 2. Extract PR Information
 
 Use GitHub CLI (`gh pr view {PR_NUMBER} --json`) to fetch:
+
 - **PR Metadata**: title, number, author, state, created/updated dates
 - **Branch Info**: source branch (head), target branch (base)
 - **Commit Info**: HEAD commit SHA, commit count, commit messages
@@ -82,6 +85,7 @@ Use GitHub CLI (`gh pr view {PR_NUMBER} --json`) to fetch:
 - **Diff**: Full diff for analysis
 
 **Fallback** (if `gh` unavailable):
+
 - Use git commands: `git diff origin/{base}...origin/{head}`
 - Extract info from git log and branch info
 - Prompt user for missing metadata
@@ -89,12 +93,14 @@ Use GitHub CLI (`gh pr view {PR_NUMBER} --json`) to fetch:
 ### 3. Load Review Artifacts
 
 **REQUIRED**:
+
 - Constitution from `/.documentation/memory/constitution.md`
   - Extract core principles
   - Identify MUST/SHOULD requirements
   - Note version and last amended date
 
 **OPTIONAL** (if available):
+
 - Feature spec from `/.documentation/specs/{feature}/spec.md` (if PR branch matches feature pattern)
 - Implementation plan from `/.documentation/specs/{feature}/plan.md`
 - Match PR changes to specific feature context if applicable
@@ -104,17 +110,20 @@ Use GitHub CLI (`gh pr view {PR_NUMBER} --json`) to fetch:
 For each principle in the constitution:
 
 #### A. Compliance Check
+
 - Review changed files against principle requirements
 - Identify violations, partial compliance, or full compliance
 - Note specific file/line references for issues
 
 #### B. Severity Classification
+
 - **CRITICAL**: Violates mandatory (MUST) principle
 - **HIGH**: Violates recommended (SHOULD) principle significantly
 - **MEDIUM**: Partial compliance, improvement needed
 - **LOW**: Style/minor improvements suggested
 
 #### C. Evidence Collection
+
 - Quote relevant code sections
 - Reference constitution section
 - Explain rationale for finding
@@ -122,23 +131,27 @@ For each principle in the constitution:
 ### 5. Additional Review Dimensions
 
 #### Security Analysis
+
 - Check for hardcoded secrets/credentials
 - Validate input sanitization
 - Review authentication/authorization changes
 - Identify potential vulnerability patterns
 
 #### Code Quality Assessment
+
 - Naming conventions per constitution
 - Error handling patterns
 - Code organization and structure
 - Duplication or anti-patterns
 
 #### Testing Validation (if TDD principle exists)
+
 - Verify test coverage for changes
 - Check if tests were written first
 - Validate test quality and completeness
 
 #### Documentation Review
+
 - Check if changes are documented
 - Verify README/docs updates if needed
 - Review code comments for clarity
@@ -284,6 +297,7 @@ Create comprehensive report at `/.documentation/specs/pr-review/pr-{id}.md`:
 ### 7. Handle Review Updates
 
 If `pr-{id}.md` already exists:
+
 - Load previous review
 - Compare previous commit SHA vs current commit SHA
 - If different:
@@ -295,6 +309,7 @@ If `pr-{id}.md` already exists:
   - Preserve creation date, update review date
 
 **Multi-Review Format** (when PR updated):
+
 ```markdown
 # Pull Request Review: [PR_TITLE]
 
@@ -318,6 +333,7 @@ If `pr-{id}.md` already exists:
 ### 8. Output Summary
 
 Display to user:
+
 - Review completion confirmation
 - Path to saved review file
 - Executive summary of findings
@@ -325,7 +341,8 @@ Display to user:
 - Next steps
 
 **Example Output**:
-```
+
+```text
 ✅ PR Review Complete!
 
 📄 Review saved: /.documentation/specs/pr-review/pr-123.md
@@ -351,6 +368,7 @@ View full review: /.documentation/specs/pr-review/pr-123.md
 ### Constitution Authority
 
 The constitution is **non-negotiable**. All findings must:
+
 - Reference specific constitution section
 - Explain how change violates/complies with principle
 - Use constitution language (MUST/SHOULD) for severity
@@ -358,6 +376,7 @@ The constitution is **non-negotiable**. All findings must:
 ### Evidence-Based Feedback
 
 All issues must include:
+
 - **Specific file and line reference** (not "multiple files")
 - **Code snippet quote** showing the issue
 - **Constitution reference** explaining why it's an issue
@@ -366,16 +385,19 @@ All issues must include:
 ### Graceful Handling
 
 **If constitution missing**:
+
 - Error message with clear guidance
 - Explain that constitution is required
 - Show how to create one with `/speckit.constitution`
 
 **If PR not found**:
+
 - Clear error message
 - Show how to specify PR number
 - Suggest checking `gh` CLI installation
 
 **If no GitHub context**:
+
 - Offer manual mode with PR number input
 - Guide user through providing PR details
 
@@ -425,7 +447,7 @@ git log origin/{base}..origin/{head} --oneline
 
 ### Directory Structure
 
-```
+```text
 .documentation/specs/
   pr-review/
     pr-1.md
@@ -435,11 +457,11 @@ git log origin/{base}..origin/{head} --oneline
 ```
 
 Created automatically on first review, persists across reviews.
-```
 
 ### 1.2 Review Report Metadata Schema
 
 **Required Fields**:
+
 - `PR Number`: Integer
 - `Source Branch`: String
 - `Target Branch`: String
@@ -448,6 +470,7 @@ Created automatically on first review, persists across reviews.
 - `Constitution Version`: String (from constitution file)
 
 **Optional Fields**:
+
 - `Feature Context`: If PR maps to a spec feature
 - `Previous Review Date`: If updating existing review
 - `Changes Since Last Review`: Summary if re-reviewing
@@ -670,6 +693,7 @@ description: Perform constitution-aware pull request review with actionable feed
 ### 3.3 Other Agents
 
 Use standard Markdown format for:
+
 - Cursor (`.cursor/commands/pr-review.md`)
 - opencode (`.opencode/command/pr-review.md`)
 - Windsurf (`.windsurf/workflows/pr-review.md`)
@@ -677,6 +701,7 @@ Use standard Markdown format for:
 - Others following the pattern
 
 Use TOML format for:
+
 - Gemini (`.gemini/commands/pr-review.toml`)
 - Qwen (`.qwen/commands/pr-review.toml`)
 
@@ -712,13 +737,13 @@ The `/speckit.pr-review` command performs constitution-based code reviews on Git
 ```
 
 **Key Features**:
+
 - Works for any PR in the repository
 - Only requires project constitution
 - Stores reviews in `/.documentation/specs/pr-review/pr-{id}.md`
 - Tracks commit SHA and review timestamp
 - Updates existing reviews if PR changes
 - Provides actionable, line-specific feedback
-```
 
 ### 4.2 Create Usage Guide
 
@@ -769,6 +794,7 @@ When a PR is updated with new commits:
 ```
 
 The command will:
+
 - Detect if the commit has changed
 - Append an updated review to the existing file
 - Show what changed since the last review
@@ -776,6 +802,7 @@ The command will:
 ## Review Output
 
 Reviews are saved to `/.documentation/specs/pr-review/pr-{id}.md` with:
+
 - **Metadata**: PR details, commit SHA, review timestamp
 - **Executive Summary**: Overall assessment and recommendation
 - **Categorized Issues**: Critical, High, Medium, Low priority
@@ -806,6 +833,7 @@ ls .documentation/specs/pr-review/
 ### Review History
 
 When a PR is reviewed multiple times, the file contains:
+
 - Latest review at the top
 - Previous review history at the bottom
 - Commit SHA for each review
@@ -942,7 +970,6 @@ Authenticate with GitHub CLI: `gh auth login`
 ---
 
 For more information, see the [Spec-Driven Development Guide](https://github.com/MarkHazleton/spec-kit/blob/main/spec-driven.md).
-```
 
 ### 4.3 Update AGENTS.md
 
@@ -982,27 +1009,32 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 
 ### 5.1 Test Scenarios
 
-**Scenario 1: Clean PR**
+#### Scenario 1: Clean PR
+
 - Constitution: Basic principles
 - PR: Well-tested, documented changes
 - Expected: All checks pass, approval recommended
 
-**Scenario 2: TDD Violation**
+#### Scenario 2: TDD Violation
+
 - Constitution: Mandatory TDD principle
 - PR: New code without tests
 - Expected: CRITICAL issue flagged
 
-**Scenario 3: Security Issue**
+#### Scenario 3: Security Issue
+
 - Constitution: Security principles
 - PR: Hardcoded credentials
 - Expected: HIGH/CRITICAL security issue
 
-**Scenario 4: Multiple Reviews**
+#### Scenario 4: Multiple Reviews
+
 - First review: Issues found
 - PR updated with fixes
 - Second review: Shows improvement, issues resolved
 
-**Scenario 5: No Constitution**
+#### Scenario 5: No Constitution
+
 - PR ready for review
 - No constitution exists
 - Expected: Clear error message, guidance to create constitution
@@ -1020,6 +1052,7 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 ## Phase 6: Implementation Checklist
 
 ### Core Functionality
+
 - [ ] Create `templates/commands/pr-review.md`
 - [ ] Create `scripts/bash/get-pr-context.sh`
 - [ ] Create `scripts/powershell/get-pr-context.ps1`
@@ -1029,6 +1062,7 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 - [ ] Handle existing review updates
 
 ### GitHub Integration
+
 - [ ] Test with GitHub CLI (`gh pr view`)
 - [ ] Test with GitHub CLI (`gh pr diff`)
 - [ ] Handle authentication errors gracefully
@@ -1036,12 +1070,14 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 - [ ] Test explicit PR number input
 
 ### Constitution Integration
+
 - [ ] Parse constitution principles
 - [ ] Extract MUST vs SHOULD requirements
 - [ ] Map code changes to principles
 - [ ] Generate constitution-aligned feedback
 
 ### Multi-Agent Support
+
 - [ ] Generate `.github/agents/pr-review.md`
 - [ ] Generate `.claude/commands/pr-review.md`
 - [ ] Generate `.gemini/commands/pr-review.toml`
@@ -1049,12 +1085,14 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 - [ ] Test with each agent type
 
 ### Documentation
+
 - [ ] Update README.md with command info
 - [ ] Create `.documentation/pr-review-usage.md`
 - [ ] Update AGENTS.md with implementation notes
 - [ ] Add examples to documentation
 
 ### Quality Assurance
+
 - [ ] Test all scenarios from 5.1
 - [ ] Test all edge cases from 5.2
 - [ ] Verify review file format consistency
@@ -1062,6 +1100,7 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 - [ ] Validate commit SHA tracking
 
 ### Release Preparation
+
 - [ ] Update CHANGELOG.md
 - [ ] Bump version in pyproject.toml
 - [ ] Update release scripts if needed

@@ -38,12 +38,15 @@ The workflow begins with an idea—often vague and incomplete. Through iterative
 Three trends make SDD not just possible but necessary:
 
 ### 1. AI Capabilities
+
 AI can now understand and implement complex specifications. This isn't about replacing developers—it's about amplifying their effectiveness by automating the mechanical translation from specification to implementation.
 
 ### 2. Growing Complexity
+
 Modern systems integrate dozens of services, frameworks, and dependencies. SDD provides systematic alignment through specification-driven generation.
 
 ### 3. Accelerating Change
+
 Requirements change far more rapidly than ever before. Pivoting is no longer exceptional—it's expected. SDD transforms requirement changes from obstacles into normal workflow.
 
 ## Streamlining SDD with Commands
@@ -74,6 +77,7 @@ These commands work independently of the spec workflow—they only require a con
 | `/speckit.constitution` | Create or update project constitution |
 
 For detailed information on constitution-powered commands, see:
+
 - [Constitution Guide](constitution-guide.md)
 - [PR Review Guide](pr-review-usage.md)
 - [Site Audit Guide](site-audit-usage.md)
@@ -112,6 +116,7 @@ Here's how these commands transform the traditional development workflow:
 ```
 
 In 15 minutes, you have:
+
 - A complete feature specification with user stories and acceptance criteria
 - A detailed implementation plan with technology choices and rationale
 - API contracts and data models ready for code generation
@@ -168,14 +173,17 @@ The implementation plan template operationalizes these articles through concrete
 ### Phase -1: Pre-Implementation Gates
 
 #### Simplicity Gate (Article VII)
+
 - [ ] Using ≤3 projects?
 - [ ] No future-proofing?
 
 #### Anti-Abstraction Gate (Article VIII)
+
 - [ ] Using framework directly?
 - [ ] Single model representation?
 
 #### Integration-First Gate (Article IX)
+
 - [ ] Contracts defined?
 - [ ] Contract tests written?
 ```
@@ -183,20 +191,24 @@ The implementation plan template operationalizes these articles through concrete
 ## Benefits of SDD
 
 ### Consistency
+
 - Checklists ensure nothing is forgotten
 - Constitutional principles are enforced uniformly
 
 ### Quality
+
 - Forced clarification markers highlight uncertainties
 - Test-first thinking baked into the process
 - Proper abstraction levels maintained
 
 ### Velocity
+
 - Specifications stay in sync with code because they generate it
 - Change requirements and regenerate plans in minutes, not days
 - Pivots become systematic regenerations rather than manual rewrites
 
 ### Traceability
+
 - Every technical choice links back to specific requirements
 - Living documentation that evolves with the code
 
@@ -226,4 +238,4 @@ Software development needs better tools for maintaining alignment between intent
 
 ---
 
-*Part of the Spec Kit - Spec-Driven Development Toolkit*
+> Part of the Spec Kit - Spec-Driven Development Toolkit

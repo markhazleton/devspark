@@ -52,12 +52,14 @@ I created **Spec Kit Spark** as a community extension that keeps the original SD
 **The solution:** Use the constitution as an objective standard. Every PR gets evaluated against the same principles.
 
 **Key design decisions:**
+
 - Works for **any PR in any branch**—not limited to feature branches
 - Only requires a constitution—no spec, plan, or tasks needed
 - Saves review history to `/.documentation/specs/pr-review/pr-{number}.md`
 - Tracks commit SHAs so you can re-review after changes
 
 This means constitution-powered reviews work for:
+
 - Hotfixes to main
 - Documentation updates to develop
 - Any contribution, regardless of whether it followed the SDD workflow
@@ -69,6 +71,7 @@ This means constitution-powered reviews work for:
 **The solution:** A comprehensive audit command that evaluates your entire codebase against constitution principles.
 
 **What it checks:**
+
 - Constitution compliance (principle-by-principle)
 - Security vulnerabilities and patterns
 - Dependency health (outdated, unused, vulnerable packages)
@@ -76,6 +79,7 @@ This means constitution-powered reviews work for:
 - Unused code detection
 
 **Key design decisions:**
+
 - Supports scoped audits (`--scope=constitution`, `--scope=packages`, etc.)
 - Produces trend-trackable reports in `/.documentation/copilot/audit/`
 - Compares against previous audits to show improvement or regression
@@ -87,16 +91,19 @@ This means constitution-powered reviews work for:
 **The solution:** A skeptical reviewer that identifies showstoppers *before* implementation begins.
 
 **How it differs from `/speckit.analyze`:**
+
 - `/speckit.analyze` = Consistency checking (are artifacts aligned?)
 - `/speckit.critic` = Adversarial analysis (what will fail in production?)
 
 **Severity levels:**
+
 - **SHOWSTOPPER** — Will cause production outage, data loss, or security breach
 - **CRITICAL** — Major user-facing issues or costly rework
 - **HIGH** — Technical debt or operational burden
 - **MEDIUM** — Development slowdown or minor issues
 
 **Key design decisions:**
+
 - Constitution violations are automatically SHOWSTOPPER severity
 - Provides a clear Go/No-Go recommendation
 - Runs after `/speckit.tasks` but before `/speckit.implement`
@@ -108,12 +115,14 @@ This means constitution-powered reviews work for:
 **The solution:** Analyze the codebase, discover patterns, and guide teams through interactive questions to formalize a constitution.
 
 **How it works:**
+
 1. Scans for patterns (testing frameworks, security practices, architecture conventions)
 2. Reports high-confidence patterns (>80% consistent) vs. inconsistent areas
 3. Asks 8-10 targeted questions to validate findings
 4. Generates a draft constitution at `/.documentation/memory/constitution-draft.md`
 
 **Key design decisions:**
+
 - Discovery-first: analyze code before asking questions
 - Draft output: produces a starting point for team review, not a final document
 - Respects existing work: treats discovered patterns as valuable
@@ -138,6 +147,7 @@ Every bash script has a corresponding PowerShell script. Windows developers get 
 ### Repository Health Analysis
 
 Integrated Git Spark reports provide insights into:
+
 - Contributor activity and bus factor
 - File hotspots (high churn, many authors)
 - Governance scores (commit message quality, traceability)
@@ -160,6 +170,7 @@ The core philosophy of Spec Kit Spark is simple:
 > **A project constitution should provide value continuously, not just during feature development.**
 
 If you write a constitution that says "All public APIs must have input validation," that principle should:
+
 - Guide new feature development (original Spec Kit)
 - Catch violations in pull requests (`/speckit.pr-review`)
 - Identify existing violations in the codebase (`/speckit.site-audit`)
@@ -206,6 +217,7 @@ specify init my-project --ai claude
 ```
 
 Then try the constitution-powered commands:
+
 - `/speckit.discover-constitution` — Draft a constitution from existing code
 - `/speckit.pr-review #123` — Review a PR against your constitution
 - `/speckit.site-audit` — Audit your entire codebase
@@ -227,6 +239,6 @@ The goal is simple: **maximize the return on investment for crafting a thoughtfu
 
 ---
 
-*— Mark Hazleton*
-
-*Part of the [WebSpark](https://github.com/MarkHazleton?tab=repositories&q=webspark) demonstration suite*
+> — Mark Hazleton
+>
+> Part of the [WebSpark](https://github.com/MarkHazleton?tab=repositories&q=webspark) demonstration suite

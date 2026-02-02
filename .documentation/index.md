@@ -61,7 +61,8 @@ specify init --here --ai claude
 
 ### First Steps by Project Type
 
-**Greenfield (New Project)**
+#### Greenfield (New Project)
+
 ```bash
 specify init my-project --ai claude
 cd my-project
@@ -69,7 +70,8 @@ cd my-project
 /speckit.specify             # Create first feature spec
 ```
 
-**Brownfield (Existing Project)**
+#### Brownfield (Existing Project)
+
 ```bash
 cd /path/to/existing-project
 specify init --here --ai claude
@@ -188,7 +190,7 @@ Constitution-powered quality commands that work independently.
 
 Site audits quantify technical debt through compliance scores:
 
-```
+```markdown
 | Category | Score | Status |
 |----------|-------|--------|
 | Constitution Compliance | 87% | ⚠️ PARTIAL |

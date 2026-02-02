@@ -96,7 +96,7 @@ If ACTION is "list":
 | QF-2026-001 | 2026-01-25 | config-change | Completed | Update rate limits |
 ```
 
-4. Stop execution (no record creation)
+1. Stop execution (no record creation)
 
 #### Action: `complete`
 

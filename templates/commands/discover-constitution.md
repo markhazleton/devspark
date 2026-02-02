@@ -44,12 +44,14 @@ Identify the codebase structure:
 - Look for existing AI instruction files (.github/copilot-instructions.md, CLAUDE.md, etc.)
 
 If `/.documentation/memory/constitution.md` already exists:
+
 - Warn user: "A constitution already exists. This will create a draft to compare/merge."
 - Proceed with analysis to identify gaps or conflicts
 
 ### 2. Automated Pattern Discovery
 
 Scan the codebase for patterns across these categories. For each, note:
+
 - **Consistency**: What % of files follow this pattern?
 - **Examples**: 2-3 specific file paths demonstrating the pattern
 - **Confidence**: HIGH (>80% consistent), MEDIUM (50-80%), LOW (<50% or unclear)
@@ -345,6 +347,7 @@ How should constitution amendments be handled?
 ### Empty/Minimal Codebase
 
 If fewer than 10 source files found:
+
 - Skip automated discovery
 - Switch to aspirational mode: "What principles do you WANT to establish?"
 - Provide common principle templates to choose from
@@ -352,11 +355,14 @@ If fewer than 10 source files found:
 ### Highly Inconsistent Codebase
 
 If no patterns reach >50% consistency:
+
 - Report honestly: "No strong patterns detected—codebase may have evolved organically"
 - Focus questions on: "What SHOULD the standard be going forward?"
 - Recommend running site-audit after constitution to identify cleanup areas
 
 ### Existing Constitution Present
+
+If an existing constitution is found:
 
 - Complete discovery anyway
 - Compare discovered patterns vs. documented principles
@@ -366,6 +372,7 @@ If no patterns reach >50% consistency:
 ### User Skips All Questions
 
 If user says "done" before any questions:
+
 - Generate constitution from high-confidence patterns only
 - Mark all medium/low patterns as "SUGGESTED" not MUST/SHOULD
 - Strongly recommend reviewing draft

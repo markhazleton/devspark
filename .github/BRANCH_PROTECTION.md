@@ -5,6 +5,7 @@ This document describes the recommended branch protection rules for the `main` b
 ## Recommended Branch Protection Rules
 
 ### Navigate to Settings
+
 1. Go to your repository on GitHub
 2. Click **Settings** → **Branches**
 3. Under "Branch protection rules", click **Add rule**
@@ -16,17 +17,20 @@ This document describes the recommended branch protection rules for the `main` b
 #### Protect matching branches
 
 ✅ **Require a pull request before merging**
+
 - Require approvals: `1` (or more if you have collaborators)
 - Dismiss stale pull request approvals when new commits are pushed
 - Require review from Code Owners (optional - if you set up CODEOWNERS)
 
 ✅ **Require status checks to pass before merging**
+
 - Require branches to be up to date before merging
 - Status checks to require:
   - `markdownlint` (from lint workflow)
   - `build` (from docs workflow - if DocFX build is critical)
 
 ✅ **Require conversation resolution before merging**
+
 - Ensures all PR comments are addressed
 
 ❌ **Do not allow bypassing the above settings** (unless you need admin override)
@@ -50,17 +54,19 @@ This document describes the recommended branch protection rules for the `main` b
 
 If you want more control over releases, consider this workflow:
 
-```
+```text
 develop (default branch) → main (protected, releases only)
 ```
 
 **Setup:**
+
 1. Create a `develop` branch: `git checkout -b develop && git push -u origin develop`
 2. Set `develop` as default branch in repo settings
 3. Apply strict protection rules to `main` (no direct commits)
 4. Only merge to `main` when ready to release
 
 **Benefits:**
+
 - `main` only contains released code
 - Release workflow only triggers when you explicitly merge
 - More control over when versions are published
@@ -70,9 +76,11 @@ develop (default branch) → main (protected, releases only)
 After setting up protection rules:
 
 1. Try to push directly to `main`: `git push origin main`
+
    - Should be blocked with: `remote: error: GH006: Protected branch update failed`
 
 2. Create a PR instead:
+
    ```bash
    git checkout -b test-protection
    git commit --allow-empty -m "Test branch protection"
@@ -85,6 +93,7 @@ After setting up protection rules:
 ## Current Versioning Strategy
 
 Spec Kit Spark uses custom versioning to distinguish from upstream:
+
 - Format: `v1.0.0-spark.X`
 - First release: `v1.0.0-spark.1`
 - Subsequent releases increment the fourth number

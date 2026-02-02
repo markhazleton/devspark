@@ -40,6 +40,7 @@ Use the `/speckit.constitution` command to create or update your constitution:
 ```
 
 The discover command will:
+
 1. Scan your codebase for patterns (testing, security, architecture, code quality)
 2. Report what it finds with confidence levels (high/medium/low consistency)
 3. Ask 8-10 targeted questions to validate findings and fill gaps
@@ -49,16 +50,19 @@ The discover command will:
 ### Example Prompts
 
 **Security-focused project**:
+
 ```bash
 /speckit.constitution Security-first principles: no hardcoded secrets, mandatory input validation, parameterized SQL queries, rate limiting required on all public endpoints
 ```
 
 **TDD-focused project**:
+
 ```bash
 /speckit.constitution Strict TDD with test-first development, minimum 80% coverage, integration tests for all API endpoints, red-green-refactor cycle enforced
 ```
 
 **Enterprise project**:
+
 ```bash
 /speckit.constitution Enterprise standards: code review required, documentation for all public APIs, changelog updates mandatory, semantic versioning, accessibility compliance
 ```
@@ -215,6 +219,7 @@ A constitution with 50 principles is hard to follow. Focus on 5-10 core principl
 ### 6. Review and Update
 
 Periodically review your constitution:
+
 - Are principles being followed?
 - Are any principles causing friction without value?
 - Have new concerns emerged that need principles?
@@ -251,24 +256,28 @@ These principles are still valid! The automated commands will flag *potential* i
 ### Tips for Auditable Principles
 
 1. **Include specific patterns to check for**:
+
    ```markdown
    - No `console.log` statements in production code (MUST)
    - No `// TODO` comments older than 30 days (SHOULD)
    ```
 
 2. **Specify file/directory conventions**:
+
    ```markdown
    - All API routes MUST be in `/src/routes/`
    - Test files MUST be named `*.test.ts` or `*.spec.ts`
    ```
 
 3. **Define measurable thresholds**:
+
    ```markdown
    - Files MUST NOT exceed 500 lines
    - Functions MUST NOT have more than 5 parameters
    ```
 
 4. **List prohibited patterns explicitly**:
+
    ```markdown
    - MUST NOT use `eval()`, `Function()`, or `setTimeout(string)`
    - MUST NOT disable ESLint rules inline without justification comment
@@ -281,6 +290,7 @@ The constitution should contain **principles**—fundamental rules that define y
 ### The Litmus Test
 
 **Put it in the Constitution if:**
+
 - Violating it would be a showstopper in PR review
 - It applies project-wide, not to specific components  
 - It's a *principle*, not an implementation detail
@@ -335,7 +345,7 @@ When using AI coding assistants like GitHub Copilot, Claude Code, or OpenAI Code
 
 ### The Hierarchy: Constitution as Source of Truth
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │         /.documentation/memory/constitution.md          │  ← Principles (WHAT must be true)
 │   Non-negotiable, agent-agnostic rules   │
@@ -378,6 +388,7 @@ Key principles include:
 ```
 
 **Why reference instead of copy?**
+
 - Single source of truth prevents drift
 - Constitution updates automatically apply
 - No risk of conflicting instructions
@@ -401,6 +412,7 @@ Key principles include:
 ### Example: Complementary Files
 
 **`/.documentation/memory/constitution.md`** (principles):
+
 ```markdown
 ### II. Security First
 
@@ -411,6 +423,7 @@ Key principles include:
 ```
 
 **`.github/copilot-instructions.md`** (implementation guidance):
+
 ```markdown
 ## Security Implementation
 
@@ -439,7 +452,8 @@ If your team uses multiple agents (Copilot, Claude, Cursor), create consistent i
 3. **Consider a shared include**: Some teams create `.documentation/ai-context.md` that all agent files reference
 
 **Example structure**:
-```
+
+```text
 /.documentation/
   memory/
     constitution.md           # Principles (all agents)
@@ -462,6 +476,7 @@ If agent instructions conflict with the constitution:
 3. **Consider intent**: If the agent instruction seems better, propose a constitution amendment instead
 
 **Signs of conflict**:
+
 - Agent suggests a library but constitution requires a different approach
 - Agent's code patterns violate constitution principles
 - Different files give different answers to the same question

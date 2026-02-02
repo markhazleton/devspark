@@ -23,6 +23,7 @@ These commands support the Adaptive System Life Cycle Development (ASLCD) approa
 The `/speckit.quickfix` command enables rapid fixes without full spec overhead:
 
 **Key Features:**
+
 1. **Auto-Classification**: Automatically classifies tasks as bug-fix, hotfix, minor-feature, config-change, or docs-update
 2. **Targeted Validation**: Only validates against constitution principles relevant to the task type
 3. **Lightweight Records**: Creates minimal documentation at `/.documentation/quickfixes/QF-{YYYY}-{NNN}.md`
@@ -30,6 +31,7 @@ The `/speckit.quickfix` command enables rapid fixes without full spec overhead:
 5. **Scope Detection**: Warns when work expands beyond classification limits
 
 **Usage:**
+
 ```bash
 /speckit.quickfix fix null pointer in UserService
 /speckit.quickfix urgent: payment timeout in checkout
@@ -42,6 +44,7 @@ The `/speckit.quickfix` command enables rapid fixes without full spec overhead:
 The `/speckit.release` command manages documentation lifecycle at release boundaries:
 
 **Key Features:**
+
 1. **Artifact Archival**: Archives completed specs and quickfixes to `/.documentation/releases/v{VERSION}/`
 2. **ADR Extraction**: Distills key architectural decisions from specs into ADR format
 3. **CHANGELOG Generation**: Auto-generates changelog entries from completed work
@@ -50,6 +53,7 @@ The `/speckit.release` command manages documentation lifecycle at release bounda
 6. **Dry Run Mode**: Preview changes before committing
 
 **Usage:**
+
 ```bash
 /speckit.release              # Auto-calculate version
 /speckit.release 2.0.0        # Explicit version
@@ -61,6 +65,7 @@ The `/speckit.release` command manages documentation lifecycle at release bounda
 The `/speckit.evolve-constitution` command facilitates constitution amendments:
 
 **Key Features:**
+
 1. **Pattern Analysis**: Scans PR reviews and audits for recurring violation patterns
 2. **Gap Detection**: Identifies issues not mapped to existing principles
 3. **Proposal Generation**: Creates CAP (Constitution Amendment Proposal) documents
@@ -68,6 +73,7 @@ The `/speckit.evolve-constitution` command facilitates constitution amendments:
 5. **Approval Workflow**: Supports approve/reject actions with reasons
 
 **Usage:**
+
 ```bash
 /speckit.evolve-constitution                          # Full analysis
 /speckit.evolve-constitution --from-pr #123           # From specific PR
@@ -101,6 +107,7 @@ The `/speckit.pr-review` command is a special command that works independently o
 ### Agent Integration
 
 When adding new agents, include `/speckit.pr-review` following the same pattern as other commands:
+
 - Markdown format for most agents
 - TOML format for Gemini/Qwen
 - Script placeholders: `{SCRIPT}` replaced with `get-pr-context` script path

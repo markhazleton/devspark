@@ -34,12 +34,14 @@ This command reviews GitHub Pull Requests against the project constitution. It w
 ### 1. Initialize Review Context
 
 Run `{SCRIPT}` to extract PR context and parse JSON output for:
+
 - `PR_CONTEXT`: PR metadata (number, title, branches, commit SHA, files, diff)
 - `CONSTITUTION_PATH`: Path to constitution file
 - `REVIEW_DIR`: Directory where review will be saved
 
 **PR Number Detection**:
 The script will try to determine PR number in this order:
+
 1. User explicitly provides PR number in arguments: `#123` or `123`
 2. GitHub environment variables: `GITHUB_PR_NUMBER`, `PR_NUMBER`
 3. Current branch PR detection via `gh pr view`
@@ -47,6 +49,7 @@ The script will try to determine PR number in this order:
 
 **Error Handling**:
 If the script fails:
+
 - **Constitution missing**: Guide user to run `/speckit.constitution`
 - **GitHub CLI not installed**: Provide installation instructions
 - **PR not found**: Ask user to verify PR number and `gh auth status`
@@ -57,6 +60,7 @@ For single quotes in args like "I'm reviewing", use escape syntax: e.g 'I'\''m r
 ### 2. Load Constitution
 
 Read and parse `/.documentation/memory/constitution.md`:
+
 - Extract all core principles with their names
 - Identify MUST requirements (non-negotiable/mandatory)
 - Identify SHOULD requirements (recommended)
@@ -64,6 +68,7 @@ Read and parse `/.documentation/memory/constitution.md`:
 - Build a checklist of principles to evaluate
 
 If constitution doesn't exist:
+
 - **STOP** and inform user that constitution is required
 - Provide guidance: "Run `/speckit.constitution` to create project principles first"
 - Do not proceed with review
@@ -73,20 +78,25 @@ If constitution doesn't exist:
 Using the PR_CONTEXT data from the script:
 
 #### A. Review Changed Files
+
 For each file in `files_changed`:
+
 - Read the diff to understand what changed
 - Identify the type of change (new file, modified, deleted)
 - Note the scope of changes (lines added/removed)
 - Extract code snippets for analysis
 
 #### B. Examine PR Diff
+
 Parse the full diff to:
+
 - Identify new functionality added
 - Check for removed functionality
 - Look for modified behavior
 - Note refactoring vs. feature changes
 
 #### C. Review Commit Messages
+
 - Check if commits follow conventions
 - Identify the intent behind changes
 - Look for breaking change indicators
@@ -96,25 +106,31 @@ Parse the full diff to:
 For **each principle** in the constitution:
 
 #### A. Compliance Check
+
 - Review changed files against this specific principle
 - Determine if the PR violates, partially complies, or fully complies
 - Collect specific evidence (file names, line numbers, code snippets)
 
 #### B. Severity Classification
+
 Based on the principle's importance and violation type:
+
 - **CRITICAL**: Violates mandatory (MUST) principle - blocks merge
 - **HIGH**: Violates recommended (SHOULD) principle significantly
 - **MEDIUM**: Partial compliance, improvement opportunity
 - **LOW**: Style suggestions or minor improvements
 
 For each finding:
+
 - Quote the specific code that demonstrates the issue
 - Reference the exact constitution section violated
 - Explain clearly why this is an issue
 - Provide a specific, actionable recommendation
 
 #### C. Generate Findings
+
 Create structured findings with:
+
 - **ID**: Unique identifier (C1, H1, M1, L1, etc.)
 - **Principle**: Name of constitution principle
 - **File:Line**: Exact location in code
@@ -124,6 +140,7 @@ Create structured findings with:
 ### 5. Additional Review Dimensions
 
 #### Security Analysis
+
 - **Hardcoded Secrets**: Scan for API keys, passwords, tokens in code
 - **Input Validation**: Check if user inputs are validated
 - **Authentication**: Review auth/authz changes for correctness
@@ -132,6 +149,7 @@ Create structured findings with:
 - **Dependency Vulnerabilities**: Note if new dependencies added
 
 Create checklist:
+
 - [ ] No hardcoded secrets or credentials
 - [ ] Input validation present where needed
 - [ ] Authentication/authorization checks appropriate
@@ -140,7 +158,9 @@ Create checklist:
 - [ ] Dependencies reviewed for vulnerabilities
 
 #### Code Quality Assessment
+
 If constitution has code quality principles:
+
 - **Naming Conventions**: Verify names follow standards
 - **Code Organization**: Check structure matches guidelines
 - **Error Handling**: Review exception handling patterns
@@ -148,18 +168,23 @@ If constitution has code quality principles:
 - **Complexity**: Note overly complex code
 
 Identify:
+
 - **Strengths**: What the PR does well
 - **Areas for Improvement**: Specific suggestions
 
 #### Testing Validation
+
 If constitution has testing principles (e.g., TDD):
+
 - Check if tests exist for new/modified code
 - Verify test quality and coverage
 - Confirm tests were written appropriately
 - Review test naming and organization
 
 #### Documentation Review
+
 If constitution requires documentation:
+
 - Check if README updated if needed
 - Verify code comments for complex logic
 - Confirm API documentation updated
@@ -168,9 +193,11 @@ If constitution requires documentation:
 ### 6. Check for Feature Context (Optional)
 
 Try to determine if this PR maps to a feature spec:
+
 - Extract feature number from branch name pattern (e.g., `001-feature-name`)
 - Check if `/.documentation/specs/{feature}/spec.md` exists
 - If spec exists, optionally cross-reference:
+
   - Does implementation match spec requirements?
   - Are acceptance criteria being addressed?
   - Is scope appropriate for the spec?
@@ -182,7 +209,9 @@ Try to determine if this PR maps to a feature spec:
 Create comprehensive report at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`:
 
 #### Handle Existing Reviews
+
 If file already exists:
+
 1. Read the existing file
 2. Extract the previous commit SHA from metadata
 3. Compare with current commit SHA from PR_CONTEXT
@@ -337,7 +366,9 @@ const apiKey = "hardcoded-secret-key";
 ## Next Steps
 
 ### Immediate Actions (Required)
+
 [If critical issues exist]
+
 - [ ] [Action 1 - reference issue ID]
 - [ ] [Action 2 - reference issue ID]
 
@@ -345,10 +376,12 @@ const apiKey = "hardcoded-secret-key";
 No immediate blocking actions required.
 
 ### Recommended Improvements
+
 - [ ] [Improvement 1 - reference issue ID]
 - [ ] [Improvement 2 - reference issue ID]
 
 ### Future Considerations (Optional)
+
 - [ ] [Enhancement 1]
 - [ ] [Enhancement 2]
 
@@ -356,8 +389,9 @@ No immediate blocking actions required.
 
 **Recommendation**: [✅ APPROVE | ⚠️ REQUEST CHANGES | ❌ REJECT]
 
-**Reasoning**: 
+**Reasoning**:
 [Provide clear reasoning based on findings. Examples:
+
 - "PR violates mandatory Test-First principle (C1). Must add tests before merge."
 - "No critical issues found. Minor suggestions provided but not blocking."
 - "Excellent PR - follows all constitution principles and includes comprehensive tests."]
@@ -377,19 +411,25 @@ No immediate blocking actions required.
 [If this is an updated review, previous reviews go here]
 
 ### Review 2: 2026-01-24 10:30:00 UTC
+
 **Commit**: abc123def
 
 [Summary of previous review or full previous review content]
 
 ### Review 1: 2026-01-23 14:15:00 UTC
+
 **Commit**: 789xyz012
 
 [Summary of first review]
+
+```text
+End of report template
 ```
 
 ### 8. Create Review Directory
 
 Ensure `/.documentation/specs/pr-review/` directory exists:
+
 - Check if directory exists
 - Create it if it doesn't (including parent `/.documentation/specs/` if needed)
 - Set appropriate permissions
@@ -397,6 +437,7 @@ Ensure `/.documentation/specs/pr-review/` directory exists:
 ### 9. Write Review File
 
 Write the generated report to `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`:
+
 - Use UTF-8 encoding
 - Ensure proper line endings
 - Make file readable
@@ -405,7 +446,7 @@ Write the generated report to `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md
 
 Display concise summary to the user:
 
-```
+```text
 ✅ PR Review Complete!
 
 📄 Review saved: /.documentation/specs/pr-review/pr-{NUMBER}.md
@@ -435,6 +476,7 @@ View full review: /.documentation/specs/pr-review/pr-{NUMBER}.md
 The constitution is **non-negotiable** and the **authoritative source** for all review criteria.
 
 All findings must:
+
 - Reference the specific constitution section (by principle name)
 - Quote the exact constitution language (MUST/SHOULD/etc.)
 - Explain how the code violates or complies with the principle
@@ -443,6 +485,7 @@ All findings must:
 ### Evidence-Based Feedback
 
 Every issue must include:
+
 - **Specific location**: File path and line number (not "multiple files" or "various places")
 - **Code quote**: Actual code snippet showing the issue (2-5 lines of context)
 - **Constitution reference**: Which principle is violated and why
@@ -461,6 +504,7 @@ Every issue must include:
 ### Severity Guidelines
 
 Use these criteria for classification:
+
 - **CRITICAL**: Violates MUST principle, blocks functionality, security risk, breaks production
 - **HIGH**: Violates SHOULD principle significantly, quality concerns, technical debt
 - **MEDIUM**: Partial compliance, improvement opportunity, maintainability concern
@@ -469,7 +513,8 @@ Use these criteria for classification:
 ### Graceful Error Handling
 
 **If constitution missing**:
-```
+
+```text
 ❌ Cannot perform PR review - Constitution required
 
 The project constitution defines the review criteria. Create one first:
@@ -478,11 +523,12 @@ The project constitution defines the review criteria. Create one first:
 2. Define your project's core principles
 3. Then retry: /speckit.pr-review #{PR_NUMBER}
 
-Learn more: https://github.com/MarkHazleton/spec-kit
+Learn more: <https://github.com/MarkHazleton/spec-kit>
 ```
 
 **If PR not found**:
-```
+
+```text
 ❌ PR #{NUMBER} not found
 
 Troubleshooting:
@@ -495,13 +541,14 @@ If issue persists, provide PR number explicitly:
 ```
 
 **If GitHub CLI not installed**:
-```
+
+```text
 ❌ GitHub CLI (gh) required but not installed
 
 Install GitHub CLI:
 - macOS: brew install gh
 - Windows: winget install --id GitHub.cli
-- Linux: https://github.com/cli/cli#installation
+- Linux: <https://github.com/cli/cli#installation>
 
 After installation, authenticate:
 gh auth login
@@ -512,6 +559,7 @@ Then retry: /speckit.pr-review
 ### Positive Feedback
 
 If PR is excellent:
+
 - Acknowledge good practices
 - Call out strengths specifically
 - Provide enthusiastic approval
@@ -520,6 +568,7 @@ If PR is excellent:
 ### Review Updates
 
 When re-reviewing an updated PR:
+
 - Explicitly note what changed since last review
 - Acknowledge fixed issues: "✅ Fixed: C1 (tests added)"
 - Note new issues introduced: "⚠️ New: H3 (missing validation)"

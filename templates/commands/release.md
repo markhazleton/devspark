@@ -218,7 +218,7 @@ Create or update `CHANGELOG.md` at repository root:
 
 Create directory structure at `/.documentation/releases/v{NEXT_VERSION}/`:
 
-```
+```text
 releases/v{NEXT_VERSION}/
 ├── release-notes.md      # Human-readable release summary
 ├── specs/                # Archived specs
@@ -425,27 +425,30 @@ To execute this release:
    - `/.documentation/releases/v{NEXT_VERSION}/release-notes.md`
    - `CHANGELOG.md`
 
-2. Commit changes:
+1. Commit changes:
+
    ```bash
    git add -A
    git commit -m "docs: release v{NEXT_VERSION}"
    ```
 
-3. Tag release:
+1. Tag release:
+
    ```bash
    git tag -a v{NEXT_VERSION} -m "Release v{NEXT_VERSION}"
    ```
 
-4. Push to remote:
+1. Push to remote:
+
    ```bash
    git push origin main --tags
    ```
 
-5. Create GitHub Release (optional):
+1. Create GitHub Release (optional):
+
    ```bash
    gh release create v{NEXT_VERSION} --notes-file .documentation/releases/v{NEXT_VERSION}/release-notes.md
    ```
-```
 
 ## Guidelines
 

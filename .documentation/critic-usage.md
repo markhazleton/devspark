@@ -19,11 +19,12 @@ This is a **pre-mortem** analysis tool—it imagines the project has already fai
 
 Run `/speckit.critic` **after** `/speckit.tasks` and **before** `/speckit.implement`:
 
-```
+```text
 /speckit.specify → /speckit.plan → /speckit.tasks → /speckit.critic → /speckit.implement
 ```
 
 Use this command when you want:
+
 - A skeptical review of your implementation plan
 - To identify risks the team may have overlooked
 - A Go/No-Go recommendation before investing in implementation
@@ -55,24 +56,28 @@ Use this command when you want:
 | **Severity** | Quality issues | Business impact |
 | **Output** | Remediation suggestions | Go/No-Go recommendation |
 
-**Summary**: 
+**Summary**:
+
 - `/speckit.analyze` = Are the artifacts aligned and complete?
 - `/speckit.critic` = What will fail in production?
 
 ## Understanding Severity Levels
 
 ### SHOWSTOPPER
-```
+
+```text
 ❌ STOP - Cannot proceed to implementation
 ```
 
 Will cause:
+
 - Production outage
 - Data loss
 - Security breach
 - Constitution violation
 
 **Examples**:
+
 - No authentication on protected endpoints
 - Blocking I/O causing event loop starvation
 - Missing connection pooling in high-traffic API
@@ -80,47 +85,56 @@ Will cause:
 - Any constitution violation
 
 ### CRITICAL
-```
+
+```text
 ⚠️ Fix before proceeding
 ```
 
 Will cause:
+
 - Major user-facing issues
 - Costly rework post-launch
 - Significant technical debt
 
 **Examples**:
+
 - Missing pagination on list endpoints
 - No error handling strategy
 - Missing health check endpoints
 - No database migration strategy
 
 ### HIGH
-```
+
+```text
 ⚠️ Should fix
 ```
 
 Will cause:
+
 - Technical debt accumulation
 - Operational burden
 - Developer frustration
 
 **Examples**:
+
 - Missing structured logging
 - Hardcoded configuration values
 - No rollback procedure
 - Missing type checking
 
 ### MEDIUM
-```
+
+```text
 ℹ️ Consider addressing
 ```
 
 Will cause:
+
 - Slower development
 - Minor issues in production
 
 **Examples**:
+
 - Suboptimal query patterns
 - Missing edge case handling
 - Inconsistent code style
@@ -130,6 +144,7 @@ Will cause:
 ### Architectural Risks
 
 #### Async/Concurrency Risks
+
 - Blocking I/O in async contexts
 - Wrong database driver (sync vs async)
 - Connection pool exhaustion
@@ -137,6 +152,7 @@ Will cause:
 - Race conditions and deadlocks
 
 #### Scale Naivety
+
 - N+1 query patterns in ORM usage
 - Missing pagination on list endpoints
 - No caching strategy for hot paths
@@ -144,6 +160,7 @@ Will cause:
 - Single-instance deployment
 
 #### Distributed System Blindness
+
 - Missing network partition handling
 - No eventual consistency strategy
 - Assuming atomic cross-service operations
@@ -153,6 +170,7 @@ Will cause:
 ### Security & Compliance Risks
 
 #### Authentication/Authorization
+
 - Missing or incomplete auth middleware
 - No API key validation on protected endpoints
 - Overly permissive CORS configuration
@@ -160,6 +178,7 @@ Will cause:
 - Secrets not in vault
 
 #### Input Validation
+
 - Unvalidated path parameters
 - Missing input sanitization
 - No request size limits
@@ -167,6 +186,7 @@ Will cause:
 - XSS vulnerabilities
 
 #### Regulatory Blindness
+
 - No GDPR consideration for user data
 - Missing data retention policies
 - No backup/restore procedures
@@ -175,6 +195,7 @@ Will cause:
 ### Operational Hazards
 
 #### Observability Gaps
+
 - No structured logging strategy
 - Missing metrics/monitoring
 - No alerting thresholds
@@ -182,6 +203,7 @@ Will cause:
 - Missing health check endpoints
 
 #### Deployment Risks
+
 - Zero-downtime deployment not addressed
 - Missing database migration strategy
 - No rollback procedure
@@ -189,6 +211,7 @@ Will cause:
 - No graceful shutdown handling
 
 #### Testing Gaps
+
 - Missing integration test strategy
 - No database fixtures
 - No API contract testing
@@ -197,12 +220,14 @@ Will cause:
 ### Implementation Traps
 
 #### Optimistic Estimates
+
 - Integration tasks without API issue buffer
 - No time for debugging race conditions
 - Missing performance optimization tasks
 - Inadequate testing time
 
 #### Missing Dependencies
+
 - Tasks referencing undefined models
 - Parallel tasks with hidden shared resources
 - No infrastructure provisioning tasks
@@ -250,24 +275,28 @@ The critic produces a structured risk assessment:
 The critic applies stack-specific knowledge:
 
 ### Python + FastAPI
+
 - Blocking I/O in async endpoints?
 - Using sync psycopg2 instead of asyncpg?
 - Missing Pydantic validation constraints?
 - Debug mode in production config?
 
 ### Node.js + Express
+
 - Unhandled promise rejections?
 - Missing async error middleware?
 - Callback hell without structure?
 - Missing TypeScript strict mode?
 
 ### Go + Gin/Fiber
+
 - Goroutine leaks?
 - Missing context cancellation?
 - Improper error handling?
 - Missing structured logging?
 
 ### Java + Spring Boot
+
 - Missing @Transactional boundaries?
 - N+1 queries in JPA/Hibernate?
 - No connection pool tuning?
@@ -322,9 +351,11 @@ The critic applies stack-specific knowledge:
 ## Interpreting the Go/No-Go Recommendation
 
 ### STOP
+
 Showstoppers are present. Implementation will likely fail or cause serious issues.
 
 **Required Actions**:
+
 1. Address every showstopper finding
 2. Update plan.md with fixes
 3. Regenerate tasks.md
@@ -332,18 +363,22 @@ Showstoppers are present. Implementation will likely fail or cause serious issue
 5. Only proceed when clean
 
 ### CONDITIONAL
+
 Critical risks exist that should be addressed.
 
 **Recommended Actions**:
+
 1. Fix critical risks if time permits
 2. If proceeding, document each accepted risk
 3. Add monitoring/alerting for risk areas
 4. Plan mitigation tasks post-MVP
 
 ### PROCEED WITH CAUTION
+
 No showstoppers, but some concerns exist.
 
 **Checklist**:
+
 - [ ] Acknowledge documented risks
 - [ ] Add mitigation tasks to backlog
 - [ ] Set up monitoring for risk areas
@@ -352,25 +387,32 @@ No showstoppers, but some concerns exist.
 ## Best Practices
 
 ### 1. Run Before Every Implementation
+
 Never skip the critic review. Hidden risks compound quickly.
 
 ### 2. Don't Ignore Showstoppers
+
 Showstoppers are non-negotiable. Fix them before proceeding.
 
 ### 3. Document Accepted Risks
+
 If you proceed with known risks, document them explicitly.
 
 ### 4. Use Focus Arguments
+
 When concerned about specific areas, use arguments to focus the analysis.
 
 ### 5. Combine with /speckit.analyze
+
 Run both commands for comprehensive validation:
+
 ```bash
 /speckit.analyze  # Check consistency
 /speckit.critic   # Check risks
 ```
 
 ### 6. Learn from Findings
+
 Use recurring findings to improve your constitution and planning process.
 
 ## Comparison to Other Commands
@@ -389,6 +431,7 @@ Use recurring findings to improve your constitution and planning process.
 **Problem**: spec.md, plan.md, or tasks.md not found
 
 **Solution**: Run the prerequisite commands first:
+
 ```bash
 /speckit.specify [requirements]
 /speckit.plan [tech stack]
@@ -401,6 +444,7 @@ Use recurring findings to improve your constitution and planning process.
 **Problem**: `/.documentation/memory/constitution.md` not found
 
 **Solution**:
+
 ```bash
 /speckit.constitution Create project principles
 ```
@@ -410,6 +454,7 @@ Use recurring findings to improve your constitution and planning process.
 **Problem**: Report has many showstoppers, feels overwhelming
 
 **Mitigation**:
+
 1. Prioritize by business impact
 2. Address most critical first
 3. Consider phased approach
@@ -420,6 +465,7 @@ Use recurring findings to improve your constitution and planning process.
 **Problem**: A finding seems incorrect for your context
 
 **Actions**:
+
 1. Document why you disagree
 2. If proceeding, note as accepted risk
 3. Set up monitoring for that area
@@ -428,10 +474,11 @@ Use recurring findings to improve your constitution and planning process.
 ## Support
 
 If you encounter issues:
+
 - Check [Troubleshooting](#troubleshooting) section above
 - Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
 
 ---
 
-*Part of the Spec Kit - Spec-Driven Development Toolkit*  
-*For more information: https://github.com/MarkHazleton/spec-kit*
+*Part of the Spec Kit - Spec-Driven Development Toolkit*
+*For more information: <https://github.com/MarkHazleton/spec-kit>*

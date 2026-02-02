@@ -114,6 +114,7 @@ This command provides constitution-based code review for any GitHub Pull Request
 6. **Update Support**: Re-reviews updated PRs and maintains review history with timestamps
 
 **Key Features**:
+
 - Only requires constitution (no spec/plan/tasks needed)
 - Works on main, develop, or any branch
 - Categorizes findings by severity (Critical/High/Medium/Low)
@@ -121,6 +122,7 @@ This command provides constitution-based code review for any GitHub Pull Request
 - Includes approval recommendation (Approve/Request Changes/Reject)
 
 **Usage**:
+
 ```bash
 # Auto-detect PR from current branch
 /speckit.pr-review
@@ -145,6 +147,7 @@ This command performs comprehensive codebase audits against your project constit
 7. **Trend Tracking**: Compares results against previous audits for improvement tracking
 
 **Key Features**:
+
 - Scoped audits for focused analysis
 - Automated reports saved to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`
 - Historical comparison with previous audits
@@ -152,6 +155,7 @@ This command performs comprehensive codebase audits against your project constit
 - Actionable recommendations with file:line references
 
 **Scope Options**:
+
 - `--scope=full` (default) - Complete audit
 - `--scope=constitution` - Constitution compliance only
 - `--scope=packages` - Package/dependency analysis
@@ -160,6 +164,7 @@ This command performs comprehensive codebase audits against your project constit
 - `--scope=duplicate` - Duplicate code detection
 
 **Usage**:
+
 ```bash
 # Full audit
 /speckit.site-audit
@@ -183,6 +188,7 @@ This command performs adversarial risk analysis identifying technical flaws, imp
 6. **Constitution Enforcement**: Flags any deviations from project principles as showstoppers
 
 **Key Features**:
+
 - Adversarial mindset (assumes Murphy's Law)
 - Framework-specific risk checklists (Python, Node.js, Go, Java, etc.)
 - Severity classification (Showstopper/Critical/High/Medium)
@@ -192,15 +198,18 @@ This command performs adversarial risk analysis identifying technical flaws, imp
 - Missing task detection
 
 **When to Use**:
+
 - After `/speckit.tasks` and before `/speckit.implement`
 - When you want a skeptical review of your implementation plan
 - To identify risks the team may have overlooked
 
 **Key Distinction from `/speckit.analyze`**:
+
 - `/speckit.analyze` = Consistency & completeness checking (are artifacts aligned?)
 - `/speckit.critic` = Adversarial risk analysis (what will fail in production?)
 
 **Usage**:
+
 ```bash
 # Run critic analysis
 /speckit.critic

@@ -61,7 +61,7 @@
 
 ### Workflow Selection
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │           Task Arrives                   │
 └─────────────────┬───────────────────────┘
@@ -218,6 +218,7 @@ Use the **`/speckit.site-audit`** command to perform a comprehensive codebase au
 ```
 
 **Key Features**:
+
 - **Constitution-Driven Analysis** - Evaluates codebase against project principles
 - **Security Scanning** - Detects hardcoded secrets, insecure patterns, missing validation
 - **Dependency Auditing** - Identifies outdated, vulnerable, or unused packages
@@ -226,6 +227,7 @@ Use the **`/speckit.site-audit`** command to perform a comprehensive codebase au
 - **Trend Tracking** - Compares results against previous audits for improvement trends
 
 **Prerequisites**:
+
 - Project constitution at `/.documentation/memory/constitution.md`
 - PowerShell 7+ (for script execution)
 - pip-audit (optional, for Python security scanning)
@@ -245,6 +247,7 @@ Use the **`/speckit.critic`** command to perform adversarial risk analysis ident
 ```
 
 **Key Features**:
+
 - **Pre-mortem Analysis** - Imagines project failure in production and explains why
 - **Stack-Specific Risks** - Detects framework-specific hazards (Python async, Node.js, Go, etc.)
 - **Showstopper Detection** - Identifies issues that will cause production outages or security breaches
@@ -252,21 +255,25 @@ Use the **`/speckit.critic`** command to perform adversarial risk analysis ident
 - **Constitution Violations** - Flags any deviations from project principles as showstoppers
 
 **Severity Levels**:
+
 - **SHOWSTOPPER** - Will cause production outage, data loss, or security breach (blocks implementation)
 - **CRITICAL** - Will cause major user-facing issues or costly rework
 - **HIGH** - Will cause technical debt or operational burden
 - **MEDIUM** - Will slow development or cause minor issues
 
 **When to Use**:
+
 - After `/speckit.tasks` and before `/speckit.implement`
 - When you want a skeptical review of your implementation plan
 - To identify risks the team may have overlooked
 
 **Key Distinction from `/speckit.analyze`**:
+
 - `/speckit.analyze` = Consistency & completeness checking (are artifacts aligned?)
 - `/speckit.critic` = Adversarial risk analysis (what will fail in production?)
 
 **Prerequisites**:
+
 - Project constitution at `/.documentation/memory/constitution.md`
 - Completed spec.md, plan.md, and tasks.md in the feature directory (this command is part of the spec workflow)
 
@@ -286,6 +293,7 @@ Use the **`/speckit.pr-review`** command to perform constitution-based code revi
 ```
 
 **Key Features**:
+
 - **Works for any PR** - not limited to feature branches or spec-driven development
 - **Only requires constitution** - no spec, plan, or tasks needed
 - **Branch-agnostic** - review PRs targeting main, develop, or any branch
@@ -294,6 +302,7 @@ Use the **`/speckit.pr-review`** command to perform constitution-based code revi
 - **Update handling** - appends new reviews when PR changes, preserves history
 
 **Review Output**:
+
 - Constitution compliance evaluation (principle-by-principle)
 - Security analysis and checklist
 - Code quality assessment
@@ -303,6 +312,7 @@ Use the **`/speckit.pr-review`** command to perform constitution-based code revi
 - Approval recommendation (Approve/Request Changes/Reject)
 
 **Prerequisites**:
+
 - Project constitution at `/.documentation/memory/constitution.md`
 - [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
 - GitHub repository with pull requests
@@ -328,6 +338,7 @@ Use the **`/speckit.quickfix`** command for rapid bug fixes and small features w
 ```
 
 **Key Features**:
+
 - **Auto-Classification** - Detects bug-fix, hotfix, minor-feature, config-change, or docs-update
 - **Targeted Validation** - Only checks constitution principles relevant to the task type
 - **Lightweight Records** - Creates minimal documentation at `/.documentation/quickfixes/QF-{YYYY}-{NNN}.md`
@@ -335,12 +346,14 @@ Use the **`/speckit.quickfix`** command for rapid bug fixes and small features w
 - **Completion Tracking** - Links to commits and PRs when marking complete
 
 **When to Use**:
+
 - Single file changes under 50 lines
 - Bugs with clear root cause
 - Production issues needing rapid response
 - Configuration changes
 
 **When to Use Full Spec Instead**:
+
 - Multiple files with architectural impact
 - New user-facing features
 - Database schema or API contract changes
@@ -361,6 +374,7 @@ Use the **`/speckit.release`** command to archive development artifacts and prep
 ```
 
 **Key Features**:
+
 - **Artifact Archival** - Moves completed specs and quickfixes to `/.documentation/releases/v{VERSION}/`
 - **ADR Extraction** - Distills key architectural decisions into permanent documentation
 - **CHANGELOG Generation** - Auto-generates changelog entries from completed work
@@ -368,6 +382,7 @@ Use the **`/speckit.release`** command to archive development artifacts and prep
 - **Clean Slate** - Resets specs directory for next development cycle
 
 **Output**:
+
 - `/.documentation/releases/v{VERSION}/release-notes.md` - Human-readable release summary
 - `/.documentation/releases/v{VERSION}/specs/` - Archived specifications
 - `/.documentation/releases/v{VERSION}/quickfixes/` - Archived quickfixes
@@ -396,6 +411,7 @@ Use the **`/speckit.evolve-constitution`** command to analyze PR reviews and pro
 ```
 
 **Key Features**:
+
 - **Pattern Analysis** - Scans PR reviews for recurring violation patterns
 - **Gap Detection** - Identifies issues not mapped to existing principles
 - **Proposal Generation** - Creates CAP (Constitution Amendment Proposal) documents
@@ -403,12 +419,14 @@ Use the **`/speckit.evolve-constitution`** command to analyze PR reviews and pro
 - **Approval Workflow** - Supports approve/reject actions with rationale
 
 **Amendment Types**:
+
 - **ADD** - New principle for uncovered area
 - **MODIFY** - Update unclear or incomplete principle
 - **DEPRECATE** - Remove or soften outdated principle
 - **CLARIFY** - Add examples without changing rules
 
 **Prerequisites**:
+
 - Project constitution at `/.documentation/memory/constitution.md`
 - PR review history (recommended for analysis mode)
 
@@ -964,6 +982,7 @@ Or for a specific PR:
 ```
 
 The PR review command will:
+
 - Evaluate your changes against the project constitution
 - Check for security issues and code quality concerns
 - Verify testing coverage and documentation
@@ -971,6 +990,7 @@ The PR review command will:
 - Provide actionable recommendations categorized by severity
 
 **Key Features**:
+
 - Works for **any PR** in the repository, not just feature branches
 - Only requires a constitution (no spec/plan/tasks needed)
 - Can be used on main branch, develop, or any other branch
@@ -998,6 +1018,7 @@ Throughout development, use these commands to maintain code quality:
 ```
 
 The site audit produces detailed compliance reports saved to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`, including:
+
 - Constitution compliance scores
 - Security vulnerability detection
 - Unused code and dependency identification
@@ -1016,6 +1037,7 @@ For detailed usage, see the [Site Audit Guide](.documentation/site-audit-usage.m
 ```
 
 The critic command identifies showstoppers and provides a Go/No-Go recommendation:
+
 - **STOP** - Showstoppers present, cannot proceed
 - **CONDITIONAL** - Fix critical risks first
 - **PROCEED WITH CAUTION** - Document acknowledged risks
