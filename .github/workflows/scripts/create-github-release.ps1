@@ -6,9 +6,9 @@
 .DESCRIPTION
     Create-github-release.ps1 - Create a new GitHub release and upload all agent template packages
 .PARAMETER Version
-    The version to release (e.g., v1.0.0-markhazleton.1)
+    The version to release (e.g., v1.0.0-spark.1)
 .EXAMPLE
-    .\create-github-release.ps1 -Version "v1.0.0-markhazleton.1"
+    .\create-github-release.ps1 -Version "v1.0.0-spark.1"
 #>
 
 param(

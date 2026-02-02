@@ -6,9 +6,9 @@
 .DESCRIPTION
     Update-version.ps1 - Update the version field in pyproject.toml (for release artifacts only)
 .PARAMETER Version
-    The version to set (e.g., v1.0.0-markhazleton.1)
+    The version to set (e.g., v1.0.0-spark.1)
 .EXAMPLE
-    .\update-version.ps1 -Version "v1.0.0-markhazleton.1"
+    .\update-version.ps1 -Version "v1.0.0-spark.1"
 #>
 
 param(

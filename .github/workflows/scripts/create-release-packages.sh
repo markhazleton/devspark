@@ -4,22 +4,22 @@ set -euo pipefail
 # create-release-packages.sh (workflow-local)
 # Build Spec Kit template release archives for each supported AI assistant and script type.
 # Usage: .github/workflows/scripts/create-release-packages.sh <version>
-#   Version argument should include leading 'v'.
+#   Version argument should include leading 'v' (e.g., v1.0.0-spark.1).
 #   Optionally set AGENTS and/or SCRIPTS env vars to limit what gets built.
 #     AGENTS  : space or comma separated subset of: claude gemini copilot cursor-agent qwen opencode windsurf codex amp shai bob (default: all)
 #     SCRIPTS : space or comma separated subset of: sh ps (default: both)
 #   Examples:
-#     AGENTS=claude SCRIPTS=sh $0 v0.2.0
-#     AGENTS="copilot,gemini" $0 v0.2.0
-#     SCRIPTS=ps $0 v0.2.0
+#     AGENTS=claude SCRIPTS=sh $0 v1.0.0-spark.1
+#     AGENTS="copilot,gemini" $0 v1.0.0-spark.1
+#     SCRIPTS=ps $0 v1.0.0-spark.1
 
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 <version-with-v-prefix>" >&2
   exit 1
 fi
 NEW_VERSION="$1"
-if [[ ! $NEW_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "Version must look like v0.0.0" >&2
+if [[ ! $NEW_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-spark\.[0-9]+)?$ ]]; then
+  echo "Version must look like v0.0.0 or v0.0.0-spark.1" >&2
   exit 1
 fi
 

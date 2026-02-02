@@ -32,14 +32,14 @@ This directory contains PowerShell versions of the GitHub Actions workflow scrip
 
 ```text
 Latest tag: v0.0.90
-New version will be: v1.0.0-markhazleton.1
+New version will be: v1.0.0-spark.1
 ```
 
 ### 2. Generate Release Notes
 
 ```powershell
 .\.github\workflows\scripts\generate-release-notes.ps1 `
-    -NewVersion "v1.0.0-markhazleton.1" `
+    -NewVersion "v1.0.0-spark.1" `
     -LastTag "v0.0.90"
 ```
 
@@ -49,14 +49,14 @@ This creates `release_notes.md` with your fork-specific branding.
 
 ```powershell
 .\.github\workflows\scripts\check-release-exists.ps1 `
-    -Version "v1.0.0-markhazleton.1"
+    -Version "v1.0.0-spark.1"
 ```
 
 ### 4. Create Release Packages (Local Test)
 
 ```powershell
 .\.github\workflows\scripts\create-release-packages.ps1 `
-    -Version "v1.0.0-markhazleton.1"
+    -Version "v1.0.0-spark.1"
 ```
 
 This creates all agent-specific ZIP packages in `.genreleases/` directory.
@@ -65,7 +65,7 @@ This creates all agent-specific ZIP packages in `.genreleases/` directory.
 
 ```powershell
 .\.github\workflows\scripts\update-version.ps1 `
-    -Version "v1.0.0-markhazleton.1"
+    -Version "v1.0.0-spark.1"
 ```
 
 **Note:** This is typically only needed for PyPI releases.
@@ -78,7 +78,7 @@ gh auth status
 
 # Create the release
 .\.github\workflows\scripts\create-github-release.ps1 `
-    -Version "v1.0.0-markhazleton.1"
+    -Version "v1.0.0-spark.1"
 ```
 
 ## Full Local Test Workflow
@@ -114,7 +114,7 @@ Write-Host ".\.github\workflows\scripts\create-github-release.ps1 -Version $vers
 - **GitHub Actions uses bash scripts** (`.sh` files) on `ubuntu-latest` runners
 - **PowerShell scripts** (`.ps1` files) are for local Windows testing only
 - Both versions are kept in sync for the same functionality
-- The versioning format `v1.0.0-markhazleton.X` distinguishes fork releases from upstream
+- The versioning format `v1.0.0-spark.X` distinguishes Spark releases from upstream
 
 ## Differences from GitHub Actions
 
@@ -144,4 +144,4 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
 - Ensure you have at least one commit
 - The script will default to `v0.0.0` if no tags exist
-- For fork versioning, any non-fork tag triggers `v1.0.0-markhazleton.1`
+- For Spark versioning, any non-Spark tag triggers `v1.0.0-spark.1`
