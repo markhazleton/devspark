@@ -12,11 +12,11 @@ Create a new speckit command that performs context-aware pull request reviews us
 
 ### Key Design Principles
 
-1. **Constitution-Only Requirement**: Only requires `/memory/constitution.md` - no spec/plan/tasks needed
+1. **Constitution-Only Requirement**: Only requires `/.documentation/memory/constitution.md` - no spec/plan/tasks needed
 2. **Repository-Wide**: Works for any PR in the repository, not tied to specific features
 3. **Branch-Agnostic**: Can review PRs targeting any branch (main, develop, feature branches)
 4. **Suggestion-Only**: Generates recommendations without making code changes
-5. **Persistent Reviews**: Stores reviews in `/specs/pr-review/pr-{id}.md` with metadata
+5. **Persistent Reviews**: Stores reviews in `/.documentation/specs/pr-review/pr-{id}.md` with metadata
 
 ---
 
@@ -45,13 +45,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Overview
 
-This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are stored in `/specs/pr-review/pr-{id}.md` for historical reference.
+This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are stored in `/.documentation/specs/pr-review/pr-{id}.md` for historical reference.
 
 **IMPORTANT**: This command **only provides suggestions** - it does not make any code changes.
 
 ## Prerequisites
 
-- Project constitution at `/memory/constitution.md` (REQUIRED)
+- Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
 - GitHub repository with PR context
 - GitHub CLI (`gh`) installed (recommended) or manual PR number
 
@@ -62,8 +62,8 @@ This command reviews GitHub Pull Requests against the project constitution. It w
 Run repository detection and PR context extraction:
 - Detect if running in GitHub PR environment
 - Extract PR number from user input or GitHub context
-- Verify constitution exists at `/memory/constitution.md`
-- Create `/specs/pr-review/` directory if it doesn't exist
+- Verify constitution exists at `/.documentation/memory/constitution.md`
+- Create `/.documentation/specs/pr-review/` directory if it doesn't exist
 
 **PR Number Detection Priority**:
 1. User explicitly provides PR number: `/speckit.pr-review #123` or `/speckit.pr-review 123`
@@ -89,14 +89,14 @@ Use GitHub CLI (`gh pr view {PR_NUMBER} --json`) to fetch:
 ### 3. Load Review Artifacts
 
 **REQUIRED**:
-- Constitution from `/memory/constitution.md`
+- Constitution from `/.documentation/memory/constitution.md`
   - Extract core principles
   - Identify MUST/SHOULD requirements
   - Note version and last amended date
 
 **OPTIONAL** (if available):
-- Feature spec from `/specs/{feature}/spec.md` (if PR branch matches feature pattern)
-- Implementation plan from `/specs/{feature}/plan.md`
+- Feature spec from `/.documentation/specs/{feature}/spec.md` (if PR branch matches feature pattern)
+- Implementation plan from `/.documentation/specs/{feature}/plan.md`
 - Match PR changes to specific feature context if applicable
 
 ### 4. Perform Constitution-Based Review
@@ -145,7 +145,7 @@ For each principle in the constitution:
 
 ### 6. Generate Review Report
 
-Create comprehensive report at `/specs/pr-review/pr-{id}.md`:
+Create comprehensive report at `/.documentation/specs/pr-review/pr-{id}.md`:
 
 ```markdown
 # Pull Request Review: [PR_TITLE]
@@ -328,7 +328,7 @@ Display to user:
 ```
 ✅ PR Review Complete!
 
-📄 Review saved: /specs/pr-review/pr-123.md
+📄 Review saved: /.documentation/specs/pr-review/pr-123.md
 🔍 Reviewed commit: abc123def456
 📅 Review date: 2026-01-25 15:30:00 UTC
 
@@ -343,7 +343,7 @@ Critical issues must be resolved before merge:
 - C1: TDD principle violated (no tests for new API endpoints)
 - C2: Security issue (hardcoded API key in config)
 
-View full review: /specs/pr-review/pr-123.md
+View full review: /.documentation/specs/pr-review/pr-123.md
 ```
 
 ## Guidelines
@@ -426,7 +426,7 @@ git log origin/{base}..origin/{head} --oneline
 ### Directory Structure
 
 ```
-specs/
+.documentation/specs/
   pr-review/
     pr-1.md
     pr-2.md
@@ -536,8 +536,8 @@ cat <<EOF
     "updated_at": $(echo "$PR_DATA" | jq -r '.updatedAt' | jq -Rs .),
     "diff_available": $([ -n "$PR_DIFF" ] && echo "true" || echo "false")
   },
-  "CONSTITUTION_PATH": "$REPO_ROOT/memory/constitution.md",
-  "REVIEW_DIR": "$REPO_ROOT/specs/pr-review"
+  "CONSTITUTION_PATH": "$REPO_ROOT/.documentation/memory/constitution.md",
+  "REVIEW_DIR": "$REPO_ROOT/.documentation/specs/pr-review"
 }
 EOF
 ```
@@ -631,8 +631,8 @@ $output = @{
         updated_at = $prData.updatedAt
         diff_available = $diffAvailable
     }
-    CONSTITUTION_PATH = Join-Path $repoRoot.Path "memory\constitution.md"
-    REVIEW_DIR = Join-Path $repoRoot.Path "specs\pr-review"
+    CONSTITUTION_PATH = Join-Path $repoRoot.Path ".documentation\memory\constitution.md"
+    REVIEW_DIR = Join-Path $repoRoot.Path ".documentation\specs\pr-review"
 } | ConvertTo-Json -Depth 10 -Compress
 
 Write-Output $output
@@ -714,7 +714,7 @@ The `/speckit.pr-review` command performs constitution-based code reviews on Git
 **Key Features**:
 - Works for any PR in the repository
 - Only requires project constitution
-- Stores reviews in `/specs/pr-review/pr-{id}.md`
+- Stores reviews in `/.documentation/specs/pr-review/pr-{id}.md`
 - Tracks commit SHA and review timestamp
 - Updates existing reviews if PR changes
 - Provides actionable, line-specific feedback
@@ -733,7 +733,7 @@ The `/speckit.pr-review` command performs automated, constitution-driven code re
 
 ## Prerequisites
 
-- Project constitution at `/memory/constitution.md`
+- Project constitution at `/.documentation/memory/constitution.md`
 - GitHub repository
 - GitHub CLI (`gh`) installed and authenticated
 - Pull request in the repository
@@ -775,7 +775,7 @@ The command will:
 
 ## Review Output
 
-Reviews are saved to `/specs/pr-review/pr-{id}.md` with:
+Reviews are saved to `/.documentation/specs/pr-review/pr-{id}.md` with:
 - **Metadata**: PR details, commit SHA, review timestamp
 - **Executive Summary**: Overall assessment and recommendation
 - **Categorized Issues**: Critical, High, Medium, Low priority
@@ -794,10 +794,10 @@ Reviews are saved to `/specs/pr-review/pr-{id}.md` with:
 
 ### Viewing Past Reviews
 
-All PR reviews are stored in `/specs/pr-review/` directory:
+All PR reviews are stored in `/.documentation/specs/pr-review/` directory:
 
 ```bash
-ls specs/pr-review/
+ls .documentation/specs/pr-review/
 # pr-1.md
 # pr-2.md
 # pr-123.md
@@ -813,7 +813,7 @@ When a PR is reviewed multiple times, the file contains:
 
 ### Acting on Feedback
 
-1. Read the review report in `/specs/pr-review/pr-{id}.md`
+1. Read the review report in `/.documentation/specs/pr-review/pr-{id}.md`
 2. Address CRITICAL issues first (required for merge)
 3. Consider HIGH priority suggestions strongly
 4. Address MEDIUM/LOW as time permits
@@ -957,7 +957,7 @@ The `/speckit.pr-review` command follows standard speckit patterns but with uniq
 
 1. **No Feature Context**: Works repository-wide, not tied to specific features
 2. **External Data Source**: Pulls from GitHub PR API via `gh` CLI
-3. **Persistent Output**: Creates/updates files in `/specs/pr-review/`
+3. **Persistent Output**: Creates/updates files in `/.documentation/specs/pr-review/`
 4. **Metadata Tracking**: Includes commit SHA and timestamps
 5. **Update Logic**: Handles multiple reviews of same PR
 
@@ -1023,7 +1023,7 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 - [ ] Create `templates/commands/pr-review.md`
 - [ ] Create `scripts/bash/get-pr-context.sh`
 - [ ] Create `scripts/powershell/get-pr-context.ps1`
-- [ ] Add `/specs/pr-review/` directory creation logic
+- [ ] Add `/.documentation/specs/pr-review/` directory creation logic
 - [ ] Implement review report generation
 - [ ] Add metadata tracking (commit SHA, timestamp)
 - [ ] Handle existing review updates
@@ -1078,7 +1078,7 @@ The `/speckit.pr-review` command is successful when:
 2. ✅ Works for any PR in any branch
 3. ✅ Accurately detects constitution violations
 4. ✅ Generates actionable, line-specific feedback
-5. ✅ Saves reviews to `/specs/pr-review/pr-{id}.md`
+5. ✅ Saves reviews to `/.documentation/specs/pr-review/pr-{id}.md`
 6. ✅ Tracks commit SHA and review timestamp
 7. ✅ Handles review updates correctly (appends, not replaces)
 8. ✅ Works across all supported AI agents

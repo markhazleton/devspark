@@ -54,7 +54,7 @@ I created **Spec Kit Spark** as a community extension that keeps the original SD
 **Key design decisions:**
 - Works for **any PR in any branch**—not limited to feature branches
 - Only requires a constitution—no spec, plan, or tasks needed
-- Saves review history to `/specs/pr-review/pr-{number}.md`
+- Saves review history to `/.documentation/specs/pr-review/pr-{number}.md`
 - Tracks commit SHAs so you can re-review after changes
 
 This means constitution-powered reviews work for:
@@ -77,7 +77,7 @@ This means constitution-powered reviews work for:
 
 **Key design decisions:**
 - Supports scoped audits (`--scope=constitution`, `--scope=packages`, etc.)
-- Produces trend-trackable reports in `/docs/copilot/audit/`
+- Produces trend-trackable reports in `/.documentation/copilot/audit/`
 - Compares against previous audits to show improvement or regression
 
 ### `/speckit.critic` — Adversarial Risk Analysis
@@ -111,7 +111,7 @@ This means constitution-powered reviews work for:
 1. Scans for patterns (testing frameworks, security practices, architecture conventions)
 2. Reports high-confidence patterns (>80% consistent) vs. inconsistent areas
 3. Asks 8-10 targeted questions to validate findings
-4. Generates a draft constitution at `/memory/constitution-draft.md`
+4. Generates a draft constitution at `/.documentation/memory/constitution-draft.md`
 
 **Key design decisions:**
 - Discovery-first: analyze code before asking questions

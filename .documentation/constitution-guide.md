@@ -4,7 +4,7 @@
 
 The **project constitution** is the foundational document that defines your project's core principles, standards, and governance rules. It serves as the authoritative source of truth that all Spec Kit commands reference when making decisions, reviewing code, or auditing your codebase.
 
-The constitution lives at `/memory/constitution.md` in your project root.
+The constitution lives at `/.documentation/memory/constitution.md` in your project root.
 
 ## Why a Constitution?
 
@@ -43,7 +43,7 @@ The discover command will:
 1. Scan your codebase for patterns (testing, security, architecture, code quality)
 2. Report what it finds with confidence levels (high/medium/low consistency)
 3. Ask 8-10 targeted questions to validate findings and fill gaps
-4. Generate a draft constitution at `/memory/constitution-draft.md`
+4. Generate a draft constitution at `/.documentation/memory/constitution-draft.md`
 5. You review the draft and finalize with `/speckit.constitution`
 
 ### Example Prompts
@@ -326,7 +326,7 @@ When using AI coding assistants like GitHub Copilot, Claude Code, or OpenAI Code
 
 | File | Agent | Purpose |
 |------|-------|---------|
-| `/memory/constitution.md` | All (via Spec Kit) | Project principles, quality standards, governance |
+| `/.documentation/memory/constitution.md` | All (via Spec Kit) | Project principles, quality standards, governance |
 | `.github/copilot-instructions.md` | GitHub Copilot | Agent-specific behavior, coding patterns |
 | `CLAUDE.md` or `.claude/settings.json` | Claude Code | Agent-specific context, preferences |
 | `.codex/` or `AGENTS.md` | OpenAI Codex | Agent configuration, project context |
@@ -337,7 +337,7 @@ When using AI coding assistants like GitHub Copilot, Claude Code, or OpenAI Code
 
 ```
 ┌─────────────────────────────────────────┐
-│         /memory/constitution.md          │  ← Principles (WHAT must be true)
+│         /.documentation/memory/constitution.md          │  ← Principles (WHAT must be true)
 │   Non-negotiable, agent-agnostic rules   │
 └─────────────────────────────────────────┘
                     │
@@ -365,7 +365,7 @@ When using AI coding assistants like GitHub Copilot, Claude Code, or OpenAI Code
 ## Project Principles
 
 This project follows Spec-Driven Development. Before generating code, 
-always consult `/memory/constitution.md` for non-negotiable principles.
+always consult `/.documentation/memory/constitution.md` for non-negotiable principles.
 
 Key principles include:
 - Security First: All input must be validated
@@ -400,7 +400,7 @@ Key principles include:
 
 ### Example: Complementary Files
 
-**`/memory/constitution.md`** (principles):
+**`/.documentation/memory/constitution.md`** (principles):
 ```markdown
 ### II. Security First
 
@@ -414,7 +414,7 @@ Key principles include:
 ```markdown
 ## Security Implementation
 
-Follow principles in `/memory/constitution.md` Section II.
+Follow principles in `/.documentation/memory/constitution.md` Section II.
 
 When implementing input validation:
 - Use Zod schemas in `/src/schemas/`
@@ -434,13 +434,13 @@ For secrets:
 
 If your team uses multiple agents (Copilot, Claude, Cursor), create consistent instruction files:
 
-1. **Shared principles**: All reference `/memory/constitution.md`
+1. **Shared principles**: All reference `/.documentation/memory/constitution.md`
 2. **Agent-specific behaviors**: Each file can have unique content
 3. **Consider a shared include**: Some teams create `/docs/ai-context.md` that all agent files reference
 
 **Example structure**:
 ```
-/memory/
+/.documentation/memory/
   constitution.md           # Principles (all agents)
   
 /docs/
@@ -474,7 +474,7 @@ Different agents parse references differently. Use clear, consistent references:
 ```markdown
 ## Good References
 
-See `/memory/constitution.md` for project principles.
+See `/.documentation/memory/constitution.md` for project principles.
 Follow Section III (Code Quality) of the constitution.
 Constitution requirement: "All public APIs MUST have documentation"
 
@@ -495,7 +495,7 @@ Use this template at the top of any AI agent instruction file:
 
 Before generating or reviewing code, consult these documents:
 
-1. **Project Constitution**: `/memory/constitution.md`
+1. **Project Constitution**: `/.documentation/memory/constitution.md`
    - Contains non-negotiable principles
    - Violations are blocking issues in PR review
    
@@ -514,7 +514,7 @@ Before generating or reviewing code, consult these documents:
 
 ### "Constitution not found"
 
-Commands require `/memory/constitution.md` to exist:
+Commands require `/.documentation/memory/constitution.md` to exist:
 
 ```bash
 /speckit.constitution Create initial project principles

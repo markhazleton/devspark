@@ -128,7 +128,7 @@ Spec Kit provides powerful commands that leverage your project constitution for 
 **For brownfield projects**: Analyze your existing codebase to discover implicit patterns and conventions, then interactively build a constitution through guided questions.
 
 - **Usage**: `/speckit.discover-constitution` or with focus: `/speckit.discover-constitution Focus on security and testing`
-- **Output**: Draft constitution at `/memory/constitution-draft.md`
+- **Output**: Draft constitution at `/.documentation/memory/constitution-draft.md`
 - **Key Features**: Pattern detection, interactive questioning, gap analysis, draft generation
 
 **How it works**:
@@ -144,7 +144,7 @@ Spec Kit provides powerful commands that leverage your project constitution for 
 Review any GitHub Pull Request against your project constitution. Works for any PR in any branch without requiring any spec-driven artifacts.
 
 - **Usage**: `/speckit.pr-review #123` or `/speckit.pr-review` (auto-detect from branch)
-- **Output**: Detailed review saved to `/specs/pr-review/pr-{number}.md`
+- **Output**: Detailed review saved to `/.documentation/specs/pr-review/pr-{number}.md`
 - **Key Features**: Security analysis, code quality assessment, testing validation, approval recommendation
 
 [Full PR Review Guide](pr-review-usage.md)
@@ -154,7 +154,7 @@ Review any GitHub Pull Request against your project constitution. Works for any 
 Perform comprehensive codebase audits against your project constitution and standards. Like PR review, this command only requires a constitution—no specs needed.
 
 - **Usage**: `/speckit.site-audit` or `/speckit.site-audit --scope=constitution`
-- **Output**: Audit results saved to `/docs/copilot/audit/YYYY-MM-DD_results.md`
+- **Output**: Audit results saved to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`
 - **Key Features**: Security scanning, dependency analysis, code quality metrics, compliance scoring
 
 **Scope Options**:

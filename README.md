@@ -73,7 +73,7 @@ specify check
 
 > **Brownfield Tip**: Use `/speckit.discover-constitution` after initialization to analyze existing code patterns and draft a constitution.
 
-To upgrade Specify, see the [Upgrade Guide](./docs/upgrade.md) for detailed instructions. Quick upgrade:
+To upgrade Specify, see the [Upgrade Guide](./.documentation/upgrade.md) for detailed instructions. Quick upgrade:
 
 ```bash
 uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
@@ -176,15 +176,15 @@ Use the **`/speckit.site-audit`** command to perform a comprehensive codebase au
 - **Security Scanning** - Detects hardcoded secrets, insecure patterns, missing validation
 - **Dependency Auditing** - Identifies outdated, vulnerable, or unused packages
 - **Code Quality Metrics** - Measures complexity, duplication, and maintainability
-- **Automated Reports** - Saves detailed audit results to `/docs/copilot/audit/YYYY-MM-DD_results.md`
+- **Automated Reports** - Saves detailed audit results to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`
 - **Trend Tracking** - Compares results against previous audits for improvement trends
 
 **Prerequisites**:
-- Project constitution at `/memory/constitution.md`
+- Project constitution at `/.documentation/memory/constitution.md`
 - PowerShell 7+ (for script execution)
 - pip-audit (optional, for Python security scanning)
 
-For complete audit details, see the generated report in `/docs/copilot/audit/`.
+For complete audit details, see the generated report in `/.documentation/copilot/audit/`.
 
 ### Critic (Adversarial Risk Analysis)
 
@@ -221,7 +221,7 @@ Use the **`/speckit.critic`** command to perform adversarial risk analysis ident
 - `/speckit.critic` = Adversarial risk analysis (what will fail in production?)
 
 **Prerequisites**:
-- Project constitution at `/memory/constitution.md`
+- Project constitution at `/.documentation/memory/constitution.md`
 - Completed spec.md, plan.md, and tasks.md in the feature directory (this command is part of the spec workflow)
 
 ### Pull Request Review
@@ -243,7 +243,7 @@ Use the **`/speckit.pr-review`** command to perform constitution-based code revi
 - **Works for any PR** - not limited to feature branches or spec-driven development
 - **Only requires constitution** - no spec, plan, or tasks needed
 - **Branch-agnostic** - review PRs targeting main, develop, or any branch
-- **Persistent reviews** - saves reports to `/specs/pr-review/pr-{number}.md`
+- **Persistent reviews** - saves reports to `/.documentation/specs/pr-review/pr-{number}.md`
 - **Tracks changes** - monitors commit SHA and review timestamps
 - **Update handling** - appends new reviews when PR changes, preserves history
 
@@ -257,11 +257,114 @@ Use the **`/speckit.pr-review`** command to perform constitution-based code revi
 - Approval recommendation (Approve/Request Changes/Reject)
 
 **Prerequisites**:
-- Project constitution at `/memory/constitution.md`
+- Project constitution at `/.documentation/memory/constitution.md`
 - [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
 - GitHub repository with pull requests
 
-For complete usage guide, see [PR Review Documentation](./docs/pr-review-usage.md).
+For complete usage guide, see [PR Review Documentation](./.documentation/pr-review-usage.md).
+
+### Quickfix (Lightweight Workflow)
+
+Use the **`/speckit.quickfix`** command for rapid bug fixes and small features without the overhead of full specification workflows:
+
+```bash
+# Bug fix with auto-classification
+/speckit.quickfix fix null pointer exception in UserService.getProfile()
+
+# Urgent hotfix
+/speckit.quickfix urgent: payment processing timeout in checkout flow
+
+# Mark as complete
+/speckit.quickfix complete QF-2026-001
+
+# List recent quickfixes
+/speckit.quickfix list
+```
+
+**Key Features**:
+- **Auto-Classification** - Detects bug-fix, hotfix, minor-feature, config-change, or docs-update
+- **Targeted Validation** - Only checks constitution principles relevant to the task type
+- **Lightweight Records** - Creates minimal documentation at `/.documentation/quickfixes/QF-{YYYY}-{NNN}.md`
+- **Scope Detection** - Warns when work expands beyond classification limits
+- **Completion Tracking** - Links to commits and PRs when marking complete
+
+**When to Use**:
+- Single file changes under 50 lines
+- Bugs with clear root cause
+- Production issues needing rapid response
+- Configuration changes
+
+**When to Use Full Spec Instead**:
+- Multiple files with architectural impact
+- New user-facing features
+- Database schema or API contract changes
+
+### Release Documentation
+
+Use the **`/speckit.release`** command to archive development artifacts and prepare for the next development cycle:
+
+```bash
+# Auto-calculate version from completed work
+/speckit.release
+
+# Explicit version
+/speckit.release 2.0.0
+
+# Preview changes without writing
+/speckit.release --dry-run
+```
+
+**Key Features**:
+- **Artifact Archival** - Moves completed specs and quickfixes to `/.documentation/releases/v{VERSION}/`
+- **ADR Extraction** - Distills key architectural decisions into permanent documentation
+- **CHANGELOG Generation** - Auto-generates changelog entries from completed work
+- **Version Calculation** - Determines MAJOR/MINOR/PATCH based on content
+- **Clean Slate** - Resets specs directory for next development cycle
+
+**Output**:
+- `/.documentation/releases/v{VERSION}/release-notes.md` - Human-readable release summary
+- `/.documentation/releases/v{VERSION}/specs/` - Archived specifications
+- `/.documentation/releases/v{VERSION}/quickfixes/` - Archived quickfixes
+- `/.documentation/decisions/ADR-{NNN}.md` - Architectural Decision Records
+- Updated `CHANGELOG.md`
+
+### Constitution Evolution
+
+Use the **`/speckit.evolve-constitution`** command to analyze PR reviews and propose constitution amendments:
+
+```bash
+# Full analysis of PR reviews and audits
+/speckit.evolve-constitution
+
+# Analyze specific PR findings
+/speckit.evolve-constitution --from-pr #123
+
+# Manual suggestion
+/speckit.evolve-constitution suggest "Add principle for API versioning standards"
+
+# Approve a proposal
+/speckit.evolve-constitution approve CAP-2026-001
+
+# Reject with reason
+/speckit.evolve-constitution reject CAP-2026-002 "Too restrictive for current team"
+```
+
+**Key Features**:
+- **Pattern Analysis** - Scans PR reviews for recurring violation patterns
+- **Gap Detection** - Identifies issues not mapped to existing principles
+- **Proposal Generation** - Creates CAP (Constitution Amendment Proposal) documents
+- **History Tracking** - Maintains amendment log at `/.documentation/memory/constitution-history.md`
+- **Approval Workflow** - Supports approve/reject actions with rationale
+
+**Amendment Types**:
+- **ADD** - New principle for uncovered area
+- **MODIFY** - Update unclear or incomplete principle
+- **DEPRECATE** - Remove or soften outdated principle
+- **CLARIFY** - Add examples without changing rules
+
+**Prerequisites**:
+- Project constitution at `/.documentation/memory/constitution.md`
+- PR review history (recommended for analysis mode)
 
 ## 📽️ Video Overview
 
@@ -391,10 +494,13 @@ Essential commands for the Spec-Driven Development workflow:
 
 These commands only require a constitution and work independently of the spec workflow:
 
-| Command               | Description                                                              |
-| --------------------- | ------------------------------------------------------------------------ |
-| `/speckit.pr-review`  | Review pull requests against constitution (works for any PR, any branch) |
-| `/speckit.site-audit` | Comprehensive codebase audit for security, quality, and compliance       |
+| Command                         | Description                                                              |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `/speckit.pr-review`            | Review pull requests against constitution (works for any PR, any branch) |
+| `/speckit.site-audit`           | Comprehensive codebase audit for security, quality, and compliance       |
+| `/speckit.quickfix`             | Rapid bug fixes and small features without full spec overhead            |
+| `/speckit.release`              | Archive dev artifacts at release and generate release documentation      |
+| `/speckit.evolve-constitution`  | Propose constitution amendments based on PR review patterns              |
 
 #### Spec Workflow Commands
 
@@ -544,7 +650,7 @@ The first step should be establishing your project's governing principles using 
 /speckit.constitution Create principles focused on code quality, testing standards, user experience consistency, and performance requirements. Include governance for how these principles should guide technical decisions and implementation choices.
 ```
 
-This step creates or updates the `.specify/memory/constitution.md` file with your project's foundational guidelines that the AI agent will reference during specification, planning, and implementation phases.
+This step creates or updates the `.documentation/memory/constitution.md` file with your project's foundational guidelines that the AI agent will reference during specification, planning, and implementation phases.
 
 ### **STEP 2:** Create project specifications
 
@@ -576,25 +682,26 @@ delete any comments that you made, but you can't delete comments anybody else ma
 
 After this prompt is entered, you should see Claude Code kick off the planning and spec drafting process. Claude Code will also trigger some of the built-in scripts to set up the repository.
 
-Once this step is completed, you should have a new branch created (e.g., `001-create-taskify`), as well as a new specification in the `specs/001-create-taskify` directory.
+Once this step is completed, you should have a new branch created (e.g., `001-create-taskify`), as well as a new specification in the `.documentation/specs/001-create-taskify` directory.
 
 The produced specification should contain a set of user stories and functional requirements, as defined in the template.
 
 At this stage, your project folder contents should resemble the following:
 
 ```text
+├── .documentation
+│   ├── memory
+│   │   └── constitution.md
+│   └── specs
+│       └── 001-create-taskify
+│           └── spec.md
 └── .specify
-    ├── memory
-    │  └── constitution.md
     ├── scripts
-    │  ├── check-prerequisites.sh
-    │  ├── common.sh
-    │  ├── create-new-feature.sh
-    │  ├── setup-plan.sh
-    │  └── update-claude-md.sh
-    ├── specs
-    │  └── 001-create-taskify
-    │      └── spec.md
+    │   ├── check-prerequisites.sh
+    │   ├── common.sh
+    │   ├── create-new-feature.sh
+    │   ├── setup-plan.sh
+    │   └── update-claude-md.sh
     └── templates
         ├── plan-template.md
         ├── spec-template.md
@@ -645,29 +752,31 @@ The output of this step will include a number of implementation detail documents
 ```text
 .
 ├── CLAUDE.md
-├── memory
-│  └── constitution.md
-├── scripts
-│  ├── check-prerequisites.sh
-│  ├── common.sh
-│  ├── create-new-feature.sh
-│  ├── setup-plan.sh
-│  └── update-claude-md.sh
-├── specs
-│  └── 001-create-taskify
-│      ├── contracts
-│      │  ├── api-spec.json
-│      │  └── signalr-spec.md
-│      ├── data-model.md
-│      ├── plan.md
-│      ├── quickstart.md
-│      ├── research.md
-│      └── spec.md
-└── templates
-    ├── CLAUDE-template.md
-    ├── plan-template.md
-    ├── spec-template.md
-    └── tasks-template.md
+├── .documentation
+│   ├── memory
+│   │   └── constitution.md
+│   └── specs
+│       └── 001-create-taskify
+│           ├── contracts
+│           │   ├── api-spec.json
+│           │   └── signalr-spec.md
+│           ├── data-model.md
+│           ├── plan.md
+│           ├── quickstart.md
+│           ├── research.md
+│           └── spec.md
+└── .specify
+    ├── scripts
+    │   ├── check-prerequisites.sh
+    │   ├── common.sh
+    │   ├── create-new-feature.sh
+    │   ├── setup-plan.sh
+    │   └── update-claude-md.sh
+    └── templates
+        ├── CLAUDE-template.md
+        ├── plan-template.md
+        ├── spec-template.md
+        └── tasks-template.md
 ```
 
 Check the `research.md` document to ensure that the right tech stack is used, based on your instructions. You can ask Claude Code to refine it if any of the components stand out, or even have it check the locally-installed version of the platform/framework you want to use (e.g., .NET).
@@ -714,7 +823,7 @@ This helps refine the implementation plan and helps you avoid potential blind sp
 You can also ask Claude Code (if you have the [GitHub CLI](https://docs.github.com/en/github-cli/github-cli) installed) to go ahead and create a pull request from your current branch to `main` with a detailed description, to make sure that the effort is properly tracked.
 
 > [!NOTE]
-> Before you have the agent implement it, it's also worth prompting Claude Code to cross-check the details to see if there are any over-engineered pieces (remember - it can be over-eager). If over-engineered components or decisions exist, you can ask Claude Code to resolve them. Ensure that Claude Code follows the [constitution](base/memory/constitution.md) as the foundational piece that it must adhere to when establishing the plan.
+> Before you have the agent implement it, it's also worth prompting Claude Code to cross-check the details to see if there are any over-engineered pieces (remember - it can be over-eager). If over-engineered components or decisions exist, you can ask Claude Code to resolve them. Ensure that Claude Code follows the [constitution](.documentation/memory/constitution.md) as the foundational piece that it must adhere to when establishing the plan.
 
 ### **STEP 6:** Generate task breakdown with /speckit.tasks
 
@@ -774,7 +883,7 @@ The PR review command will:
 - Evaluate your changes against the project constitution
 - Check for security issues and code quality concerns
 - Verify testing coverage and documentation
-- Generate a detailed review report in `/specs/pr-review/pr-{number}.md`
+- Generate a detailed review report in `/.documentation/specs/pr-review/pr-{number}.md`
 - Provide actionable recommendations categorized by severity
 
 **Key Features**:
@@ -786,7 +895,7 @@ The PR review command will:
 
 Address critical and high-priority issues before merging. Re-run the review after fixes to verify improvements.
 
-For detailed usage, see the [PR Review Guide](docs/pr-review-usage.md).
+For detailed usage, see the [PR Review Guide](.documentation/pr-review-usage.md).
 
 ### **STEP 9:** Ongoing Code Quality
 
@@ -804,13 +913,13 @@ Throughout development, use these commands to maintain code quality:
 /speckit.site-audit --scope=quality       # Code quality metrics
 ```
 
-The site audit produces detailed compliance reports saved to `/docs/copilot/audit/YYYY-MM-DD_results.md`, including:
+The site audit produces detailed compliance reports saved to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`, including:
 - Constitution compliance scores
 - Security vulnerability detection
 - Unused code and dependency identification
 - Code quality metrics and trends
 
-For detailed usage, see the [Site Audit Guide](docs/site-audit-usage.md).
+For detailed usage, see the [Site Audit Guide](.documentation/site-audit-usage.md).
 
 **Critic (Pre-Implementation)** - Run adversarial risk analysis before implementing:
 
@@ -827,7 +936,7 @@ The critic command identifies showstoppers and provides a Go/No-Go recommendatio
 - **CONDITIONAL** - Fix critical risks first
 - **PROCEED WITH CAUTION** - Document acknowledged risks
 
-For detailed usage, see the [Critic Guide](docs/critic-usage.md).
+For detailed usage, see the [Critic Guide](.documentation/critic-usage.md).
 
 </details>
 

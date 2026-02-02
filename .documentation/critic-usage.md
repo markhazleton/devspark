@@ -13,7 +13,7 @@ This is a **pre-mortem** analysis tool—it imagines the project has already fai
 - **Required**: Completed feature specification at `spec.md`
 - **Required**: Implementation plan at `plan.md`
 - **Required**: Task breakdown at `tasks.md`
-- **Required**: Project constitution at `/memory/constitution.md`
+- **Required**: Project constitution at `/.documentation/memory/constitution.md`
 
 ## When to Use
 
@@ -398,7 +398,7 @@ Use recurring findings to improve your constitution and planning process.
 
 ### "Constitution missing"
 
-**Problem**: `/memory/constitution.md` not found
+**Problem**: `/.documentation/memory/constitution.md` not found
 
 **Solution**:
 ```bash

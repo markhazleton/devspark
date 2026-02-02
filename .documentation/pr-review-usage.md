@@ -4,11 +4,11 @@
 
 The `/speckit.pr-review` command performs automated, constitution-driven code reviews for GitHub Pull Requests. It evaluates code changes against your project's established principles and generates detailed feedback reports stored in your repository.
 
-> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/speckit.specify`, `/speckit.plan`, and `/speckit.tasks`, PR review does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/memory/constitution.md`) and works for any PR in any repository—whether or not you're using spec-driven development.
+> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/speckit.specify`, `/speckit.plan`, and `/speckit.tasks`, PR review does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/.documentation/memory/constitution.md`) and works for any PR in any repository—whether or not you're using spec-driven development.
 
 ## Prerequisites
 
-- **Required**: Project constitution at `/memory/constitution.md`
+- **Required**: Project constitution at `/.documentation/memory/constitution.md`
 - **Required**: GitHub repository with pull requests
 - **Required**: GitHub CLI (`gh`) installed and authenticated
 - **Optional**: Feature specifications (if using spec-driven development)
@@ -59,7 +59,7 @@ The command will:
 2. Fetch PR metadata and changes from GitHub
 3. Evaluate changes against constitution principles
 4. Generate a comprehensive review report
-5. Save the report to `/specs/pr-review/pr-{number}.md`
+5. Save the report to `/.documentation/specs/pr-review/pr-{number}.md`
 
 ### Review Specific PR
 
@@ -100,9 +100,9 @@ The command will:
 
 ### Review File Location
 
-Reviews are saved to: `/specs/pr-review/pr-{number}.md`
+Reviews are saved to: `/.documentation/specs/pr-review/pr-{number}.md`
 
-Example: `/specs/pr-review/pr-123.md`
+Example: `/.documentation/specs/pr-review/pr-123.md`
 
 ### Review Structure
 
@@ -369,7 +369,7 @@ This produces vague reviews:
 
 ### "Constitution not found"
 
-**Problem**: `/memory/constitution.md` doesn't exist
+**Problem**: `/.documentation/memory/constitution.md` doesn't exist
 
 **Solution**:
 ```bash
@@ -435,7 +435,7 @@ Then re-run: `/speckit.pr-review #123`
 - Medium/Low can be addressed or deferred with justification
 
 ### 3. Keep Reviews as Historical Records
-- Don't delete review files from `/specs/pr-review/`
+- Don't delete review files from `/.documentation/specs/pr-review/`
 - They provide valuable history and patterns
 - Use for onboarding and pattern recognition
 
@@ -447,7 +447,7 @@ Then re-run: `/speckit.pr-review #123`
 ### 5. Use Reviews in Team Discussions
 - Share review reports in PR comments
 - Use specific finding IDs (C1, H2, etc.) in discussions
-- Link to review file: `/specs/pr-review/pr-123.md`
+- Link to review file: `/.documentation/specs/pr-review/pr-123.md`
 
 ### 6. Review All PRs Consistently
 - Main branch merges

@@ -156,14 +156,14 @@ main() {
     files_changed=$(echo "$pr_data" | jq -c '[.files[].path]')
     
     # Check for constitution
-    local constitution_path="$REPO_ROOT/memory/constitution.md"
+    local constitution_path="$REPO_ROOT/.documentation/memory/constitution.md"
     local constitution_exists="false"
     if [[ -f "$constitution_path" ]]; then
         constitution_exists="true"
     fi
     
     # Prepare review directory
-    local review_dir="$REPO_ROOT/specs/pr-review"
+    local review_dir="$REPO_ROOT/.documentation/specs/pr-review"
     
     # Build JSON output
     if [[ "$JSON_MODE" == true ]]; then

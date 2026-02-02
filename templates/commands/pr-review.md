@@ -3,7 +3,7 @@ description: Perform constitution-aware pull request review with actionable feed
 handoffs:
   - label: View Review History
     agent: speckit.pr-review
-    prompt: Show me previous PR reviews in specs/pr-review/
+    prompt: Show me previous PR reviews in .documentation/specs/pr-review/
 scripts:
   sh: scripts/bash/get-pr-context.sh $ARGUMENTS --json
   ps: scripts/powershell/get-pr-context.ps1 $ARGUMENTS -Json
@@ -19,13 +19,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Overview
 
-This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are stored in `/specs/pr-review/pr-{id}.md` for historical reference.
+This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are stored in `/.documentation/specs/pr-review/pr-{id}.md` for historical reference.
 
 **IMPORTANT**: This command **only provides suggestions** - it does not make any code changes.
 
 ## Prerequisites
 
-- Project constitution at `/memory/constitution.md` (REQUIRED)
+- Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
 - GitHub repository with PR context
 - GitHub CLI (`gh`) installed and authenticated (required)
 
@@ -56,7 +56,7 @@ For single quotes in args like "I'm reviewing", use escape syntax: e.g 'I'\''m r
 
 ### 2. Load Constitution
 
-Read and parse `/memory/constitution.md`:
+Read and parse `/.documentation/memory/constitution.md`:
 - Extract all core principles with their names
 - Identify MUST requirements (non-negotiable/mandatory)
 - Identify SHOULD requirements (recommended)
@@ -169,7 +169,7 @@ If constitution requires documentation:
 
 Try to determine if this PR maps to a feature spec:
 - Extract feature number from branch name pattern (e.g., `001-feature-name`)
-- Check if `/specs/{feature}/spec.md` exists
+- Check if `/.documentation/specs/{feature}/spec.md` exists
 - If spec exists, optionally cross-reference:
   - Does implementation match spec requirements?
   - Are acceptance criteria being addressed?
@@ -179,7 +179,7 @@ Try to determine if this PR maps to a feature spec:
 
 ### 7. Generate Review Report
 
-Create comprehensive report at `/specs/pr-review/pr-{PR_NUMBER}.md`:
+Create comprehensive report at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`:
 
 #### Handle Existing Reviews
 If file already exists:
@@ -389,14 +389,14 @@ No immediate blocking actions required.
 
 ### 8. Create Review Directory
 
-Ensure `/specs/pr-review/` directory exists:
+Ensure `/.documentation/specs/pr-review/` directory exists:
 - Check if directory exists
-- Create it if it doesn't (including parent `/specs/` if needed)
+- Create it if it doesn't (including parent `/.documentation/specs/` if needed)
 - Set appropriate permissions
 
 ### 9. Write Review File
 
-Write the generated report to `/specs/pr-review/pr-{PR_NUMBER}.md`:
+Write the generated report to `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`:
 - Use UTF-8 encoding
 - Ensure proper line endings
 - Make file readable
@@ -408,7 +408,7 @@ Display concise summary to the user:
 ```
 ✅ PR Review Complete!
 
-📄 Review saved: /specs/pr-review/pr-{NUMBER}.md
+📄 Review saved: /.documentation/specs/pr-review/pr-{NUMBER}.md
 🔍 Reviewed commit: {COMMIT_SHA}
 📅 Review date: {DATETIME}
 
@@ -425,7 +425,7 @@ Critical issues must be resolved before merge:
 - C1: {Brief description}
 - C2: {Brief description}
 
-View full review: /specs/pr-review/pr-{NUMBER}.md
+View full review: /.documentation/specs/pr-review/pr-{NUMBER}.md
 ```
 
 ## Guidelines

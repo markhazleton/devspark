@@ -43,7 +43,7 @@ Identify the codebase structure:
 - Check for existing documentation (README, CONTRIBUTING, docs/)
 - Look for existing AI instruction files (.github/copilot-instructions.md, CLAUDE.md, etc.)
 
-If `/memory/constitution.md` already exists:
+If `/.documentation/memory/constitution.md` already exists:
 - Warn user: "A constitution already exists. This will create a draft to compare/merge."
 - Proceed with analysis to identify gaps or conflicts
 
@@ -256,12 +256,12 @@ Would you like to add any of these? (Reply with area names, or "none")
 
 ### 7. Output Draft and Next Steps
 
-Write draft to `/memory/constitution-draft.md` (not overwriting existing constitution if present).
+Write draft to `/.documentation/memory/constitution-draft.md` (not overwriting existing constitution if present).
 
 ```markdown
 ## Discovery Complete
 
-**Draft saved to**: `/memory/constitution-draft.md`
+**Draft saved to**: `/.documentation/memory/constitution-draft.md`
 
 ### Summary
 
@@ -272,7 +272,7 @@ Write draft to `/memory/constitution-draft.md` (not overwriting existing constit
 
 ### Recommended Next Steps
 
-1. **Review the draft**: Open `/memory/constitution-draft.md` and refine wording
+1. **Review the draft**: Open `/.documentation/memory/constitution-draft.md` and refine wording
 2. **Team discussion**: Share draft with team for feedback
 3. **Finalize**: Run `/speckit.constitution` to create the official constitution
 4. **Validate**: Run `/speckit.site-audit` to check codebase against new principles

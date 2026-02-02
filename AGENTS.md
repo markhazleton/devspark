@@ -14,15 +14,79 @@ The toolkit supports multiple AI coding assistants, allowing teams to use their 
 
 - Any changes to `__init__.py` for the Specify CLI require a version rev in `pyproject.toml` and addition of entries to `CHANGELOG.md`.
 
+## Lightweight Workflow Commands
+
+These commands support the Adaptive System Life Cycle Development (ASLCD) approach, providing right-sized processes for tasks of varying complexity.
+
+### Quickfix Command
+
+The `/speckit.quickfix` command enables rapid fixes without full spec overhead:
+
+**Key Features:**
+1. **Auto-Classification**: Automatically classifies tasks as bug-fix, hotfix, minor-feature, config-change, or docs-update
+2. **Targeted Validation**: Only validates against constitution principles relevant to the task type
+3. **Lightweight Records**: Creates minimal documentation at `/.documentation/quickfixes/QF-{YYYY}-{NNN}.md`
+4. **Completion Tracking**: Supports marking quickfixes complete with commit/PR references
+5. **Scope Detection**: Warns when work expands beyond classification limits
+
+**Usage:**
+```bash
+/speckit.quickfix fix null pointer in UserService
+/speckit.quickfix urgent: payment timeout in checkout
+/speckit.quickfix complete QF-2026-001
+/speckit.quickfix list
+```
+
+### Release Command
+
+The `/speckit.release` command manages documentation lifecycle at release boundaries:
+
+**Key Features:**
+1. **Artifact Archival**: Archives completed specs and quickfixes to `/.documentation/releases/v{VERSION}/`
+2. **ADR Extraction**: Distills key architectural decisions from specs into ADR format
+3. **CHANGELOG Generation**: Auto-generates changelog entries from completed work
+4. **Version Calculation**: Auto-determines MAJOR/MINOR/PATCH based on content
+5. **Clean Slate**: Resets specs directory for next development cycle
+6. **Dry Run Mode**: Preview changes before committing
+
+**Usage:**
+```bash
+/speckit.release              # Auto-calculate version
+/speckit.release 2.0.0        # Explicit version
+/speckit.release --dry-run    # Preview only
+```
+
+### Constitution Evolution Command
+
+The `/speckit.evolve-constitution` command facilitates constitution amendments:
+
+**Key Features:**
+1. **Pattern Analysis**: Scans PR reviews and audits for recurring violation patterns
+2. **Gap Detection**: Identifies issues not mapped to existing principles
+3. **Proposal Generation**: Creates CAP (Constitution Amendment Proposal) documents
+4. **History Tracking**: Maintains amendment history at `/.documentation/memory/constitution-history.md`
+5. **Approval Workflow**: Supports approve/reject actions with reasons
+
+**Usage:**
+```bash
+/speckit.evolve-constitution                          # Full analysis
+/speckit.evolve-constitution --from-pr #123           # From specific PR
+/speckit.evolve-constitution suggest "API versioning" # Manual suggestion
+/speckit.evolve-constitution approve CAP-2026-001     # Approve proposal
+/speckit.evolve-constitution reject CAP-2026-002 "Too restrictive"
+```
+
+---
+
 ## PR Review Command
 
 The `/speckit.pr-review` command is a special command that works independently of the spec-driven development workflow:
 
 ### Unique Characteristics
 
-1. **Constitution-Only**: Requires only `/memory/constitution.md` - no spec, plan, or tasks needed
+1. **Constitution-Only**: Requires only `/.documentation/memory/constitution.md` - no spec, plan, or tasks needed
 2. **Repository-Wide**: Works for any PR in any branch (main, develop, feature, etc.)
-3. **Persistent Storage**: Reviews saved to `/specs/pr-review/pr-{id}.md` with metadata
+3. **Persistent Storage**: Reviews saved to `/.documentation/specs/pr-review/pr-{id}.md` with metadata
 4. **Version Tracking**: Tracks commit SHA and timestamp for each review
 5. **Update Logic**: Handles multiple reviews of same PR with history
 6. **GitHub Integration**: Uses GitHub CLI (`gh`) for PR data extraction

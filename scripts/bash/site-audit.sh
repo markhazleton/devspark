@@ -45,8 +45,8 @@ case $SCOPE in
 esac
 
 REPO_ROOT=$(get_repo_root)
-CONSTITUTION_PATH="$REPO_ROOT/memory/constitution.md"
-AUDIT_DIR="docs/copilot/audit"
+CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
+AUDIT_DIR=".documentation/copilot/audit"
 
 # Check constitution
 CONSTITUTION_EXISTS="false"

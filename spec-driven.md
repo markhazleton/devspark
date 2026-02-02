@@ -81,7 +81,7 @@ This command transforms a simple feature description (the user-prompt) into a co
 1. **Automatic Feature Numbering**: Scans existing specs to determine the next feature number (e.g., 001, 002, 003)
 2. **Branch Creation**: Generates a semantic branch name from your description and creates it automatically
 3. **Template-Based Generation**: Copies and customizes the feature specification template with your requirements
-4. **Directory Structure**: Creates the proper `specs/[branch-name]/` structure for all related documents
+4. **Directory Structure**: Creates the proper `.documentation/specs/[branch-name]/` structure for all related documents
 
 ### The `/speckit.plan` Command
 
@@ -106,11 +106,11 @@ After a plan is created, this command analyzes the plan and related design docum
 
 This command provides constitution-based code review for any GitHub Pull Request in the repository. **Unlike the spec workflow commands above, this command is independent of the Spec-Driven Development workflow**—it only requires a constitution and works for any PR in any repository:
 
-1. **Constitution-Driven**: Evaluates PR changes against project principles defined in `/memory/constitution.md`
+1. **Constitution-Driven**: Evaluates PR changes against project principles defined in `/.documentation/memory/constitution.md`
 2. **Repository-Wide**: Works for any PR, not limited to feature branches or spec-driven development
 3. **No Spec Required**: Does not need spec.md, plan.md, or tasks.md—just a constitution
 4. **Automated Analysis**: Reviews code quality, security, testing coverage, and documentation
-5. **Persistent Reports**: Saves comprehensive reviews to `/specs/pr-review/pr-{number}.md` with commit tracking
+5. **Persistent Reports**: Saves comprehensive reviews to `/.documentation/specs/pr-review/pr-{number}.md` with commit tracking
 6. **Update Support**: Re-reviews updated PRs and maintains review history with timestamps
 
 **Key Features**:
@@ -136,7 +136,7 @@ This command provides constitution-based code review for any GitHub Pull Request
 
 This command performs comprehensive codebase audits against your project constitution and development standards. **Like PR review, this command is independent of the Spec-Driven Development workflow**—it only requires a constitution and works on any codebase at any time:
 
-1. **Constitution-Driven**: Evaluates codebase against principles defined in `/memory/constitution.md`
+1. **Constitution-Driven**: Evaluates codebase against principles defined in `/.documentation/memory/constitution.md`
 2. **No Spec Required**: Does not need spec.md, plan.md, or tasks.md—just a constitution
 3. **Security Scanning**: Detects hardcoded secrets, insecure patterns, missing validation
 4. **Dependency Analysis**: Identifies outdated, vulnerable, or unused packages
@@ -146,7 +146,7 @@ This command performs comprehensive codebase audits against your project constit
 
 **Key Features**:
 - Scoped audits for focused analysis
-- Automated reports saved to `/docs/copilot/audit/YYYY-MM-DD_results.md`
+- Automated reports saved to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`
 - Historical comparison with previous audits
 - Severity-based categorization (Critical/High/Medium/Low)
 - Actionable recommendations with file:line references

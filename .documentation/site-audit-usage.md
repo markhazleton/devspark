@@ -4,11 +4,11 @@
 
 The `/speckit.site-audit` command performs comprehensive codebase audits against your project constitution and development standards. It scans your repository for compliance violations, security issues, code quality concerns, unused dependencies, and architectural problems.
 
-> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/speckit.specify`, `/speckit.plan`, and `/speckit.tasks`, site-audit does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/memory/constitution.md`) and can be run on any codebase at any time.
+> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/speckit.specify`, `/speckit.plan`, and `/speckit.tasks`, site-audit does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/.documentation/memory/constitution.md`) and can be run on any codebase at any time.
 
 ## Prerequisites
 
-- **Required**: Project constitution at `/memory/constitution.md`
+- **Required**: Project constitution at `/.documentation/memory/constitution.md`
 - **Required**: PowerShell 7+ (for script execution)
 - **Optional**: pip-audit (for Python security scanning)
 - **Optional**: npm audit (for Node.js security scanning)
@@ -105,7 +105,7 @@ Finds:
 
 ### Report Location
 
-Audit reports are saved to: `/docs/copilot/audit/YYYY-MM-DD_results.md`
+Audit reports are saved to: `/.documentation/copilot/audit/YYYY-MM-DD_results.md`
 
 ### Report Structure
 
@@ -287,7 +287,7 @@ This helps track improvement over time.
 
 ### "Constitution not found"
 
-**Problem**: `/memory/constitution.md` doesn't exist
+**Problem**: `/.documentation/memory/constitution.md` doesn't exist
 
 **Solution**:
 ```bash
@@ -334,7 +334,7 @@ pip install pip-audit
 - MEDIUM/LOW can be scheduled
 
 ### 3. Track Trends
-- Keep audit history in `/docs/copilot/audit/`
+- Keep audit history in `/.documentation/copilot/audit/`
 - Compare scores over time
 - Celebrate improvements
 
