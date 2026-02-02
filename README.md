@@ -612,6 +612,44 @@ Our research and experimentation focus on:
 - Provide robust iterative feature development workflows
 - Extend processes to handle upgrades and modernization tasks
 
+## 🗺️ Roadmap
+
+Spec Kit Spark is actively developed with a clear vision for the future:
+
+### Current Release (v0.0.25)
+
+- ✅ Full Spec-Driven Development workflow
+- ✅ Constitution-based PR review (`/speckit.pr-review`)
+- ✅ Comprehensive site auditing (`/speckit.site-audit`)
+- ✅ Adversarial risk analysis (`/speckit.critic`)
+- ✅ Lightweight quickfix workflow (`/speckit.quickfix`)
+- ✅ Release documentation management (`/speckit.release`)
+- ✅ Constitution evolution (`/speckit.evolve-constitution`)
+- ✅ 17+ AI agent integrations
+
+### Near-Term (v0.1.x)
+
+- 🔄 Enhanced technical debt tracking with metrics storage
+- 🔄 Trend visualization for compliance scores
+- 🔄 Improved quickfix-to-spec escalation workflow
+- 🔄 Constitution template library
+
+### Medium-Term (v0.2.x)
+
+- 📋 CI/CD pipeline integration (GitHub Actions, Azure DevOps)
+- 📋 Business value alignment documentation
+- 📋 Cross-project governance for organizations
+- 📋 Interactive constitution builder
+
+### Long-Term (v1.0+)
+
+- 🎯 Spec-to-test generation pipeline
+- 🎯 Multi-repository constitution inheritance
+- 🎯 AI model performance benchmarking
+- 🎯 Enterprise compliance frameworks
+
+**[Full Roadmap Details](./.documentation/roadmap.md)**
+
 ## 🔧 Prerequisites
 
 - **Linux/macOS/Windows**
