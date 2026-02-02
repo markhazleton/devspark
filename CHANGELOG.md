@@ -7,6 +7,18 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.91] - 2026-02-02
+
+### Added
+
+- **New `/speckit.evolve-constitution` command**: Analyzes PR reviews and audits to identify recurring patterns, detect gaps in constitution coverage, and propose amendments via CAP (Constitution Amendment Proposal) documents. Supports approval/rejection workflow with history tracking.
+- **Detailed Roadmap**: Added comprehensive roadmap section outlining current and future releases for Spec Kit Spark
+
+### Changed
+
+- Enhanced documentation and roadmap for ASLCD (Adaptive System Life Cycle Development) Toolkit
+- Updated documentation paths and references to align with new project structure
+
 ## [0.0.25] - 2026-01-30
 
 ### Added
