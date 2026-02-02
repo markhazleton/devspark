@@ -302,11 +302,11 @@ The constitution should contain **principles**—fundamental rules that define y
 ### Security First
 - All external input MUST be validated before use
 
-# ADR (decision - goes in /docs/adr/)
+# ADR (decision - goes in .documentation/decisions/)
 ## ADR-007: Input Validation Library
 We use Zod for input validation because of TypeScript integration...
 
-# Coding Standards (convention - goes in /docs/standards.md)
+# Coding Standards (convention - goes in .documentation/standards.md)
 ## Validation Patterns  
 - Use `validateRequest()` from `/lib/validation.ts`
 - Add schemas to `/schemas/` directory
@@ -353,7 +353,7 @@ When using AI coding assistants like GitHub Copilot, Claude Code, or OpenAI Code
                     ▼
 ┌─────────────────────────────────────────┐
 │     Coding Standards / Style Guides      │  ← Conventions (HOW we code)
-│  /docs/standards.md, .editorconfig       │
+│  .documentation/standards.md, .editorconfig │
 └─────────────────────────────────────────┘
 ```
 
@@ -436,16 +436,15 @@ If your team uses multiple agents (Copilot, Claude, Cursor), create consistent i
 
 1. **Shared principles**: All reference `/.documentation/memory/constitution.md`
 2. **Agent-specific behaviors**: Each file can have unique content
-3. **Consider a shared include**: Some teams create `/docs/ai-context.md` that all agent files reference
+3. **Consider a shared include**: Some teams create `.documentation/ai-context.md` that all agent files reference
 
 **Example structure**:
 ```
-/.documentation/memory/
-  constitution.md           # Principles (all agents)
-  
-/docs/
-  ai-context.md             # Shared project context (optional)
-  coding-standards.md       # Implementation conventions
+/.documentation/
+  memory/
+    constitution.md           # Principles (all agents)
+  ai-context.md               # Shared project context (optional)
+  standards.md                # Implementation conventions
   
 .github/
   copilot-instructions.md   # Copilot-specific + references above
@@ -499,10 +498,10 @@ Before generating or reviewing code, consult these documents:
    - Contains non-negotiable principles
    - Violations are blocking issues in PR review
    
-2. **Coding Standards**: `/docs/coding-standards.md` (if exists)
+2. **Coding Standards**: `.documentation/standards.md` (if exists)
    - Implementation patterns and conventions
-   
-3. **Architecture Decisions**: `/docs/adr/` (if exists)
+
+3. **Architecture Decisions**: `.documentation/decisions/` (if exists)
    - Technical choices with rationale
 
 ## Agent-Specific Guidance

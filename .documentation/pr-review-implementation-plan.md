@@ -722,7 +722,7 @@ The `/speckit.pr-review` command performs constitution-based code reviews on Git
 
 ### 4.2 Create Usage Guide
 
-**File**: `docs/pr-review-usage.md`
+**File**: `.documentation/pr-review-usage.md`
 
 ```markdown
 # PR Review Command Guide
@@ -1050,7 +1050,7 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 
 ### Documentation
 - [ ] Update README.md with command info
-- [ ] Create `docs/pr-review-usage.md`
+- [ ] Create `.documentation/pr-review-usage.md`
 - [ ] Update AGENTS.md with implementation notes
 - [ ] Add examples to documentation
 

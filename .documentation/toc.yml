@@ -17,6 +17,10 @@
   items:
     - name: Spec-Driven Development
       href: spec-driven-development.md
+    - name: Adaptive Lifecycle (ASLCD)
+      href: adaptive-lifecycle.md
+    - name: Roadmap
+      href: roadmap.md
 
 # Development workflows
 - name: Development

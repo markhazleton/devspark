@@ -40,7 +40,7 @@ Identify the codebase structure:
 - Identify source directories (src/, lib/, app/, etc.)
 - Locate test directories and patterns
 - Find configuration files (.eslintrc, tsconfig, .editorconfig, etc.)
-- Check for existing documentation (README, CONTRIBUTING, docs/)
+- Check for existing documentation (README, CONTRIBUTING, .documentation/)
 - Look for existing AI instruction files (.github/copilot-instructions.md, CLAUDE.md, etc.)
 
 If `/.documentation/memory/constitution.md` already exists:

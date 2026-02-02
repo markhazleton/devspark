@@ -43,7 +43,7 @@ jobs:
 
       - name: Build with DocFX
         run: |
-          cd docs
+          cd .documentation
           docfx docfx.json
 
       - name: Setup Pages
