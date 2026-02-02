@@ -5,7 +5,7 @@
 </div>
 
 <p align="center">
-    <strong>A community extension of Spec Kit, adding constitution-powered commands for PR review, site auditing, and risk analysis. Part of the WebSpark suite.</strong>
+    <strong>An Adaptive System Life Cycle Development (ASLCD) Toolkit - combining specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity. Part of the WebSpark suite.</strong>
 </p>
 
 <p align="center">
@@ -22,6 +22,7 @@
 
 ## Table of Contents
 
+- [🎯 The ASLCD Vision](#-the-aslcd-vision)
 - [🤔 What is Spec-Driven Development?](#-what-is-spec-driven-development)
 - [⚡ Get Started](#-get-started)
 - [📽️ Video Overview](#️-video-overview)
@@ -29,7 +30,7 @@
 - [🔧 Specify CLI Reference](#-specify-cli-reference)
 - [📚 Core Philosophy](#-core-philosophy)
 - [🌟 Development Phases](#-development-phases)
-- [🎯 Experimental Goals](#-experimental-goals)
+- [🗺️ Roadmap](#️-roadmap)
 - [🔧 Prerequisites](#-prerequisites)
 - [📖 Learn More](#-learn-more)
 - [📋 Detailed Process](#-detailed-process)
@@ -38,6 +39,51 @@
 - [💬 Support](#-support)
 - [🙏 Acknowledgements](#-acknowledgements)
 - [📄 License](#-license)
+
+## 🎯 The ASLCD Vision
+
+**Adaptive System Life Cycle Development** extends traditional spec-driven development to address real-world challenges that the original approach doesn't fully cover:
+
+| Challenge | Traditional Approach | ASLCD Solution |
+|-----------|---------------------|----------------|
+| **Greenfield Bias** | Works well for new projects | `/speckit.discover-constitution` generates constitutions from existing code |
+| **Task Overhead** | Full spec workflow for everything | `/speckit.quickfix` provides lightweight workflow for bug fixes |
+| **Documentation Drift** | Specs accumulate and become stale | `/speckit.release` archives artifacts and maintains living docs |
+| **Constitution Staleness** | No formal update process | `/speckit.evolve-constitution` proposes amendments from findings |
+| **Context Management** | Same context for all tasks | Right-sized workflows optimize AI agent effectiveness |
+
+### Design Principles
+
+1. **Universality over Opinion** - Core prompts that adapt rather than single-use commands
+2. **Right-Sized Rigor** - Match process overhead to task complexity
+3. **Continuous Compliance** - Constitution validation throughout the lifecycle
+4. **Adaptive Evolution** - Systems and documentation evolve together
+
+### Workflow Selection
+
+```
+┌─────────────────────────────────────────┐
+│           Task Arrives                   │
+└─────────────────┬───────────────────────┘
+                  │
+    ┌─────────────┼─────────────┐
+    ▼             ▼             ▼
+┌────────┐  ┌──────────┐  ┌──────────┐
+│Bug Fix │  │ Minor    │  │ Major    │
+│Hotfix  │  │ Feature  │  │ Feature  │
+└───┬────┘  └────┬─────┘  └────┬─────┘
+    │            │             │
+    ▼            ▼             ▼
+┌────────┐  ┌──────────┐  ┌──────────┐
+│quickfix│  │ quickfix │  │ specify  │
+│        │  │   OR     │  │ plan     │
+│        │  │ specify  │  │ tasks    │
+└────────┘  └──────────┘  └──────────┘
+```
+
+**[Full ASLCD Documentation](./.documentation/adaptive-lifecycle.md)** | **[Roadmap](./.documentation/roadmap.md)**
+
+---
 
 ## 🤔 What is Spec-Driven Development?
 

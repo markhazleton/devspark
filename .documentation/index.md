@@ -1,8 +1,8 @@
 # Spec Kit Spark
 
-*Build high-quality software faster.*
+*Build high-quality software faster with AI-driven lifecycle management.*
 
-**A community extension of Spec Kit, adding constitution-powered commands that help teams get more value from their project principles.**
+**An Adaptive System Life Cycle Development (ASLCD) Toolkit** - a community extension of Spec Kit that combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
 ---
 
@@ -12,61 +12,70 @@
 >
 > Part of the [WebSpark](https://github.com/MarkHazleton?tab=repositories&q=webspark) demonstration suite. Looking for the original? Visit **[github.com/github/spec-kit](https://github.com/github/spec-kit)**
 
-### Why Spec Kit Spark Exists
+### The ASLCD Vision
 
-The original Spec Kit project established an excellent foundation for Spec-Driven Development. Spec Kit Spark builds upon that great work by adding **constitution-powered commands** that help teams get more value from the effort invested in creating a well-crafted project constitution.
+Traditional spec-driven development works well for greenfield projects with major features. But real-world development includes bug fixes, hotfixes, brownfield codebases, and documentation that drifts over time. **Adaptive System Life Cycle Development** addresses these gaps:
 
-### What's Different
+| Challenge | ASLCD Solution |
+|-----------|----------------|
+| Greenfield bias | `/speckit.discover-constitution` generates constitutions from existing code |
+| Task overhead | `/speckit.quickfix` provides lightweight workflow for small tasks |
+| Documentation drift | `/speckit.release` archives artifacts and maintains living documentation |
+| Constitution staleness | `/speckit.evolve-constitution` proposes amendments from PR findings |
+| Context management | Right-sized workflows optimize AI agent effectiveness |
+
+### What Makes Spark Different
 
 | Feature | Original Spec Kit | Spec Kit Spark |
 |---------|-------------------|----------------|
 | Core SDD Workflow | ✅ Full support | ✅ Full support |
 | `/speckit.constitution` | ✅ Included | ✅ Included |
-| `/speckit.discover-constitution` | ❌ Not included | ✅ **Added** - Brownfield codebase discovery |
-| `/speckit.pr-review` | ❌ Not included | ✅ **Added** - Constitution-based PR review |
-| `/speckit.site-audit` | ❌ Not included | ✅ **Added** - Full codebase auditing |
-| `/speckit.critic` | ❌ Not included | ✅ **Added** - Adversarial risk analysis |
-| Multi-agent support | Limited | ✅ **Expanded** - 17+ AI agents supported |
+| `/speckit.discover-constitution` | ❌ | ✅ Brownfield discovery |
+| `/speckit.pr-review` | ❌ | ✅ Constitution-based PR review |
+| `/speckit.site-audit` | ❌ | ✅ Full codebase auditing |
+| `/speckit.critic` | ❌ | ✅ Adversarial risk analysis |
+| `/speckit.quickfix` | ❌ | ✅ Lightweight workflow |
+| `/speckit.release` | ❌ | ✅ Release documentation |
+| `/speckit.evolve-constitution` | ❌ | ✅ Constitution evolution |
+| Multi-agent support | Limited | ✅ 17+ AI agents |
 
-### Philosophy
-
-The original Spec Kit included the constitution concept to define project principles. Spec Kit Spark extends that investment by adding commands that **continuously leverage your constitution** beyond just the spec workflow:
-
-- **Discover principles** from existing codebases (`/speckit.discover-constitution`)
-- **Review every PR** against your established principles (`/speckit.pr-review`)
-- **Audit your entire codebase** for compliance violations (`/speckit.site-audit`)
-- **Identify risks** before they become production issues (`/speckit.critic`)
-
-### Credit & Attribution
-
-Full credit goes to the GitHub team for creating the Spec-Driven Development methodology and the original Spec Kit toolkit. Spec Kit Spark is an extension of their work, not a replacement. If you're looking for the official, GitHub-maintained version, please visit [github.com/github/spec-kit](https://github.com/github/spec-kit).
+Learn more: [Adaptive Lifecycle Documentation](adaptive-lifecycle.md)
 
 ---
 
-## What is Spec-Driven Development?
-
-Spec-Driven Development **flips the script** on traditional software development. For decades, code has been king — specifications were just scaffolding we built and discarded once the "real work" of coding began. Spec-Driven Development changes this: **specifications become executable**, directly generating working implementations rather than just guiding them.
-
 ## Getting Started
 
-### Greenfield (New Projects)
-
-Starting fresh? Initialize a new project with full Spec Kit scaffolding:
+### Quick Start
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME>
+# Install Specify CLI
+uv tool install specify-cli --from git+https://github.com/MarkHazleton/spec-kit.git
+
+# New project (greenfield)
+specify init my-project --ai claude
+
+# Existing project (brownfield)
+cd /path/to/existing-project
+specify init --here --ai claude
 ```
 
-### Brownfield (Existing Projects)
+### First Steps by Project Type
 
-Adding Spec Kit to an existing codebase? Initialize in your project directory:
-
+**Greenfield (New Project)**
 ```bash
-cd /path/to/your-existing-project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
+specify init my-project --ai claude
+cd my-project
+/speckit.constitution        # Define governing principles
+/speckit.specify             # Create first feature spec
 ```
 
-After initialization, use `/speckit.discover-constitution` to analyze your existing code patterns and draft a constitution that reflects your established conventions.
+**Brownfield (Existing Project)**
+```bash
+cd /path/to/existing-project
+specify init --here --ai claude
+/speckit.discover-constitution   # Analyze existing patterns
+/speckit.site-audit              # Baseline technical debt
+```
 
 ### Guides
 
@@ -75,116 +84,148 @@ After initialization, use `/speckit.discover-constitution` to analyze your exist
 - [Upgrade Guide](upgrade.md) - Updating to latest version
 - [Local Development](local-development.md) - Contributing to Spec Kit
 
-## Core Philosophy
+---
 
-Spec-Driven Development is a structured process that emphasizes:
+## Core Concepts
 
-- **Intent-driven development** where specifications define the "*what*" before the "*how*"
-- **Rich specification creation** using guardrails and organizational principles
-- **Multi-step refinement** rather than one-shot code generation from prompts
-- **Heavy reliance** on advanced AI model capabilities for specification interpretation
+### The Constitution
+
+The **constitution** is the foundational document defining your project's architecture, coding standards, and development guidelines. All Spec Kit commands reference the constitution for validation.
+
+- **Create**: `/speckit.constitution` - Define principles for new projects
+- **Discover**: `/speckit.discover-constitution` - Generate from existing code
+- **Evolve**: `/speckit.evolve-constitution` - Propose amendments
+- **Learn More**: [Constitution Guide](constitution-guide.md)
+
+### Right-Sized Workflows
+
+Match process overhead to task complexity:
+
+| Task Type | Workflow | When to Use |
+|-----------|----------|-------------|
+| Major Feature | Full Spec | Multiple files, architectural impact |
+| Bug Fix | Quickfix | Single file, clear root cause |
+| Hotfix | Quickfix (expedited) | Production emergency |
+| Minor Feature | Quickfix or Spec | Depends on scope |
+
+### Adaptive Documentation
+
+Documentation evolves with your system:
+
+1. **Development**: Specs, plans, tasks guide implementation
+2. **Release**: Artifacts archived, decisions extracted as ADRs
+3. **Maintenance**: Constitution updated as architecture evolves
+
+---
+
+## Command Categories
+
+### Constitution Commands
+
+| Command | Purpose | Guide |
+|---------|---------|-------|
+| `/speckit.constitution` | Create/update constitution | [Constitution Guide](constitution-guide.md) |
+| `/speckit.discover-constitution` | Generate from existing code | [Constitution Guide](constitution-guide.md) |
+| `/speckit.evolve-constitution` | Propose amendments | [Adaptive Lifecycle](adaptive-lifecycle.md) |
+
+### Full Spec Workflow
+
+For major features and architectural changes.
+
+| Command | Purpose | Next Step |
+|---------|---------|-----------|
+| `/speckit.specify` | Define requirements | `/speckit.plan` |
+| `/speckit.plan` | Technical planning | `/speckit.tasks` |
+| `/speckit.tasks` | Task breakdown | `/speckit.critic` |
+| `/speckit.critic` | Risk analysis | `/speckit.implement` |
+| `/speckit.implement` | Execute tasks | PR Review |
+
+### Lightweight Workflow
+
+For bug fixes, hotfixes, and small features.
+
+| Command | Purpose |
+|---------|---------|
+| `/speckit.quickfix` | Create, validate, and track quick fixes |
+
+### Quality Assurance
+
+Constitution-powered quality commands that work independently.
+
+| Command | Purpose | Guide |
+|---------|---------|-------|
+| `/speckit.pr-review` | Review PRs against constitution | [PR Review Guide](pr-review-usage.md) |
+| `/speckit.site-audit` | Codebase compliance audit | [Site Audit Guide](site-audit-usage.md) |
+| `/speckit.critic` | Adversarial risk analysis | [Critic Guide](critic-usage.md) |
+
+### Lifecycle Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/speckit.release` | Archive artifacts, generate release docs |
+| `/speckit.clarify` | Clarify specification requirements |
+| `/speckit.checklist` | Generate quality checklists |
+| `/speckit.analyze` | Artifact consistency checking |
+
+---
 
 ## Development Phases
 
-| Phase | Focus | Key Activities |
-|-------|-------|----------------|
-| **0-to-1 Development** ("Greenfield") | Generate from scratch | <ul><li>Start with high-level requirements</li><li>Generate specifications</li><li>Plan implementation steps</li><li>Build production-ready applications</li></ul> |
-| **Creative Exploration** | Parallel implementations | <ul><li>Explore diverse solutions</li><li>Support multiple technology stacks & architectures</li><li>Experiment with UX patterns</li></ul> |
-| **Iterative Enhancement** ("Brownfield") | Brownfield modernization | <ul><li>Add features iteratively</li><li>Modernize legacy systems</li><li>Adapt processes</li></ul> |
-| **Code Review & Quality** | Constitution-based review | <ul><li>Automated PR review with `/speckit.pr-review`</li><li>Codebase auditing with `/speckit.site-audit`</li><li>Risk analysis with `/speckit.critic`</li><li>Track review history and trends</li></ul> |
+| Phase | Commands | Activities |
+|-------|----------|------------|
+| **Project Initiation** | `constitution`, `discover-constitution` | Establish governing principles |
+| **Baseline Assessment** | `site-audit` | Quantify technical debt |
+| **Feature Development** | `specify`, `plan`, `tasks`, `implement` | Full spec workflow |
+| **Production Support** | `quickfix` | Rapid fixes with validation |
+| **Code Review** | `pr-review` | Constitution compliance |
+| **Risk Analysis** | `critic` | Pre-implementation assessment |
+| **Release** | `release` | Archive and document |
+| **Maintenance** | `site-audit`, `evolve-constitution` | Monitor and evolve |
 
-## Experimental Goals
+---
 
-Our research and experimentation focus on:
+## Technical Debt as a Metric
 
-### Technology Independence
+Site audits quantify technical debt through compliance scores:
 
-- Create applications using diverse technology stacks
-- Validate the hypothesis that Spec-Driven Development is a process not tied to specific technologies, programming languages, or frameworks
+```
+| Category | Score | Status |
+|----------|-------|--------|
+| Constitution Compliance | 87% | ⚠️ PARTIAL |
+| Security | 95% | ✅ PASS |
+| Code Quality | 72% | ⚠️ PARTIAL |
+| Dependencies | 85% | ⚠️ PARTIAL |
+```
 
-### Enterprise Constraints
+Track trends over time by running regular audits and comparing results.
 
-- Demonstrate mission-critical application development
-- Incorporate organizational constraints (cloud providers, tech stacks, engineering practices)
-- Support enterprise design systems and compliance requirements
+---
 
-### User-Centric Development
+## Future Direction
 
-- Build applications for different user cohorts and preferences
-- Support various development approaches (from vibe-coding to AI-native development)
+Spec Kit Spark is actively developed with plans for:
 
-### Creative & Iterative Processes
+- **Enhanced Debt Tracking** - Structured metrics storage and visualization
+- **Business Value Alignment** - Link features to business goals
+- **CI/CD Integration** - Run audits as pipeline steps
+- **Cross-Project Governance** - Organizational-level consistency
 
-- Validate the concept of parallel implementation exploration
-- Provide robust iterative feature development workflows
-- Extend processes to handle upgrades and modernization tasks
+See the full [Roadmap](roadmap.md) for details.
 
-## Constitution-Powered Commands (Independent of Spec Workflow)
-
-Spec Kit provides powerful commands that leverage your project constitution for quality assurance. These commands are **independent of the Spec-Driven Development workflow**—they don't require any spec, plan, or tasks to exist. They only need a constitution and can be used on any codebase.
-
-### Discover Constitution (`/speckit.discover-constitution`) - NEW
-
-**For brownfield projects**: Analyze your existing codebase to discover implicit patterns and conventions, then interactively build a constitution through guided questions.
-
-- **Usage**: `/speckit.discover-constitution` or with focus: `/speckit.discover-constitution Focus on security and testing`
-- **Output**: Draft constitution at `/.documentation/memory/constitution-draft.md`
-- **Key Features**: Pattern detection, interactive questioning, gap analysis, draft generation
-
-**How it works**:
-1. Scans codebase for patterns (testing, security, architecture, code quality)
-2. Reports high-confidence patterns (>80% consistent) vs. inconsistent areas
-3. Asks 8-10 targeted questions to validate findings and fill gaps
-4. Generates draft constitution for team review
-
-**Ideal for**: Teams adopting Spec Kit on existing projects where principles exist in code but aren't documented.
-
-### Pull Request Review (`/speckit.pr-review`)
-
-Review any GitHub Pull Request against your project constitution. Works for any PR in any branch without requiring any spec-driven artifacts.
-
-- **Usage**: `/speckit.pr-review #123` or `/speckit.pr-review` (auto-detect from branch)
-- **Output**: Detailed review saved to `/.documentation/specs/pr-review/pr-{number}.md`
-- **Key Features**: Security analysis, code quality assessment, testing validation, approval recommendation
-
-[Full PR Review Guide](pr-review-usage.md)
-
-### Site Audit (`/speckit.site-audit`)
-
-Perform comprehensive codebase audits against your project constitution and standards. Like PR review, this command only requires a constitution—no specs needed.
-
-- **Usage**: `/speckit.site-audit` or `/speckit.site-audit --scope=constitution`
-- **Output**: Audit results saved to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`
-- **Key Features**: Security scanning, dependency analysis, code quality metrics, compliance scoring
-
-**Scope Options**:
-- `--scope=full` (default) - Complete audit
-- `--scope=constitution` - Constitution compliance only
-- `--scope=packages` - Package/dependency analysis
-- `--scope=quality` - Code quality metrics
-- `--scope=unused` - Unused code detection
-- `--scope=duplicate` - Duplicate code detection
-
-## Spec Workflow Commands
-
-### Critic (`/speckit.critic`)
-
-Perform adversarial risk analysis identifying technical flaws, implementation hazards, and failure modes. Unlike PR review and site audit, this command **requires the spec workflow**—it analyzes your spec.md, plan.md, and tasks.md files.
-
-- **Usage**: `/speckit.critic` (after `/speckit.tasks`, before `/speckit.implement`)
-- **Output**: Risk assessment with Go/No-Go recommendation
-- **Key Features**: Showstopper detection, stack-specific risks, constitutional compliance, production failure analysis
-
-**Severity Levels**:
-- **SHOWSTOPPER** - Will cause production outage, data loss, or security breach
-- **CRITICAL** - Will cause major user-facing issues or costly rework
-- **HIGH** - Will cause technical debt or operational burden
-- **MEDIUM** - Will slow development or cause minor issues
+---
 
 ## Contributing
 
-Please see our [Contributing Guide](https://github.com/MarkHazleton/spec-kit/blob/main/CONTRIBUTING.md) for information on how to contribute to this project.
+Spec Kit Spark welcomes contributions:
 
-## Support
+- **Issues**: [Report bugs or request features](https://github.com/MarkHazleton/spec-kit/issues)
+- **Discussions**: [Ask questions or share ideas](https://github.com/MarkHazleton/spec-kit/discussions)
+- **Pull Requests**: Fork, branch, and submit
 
-For support, please check our [Support Guide](https://github.com/MarkHazleton/spec-kit/blob/main/SUPPORT.md) or open an issue on GitHub.
+See [Local Development](local-development.md) for setup instructions.
+
+---
+
+## Credit & Attribution
+
+Full credit goes to the GitHub team for creating the Spec-Driven Development methodology and the original Spec Kit toolkit. Spec Kit Spark is an extension of their work, not a replacement. For the official, GitHub-maintained version, visit [github.com/github/spec-kit](https://github.com/github/spec-kit).
