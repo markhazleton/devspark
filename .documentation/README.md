@@ -15,7 +15,7 @@ To build the documentation locally:
 2. Build the documentation:
 
    ```bash
-   cd docs
+   cd .documentation
    docfx docfx.json --serve
    ```
 
