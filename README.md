@@ -797,7 +797,7 @@ At this stage, your project folder contents should resemble the following:
 │   └── specs
 │       └── 001-create-taskify
 │           └── spec.md
-└── .specify
+└── .documentation
     ├── scripts
     │   ├── check-prerequisites.sh
     │   ├── common.sh
@@ -867,7 +867,7 @@ The output of this step will include a number of implementation detail documents
 │           ├── quickstart.md
 │           ├── research.md
 │           └── spec.md
-└── .specify
+└── .documentation
     ├── scripts
     │   ├── check-prerequisites.sh
     │   ├── common.sh

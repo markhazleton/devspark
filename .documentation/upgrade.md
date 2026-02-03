@@ -51,8 +51,8 @@ When Spec Kit releases new features (like new slash commands or updated template
 Running `specify init --here --force` will update:
 
 - ✅ **Slash command files** (`.claude/commands/`, `.github/prompts/`, etc.)
-- ✅ **Script files** (`.specify/scripts/`)
-- ✅ **Template files** (`.specify/templates/`)
+- ✅ **Script files** (`.documentation/scripts/`)
+- ✅ **Template files** (`.documentation/templates/`)
 - ✅ **Shared memory files** (`.documentation/memory/`) - **⚠️ See warnings below**
 
 ### What stays safe?
@@ -126,11 +126,11 @@ git restore .documentation/memory/constitution.md
 
 ### 2. Custom template modifications
 
-If you customized any templates in `.specify/templates/`, the upgrade will overwrite them. Back them up first:
+If you customized any templates in `.documentation/templates/`, the upgrade will overwrite them. Back them up first:
 
 ```bash
 # Back up custom templates
-cp -r .specify/templates .specify/templates-backup
+cp -r .documentation/templates .documentation/templates-backup
 
 # After upgrade, merge your changes back manually
 ```
@@ -179,7 +179,7 @@ git restore .documentation/memory/constitution.md
 ```bash
 # 1. Back up customizations
 cp .documentation/memory/constitution.md /tmp/constitution-backup.md
-cp -r .specify/templates /tmp/templates-backup
+cp -r .documentation/templates /tmp/templates-backup
 
 # 2. Upgrade CLI
 uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
@@ -327,15 +327,15 @@ This warning appears when you run `specify init --here` (or `specify init .`) in
 
 1. **The directory has existing content** - In the example, 25 files/folders
 2. **Files will be merged** - New template files will be added alongside your existing files
-3. **Some files may be overwritten** - If you already have Spec Kit files (`.claude/`, `.specify/`, etc.), they'll be replaced with the new versions
+3. **Some files may be overwritten** - If you already have Spec Kit files (`.claude/`, `.documentation/`, etc.), they'll be replaced with the new versions
 
 **What gets overwritten:**
 
 Only Spec Kit infrastructure files:
 
 - Agent command files (`.claude/commands/`, `.github/prompts/`, etc.)
-- Scripts in `.specify/scripts/`
-- Templates in `.specify/templates/`
+- Scripts in `.documentation/scripts/`
+- Templates in `.documentation/templates/`
 - Memory files in `.documentation/memory/` (including constitution)
 
 **What stays untouched:**

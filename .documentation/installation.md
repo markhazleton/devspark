@@ -38,7 +38,7 @@ uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
 uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init .
 ```
 
-This adds the Spec Kit structure (`.specify/`, `.documentation/memory/`, templates, scripts) to your existing project without disrupting your current files.
+This adds the Spec Kit structure (`.documentation/`, `.documentation/memory/`, templates, scripts) to your existing project without disrupting your current files.
 
 > [!TIP]
 > **Brownfield Tip**: After initialization, use the `/speckit.discover-constitution` command to help create a constitution from your existing codebase patterns. This analyzes your code conventions, architecture decisions, and established practices to draft a constitution that reflects how your project already works.
@@ -104,7 +104,7 @@ These commands only need a constitution and work independently on any codebase:
 - `/speckit.pr-review` - Review pull requests against constitution
 - `/speckit.site-audit` - Comprehensive codebase audit for security, quality, and compliance
 
-The `.specify/scripts` directory will contain both `.sh` and `.ps1` scripts.
+The `.documentation/scripts` directory will contain both `.sh` and `.ps1` scripts.
 
 ## Troubleshooting
 
