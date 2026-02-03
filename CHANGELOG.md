@@ -7,6 +7,19 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-spark.1] - 2026-02-03
+
+### Changed
+
+- **Spark Release Format**: Adopted new versioning scheme (1.0.0-spark.x) to clearly differentiate Spec Kit Spark releases from upstream GitHub Spec Kit
+- **Enhanced Documentation**: Improved clarity and usability across command templates and documentation
+- **Script Updates**: Updated all scripts and documentation to reflect Spark release format and branding
+
+### Notes
+
+- This marks the first major Spark release, establishing the fork's identity as a community-driven extension with enhanced features
+- Maintains backward compatibility with all 0.0.x features while establishing new release versioning
+
 ## [0.0.91] - 2026-02-02
 
 ### Added

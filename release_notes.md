@@ -1,6 +1,10 @@
-# Spec Kit Spark
+# Spec Kit Spark v1.0.0-spark.1
 
 A community extension of GitHub Spec Kit with constitution-powered commands for enhanced development workflows. Part of the WebSpark demonstration suite.
+
+## Release Highlights
+
+This release establishes the Spark release format (v1.0.0-spark.x) to clearly differentiate community enhancements from the upstream GitHub Spec Kit project. All documentation and scripts have been updated to reflect this new versioning scheme.
 
 ## Spark-Specific Features
 
