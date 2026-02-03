@@ -92,13 +92,11 @@ After setting up protection rules:
 
 ## Current Versioning Strategy
 
-Spec Kit Spark uses custom versioning to distinguish from upstream:
+Spec Kit Spark uses standard semantic versioning:
 
-- Format: `v1.0.0-spark.X`
-- First release: `v1.0.0-spark.1`
-- Subsequent releases increment the fourth number
-
-The versioning script automatically handles this format and distinguishes Spark releases from upstream releases.
+- Format: `vMAJOR.MINOR.PATCH` (e.g., v1.0.0, v1.1.0, v2.0.0)
+- Follows [Semantic Versioning 2.0.0](https://semver.org/)
+- Compatible with all Python packaging tools
 
 ---
 

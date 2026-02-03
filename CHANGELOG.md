@@ -7,13 +7,13 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0-spark.1] - 2026-02-03
+## [1.0.0] - 2026-02-03
 
 ### Changed
 
-- **Spark Release Format**: Adopted new versioning scheme (1.0.0-spark.x) to clearly differentiate Spec Kit Spark releases from upstream GitHub Spec Kit
+- **Standard Semantic Versioning**: Adopted standard semantic versioning (MAJOR.MINOR.PATCH) for universal compatibility
 - **Enhanced Documentation**: Improved clarity and usability across command templates and documentation
-- **Script Updates**: Updated all scripts and documentation to reflect Spark release format and branding
+- **PEP 440 Compliance**: Ensured version format works with all Python packaging tools (pip, uvx, pipx)
 
 ### Notes
 

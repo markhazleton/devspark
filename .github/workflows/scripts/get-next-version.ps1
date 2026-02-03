@@ -5,7 +5,7 @@
     Calculate the next version based on the latest git tag
 .DESCRIPTION
     Get-next-version.ps1 - Calculate the next version and output GitHub Actions variables
-    Spec Kit Spark: Uses v1.0.0-spark.X versioning to distinguish from upstream
+    Uses standard semantic versioning (MAJOR.MINOR.PATCH)
 .EXAMPLE
     .\get-next-version.ps1
 #>
@@ -25,18 +25,17 @@ if ($env:GITHUB_OUTPUT) {
 }
 Write-Host "Latest tag: $latestTag"
 
-# Check if this is a Spark version
-if ($latestTag -match '^v(\d+)\.(\d+)\.(\d+)-spark\.(\d+)$') {
-    # Increment the Spark version number
-    $major = $matches[1]
-    $minor = $matches[2]
-    $patch = $matches[3]
-    $sparkVersion = [int]$matches[4]
-    $sparkVersion++
-    $newVersion = "v$major.$minor.$patch-spark.$sparkVersion"
+# Parse semantic version
+if ($latestTag -match '^v(\d+)\.(\d+)\.(\d+)') {
+    # Increment patch version
+    $major = [int]$matches[1]
+    $minor = [int]$matches[2]
+    $patch = [int]$matches[3]
+    $patch++
+    $newVersion = "v$major.$minor.$patch"
 } else {
-    # First Spark release or upstream version - start with v1.0.0-spark.1
-    $newVersion = "v1.0.0-spark.1"
+    # First release - start with v1.0.0
+    $newVersion = "v1.0.0"
 }
 
 if ($env:GITHUB_OUTPUT) {

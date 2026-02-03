@@ -10,7 +10,7 @@
     Build Spec Kit template release archives for each supported AI assistant and script type.
     
 .PARAMETER Version
-    Version string with leading 'v' (e.g., v0.2.0 or v1.0.0-spark.1)
+    Version string with leading 'v' (e.g., v1.0.0)
 
 .PARAMETER Agents
     Comma or space separated subset of agents to build (default: all)
@@ -21,13 +21,13 @@
     Valid scripts: sh, ps
 
 .EXAMPLE
-    .\create-release-packages.ps1 -Version v1.0.0-spark.1
+    .\create-release-packages.ps1 -Version v1.0.0
 
 .EXAMPLE
-    .\create-release-packages.ps1 -Version v1.0.0-spark.1 -Agents claude,copilot -Scripts sh
+    .\create-release-packages.ps1 -Version v1.0.0 -Agents claude,copilot -Scripts sh
 
 .EXAMPLE
-    .\create-release-packages.ps1 -Version v1.0.0-spark.1 -Agents claude -Scripts ps
+    .\create-release-packages.ps1 -Version v1.0.0 -Agents claude -Scripts ps
 #>
 
 param(
@@ -44,8 +44,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Validate version format
-if ($Version -notmatch '^v\d+\.\d+\.\d+(-spark\.\d+)?$') {
-    Write-Error "Version must look like v0.0.0 or v0.0.0-spark.1"
+if ($Version -notmatch '^v\d+\.\d+\.\d+$') {
+    Write-Error "Version must look like v1.0.0 (standard semantic versioning)"
     exit 1
 }
 

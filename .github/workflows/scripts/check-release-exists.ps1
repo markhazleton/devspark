@@ -6,9 +6,9 @@
 .DESCRIPTION
     Check-release-exists.ps1 - Verify if a specific version release exists on GitHub
 .PARAMETER Version
-    The version to check (e.g., v1.0.0-spark.1)
+    The version to check (e.g., v1.0.0)
 .EXAMPLE
-    .\check-release-exists.ps1 -Version "v1.0.0-spark.1"
+    .\check-release-exists.ps1 -Version "v1.0.0"
 #>
 
 param(

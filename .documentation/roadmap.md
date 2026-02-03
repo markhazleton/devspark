@@ -220,15 +220,15 @@ We welcome contributions in all areas! Here's how to get involved:
 
 ## Versioning Strategy
 
-Spec Kit Spark follows semantic versioning with Spark-specific extensions:
+Spec Kit Spark follows standard [Semantic Versioning 2.0.0](https://semver.org/):
 
 ```text
-v{MAJOR}.{MINOR}.{PATCH}-spark.{BUILD}
+vMAJOR.MINOR.PATCH
 
 Examples:
-- v0.0.25-spark.1  (current)
-- v0.1.0-spark.1   (first minor with new features)
-- v1.0.0-spark.1   (stable release)
+- v1.0.0  (current stable release)
+- v1.1.0  (minor feature additions)
+- v2.0.0  (breaking changes)
 ```
 
 ### Version Meaning
@@ -238,7 +238,6 @@ Examples:
 | MAJOR | Breaking changes to command interfaces or file formats |
 | MINOR | New commands or significant feature additions |
 | PATCH | Bug fixes and minor improvements |
-| BUILD | Spark-specific build number for rapid iterations |
 
 ---
 
