@@ -33,10 +33,10 @@ rm -rf "$GENRELEASES_DIR"/* || true
 rewrite_paths() {
   # Spec Kit Spark uses .documentation/ instead of .specify/ to distinguish from upstream
   sed -E \
-    -e 's@(/?)\.specify/@.documentation/@g' \
-    -e 's@(/?)memory/@.documentation/memory/@g' \
-    -e 's@(/?)scripts/@.documentation/scripts/@g' \
-    -e 's@(/?)templates/@.documentation/templates/@g'
+    -e 's@(/?)\.specify/@\1.documentation/@g' \
+    -e 's@(^|[[:space:]]|`)/memory/@\1/.documentation/memory/@g' \
+    -e 's@(^|[[:space:]]|`)/scripts/@\1/.documentation/scripts/@g' \
+    -e 's@(^|[[:space:]]|`)/templates/@\1/.documentation/templates/@g'
 }
 
 generate_commands() {

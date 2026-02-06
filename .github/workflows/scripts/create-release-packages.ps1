@@ -60,12 +60,12 @@ New-Item -ItemType Directory -Path $GenReleasesDir -Force | Out-Null
 
 function Rewrite-Paths {
     param([string]$Content)
-    
+
     # Spec Kit Spark uses .documentation/ instead of .specify/ to distinguish from upstream
-    $Content = $Content -replace '(/?)\.specify/', '.documentation/'
-    $Content = $Content -replace '(/?)\bmemory/', '.documentation/memory/'
-    $Content = $Content -replace '(/?)\bscripts/', '.documentation/scripts/'
-    $Content = $Content -replace '(/?)\btemplates/', '.documentation/templates/'
+    $Content = $Content -replace '(/?)\.specify/', '$1.documentation/'
+    $Content = $Content -replace '(^|\s|`)/memory/', '$1/.documentation/memory/'
+    $Content = $Content -replace '(^|\s|`)/scripts/', '$1/.documentation/scripts/'
+    $Content = $Content -replace '(^|\s|`)/templates/', '$1/.documentation/templates/'
     return $Content
 }
 
