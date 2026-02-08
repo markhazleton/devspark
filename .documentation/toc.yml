@@ -11,6 +11,8 @@
       href: quickstart.md
     - name: Upgrade
       href: upgrade.md
+    - name: Migration Guide
+      href: migration-guide.md
 
 # SDD Methodology
 - name: Methodology

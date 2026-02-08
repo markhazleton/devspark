@@ -84,6 +84,7 @@ specify init --here --ai claude
 - [Installation Guide](installation.md) - Detailed setup for all scenarios
 - [Quick Start Guide](quickstart.md) - 6-step process walkthrough
 - [Upgrade Guide](upgrade.md) - Updating to latest version
+- [Migration Guide](migration-guide.md) - Migrate from old `.specify/` structure
 - [Local Development](local-development.md) - Contributing to Spec Kit
 
 ---

@@ -125,6 +125,8 @@ To upgrade Specify, see the [Upgrade Guide](./.documentation/upgrade.md) for det
 uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
 ```
 
+> **Migrating from old version?** If your project uses the old `.specify/` directory or root-level `memory/`, `scripts/`, `templates/` directories, see the [Migration Guide](./.documentation/migration-guide.md) for automated migration to the new `.documentation/` structure.
+
 #### Option 2: One-time Usage
 
 Run directly without installing:
