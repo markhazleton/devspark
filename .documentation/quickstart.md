@@ -99,6 +99,43 @@ Then, use the `/speckit.implement` slash command to execute the plan.
 /speckit.implement
 ```
 
+---
+
+## Upgrading Spec Kit
+
+To upgrade to the latest version of Spec Kit:
+
+### 1. Upgrade CLI Tool
+
+```bash
+uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+```
+
+### 2. Upgrade Project Files
+
+Use the `specify upgrade` command:
+
+```bash
+# Simple upgrade with auto-detection
+specify upgrade
+
+# Preview changes first
+specify upgrade --dry-run
+
+# With constitution backup
+specify upgrade --backup
+```
+
+The upgrade command will:
+- Auto-detect your AI assistant
+- Check for migration needs
+- Update all templates and scripts
+- Preserve your specs and customizations
+
+See the [Upgrade Guide](upgrade.md) for more details.
+
+---
+
 ## Detailed Example: Building Taskify
 
 Here's a complete example of building a team productivity platform:

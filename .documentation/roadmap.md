@@ -16,7 +16,7 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 ---
 
-## Current Release: v0.0.25
+## Current Release: v1.1.0
 
 ### What's Implemented
 
@@ -38,11 +38,26 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 - ✅ `/speckit.site-audit` - Codebase compliance auditing
 - ✅ `/speckit.critic` - Adversarial risk analysis
 
-#### Adaptive Lifecycle Commands (NEW)
+#### Adaptive Lifecycle Commands
 
 - ✅ `/speckit.quickfix` - Lightweight workflow for bug fixes
 - ✅ `/speckit.release` - Release documentation and archival
 - ✅ `/speckit.evolve-constitution` - Constitution amendment proposals
+
+#### CLI Commands
+
+- ✅ `specify init` - Initialize new or existing projects
+- ✅ `specify upgrade` - Upgrade existing projects (NEW in v1.1.0)
+- ✅ `specify check` - Verify tool dependencies
+- ✅ `specify version` - Show version information
+
+#### Migration & Upgrade Tools (NEW in v1.1.0)
+
+- ✅ Migration scripts (PowerShell + Bash) - Automated migration from old structure
+- ✅ Dry-run mode - Preview changes before applying
+- ✅ Cleanup mode - Remove backup directories after verification
+- ✅ Auto-detection - Detect AI assistant and migration needs
+- ✅ Safety checks - Git status checks, confirmation prompts, backups
 
 #### Platform Support
 
@@ -52,7 +67,7 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 ---
 
-## Near-Term Roadmap (v0.1.x)
+## Near-Term Roadmap (v1.2.x)
 
 ### Enhanced Technical Debt Tracking
 
@@ -226,8 +241,8 @@ Spec Kit Spark follows standard [Semantic Versioning 2.0.0](https://semver.org/)
 vMAJOR.MINOR.PATCH
 
 Examples:
-- v1.0.0  (current stable release)
-- v1.1.0  (minor feature additions)
+- v1.1.0  (current stable release)
+- v1.2.0  (next minor feature additions)
 - v2.0.0  (breaking changes)
 ```
 

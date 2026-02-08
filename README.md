@@ -119,11 +119,24 @@ specify check
 
 > **Brownfield Tip**: Use `/speckit.discover-constitution` after initialization to analyze existing code patterns and draft a constitution.
 
-To upgrade Specify, see the [Upgrade Guide](./.documentation/upgrade.md) for detailed instructions. Quick upgrade:
+### Upgrading Spec Kit
+
+To upgrade to the latest version:
 
 ```bash
+# Upgrade CLI tool
 uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+
+# Upgrade project files (auto-detects your AI assistant)
+specify upgrade
+
+# Or with options
+specify upgrade --dry-run          # Preview changes first
+specify upgrade --backup           # Backup constitution
+specify upgrade --ai claude        # Override detected agent
 ```
+
+See the [Upgrade Guide](./.documentation/upgrade.md) for detailed instructions.
 
 > **Migrating from old version?** If your project uses the old `.specify/` directory or root-level `memory/`, `scripts/`, `templates/` directories, see the [Migration Guide](./.documentation/migration-guide.md) for automated migration to the new `.documentation/` structure.
 

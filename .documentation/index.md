@@ -57,6 +57,9 @@ specify init my-project --ai claude
 # Existing project (brownfield)
 cd /path/to/existing-project
 specify init --here --ai claude
+
+# Upgrade existing project
+specify upgrade
 ```
 
 ### First Steps by Project Type
@@ -83,8 +86,8 @@ specify init --here --ai claude
 
 - [Installation Guide](installation.md) - Detailed setup for all scenarios
 - [Quick Start Guide](quickstart.md) - 6-step process walkthrough
-- [Upgrade Guide](upgrade.md) - Updating to latest version
-- [Migration Guide](migration-guide.md) - Migrate from old `.specify/` structure
+- [Upgrade Guide](upgrade.md) - Updating to latest version (NEW in v1.1.0)
+- [Migration Guide](migration-guide.md) - Migrate from old `.specify/` structure (NEW in v1.1.0)
 - [Local Development](local-development.md) - Contributing to Spec Kit
 
 ---

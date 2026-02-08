@@ -7,6 +7,38 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-08
+
+### Added
+
+- **New `specify upgrade` command**: Simplified project upgrade with auto-detection of AI assistant, migration needs, and comprehensive safety checks
+  - Auto-detects AI assistant from existing project setup (no need to specify `--ai` manually)
+  - Auto-detects old structure migration needs (`.specify/`, root-level directories)
+  - Safety checks: warns about uncommitted Git changes before proceeding
+  - Dry-run mode: preview changes without modifying files (`--dry-run`)
+  - Constitution backup: optional backup before upgrade (`--backup`)
+  - Skip migration: bypass automatic migration check (`--skip-migration`)
+  - Guided upgrade process with helpful status messages and next steps
+- **Migration scripts**: Automated migration from old structure (`.specify/`, root-level `memory/`, `scripts/`, `templates/`) to new `.documentation/` structure
+  - PowerShell script for Windows (`.documentation/scripts/migrate-to-documentation.ps1`)
+  - Bash script for Linux/Mac (`.documentation/scripts/migrate-to-documentation.sh`)
+  - Support for dry-run mode to preview changes
+  - Cleanup mode to remove `.old` backup directories after verification
+  - Automatic path reference updates in agent files, scripts, and documentation
+  - Safety features: Git status checks, confirmation prompts, backup creation
+  - Detailed summary reports with statistics
+- **Migration documentation**: Comprehensive guides for upgrading from old structure
+  - Migration guide with step-by-step instructions (`.documentation/migration-guide.md`)
+  - Quick reference card for common migration tasks (`.documentation/MIGRATION-QUICKREF.md`)
+  - Specification document for upgrade command design (`.documentation/spec-upgrade-command.md`)
+  - Troubleshooting section with common issues and solutions
+
+### Changed
+
+- **Upgrade guide**: Now recommends `specify upgrade` as the primary upgrade method instead of `specify init --here --force`
+- **README**: Updated with comprehensive upgrade instructions including `specify upgrade` command
+- **Documentation index**: Added migration guide references to documentation site
+
 ## [1.0.3] - 2026-02-06
 
 ### Fixed

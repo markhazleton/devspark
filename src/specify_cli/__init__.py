@@ -1241,6 +1241,323 @@ def init(
     console.print()
     console.print(enhancements_panel)
 
+
+# ============================================================================
+# Helper Functions for Upgrade Command
+# ============================================================================
+
+def is_spec_kit_project() -> bool:
+    """Check if current directory is a Spec Kit project."""
+    indicators = [
+        Path(".documentation").exists(),
+        Path(".specify").exists(),
+        Path("specs").exists(),
+    ]
+
+    # Check for any agent command directories
+    agent_dirs = [
+        ".claude/commands",
+        ".github/agents",
+        ".cursor/commands",
+        ".windsurf/workflows",
+        ".gemini/commands",
+        ".qwen/commands",
+        ".opencode",
+        ".codex",
+        ".kilocode",
+        ".augment",
+        ".roo",
+        ".codebuddy",
+        ".qoder",
+        ".amazonq",
+        ".agents",
+        ".shai",
+        ".bob",
+    ]
+
+    indicators.extend([Path(d).exists() for d in agent_dirs])
+    return any(indicators)
+
+
+def detect_ai_agent() -> Optional[str]:
+    """Auto-detect the AI agent from existing setup."""
+    # Check against AGENT_CONFIG
+    for agent_key, agent_config in AGENT_CONFIG.items():
+        folder = agent_config["folder"]
+        # Check both the folder itself and common subdirectories
+        if Path(folder).exists():
+            # For some agents, check if commands subdirectory exists
+            if agent_key in ["claude", "copilot", "cursor-agent"]:
+                commands_path = Path(folder) / "commands" if agent_key == "claude" else Path(folder) / ("agents" if agent_key == "copilot" else "commands")
+                if commands_path.exists():
+                    return agent_key
+            else:
+                return agent_key
+
+    return None
+
+
+def needs_migration() -> bool:
+    """Check if old structure exists and needs migration."""
+    old_paths = [
+        Path(".specify"),
+        Path("memory") if not Path(".documentation/memory").exists() else None,
+        Path("scripts") if not Path(".documentation/scripts").exists() else None,
+        Path("templates") if not Path(".documentation/templates").exists() else None,
+    ]
+    # Filter out None values
+    old_paths = [p for p in old_paths if p is not None]
+    return any(p.exists() for p in old_paths)
+
+
+def has_uncommitted_changes() -> bool:
+    """Check if git working tree has uncommitted changes."""
+    try:
+        result = subprocess.run(
+            ["git", "diff-index", "--quiet", "HEAD", "--"],
+            capture_output=True,
+            cwd=Path.cwd(),
+            timeout=5
+        )
+        return result.returncode != 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+
+def run_migration_script() -> bool:
+    """Run the appropriate migration script. Returns True on success."""
+    try:
+        if sys.platform == "win32":
+            script = Path(".documentation/scripts/migrate-to-documentation.ps1")
+            if script.exists():
+                console.print("[cyan]Running Windows migration script...[/cyan]")
+                result = subprocess.run(
+                    ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(script)],
+                    check=False,
+                    capture_output=False
+                )
+                return result.returncode == 0
+        else:
+            script = Path(".documentation/scripts/migrate-to-documentation.sh")
+            if script.exists():
+                console.print("[cyan]Running migration script...[/cyan]")
+                result = subprocess.run(
+                    ["bash", str(script)],
+                    check=False,
+                    capture_output=False
+                )
+                return result.returncode == 0
+
+        # If script doesn't exist, try to download it
+        console.print("[yellow]Migration script not found. Skipping migration.[/yellow]")
+        console.print("[dim]You can manually run migration later if needed.[/dim]")
+        return False
+    except Exception as e:
+        console.print(f"[yellow]Migration script failed: {e}[/yellow]")
+        return False
+
+
+def backup_constitution() -> Optional[Path]:
+    """Create backup of constitution file. Returns backup path on success."""
+    constitution = Path(".documentation/memory/constitution.md")
+    if not constitution.exists():
+        return None
+
+    try:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_path = Path(f".documentation/memory/constitution.md.{timestamp}.bak")
+        shutil.copy2(constitution, backup_path)
+        return backup_path
+    except Exception as e:
+        console.print(f"[yellow]Failed to backup constitution: {e}[/yellow]")
+        return None
+
+
+# ============================================================================
+# Upgrade Command
+# ============================================================================
+
+@app.command()
+def upgrade(
+    ai_assistant: str = typer.Option(None, "--ai", help="Override AI assistant (auto-detected if not specified)"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview changes without modifying files"),
+    backup: bool = typer.Option(False, "--backup", help="Create backup of constitution before upgrade"),
+    skip_migration: bool = typer.Option(False, "--skip-migration", help="Skip automatic migration check"),
+    force: bool = typer.Option(False, "--force", help="Skip all confirmations"),
+    github_token: str = typer.Option(None, "--github-token", help="GitHub token for API requests"),
+    script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
+    ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools"),
+    no_git: bool = typer.Option(False, "--no-git", help="Skip git repository operations"),
+):
+    """
+    Upgrade an existing Spec Kit project to the latest version.
+
+    This command will:
+    1. Detect your current AI assistant setup
+    2. Check for old structure (.specify/, memory/, etc.) and migrate if needed
+    3. Backup your constitution if requested
+    4. Download and apply latest templates
+    5. Preserve your specs/ directory and customizations
+
+    Examples:
+        specify upgrade                    # Auto-detect and upgrade
+        specify upgrade --dry-run          # Preview without changes
+        specify upgrade --ai claude        # Override detected agent
+        specify upgrade --backup           # Create safety backup
+        specify upgrade --skip-migration   # Skip old structure migration
+    """
+
+    show_banner()
+    console.print("[bold]Upgrading Spec Kit project...[/bold]\n")
+
+    # Step 1: Verify we're in a Spec Kit project
+    console.print("[cyan]→[/cyan] Verifying Spec Kit project...")
+    if not is_spec_kit_project():
+        console.print("[red]✗ Error:[/red] Current directory is not a Spec Kit project")
+        console.print("[dim]Run 'specify init --here' to initialize Spec Kit in this directory[/dim]")
+        raise typer.Exit(1)
+    console.print("[green]✓[/green] Spec Kit project detected\n")
+
+    # Step 2: Check for uncommitted changes
+    if not no_git:
+        console.print("[cyan]→[/cyan] Checking git status...")
+        if has_uncommitted_changes():
+            console.print("[yellow]⚠ Warning:[/yellow] You have uncommitted changes in your repository")
+            console.print("[dim]It's recommended to commit or stash changes before upgrading[/dim]")
+            if not dry_run and not force:
+                response = typer.confirm("Continue anyway?", default=False)
+                if not response:
+                    console.print("[yellow]Upgrade cancelled[/yellow]")
+                    raise typer.Exit(0)
+        else:
+            console.print("[green]✓[/green] Working tree is clean\n")
+
+    # Step 3: Auto-detect AI agent if not specified
+    console.print("[cyan]→[/cyan] Detecting AI assistant...")
+    if not ai_assistant:
+        detected = detect_ai_agent()
+        if detected:
+            agent_name = AGENT_CONFIG[detected]["name"]
+            console.print(f"[green]✓[/green] Detected AI assistant: [cyan]{agent_name}[/cyan] ({detected})\n")
+            ai_assistant = detected
+        else:
+            console.print("[yellow]⚠[/yellow] Could not auto-detect AI assistant")
+            if dry_run:
+                console.print("[cyan]In actual run, you would be prompted to select an agent[/cyan]\n")
+                ai_assistant = "claude"  # Default for dry run
+            else:
+                console.print("\n[bold]Please select your AI assistant:[/bold]")
+                ai_choices = {key: config["name"] for key, config in AGENT_CONFIG.items()}
+                selected_ai = prompt_choice(ai_choices, "AI Assistant")
+                ai_assistant = selected_ai
+                console.print()
+    else:
+        if ai_assistant not in AGENT_CONFIG:
+            console.print(f"[red]✗ Error:[/red] Invalid AI assistant '{ai_assistant}'")
+            console.print(f"[dim]Choose from: {', '.join(AGENT_CONFIG.keys())}[/dim]")
+            raise typer.Exit(1)
+        agent_name = AGENT_CONFIG[ai_assistant]["name"]
+        console.print(f"[green]✓[/green] Using AI assistant: [cyan]{agent_name}[/cyan] ({ai_assistant})\n")
+
+    # Step 4: Check for old structure migration
+    if not skip_migration:
+        console.print("[cyan]→[/cyan] Checking for old structure...")
+        if needs_migration():
+            console.print("[yellow]⚠[/yellow] Old structure detected (.specify/, memory/, scripts/, or templates/)")
+            console.print("[dim]Migration to .documentation/ structure is recommended[/dim]")
+
+            if dry_run:
+                console.print("[cyan]Would run migration script in actual upgrade[/cyan]\n")
+            else:
+                if force:
+                    console.print("[cyan]Running migration automatically (--force specified)...[/cyan]")
+                    run_migration = True
+                else:
+                    run_migration = typer.confirm("Run migration now?", default=True)
+
+                if run_migration:
+                    success = run_migration_script()
+                    if success:
+                        console.print("[green]✓[/green] Migration completed\n")
+                    else:
+                        console.print("[yellow]⚠[/yellow] Migration had issues, but continuing...\n")
+                else:
+                    console.print("[yellow]Skipping migration - you can run it later[/yellow]")
+                    console.print("[dim]See .documentation/migration-guide.md for manual steps[/dim]\n")
+        else:
+            console.print("[green]✓[/green] Already using .documentation/ structure\n")
+
+    # Step 5: Backup constitution if requested
+    if backup:
+        console.print("[cyan]→[/cyan] Backing up constitution...")
+        if dry_run:
+            console.print("[cyan]Would create constitution backup in actual upgrade[/cyan]\n")
+        else:
+            backup_path = backup_constitution()
+            if backup_path:
+                console.print(f"[green]✓[/green] Constitution backed up to: [dim]{backup_path}[/dim]\n")
+            else:
+                console.print("[yellow]⚠[/yellow] No constitution found or backup failed\n")
+
+    # Step 6: Show upgrade preview for dry run
+    if dry_run:
+        console.print("\n" + "="*60)
+        console.print("[bold cyan]DRY RUN COMPLETE - No changes made[/bold cyan]")
+        console.print("="*60 + "\n")
+
+        console.print("[bold]What would happen in actual upgrade:[/bold]")
+        console.print("  1. Download latest Spec Kit templates from GitHub")
+        console.print(f"  2. Update .{AGENT_CONFIG[ai_assistant]['folder'][:-1]}/ directory with new commands")
+        console.print("  3. Update .documentation/ with latest scripts and templates")
+        console.print("  4. Preserve your specs/ directory (never touched)")
+        console.print("  5. Preserve your constitution and customizations")
+        console.print()
+        console.print("[bold]To perform the actual upgrade:[/bold]")
+        console.print(f"  [cyan]specify upgrade --ai {ai_assistant}[/cyan]")
+        console.print()
+        return
+
+    # Step 7: Run the actual upgrade (using init logic)
+    console.print("[cyan]→[/cyan] Downloading and applying latest templates...\n")
+
+    try:
+        # Call init with --here --force internally
+        init(
+            project_name=None,
+            ai_assistant=ai_assistant,
+            script_type=script_type,
+            ignore_agent_tools=ignore_agent_tools,
+            no_git=no_git,
+            here=True,
+            force=True,  # Always force to skip confirmation since we already confirmed in upgrade
+            skip_tls=False,
+            debug=False,
+            github_token=github_token,
+        )
+    except Exception as e:
+        console.print(f"\n[red]✗ Upgrade failed:[/red] {e}")
+        raise typer.Exit(1)
+
+    # Step 8: Post-upgrade guidance
+    console.print("\n" + "="*60)
+    console.print("[bold green]✓ Upgrade Complete![/bold green]")
+    console.print("="*60 + "\n")
+
+    console.print("[bold]Next steps:[/bold]")
+    console.print("  1. Review changes: [cyan]git status[/cyan] and [cyan]git diff[/cyan]")
+    console.print("  2. Test slash commands in your AI assistant (e.g., [cyan]/speckit.constitution[/cyan])")
+    console.print("  3. Verify your specs are intact: [cyan]ls specs/[/cyan]")
+    console.print("  4. If everything looks good, commit:")
+    console.print("     [cyan]git add -A[/cyan]")
+    console.print("     [cyan]git commit -m 'chore: upgrade to latest spec-kit version'[/cyan]")
+
+    if backup:
+        console.print()
+        console.print("[dim]Your constitution backup is preserved in .documentation/memory/[/dim]")
+
+    console.print()
+
+
 @app.command()
 def check():
     """Check that all required tools are installed."""

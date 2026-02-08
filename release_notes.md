@@ -1,10 +1,17 @@
-# Spec Kit Spark v1.0.0
+# Spec Kit Spark v1.1.0
 
 A community extension of GitHub Spec Kit with constitution-powered commands for enhanced development workflows. Part of the WebSpark demonstration suite.
 
 ## Release Highlights
 
-This marks the first major release (v1.0.0) of Spec Kit Spark, establishing the fork's identity as a community-driven extension with enhanced features while maintaining clean version numbering for compatibility with all Python packaging tools.
+This minor release (v1.1.0) introduces the new `specify upgrade` command and comprehensive migration tooling, making it easier than ever to upgrade existing projects and migrate from the old directory structure.
+
+### What's New in v1.1.0
+
+- **`specify upgrade` Command**: One-command upgrade with auto-detection and safety checks
+- **Migration Scripts**: Automated scripts for Windows (PowerShell) and Linux/Mac (Bash)
+- **Comprehensive Documentation**: Step-by-step migration guides and troubleshooting
+- **Safety First**: Dry-run mode, Git checks, backups, and detailed reporting
 
 ## Spark-Specific Features
 
@@ -18,9 +25,24 @@ This marks the first major release (v1.0.0) of Spec Kit Spark, establishing the 
 
 You can use these releases with your agent of choice. We recommend using the Specify CLI to scaffold your projects, however you can download these independently and manage them yourself.
 
-## Changelog
+## Recent Changes
 
-- Refactor release notes and versioning for Spec Kit Spark - Update documentation and references for Mark Hazleton Edition of Spec Kit - Add Git Spark Report for repository health analysis and contributor insights - update documentation for spec driven development and site audit tool - Add /speckit.critic command for adversarial risk analysis and update changelog - Add README for local testing scripts in PowerShell - Add fork-specific scripts and documentation for release management - Add /speckit.pr-review command for constitution-based PR reviews
+### Version 1.1.0 (February 8, 2026)
+- New `specify upgrade` command for simplified project upgrades
+- Migration scripts for Windows (PowerShell) and Linux/Mac (Bash)
+- Comprehensive migration documentation and guides
+- Auto-detection of AI assistants and migration needs
+- Dry-run mode and safety checks for upgrade process
+
+### Version 1.0.3 (February 6, 2026)
+- Fixed critical double documentation path bug
+- Enhanced path transformation regex patterns
+
+### Version 1.0.0 (February 3, 2026)
+- First major release with standard semantic versioning
+- Transition to `.documentation/` directory structure
+- Constitution-powered commands
+- Extended agent support (17+ AI assistants)
 
 ---
 

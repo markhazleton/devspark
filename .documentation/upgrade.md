@@ -9,8 +9,9 @@
 | What to Upgrade | Command | When to Use |
 |----------------|---------|-------------|
 | **CLI Tool Only** | `uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git` | Get latest CLI features without touching project files |
-| **Project Files** | `specify init --here --force --ai <your-agent>` | Update slash commands, templates, and scripts in your project |
-| **Both** | Run CLI upgrade, then project update | Recommended for major version updates |
+| **Project Files** (Recommended) | `specify upgrade` | Update project with auto-detection and safety checks |
+| **Project Files** (Manual) | `specify init --here --force --ai <your-agent>` | Update when you want to override agent selection |
+| **Both** | Run CLI upgrade, then `specify upgrade` | Recommended for major version updates |
 
 ---
 
@@ -29,46 +30,83 @@ uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/s
 No upgrade needed—`uvx` always fetches the latest version. Just run your commands as normal:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here --ai copilot
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify upgrade
 ```
 
 ### Verify the upgrade
 
 ```bash
-specify check
+specify version
 ```
 
-This shows installed tools and confirms the CLI is working.
+This shows CLI and template versions plus system information.
 
 ---
 
-## Part 2: Updating Project Files
+## Part 2: Updating Project Files (Recommended Method)
 
-When Spec Kit releases new features (like new slash commands or updated templates), you need to refresh your project's Spec Kit files.
+Use the `specify upgrade` command for a safe, guided upgrade experience with auto-detection and safety checks.
+
+### Simple Upgrade
+
+```bash
+cd /path/to/your-project
+specify upgrade
+```
+
+**What it does:**
+1. ✅ Verifies you're in a Spec Kit project
+2. ✅ Checks for uncommitted git changes
+3. ✅ Auto-detects your AI assistant (claude, copilot, etc.)
+4. ✅ Detects old structure (.specify/, memory/) and offers to migrate
+5. ✅ Downloads and applies latest templates
+6. ✅ Preserves your specs/ and constitution
+
+### Upgrade Options
+
+```bash
+# Preview changes without modifying files
+specify upgrade --dry-run
+
+# Override auto-detected agent
+specify upgrade --ai claude
+
+# Create backup of constitution before upgrade
+specify upgrade --backup
+
+# Skip automatic migration check
+specify upgrade --skip-migration
+
+# Skip all confirmations
+specify upgrade --force
+```
 
 ### What gets updated?
 
-Running `specify init --here --force` will update:
+The upgrade command updates:
 
-- ✅ **Slash command files** (`.claude/commands/`, `.github/prompts/`, etc.)
+- ✅ **Slash command files** (`.claude/commands/`, `.github/agents/`, etc.)
 - ✅ **Script files** (`.documentation/scripts/`)
 - ✅ **Template files** (`.documentation/templates/`)
 - ✅ **Shared memory files** (`.documentation/memory/`) - **⚠️ See warnings below**
 
 ### What stays safe?
 
-These files are **never touched** by the upgrade—the template packages don't even contain them:
+These files are **never touched** by the upgrade:
 
-- ✅ **Your specifications** (`specs/001-my-feature/spec.md`, etc.) - **CONFIRMED SAFE**
-- ✅ **Your implementation plans** (`specs/001-my-feature/plan.md`, `tasks.md`, etc.) - **CONFIRMED SAFE**
-- ✅ **Your source code** - **CONFIRMED SAFE**
-- ✅ **Your git history** - **CONFIRMED SAFE**
+- ✅ **Your specifications** (`specs/`) - **COMPLETELY SAFE**
+- ✅ **Your implementation plans** (`specs/*/plan.md`, `tasks.md`, etc.) - **SAFE**
+- ✅ **Your source code** - **SAFE**
+- ✅ **Your git history** - **SAFE**
+- ✅ **Your custom scripts** (preserved in .documentation/scripts/)
 
-The `specs/` directory is completely excluded from template packages and will never be modified during upgrades.
+The `specs/` directory is completely excluded from upgrades and will never be modified.
 
-### Update command
+---
 
-Run this inside your project directory:
+## Part 3: Alternative Method (Manual Update)
+
+If you prefer manual control or the `upgrade` command isn't available, you can update project files directly:
 
 ```bash
 specify init --here --force --ai <your-agent>
@@ -100,27 +138,33 @@ With `--force`, it skips the confirmation and proceeds immediately.
 
 ## ⚠️ Important Warnings
 
-### 1. Constitution file will be overwritten
+### 1. Constitution file may be overwritten
 
-**Known issue:** `specify init --here --force` currently overwrites `.documentation/memory/constitution.md` with the default template, erasing any customizations you made.
+**Recommendation:** Use the `--backup` flag when upgrading to automatically backup your constitution:
 
-**Workaround:**
+```bash
+specify upgrade --backup
+```
+
+This creates a timestamped backup at `.documentation/memory/constitution.md.YYYYMMDD_HHMMSS.bak`.
+
+**Manual backup alternative:**
 
 ```bash
 # 1. Back up your constitution before upgrading
 cp .documentation/memory/constitution.md .documentation/memory/constitution-backup.md
 
 # 2. Run the upgrade
-specify init --here --force --ai copilot
+specify upgrade
 
-# 3. Restore your customized constitution
+# 3. If needed, restore your customized constitution
 mv .documentation/memory/constitution-backup.md .documentation/memory/constitution.md
 ```
 
-Or use git to restore it:
+Or use git to restore it after upgrade:
 
 ```bash
-# After upgrade, restore from git history
+# After upgrade, restore from git history if overwritten
 git restore .documentation/memory/constitution.md
 ```
 
@@ -131,6 +175,9 @@ If you customized any templates in `.documentation/templates/`, the upgrade will
 ```bash
 # Back up custom templates
 cp -r .documentation/templates .documentation/templates-backup
+
+# Run upgrade
+specify upgrade
 
 # After upgrade, merge your changes back manually
 ```

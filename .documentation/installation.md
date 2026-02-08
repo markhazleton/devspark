@@ -79,6 +79,52 @@ If you prefer to get the templates without checking for the right tools:
 uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --ai claude --ignore-agent-tools
 ```
 
+## Upgrading Spec Kit
+
+To upgrade an existing Spec Kit project to the latest version:
+
+### Upgrade CLI Tool
+
+First, upgrade the Specify CLI tool:
+
+```bash
+uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+```
+
+### Upgrade Project Files (Recommended)
+
+Use the `specify upgrade` command for a safe, guided upgrade:
+
+```bash
+# Simple upgrade (auto-detects AI assistant and migration needs)
+specify upgrade
+
+# Preview changes without modifying files
+specify upgrade --dry-run
+
+# Override detected agent
+specify upgrade --ai claude
+
+# Create backup of constitution before upgrade
+specify upgrade --backup
+
+# Skip automatic migration check
+specify upgrade --skip-migration
+```
+
+The `upgrade` command will:
+- ✅ Auto-detect your AI assistant from existing setup
+- ✅ Check for uncommitted Git changes
+- ✅ Detect old structure (`.specify/`, root-level directories) and offer migration
+- ✅ Download and apply latest templates
+- ✅ Preserve your specs and customizations
+
+See the [Upgrade Guide](upgrade.md) for detailed instructions.
+
+### Migration from Old Structure
+
+If you're using the old `.specify/` directory or root-level `memory/`, `scripts/`, `templates/` directories, see the [Migration Guide](migration-guide.md) for automated migration to the new `.documentation/` structure.
+
 ## Verification
 
 After initialization, you should see the following commands available in your AI agent:
