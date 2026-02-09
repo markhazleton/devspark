@@ -52,7 +52,7 @@ Today's AI coding tools suffer from fundamental limitations:
 
 Traditional development treats code as king:
 
-```
+```text
 Requirements → Design → Code → Test → Deploy
                          ↑
                     (Source of truth)
@@ -64,7 +64,7 @@ This creates an inevitable gap between intent and implementation. Documentation 
 
 ASLCD inverts this model:
 
-```
+```text
 Constitution → Specification → Plan → Tasks → Code
       ↑              ↑                          |
       |         (Source of truth)               |
@@ -86,7 +86,7 @@ In 3-5 years, a development team using ASLCD will experience:
 
 Every change—from major feature to bug fix—begins with a specification appropriate to its scope. AI agents understand context through specifications, not by reading thousands of lines of code.
 
-```
+```text
 Developer: "Add password reset functionality"
 
 AI Agent:
@@ -106,7 +106,7 @@ The constitution is not a static document written once. It evolves through:
 - **Evolution**: Amended based on real-world learnings
 - **Inheritance**: Organization-level principles flow to projects
 
-```
+```text
 Organization Constitution
          │
          ├── Project A Constitution (extends)
@@ -123,7 +123,7 @@ Instead of losing institutional knowledge when developers leave or projects age:
 - **Learnings**: Constitution evolves based on real outcomes
 - **History**: Git preserves everything; library preserves wisdom
 
-```
+```text
 Feature Complete
       │
       ├── Code merged (in git forever)
@@ -155,7 +155,7 @@ The system detects scope and suggests appropriate rigor.
 - **Large teams**: Landmarks prevent "merge roulette" and establish clear ownership
 - **Enterprise**: Inherited constitutions ensure consistency across hundreds of repos
 
-```
+```text
                     Process Overhead
                            ▲
                            │
@@ -179,7 +179,8 @@ Anything above the appropriate line is bureaucracy. Anything below is recklessne
 ASLCD works for codebases of any age:
 
 **Greenfield (New Projects):**
-```
+
+```text
 Day 1: Minimal constitution (security, testing, dependencies)
        ↓
 Week 4: Add patterns as they emerge
@@ -192,7 +193,8 @@ Year 1+: Mature constitution, rich pattern library
 The constitution **grows with the project**. Start with 10 principles, not 100.
 
 **Brownfield (Legacy Systems):**
-```
+
+```text
 Existing Code → /speckit.discover-constitution → Extracted Patterns
                                                         ↓
                                                  Draft Constitution
@@ -203,6 +205,7 @@ Existing Code → /speckit.discover-constitution → Extracted Patterns
 ```
 
 Constitution discovery analyzes:
+
 - File structure and naming conventions
 - Import patterns and dependency graphs
 - Error handling approaches
@@ -215,7 +218,7 @@ This means a 15-year-old legacy system can adopt ASLCD **without rewriting anyth
 
 Progress through the lifecycle requires explicit checkpoints:
 
-```
+```text
 Spec Written ──PR──► Spec Approved ──PR──► Plan Approved ──PR──► Code Merged
                 │                    │                      │
                 ▼                    ▼                      ▼
@@ -244,7 +247,7 @@ Constitution compliance is not a one-time check:
 - **At PR Review**: Does this change violate anything?
 - **At Audit**: Has the codebase drifted?
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │              COMPLIANCE THROUGHOUT                   │
 ├─────────────────────────────────────────────────────┤
@@ -265,7 +268,7 @@ Large codebases create "context chaos" for AI—too much information leads to th
 
 ASLCD solves this through **Right-Sized Context Delivery**:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │              CONTEXT SCALING                                 │
 ├─────────────────────────────────────────────────────────────┤
@@ -298,7 +301,7 @@ This means a 2-million-line codebase gets the **same AI effectiveness** as a 2,0
 
 After features ship, the system learns:
 
-```
+```text
 Feature Shipped
       │
       ├── Did implementation match spec? (accuracy)
@@ -366,7 +369,7 @@ The constitution is not bureaucracy. It's the project's conscience:
 
 Process overhead should match task complexity **and team context**:
 
-```
+```text
 Process Overhead
        ▲
        │                           Enterprise
@@ -380,6 +383,7 @@ Process Overhead
 ```
 
 The "appropriate rigor line" shifts based on:
+
 - Team size and distribution
 - Project criticality (hobby vs. financial system)
 - Regulatory requirements
@@ -468,7 +472,7 @@ AI assists at every stage. Humans decide at gates.
 
 **Constitution Inheritance Model:**
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                 ENTERPRISE SCALING                           │
 ├─────────────────────────────────────────────────────────────┤
@@ -492,6 +496,7 @@ AI assists at every stage. Humans decide at gates.
 ```
 
 This enables:
+
 - Consistent security practices across 100+ repositories
 - Division-specific patterns that don't pollute other teams
 - Individual project flexibility within organizational guardrails
@@ -591,6 +596,7 @@ This is the future we're building:
 - **AI-accelerated**: Agents that work within guardrails
 
 **The same principles serve:**
+
 - The solo developer shipping a weekend project
 - The startup racing to product-market fit
 - The enterprise maintaining critical infrastructure
