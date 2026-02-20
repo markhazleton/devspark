@@ -40,8 +40,8 @@ gh release create "$VERSION" \
   .genreleases/spec-kit-spark-template-roo-ps-"$VERSION".zip \
   .genreleases/spec-kit-spark-template-codebuddy-sh-"$VERSION".zip \
   .genreleases/spec-kit-spark-template-codebuddy-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-qoder-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-qoder-ps-"$VERSION".zip \
+  .genreleases/spec-kit-spark-template-qodercli-sh-"$VERSION".zip \
+  .genreleases/spec-kit-spark-template-qodercli-ps-"$VERSION".zip \
   .genreleases/spec-kit-spark-template-amp-sh-"$VERSION".zip \
   .genreleases/spec-kit-spark-template-amp-ps-"$VERSION".zip \
   .genreleases/spec-kit-spark-template-shai-sh-"$VERSION".zip \

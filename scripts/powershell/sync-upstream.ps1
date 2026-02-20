@@ -8,6 +8,7 @@
     - Fetching latest upstream changes
     - Categorizing commits by decision criteria
     - Auto-applying safe bug fixes (with --auto flag)
+    - Creating integration plans for commits needing evaluation (interactive mode)
     - Generating reports for manual review
     - Updating FORK_DIVERGENCE.md with applied changes
 
@@ -15,6 +16,7 @@
     Operation mode:
     - review: Show categorized commits (default)
     - interactive: Review each commit with detailed implications and prompt for action
+                   Actions: Apply, Skip, Plan (create integration evaluation), Defer
     - auto: Auto-apply safe cherry-picks
     - report: Generate detailed report only
     - update-doc: Update FORK_DIVERGENCE.md with current status
@@ -398,6 +400,262 @@ function Update-DivergenceDoc {
     Write-Success "Updated FORK_DIVERGENCE.md"
 }
 
+function Create-IntegrationPlan {
+    param(
+        [PSCustomObject]$Commit,
+        [string]$Note = ""
+    )
+    
+    $incomingDir = Join-Path $repoRoot "incoming"
+    $commitDir = Join-Path $incomingDir $Commit.Hash
+    
+    # Create directory structure
+    if (-not (Test-Path $incomingDir)) {
+        New-Item -ItemType Directory -Path $incomingDir -Force | Out-Null
+        Write-Info "Created incoming directory"
+    }
+    
+    if (Test-Path $commitDir) {
+        Write-Warning "Plan already exists for $($Commit.Hash)"
+        return $commitDir
+    }
+    
+    New-Item -ItemType Directory -Path $commitDir -Force | Out-Null
+    
+    # Collect detailed commit metadata
+    $author = git show -s --format='%an <%ae>' $Commit.Hash
+    $authorDate = git show -s --format='%ai' $Commit.Hash
+    $committer = git show -s --format='%cn <%ce>' $Commit.Hash
+    $commitDate = git show -s --format='%ci' $Commit.Hash
+    $body = git show -s --format='%b' $Commit.Hash
+    $filesChanged = git diff-tree --no-commit-id --name-status -r $Commit.Hash
+    $diffStats = git diff --stat "$($Commit.Hash)^..$($Commit.Hash)"
+    
+    # Parse PR number if exists
+    $prNumber = ""
+    if ($Commit.Message -match '#(\d+)') {
+        $prNumber = $Matches[1]
+    }
+    
+    # Get full diff
+    $fullDiff = git show $Commit.Hash
+    
+    # Create integration plan document
+    $planContent = @"
+# Integration Plan: $($Commit.Message)
+
+**Status**: 📋 Pending Evaluation  
+**Created**: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  
+**Evaluator**: _[Your Name]_
+
+---
+
+## Upstream Commit Metadata
+
+| Field | Value |
+|-------|-------|
+| **Commit Hash** | ``$($Commit.Hash)`` |
+| **Category** | $($Commit.Category) |
+| **Author** | $author |
+| **Author Date** | $authorDate |
+| **Committer** | $committer |
+| **Commit Date** | $commitDate |
+| **PR Number** | $(if ($prNumber) { "#$prNumber ([View](https://github.com/github/spec-kit/pull/$prNumber))" } else { "N/A" }) |
+
+### Commit Message
+``````
+$($Commit.Message)
+``````
+
+### Full Description
+``````
+$(if ($body -and $body.Trim()) { $body.Trim() } else { "_No additional description_" })
+``````
+
+---
+
+## Files Changed
+
+``````
+$filesChanged
+``````
+
+### Diff Statistics
+``````
+$diffStats
+``````
+
+---
+
+## Integration Analysis
+
+### 1. What Does This Change Do?
+_Describe in plain language what this upstream commit accomplishes._
+
+**Key Changes:**
+- [ ] _Change 1_
+- [ ] _Change 2_
+- [ ] _Change 3_
+
+**Upstream Problem Solved:**
+_What issue or need does this address in the upstream repository?_
+
+---
+
+### 2. Relevance to Spec Kit Spark
+
+**Does this apply to Spark?**  
+- [ ] Yes - Directly applicable
+- [ ] Partially - Needs adaptation
+- [ ] No - Not relevant to Spark's goals
+- [ ] Uncertain - Requires discussion
+
+**Reasoning:**
+_Why is this relevant or not relevant to Spark users?_
+
+---
+
+### 3. Conflicts & Dependencies
+
+**File Conflicts:**
+- [ ] No conflicts with Spark-specific files
+- [ ] Conflicts with: _[list files]_
+
+**Spark-Specific Files Affected:**
+$(
+    $sparkFiles = @('.documentation/', 'templates/commands/critic.md', 'templates/commands/pr-review.md', 
+                   'templates/commands/site-audit.md', 'templates/commands/quickfix.md',
+                   'templates/commands/evolve-constitution.md', 'templates/commands/release.md',
+                   'templates/commands/discover-constitution.md', 'templates/commands/clarify.md',
+                   'templates/commands/analyze.md')
+    
+    $affected = @()
+    foreach ($pattern in $sparkFiles) {
+        if ($filesChanged -match [regex]::Escape($pattern)) {
+            $affected += "- ⚠️ ``$pattern``"
+        }
+    }
+    
+    if ($affected.Count -gt 0) {
+        $affected -join "`n"
+    } else {
+        "- ✅ None"
+    }
+)
+
+**Dependencies:**
+_Does this depend on other upstream commits or features?_
+
+---
+
+### 4. Adaptation Strategy
+
+**Integration Approach:**
+- [ ] Cherry-pick as-is
+- [ ] Cherry-pick with modifications
+- [ ] Reimplement from scratch
+- [ ] Extract concept only
+- [ ] Skip entirely
+
+**Required Adaptations:**
+1. _[Adaptation 1]_
+2. _[Adaptation 2]_
+3. _[Adaptation 3]_
+
+**Path Adjustments Needed:**
+- [ ] ``.specify/`` → ``.documentation/``
+- [ ] ``docs/`` → ``.documentation/``
+- [ ] ``memory/`` → ``.documentation/memory/``
+- [ ] Other: _[specify]_
+
+---
+
+### 5. Testing & Validation
+
+**Test Plan:**
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Manual testing in sample project
+- [ ] Documentation updated
+- [ ] All AI agent commands work
+
+**Validation Criteria:**
+_How will you know this integration is successful?_
+
+---
+
+### 6. Impact Assessment
+
+**User Impact:**
+- [ ] No user-facing changes
+- [ ] Minor UX improvement
+- [ ] Major feature addition
+- [ ] Breaking change
+
+**Risk Level:**
+- [ ] Low - Isolated change
+- [ ] Medium - Touches multiple areas
+- [ ] High - Core functionality change
+
+**Effort Estimate:**
+- [ ] Trivial (< 1 hour)
+- [ ] Small (1-4 hours)
+- [ ] Medium (1-2 days)
+- [ ] Large (> 2 days)
+
+---
+
+### 7. Decision & Next Steps
+
+**Decision:** _[Approve / Modify / Reject / Defer]_
+
+**Rationale:**
+_Why was this decision made?_
+
+**Action Items:**
+- [ ] _[Action 1]_
+- [ ] _[Action 2]_
+- [ ] _[Action 3]_
+
+**Timeline:** _[Target date or sprint]_
+
+---
+
+## Notes
+
+$(if ($Note) { $Note } else { "_Add any additional notes, concerns, or discussion points here._" })
+
+---
+
+## Reference: Full Diff
+
+<details>
+<summary>Click to expand full diff</summary>
+
+``````diff
+$fullDiff
+``````
+
+</details>
+
+---
+
+**Generated by**: ``sync-upstream.ps1``  
+**Script Version**: 1.0  
+**Repository**: [github/spec-kit](https://github.com/github/spec-kit)
+
+"@
+    
+    # Save integration plan
+    $planFile = Join-Path $commitDir "integration-plan.md"
+    Set-Content -Path $planFile -Value $planContent -Encoding UTF8
+    
+    Write-Success "Created integration plan at: $commitDir"
+    Write-Info "Edit: $planFile"
+    
+    return $commitDir
+}
+
 function Invoke-InteractiveReview {
     param([array]$Commits)
     
@@ -406,17 +664,19 @@ function Invoke-InteractiveReview {
         return @{
             Applied = @()
             Skipped = @()
+            Planned = @()
             Deferred = @()
         }
     }
     
     Write-Header "Interactive Commit Review"
-    Write-Info "Review each commit and decide: Apply, Skip, or Defer"
+    Write-Info "Review each commit and decide: Apply, Skip, Plan, or Defer"
     Write-Info "Total commits: $($Commits.Count)"
     
     $results = @{
         Applied = @()
         Skipped = @()
+        Planned = @()
         Deferred = @()
     }
     
@@ -541,12 +801,13 @@ function Invoke-InteractiveReview {
         Write-Host "`n❓ What would you like to do?" -ForegroundColor Cyan
         Write-Host "  [A] Apply this commit now" -ForegroundColor Green
         Write-Host "  [S] Skip this commit" -ForegroundColor Yellow
+        Write-Host "  [P] Plan - Create integration evaluation folder" -ForegroundColor Blue
         Write-Host "  [D] Defer for later (add note)" -ForegroundColor Cyan
         Write-Host "  [V] View full diff" -ForegroundColor Magenta
         Write-Host "  [Q] Quit interactive review" -ForegroundColor Red
         
         do {
-            $choice = Read-Host "`nChoice (A/S/D/V/Q)"
+            $choice = Read-Host "`nChoice (A/S/P/D/V/Q)"
             $choice = $choice.ToUpper()
             
             switch ($choice) {
@@ -560,6 +821,7 @@ function Invoke-InteractiveReview {
                     Write-Host "`n❓ What would you like to do?" -ForegroundColor Cyan
                     Write-Host "  [A] Apply this commit now" -ForegroundColor Green
                     Write-Host "  [S] Skip this commit" -ForegroundColor Yellow
+                    Write-Host "  [P] Plan - Create integration evaluation folder" -ForegroundColor Blue
                     Write-Host "  [D] Defer for later (add note)" -ForegroundColor Cyan
                     Write-Host "  [Q] Quit interactive review" -ForegroundColor Red
                 }
@@ -611,6 +873,17 @@ function Invoke-InteractiveReview {
                     Write-Warning "Skipping commit"
                     $results.Skipped += $commit
                 }
+                'P' {
+                    Write-Host "`n📋 Creating integration plan..." -ForegroundColor Cyan
+                    $note = Read-Host "Add initial notes (optional)"
+                    $planDir = Create-IntegrationPlan -Commit $commit -Note $note
+                    $results.Planned += @{
+                        Commit = $commit
+                        PlanDir = $planDir
+                        Note = $note
+                    }
+                    Write-Success "Integration plan created - review and update as needed"
+                }
                 'D' {
                     $reason = Read-Host "`nReason for deferring"
                     $results.Deferred += @{
@@ -626,13 +899,21 @@ function Invoke-InteractiveReview {
                     Write-Header "Interactive Review Summary"
                     Write-Success "Applied: $($results.Applied.Count)"
                     Write-Warning "Skipped: $($results.Skipped.Count)"
+                    Write-Host "Planned: $($results.Planned.Count)" -ForegroundColor Blue
                     Write-Info "Deferred: $($results.Deferred.Count)"
                     Write-Host "Remaining: $(($Commits.Count - $commitNumber))" -ForegroundColor Gray
+                    
+                    if ($results.Planned.Count -gt 0) {
+                        Write-Host "`n📋 Integration Plans Created:" -ForegroundColor Cyan
+                        foreach ($item in $results.Planned) {
+                            Write-Host "  • $($item.PlanDir)" -ForegroundColor Gray
+                        }
+                    }
                     
                     return $results
                 }
                 default {
-                    Write-Warning "Invalid choice. Please enter A, S, D, V, or Q"
+                    Write-Warning "Invalid choice. Please enter A, S, P, D, V, or Q"
                     $choice = "" # Force re-prompt
                 }
             }
@@ -642,7 +923,17 @@ function Invoke-InteractiveReview {
     Write-Header "Interactive Review Complete"
     Write-Success "Applied: $($results.Applied.Count)"
     Write-Warning "Skipped: $($results.Skipped.Count)"
+    Write-Host "Planned: $($results.Planned.Count)" -ForegroundColor Blue
     Write-Info "Deferred: $($results.Deferred.Count)"
+    
+    if ($results.Planned.Count -gt 0) {
+        Write-Host "`n📋 Integration Plans Created:" -ForegroundColor Cyan
+        foreach ($item in $results.Planned) {
+            Write-Host "  • $($item.Commit.Hash) - $($item.Commit.Message)" -ForegroundColor Gray
+            Write-Host "    Location: $($item.PlanDir)" -ForegroundColor DarkGray
+        }
+        Write-Host "`n💡 Next: Review integration plans and execute when ready" -ForegroundColor Magenta
+    }
     
     # Show deferred commits
     if ($results.Deferred.Count -gt 0) {
@@ -717,6 +1008,11 @@ switch ($Mode) {
         $results = Invoke-InteractiveReview -Commits $commits
         
         Write-Host "`n💡 Next Steps:" -ForegroundColor Yellow
+        if ($results.Planned.Count -gt 0) {
+            Write-Host "  • Review integration plans in incoming/ folder"
+            Write-Host "  • Update plans with integration strategy"
+            Write-Host "  • Execute planned integrations when ready"
+        }
         if ($results.Deferred.Count -gt 0) {
             Write-Host "  • Review deferred commits and handle manually"
         }
