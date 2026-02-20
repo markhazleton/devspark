@@ -87,6 +87,181 @@ To test your templates, commands, and other changes locally, follow these steps:
 
    Navigate to your test project folder and open the agent to verify your implementation.
 
+## Fork Maintenance
+
+**Spec Kit Spark** is a maintained fork of [github.com/github/spec-kit](https://github.com/github/spec-kit). We track and selectively incorporate upstream improvements using documented decision criteria.
+
+### Syncing with Upstream
+
+**Monthly Reviews** (or as needed): Check for valuable upstream changes.
+
+**Interactive Mode** (Recommended for thorough review):
+
+```powershell
+# PowerShell - Interactive review with explanations
+.\scripts\powershell\sync-upstream.ps1 -Mode interactive
+
+# Bash - Interactive review with explanations
+./scripts/bash/sync-upstream.sh --mode interactive
+```
+
+Interactive mode provides:
+- Detailed commit analysis (author, date, files changed, diff stats)
+- Implications explained for each category (AUTO/ADAPT/IGNORE/EVALUATE)
+- Conflict detection with Spark-specific files
+- Options: Apply, Skip, Defer (with notes), View full diff, Quit
+- Checkpoint branches for safe rollback
+
+**Quick Review** (for overview):
+
+```powershell
+# PowerShell - Quick categorized view
+.\scripts\powershell\sync-upstream.ps1 -Mode review
+
+# Bash - Quick categorized view
+./scripts/bash/sync-upstream.sh --mode review
+```
+
+This categorizes upstream commits into:
+
+- 🟢 **AUTO** - Safe to auto-apply (bug fixes, security patches)
+- 🟡 **ADAPT** - Requires path adaptation (docs/ → .documentation/)
+- 🔴 **IGNORE** - Not applicable to Spark
+- 🔵 **EVALUATE** - Major features needing team discussion
+- ⚪ **REVIEW** - Needs manual categorization
+
+### Auto-Applying Safe Changes
+
+After reviewing, auto-apply bug fixes and security patches:
+
+```powershell
+# PowerShell
+.\scripts\powershell\sync-upstream.ps1 --mode auto
+
+# Bash
+./scripts/bash/sync-upstream.sh --mode auto
+```
+
+This will:
+
+- Create a checkpoint branch for rollback safety
+- Cherry-pick all AUTO-categorized commits
+- Report successes and failures
+- Update FORK_DIVERGENCE.md
+
+### Adapting Changes Manually
+
+For ADAPT commits that need path adjustments:
+
+1. **Cherry-pick to feature branch**:
+
+   ```bash
+   git checkout -b sync/adapt-<hash>
+   git cherry-pick <commit-hash>
+   ```
+
+2. **Resolve path conflicts**:
+
+   - Change `docs/` → `.documentation/`
+   - Change `.specify/` → `.documentation/`
+   - Update any hardcoded references
+
+3. **Test commands**: Verify all `/speckit.*` commands still work
+
+4. **Merge when validated**:
+
+   ```bash
+   git checkout main
+   git merge sync/adapt-<hash>
+   ```
+
+### Evaluating Major Features
+
+For EVALUATE commits (extension system, etc.):
+
+1. **Create RFC or discussion** in GitHub Issues
+2. **Test in isolated branch**: `git checkout -b evaluate/<feature-name>`
+3. **Document implications**: How does it fit with Spark architecture?
+4. **Team decision**: Integrate, adapt, or defer
+
+### Decision Criteria Summary
+
+Use these patterns when manually reviewing commits:
+
+**AUTO (🟢)** - Apply automatically:
+
+- Bug fixes (typos, path errors, dependency conflicts)
+- Security patches
+- Agent CLI compatibility fixes
+
+**ADAPT (🟡)** - Requires modification:
+
+- Template wording improvements
+- Documentation updates
+- Script enhancements (common.sh, etc.)
+
+**IGNORE (🔴)** - Skip these:
+
+- Upstream version bumps
+- Changes to `docs/` folder (we use `.documentation/`)
+- Workflow changes specific to github/github
+
+**EVALUATE (🔵)** - Team discussion needed:
+
+- Extension system
+- Generic agent support
+- Major architectural changes
+
+### Updating FORK_DIVERGENCE.md
+
+After applying changes, document them:
+
+1. **Auto-updates**: The sync script updates metadata automatically
+2. **Manual entries**: Add to "Absorbed Changes Log" section
+3. **Include**: Commit hash, category, and brief description
+
+Example entry:
+
+```markdown
+### 2026-02-20: Auto-Applied Cherry-Picks
+
+**Upstream Commit**: `aeed11f`  
+**Applied**: 5 commits
+
+- `fc3b98e` - fix: rename Qoder CLI key
+- `6fca5d8` - fix: pin click>=8.1 dependency
+- `c78f842` - fix: typo in plan-template.md
+- ...
+```
+
+### Contributing Back to Upstream
+
+Developed something valuable that could help the broader community?
+
+1. **Create upstream-compatible branch**:
+
+   ```bash
+   git checkout -b upstream/feature-name
+   ```
+
+2. **Adjust to upstream structure**:
+   - Change `.documentation/` → `docs/`
+   - Remove Spark-specific commands
+   - Follow upstream conventions
+
+3. **Test with upstream templates**
+
+4. **Submit PR** to [github.com/github/spec-kit](https://github.com/github/spec-kit)
+
+5. **Document** in FORK_DIVERGENCE.md → "Contributed to Upstream"
+
+### Resources
+
+- **[FORK_DIVERGENCE.md](./FORK_DIVERGENCE.md)** - Complete tracking document
+- **[sync-upstream.ps1](./scripts/powershell/sync-upstream.ps1)** - PowerShell sync script
+- **[sync-upstream.sh](./scripts/bash/sync-upstream.sh)** - Bash sync script
+- **[Upstream Repository](https://github.com/github/spec-kit)** - Original spec-kit
+
 ## AI contributions in Spec Kit
 
 > [!IMPORTANT]

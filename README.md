@@ -1095,6 +1095,94 @@ For support, please open a [GitHub issue](https://github.com/MarkHazleton/spec-k
 
 This project is heavily influenced by and based on the work and research of [John Lam](https://github.com/jflam).
 
-## 📄 License
+## � Fork Sync & Maintenance
+
+**Spec Kit Spark** is a maintained fork of [github.com/github/spec-kit](https://github.com/github/spec-kit) with significant enhancements for Adaptive System Life Cycle Development. We actively track and selectively incorporate valuable improvements from upstream.
+
+### Fork Strategy
+
+We maintain this fork using documented decision criteria to:
+
+- **Auto-apply** bug fixes and security patches
+- **Adapt** template and documentation improvements
+- **Evaluate** major features for integration
+- **Ignore** changes incompatible with our structure
+
+See **[FORK_DIVERGENCE.md](./FORK_DIVERGENCE.md)** for:
+
+- Complete divergence history
+- Decision criteria framework
+- Absorbed changes log
+- Integration opportunities
+
+### Syncing with Upstream
+
+**For Contributors**: Run the sync script to review and apply upstream changes.
+
+**Interactive Mode** (Recommended): Review each commit with detailed implications:
+
+```powershell
+# PowerShell
+.\scripts\powershell\sync-upstream.ps1 -Mode interactive
+
+# Bash
+./scripts/bash/sync-upstream.sh --mode interactive
+```
+
+This mode:
+- Shows full commit details and file changes
+- Explains implications for Spark architecture
+- Detects potential conflicts with Spark-specific files
+- Prompts for action: Apply, Skip, Defer, or View diff
+- Creates checkpoint branches for safe rollback
+
+**Quick Review**: See categorized commits:
+
+```powershell
+# PowerShell
+.\scripts\powershell\sync-upstream.ps1 -Mode review
+
+# Bash
+./scripts/bash/sync-upstream.sh --mode review
+```
+
+**Automated Cherry-Picks**: Apply safe bug fixes automatically:
+
+```powershell
+# PowerShell
+.\scripts\powershell\sync-upstream.ps1 -Mode auto
+
+# Bash
+./scripts/bash/sync-upstream.sh --mode auto
+```
+
+**Generate Report**: Create detailed analysis for team review:
+
+```powershell
+# PowerShell
+.\scripts\powershell\sync-upstream.ps1 --mode report > sync-report.md
+
+# Bash
+./scripts/bash/sync-upstream.sh --mode report > sync-report.md
+```
+
+The sync script automatically:
+
+- Categories upstream commits by our decision criteria
+- Identifies safe auto-applicable changes
+- Generates reports for manual review
+- Updates FORK_DIVERGENCE.md with applied changes
+- Creates checkpoint branches for safe rollback
+
+### Contributing to Upstream
+
+We believe in contributing valuable innovations back to the community. If you've developed a feature that could benefit the upstream project:
+
+1. Create an upstream-compatible branch (adjust paths: `.documentation/` → `docs/`)
+2. Remove Spark-specific dependencies
+3. Submit PR to [github.com/github/spec-kit](https://github.com/github/spec-kit)
+4. Document in FORK_DIVERGENCE.md under "Contributed to Upstream"
+
+## �📄 License
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) file for the full terms.
