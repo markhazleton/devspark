@@ -219,6 +219,40 @@ f14a47e - Add modular extension system
 
 *Track successful cherry-picks and adaptations here*
 
+### Applied Changes
+
+#### 2026-02-20: GitHub Issue Templates
+
+**Status**: ✅ Adapted & Merged  
+**Upstream Commit**: `68d1d3a`  
+**PR**: [#1655](https://github.com/github/spec-kit/pull/1655)  
+**Category**: 🟡 ADAPT & MERGE
+
+**Changes Applied**:
+- Added `bug_report.yml` with Spark-specific URLs and agent list (17 agents)
+- Added `feature_request.yml` with Spark-specific URLs and agent list
+- Added `agent_request.yml` with Spark-specific URLs and current agent list
+- Added `config.yml` with Spark contact links (removed Extension Development Guide link)
+
+**Changes Deferred**:
+- `extension_submission.yml` - Awaiting extension system implementation (upstream feature not yet in Spark)
+
+**Adaptations Made**:
+- All `github.com/github/spec-kit` → `github.com/MarkHazleton/spec-kit`
+- All `github.com/manfredseee/spec-kit` → `github.com/MarkHazleton/spec-kit`
+- Removed "Antigravity" agent (not yet supported in Spark)
+- Updated agent lists to match current AGENTS.md (17 agents)
+- Branding updated from "Spec Kit" to "Spec Kit Spark" where appropriate
+- Removed extension development guide link (feature not yet available)
+
+**Validation**:
+- [ ] Templates render correctly on GitHub (requires push to verify)
+- [ ] All links resolve to correct Spark repository locations
+- [ ] Agent dropdowns match AGENTS.md exactly
+- [ ] Blank issues disabled per config.yml
+
+---
+
 ### Planned (Not Yet Applied)
 
 **Bug Fixes**:

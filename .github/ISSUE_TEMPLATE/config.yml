@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 General Discussion
+    url: https://github.com/MarkHazleton/spec-kit/discussions
+    about: Ask questions, share ideas, or discuss Spec-Driven Development
+  - name: 📚 Documentation
+    url: https://github.com/MarkHazleton/spec-kit/blob/main/README.md
+    about: Read the Spec Kit Spark documentation and guides
+  - name: 🤝 Contributing Guide
+    url: https://github.com/MarkHazleton/spec-kit/blob/main/CONTRIBUTING.md
+    about: Learn how to contribute to Spec Kit Spark
+  - name: 🔒 Security Issues
+    url: https://github.com/MarkHazleton/spec-kit/blob/main/SECURITY.md
+    about: Report security vulnerabilities privately
