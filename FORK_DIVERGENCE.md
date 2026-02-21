@@ -253,6 +253,43 @@ f14a47e - Add modular extension system
 
 ---
 
+#### 2026-02-20: Template Bias Removal
+
+**Status**: ✅ Applied (Cherry-picked)  
+**Upstream Commit**: `12405c0` → Spark commit `a5f9773`  
+**PR**: [#1652](https://github.com/github/spec-kit/pull/1652)  
+**Category**: 🟡 ADAPT & MERGE  
+**Applied**: 2026-02-20 17:07:22
+
+**Changes Applied**:
+- Removed OpenAPI/GraphQL-specific language from templates
+- Updated terminology: "API contracts" → "interface contracts"
+- Updated: "endpoints" → "interfaces" (in generic contexts)
+- Expanded Project Type field: "web/mobile" → "library/cli/web-service/mobile-app/compiler/desktop-app"
+- Made templates applicable to CLI tools, libraries, compilers, desktop apps
+
+**Files Modified**:
+- `templates/commands/plan.md` - Interface contracts section
+- `templates/commands/specify.md` - Integration patterns defaults
+- `templates/commands/tasks.md` - Contract/endpoint references
+- `templates/plan-template.md` - Project Type field
+
+**Adaptations Made**:
+- None required - upstream changes compatible with Spark structure
+- All Spark-specific enhancements preserved
+
+**Validation**:
+- [x] Templates use generic "interface contracts" terminology
+- [x] Project Type field includes diverse categories
+- [x] Web service backward compatibility maintained
+- [x] CLI/library project types properly supported
+- [x] No Spark-specific features removed
+
+**Notes**:
+Cherry-picked directly from upstream without modification. Changes align perfectly with Spark's goal of supporting diverse project types through Adaptive System Life Cycle Development (ASLCD).
+
+---
+
 #### 2026-02-20: Extension System and Qoder CLI Fix
 
 **Status**: ✅ Applied  
@@ -275,7 +312,6 @@ f14a47e - Add modular extension system
 **Integration Decisions**:
 - **Extension System**: Approved for integration. Enables community contributions without core modifications.
 - **V-Model v0.2.0 Update** (07077d0): Applied - Updated catalog to v0.2.0 with 5 commands (added system-design, system-test).
-- **Template Refactoring** (12405c0): Approved for manual merge after extension system stabilizes.
 
 **Validation**:
 - [x] Extension directory created successfully
@@ -298,7 +334,6 @@ f14a47e - Add modular extension system
 - `4afbd87` - preserve constitution.md
 
 **Template Improvements**:
-- `12405c0` - Remove API bias from templates (approved, pending manual merge)
 - `b562438` - Markdownlint fixes
 
 **Extension Updates**:
