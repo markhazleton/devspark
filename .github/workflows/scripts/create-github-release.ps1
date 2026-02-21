@@ -31,7 +31,7 @@ $versionNoV = $Version -replace '^v', ''
 $agents = @(
     'copilot', 'claude', 'gemini', 'cursor-agent', 'opencode', 'qwen',
     'windsurf', 'codex', 'kilocode', 'auggie', 'roo', 'codebuddy',
-    'qoder', 'amp', 'shai', 'q', 'bob'
+    'qodercli', 'amp', 'shai', 'q', 'bob'
 )
 
 # Build the list of files to upload
