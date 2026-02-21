@@ -256,14 +256,15 @@ f14a47e - Add modular extension system
 #### 2026-02-20: Extension System and Qoder CLI Fix
 
 **Status**: ✅ Applied  
-**Upstream Commits**: `aeed11f` (extensions), `fc3b98e` (Qoder fix)  
-**PRs**: [#1640](https://github.com/github/spec-kit/pull/1640), [#1651](https://github.com/github/spec-kit/pull/1651)  
+**Upstream Commits**: `aeed11f` (extensions), `07077d0` (V-Model v0.2.0), `fc3b98e` (Qoder fix)  
+**PRs**: [#1640](https://github.com/github/spec-kit/pull/1640), [#1656](https://github.com/github/spec-kit/pull/1656), [#1651](https://github.com/github/spec-kit/pull/1651)  
 **Category**: 🟡 ADAPT & MERGE + 🟢 AUTO
 
 **Changes Applied**:
 - Created `extensions/` directory structure for community extensions
 - Added `extensions/README.md` with Spark-specific branding
 - Added `extensions/catalog.community.json` with V-Model Extension Pack v0.1.0
+- Updated V-Model Extension Pack v0.1.0 → v0.2.0 (07077d0, added system-design and system-test commands)
 - Fixed Qoder CLI tool name: `qoder` → `qodercli` in `create-github-release.ps1`
 
 **Adaptations Made**:
@@ -273,7 +274,7 @@ f14a47e - Add modular extension system
 
 **Integration Decisions**:
 - **Extension System**: Approved for integration. Enables community contributions without core modifications.
-- **V-Model v0.2.0 Update** (07077d0): Deferred until extension infrastructure is fully tested.
+- **V-Model v0.2.0 Update** (07077d0): Applied - Updated catalog to v0.2.0 with 5 commands (added system-design, system-test).
 - **Template Refactoring** (12405c0): Approved for manual merge after extension system stabilizes.
 
 **Validation**:
@@ -281,6 +282,9 @@ f14a47e - Add modular extension system
 - [x] JSON validates correctly
 - [x] No conflicts with Spark's `.documentation/` structure
 - [x] Qoder CLI reference updated correctly
+- [x] V-Model v0.2.0 catalog updated
+- [x] Download URL verified (v0.2.0 tag)
+- [x] Command count reflects new capabilities (5 commands)
 - [ ] Test extension installation workflow (future work)
 
 ---
