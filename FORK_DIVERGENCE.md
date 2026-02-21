@@ -253,21 +253,54 @@ f14a47e - Add modular extension system
 
 ---
 
+#### 2026-02-20: Extension System and Qoder CLI Fix
+
+**Status**: ✅ Applied  
+**Upstream Commits**: `aeed11f` (extensions), `fc3b98e` (Qoder fix)  
+**PRs**: [#1640](https://github.com/github/spec-kit/pull/1640), [#1651](https://github.com/github/spec-kit/pull/1651)  
+**Category**: 🟡 ADAPT & MERGE + 🟢 AUTO
+
+**Changes Applied**:
+- Created `extensions/` directory structure for community extensions
+- Added `extensions/README.md` with Spark-specific branding
+- Added `extensions/catalog.community.json` with V-Model Extension Pack v0.1.0
+- Fixed Qoder CLI tool name: `qoder` → `qodercli` in `create-github-release.ps1`
+
+**Adaptations Made**:
+- Updated README links: `github.com/github/spec-kit` → `github.com/MarkHazleton/spec-kit`
+- Updated catalog URL to point to Spark's fork
+- Enhanced README with Spark-specific context about extensions working alongside built-in commands
+
+**Integration Decisions**:
+- **Extension System**: Approved for integration. Enables community contributions without core modifications.
+- **V-Model v0.2.0 Update** (07077d0): Deferred until extension infrastructure is fully tested.
+- **Template Refactoring** (12405c0): Approved for manual merge after extension system stabilizes.
+
+**Validation**:
+- [x] Extension directory created successfully
+- [x] JSON validates correctly
+- [x] No conflicts with Spark's `.documentation/` structure
+- [x] Qoder CLI reference updated correctly
+- [ ] Test extension installation workflow (future work)
+
+---
+
 ### Planned (Not Yet Applied)
 
 **Bug Fixes**:
-- `fc3b98e` - Qoder CLI name fix
 - `6fca5d8` - click>=8.1 dependency pin
 - `c78f842` - plan-template.md typo
 - `36d9723` - path error fix
 - `4afbd87` - preserve constitution.md
 
 **Template Improvements**:
-- `12405c0` - Remove API bias from templates
+- `12405c0` - Remove API bias from templates (approved, pending manual merge)
 - `b562438` - Markdownlint fixes
 
+**Extension Updates**:
+- `07077d0` - V-Model v0.2.0 update (deferred, blocked by extension system testing)
+
 **Documentation**:
-- `aeed11f` - V-Model extension catalog format
 - `0f7d04b` - PR template for contributions
 
 ---
