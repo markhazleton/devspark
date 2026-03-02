@@ -1126,7 +1126,7 @@ See **[FORK_DIVERGENCE.md](./FORK_DIVERGENCE.md)** for:
 .\scripts\powershell\sync-upstream.ps1 -Mode interactive
 
 # Bash
-./scripts/bash/sync-upstream.sh --mode interactive
+./.documentation/scripts/bash/sync-upstream.sh --mode interactive
 ```
 
 This mode:
@@ -1143,7 +1143,7 @@ This mode:
 .\scripts\powershell\sync-upstream.ps1 -Mode review
 
 # Bash
-./scripts/bash/sync-upstream.sh --mode review
+./.documentation/scripts/bash/sync-upstream.sh --mode review
 ```
 
 **Automated Cherry-Picks**: Apply safe bug fixes automatically:
@@ -1153,7 +1153,7 @@ This mode:
 .\scripts\powershell\sync-upstream.ps1 -Mode auto
 
 # Bash
-./scripts/bash/sync-upstream.sh --mode auto
+./.documentation/scripts/bash/sync-upstream.sh --mode auto
 ```
 
 **Generate Report**: Create detailed analysis for team review:
@@ -1163,7 +1163,7 @@ This mode:
 .\scripts\powershell\sync-upstream.ps1 --mode report > sync-report.md
 
 # Bash
-./scripts/bash/sync-upstream.sh --mode report > sync-report.md
+./.documentation/scripts/bash/sync-upstream.sh --mode report > sync-report.md
 ```
 
 The sync script automatically:

@@ -1431,10 +1431,10 @@ README.md                           # Add new sections + scalability
 templates/commands/release.md       # Add harvest integration
 templates/commands/quickfix.md      # Add context optimization
 templates/commands/specify.md       # Add context tiers
-scripts/bash/release-context.sh     # Add harvest prompt logic
-scripts/bash/specify-context.sh     # Add context optimization
-scripts/powershell/release-context.ps1
-scripts/powershell/specify-context.ps1
+.documentation/scripts/bash/release-context.sh     # Add harvest prompt logic
+.documentation/scripts/bash/specify-context.sh     # Add context optimization
+.documentation/scripts/powershell/release-context.ps1
+.documentation/scripts/powershell/specify-context.ps1
 ```
 
 ---

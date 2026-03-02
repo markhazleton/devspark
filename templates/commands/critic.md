@@ -10,8 +10,8 @@ handoffs:
     prompt: Regenerate tasks with missing operational items
     send: true
 scripts:
-  sh: scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
-  ps: scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+  sh: .documentation/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
+  ps: .documentation/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
 ---
 
 ## User Input

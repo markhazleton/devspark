@@ -6,8 +6,8 @@ handoffs:
     agent: speckit.site-audit
     prompt: Show me previous audit reports in .documentation/copilot/audit/
 scripts:
-  sh: scripts/bash/site-audit.sh $ARGUMENTS --json
-  ps: scripts/powershell/site-audit.ps1 $ARGUMENTS -Json
+  sh: .documentation/scripts/bash/site-audit.sh $ARGUMENTS --json
+  ps: .documentation/scripts/powershell/site-audit.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

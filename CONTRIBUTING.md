@@ -61,7 +61,7 @@ When working on spec-kit:
    - Core: `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`
    - Quality: `/speckit.pr-review`, `/speckit.site-audit`, `/speckit.critic`
 2. Verify templates are working correctly in `templates/` directory
-3. Test script functionality in the `scripts/` directory
+3. Test script functionality in the `.documentation/scripts/` directory
 4. Ensure memory files (`memory/constitution.md`) are updated if major process changes are made
 
 ### Testing template and command changes locally
@@ -99,10 +99,10 @@ To test your templates, commands, and other changes locally, follow these steps:
 
 ```powershell
 # PowerShell - Interactive review with explanations
-.\scripts\powershell\sync-upstream.ps1 -Mode interactive
+.\\.documentation\\scripts\\powershell\\sync-upstream.ps1 -Mode interactive
 
 # Bash - Interactive review with explanations
-./scripts/bash/sync-upstream.sh --mode interactive
+./.documentation/scripts/bash/sync-upstream.sh --mode interactive
 ```
 
 Interactive mode provides:
@@ -119,7 +119,7 @@ Interactive mode provides:
 .\scripts\powershell\sync-upstream.ps1 -Mode review
 
 # Bash - Quick categorized view
-./scripts/bash/sync-upstream.sh --mode review
+./.documentation/scripts/bash/sync-upstream.sh --mode review
 ```
 
 This categorizes upstream commits into:
@@ -139,7 +139,7 @@ After reviewing, auto-apply bug fixes and security patches:
 .\scripts\powershell\sync-upstream.ps1 --mode auto
 
 # Bash
-./scripts/bash/sync-upstream.sh --mode auto
+./.documentation/scripts/bash/sync-upstream.sh --mode auto
 ```
 
 This will:
@@ -258,8 +258,8 @@ Developed something valuable that could help the broader community?
 ### Resources
 
 - **[FORK_DIVERGENCE.md](./FORK_DIVERGENCE.md)** - Complete tracking document
-- **[sync-upstream.ps1](./scripts/powershell/sync-upstream.ps1)** - PowerShell sync script
-- **[sync-upstream.sh](./scripts/bash/sync-upstream.sh)** - Bash sync script
+- **[sync-upstream.ps1](./.documentation/scripts/powershell/sync-upstream.ps1)** - PowerShell sync script
+- **[sync-upstream.sh](./.documentation/scripts/bash/sync-upstream.sh)** - Bash sync script
 - **[Upstream Repository](https://github.com/github/spec-kit)** - Original spec-kit
 
 ## AI contributions in Spec Kit

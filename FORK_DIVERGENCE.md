@@ -393,7 +393,7 @@ Cherry-picked directly from upstream without modification. Changes align perfect
 ### Sync Workflow
 
 1. **Fetch upstream**: `git fetch upstream`
-2. **Run sync script**: `./scripts/powershell/sync-upstream.ps1` or `./scripts/bash/sync-upstream.sh`
+2. **Run sync script**: `./.documentation/scripts/powershell/sync-upstream.ps1` or `./.documentation/scripts/bash/sync-upstream.sh`
 3. **Choose workflow**:
    - **Interactive** (recommended): Review each commit with detailed implications and choose actions
    - **Review**: Quick categorized overview
@@ -498,18 +498,18 @@ git fetch upstream
 git log --oneline main..upstream/main
 
 # Interactive review (recommended) - explains implications and prompts for action
-./scripts/bash/sync-upstream.sh --mode interactive
+./.documentation/scripts/bash/sync-upstream.sh --mode interactive
 # or PowerShell:
-.\scripts\powershell\sync-upstream.ps1 -Mode interactive
+.\.documentation\scripts\powershell\sync-upstream.ps1 -Mode interactive
 
 # Quick categorized review
-./scripts/bash/sync-upstream.sh --mode review
+./.documentation/scripts/bash/sync-upstream.sh --mode review
 
 # Auto-apply safe fixes
-./scripts/bash/sync-upstream.sh --mode auto
+./.documentation/scripts/bash/sync-upstream.sh --mode auto
 
 # Generate detailed report
-./scripts/bash/sync-upstream.sh --mode report > sync-report.md
+./.documentation/scripts/bash/sync-upstream.sh --mode report > sync-report.md
 
 # Manual cherry-pick if needed
 git cherry-pick <commit-hash>
@@ -531,8 +531,8 @@ These files frequently change in both repos:
 - `AGENTS.md` - Agent additions compatible
 - `src/specify_cli/__init__.py` - Core CLI logic
 - `templates/commands/*` - Enhance, don't replace
-- `scripts/bash/*` - Usually compatible
-- `scripts/powershell/*` - Usually compatible
+- `.documentation/scripts/bash/*` - Usually compatible
+- `.documentation/scripts/powershell/*` - Usually compatible
 
 ---
 

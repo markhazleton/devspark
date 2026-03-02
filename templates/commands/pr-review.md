@@ -5,8 +5,8 @@ handoffs:
     agent: speckit.pr-review
     prompt: Show me previous PR reviews in .documentation/specs/pr-review/
 scripts:
-  sh: scripts/bash/get-pr-context.sh $ARGUMENTS --json
-  ps: scripts/powershell/get-pr-context.ps1 $ARGUMENTS -Json
+  sh: .documentation/scripts/bash/get-pr-context.sh $ARGUMENTS --json
+  ps: .documentation/scripts/powershell/get-pr-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

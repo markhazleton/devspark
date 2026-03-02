@@ -481,7 +481,7 @@ Created automatically on first review, persists across reviews.
 
 ### 2.1 Create PR Context Script
 
-**New File**: `scripts/bash/get-pr-context.sh`
+**New File**: `.documentation/scripts/bash/get-pr-context.sh`
 
 ```bash
 #!/usr/bin/env bash
@@ -565,7 +565,7 @@ cat <<EOF
 EOF
 ```
 
-**New File**: `scripts/powershell/get-pr-context.ps1`
+**New File**: `.documentation/scripts/powershell/get-pr-context.ps1`
 
 ```powershell
 #!/usr/bin/env pwsh
@@ -1054,8 +1054,8 @@ The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 ### Core Functionality
 
 - [ ] Create `templates/commands/pr-review.md`
-- [ ] Create `scripts/bash/get-pr-context.sh`
-- [ ] Create `scripts/powershell/get-pr-context.ps1`
+- [ ] Create `.documentation/scripts/bash/get-pr-context.sh`
+- [ ] Create `.documentation/scripts/powershell/get-pr-context.ps1`
 - [ ] Add `/.documentation/specs/pr-review/` directory creation logic
 - [ ] Implement review report generation
 - [ ] Add metadata tracking (commit SHA, timestamp)

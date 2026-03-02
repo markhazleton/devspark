@@ -8,8 +8,8 @@ handoffs:
     agent: speckit.specify
     prompt: Create a full specification for this change
 scripts:
-  sh: scripts/bash/quickfix-context.sh $ARGUMENTS --json
-  ps: scripts/powershell/quickfix-context.ps1 $ARGUMENTS -Json
+  sh: .documentation/scripts/bash/quickfix-context.sh $ARGUMENTS --json
+  ps: .documentation/scripts/powershell/quickfix-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

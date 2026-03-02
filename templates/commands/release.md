@@ -8,8 +8,8 @@ handoffs:
     agent: speckit.site-audit
     prompt: Run a final site audit before release
 scripts:
-  sh: scripts/bash/release-context.sh $ARGUMENTS --json
-  ps: scripts/powershell/release-context.ps1 $ARGUMENTS -Json
+  sh: .documentation/scripts/bash/release-context.sh $ARGUMENTS --json
+  ps: .documentation/scripts/powershell/release-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input
