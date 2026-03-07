@@ -1110,6 +1110,7 @@ def init(
         ("chmod", "Ensure scripts executable"),
         ("cleanup", "Cleanup"),
         ("git", "Initialize git repository"),
+        ("version-stamp", "Write version stamp"),
         ("final", "Finalize")
     ]:
         tracker.add(key, label)
@@ -1143,6 +1144,10 @@ def init(
                     tracker.skip("git", "git not available")
             else:
                 tracker.skip("git", "--no-git flag")
+
+            tracker.start("version-stamp")
+            write_version_stamp(project_path, selected_ai)
+            tracker.complete("version-stamp", "stamped")
 
             tracker.complete("final", "project ready")
         except Exception as e:
@@ -1373,6 +1378,69 @@ def backup_constitution() -> Optional[Path]:
         return None
 
 
+def write_version_stamp(project_path: Path, ai_assistant: str) -> None:
+    """Write .documentation/SPECKIT_VERSION to record the installed version and agent.
+
+    This file lets consumers and the /speckit.upgrade command quickly determine
+    which version of Spec Kit Spark is installed without querying the CLI or GitHub.
+    Format (plain text, three lines):
+        <version>
+        installed: <YYYY-MM-DD>
+        agent: <agent-key>
+    """
+    import importlib.metadata
+
+    cli_version = "unknown"
+    try:
+        cli_version = importlib.metadata.version("specify-cli")
+    except Exception:
+        try:
+            import tomllib
+            pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+            if pyproject_path.exists():
+                with open(pyproject_path, "rb") as f:
+                    data = tomllib.load(f)
+                    cli_version = data.get("project", {}).get("version", "unknown")
+        except Exception:
+            pass
+
+    doc_dir = project_path / ".documentation"
+    if not doc_dir.exists():
+        return  # .documentation not present — skip silently
+
+    stamp_path = doc_dir / "SPECKIT_VERSION"
+    install_date = datetime.now().strftime("%Y-%m-%d")
+
+    try:
+        stamp_path.write_text(
+            f"{cli_version}\n"
+            f"installed: {install_date}\n"
+            f"agent: {ai_assistant}\n",
+            encoding="utf-8",
+        )
+    except Exception:
+        pass  # Non-fatal — never break init/upgrade for a stamp write failure
+
+
+def read_version_stamp(project_path: Path) -> Optional[dict]:
+    """Read .documentation/SPECKIT_VERSION and return a dict with version/date/agent,
+    or None if the file is absent or unreadable."""
+    stamp_path = project_path / ".documentation" / "SPECKIT_VERSION"
+    if not stamp_path.exists():
+        return None
+    try:
+        lines = stamp_path.read_text(encoding="utf-8").splitlines()
+        result = {"version": lines[0].strip() if lines else "unknown"}
+        for line in lines[1:]:
+            if line.startswith("installed:"):
+                result["installed"] = line.split(":", 1)[1].strip()
+            elif line.startswith("agent:"):
+                result["agent"] = line.split(":", 1)[1].strip()
+        return result
+    except Exception:
+        return None
+
+
 # ============================================================================
 # Upgrade Command
 # ============================================================================
@@ -1542,6 +1610,12 @@ def upgrade(
     console.print("\n" + "="*60)
     console.print("[bold green]✓ Upgrade Complete![/bold green]")
     console.print("="*60 + "\n")
+
+    # Show the stamped version
+    stamp = read_version_stamp(Path.cwd())
+    if stamp:
+        console.print(f"[green]✓[/green] Version stamp written: [cyan].documentation/SPECKIT_VERSION[/cyan]")
+        console.print(f"  Version: [bold]{stamp.get('version', 'unknown')}[/bold]  Agent: {stamp.get('agent', 'unknown')}  Date: {stamp.get('installed', 'unknown')}\n")
 
     console.print("[bold]Next steps:[/bold]")
     console.print("  1. Review changes: [cyan]git status[/cyan] and [cyan]git diff[/cyan]")

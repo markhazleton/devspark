@@ -96,7 +96,51 @@ Skip these by default:
 - `dist/`, `build/`, `bin/`, `obj/`
 - `*.min.js`, `*.map`
 
-### 4. Constitution Compliance Audit
+### 4. Spec Kit Spark Version Check
+
+Before auditing code, check whether the project's Spec Kit Spark installation is
+current. Stale installations may have outdated command files or missing framework scripts.
+
+#### A. Read Version Stamp
+
+Check for `.documentation/SPECKIT_VERSION`:
+
+- **If missing**: Flag `VER1` — stamp absent, version unknown (HIGH)
+- **If present**: Parse `version`, `installed`, and `agent` fields
+
+#### B. Detect Latest Version
+
+Read the most recent `## [X.Y.Z]` entry in `CHANGELOG.md` (repo root) to get
+`LATEST_VERSION`. Fallback: read `version = "..."` from `pyproject.toml`.
+
+#### C. Compare and Flag
+
+| Condition | Finding ID | Severity |
+|-----------|-----------|---------|
+| `.documentation/SPECKIT_VERSION` absent | VER1 | HIGH |
+| Installed version < latest version | VER2 | MEDIUM |
+| Agent command files reference `.specify/` or root `memory/` paths | VER3 | HIGH |
+| Root-level `memory/`, `scripts/`, or `templates/` directories exist | VER4 | HIGH |
+| Old `speckit.*-old.md` files in agent folder | VER5 | LOW |
+
+Include in the audit report under a **Spec Kit Spark Version** section:
+
+```markdown
+## Spec Kit Spark Version
+
+| Field | Value |
+|-------|-------|
+| Installed Version | {version or "absent"} |
+| Latest Version    | {LATEST_VERSION} |
+| Install Date      | {installed field} |
+| Agent             | {agent field} |
+| Status            | UP TO DATE / UPGRADE AVAILABLE / UNKNOWN |
+```
+
+If VER1 or VER2 is present, add to the Recommendations section:
+> Run `/speckit.upgrade` or `specify upgrade` to update Spec Kit Spark.
+
+### 5. Constitution Compliance Audit
 
 For **each principle** in the constitution:
 
@@ -140,7 +184,7 @@ For each violation found:
 - **Issue**: Specific description
 - **Recommendation**: Concrete fix
 
-### 5. Package/Dependency Audit
+### 6. Package/Dependency Audit
 
 #### A. Detect Package Manager
 Identify from files present:
@@ -163,7 +207,7 @@ For each detected package manager:
 - Flag heavy transitive chains
 - Note conflicting version requirements
 
-### 6. Code Quality Metrics
+### 7. Code Quality Metrics
 
 Calculate and report:
 
@@ -184,7 +228,7 @@ Calculate and report:
 - Commented-out code blocks
 - Inconsistent formatting patterns
 
-### 7. Unused Code Detection
+### 8. Unused Code Detection
 
 Scan for potentially unused:
 
@@ -203,7 +247,7 @@ Scan for potentially unused:
 - Packages in requirements but never imported
 - DevDependencies in package.json unused
 
-### 8. Duplicate Code Detection
+### 9. Duplicate Code Detection
 
 Identify copy-paste patterns:
 
@@ -218,7 +262,7 @@ For each duplicate:
 - Similarity percentage
 - Suggested consolidation approach
 
-### 9. Severity Classification
+### 10. Severity Classification
 
 Apply consistent severity across all findings:
 
@@ -229,7 +273,7 @@ Apply consistent severity across all findings:
 | **MEDIUM** | Code quality concern, maintainability issue, missing tests |
 | **LOW** | Style suggestion, minor improvement, optimization opportunity |
 
-### 10. Generate Audit Report
+### 11. Generate Audit Report
 
 Create comprehensive report at `/.documentation/copilot/audit/YYYY-MM-DD_results.md`:
 
@@ -258,6 +302,7 @@ Use this format:
 
 | Category | Score | Status |
 |----------|-------|--------|
+| Spec Kit Version | [UP TO DATE / UPGRADE AVAILABLE / UNKNOWN] | [Status] |
 | Constitution Compliance | [X]% | [✅ PASS / ⚠️ PARTIAL / ❌ FAIL] |
 | Security | [X]% | [Status] |
 | Code Quality | [X]% | [Status] |
@@ -291,6 +336,23 @@ Use this format:
 | ID | Principle | File:Line | Issue | Severity | Recommendation |
 |----|-----------|-----------|-------|----------|----------------|
 | SEC1 | Security | src/config.py:45 | Hardcoded API key | CRITICAL | Use environment variable |
+
+## Spec Kit Spark Version
+
+| Field | Value |
+|-------|-------|
+| Installed Version | [version from SPECKIT_VERSION, or "absent"] |
+| Latest Version | [LATEST_VERSION] |
+| Install Date | [installed field] |
+| Agent | [agent field] |
+| Status | [UP TO DATE / UPGRADE AVAILABLE / UNKNOWN] |
+
+### Version Findings
+
+| ID | Issue | Severity | Recommendation |
+|----|-------|----------|----------------|
+| VER1 | SPECKIT_VERSION absent | HIGH | Run `specify upgrade` to install version stamp |
+| VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/speckit.upgrade` to update |
 
 ## Security Findings
 
@@ -466,7 +528,7 @@ Use this format:
 *To re-run: `/speckit.site-audit` or `/speckit.site-audit --scope=constitution`*
 ```
 
-### 11. Output Summary to User
+### 12. Output Summary to User
 
 Display concise summary:
 

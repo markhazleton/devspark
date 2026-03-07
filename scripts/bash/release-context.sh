@@ -170,6 +170,13 @@ fi
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_DATE=$(date +"%Y-%m-%d")
 
+# Spec Kit Spark version stamp info
+SPECKIT_VERSION_PATH="$REPO_ROOT/.documentation/SPECKIT_VERSION"
+INSTALLED_VERSION=""
+if [[ -f "$SPECKIT_VERSION_PATH" ]]; then
+    INSTALLED_VERSION=$(head -1 "$SPECKIT_VERSION_PATH" 2>/dev/null || echo "")
+fi
+
 # Output JSON if requested
 if [[ "$JSON_MODE" == true ]]; then
     cat <<EOF
@@ -193,7 +200,9 @@ if [[ "$JSON_MODE" == true ]]; then
   "CONTRIBUTORS": $CONTRIBUTORS,
   "TIMESTAMP": "$TIMESTAMP",
   "RELEASE_DATE": "$RELEASE_DATE",
-  "DRY_RUN": $DRY_RUN
+  "DRY_RUN": $DRY_RUN,
+  "SPECKIT_VERSION_PATH": "$SPECKIT_VERSION_PATH",
+  "INSTALLED_VERSION": "$INSTALLED_VERSION"
 }
 EOF
 else
@@ -210,6 +219,12 @@ else
     echo "Pending Specs: $(echo "$PENDING_SPECS" | jq 'length')"
     echo "Quickfixes: $(echo "$QUICKFIXES" | jq 'length')"
     echo "Contributors: $(echo "$CONTRIBUTORS" | jq 'length')"
+    echo ""
+    if [[ -n "$INSTALLED_VERSION" ]]; then
+        echo "Installed Spec Kit Version: $INSTALLED_VERSION"
+    else
+        echo "Installed Spec Kit Version: (SPECKIT_VERSION not found)"
+    fi
     if [[ "$DRY_RUN" == true ]]; then
         echo ""
         echo "** DRY RUN MODE - No changes will be made **"
