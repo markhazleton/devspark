@@ -1333,42 +1333,68 @@ def has_uncommitted_changes() -> bool:
 
 
 def run_migration_script() -> bool:
-    """Run the appropriate migration script. Returns True on success."""
-    try:
-        if sys.platform == "win32":
-            # Try both install locations: powershell subdir (release package) and scripts root (legacy)
-            script = Path(".documentation/scripts/powershell/migrate-to-documentation.ps1")
-            if not script.exists():
-                script = Path(".documentation/scripts/migrate-to-documentation.ps1")
-            if script.exists():
-                console.print("[cyan]Running Windows migration script...[/cyan]")
-                result = subprocess.run(
-                    ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(script)],
-                    check=False,
-                    capture_output=False
-                )
-                return result.returncode == 0
-        else:
-            # Try both install locations: bash subdir (release package) and scripts root (legacy)
-            script = Path(".documentation/scripts/bash/migrate-to-documentation.sh")
-            if not script.exists():
-                script = Path(".documentation/scripts/migrate-to-documentation.sh")
-            if script.exists():
-                console.print("[cyan]Running migration script...[/cyan]")
-                result = subprocess.run(
-                    ["bash", str(script)],
-                    check=False,
-                    capture_output=False
-                )
-                return result.returncode == 0
+    """Migrate old project structure to .documentation/ using Python.
 
-        # If script doesn't exist, try to download it
-        console.print("[yellow]Migration script not found. Skipping migration.[/yellow]")
-        console.print("[dim]You can manually run migration later if needed.[/dim]")
+    Moves the following into .documentation/ and renames originals to *.old:
+      .specify/  ->  .specify.old/  (contents copied into .documentation/)
+      memory/    ->  memory.old/
+      scripts/   ->  scripts.old/
+      templates/ ->  templates.old/
+      specs/     ->  specs.old/
+    """
+    import shutil
+
+    cwd = Path.cwd()
+    doc_dir = cwd / ".documentation"
+    doc_dir.mkdir(exist_ok=True)
+
+    moved = 0
+
+    def _merge_into(src: Path, dst: Path) -> None:
+        """Copy src tree into dst, skipping files that already exist at dst."""
+        dst.mkdir(parents=True, exist_ok=True)
+        for item in src.rglob("*"):
+            if item.is_file():
+                rel = item.relative_to(src)
+                dst_file = dst / rel
+                if not dst_file.exists():
+                    dst_file.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(str(item), str(dst_file))
+
+    # Handle .specify/ — copy known subdirs then root files, then rename
+    specify_dir = cwd / ".specify"
+    if specify_dir.exists():
+        for sub in ["memory", "scripts", "templates", "specs"]:
+            src = specify_dir / sub
+            if src.exists():
+                _merge_into(src, doc_dir / sub)
+        # Copy any root-level files in .specify
+        for item in specify_dir.iterdir():
+            if item.is_file():
+                dst_file = doc_dir / item.name
+                if not dst_file.exists():
+                    shutil.copy2(str(item), str(dst_file))
+        specify_dir.rename(cwd / ".specify.old")
+        console.print("[green]>[/green] .specify/ -> .specify.old/")
+        moved += 1
+
+    # Handle root-level directories
+    for src_name in ["memory", "scripts", "templates", "specs"]:
+        src = cwd / src_name
+        dst = doc_dir / src_name
+        if src.exists():
+            _merge_into(src, dst)
+            src.rename(cwd / f"{src_name}.old")
+            console.print(f"[green]>[/green] {src_name}/ -> .documentation/{src_name}/ (original -> {src_name}.old/)")
+            moved += 1
+
+    if moved == 0:
+        console.print("[yellow]Nothing to migrate — old directories not found.[/yellow]")
         return False
-    except Exception as e:
-        console.print(f"[yellow]Migration script failed: {e}[/yellow]")
-        return False
+
+    console.print(f"[green]Migration complete.[/green] Moved {moved} item(s). Old directories renamed to *.old/")
+    console.print("[dim]After verifying, delete *.old/ directories when ready.[/dim]")
+    return True
 
 
 def backup_constitution() -> Optional[Path]:
