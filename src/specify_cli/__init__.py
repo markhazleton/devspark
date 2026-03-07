@@ -1351,15 +1351,18 @@ def run_migration_script() -> bool:
     moved = 0
 
     def _merge_into(src: Path, dst: Path) -> None:
-        """Copy src tree into dst, skipping files that already exist at dst."""
+        """Copy src tree into dst, overwriting existing files.
+
+        User files from the old structure always take priority over template
+        files that init() just installed.
+        """
         dst.mkdir(parents=True, exist_ok=True)
         for item in src.rglob("*"):
             if item.is_file():
                 rel = item.relative_to(src)
                 dst_file = dst / rel
-                if not dst_file.exists():
-                    dst_file.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(str(item), str(dst_file))
+                dst_file.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(str(item), str(dst_file))
 
     # Handle .specify/ — copy known subdirs then root files, then rename
     specify_dir = cwd / ".specify"
