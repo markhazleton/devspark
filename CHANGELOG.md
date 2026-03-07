@@ -7,6 +7,22 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-07
+
+### Added
+
+- **`SPECKIT_VERSION` stamp**: `specify init` and `specify upgrade` now write `.documentation/SPECKIT_VERSION` into every consumer project after a successful install or upgrade. The file records the installed version, install date, and agent key — giving AI commands and scripts a single, offline source of truth for the installed version.
+- **New `/speckit.upgrade` AI command** (`templates/commands/upgrade.md`): A dedicated AI agent command that reads the version stamp, compares to the latest release, classifies files as framework-owned vs. user-owned, identifies stale paths, runs `specify upgrade`, and verifies the stamp was updated after completion.
+- **Version check in `/speckit.site-audit`**: Audit reports now include a **Spec Kit Spark Version** section (Step 4) with `VER1`–`VER5` finding codes for missing stamps, outdated versions, and stale pre-migration paths.
+- **Release workflow version bump step** (`templates/commands/release.md`): New Step 9 — *Bump Version in Source Files* — instructs maintainers to update `pyproject.toml`, verifies three-way consistency (pyproject / CHANGELOG / git tag), and explains that consumer projects receive the new stamp automatically on their next `specify upgrade`.
+- **`SPECKIT_VERSION_PATH` and `INSTALLED_VERSION` in release-context scripts**: Both `release-context.ps1` and `release-context.sh` now surface the consumer project's installed version in JSON and human-readable output.
+- **`read_version_stamp()` helper**: New Python helper in the CLI that reads and parses `.documentation/SPECKIT_VERSION` back as a dict; used in the post-upgrade summary to display the newly written version.
+
+### Changed
+
+- `specify upgrade` post-completion output now shows the version stamp details (version, agent, install date).
+- `specify init` progress tracker now includes a **Write version stamp** step, visible in the live progress display.
+
 ## [1.1.0] - 2026-02-08
 
 ### Fixed
