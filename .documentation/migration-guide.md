@@ -278,7 +278,7 @@ $TemplatesDir = ".documentation/templates"
 
 ```markdown
 # Old patterns
-`bash .documentation/scripts/bash/setup-plan.sh`
+`bash scripts/bash/setup-plan.sh`
 Read the constitution in `memory/constitution.md`
 Use the template in `templates/spec-template.md`
 

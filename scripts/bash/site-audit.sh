@@ -71,7 +71,7 @@ FILE_COUNTS[scripts]=0
 FILE_COUNTS[build]=0
 
 # Exclusion pattern for find
-EXCLUDE_DIRS="-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*'"
+EXCLUDE_DIRS="-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*' -o -path '*/.archive/*'"
 
 # Count files by category
 count_files() {
@@ -154,7 +154,7 @@ if [[ "$OUTPUT_FORMAT" == "json" ]]; then
   "audit_dir": "$AUDIT_DIR",
   "constitution": {
     "exists": $CONSTITUTION_EXISTS,
-    "path": "memory/constitution.md",
+    "path": ".documentation/memory/constitution.md",
     "version": $(if [[ -n "$CONSTITUTION_VERSION" ]]; then echo "\"$CONSTITUTION_VERSION\""; else echo "null"; fi),
     "principles": $CONSTITUTION_PRINCIPLES
   },

@@ -242,7 +242,7 @@ gh release create "$VERSION" \
 
 #### 5. Update Agent Context Scripts
 
-##### Bash script (`.documentation/scripts/bash/update-agent-context.sh`)
+##### Bash script (`scripts/bash/update-agent-context.sh`)
 
 Add file variable:
 
@@ -264,7 +264,7 @@ case "$AGENT_TYPE" in
 esac
 ```
 
-##### PowerShell script (`.documentation/scripts/powershell/update-agent-context.ps1`)
+##### PowerShell script (`scripts/powershell/update-agent-context.ps1`)
 
 Add file variable:
 

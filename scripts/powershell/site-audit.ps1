@@ -86,9 +86,9 @@ function Get-FileCategories {
     $scriptExtensions = @('.sh', '.ps1', '.bash', '.bat', '.cmd')
     
     # Exclusion patterns
-    $excludeDirs = @('node_modules', 'venv', '.venv', '__pycache__', '.git', '.vs', '.idea', 
+    $excludeDirs = @('node_modules', 'venv', '.venv', '__pycache__', '.git', '.vs', '.idea',
                      'dist', 'build', 'bin', 'obj', '.next', 'coverage', '.pytest_cache',
-                     '.mypy_cache', '.tox', 'eggs', '.egg-info', '.genreleases')
+                     '.mypy_cache', '.tox', 'eggs', '.egg-info', '.genreleases', '.archive')
     
     $excludePattern = '(^|[/\\])(' + (($excludeDirs | ForEach-Object { [regex]::Escape($_) }) -join '|') + ')([/\\]|$)'
     

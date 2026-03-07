@@ -990,7 +990,7 @@ The `/speckit.pr-review` command follows standard speckit patterns but with uniq
 
 ### Script Integration
 
-The command uses `scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
+The command uses `.documentation/scripts/{bash,powershell}/get-pr-context.{sh,ps1}` to:
 - Extract PR metadata from GitHub
 - Get commit SHA for review tracking
 - Fetch diff and changed files
