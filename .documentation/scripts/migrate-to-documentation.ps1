@@ -191,10 +191,16 @@ if ((Test-Path "templates") -and -not (Test-Path ".documentation\templates")) {
     $oldStructuresFound = $true
 }
 
+if ((Test-Path "specs") -and -not (Test-Path ".documentation\specs")) {
+    Print-Status "Found specs/ directory"
+    $structuresToMigrate += "specs"
+    $oldStructuresFound = $true
+}
+
 if (-not $oldStructuresFound) {
     Write-Host ""
     Print-Error "No old structure found to migrate."
-    Write-Host "Looking for: .specify/, memory/, scripts/, or templates/"
+    Write-Host "Looking for: .specify/, memory/, scripts/, templates/, or specs/"
     Write-Host ""
     exit 0
 }
@@ -219,7 +225,7 @@ foreach ($struct in $structuresToMigrate) {
 }
 Write-Host "  5. Update .gitignore if needed"
 Write-Host ""
-Write-ColorOutput "Your specs/ directory will NOT be touched - it's completely safe!" "Green"
+Write-ColorOutput "Your specs/ directory will be moved to .documentation/specs/" "Green"
 Write-Host ""
 
 if (-not $DryRun) {
@@ -247,6 +253,9 @@ if ($DryRun) {
 
     New-Item -ItemType Directory -Path ".documentation\templates" -Force | Out-Null
     Print-Status "Created .documentation\templates\"
+
+    New-Item -ItemType Directory -Path ".documentation\specs" -Force | Out-Null
+    Print-Status "Created .documentation\specs\"
 }
 
 Write-Host ""
@@ -341,6 +350,20 @@ if (Test-Path ".specify") {
             Print-Status "Copied .specify\templates\ to .documentation\templates\"
         }
 
+        if (Test-Path ".specify\specs") {
+            Get-ChildItem ".specify\specs" -Recurse | ForEach-Object {
+                $target = $_.FullName.Replace(".specify\specs", ".documentation\specs")
+                if ($_.PSIsContainer -eq $false) {
+                    $targetDir = Split-Path $target -Parent
+                    if (-not (Test-Path $targetDir)) {
+                        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+                    }
+                    Copy-Item $_.FullName -Destination $target -Force
+                }
+            }
+            Print-Status "Copied .specify\specs\ to .documentation\specs\"
+        }
+
         # Copy any other files in .specify root
         Get-ChildItem ".specify" -File | ForEach-Object {
             Copy-Item $_.FullName -Destination ".documentation\" -Force
@@ -357,6 +380,7 @@ if (Test-Path ".specify") {
 Copy-Directory "memory" ".documentation\memory" "memory\"
 Copy-Directory "scripts" ".documentation\scripts" "scripts\"
 Copy-Directory "templates" ".documentation\templates" "templates\"
+Copy-Directory "specs" ".documentation\specs" "specs\"
 
 Write-Host ""
 Write-ColorOutput "Step 3: Updating path references in files" "Blue"

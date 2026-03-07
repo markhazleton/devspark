@@ -199,10 +199,16 @@ if [ -d "templates" ] && [ ! -d ".documentation/templates" ]; then
     OLD_STRUCTURES_FOUND=true
 fi
 
+if [ -d "specs" ] && [ ! -d ".documentation/specs" ]; then
+    print_status "Found specs/ directory"
+    STRUCTURES_TO_MIGRATE+=("specs")
+    OLD_STRUCTURES_FOUND=true
+fi
+
 if [ "$OLD_STRUCTURES_FOUND" = false ]; then
     echo ""
     print_error "No old structure found to migrate."
-    echo "Looking for: .specify/, memory/, scripts/, or templates/"
+    echo "Looking for: .specify/, memory/, scripts/, templates/, or specs/"
     echo ""
     exit 0
 fi
@@ -227,7 +233,7 @@ for struct in "${STRUCTURES_TO_MIGRATE[@]}"; do
 done
 echo "  5. Update .gitignore if needed"
 echo ""
-echo -e "${GREEN}Your specs/ directory will NOT be touched - it's completely safe!${NC}"
+echo -e "${GREEN}Your specs/ directory will be moved to .documentation/specs/${NC}"
 echo ""
 
 if [ "$DRY_RUN" = false ]; then
@@ -307,6 +313,11 @@ if [ -d ".specify" ]; then
             cp -r .specify/templates/* .documentation/templates/ 2>/dev/null || true
             print_status "Copied .specify/templates/ to .documentation/templates/"
         fi
+        if [ -d ".specify/specs" ]; then
+            mkdir -p .documentation/specs
+            cp -r .specify/specs/* .documentation/specs/ 2>/dev/null || true
+            print_status "Copied .specify/specs/ to .documentation/specs/"
+        fi
         # Copy any other files in .specify root
         find .specify -maxdepth 1 -type f -exec cp {} .documentation/ \; 2>/dev/null || true
         print_status "Copied .specify/ root files to .documentation/"
@@ -321,6 +332,7 @@ fi
 copy_dir "memory" ".documentation/memory" "memory/"
 copy_dir "scripts" ".documentation/scripts" "scripts/"
 copy_dir "templates" ".documentation/templates" "templates/"
+copy_dir "specs" ".documentation/specs" "specs/"
 
 echo ""
 echo -e "${BLUE}Step 3: Updating path references in files${NC}"

@@ -1309,6 +1309,7 @@ def needs_migration() -> bool:
         Path("memory") if not Path(".documentation/memory").exists() else None,
         Path("scripts") if not Path(".documentation/scripts").exists() else None,
         Path("templates") if not Path(".documentation/templates").exists() else None,
+        Path("specs") if not Path(".documentation/specs").exists() else None,
     ]
     # Filter out None values
     old_paths = [p for p in old_paths if p is not None]
@@ -1527,29 +1528,24 @@ def upgrade(
         agent_name = AGENT_CONFIG[ai_assistant]["name"]
         console.print(f"[green]✓[/green] Using AI assistant: [cyan]{agent_name}[/cyan] ({ai_assistant})\n")
 
-    # Step 4: Check for old structure migration
+    # Step 4: Check for old structure migration (deferred — runs after templates are installed)
+    migration_needed = False
+    migration_confirmed = False
     if not skip_migration:
         console.print("[cyan]→[/cyan] Checking for old structure...")
         if needs_migration():
+            migration_needed = True
             console.print("[yellow]⚠[/yellow] Old structure detected (.specify/, memory/, scripts/, or templates/)")
-            console.print("[dim]Migration to .documentation/ structure is recommended[/dim]")
+            console.print("[dim]Migration to .documentation/ structure will run after templates are installed[/dim]")
 
             if dry_run:
-                console.print("[cyan]Would run migration script in actual upgrade[/cyan]\n")
+                console.print("[cyan]Would run migration after templates are installed[/cyan]\n")
+            elif force:
+                console.print("[cyan]Migration will run automatically after templates are installed (--force)...[/cyan]\n")
+                migration_confirmed = True
             else:
-                if force:
-                    console.print("[cyan]Running migration automatically (--force specified)...[/cyan]")
-                    run_migration = True
-                else:
-                    run_migration = typer.confirm("Run migration now?", default=True)
-
-                if run_migration:
-                    success = run_migration_script()
-                    if success:
-                        console.print("[green]✓[/green] Migration completed\n")
-                    else:
-                        console.print("[yellow]⚠[/yellow] Migration had issues, but continuing...\n")
-                else:
+                migration_confirmed = typer.confirm("Run migration after templates are installed?", default=True)
+                if not migration_confirmed:
                     console.print("[yellow]Skipping migration - you can run it later[/yellow]")
                     console.print("[dim]See .documentation/migration-guide.md for manual steps[/dim]\n")
         else:
@@ -1606,6 +1602,15 @@ def upgrade(
         console.print(f"\n[red]✗ Upgrade failed:[/red] {e}")
         raise typer.Exit(1)
 
+    # Step 7.5: Run migration now that templates (including migration scripts) are installed
+    if migration_needed and migration_confirmed:
+        console.print("[cyan]→[/cyan] Running migration to .documentation/ structure...")
+        success = run_migration_script()
+        if success:
+            console.print("[green]✓[/green] Migration completed\n")
+        else:
+            console.print("[yellow]⚠[/yellow] Migration had issues. See .documentation/migration-guide.md for manual steps.\n")
+
     # Step 8: Post-upgrade guidance
     console.print("\n" + "="*60)
     console.print("[bold green]✓ Upgrade Complete![/bold green]")
@@ -1620,7 +1625,7 @@ def upgrade(
     console.print("[bold]Next steps:[/bold]")
     console.print("  1. Review changes: [cyan]git status[/cyan] and [cyan]git diff[/cyan]")
     console.print("  2. Test slash commands in your AI assistant (e.g., [cyan]/speckit.constitution[/cyan])")
-    console.print("  3. Verify your specs are intact: [cyan]ls specs/[/cyan]")
+    console.print("  3. Verify your specs are intact: [cyan]ls .documentation/specs/[/cyan]")
     console.print("  4. If everything looks good, commit:")
     console.print("     [cyan]git add -A[/cyan]")
     console.print("     [cyan]git commit -m 'chore: upgrade to latest spec-kit version'[/cyan]")
