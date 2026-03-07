@@ -748,11 +748,12 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
     }
     return zip_path, metadata
 
-def download_and_extract_template(project_path: Path, ai_assistant: str, script_type: str, is_current_dir: bool = False, *, verbose: bool = True, tracker: StepTracker | None = None, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Path:
+def download_and_extract_template(project_path: Path, ai_assistant: str, script_type: str, is_current_dir: bool = False, *, verbose: bool = True, tracker: StepTracker | None = None, client: httpx.Client = None, debug: bool = False, github_token: str = None):
     """Download the latest release and extract it to create a new project.
-    Returns project_path. Uses tracker if provided (with keys: fetch, download, extract, cleanup)
+    Returns (project_path, release_tag). Uses tracker if provided (with keys: fetch, download, extract, cleanup)
     """
     current_dir = Path.cwd()
+    release_tag = ""
 
     if tracker:
         tracker.start("fetch", "contacting GitHub API")
@@ -767,6 +768,7 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
             debug=debug,
             github_token=github_token
         )
+        release_tag = meta.get("release", "")
         if tracker:
             tracker.complete("fetch", f"release {meta['release']} ({meta['size']:,} bytes)")
             tracker.add("download", "Download template")
@@ -895,7 +897,7 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
             elif verbose:
                 console.print(f"Cleaned up: {zip_path.name}")
 
-    return project_path
+    return project_path, release_tag
 
 
 def ensure_executable_scripts(project_path: Path, tracker: StepTracker | None = None) -> None:
@@ -1125,7 +1127,7 @@ def init(
             local_ssl_context = ssl_context if verify else False
             local_client = httpx.Client(verify=local_ssl_context)
 
-            download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, github_token=github_token)
+            _, release_tag = download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, github_token=github_token)
 
             ensure_executable_scripts(project_path, tracker=tracker)
 
@@ -1146,7 +1148,7 @@ def init(
                 tracker.skip("git", "--no-git flag")
 
             tracker.start("version-stamp")
-            write_version_stamp(project_path, selected_ai)
+            write_version_stamp(project_path, selected_ai, release_version=release_tag)
             tracker.complete("version-stamp", "stamped")
 
             tracker.complete("final", "project ready")
@@ -1334,7 +1336,10 @@ def run_migration_script() -> bool:
     """Run the appropriate migration script. Returns True on success."""
     try:
         if sys.platform == "win32":
-            script = Path(".documentation/scripts/migrate-to-documentation.ps1")
+            # Try both install locations: powershell subdir (release package) and scripts root (legacy)
+            script = Path(".documentation/scripts/powershell/migrate-to-documentation.ps1")
+            if not script.exists():
+                script = Path(".documentation/scripts/migrate-to-documentation.ps1")
             if script.exists():
                 console.print("[cyan]Running Windows migration script...[/cyan]")
                 result = subprocess.run(
@@ -1344,7 +1349,10 @@ def run_migration_script() -> bool:
                 )
                 return result.returncode == 0
         else:
-            script = Path(".documentation/scripts/migrate-to-documentation.sh")
+            # Try both install locations: bash subdir (release package) and scripts root (legacy)
+            script = Path(".documentation/scripts/bash/migrate-to-documentation.sh")
+            if not script.exists():
+                script = Path(".documentation/scripts/migrate-to-documentation.sh")
             if script.exists():
                 console.print("[cyan]Running migration script...[/cyan]")
                 result = subprocess.run(
@@ -1379,31 +1387,33 @@ def backup_constitution() -> Optional[Path]:
         return None
 
 
-def write_version_stamp(project_path: Path, ai_assistant: str) -> None:
+def write_version_stamp(project_path: Path, ai_assistant: str, release_version: str = "") -> None:
     """Write .documentation/SPECKIT_VERSION to record the installed version and agent.
 
-    This file lets consumers and the /speckit.upgrade command quickly determine
-    which version of Spec Kit Spark is installed without querying the CLI or GitHub.
+    Uses release_version (the GitHub release tag that was downloaded) when available,
+    falling back to the installed CLI metadata version.
     Format (plain text, three lines):
         <version>
         installed: <YYYY-MM-DD>
         agent: <agent-key>
     """
-    import importlib.metadata
+    # Prefer the release tag from the downloaded template (e.g. "v1.2.2")
+    version = release_version.lstrip("v") if release_version else ""
 
-    cli_version = "unknown"
-    try:
-        cli_version = importlib.metadata.version("specify-cli")
-    except Exception:
+    if not version:
+        import importlib.metadata
         try:
-            import tomllib
-            pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
-            if pyproject_path.exists():
-                with open(pyproject_path, "rb") as f:
-                    data = tomllib.load(f)
-                    cli_version = data.get("project", {}).get("version", "unknown")
+            version = importlib.metadata.version("specify-cli")
         except Exception:
-            pass
+            try:
+                import tomllib
+                pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+                if pyproject_path.exists():
+                    with open(pyproject_path, "rb") as f:
+                        data = tomllib.load(f)
+                        version = data.get("project", {}).get("version", "unknown")
+            except Exception:
+                version = "unknown"
 
     doc_dir = project_path / ".documentation"
     if not doc_dir.exists():
@@ -1414,7 +1424,7 @@ def write_version_stamp(project_path: Path, ai_assistant: str) -> None:
 
     try:
         stamp_path.write_text(
-            f"{cli_version}\n"
+            f"{version}\n"
             f"installed: {install_date}\n"
             f"agent: {ai_assistant}\n",
             encoding="utf-8",
