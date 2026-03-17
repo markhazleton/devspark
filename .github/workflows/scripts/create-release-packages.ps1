@@ -63,6 +63,7 @@ function Rewrite-Paths {
 
     # Spec Kit Spark uses .documentation/ instead of .specify/ to distinguish from upstream
     $Content = $Content -replace '(/?)\.specify/', '$1.documentation/'
+    $Content = $Content -replace '(^|\s|`)/specs/', '$1/.documentation/specs/'
     $Content = $Content -replace '(^|\s|`)/memory/', '$1/.documentation/memory/'
     $Content = $Content -replace '(^|\s|`)/scripts/', '$1/.documentation/scripts/'
     $Content = $Content -replace '(^|\s|`)/templates/', '$1/.documentation/templates/'

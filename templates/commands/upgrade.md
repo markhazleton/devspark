@@ -51,7 +51,7 @@ agent: <agent-key>
 
 **If the file is missing:**
 - Report: `SPECKIT_VERSION not found — version unknown`
-- The project was installed before v1.2.0 or the stamp was not written
+- The project was installed before v1.2.4 or the stamp was not written
 - Proceed to Step 2 to determine what version is actually present
 
 **If the file exists**, extract:
@@ -79,7 +79,7 @@ Display the comparison result clearly:
 
 ```
 Installed : 1.1.0  (2026-02-08, agent: copilot)
-Latest    : 1.2.0
+Latest    : 1.2.4
 Status    : UPGRADE AVAILABLE
 ```
 
@@ -113,13 +113,12 @@ These come from the Spec Kit Spark release package and should match the latest v
 #### User-owned (NEVER overwritten)
 These are written by the project team and must be preserved:
 
-- `specs/` — all feature specifications, plans, tasks
+- `.documentation/specs/` — all feature specifications, plans, and tasks
 - `.documentation/memory/constitution.md` — project constitution
 - `.documentation/copilot/` — session artifacts and audit history
 - `.documentation/decisions/` — ADRs
 - `.documentation/releases/` — release archives
 - `.documentation/quickfixes/` — active quickfixes
-- `.documentation/specs/` — in-progress spec documents
 - `CHANGELOG.md` (repo root)
 - Any file not listed in the framework-owned category
 
@@ -130,9 +129,9 @@ Scan for signs that the install is outdated. Flag any of the following:
 | Check | Issue | Severity |
 |-------|-------|----------|
 | `.documentation/SPECKIT_VERSION` absent | No version stamp | HIGH |
-| Agent command files reference old paths (`.specify/`, `memory/`, `/scripts/`) | Pre-migration paths | HIGH |
+| Agent command files reference old paths (`.specify/`, root `memory/`, `scripts/`, `templates/`, or `specs/`) | Pre-migration paths | HIGH |
 | `.specify/` directory exists | Pre-v1.0 structure | HIGH |
-| Root-level `memory/`, `scripts/`, `templates/` directories exist | Pre-v1.0 structure | HIGH |
+| Root-level `memory/`, `scripts/`, `templates/`, or `specs/` directories exist | Pre-v1.0 structure | HIGH |
 | `SPECKIT_VERSION` present but older than `LATEST_VERSION` | Out of date | MEDIUM |
 | Old `speckit.*-old.md` command files in agent folder | Leftover duplicates | LOW |
 
@@ -210,16 +209,16 @@ After the upgrade completes:
 
 1. **Read `.documentation/SPECKIT_VERSION` again** — confirm version changed to `LATEST_VERSION`
 2. **Check agent command files** — confirm they no longer reference old paths
-3. **Confirm `specs/` is untouched** — user data must be preserved
+3. **Confirm `.documentation/specs/` is untouched** — user data must be preserved
 4. **Confirm `constitution.md` is intact** (or restored from backup)
 
 Report a post-upgrade summary:
 
 ```
 Post-Upgrade Verification
-  SPECKIT_VERSION : 1.2.0  (was 1.1.0)
+  SPECKIT_VERSION : 1.2.4  (was 1.1.0)
   Agent commands  : updated
-  specs/          : unchanged
+  .documentation/specs/ : unchanged
   constitution.md : preserved
 ```
 
@@ -255,7 +254,7 @@ Dry Run — No changes made.
 
 Would upgrade: <INSTALLED_VERSION> -> <LATEST_VERSION>
 Framework files to update: <N>
-User files preserved: specs/, constitution.md, session artifacts
+User files preserved: .documentation/specs/, constitution.md, session artifacts
 
 To apply:
   specify upgrade --ai <INSTALLED_AGENT>
@@ -268,7 +267,7 @@ To apply:
 ### User Data is Sacred
 
 Never modify or delete:
-- `specs/` and all contents
+- `.documentation/specs/` and all contents
 - `constitution.md`
 - `.documentation/copilot/`
 - `.documentation/decisions/`

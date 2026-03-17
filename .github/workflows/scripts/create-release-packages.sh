@@ -34,6 +34,7 @@ rewrite_paths() {
   # Spec Kit Spark uses .documentation/ instead of .specify/ to distinguish from upstream
   sed -E \
     -e 's@(/?)\.specify/@\1.documentation/@g' \
+    -e 's@(^|[[:space:]]|`)/specs/@\1/.documentation/specs/@g' \
     -e 's@(^|[[:space:]]|`)/memory/@\1/.documentation/memory/@g' \
     -e 's@(^|[[:space:]]|`)/scripts/@\1/.documentation/scripts/@g' \
     -e 's@(^|[[:space:]]|`)/templates/@\1/.documentation/templates/@g'
