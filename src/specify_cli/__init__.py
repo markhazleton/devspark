@@ -1612,7 +1612,7 @@ def upgrade(
         console.print("  1. Download latest Spec Kit templates from GitHub")
         console.print(f"  2. Update .{AGENT_CONFIG[ai_assistant]['folder'][:-1]}/ directory with new commands")
         console.print("  3. Update .documentation/ with latest scripts and templates")
-        console.print("  4. Preserve your specs/ directory (never touched)")
+        console.print("  4. Preserve your .documentation/specs/ directory (never touched)")
         console.print("  5. Preserve your constitution and customizations")
         console.print()
         console.print("[bold]To perform the actual upgrade:[/bold]")

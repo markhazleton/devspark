@@ -806,19 +806,18 @@ The produced specification should contain a set of user stories and functional r
 At this stage, your project folder contents should resemble the following:
 
 ```text
-├── .documentation
-│   ├── memory
-│   │   └── constitution.md
-│   └── specs
-│       └── 001-create-taskify
-│           └── spec.md
 └── .documentation
+    ├── memory
+    │   └── constitution.md
     ├── scripts
     │   ├── check-prerequisites.sh
     │   ├── common.sh
     │   ├── create-new-feature.sh
     │   ├── setup-plan.sh
     │   └── update-claude-md.sh
+    ├── specs
+    │   └── 001-create-taskify
+    │       └── spec.md
     └── templates
         ├── plan-template.md
         ├── spec-template.md
@@ -869,26 +868,25 @@ The output of this step will include a number of implementation detail documents
 ```text
 .
 ├── CLAUDE.md
-├── .documentation
-│   ├── memory
-│   │   └── constitution.md
-│   └── specs
-│       └── 001-create-taskify
-│           ├── contracts
-│           │   ├── api-spec.json
-│           │   └── signalr-spec.md
-│           ├── data-model.md
-│           ├── plan.md
-│           ├── quickstart.md
-│           ├── research.md
-│           └── spec.md
 └── .documentation
+    ├── memory
+    │   └── constitution.md
     ├── scripts
     │   ├── check-prerequisites.sh
     │   ├── common.sh
     │   ├── create-new-feature.sh
     │   ├── setup-plan.sh
     │   └── update-claude-md.sh
+    ├── specs
+    │   └── 001-create-taskify
+    │       ├── contracts
+    │       │   ├── api-spec.json
+    │       │   └── signalr-spec.md
+    │       ├── data-model.md
+    │       ├── plan.md
+    │       ├── quickstart.md
+    │       ├── research.md
+    │       └── spec.md
     └── templates
         ├── CLAUDE-template.md
         ├── plan-template.md
