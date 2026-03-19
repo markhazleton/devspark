@@ -7,6 +7,17 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-03-19
+
+### Fixed
+
+- **`/speckit.site-audit` performance on large repositories**: Reduced default PowerShell pre-scan JSON payload size by returning sampled file inventories and sampled pattern findings with full counts, while keeping full inventories available via an explicit opt-in switch (`--full-inventory` / `--include-full-inventory`).
+- **JSON rendering overhead in chat surfaces**: Switched site-audit pre-scan JSON output from compressed single-line output to multiline JSON to reduce UI/context processing pressure.
+- **Unbounded audit expansion risk**: Added explicit execution guardrails in the site-audit command template to limit findings, search breadth, and per-finding file reads, and to stop once high-signal evidence is sufficient.
+- **`/speckit.pr-review` large PR payload risk**: Added bounded file list output in PowerShell PR context pre-scan (`files_changed_total`, `files_changed_truncated`, sample limit) with an opt-in switch for full file inventory, and added prompt-level scope limits for deep file inspection.
+- **`/speckit.archive` large candidate-set expansion risk**: Added sampled candidate arrays with full counts and opt-in full inventory in PowerShell archive context output, plus prompt guardrails to avoid unbounded candidate reading in a single pass.
+- **Defensive JSON output standardization**: Converted remaining PowerShell context scripts from compressed single-line JSON to multiline JSON to reduce chat/UI rendering pressure and improve diagnostics readability.
+
 ## [1.2.4] - 2026-03-07
 
 ### Added

@@ -56,6 +56,18 @@ Run `{SCRIPT}` to gather codebase data and parse JSON output for:
 - `PACKAGES`: Dependency information
 - `METRICS`: Code metrics (line counts, file counts)
 
+Treat pre-scan JSON as summary context:
+- Use `files.counts` and sampled file arrays as the primary source.
+- Do not assume sampled arrays are exhaustive.
+- Only request full inventories when explicitly needed and user-approved.
+
+Execution limits (required):
+- Max findings in report: 5 highest-signal items
+- Max broad follow-up searches: 6
+- Max file reads per finding: 3
+- Stop early once evidence is sufficient for high-confidence findings
+- If confidence is low, ask one clarifying question instead of broadening scope
+
 **Error Handling**:
 If the script fails:
 - **Constitution missing**: Guide user to run `/speckit.constitution`

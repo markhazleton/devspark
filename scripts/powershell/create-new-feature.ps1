@@ -272,7 +272,7 @@ if ($Json) {
         FEATURE_NUM = $featureNum
         HAS_GIT = $hasGit
     }
-    $obj | ConvertTo-Json -Compress
+    $obj | ConvertTo-Json
 } else {
     Write-Output "BRANCH_NAME: $branchName"
     Write-Output "SPEC_FILE: $specFile"
