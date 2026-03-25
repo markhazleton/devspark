@@ -49,6 +49,7 @@
 | **Greenfield Bias** | Works well for new projects | `/speckit.discover-constitution` generates constitutions from existing code |
 | **Task Overhead** | Full spec workflow for everything | `/speckit.quickfix` provides lightweight workflow for bug fixes |
 | **Documentation Drift** | Specs accumulate and become stale | `/speckit.release` archives artifacts and maintains living docs |
+| **Repo Clutter** | AI-generated docs and stale drafts accumulate | `/speckit.harvest` consolidates knowledge and archives obsolete artifacts |
 | **Constitution Staleness** | No formal update process | `/speckit.evolve-constitution` proposes amendments from findings |
 | **Context Management** | Same context for all tasks | Right-sized workflows optimize AI agent effectiveness |
 
@@ -404,6 +405,44 @@ Use the **`/speckit.release`** command to archive development artifacts and prep
 - `/.documentation/decisions/ADR-{NNN}.md` - Architectural Decision Records
 - Updated `CHANGELOG.md`
 
+### Harvest Documentation Cleanup
+
+Use the **`/speckit.harvest`** command to clean stale docs, rewrite spec-linked code comments, and archive obsolete artifacts after preserving useful knowledge in living documentation:
+
+```bash
+# Full harvest
+/speckit.harvest
+
+# Documentation-only review and cleanup plan
+/speckit.harvest --scope=docs
+
+# Rewrite stale spec/task references in code comments only
+/speckit.harvest --scope=comments
+
+# Dry-run inventory and report only
+/speckit.harvest --scope=scan
+```
+
+**Key Features**:
+
+- **Knowledge Preservation First** - Updates living docs before archival
+- **Documentation Scoring** - Assigns taxonomy, usefulness score, and disposition to scanned artifacts
+- **Comment Hygiene** - Rewrites spec-linked comments into self-contained code documentation
+- **Safe Archival** - Moves stale content to `/.archive/` with preserved structure
+- **Approval Gate** - Presents a harvest plan and requires explicit confirmation before changes
+
+**Output**:
+
+- Updated `CHANGELOG.md` or living docs where knowledge is harvested
+- Harvest report at `/.documentation/copilot/harvest-YYYY-MM-DD.md`
+- Archived stale docs and completed artifacts under `/.archive/`
+
+**When to Use**:
+
+- After several specs or quickfixes have accumulated supporting docs
+- When AI-generated reviews, drafts, or session notes are cluttering the repo
+- Before a release or documentation cleanup pass
+
 ### Constitution Evolution
 
 Use the **`/speckit.evolve-constitution`** command to analyze PR reviews and propose constitution amendments:
@@ -579,6 +618,7 @@ These commands only require a constitution and work independently of the spec wo
 | `/speckit.site-audit`           | Comprehensive codebase audit for security, quality, and compliance       |
 | `/speckit.quickfix`             | Rapid bug fixes and small features without full spec overhead            |
 | `/speckit.release`              | Archive dev artifacts at release and generate release documentation      |
+| `/speckit.harvest`              | Harvest living knowledge from stale docs and archive obsolete artifacts  |
 | `/speckit.evolve-constitution`  | Propose constitution amendments based on PR review patterns              |
 
 #### Spec Workflow Commands
@@ -657,6 +697,7 @@ Spec Kit Spark is actively developed with a clear vision for the future:
 - ✅ Adversarial risk analysis (`/speckit.critic`)
 - ✅ Lightweight quickfix workflow (`/speckit.quickfix`)
 - ✅ Release documentation management (`/speckit.release`)
+- ✅ Documentation harvest and cleanup workflow (`/speckit.harvest`)
 - ✅ Constitution evolution (`/speckit.evolve-constitution`)
 - ✅ 17+ AI agent integrations
 

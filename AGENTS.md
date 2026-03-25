@@ -60,6 +60,28 @@ The `/speckit.release` command manages documentation lifecycle at release bounda
 /speckit.release --dry-run    # Preview only
 ```
 
+### Harvest Command
+
+The `/speckit.harvest` command cleans up stale documentation and completed delivery artifacts while preserving useful knowledge in living docs:
+
+**Key Features:**
+
+1. **Knowledge-Preserving Cleanup**: Captures durable guidance in CHANGELOG, instructions, and living docs before archival
+2. **Documentation Triage**: Scores and classifies stale drafts, reviews, audits, backups, and legacy-root docs
+3. **Comment Rewriting**: Finds spec-linked code comments and rewrites them into self-contained explanations
+4. **Archive Safety**: Moves obsolete artifacts to `/.archive/` instead of deleting them
+5. **Approval Gate**: Requires an explicit user confirmation step before any edits or archival moves
+6. **Scan Mode**: Supports dry-run style inventory via `--scope=scan`
+
+**Usage:**
+
+```bash
+/speckit.harvest
+/speckit.harvest --scope=docs
+/speckit.harvest --scope=comments
+/speckit.harvest --scope=scan
+```
+
 ### Constitution Evolution Command
 
 The `/speckit.evolve-constitution` command facilitates constitution amendments:
