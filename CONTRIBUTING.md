@@ -106,6 +106,7 @@ To test your templates, commands, and other changes locally, follow these steps:
 ```
 
 Interactive mode provides:
+
 - Detailed commit analysis (author, date, files changed, diff stats)
 - Implications explained for each category (AUTO/ADAPT/IGNORE/EVALUATE)
 - Conflict detection with Spark-specific files

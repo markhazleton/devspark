@@ -29,6 +29,7 @@ Harvest valuable knowledge from completed specs, stale documentation, and in-pro
 Additionally, scan source code for comments that reference completed specs, plans, or tasks and rewrite them as self-contained code documentation.
 
 The output is:
+
 1. Updated living documents (CHANGELOG, Guide.md) with harvested knowledge
 2. Cleaned code comments (spec references → self-contained descriptions)
 3. Stale files moved to `.archive/` with preserved folder structure
@@ -125,6 +126,7 @@ For each file in `.documentation/` (recursive, never `.archive/`):
 | **Living Reference** | Top-level `.documentation/*.md`, Guide.md, CHANGELOG.md | Keep — may update |
 
 **Never archive:**
+
 - `/.documentation/memory/constitution.md`
 - `/.documentation/scripts/` and `/.documentation/templates/`
 - `/.documentation/Guide.md` — update it instead
@@ -206,6 +208,7 @@ If the user says **modify**, apply their changes to the plan and re-present befo
 #### 4a. Update CHANGELOG.md
 
 For each completed spec NOT already in CHANGELOG:
+
 1. Read the spec's `spec.md`, `plan.md`, and `tasks.md`
 2. Extract: spec number, key changes, what was delivered
 3. Prepend a new entry above existing content:
@@ -225,6 +228,7 @@ Never modify existing CHANGELOG entries.
 #### 4b. Update .documentation/Guide.md
 
 If completed specs introduced:
+
 - New patterns or conventions → update the relevant section
 - New directories or files in `.documentation/` → update the directory map
 - Deprecated old patterns → note the deprecation
@@ -234,6 +238,7 @@ The guide describes the **current state only** — no historical content.
 #### 4c. Update .github/copilot-instructions.md (if it exists)
 
 If completed specs introduced:
+
 - New import paths, module names, or architectural patterns
 - New document schemas or field names
 - Deprecations of old patterns
@@ -249,6 +254,7 @@ For each spec/task reference identified in the pre-scan:
 3. Apply the edit
 
 **Rules**:
+
 - Never remove a comment without understanding its purpose first
 - If the comment accurately describes behavior but just has a spec prefix, strip only the prefix
 - If the comment is a pure task marker with no behavioral value, remove it entirely
@@ -268,6 +274,7 @@ For each spec/task reference identified in the pre-scan:
 6. After moving, verify no active file references the archived paths
 
 **Do not move:**
+
 - `/.documentation/memory/constitution.md`
 - `/.documentation/scripts/`
 - `/.documentation/templates/`

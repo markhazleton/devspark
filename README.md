@@ -1169,6 +1169,7 @@ See **[FORK_DIVERGENCE.md](./FORK_DIVERGENCE.md)** for:
 ```
 
 This mode:
+
 - Shows full commit details and file changes
 - Explains implications for Spark architecture
 - Detects potential conflicts with Spark-specific files

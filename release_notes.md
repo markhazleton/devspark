@@ -28,6 +28,7 @@ You can use these releases with your agent of choice. We recommend using the Spe
 ## Recent Changes
 
 ### Version 1.1.0 (February 8, 2026)
+
 - New `specify upgrade` command for simplified project upgrades
 - Migration scripts for Windows (PowerShell) and Linux/Mac (Bash)
 - Comprehensive migration documentation and guides
@@ -35,10 +36,12 @@ You can use these releases with your agent of choice. We recommend using the Spe
 - Dry-run mode and safety checks for upgrade process
 
 ### Version 1.0.3 (February 6, 2026)
+
 - Fixed critical double documentation path bug
 - Enhanced path transformation regex patterns
 
 ### Version 1.0.0 (February 3, 2026)
+
 - First major release with standard semantic versioning
 - Transition to `.documentation/` directory structure
 - Constitution-powered commands
