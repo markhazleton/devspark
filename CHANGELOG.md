@@ -7,6 +7,18 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.6] - 2026-03-26
+
+### Fixed
+
+- **PowerShell runtime safety and compatibility**: Hardened PowerShell scripts for safer runtime behavior and improved PowerShell 7 compatibility.
+- **Markdownlint workflow failures**: Fixed documentation and template markdown issues that were causing markdownlint workflow failures.
+
+### Changed
+
+- **Spark command templates**: Aligned prompt and command template paths to canonical `.documentation` locations.
+- **Docs cleanup and branding**: Finalized markdownlint-oriented documentation cleanup and branding consistency updates.
+
 ## [1.4.5] - 2026-03-25
 
 ### Fixed
