@@ -41,6 +41,8 @@
       href: site-audit-usage.md
     - name: Critic Guide (Spec Workflow)
       href: critic-usage.md
+    - name: Harvest Guide
+      href: harvest-usage.md
 
 # About This Fork
 - name: About Spec Kit Spark

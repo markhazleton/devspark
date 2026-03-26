@@ -7,6 +7,13 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-03-25
+
+### Added
+
+- **New `/speckit.harvest` command**: Knowledge-preserving cleanup for completed specs, stale documentation, and spec-linked code comments. The command scans `.documentation/specs/` for all-complete specs, triages `.documentation/` files into archive categories (completed reviews, stale drafts, session notes, impl plans, backup files, orphaned assets), and rewrites source-code comments that reference specs/tasks/FRs as self-contained behavior descriptions. An explicit approval gate presents the full harvest plan before any file is moved or edited. Files are moved to `.archive/YYYY-MM-DD/` (never deleted), and knowledge is extracted into `CHANGELOG.md` and `.documentation/Guide.md` before archival. Output: `/.documentation/copilot/harvest-YYYY-MM-DD.md`.
+- **`harvest.ps1` pre-scan script**: PowerShell context-gathering script (`scripts/powershell/harvest.ps1`) installed to `/.documentation/scripts/powershell/harvest.ps1` in consumer projects. Outputs JSON with spec completion status (completed/completed-needs-changelog/in-progress/draft), doc taxonomy scores, disposition recommendations, code comment hits, CHANGELOG gap analysis, and existing archive inventory. Supports `-Scope` (`full`, `specs`, `docs`, `comments`, `changelog`, `scan`) and `-Json` flags. Language-agnostic comment scanning covers Python, TypeScript, JavaScript, C#, Go, and Rust.
+
 ## [1.3.0] - 2026-03-19
 
 ### Fixed

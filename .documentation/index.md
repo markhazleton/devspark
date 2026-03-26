@@ -21,6 +21,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | Greenfield bias | `/speckit.discover-constitution` generates constitutions from existing code |
 | Task overhead | `/speckit.quickfix` provides lightweight workflow for small tasks |
 | Documentation drift | `/speckit.release` archives artifacts and maintains living documentation |
+| Repo clutter | `/speckit.harvest` consolidates knowledge and archives obsolete artifacts |
 | Constitution staleness | `/speckit.evolve-constitution` proposes amendments from PR findings |
 | Context management | Right-sized workflows optimize AI agent effectiveness |
 
@@ -37,6 +38,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | `/speckit.quickfix` | ❌ | ✅ Lightweight workflow |
 | `/speckit.release` | ❌ | ✅ Release documentation |
 | `/speckit.evolve-constitution` | ❌ | ✅ Constitution evolution |
+| `/speckit.harvest` | ❌ | ✅ Knowledge harvest and cleanup |
 | Multi-agent support | Limited | ✅ 17+ AI agents |
 
 Learn more: [Adaptive Lifecycle Documentation](adaptive-lifecycle.md)
