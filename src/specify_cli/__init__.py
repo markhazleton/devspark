@@ -1556,7 +1556,7 @@ def upgrade(
             else:
                 console.print("\n[bold]Please select your AI assistant:[/bold]")
                 ai_choices = {key: config["name"] for key, config in AGENT_CONFIG.items()}
-                selected_ai = prompt_choice(ai_choices, "AI Assistant")
+                selected_ai = select_with_arrows(ai_choices, "Choose your AI assistant:", "copilot")
                 ai_assistant = selected_ai
                 console.print()
     else:
