@@ -452,7 +452,7 @@ if ($Scope -in @('full', 'docs', 'scan', 'changelog')) {
                 # Check if referenced in any .md file
                 $isReferenced = $false
                 $fileName = $file.Name
-                Get-ChildItem $docDir -Recurse -Filter '*.md' -ErrorAction SilentlyContinue | ForEach-Object {
+                Get-ChildItem $docRoot.path -Recurse -Filter '*.md' -ErrorAction SilentlyContinue | ForEach-Object {
                     if (-not $isReferenced) {
                         $mdContent = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
                         if ($mdContent -and $mdContent -match [regex]::Escape($fileName)) {
