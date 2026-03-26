@@ -9,6 +9,11 @@ on:
       - 'templates/**'
       - '.github/workflows/**'
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Optional release version (e.g., 1.4.6 or v1.4.6). If omitted, workflow auto-selects.'
+        required: false
+        type: string
 
 jobs:
   release:
@@ -26,7 +31,7 @@ jobs:
         id: get_tag
         run: |
           chmod +x .github/workflows/scripts/get-next-version.sh
-          .github/workflows/scripts/get-next-version.sh
+          .github/workflows/scripts/get-next-version.sh "${{ github.event.inputs.release_version || '' }}"
       - name: Check if release already exists
         id: check_release
         run: |
