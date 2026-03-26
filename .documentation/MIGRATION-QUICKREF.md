@@ -1,5 +1,7 @@
 # Migration Quick Reference
 
+<!-- markdownlint-disable MD036 -->
+
 **Migrating from old Spec Kit structure to .documentation/**
 
 ---
@@ -7,11 +9,13 @@
 ## One-Line Migration
 
 ### Bash (Linux/Mac/Git Bash)
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.sh | bash
 ```
 
 ### PowerShell (Windows)
+
 ```powershell
 iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.ps1'))
 ```
@@ -33,11 +37,13 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercon
 ## Manual Migration (If Scripts Fail)
 
 ### 1. Create Structure
+
 ```bash
 mkdir -p .documentation/{memory,scripts,templates}
 ```
 
 ### 2. Move Files
+
 ```bash
 # If you have .specify/
 cp -r .specify/* .documentation/ && mv .specify .specify.old
@@ -49,13 +55,16 @@ cp -r templates/* .documentation/templates/ && mv templates templates.old
 ```
 
 ### 3. Find & Replace
+
 Search and replace in all files:
+
 - `.specify/` → `.documentation/`
 - `/memory/` → `/.documentation/memory/`
 - `/scripts/` → `/.documentation/scripts/`
 - `/templates/` → `/.documentation/templates/`
 
 ### 4. Update These Files
+
 - [ ] `.claude/commands/*.md`
 - [ ] `.github/agents/*.md` (or `.github/prompts/*.md`)
 - [ ] `.cursor/commands/*.md`
@@ -64,6 +73,7 @@ Search and replace in all files:
 - [ ] `.vscode/settings.json`
 
 ### 5. Commit
+
 ```bash
 git add -A
 git commit -m "chore: migrate to .documentation/ structure"
@@ -88,19 +98,23 @@ After migration, check:
 ## Troubleshooting
 
 ### Slash Commands Not Working
+
 1. Restart IDE completely
 2. Check command files updated:
+
    ```bash
    grep -r "\.specify" .claude/  # Should return nothing
    ```
 
 ### Script Errors
+
 ```bash
 # Re-run with verbose output (bash)
 bash -x .documentation/scripts/migrate-to-documentation.sh
 ```
 
 ### Manual Path Updates
+
 ```bash
 # Find all references to old paths
 grep -r "\.specify" .

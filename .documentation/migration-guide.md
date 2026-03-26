@@ -1,5 +1,7 @@
 # Migration Guide: Old Structure to .documentation/
 
+<!-- markdownlint-disable MD036 -->
+
 > This guide helps you migrate an existing Spec Kit project from the old `.specify/` directory structure to the new `.documentation/` structure introduced in v1.0.0.
 
 ---
@@ -115,7 +117,7 @@ mkdir -p .documentation/{memory,scripts,templates}
 
 ### Step 2: Move Files
 
-#### If you have `.specify/` directory:
+#### If you have `.specify/` directory
 
 ```bash
 # Move all contents from .specify/ to .documentation/
@@ -125,7 +127,7 @@ if [ -d ".specify" ]; then
 fi
 ```
 
-#### If you have top-level `memory/`, `scripts/`, `templates/`:
+#### If you have top-level `memory/`, `scripts/`, `templates/`
 
 ```bash
 # Move memory/
@@ -164,6 +166,7 @@ Find and replace in all agent command files:
 ```
 
 **Files to check:**
+
 - `.claude/commands/*.md`
 - `.github/agents/*.md`
 - `.cursor/commands/*.md`
@@ -175,6 +178,7 @@ Find and replace in all agent command files:
 #### Script Files
 
 Update references in:
+
 - `.documentation/scripts/bash/*.sh`
 - `.documentation/scripts/powershell/*.ps1`
 
@@ -193,6 +197,7 @@ If you have `.vscode/settings.json`, update:
 #### Documentation Files
 
 Update references in:
+
 - `README.md`
 - `.documentation/*.md`
 - Any other documentation
@@ -307,11 +312,13 @@ Use the template in `.documentation/templates/spec-template.md`
 The migration scripts are included in Spec Kit v1.0.0+. If you don't have them:
 
 1. **Download from GitHub:**
+
    ```bash
    curl -o migrate.sh https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.sh
    ```
 
 2. **Or upgrade your Spec Kit installation:**
+
    ```bash
    specify init --here --force --ai <your-agent>
    ```
@@ -320,10 +327,12 @@ The migration scripts are included in Spec Kit v1.0.0+. If you don't have them:
 
 1. **Restart your IDE/editor completely**
 2. **Verify command files updated:**
+
    ```bash
    grep -r "\.specify" .claude/commands/  # Should return nothing
    grep -r "/memory/" .claude/commands/   # Should return nothing
    ```
+
 3. **Re-run the migration script** if some references were missed
 
 ### "Scripts returning 'file not found' errors"
@@ -389,6 +398,7 @@ After migration, verify:
 ### Can I migrate mid-project?
 
 **Yes.** You can migrate at any time. Your active feature specs won't be affected. However, it's recommended to:
+
 1. Commit any pending work first
 2. Run migration on a clean working tree
 3. Test thoroughly before continuing development
@@ -435,11 +445,13 @@ However, typically `.documentation/` should be committed to git (except for `_si
 After successful migration:
 
 1. **Upgrade to latest Spec Kit:**
+
    ```bash
    uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
    ```
 
 2. **Update project files:**
+
    ```bash
    specify init --here --force --ai <your-agent>
    ```

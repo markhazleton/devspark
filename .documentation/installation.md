@@ -113,6 +113,7 @@ specify upgrade --skip-migration
 ```
 
 The `upgrade` command will:
+
 - ✅ Auto-detect your AI assistant from existing setup
 - ✅ Check for uncommitted Git changes
 - ✅ Detect old structure (`.specify/`, root-level directories) and offer migration

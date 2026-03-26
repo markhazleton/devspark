@@ -23,6 +23,8 @@
     "MD060": false
   },
   "ignores": [
-    ".genreleases/"
+    ".genreleases/",
+    "incoming/**",
+    ".documentation/drafts/**"
   ]
 }

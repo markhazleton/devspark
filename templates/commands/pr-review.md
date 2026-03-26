@@ -40,11 +40,13 @@ Run `{SCRIPT}` to extract PR context and parse JSON output for:
 - `REVIEW_DIR`: Directory where review will be saved
 
 Treat script JSON as bounded context:
+
 - `files_changed` may be sampled for large PRs.
 - Use `files_changed_total` and `files_changed_truncated` to decide whether to zoom in further.
 - Do not expand to all files unless user explicitly requests a full exhaustive review.
 
 Execution limits (required):
+
 - Max findings in report: 7 highest-signal items
 - Max files to inspect deeply: 25
 - Max follow-up searches/reads beyond provided context: 8
@@ -99,6 +101,7 @@ For each file in `files_changed`:
 - Extract code snippets for analysis
 
 Prioritization policy:
+
 - If `files_changed_truncated` is true, prioritize risky files first (auth, security, configuration, dependency manifests, migration scripts, CI/CD) before expanding scope.
 - Expand beyond sampled files only if necessary to validate a top-severity finding.
 

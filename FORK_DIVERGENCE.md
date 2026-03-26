@@ -1,5 +1,7 @@
 # Fork Divergence Tracking
 
+<!-- markdownlint-disable MD036 MD040 -->
+
 **Fork**: github.com/MarkHazleton/spec-kit (Spec Kit Spark)  
 **Upstream**: github.com/github/spec-kit  
 **Last Sync**: 2026-02-20  
@@ -53,22 +55,26 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
 ### 🟢 AUTO-CHERRY-PICK (Apply automatically)
 
 **Bug Fixes**
+
 - Dependency version conflicts (e.g., click>=8.1 pinning)
 - Path resolution errors
 - CLI argument parsing issues
 - Template syntax errors
 
 **Security Fixes**
+
 - Dependency vulnerabilities
 - Path traversal fixes (Zip Slip, etc.)
 - Input validation improvements
 
 **Agent Compatibility**
+
 - New agent support (if doesn't conflict with our structure)
 - Agent CLI tool name fixes
 - Agent configuration improvements
 
 **Criteria**: ✅ Apply if:
+
 - Pure bug fix with no structural dependencies
 - No conflicts with `.documentation/` structure
 - Improves stability or security
@@ -79,27 +85,32 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
 ### 🟡 ADAPT & MERGE (Require adaptation)
 
 **Template Changes**
+
 - Wording improvements
 - Bias removal (OpenAPI/GraphQL → generic)
 - New template sections
 
 **Script Enhancements**
+
 - Improvements to shared scripts (check-prerequisites, common, etc.)
 - New utility functions
 - Enhanced error handling
 
 **Documentation Updates**
+
 - README improvements
 - CONTRIBUTING updates
 - New documentation patterns
 
 **Criteria**: ⚠️ Adapt if:
+
 - Core concept applies but paths/structure differ
 - Can be modified to work with `.documentation/` folder
 - Improves user experience without breaking Spark features
 - Requires manual merge but valuable
 
 **Adaptation Process**:
+
 1. Cherry-pick to temporary branch
 2. Adjust paths: `docs/` → `.documentation/`, `.specify/` → `.documentation/`
 3. Verify no conflicts with Spark commands
@@ -110,23 +121,28 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
 ### 🔴 IGNORE (Skip these)
 
 **Structural Changes**
+
 - Changes to `docs/` folder structure (we use `.documentation/`)
 - Removal of files we've enhanced
 - Directory reorganizations that conflict
 
 **Version Management**
+
 - Version bumps (we maintain independent versioning)
 - Changelog entries (we maintain separate changelog)
 
 **Workflow Changes**
+
 - Release workflows tied to upstream structure
 - CI/CD specific to github.com/github/spec-kit
 
 **Feature Conflicts**
+
 - Features that duplicate our Spark commands
 - Templates that override our enhanced versions
 
 **Criteria**: 🚫 Ignore if:
+
 - Incompatible with our directory structure
 - Duplicates existing Spark functionality
 - Tied to upstream-specific infrastructure
@@ -137,22 +153,26 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
 ### 🔵 EVALUATE (Manual review required)
 
 **Major Features**
+
 - Extension system (#1551) - Modular plugin architecture
 - Generic agent support (#1639) - Bring-your-own-agent
 - AI Skills system (#1632) - Skills/prompts framework
 
 **Infrastructure**
+
 - New GitHub Actions workflows
 - Testing frameworks (pytest, ruff)
 - New release processes
 
 **Criteria**: 🤔 Evaluate when:
+
 - Large feature that might benefit Spark
 - Requires significant testing
 - May conflict with existing Spark architecture
 - Needs team/maintainer decision
 
 **Evaluation Process**:
+
 1. Create RFC or discussion
 2. Test in feature branch
 3. Document compatibility implications
@@ -171,6 +191,7 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
 #### Commits by Category
 
 **🟢 Auto Cherry-Pick Candidates** (7):
+
 ```
 fc3b98e - fix: rename Qoder AGENT_CONFIG key (qoder → qodercli)
 6fca5d8 - fix: pin click>=8.1 dependency for Python 3.14
@@ -182,6 +203,7 @@ c78f842 - fix: typo in plan-template.md
 ```
 
 **🟡 Adapt & Merge Candidates** (6):
+
 ```
 12405c0 - refactor: remove OpenAPI/GraphQL bias from templates
 aeed11f - Add V-Model Extension Pack to catalog
@@ -192,6 +214,7 @@ b562438 - fix: resolve markdownlint errors
 ```
 
 **🔴 Ignore** (5):
+
 ```
 d410d18 - chore(deps): bump actions/stale 9→10
 9a1e303 - Add stale workflow
@@ -200,6 +223,7 @@ d410d18 - chore(deps): bump actions/stale 9→10
 ```
 
 **🔵 Evaluate** (3):
+
 ```
 6150f1e - Add generic agent support with customizable directories
 9402ebd - Feat/ai skills (prompt/skill system)
@@ -207,6 +231,7 @@ f14a47e - Add modular extension system
 ```
 
 #### Action Items
+
 - [ ] Cherry-pick 7 bug fixes
 - [ ] Adapt 6 template/doc improvements
 - [ ] Evaluate extension system integration
@@ -229,15 +254,18 @@ f14a47e - Add modular extension system
 **Category**: 🟡 ADAPT & MERGE
 
 **Changes Applied**:
+
 - Added `bug_report.yml` with Spark-specific URLs and agent list (17 agents)
 - Added `feature_request.yml` with Spark-specific URLs and agent list
 - Added `agent_request.yml` with Spark-specific URLs and current agent list
 - Added `config.yml` with Spark contact links (removed Extension Development Guide link)
 
 **Changes Deferred**:
+
 - `extension_submission.yml` - Awaiting extension system implementation (upstream feature not yet in Spark)
 
 **Adaptations Made**:
+
 - All `github.com/github/spec-kit` → `github.com/MarkHazleton/spec-kit`
 - All `github.com/manfredseee/spec-kit` → `github.com/MarkHazleton/spec-kit`
 - Removed "Antigravity" agent (not yet supported in Spark)
@@ -246,6 +274,7 @@ f14a47e - Add modular extension system
 - Removed extension development guide link (feature not yet available)
 
 **Validation**:
+
 - [ ] Templates render correctly on GitHub (requires push to verify)
 - [ ] All links resolve to correct Spark repository locations
 - [ ] Agent dropdowns match AGENTS.md exactly
@@ -262,6 +291,7 @@ f14a47e - Add modular extension system
 **Applied**: 2026-02-20 17:07:22
 
 **Changes Applied**:
+
 - Removed OpenAPI/GraphQL-specific language from templates
 - Updated terminology: "API contracts" → "interface contracts"
 - Updated: "endpoints" → "interfaces" (in generic contexts)
@@ -269,16 +299,19 @@ f14a47e - Add modular extension system
 - Made templates applicable to CLI tools, libraries, compilers, desktop apps
 
 **Files Modified**:
+
 - `templates/commands/plan.md` - Interface contracts section
 - `templates/commands/specify.md` - Integration patterns defaults
 - `templates/commands/tasks.md` - Contract/endpoint references
 - `templates/plan-template.md` - Project Type field
 
 **Adaptations Made**:
+
 - None required - upstream changes compatible with Spark structure
 - All Spark-specific enhancements preserved
 
 **Validation**:
+
 - [x] Templates use generic "interface contracts" terminology
 - [x] Project Type field includes diverse categories
 - [x] Web service backward compatibility maintained
@@ -298,6 +331,7 @@ Cherry-picked directly from upstream without modification. Changes align perfect
 **Category**: 🟡 ADAPT & MERGE + 🟢 AUTO
 
 **Changes Applied**:
+
 - Created `extensions/` directory structure for community extensions
 - Added `extensions/README.md` with Spark-specific branding
 - Added `extensions/catalog.community.json` with V-Model Extension Pack v0.1.0
@@ -305,15 +339,18 @@ Cherry-picked directly from upstream without modification. Changes align perfect
 - Fixed Qoder CLI tool name: `qoder` → `qodercli` in `create-github-release.ps1`
 
 **Adaptations Made**:
+
 - Updated README links: `github.com/github/spec-kit` → `github.com/MarkHazleton/spec-kit`
 - Updated catalog URL to point to Spark's fork
 - Enhanced README with Spark-specific context about extensions working alongside built-in commands
 
 **Integration Decisions**:
+
 - **Extension System**: Approved for integration. Enables community contributions without core modifications.
 - **V-Model v0.2.0 Update** (07077d0): Applied - Updated catalog to v0.2.0 with 5 commands (added system-design, system-test).
 
 **Validation**:
+
 - [x] Extension directory created successfully
 - [x] JSON validates correctly
 - [x] No conflicts with Spark's `.documentation/` structure
@@ -328,18 +365,22 @@ Cherry-picked directly from upstream without modification. Changes align perfect
 ### Planned (Not Yet Applied)
 
 **Bug Fixes**:
+
 - `6fca5d8` - click>=8.1 dependency pin
 - `c78f842` - plan-template.md typo
 - `36d9723` - path error fix
 - `4afbd87` - preserve constitution.md
 
 **Template Improvements**:
+
 - `b562438` - Markdownlint fixes
 
 **Extension Updates**:
+
 - `07077d0` - V-Model v0.2.0 update (deferred, blocked by extension system testing)
 
 **Documentation**:
+
 - `0f7d04b` - PR template for contributions
 
 ---
@@ -404,6 +445,7 @@ Cherry-picked directly from upstream without modification. Changes align perfect
 ### Conflict Resolution
 
 **Path Conflicts** (docs/ vs .documentation/):
+
 ```bash
 # During cherry-pick conflict
 git show :3:docs/file.md > .documentation/file.md
@@ -412,11 +454,13 @@ git cherry-pick --continue
 ```
 
 **Template Conflicts**:
+
 - Preserve Spark enhancements
 - Merge upstream improvements manually
 - Test commands after resolution
 
 **Script Conflicts**:
+
 - Favor upstream for shared scripts (common.sh, check-prerequisites.sh)
 - Preserve Spark-only scripts
 - Test all commands after merge
@@ -428,15 +472,18 @@ git cherry-pick --continue
 ### Candidates for Upstream Contribution
 
 **Commands** (if generalized):
+
 - `/speckit.pr-review` - Valuable for any constitution-based review
 - `/speckit.site-audit` - Generic web accessibility/SEO tool
 - `/speckit.quickfix` - Lightweight workflow pattern
 
 **Documentation Improvements**:
+
 - Constitution guide patterns
 - Migration tooling concepts
 
 **Bug Fixes**:
+
 - Any bugs found in shared code paths
 
 ### Contribution Process
@@ -520,6 +567,7 @@ git cherry-pick --continue
 ### Paths to Watch
 
 When adapting upstream changes, adjust these paths:
+
 - `docs/*` → `.documentation/*`
 - `.specify/*` → `.documentation/*`
 - Any hardcoded references to `docs/` folder
@@ -527,6 +575,7 @@ When adapting upstream changes, adjust these paths:
 ### Files Modified in Both
 
 These files frequently change in both repos:
+
 - `README.md` - Merge changes carefully
 - `AGENTS.md` - Agent additions compatible
 - `src/specify_cli/__init__.py` - Core CLI logic

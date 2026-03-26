@@ -127,6 +127,7 @@ specify upgrade --backup
 ```
 
 The upgrade command will:
+
 - Auto-detect your AI assistant
 - Check for migration needs
 - Update all templates and scripts

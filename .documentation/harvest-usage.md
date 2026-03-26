@@ -1,5 +1,7 @@
 # Harvest Command Guide
 
+<!-- markdownlint-disable MD040 -->
+
 ## Overview
 
 The `/speckit.harvest` command performs **knowledge-preserving cleanup** of your repository: completed specs, stale documentation, and draft artifacts are triaged and archived, while their valuable content is extracted into living documents (CHANGELOG, Guide.md, copilot-instructions) before anything moves.
@@ -121,6 +123,7 @@ Specs with any incomplete tasks are left in place.
 | **Living reference** | Top-level `.documentation/*.md`, Guide.md | Keep / update |
 
 **Never archived:**
+
 - `/.documentation/memory/constitution.md`
 - `/.documentation/scripts/` and `/.documentation/templates/`
 - `CHANGELOG.md`
@@ -147,6 +150,7 @@ The pre-scan identifies comments matching these patterns across Python, TypeScri
 A harvest report is written to: `/.documentation/copilot/harvest-YYYY-MM-DD.md`
 
 It contains:
+
 - Summary counts (specs archived, docs archived, comments rewritten, CHANGELOG entries added)
 - Full table of archived specs with CHANGELOG status
 - Full table of archived docs with destination paths
@@ -276,6 +280,7 @@ Never reference archived files from active prompts, scripts, or documentation. T
 **Problem**: No completed specs detected.
 
 **Possible causes**:
+
 - Specs don't have a `tasks.md`, or tasks are not yet all marked `[x]`
 - Specs are already in `.archive/`
 

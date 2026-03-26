@@ -1,5 +1,7 @@
 # Testing Guide: `specify upgrade` Command
 
+<!-- markdownlint-disable MD040 -->
+
 This guide helps test the new `specify upgrade` command implementation.
 
 ## Setup Test Environment
@@ -51,6 +53,7 @@ specify upgrade --dry-run
 ```
 
 **Expected:**
+
 - ✅ Shows "DRY RUN COMPLETE - No changes made"
 - ✅ Shows what would be updated
 - ✅ No files are actually modified
@@ -63,6 +66,7 @@ specify upgrade --dry-run
 ```
 
 **Expected:**
+
 - ✅ Auto-detects Claude as AI assistant
 - ✅ Shows "Detected AI assistant: Claude Code (claude)"
 
@@ -74,6 +78,7 @@ specify upgrade --dry-run
 ```
 
 **Expected:**
+
 - ✅ Detects old structure
 - ✅ Offers to run migration
 - ✅ Shows migration would happen in actual run
@@ -86,6 +91,7 @@ specify upgrade --backup --dry-run
 ```
 
 **Expected:**
+
 - ✅ Shows would create constitution backup
 - ✅ No actual backup created in dry run
 
@@ -99,6 +105,7 @@ specify upgrade --force --dry-run
 ```
 
 **Expected:**
+
 - ✅ Detects uncommitted changes
 - ✅ With --force, doesn't prompt for confirmation
 
@@ -110,6 +117,7 @@ specify upgrade --ai copilot --dry-run
 ```
 
 **Expected:**
+
 - ✅ Uses copilot instead of detected claude
 - ✅ Shows "Using AI assistant: GitHub Copilot (copilot)"
 
@@ -121,6 +129,7 @@ specify upgrade --skip-migration --dry-run
 ```
 
 **Expected:**
+
 - ✅ Doesn't check for old structure
 - ✅ Proceeds without migration
 
@@ -133,6 +142,7 @@ specify upgrade
 ```
 
 **Expected:**
+
 - ✅ Shows error: "Current directory is not a Spec Kit project"
 - ✅ Exits with code 1
 
@@ -145,6 +155,7 @@ specify upgrade --dry-run
 ```
 
 **Expected:**
+
 - ✅ Shows "Could not auto-detect AI assistant"
 - ✅ In actual run, would prompt for selection
 - ✅ In dry run, uses default
@@ -159,6 +170,7 @@ specify upgrade
 ```
 
 **Expected:**
+
 - ✅ Detects clean working tree
 - ✅ Auto-detects agent
 - ✅ Downloads and applies templates
@@ -176,6 +188,7 @@ specify upgrade --backup
 ```
 
 **Expected:**
+
 - ✅ Creates timestamped backup of constitution
 - ✅ Backup file exists in .documentation/memory/
 - ✅ Upgrade completes successfully
@@ -238,6 +251,7 @@ specify upgrade --dry-run
 ```
 
 **Expected:**
+
 - ✅ Detects first agent found (claude)
 - ✅ Works without errors
 
@@ -253,6 +267,7 @@ specify upgrade --dry-run
 ```
 
 **Expected:**
+
 - ✅ Detects old memory/ needs migration
 - ✅ Doesn't re-migrate .documentation/memory
 
@@ -266,6 +281,7 @@ specify upgrade --backup
 ```
 
 **Expected:**
+
 - ✅ Creates second backup with different timestamp
 - ✅ Both backups preserved
 

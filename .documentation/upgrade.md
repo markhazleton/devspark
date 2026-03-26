@@ -55,6 +55,7 @@ specify upgrade
 ```
 
 **What it does:**
+
 1. ✅ Verifies you're in a Spec Kit project
 2. ✅ Checks for uncommitted git changes
 3. ✅ Auto-detects your AI assistant (claude, copilot, etc.)

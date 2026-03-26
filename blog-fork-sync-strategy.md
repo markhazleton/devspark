@@ -1,5 +1,7 @@
 # Staying in Sync with Your Fork's Parent: How Spec Kit Spark Automates Upstream Integration
 
+<!-- markdownlint-disable MD040 -->
+
 **Published**: February 20, 2026  
 **Author**: Mark Hazleton  
 **Tags**: Open Source, Git Workflows, Fork Management, Automation
@@ -41,6 +43,7 @@ We created dual-platform scripts (`sync-upstream.sh` and `sync-upstream.ps1`) th
 ```
 
 The scripts:
+
 - Fetch latest upstream commits
 - Analyze commit messages, changed files, and diff statistics
 - Categorize each commit using our decision framework
@@ -220,6 +223,7 @@ git cherry-pick 12405c0
 ### After: Structured Integration (Safe)
 
 The integration plan provides:
+
 - **Intent**: "Removes web-centric bias to support diverse project types"
 - **Relevance**: "Highly applicable - Spark users build CLI tools, libraries, etc."
 - **Conflicts**: "Likely conflicts with Spark template enhancements"
@@ -227,6 +231,7 @@ The integration plan provides:
 - **Validation**: Checkbox list of what to verify
 
 When you hand this to an AI coding assistant, it can:
+
 1. Understand the **purpose** of the change
 2. Identify **Spark-specific code** to preserve
 3. Apply changes **systematically** across files
@@ -275,6 +280,7 @@ The decision criteria framework means we're not re-debating "should we take this
 ### 3. **Knowledge Capture**
 
 Every integration creates a paper trail:
+
 - Why we applied or skipped a change
 - What adaptations were needed
 - How to test the integration
@@ -309,6 +315,7 @@ Want to implement similar sync automation for your fork? Here's how:
 ### 1. **Document Your Divergence Strategy**
 
 Create a `FORK_DIVERGENCE.md` file with:
+
 - Your fork's unique value proposition
 - Decision criteria for different change types
 - History of what you've absorbed and skipped
@@ -362,6 +369,7 @@ git log ${BASE_COMMIT}..${UPSTREAM_REMOTE}/main --format="%h %s" | \
 ```
 
 Gradually add:
+
 - File change analysis
 - Interactive prompts
 - Integration plan generation
@@ -439,6 +447,7 @@ Forks shouldn't be permanent divergences that eventually become unmaintainable. 
 4. **Contribution pipelines**: Where improvements flow back to the parent
 
 The key is **maintaining a two-way relationship** through:
+
 - **Structured integration** of upstream improvements
 - **Clear documentation** of divergence rationale
 - **Pathways for upstreaming** your innovations

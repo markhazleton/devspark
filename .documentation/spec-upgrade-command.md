@@ -1,7 +1,11 @@
 # Spec: Add `specify upgrade` Command
 
+<!-- markdownlint-disable MD040 -->
+
 ## Problem
+
 Current upgrade process is confusing:
+
 - Users must remember: `specify init --here --force --ai <agent>`
 - "init" implies initialization, not upgrade
 - Must manually specify the AI agent each time
@@ -9,20 +13,24 @@ Current upgrade process is confusing:
 - No constitution preservation warnings
 
 ## Solution
+
 Add a dedicated `specify upgrade` command that:
 
 ### 1. Auto-Detection
+
 - Detects current directory is a Spec Kit project
 - Auto-discovers AI agent from existing setup
 - Detects if old structure migration needed
 
 ### 2. Safety
+
 - Warns about uncommitted git changes
 - Offers to backup constitution if customized
 - Runs migration automatically if needed
 - Preserves user customizations
 
 ### 3. User Experience
+
 ```bash
 # Simple upgrade command
 specify upgrade
@@ -36,6 +44,7 @@ specify upgrade --backup           # Create backup before upgrade
 ## Implementation Plan
 
 ### Command Definition
+
 ```python
 @app.command()
 def upgrade(
@@ -66,6 +75,7 @@ def upgrade(
 ### Detection Logic
 
 #### 1. Detect Spec Kit Project
+
 ```python
 def is_spec_kit_project() -> bool:
     """Check if current directory is a Spec Kit project."""
@@ -81,6 +91,7 @@ def is_spec_kit_project() -> bool:
 ```
 
 #### 2. Detect AI Agent
+
 ```python
 def detect_ai_agent() -> Optional[str]:
     """Auto-detect the AI agent from existing setup."""
@@ -102,6 +113,7 @@ def detect_ai_agent() -> Optional[str]:
 ```
 
 #### 3. Detect Old Structure
+
 ```python
 def needs_migration() -> bool:
     """Check if old structure exists and needs migration."""
@@ -215,6 +227,7 @@ def backup_constitution() -> Path:
 ## Benefits
 
 ### For Users
+
 - **Clearer intent**: `upgrade` is explicit
 - **Less typing**: No need to specify `--here --force`
 - **Safer**: Auto-detects agent, warns about changes
@@ -222,6 +235,7 @@ def backup_constitution() -> Path:
 - **Better UX**: Guided process with helpful messages
 
 ### For Maintainers
+
 - **Separation of concerns**: Init = new projects, Upgrade = existing
 - **Better analytics**: Can track upgrades separately
 - **Easier documentation**: Single command to document
@@ -230,6 +244,7 @@ def backup_constitution() -> Path:
 ## Documentation Updates
 
 ### README.md
+
 ```markdown
 ## Upgrading
 
@@ -244,10 +259,12 @@ specify upgrade
 ```
 
 That's it! The `upgrade` command will:
+
 - Auto-detect your AI assistant
 - Migrate old structure if needed
 - Update all templates and scripts
 - Preserve your specs and customizations
+
 ```
 
 ### .documentation/upgrade.md
@@ -264,7 +281,9 @@ Update guide to use `specify upgrade` instead of `specify init --here --force`
 - Update all documentation to use `upgrade`
 - Add hint in `init` when used in existing directory:
   ```
+
   Tip: Use 'specify upgrade' to upgrade existing projects
+
   ```
 
 ### Phase 3: Future
