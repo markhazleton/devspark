@@ -1,24 +1,26 @@
-# Spec Kit Spark v1.1.0
+# Spec Kit Spark v1.5.0
 
-A community extension of GitHub Spec Kit with constitution-powered commands for enhanced development workflows. Part of the WebSpark demonstration suite.
+Spec Kit Spark is an Adaptive System Life Cycle Development (ASLCD) toolkit with constitution-powered commands and right-sized workflows. Part of the WebSpark demonstration suite.
 
 ## Release Highlights
 
-This minor release (v1.1.0) introduces the new `specify upgrade` command and comprehensive migration tooling, making it easier than ever to upgrade existing projects and migrate from the old directory structure.
+This release (v1.5.0) introduces the new `/speckit.repo-story` command for generating evidence-based repository narratives, completes a branding alignment sweep, and syncs the README roadmap version with the actual CLI version.
 
-### What's New in v1.1.0
+### What's New in v1.5.0
 
-- **`specify upgrade` Command**: One-command upgrade with auto-detection and safety checks
-- **Migration Scripts**: Automated scripts for Windows (PowerShell) and Linux/Mac (Bash)
-- **Comprehensive Documentation**: Step-by-step migration guides and troubleshooting
-- **Safety First**: Dry-run mode, Git checks, backups, and detailed reporting
+- **`/speckit.repo-story` Command**: Analyze full commit history and produce compelling narratives for business and technical audiences
+- **Repository History Context Scripts**: Paired Bash and PowerShell scripts generating commit-audit-ready JSON with anonymized roles, velocity metrics, quality signals, and governance maturity scores
+- **Branding Alignment**: Consistent "Spec Kit Spark — ASLCD Toolkit" messaging across all documentation, CLI, and release generators
+- **Version Sync**: README roadmap updated from stale v0.0.25 to v1.5.0
 
 ## Spark-Specific Features
 
+- **Repo Story**: Generate evidence-based repository narratives from commit history
 - **Discover Constitution**: Analyze existing codebases to reverse-engineer project principles
 - **PR Review Command**: Constitution-based pull request review workflow
 - **Site Audit**: Comprehensive codebase auditing against constitution principles
 - **Critic Command**: Adversarial risk analysis for spec artifacts
+- **Harvest**: Knowledge-preserving cleanup for stale docs and completed specs
 - **Extended Agent Support**: 17+ AI coding assistants supported
 
 ## Using This Release
@@ -26,6 +28,29 @@ This minor release (v1.1.0) introduces the new `specify upgrade` command and com
 You can use these releases with your agent of choice. We recommend using the Specify CLI to scaffold your projects, however you can download these independently and manage them yourself.
 
 ## Recent Changes
+
+### Version 1.5.0 (March 28, 2026)
+
+- New `/speckit.repo-story` command for repository narrative generation
+- Paired `repo-story-context.sh` and `repo-story-context.ps1` context scripts
+- Branding sweep: "Spec Kit Spark — ASLCD Toolkit" across all files
+- README roadmap synced to v1.5.0
+
+### Version 1.4.6 (March 26, 2026)
+
+- PowerShell runtime safety and compatibility hardening
+- Markdownlint workflow fixes
+- Spark command template path alignment
+- Documentation branding consistency updates
+
+### Version 1.4.5 (March 25, 2026)
+
+- Fixed `specify upgrade` crash when AI assistant auto-detection fails
+
+### Version 1.4.0 (March 25, 2026)
+
+- New `/speckit.harvest` command with knowledge-preserving cleanup
+- `harvest.ps1` pre-scan script for spec completion and doc taxonomy
 
 ### Version 1.1.0 (February 8, 2026)
 
@@ -49,4 +74,4 @@ You can use these releases with your agent of choice. We recommend using the Spe
 
 ---
 
-*Based on upstream GitHub Spec Kit. Spec Kit Spark is a community extension that may contain features not yet available in the upstream project.*
+*Maintained as a fork of github/spec-kit. Spec Kit Spark is independently evolved and may contain Spark-specific capabilities not present upstream.*

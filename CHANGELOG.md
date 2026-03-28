@@ -7,6 +7,18 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-28
+
+### Added
+
+- **New `/speckit.repo-story` command**: Analyzes full repository commit history and produces a compelling, evidence-based narrative for both business stakeholders and technical audiences. Uses paired context scripts (`repo-story-context.sh` / `repo-story-context.ps1`) that generate a `history.json` with commit-audit-ready schema including anonymized contributor roles, velocity metrics, quality signals, governance maturity scores, and milestone timelines. Supports `--scope` flags (full, velocity, quality, business, team), configurable history window (`--months`), and baseline comparison (`--compare-baseline`).
+- **`repo-story-context.ps1` and `repo-story-context.sh` context scripts**: Paired PowerShell and Bash scripts that gather full-repository historical context — commit timeline, contributor trends, tag milestones, file change hotspots, conventional commit metrics, test-to-source ratios, and governance signals — into a structured JSON payload consumed by the repo-story command template.
+
+### Changed
+
+- **Branding alignment**: Updated all documentation, CLI help text, and release generators to consistently use "Spec Kit Spark — Adaptive System Life Cycle Development (ASLCD) Toolkit" branding. Replaced legacy "GitHub Spec Kit" and "Spec-Driven Development Toolkit" references across AGENTS.md, release notes generators, and supporting documentation.
+- **README roadmap version**: Updated current release section from stale v0.0.25 to v1.5.0 reflecting actual CLI version.
+
 ## [1.4.6] - 2026-03-26
 
 ### Fixed

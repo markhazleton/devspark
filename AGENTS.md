@@ -2,9 +2,9 @@
 
 ## About Spec Kit and Specify
 
-**GitHub Spec Kit** is a comprehensive toolkit for implementing Spec-Driven Development (SDD) - a methodology that emphasizes creating clear specifications before implementation. The toolkit includes templates, scripts, and workflows that guide development teams through a structured approach to building software.
+**Spec Kit Spark** is an Adaptive System Life Cycle Development (ASLCD) toolkit and a maintained fork of `github/spec-kit`. It extends specification-driven workflows with constitution-powered quality gates, right-sized execution paths, and operational lifecycle guidance.
 
-**Specify CLI** is the command-line interface that bootstraps projects with the Spec Kit framework. It sets up the necessary directory structures, templates, and AI agent integrations to support the Spec-Driven Development workflow.
+**Specify CLI** is the command-line interface that bootstraps projects with the Spec Kit Spark framework. It sets up the necessary directory structures, templates, and AI agent integrations to support ASLCD workflows.
 
 The toolkit supports multiple AI coding assistants, allowing teams to use their preferred tools while maintaining consistent project structure and development practices.
 

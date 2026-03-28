@@ -16,7 +16,6 @@ This directory contains PowerShell versions of the GitHub Actions workflow scrip
 | `generate-release-notes.ps1` | Generate release notes from commits | `-NewVersion`, `-LastTag` |
 | `check-release-exists.ps1` | Check if release exists on GitHub | `-Version` |
 | `create-github-release.ps1` | Create GitHub release with packages | `-Version` |
-| `update-version.ps1` | Update pyproject.toml version | `-Version` |
 | `create-release-packages.ps1` | Create all agent template packages | `-Version` |
 
 ## Testing the Release Process Locally
@@ -61,16 +60,7 @@ This creates `release_notes.md` with your fork-specific branding.
 
 This creates all agent-specific ZIP packages in `.genreleases/` directory.
 
-### 5. Update pyproject.toml Version
-
-```powershell
-.\.github\workflows\scripts\update-version.ps1 `
-    -Version "v1.0.0"
-```
-
-**Note:** This is typically only needed for PyPI releases.
-
-### 6. Create GitHub Release (Requires `gh` CLI)
+### 5. Create GitHub Release (Requires `gh` CLI)
 
 ```powershell
 # Ensure you're authenticated with gh CLI
@@ -114,6 +104,8 @@ Write-Host ".\.github\workflows\scripts\create-github-release.ps1 -Version $vers
 - **GitHub Actions uses bash scripts** (`.sh` files) on `ubuntu-latest` runners
 - **PowerShell scripts** (`.ps1` files) are for local Windows testing only
 - Both versions are kept in sync for the same functionality
+- `pyproject.toml` is the single source of truth for release versioning
+- Explicit release versions must match `pyproject.toml` or the workflow will fail
 - Uses standard semantic versioning (vMAJOR.MINOR.PATCH)
 
 ## Differences from GitHub Actions

@@ -339,5 +339,5 @@ If you encounter issues:
 
 ---
 
-*Part of the Spec Kit - Spec-Driven Development Toolkit*
+*Part of Spec Kit Spark - Adaptive System Life Cycle Development (ASLCD) Toolkit*
 *For more information: <https://github.com/MarkHazleton/spec-kit>*

@@ -32,6 +32,24 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/get-next-version.sh
           .github/workflows/scripts/get-next-version.sh "${{ github.event.inputs.release_version || '' }}"
+      - name: Validate release version matches pyproject.toml
+        run: |
+          pyproject_version=$(grep -oE '^[[:space:]]*version[[:space:]]*=[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' pyproject.toml | head -n1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
+          if [ -z "$pyproject_version" ]; then
+            echo "Unable to read version from pyproject.toml"
+            exit 1
+          fi
+
+          release_version="${{ steps.get_tag.outputs.new_version }}"
+          release_version="${release_version#v}"
+
+          if [ "$pyproject_version" != "$release_version" ]; then
+            echo "Version mismatch: pyproject.toml=$pyproject_version release=$release_version"
+            echo "Update pyproject.toml before creating a release to keep Spec Kit Spark and Specify CLI in sync."
+            exit 1
+          fi
+
+          echo "Version parity check passed: $release_version"
       - name: Check if release already exists
         id: check_release
         run: |
@@ -57,9 +75,4 @@ jobs:
           .github/workflows/scripts/create-github-release.sh ${{ steps.get_tag.outputs.new_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Update version in pyproject.toml (for release artifacts only)
-        if: steps.check_release.outputs.exists == 'false'
-        run: |
-          chmod +x .github/workflows/scripts/update-version.sh
-          .github/workflows/scripts/update-version.sh ${{ steps.get_tag.outputs.new_version }}
 

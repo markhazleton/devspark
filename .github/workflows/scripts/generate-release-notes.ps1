@@ -44,7 +44,7 @@ if ($LastTag -eq "v0.0.0") {
 $releaseNotes = @"
 # Spec Kit Spark
 
-A community extension of GitHub Spec Kit with constitution-powered commands for enhanced development workflows. Part of the WebSpark demonstration suite.
+Spec Kit Spark is an Adaptive System Life Cycle Development (ASLCD) toolkit with constitution-powered commands and right-sized workflows. Part of the WebSpark demonstration suite.
 
 ## Spark-Specific Features
 
@@ -64,7 +64,7 @@ $commits
 
 ---
 
-*Based on upstream GitHub Spec Kit. Spec Kit Spark is a community extension that may contain features not yet available in the upstream project.*
+*Maintained as a fork of github/spec-kit. Spec Kit Spark is independently evolved and may contain Spark-specific capabilities not present upstream.*
 "@
 
 # Write to file

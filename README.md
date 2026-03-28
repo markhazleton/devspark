@@ -523,6 +523,9 @@ The `specify` command supports the following options:
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `init`  | Initialize a new Specify project from the latest template                                                                                               |
 | `check` | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `cursor-agent`, `windsurf`, `qwen`, `opencode`, `codex`, `shai`, `qodercli`) |
+| `version` | Show Spec Kit Spark product/version information from local CLI metadata                                                                               |
+
+`specify version` reports a single local product version (`pyproject.toml`/installed package metadata). It does not compare against latest GitHub release to avoid confusing mismatches.
 
 ### `specify init` Arguments & Options
 
@@ -620,6 +623,7 @@ These commands only require a constitution and work independently of the spec wo
 | `/speckit.release`              | Archive dev artifacts at release and generate release documentation      |
 | `/speckit.harvest`              | Harvest living knowledge from stale docs and archive obsolete artifacts  |
 | `/speckit.evolve-constitution`  | Propose constitution amendments based on PR review patterns              |
+| `/speckit.repo-story`           | Analyze full commit history and produce a compelling narrative            |
 
 #### Spec Workflow Commands
 
@@ -689,7 +693,7 @@ Our research and experimentation focus on:
 
 Spec Kit Spark is actively developed with a clear vision for the future:
 
-### Current Release (v0.0.25)
+### Current Release (v1.5.0)
 
 - ✅ Full Spec-Driven Development workflow
 - ✅ Constitution-based PR review (`/speckit.pr-review`)
@@ -699,6 +703,7 @@ Spec Kit Spark is actively developed with a clear vision for the future:
 - ✅ Release documentation management (`/speckit.release`)
 - ✅ Documentation harvest and cleanup workflow (`/speckit.harvest`)
 - ✅ Constitution evolution (`/speckit.evolve-constitution`)
+- ✅ Repository story generation (`/speckit.repo-story`)
 - ✅ 17+ AI agent integrations
 
 ### Near-Term (v0.1.x)

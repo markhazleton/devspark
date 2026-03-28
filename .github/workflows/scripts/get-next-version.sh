@@ -35,9 +35,33 @@ increment_patch() {
   echo "v1.0.0"
 }
 
+get_pyproject_version() {
+  if [[ ! -f "pyproject.toml" ]]; then
+    return 1
+  fi
+
+  local parsed
+  parsed=$(grep -oE '^[[:space:]]*version[[:space:]]*=[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' pyproject.toml | head -n1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
+
+  if [[ -n "${parsed:-}" ]]; then
+    echo "v$parsed"
+    return 0
+  fi
+
+  return 1
+}
+
 # 1) Explicit manual input wins (workflow_dispatch input)
 if [[ -n "$EXPLICIT_VERSION" ]]; then
   if NEW_VERSION=$(normalize_version "$EXPLICIT_VERSION"); then
+    if PYPROJECT_VERSION=$(get_pyproject_version); then
+      if [[ "$NEW_VERSION" != "$PYPROJECT_VERSION" ]]; then
+        echo "Explicit version '$NEW_VERSION' does not match pyproject.toml version '$PYPROJECT_VERSION'." >&2
+        echo "Update pyproject.toml first to keep Spec Kit Spark and Specify CLI versions in sync." >&2
+        exit 1
+      fi
+    fi
+
     echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
     echo "New version will be: $NEW_VERSION (source: explicit input)"
     exit 0
@@ -48,15 +72,11 @@ if [[ -n "$EXPLICIT_VERSION" ]]; then
 fi
 
 # 2) Prefer pyproject.toml version when present and not already tagged
-if [[ -f "pyproject.toml" ]]; then
-  PYPROJECT_VERSION=$(grep -oE '^[[:space:]]*version[[:space:]]*=[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' pyproject.toml | head -n1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
-  if [[ -n "${PYPROJECT_VERSION:-}" ]]; then
-    CANDIDATE_VERSION="v$PYPROJECT_VERSION"
-    if ! git rev-parse -q --verify "refs/tags/$CANDIDATE_VERSION" >/dev/null 2>&1; then
-      echo "new_version=$CANDIDATE_VERSION" >> $GITHUB_OUTPUT
-      echo "New version will be: $CANDIDATE_VERSION (source: pyproject.toml)"
-      exit 0
-    fi
+if PYPROJECT_VERSION=$(get_pyproject_version); then
+  if ! git rev-parse -q --verify "refs/tags/$PYPROJECT_VERSION" >/dev/null 2>&1; then
+    echo "new_version=$PYPROJECT_VERSION" >> $GITHUB_OUTPUT
+    echo "New version will be: $PYPROJECT_VERSION (source: pyproject.toml)"
+    exit 0
   fi
 fi
 

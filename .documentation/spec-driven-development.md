@@ -238,4 +238,4 @@ Software development needs better tools for maintaining alignment between intent
 
 ---
 
-> Part of the Spec Kit - Spec-Driven Development Toolkit
+> Part of Spec Kit Spark - Adaptive System Life Cycle Development (ASLCD) Toolkit
