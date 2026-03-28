@@ -1,0 +1,1325 @@
+{
+  "generated_at": "2026-03-28T14:30:39.569350+00:00",
+  "audit_parameters": {
+    "months": 12,
+    "scope": "full",
+    "compare_baseline": "2025-03",
+    "start_month": "2025-03",
+    "end_month": "2026-03"
+  },
+  "repo": {
+    "name": "spec-kit",
+    "root": "/mnt/c/GitHub/MarkHazleton/spec-kit",
+    "remote_origin": "https://github.com/markhazleton/spec-kit.git",
+    "default_branch": "main"
+  },
+  "summary": {
+    "total_commits": 627,
+    "total_contributors": 90,
+    "total_tags": 128,
+    "history_span_days": 216
+  },
+  "timeline": {
+    "first_commit": {
+      "sha": "fa2736371e077f55c4fe145fea186bab2561386d",
+      "date": "2025-08-21T15:54:32-07:00",
+      "author": "Den Delimarsky",
+      "subject": "Initial commit"
+    },
+    "latest_commit": {
+      "sha": "bf4592f2524da4fc5bdaf5f7b6fa94fba88316d8",
+      "date": "2026-03-26T15:19:03-05:00",
+      "author": "Mark Hazleton",
+      "subject": "feat(release): add support for manual version input in workflow dispatch"
+    },
+    "commits_by_year": {
+      "2025": 543,
+      "2026": 84
+    },
+    "commits_by_month": {
+      "2025-08": 22,
+      "2025-09": 268,
+      "2025-10": 185,
+      "2025-11": 52,
+      "2025-12": 16,
+      "2026-01": 10,
+      "2026-02": 51,
+      "2026-03": 23
+    }
+  },
+  "contributors": {
+    "top": [
+      {
+        "commits": 173,
+        "name": "Den Delimarsky"
+      },
+      {
+        "commits": 113,
+        "name": "Den Delimarsky \ud83c\udf3a"
+      },
+      {
+        "commits": 75,
+        "name": "den (work)"
+      },
+      {
+        "commits": 59,
+        "name": "Mark Hazleton"
+      },
+      {
+        "commits": 15,
+        "name": "Manfred Riem"
+      },
+      {
+        "commits": 15,
+        "name": "pengjiahan.pjh"
+      },
+      {
+        "commits": 9,
+        "name": "Tine Kondo"
+      },
+      {
+        "commits": 8,
+        "name": "Ahmet \u00c7etinkaya"
+      },
+      {
+        "commits": 8,
+        "name": "danielmeppiel"
+      },
+      {
+        "commits": 8,
+        "name": "danielshih"
+      },
+      {
+        "commits": 8,
+        "name": "honjo-hiroaki-gtt"
+      },
+      {
+        "commits": 7,
+        "name": "Ashley Childress"
+      },
+      {
+        "commits": 7,
+        "name": "root"
+      },
+      {
+        "commits": 6,
+        "name": "Joseph Mearman"
+      },
+      {
+        "commits": 5,
+        "name": "Daniel Meppiel"
+      },
+      {
+        "commits": 4,
+        "name": "Brian Anderson"
+      },
+      {
+        "commits": 4,
+        "name": "Simon Gent"
+      },
+      {
+        "commits": 4,
+        "name": "danyow"
+      },
+      {
+        "commits": 4,
+        "name": "hongxuww"
+      },
+      {
+        "commits": 3,
+        "name": "Bruno Borges"
+      },
+      {
+        "commits": 3,
+        "name": "Daniel Silva"
+      },
+      {
+        "commits": 3,
+        "name": "Emanuel Turis"
+      },
+      {
+        "commits": 3,
+        "name": "King"
+      },
+      {
+        "commits": 3,
+        "name": "Vincent Burckhardt"
+      },
+      {
+        "commits": 3,
+        "name": "lispking"
+      }
+    ],
+    "all_count": 90
+  },
+  "milestones": {
+    "tags": [],
+    "readme_evolution": {
+      "total_readme_commits": 115,
+      "commits": [
+        {
+          "sha": "ed1e30236b9d0e26cb25811602223398c7679103",
+          "date": "2026-03-26T11:07:33-05:00",
+          "author": "Mark Hazleton",
+          "subject": "chore(docs): finalize markdownlint cleanups and branding"
+        },
+        {
+          "sha": "0fe7482e040a64eadadae4984afb07d21a56deef",
+          "date": "2026-03-25T18:21:36-05:00",
+          "author": "Mark Hazleton",
+          "subject": "feat: add harvest command for cleaning stale documentation and archiving artifacts"
+        },
+        {
+          "sha": "c0499140314a2ebc2041cb0537cafccb5507d53c",
+          "date": "2026-03-17T13:29:56-05:00",
+          "author": "Mark Hazleton",
+          "subject": "fix: update paths to specs directory in scripts and documentation"
+        },
+        {
+          "sha": "0d83e822a1b5d52a798aaf298c63e9dd7c1a4881",
+          "date": "2026-03-02T15:38:53-06:00",
+          "author": "Mark Hazleton",
+          "subject": "Add user personas and interaction flows documentation; introduce automated upstream integration strategy for Spec Kit Spark"
+        },
+        {
+          "sha": "f26b2f720a7166b873b81b5d9432c62c7ec9766e",
+          "date": "2026-02-20T13:30:16-06:00",
+          "author": "Manfred Riem",
+          "subject": "fix: rename Qoder AGENT_CONFIG key from 'qoder' to 'qodercli' to match actual CLI executable (#1651)"
+        },
+        {
+          "sha": "58337b9f7b678614e6f3b6a9b05b3197b176bd4c",
+          "date": "2026-02-20T17:14:56-06:00",
+          "author": "Mark Hazleton",
+          "subject": "feat: add sync-upstream.ps1 script for managing upstream changes"
+        },
+        {
+          "sha": "fc3b98ea09acfdbc27bd69a1ed93ecb072baf339",
+          "date": "2026-02-20T13:30:16-06:00",
+          "author": "Manfred Riem",
+          "subject": "fix: rename Qoder AGENT_CONFIG key from 'qoder' to 'qodercli' to match actual CLI executable (#1651)"
+        },
+        {
+          "sha": "6150f1e31747a387119bf1456128b90a05fed15e",
+          "date": "2026-02-20T11:05:38-06:00",
+          "author": "Manfred Riem",
+          "subject": "Add generic agent support with customizable command directories (#1639)"
+        },
+        {
+          "sha": "9402ebd00ae6470bf8cb862868a5b3cec1163398",
+          "date": "2026-02-19T13:24:41-06:00",
+          "author": "Manfred Riem",
+          "subject": "Feat/ai skills (#1632)"
+        },
+        {
+          "sha": "22036732d8c81f0f620faddf4e8663bbf48e2962",
+          "date": "2026-02-18T16:11:16-06:00",
+          "author": "Manfred Riem",
+          "subject": "Remove Maintainers section from README.md (#1618)"
+        },
+        {
+          "sha": "76cca342932d07a59abf1b766732f8097def55e8",
+          "date": "2026-02-12T10:31:48-08:00",
+          "author": "Hanzhi Yang",
+          "subject": "Feat: add a new agent: Google Anti Gravity (#1220)"
+        },
+        {
+          "sha": "5293e02e3a9ec5ded0dc7571c78937ad25ae6abc",
+          "date": "2026-02-08T16:29:58-06:00",
+          "author": "Mark Hazleton",
+          "subject": "chore: prepare v1.1.0 release with upgrade command and migration tools"
+        },
+        {
+          "sha": "93165d27e19f9ccbb1f9ccac292727d72ee278f1",
+          "date": "2026-02-08T12:29:18-06:00",
+          "author": "Mark Hazleton",
+          "subject": "feat: add migration guide and scripts for transitioning to .documentation/ structure"
+        },
+        {
+          "sha": "584eb228fc7dfc9117e6827c6f55f5854bdc59cb",
+          "date": "2026-02-03T07:35:51-06:00",
+          "author": "Mark Hazleton",
+          "subject": "feat: use .documentation/ instead of .specify/ as Spark fork identifier"
+        },
+        {
+          "sha": "cc71dedd496ea63e5150ae77163f5144133977ee",
+          "date": "2026-02-02T12:59:15-06:00",
+          "author": "Mark Hazleton",
+          "subject": "Enhance documentation and command templates for improved clarity and usability"
+        },
+        {
+          "sha": "14aef4cb6ba9d34c6b35d8e613700cf90f590266",
+          "date": "2026-02-02T07:55:18-06:00",
+          "author": "Mark Hazleton",
+          "subject": "feat: add detailed roadmap section outlining current and future releases for Spec Kit Spark"
+        },
+        {
+          "sha": "ab40a9d91c7a89d0b6a93f941af9e9cbb1db83a9",
+          "date": "2026-02-01T23:28:49-06:00",
+          "author": "Mark Hazleton",
+          "subject": "Enhance documentation and roadmap for ASLCD Toolkit"
+        },
+        {
+          "sha": "132b91f4e41ed3af06d3c66ced250ca7dcf8ff89",
+          "date": "2026-02-01T23:20:58-06:00",
+          "author": "Mark Hazleton",
+          "subject": "feat: add evolve-constitution command for analyzing PR reviews and proposing amendments"
+        },
+        {
+          "sha": "bc058b2368c774ed701c11f2b12ccd5c3fee809c",
+          "date": "2026-01-29T14:15:24-06:00",
+          "author": "Mark Hazleton",
+          "subject": "Refactor release notes and versioning for Spec Kit Spark"
+        },
+        {
+          "sha": "cb5df20b4a809084bc465ac53bcec6a215d0ace3",
+          "date": "2026-01-29T13:06:32-06:00",
+          "author": "Mark Hazleton",
+          "subject": "Update documentation and references for Mark Hazleton Edition of Spec Kit"
+        },
+        {
+          "sha": "1b7d1ee54a55d39284ce8a2d87b9024326b49104",
+          "date": "2026-01-29T12:04:31-06:00",
+          "author": "Mark Hazleton",
+          "subject": "update documentation for spec driven development and site audit tool"
+        },
+        {
+          "sha": "4d8e14d399b088c932c7d74f0b3b8d183500b8bf",
+          "date": "2026-01-27T00:29:18-06:00",
+          "author": "Mark Hazleton",
+          "subject": "Add /speckit.critic command for adversarial risk analysis and update changelog"
+        },
+        {
+          "sha": "5354c8c51c78b34b7f269c0b178425f342a5f589",
+          "date": "2026-01-25T23:05:04-06:00",
+          "author": "Mark Hazleton",
+          "subject": "Add /speckit.pr-review command for constitution-based PR reviews"
+        },
+        {
+          "sha": "0049b1cdc2f9ba12def39a042872b0b1b6a09704",
+          "date": "2025-12-04T11:55:56-08:00",
+          "author": "den (work)",
+          "subject": "Update Markdown formatting"
+        },
+        {
+          "sha": "3e883fa32ca768629abeb5065d51c5926b525cc9",
+          "date": "2025-12-04T11:50:36-08:00",
+          "author": "den (work)",
+          "subject": "Update Markdown formatting"
+        },
+        {
+          "sha": "236bcb39877c29cf3dda082a0036bca76f37f0fe",
+          "date": "2025-12-04T18:05:07+05:30",
+          "author": "Satya Deep Maheshwari",
+          "subject": "docs: Add existing project initialization to getting started"
+        },
+        {
+          "sha": "84e1a69edc57695f3a10abb41b177f1bf9e39970",
+          "date": "2025-12-01T09:00:39-05:00",
+          "author": "David Birks",
+          "subject": "Limit width and height to 200px to match the small logo"
+        },
+        {
+          "sha": "6f223931061660ed97e7b99020f40b1fee744e34",
+          "date": "2025-12-01T08:56:45-05:00",
+          "author": "David Birks",
+          "subject": "docs: Switch readme logo to logo_large.webp"
+        },
+        {
+          "sha": "964b1418a319ffc7d2a10c3d1c6b63d0a3e89f2e",
+          "date": "2025-12-01T21:40:17+08:00",
+          "author": "pengjiahan.pjh",
+          "subject": "fix"
+        },
+        {
+          "sha": "cad12bd2c80c5222d17702fa661a285fcbb30894",
+          "date": "2025-12-01T21:37:02+08:00",
+          "author": "pengjiahan.pjh",
+          "subject": "fix"
+        },
+        {
+          "sha": "71a20eb787545761374b919970dbf0d911b667c4",
+          "date": "2025-11-19T14:20:21-07:00",
+          "author": "Andy Warner",
+          "subject": "Update supported AI agents in README.md"
+        },
+        {
+          "sha": "d471a6fa423b9b3ce1fef59798979a667c273ca6",
+          "date": "2025-11-06T23:43:16-05:00",
+          "author": "Ashley Childress",
+          "subject": "docs: fix broken link and improve agent reference"
+        },
+        {
+          "sha": "d79d99f0a9a341e3f7bad3ccb80928b6a2c1535b",
+          "date": "2025-11-06T18:01:16-05:00",
+          "author": "Ashley Childress",
+          "subject": "docs: reorganize upgrade documentation structure"
+        },
+        {
+          "sha": "57c54d3f0a0b578b7b44ccb3bc7a967c31c01070",
+          "date": "2025-11-06T17:47:21-05:00",
+          "author": "Ashley Childress",
+          "subject": "docs: remove related documentation section from upgrading guide"
+        },
+        {
+          "sha": "e976080cbfc4d0c007663bd79af5a4e7cde675e6",
+          "date": "2025-11-06T13:55:17-05:00",
+          "author": "Elias TOURNEUX",
+          "subject": "feat: Add OVHcloud SHAI AI Agent"
+        },
+        {
+          "sha": "f438a10c7c74aeaffb6e9329c8cf439823eecc20",
+          "date": "2025-11-06T15:31:11+00:00",
+          "author": "Vincent Burckhardt",
+          "subject": "feat: add support for IBM Bob IDE"
+        },
+        {
+          "sha": "3c4081d30fd901da50cc0d3f068a8b61e198ec26",
+          "date": "2025-11-05T20:54:39-05:00",
+          "author": "Ashley Childress",
+          "subject": "fix: remove broken link to existing project guide"
+        },
+        {
+          "sha": "392dbf20c4a6589cf2df6b8627e6beac2773e878",
+          "date": "2025-11-05T18:46:48-05:00",
+          "author": "Ashley Childress",
+          "subject": "docs: Add comprehensive upgrading guide for Spec Kit"
+        },
+        {
+          "sha": "de2cdc633de199b098b4cd75f7a9331737067b72",
+          "date": "2025-11-03T16:46:30+08:00",
+          "author": "pengjiahan.pjh",
+          "subject": "fix:qoder url"
+        },
+        {
+          "sha": "891736ffc8681bf61ef595f04a3229bc47a55481",
+          "date": "2025-11-03T16:43:35+08:00",
+          "author": "pengjiahan.pjh",
+          "subject": "fix:download owner"
+        },
+        {
+          "sha": "3110452c3f79c3cfe97dbae27a36fc170fe2e267",
+          "date": "2025-11-03T14:56:49+08:00",
+          "author": "pengjiahan.pjh",
+          "subject": "feat:support Qoder CLI"
+        },
+        {
+          "sha": "9786e588b7900c8eae9a76e0a9e5d0400d204cf1",
+          "date": "2025-10-21T15:12:33-07:00",
+          "author": "den (work)",
+          "subject": "Lint fixes"
+        },
+        {
+          "sha": "33a07969c3f1bf881147313b85d5d8d89bc287cf",
+          "date": "2025-10-20T00:49:15+02:00",
+          "author": "Benjamin Pahl",
+          "subject": "feat(ci): add markdownlint-cli2 for consistent markdown formatting"
+        },
+        {
+          "sha": "ed0fa8fffe93ec871510987bc4e4badd350ced7a",
+          "date": "2025-10-17T10:25:36-07:00",
+          "author": "Lutz Roeder",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "b291a6efb0c9a1fc442903b7593b52f8569c8447",
+          "date": "2025-10-15T22:17:48+01:00",
+          "author": "Daniel Silva",
+          "subject": "Added support for Amp code agent."
+        },
+        {
+          "sha": "2baae57b264b0a3e5484d1467290f5db5ab6be5a",
+          "date": "2025-10-15T21:38:16+08:00",
+          "author": "root",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "514b0548fe420a1dac2b69c79b62df0fa9377a05",
+          "date": "2025-10-15T21:36:01+08:00",
+          "author": "root",
+          "subject": "Update CodeBuddy link in README.md"
+        },
+        {
+          "sha": "7ca792509bd50ecf3e81a7c926cd9f84cdae23e9",
+          "date": "2025-10-14T18:46:34-07:00",
+          "author": "Jarren San Jose",
+          "subject": "docs: fix heading capitalization for consistency"
+        },
+        {
+          "sha": "36ff7e6505ae49eee73a01c2d3dd31752f73ad5d",
+          "date": "2025-10-14T11:52:26-07:00",
+          "author": "den (work)",
+          "subject": "Update files"
+        },
+        {
+          "sha": "defb1870da8cfda7fc26ad02170c32079bdce3c3",
+          "date": "2025-10-14T11:47:00-07:00",
+          "author": "den (work)",
+          "subject": "Update files"
+        },
+        {
+          "sha": "64745162df143310b0683966bbd95d9fb5753249",
+          "date": "2025-10-14T11:28:47-07:00",
+          "author": "den (work)",
+          "subject": "Update wording"
+        },
+        {
+          "sha": "3e476c2ba6e88150478ba75af7c7163a48dd1ced",
+          "date": "2025-10-14T10:38:40-07:00",
+          "author": "den (work)",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "09f57a87fa48621bf14ce6bd1639494df7483115",
+          "date": "2025-10-14T09:59:27+08:00",
+          "author": "benzyc",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "2c1de4202edcf0723e10ac098f4f681f296aaaf7",
+          "date": "2025-10-13T10:18:08-06:00",
+          "author": "Brian Campbell",
+          "subject": "docs(readme): add /speckit.tasks step and renumber walkthrough"
+        },
+        {
+          "sha": "d09552fc6389bbec2136113440369996202324f1",
+          "date": "2025-10-10T20:43:20-04:00",
+          "author": "Ben Greene",
+          "subject": "fix: align Cursor agent naming to use 'cursor-agent' consistently"
+        },
+        {
+          "sha": "ed9044345b305882a1dda6427afbd97bf32e19a7",
+          "date": "2025-10-10T11:45:51-07:00",
+          "author": "den (work)",
+          "subject": "Consolidate Cursor naming"
+        },
+        {
+          "sha": "5846a38c6896a7767e1447aa9bfc40b50d1397a5",
+          "date": "2025-10-09T16:19:36+02:00",
+          "author": "Oleksandr Ovcharov",
+          "subject": "add how to upgrade specify installation"
+        },
+        {
+          "sha": "719ba762bc42a5a755230f999618074aadbe1ced",
+          "date": "2025-10-07T17:07:25-07:00",
+          "author": "den (work)",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "d4cce17f66922823e4dda275d50d0704f6c48b29",
+          "date": "2025-10-07T17:05:15-07:00",
+          "author": "den (work)",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "15e5572a1d45730bd767c48dbb5b87bfadef2ee0",
+          "date": "2025-10-06T22:16:48-07:00",
+          "author": "den (work)",
+          "subject": "Update command reference"
+        },
+        {
+          "sha": "0037a3f48468bb7979c284a905121a258e9d3026",
+          "date": "2025-10-06T21:11:52-07:00",
+          "author": "den (work)",
+          "subject": "Update template and docs"
+        },
+        {
+          "sha": "b06f2b9f8937537932a259e09af0fdd980ccfaf6",
+          "date": "2025-10-06T07:14:58+07:00",
+          "author": "Korakot Chaovavanich",
+          "subject": "Codex CLI is now fully supported"
+        },
+        {
+          "sha": "3ee225f624188751f5aed9b2a29c137d18a259ab",
+          "date": "2025-10-01T12:09:41+03:00",
+          "author": "Emanuel Turis",
+          "subject": "Remove Codex named args limitation from README.md"
+        },
+        {
+          "sha": "12b823e4c22840c4fd545cfb5829dd35b83762ad",
+          "date": "2025-10-01T02:54:59-06:00",
+          "author": "Brian Anderson",
+          "subject": "docs(readme): link Amazon Q slash command limitation issue"
+        },
+        {
+          "sha": "f430138895bc62211cee75d5bfe3c1f0caad5d64",
+          "date": "2025-10-01T02:47:58-06:00",
+          "author": "Brian Anderson",
+          "subject": "docs: clarify Amazon Q limitation and update init docstring"
+        },
+        {
+          "sha": "de1db34b084aab95aa494d04dd4bc8466cdd3bb7",
+          "date": "2025-09-25T21:01:43-06:00",
+          "author": "Brian Anderson",
+          "subject": "feat(agent): Added Amazon Q Developer CLI Integration"
+        },
+        {
+          "sha": "6a3e81f813198514dcdfcc11c933f4a996e918f0",
+          "date": "2025-09-25T10:05:08+02:00",
+          "author": "Tine Kondo",
+          "subject": "docs: fix the paths of generated files (moved under a `.specify/` folder)"
+        },
+        {
+          "sha": "68eba52a40a0e424f152d583e41d6227a3e4909b",
+          "date": "2025-09-24T22:41:50-07:00",
+          "author": "Bruno Borges",
+          "subject": "feat: support 'specify init .' for current directory initialization"
+        },
+        {
+          "sha": "62f20c601cab9e22bb40330d0cc7c204a86cb0a8",
+          "date": "2025-09-23T12:09:19+00:00",
+          "author": "Minsu Lee",
+          "subject": "docs: remove constitution_update_checklist from README"
+        },
+        {
+          "sha": "c7b61f4bfdb16bc9cef470bf19436a8b74dac5f7",
+          "date": "2025-09-22T19:35:45-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update with extra commands"
+        },
+        {
+          "sha": "9319f0425e04ef8a528115a011c5d9466a4d5cea",
+          "date": "2025-09-22T14:45:35-07:00",
+          "author": "den (work)",
+          "subject": "Update with --force flag"
+        },
+        {
+          "sha": "8b09559690166fae71e5da28f22d73ab736160ae",
+          "date": "2025-09-23T05:22:35+08:00",
+          "author": "lispking",
+          "subject": "update CodeBuddy to international site"
+        },
+        {
+          "sha": "1db65aa6aa70f043e5b4989172f404b04e1dbada",
+          "date": "2025-09-22T11:08:25-04:00",
+          "author": "Shayne Boyer",
+          "subject": "feat: add uv tool install instructions to README"
+        },
+        {
+          "sha": "318b76de50a8bffe02973a3e4a6e8772ecc6a576",
+          "date": "2025-09-22T14:34:43+08:00",
+          "author": "lispking",
+          "subject": "feat: support codebuddy ai"
+        },
+        {
+          "sha": "92621bca7d61565c301b1e0285855b2a36bde5b2",
+          "date": "2025-09-22T14:20:31+08:00",
+          "author": "lispking",
+          "subject": "feat: support codebuddy ai"
+        },
+        {
+          "sha": "9348c45f9e47ed6ed7469ef033efab086583cde9",
+          "date": "2025-09-21T19:56:17-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update with Roo Code support"
+        },
+        {
+          "sha": "ceba130e52e0bfb08952b18572dcdfcb9df8ad74",
+          "date": "2025-09-21T12:48:58-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Add support for Auggie"
+        },
+        {
+          "sha": "dceb903804a725d2546fe9680c0fa095e55db1b6",
+          "date": "2025-09-21T12:32:16-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Updates with Kilo Code support"
+        },
+        {
+          "sha": "39b33ebd22403d0cc7bf0d61a2707b0a81139158",
+          "date": "2025-09-21T11:52:10-07:00",
+          "author": "Den Delimarsky",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "cef4e8f49549593a28951db8a137d4600bf4dc91",
+          "date": "2025-09-21T11:45:33-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "8c4f348ac11c49b01b96cff3d58ca62c48477347",
+          "date": "2025-09-21T16:03:33+08:00",
+          "author": "lucien",
+          "subject": "docs: Update README with codex in check command"
+        },
+        {
+          "sha": "7c0f0a4627e0ea6a3caaf72c2ea93389f4957a1e",
+          "date": "2025-09-20T11:19:47-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Consolidate scripts"
+        },
+        {
+          "sha": "d7d2c145c7c6ce18912e8ddee4538540e0c4f931",
+          "date": "2025-09-20T10:10:23-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update config"
+        },
+        {
+          "sha": "65ccbb62ca1749744f8843c7d52e0cd89439d8cf",
+          "date": "2025-09-20T22:44:44+09:00",
+          "author": "honjo-hiroaki-gtt",
+          "subject": "Enhance Codex support by auto-syncing prompt files, allowing spec generation without git, and documenting clearer /specify usage."
+        },
+        {
+          "sha": "d1d5c82a8e7e6eb5f9725c2ba16173a80da2d679",
+          "date": "2025-09-19T18:07:18-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update package release"
+        },
+        {
+          "sha": "3a0ae75bfbf97eca7c318c8de3ce7fde59371eba",
+          "date": "2025-09-19T17:53:16+09:00",
+          "author": "honjo-hiroaki-gtt",
+          "subject": "Limit workspace command seeding to Codex init and update Codex documentation accordingly."
+        },
+        {
+          "sha": "312703260c46d4d800825383d5c6f7429ec77cd3",
+          "date": "2025-09-19T16:40:41+09:00",
+          "author": "honjo-hiroaki-gtt",
+          "subject": "Clarify Codex-specific README note with rationale for its different workflow."
+        },
+        {
+          "sha": "32c933c960cc372607f885ade04855665f7d8433",
+          "date": "2025-09-18T23:03:01-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update with support for /implement"
+        },
+        {
+          "sha": "95fba17d204aad170d2a496e5f310998e670d347",
+          "date": "2025-09-04T14:47:24+09:00",
+          "author": "honjo-hiroaki-gtt",
+          "subject": "Add Codex CLI support with AGENTS.md and commands bootstrap"
+        },
+        {
+          "sha": "c5f758247099c2c1c5a7cd5c6dc5492eba927732",
+          "date": "2025-09-17T13:12:50-07:00",
+          "author": "Emre",
+          "subject": "feat: Add opencode ai agent"
+        },
+        {
+          "sha": "a9512e00fcb05ad48ad853fca589ba8c2a6deb1c",
+          "date": "2025-09-16T16:08:42+02:00",
+          "author": "danielmeppiel",
+          "subject": "Fixes as per PR Review from Copilot"
+        },
+        {
+          "sha": "52da4ce9d5ebd4ac3d126e55ae4ea9409b0016a9",
+          "date": "2025-09-16T12:51:26+02:00",
+          "author": "danielmeppiel",
+          "subject": "Add APM docs"
+        },
+        {
+          "sha": "6e4f28791344b6b0c1b930314c51afb306b8105c",
+          "date": "2025-09-16T10:24:12+02:00",
+          "author": "danielmeppiel",
+          "subject": "Add prune, uninstall and init --with-apm. Fixes APM package collisions (APM packages with same repo name different owner are now handled well)"
+        },
+        {
+          "sha": "9d449539bb9a2cc07318370488f4022ebdeb5fe7",
+          "date": "2025-09-15T23:43:38+02:00",
+          "author": "danielmeppiel",
+          "subject": "Add APM CLI - init, install, compile, deps"
+        },
+        {
+          "sha": "ad9c93c13be94cd1d361b5633c0ee4aa0624709f",
+          "date": "2025-09-14T09:09:58-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "b1591282f62a0e6c92fd662c419b714b851af3ff",
+          "date": "2025-09-14T09:08:37-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update with video header"
+        },
+        {
+          "sha": "736e28256227a9bd6cff609f02490d09325a120d",
+          "date": "2025-09-12T15:20:20-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update with check changes"
+        },
+        {
+          "sha": "6c83e9ff663a18e815e05a2172e874edf648fa31",
+          "date": "2025-09-12T14:39:45-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update wording"
+        },
+        {
+          "sha": "0ad2f169d2563e0a7124cc6e688d09ed73c82598",
+          "date": "2025-09-12T14:34:13-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Support Cursor"
+        },
+        {
+          "sha": "57024454bf29c06f61b274615c08e6bc9a14291f",
+          "date": "2025-09-12T00:17:31-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "1ae6b55c870635bac044fd72b1ae0d45749dd501",
+          "date": "2025-09-12T00:15:25-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update CLI reference"
+        },
+        {
+          "sha": "73a9af70a4049c8480ba5a05eb1435274b41336a",
+          "date": "2025-09-11T15:35:46+03:00",
+          "author": "Ahmet \u00c7etinkaya",
+          "subject": "feat: add Qwen Code support to Spec Kit"
+        },
+        {
+          "sha": "9140e9b009f993d46a5a29e4390c43ad7e09c2d8",
+          "date": "2025-09-09T10:32:58-04:00",
+          "author": "Mark Beacom",
+          "subject": "docs: Fix formatting issues in README.md for consistency"
+        },
+        {
+          "sha": "a3b6e4455a2e5e23ebc6388e0bcd4e8ec42c682b",
+          "date": "2025-09-09T05:39:54+05:30",
+          "author": "Bitan Paul",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "9d01e9d7b66995833269fe7288f852470dce1cbd",
+          "date": "2025-09-08T13:16:38-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "29eb082e2a19f99701397f33f1bc9859959b1ae4",
+          "date": "2025-09-07T15:18:08+09:00",
+          "author": "Yuji Yaginuma",
+          "subject": "Use `/usr/bin/env bash` instead of `/bin/bash` for shebang"
+        },
+        {
+          "sha": "f88f6c8c0586bb69d1f0fbb6b4f594f5309b38b9",
+          "date": "2025-09-04T13:42:39+01:00",
+          "author": "adam.paterson",
+          "subject": "fix: incorrect tree structure in examples"
+        },
+        {
+          "sha": "c3ff114c5f582f8943ab8b40ef8428a27b8136df",
+          "date": "2025-08-25T14:09:38-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "084d111d687201a5558464e975b0a2437149a612",
+          "date": "2025-08-25T11:26:20-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Add John Lam as contributor and release badge"
+        },
+        {
+          "sha": "56120b2ff0b885d1ddce80d9cb140d8195cb3cf5",
+          "date": "2025-08-22T12:19:42-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update requirements"
+        },
+        {
+          "sha": "26da1c13b88259700a410650ee007725789b54c5",
+          "date": "2025-08-22T10:26:30-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "f6bbb3e1aaaa08b910aa54037194b8301cb49023",
+          "date": "2025-08-22T10:08:59-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "39f30babe6e60b8674a65a1e78483786453e3c37",
+          "date": "2025-08-22T10:07:28-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Update project name"
+        },
+        {
+          "sha": "28fdfaa86973d4402eecd89ba6c87d31e1edae03",
+          "date": "2025-08-22T10:06:25-07:00",
+          "author": "Den Delimarsky \ud83c\udf3a",
+          "subject": "Initial checkin"
+        },
+        {
+          "sha": "fa2736371e077f55c4fe145fea186bab2561386d",
+          "date": "2025-08-21T15:54:32-07:00",
+          "author": "Den Delimarsky",
+          "subject": "Initial commit"
+        }
+      ]
+    }
+  },
+  "change_patterns": {
+    "subject_type_estimates": {
+      "features": 97,
+      "fixes": 131,
+      "docs": 69,
+      "refactor": 16,
+      "tests": 37,
+      "ci_build": 3,
+      "chore": 13,
+      "other": 261
+    },
+    "hotspots": [
+      {
+        "path": "src/specify_cli/__init__.py",
+        "changes": 115
+      },
+      {
+        "path": "README.md",
+        "changes": 115
+      },
+      {
+        "path": "CHANGELOG.md",
+        "changes": 57
+      },
+      {
+        "path": ".github/workflows/scripts/create-release-packages.sh",
+        "changes": 54
+      },
+      {
+        "path": "pyproject.toml",
+        "changes": 52
+      },
+      {
+        "path": "scripts/powershell/update-agent-context.ps1",
+        "changes": 46
+      },
+      {
+        "path": "scripts/bash/update-agent-context.sh",
+        "changes": 46
+      },
+      {
+        "path": "templates/commands/specify.md",
+        "changes": 40
+      },
+      {
+        "path": "AGENTS.md",
+        "changes": 36
+      },
+      {
+        "path": "templates/commands/tasks.md",
+        "changes": 32
+      },
+      {
+        "path": "templates/commands/plan.md",
+        "changes": 31
+      },
+      {
+        "path": "CONTRIBUTING.md",
+        "changes": 28
+      },
+      {
+        "path": "templates/commands/implement.md",
+        "changes": 25
+      },
+      {
+        "path": "scripts/bash/create-new-feature.sh",
+        "changes": 25
+      },
+      {
+        "path": ".github/workflows/release.yml",
+        "changes": 25
+      },
+      {
+        "path": "templates/plan-template.md",
+        "changes": 22
+      },
+      {
+        "path": "templates/commands/constitution.md",
+        "changes": 22
+      },
+      {
+        "path": "scripts/powershell/create-new-feature.ps1",
+        "changes": 22
+      },
+      {
+        "path": ".github/workflows/scripts/create-github-release.sh",
+        "changes": 17
+      },
+      {
+        "path": "templates/commands/checklist.md",
+        "changes": 16
+      },
+      {
+        "path": "templates/commands/clarify.md",
+        "changes": 15
+      },
+      {
+        "path": "spec-driven.md",
+        "changes": 15
+      },
+      {
+        "path": "templates/commands/analyze.md",
+        "changes": 14
+      },
+      {
+        "path": "docs/index.md",
+        "changes": 14
+      },
+      {
+        "path": "docs/quickstart.md",
+        "changes": 13
+      },
+      {
+        "path": ".github/workflows/scripts/create-release-packages.ps1",
+        "changes": 13
+      },
+      {
+        "path": "docs/installation.md",
+        "changes": 12
+      },
+      {
+        "path": "templates/tasks-template.md",
+        "changes": 11
+      },
+      {
+        "path": "scripts/bash/common.sh",
+        "changes": 10
+      },
+      {
+        "path": ".gitignore",
+        "changes": 9
+      },
+      {
+        "path": "scripts/powershell/check-prerequisites.ps1",
+        "changes": 8
+      },
+      {
+        "path": "docs/local-development.md",
+        "changes": 8
+      },
+      {
+        "path": "templates/spec-template.md",
+        "changes": 7
+      },
+      {
+        "path": "templates/commands/site-audit.md",
+        "changes": 7
+      },
+      {
+        "path": "templates/commands/release.md",
+        "changes": 7
+      },
+      {
+        "path": "templates/commands/pr-review.md",
+        "changes": 7
+      },
+      {
+        "path": "scripts/powershell/common.ps1",
+        "changes": 7
+      },
+      {
+        "path": "scripts/bash/check-prerequisites.sh",
+        "changes": 7
+      },
+      {
+        "path": "docs/toc.yml",
+        "changes": 7
+      },
+      {
+        "path": "FORK_DIVERGENCE.md",
+        "changes": 7
+      },
+      {
+        "path": "templates/commands/taskstoissues.md",
+        "changes": 6
+      },
+      {
+        "path": "src/apm_cli/models/apm_package.py",
+        "changes": 6
+      },
+      {
+        "path": "scripts/powershell/setup-plan.ps1",
+        "changes": 6
+      },
+      {
+        "path": "scripts/bash/setup-plan.sh",
+        "changes": 6
+      },
+      {
+        "path": "docs/docfx.json",
+        "changes": 6
+      },
+      {
+        "path": ".github/workflows/scripts/get-next-version.sh",
+        "changes": 6
+      },
+      {
+        "path": ".github/workflows/scripts/generate-release-notes.sh",
+        "changes": 6
+      },
+      {
+        "path": ".documentation/index.md",
+        "changes": 6
+      },
+      {
+        "path": ".devcontainer/devcontainer.json",
+        "changes": 6
+      },
+      {
+        "path": "templates/checklist-template.md",
+        "changes": 5
+      }
+    ]
+  },
+  "technical_signals": {
+    "language_presence": {
+      "python": true,
+      "javascript": true,
+      "typescript": false,
+      "powershell": true,
+      "shell": true,
+      "markdown": true
+    },
+    "has_pyproject_toml": true,
+    "has_package_json": false,
+    "has_dockerfile": false,
+    "has_github_actions": true
+  },
+  "recent": {
+    "commits": [
+      {
+        "sha": "bf4592f2524da4fc5bdaf5f7b6fa94fba88316d8",
+        "date": "2026-03-26T15:19:03-05:00",
+        "author": "Mark Hazleton",
+        "subject": "feat(release): add support for manual version input in workflow dispatch"
+      },
+      {
+        "sha": "29f41e6c7e0637234581f42491ec250e60edbf4f",
+        "date": "2026-03-26T14:21:58-05:00",
+        "author": "Mark Hazleton",
+        "subject": "release: update changelog and bump version to 1.4.6"
+      },
+      {
+        "sha": "3d65b6b2c74c74f8b55114d92afc78cf306026e9",
+        "date": "2026-03-26T13:12:35-05:00",
+        "author": "Mark Hazleton",
+        "subject": "docs(prompts): align Spark command templates to canonical .documentation paths"
+      },
+      {
+        "sha": "eb637e26e17547a7e071e807f6ad06bb014622b9",
+        "date": "2026-03-26T12:38:03-05:00",
+        "author": "Mark Hazleton",
+        "subject": "fix(powershell): harden scripts for runtime safety and PS7 compatibility"
+      },
+      {
+        "sha": "ed1e30236b9d0e26cb25811602223398c7679103",
+        "date": "2026-03-26T11:07:33-05:00",
+        "author": "Mark Hazleton",
+        "subject": "chore(docs): finalize markdownlint cleanups and branding"
+      },
+      {
+        "sha": "8ad626ac7d91333466697062518c07bacdd9bfcf",
+        "date": "2026-03-26T11:06:31-05:00",
+        "author": "Mark Hazleton",
+        "subject": "fix(docs): resolve markdownlint workflow failures"
+      },
+      {
+        "sha": "835c87182107457edf5d8c29b5e309f1eb845d17",
+        "date": "2026-03-25T22:06:41-05:00",
+        "author": "Mark Hazleton",
+        "subject": "fix: resolve prompt_choice NameError in upgrade command; bump to 1.4.5"
+      },
+      {
+        "sha": "1076b6ce6a8d545242fb3eb84be065a90b24a16c",
+        "date": "2026-03-25T21:20:12-05:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: introduce /speckit.harvest command for knowledge preservation and repository cleanup"
+      },
+      {
+        "sha": "0fe7482e040a64eadadae4984afb07d21a56deef",
+        "date": "2026-03-25T18:21:36-05:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: add harvest command for cleaning stale documentation and archiving artifacts"
+      },
+      {
+        "sha": "df529b97c14a68258fdbbf6e64186ecb2f4c8eb8",
+        "date": "2026-03-20T00:19:03-05:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: implement harvest agent with pre-scan functionality for specs, docs, and code comments"
+      },
+      {
+        "sha": "389c0e0a9a0aa2ec0ab136d68546d9a8cc8f4482",
+        "date": "2026-03-19T15:04:54-05:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: update changelog for version 1.3.0 and enhance site-audit and PR review scripts with new sampling and inventory options"
+      },
+      {
+        "sha": "8224ec29bf226e1e1df3315d03b63d47e7c34b1c",
+        "date": "2026-03-17T14:54:56-05:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: add settings.local.json for Bash permissions configuration"
+      },
+      {
+        "sha": "c0499140314a2ebc2041cb0537cafccb5507d53c",
+        "date": "2026-03-17T13:29:56-05:00",
+        "author": "Mark Hazleton",
+        "subject": "fix: update paths to specs directory in scripts and documentation"
+      },
+      {
+        "sha": "066ab86483da86dbff5e39bbc6d08e6a10906d81",
+        "date": "2026-03-17T08:51:29-05:00",
+        "author": "Mark Hazleton",
+        "subject": "Refactor documentation paths and update user personas"
+      },
+      {
+        "sha": "03bf83c213ed0bd362a65c54891de612ea6c5635",
+        "date": "2026-03-07T12:22:46-06:00",
+        "author": "Mark Hazleton",
+        "subject": "fix: migration always overwrites template files with user's files"
+      },
+      {
+        "sha": "67c86d505a3a02ca671aabb7431629a1cbc0491e",
+        "date": "2026-03-07T12:20:02-06:00",
+        "author": "Mark Hazleton",
+        "subject": "fix: replace PS1/bash migration subprocess with Python implementation"
+      },
+      {
+        "sha": "90447e14d92076df67e6fb348b9d729b1578516c",
+        "date": "2026-03-07T12:02:39-06:00",
+        "author": "Mark Hazleton",
+        "subject": "fix: include migration scripts in release packages; use release tag for version stamp"
+      },
+      {
+        "sha": "d7e8433e064f54d11a0ac727ba0ca036ae229b58",
+        "date": "2026-03-07T11:16:26-06:00",
+        "author": "Mark Hazleton",
+        "subject": "fix: migrate specs/ to .documentation/specs/ and defer migration until after template install"
+      },
+      {
+        "sha": "7717901c7beb56cfc83e1ec89f5e3302d10e2d45",
+        "date": "2026-03-07T09:16:53-06:00",
+        "author": "Mark Hazleton",
+        "subject": "docs: add v1.2.0 release notes"
+      },
+      {
+        "sha": "92ec9a0daf992789916b2154d2a56861cb8eb2d5",
+        "date": "2026-03-07T09:15:04-06:00",
+        "author": "Mark Hazleton",
+        "subject": "chore: release v1.2.0 \u2014 version stamp, /speckit.upgrade command, site-audit version check"
+      },
+      {
+        "sha": "44634a8b23c540d3c4a8844298863488de21ca05",
+        "date": "2026-03-07T09:10:12-06:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: add Spec Kit Spark version management and upgrade guidance"
+      },
+      {
+        "sha": "0f342cdb9e3f9f5addad922adcb0fa1485bf2915",
+        "date": "2026-03-07T08:39:29-06:00",
+        "author": "Mark Hazleton",
+        "subject": "refactor: update script paths in documentation and scripts; add archive context scripts"
+      },
+      {
+        "sha": "0d83e822a1b5d52a798aaf298c63e9dd7c1a4881",
+        "date": "2026-03-02T15:38:53-06:00",
+        "author": "Mark Hazleton",
+        "subject": "Add user personas and interaction flows documentation; introduce automated upstream integration strategy for Spec Kit Spark"
+      },
+      {
+        "sha": "f38f6c8e3edff4eec698b0065a8a5fbc9482787a",
+        "date": "2026-02-20T21:41:59-06:00",
+        "author": "Mark Hazleton",
+        "subject": "docs: document template bias removal was already applied (commit a5f9773)"
+      },
+      {
+        "sha": "016f56691ab971f8d7ca92170d6d43299be0105e",
+        "date": "2026-02-20T21:39:58-06:00",
+        "author": "Mark Hazleton",
+        "subject": "docs: update V-Model extension to v0.2.0 in catalog and FORK_DIVERGENCE"
+      },
+      {
+        "sha": "9e8d1379cc0e7fa4ebb203286410ec001d25e69b",
+        "date": "2026-02-20T18:27:47-06:00",
+        "author": "Mark Hazleton",
+        "subject": "chore: remove incoming integration plans folder"
+      },
+      {
+        "sha": "097bb53700c1ebe61210653ae439b4dd565b7290",
+        "date": "2026-02-20T18:27:24-06:00",
+        "author": "Mark Hazleton",
+        "subject": "docs: update FORK_DIVERGENCE.md with extension system integration"
+      },
+      {
+        "sha": "9b9b84eb1aa0e86ba2a1c2a8c30b654584c6a74d",
+        "date": "2026-02-20T18:26:59-06:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: add extension system and fix Qoder CLI tool name"
+      },
+      {
+        "sha": "33b3fe410d0f8837d5f89cc08a7fbeaf644cf2f7",
+        "date": "2026-02-20T18:10:38-06:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: add GitHub issue templates for bug reports, feature requests, and agent requests"
+      },
+      {
+        "sha": "f26b2f720a7166b873b81b5d9432c62c7ec9766e",
+        "date": "2026-02-20T13:30:16-06:00",
+        "author": "Manfred Riem",
+        "subject": "fix: rename Qoder AGENT_CONFIG key from 'qoder' to 'qodercli' to match actual CLI executable (#1651)"
+      },
+      {
+        "sha": "68d1d3a0fcdabba01b3ed31eb504a8ff6fc53baf",
+        "date": "2026-02-20T17:35:48-06:00",
+        "author": "Manfred Riem",
+        "subject": "feat: add GitHub issue templates (#1655)"
+      },
+      {
+        "sha": "07077d0fc26f56aea8ecfc2ae41c6e5db9ce34d8",
+        "date": "2026-02-20T23:29:58+00:00",
+        "author": "Leonardo Nascimento",
+        "subject": "Update V-Model Extension Pack to v0.2.0 in community catalog (#1656)"
+      },
+      {
+        "sha": "58337b9f7b678614e6f3b6a9b05b3197b176bd4c",
+        "date": "2026-02-20T17:14:56-06:00",
+        "author": "Mark Hazleton",
+        "subject": "feat: add sync-upstream.ps1 script for managing upstream changes"
+      },
+      {
+        "sha": "dcb1b7fad82d3dd41cbb8f768757431669e2cb00",
+        "date": "2026-02-20T10:22:16-06:00",
+        "author": "Manfred Riem",
+        "subject": "fix: pin click>=8.1 to prevent Python 3.14/Homebrew env isolation crash (#1648)"
+      },
+      {
+        "sha": "a5f97730ae51b311099b042167261a89912e74e1",
+        "date": "2026-02-20T14:46:56-06:00",
+        "author": "Manfred Riem",
+        "subject": "refactor: remove OpenAPI/GraphQL bias from templates (#1652)"
+      },
+      {
+        "sha": "aeed11f735faf04bbd4548c95799081aa5615fe6",
+        "date": "2026-02-20T21:11:51+00:00",
+        "author": "Leonardo Nascimento",
+        "subject": "Add V-Model Extension Pack to catalog (#1640)"
+      },
+      {
+        "sha": "12405c01e1008ee31403155552a987851537252b",
+        "date": "2026-02-20T14:46:56-06:00",
+        "author": "Manfred Riem",
+        "subject": "refactor: remove OpenAPI/GraphQL bias from templates (#1652)"
+      },
+      {
+        "sha": "fc3b98ea09acfdbc27bd69a1ed93ecb072baf339",
+        "date": "2026-02-20T13:30:16-06:00",
+        "author": "Manfred Riem",
+        "subject": "fix: rename Qoder AGENT_CONFIG key from 'qoder' to 'qodercli' to match actual CLI executable (#1651)"
+      },
+      {
+        "sha": "6150f1e31747a387119bf1456128b90a05fed15e",
+        "date": "2026-02-20T11:05:38-06:00",
+        "author": "Manfred Riem",
+        "subject": "Add generic agent support with customizable command directories (#1639)"
+      },
+      {
+        "sha": "6fca5d83b21594f92417e72b30ac3f17cb1989c7",
+        "date": "2026-02-20T10:22:16-06:00",
+        "author": "Manfred Riem",
+        "subject": "fix: pin click>=8.1 to prevent Python 3.14/Homebrew env isolation crash (#1648)"
+      }
+    ]
+  }
+}
