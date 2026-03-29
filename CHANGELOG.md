@@ -7,6 +7,12 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-03-28
+
+### Fixed
+
+- **Markdownlint errors in repo-story template**: Added missing blank lines around lists and headings in `templates/commands/repo-story.md` to resolve 15 MD022/MD032 lint failures.
+
 ## [1.5.0] - 2026-03-28
 
 ### Added
