@@ -69,6 +69,7 @@ Run `{SCRIPT}` to produce `history.json` and parse the JSON output for these top
 
 **Error Handling**:
 If the script fails:
+
 - **Git not available**: Inform user that a Git repository is required
 - **No commits found**: Report that the repository has no history to analyze
 - **Python missing (bash only)**: Suggest running the PowerShell variant or installing Python 3
@@ -91,6 +92,7 @@ Construct the repo story using the following structure. Every claim **MUST** cit
 #### A. Executive Summary (Business Audience)
 
 Write 3–5 paragraphs covering:
+
 - **What this project is** — purpose derived from repo name, README presence, and language mix
 - **Scale and maturity** — total commits, contributor count, age of first commit, latest activity
 - **Velocity trend** — month-over-month commit patterns from `timeline`, acceleration or deceleration
@@ -104,27 +106,32 @@ Use plain language. Avoid jargon. Target a VP/director reading level.
 For each of the following subsections, provide evidence-backed analysis:
 
 ##### Development Velocity
+
 - Commits per month trend (cite `timeline` data)
 - Lines added vs removed (cite `volume_metrics`)
 - Churn ratio interpretation — high churn = refactoring, low churn = greenfield
 - If `--compare-baseline` provided, show delta between baseline and current period
 
 ##### Contributor Dynamics
+
 - Role distribution from `contributor_census` (use anonymized roles, not real names)
 - Bus factor assessment — what percentage of commits come from top contributor?
 - Team growth or contraction over the timeline
 
 ##### Quality Signals
+
 - Test-to-source file ratio (cite `test_metrics`)
 - Conventional commit adoption rate (cite `commit_message_metrics.conventional_percentage`)
 - Commit message quality — average length, prefix diversity
 
 ##### Governance & Process Maturity
+
 - Merge commit percentage as PR workflow proxy (cite `governance_maturity`)
 - Tag discipline — regular releases vs sporadic
 - Branch strategy signals from merge patterns
 
 ##### Architecture & Technology
+
 - Language/framework indicators from `technical_signals`
 - Configuration maturity — CI, linting, formatting, dependency management
 - Hotspot analysis — most-modified files may indicate active development or instability
@@ -132,6 +139,7 @@ For each of the following subsections, provide evidence-backed analysis:
 #### C. Change Pattern Analysis
 
 Using `change_patterns`:
+
 - Identify the top 5 most-modified files and explain what they suggest
 - Flag any files with disproportionate churn as potential refactoring candidates or complexity hotspots
 - Note directory-level patterns (e.g., "80% of changes in src/ — active development area")
@@ -151,6 +159,7 @@ Connect milestones to surrounding commit activity — did velocity spike before 
 #### E. Constitution Alignment (Optional)
 
 If `/.documentation/memory/constitution.md` exists:
+
 - Read the constitution principles
 - Map governance metrics to relevant principles
 - Note areas of strong alignment and gaps
@@ -203,6 +212,7 @@ Use this document structure:
 ### 5. Summary
 
 After saving, present:
+
 1. The **Executive Summary** section directly in chat for immediate reading
 2. The full file path where the complete narrative was saved
 3. One-line takeaways:
