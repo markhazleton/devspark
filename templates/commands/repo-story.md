@@ -5,8 +5,8 @@ handoffs:
     agent: speckit.repo-story
     prompt: Show me previous repo stories in .documentation/repo-story/
 scripts:
-  sh: .documentation/scripts/bash/repo-story-context.sh $ARGUMENTS --json
-  ps: .documentation/scripts/powershell/repo-story-context.ps1 $ARGUMENTS -Json
+  sh: .documentation/scripts/bash/repo-story-context.sh $ARGUMENTS --stdout
+  ps: .documentation/scripts/powershell/repo-story-context.ps1 $ARGUMENTS -Stdout
 ---
 
 ## User Input
