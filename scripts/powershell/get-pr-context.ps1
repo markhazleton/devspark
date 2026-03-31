@@ -32,7 +32,12 @@ $ErrorActionPreference = "Stop"
 #==============================================================================
 
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repoRoot = (Resolve-Path "$scriptPath\..\..")
+$gitRoot = try { git rev-parse --show-toplevel 2>$null } catch { $null }
+if ($LASTEXITCODE -eq 0 -and $gitRoot) {
+    $repoRoot = $gitRoot.Trim()
+} else {
+    $repoRoot = (Resolve-Path "$scriptPath\..\..\..\").Path
+}
 
 #==============================================================================
 # Utility Functions
@@ -170,16 +175,16 @@ if (-not $IncludeAllFiles -and $filesChangedTotal -gt $FileSampleLimit) {
 }
 
 # Check for constitution
-$constitutionPath = Join-Path $repoRoot.Path ".documentation\memory\constitution.md"
+$constitutionPath = Join-Path $repoRoot ".documentation\memory\constitution.md"
 $constitutionExists = Test-Path $constitutionPath
 
 # Prepare review directory
-$reviewDir = Join-Path $repoRoot.Path ".documentation\specs\pr-review"
+$reviewDir = Join-Path $repoRoot ".documentation\specs\pr-review"
 
 # Build output
 if ($Json) {
     $output = @{
-        REPO_ROOT = $repoRoot.Path
+        REPO_ROOT = $repoRoot
         PR_CONTEXT = @{
             enabled = $true
             pr_number = $prData.number

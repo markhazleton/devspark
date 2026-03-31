@@ -18,7 +18,11 @@ set -o pipefail
 #==============================================================================
 
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+if git rev-parse --show-toplevel >/dev/null 2>&1; then
+    REPO_ROOT="$(git rev-parse --show-toplevel)"
+else
+    REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+fi
 
 PR_NUMBER=""
 JSON_MODE=false
