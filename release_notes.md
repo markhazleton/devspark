@@ -15,6 +15,9 @@ This release (v1.5.0) introduces the new `/speckit.repo-story` command for gener
 
 ## Spark-Specific Features
 
+- **Agent-Agnostic Architecture**: Canonical prompts in `.documentation/commands/` with thin platform shims — every AI assistant is a first-class citizen
+- **Multi-User Personalization**: `/speckit.personalize` creates per-user command overrides in `.documentation/{git-user}/commands/` — team governance with individual customization
+- **Full Lifecycle Coverage**: From greenfield (`/speckit.specify`) through brownfield (`/speckit.discover-constitution`), maintenance (`/speckit.quickfix`), cleanup (`/speckit.harvest`), release (`/speckit.release`), and evolution (`/speckit.evolve-constitution`)
 - **Repo Story**: Generate evidence-based repository narratives from commit history
 - **Discover Constitution**: Analyze existing codebases to reverse-engineer project principles
 - **PR Review Command**: Constitution-based pull request review workflow

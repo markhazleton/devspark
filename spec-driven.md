@@ -58,6 +58,28 @@ SDD transforms requirement changes from obstacles into normal workflow. When spe
 
 **Branching for Exploration**: Generate multiple implementation approaches from the same specification to explore different optimization targets—performance, maintainability, user experience, cost.
 
+## Agent-Agnostic and Multi-User by Design
+
+SDD is a methodology, not a tool — and Spec Kit embodies this principle through two architectural decisions:
+
+### Agent-Agnostic Architecture
+
+The same specification workflow works identically whether your team uses Claude Code, GitHub Copilot, Gemini CLI, Cursor, or any of 17+ supported agents. Canonical prompts live in `.documentation/commands/` as a single source of truth; platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims that redirect to the canonical content.
+
+This means:
+- **No agent lock-in** — switch tools without losing workflow structure
+- **Mixed-agent teams** — different team members can use their preferred AI assistant on the same project
+- **Consistent governance** — the same constitution and quality gates apply regardless of which agent executes them
+
+### Multi-User Personalization
+
+Teams share constitutions, specs, and workflow governance — but individuals can customize how they interact with those workflows. The `/speckit.personalize` command creates per-user prompt overrides in `.documentation/{git-user}/commands/` that take priority over shared defaults.
+
+This balances:
+- **Team benefit** — shared standards, consistent output quality, unified governance
+- **Individual freedom** — each developer can tune prompts to their thinking style, add personal checklists, or emphasize areas they care about
+- **Transparency** — personalized overrides are committed to git, so the team can see and review each other's customizations
+
 ## Implementation Approaches
 
 Today, practicing SDD requires assembling existing tools and maintaining discipline throughout the process. The methodology can be practiced with:

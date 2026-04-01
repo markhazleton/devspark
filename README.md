@@ -5,7 +5,7 @@
 </div>
 
 <p align="center">
-    <strong>An Adaptive System Life Cycle Development (ASLCD) Toolkit - combining specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity. Part of the WebSpark suite.</strong>
+    <strong>An Adaptive System Life Cycle Development (ASLCD) Toolkit - agent-agnostic, multi-user, and full-lifecycle. Combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity. Part of the WebSpark suite.</strong>
 </p>
 
 <p align="center">
@@ -22,6 +22,7 @@
 
 ## Table of Contents
 
+- [Three Pillars](#three-pillars)
 - [🎯 The ASLCD Vision](#-the-aslcd-vision)
 - [🤔 What is Spec-Driven Development?](#-what-is-spec-driven-development)
 - [⚡ Get Started](#-get-started)
@@ -39,6 +40,26 @@
 - [💬 Support](#-support)
 - [🙏 Acknowledgements](#-acknowledgements)
 - [📄 License](#-license)
+
+---
+
+## Three Pillars
+
+Spec Kit Spark is built on three reinforcing design principles:
+
+### 🔀 Agent-Agnostic by Default
+
+Every AI coding assistant is a first-class citizen. Canonical command prompts live in `.documentation/commands/` — a single source of truth — while each platform (`.claude/`, `.github/`, `.cursor/`, `.gemini/`, etc.) receives only thin shims that redirect to the canonical content. Switch agents, use multiple agents on the same project, or onboard new team members on different tools — the workflow stays the same.
+
+### 👥 Multi-User Personalization
+
+Teams share a common set of prompts, but individuals can customize any command without affecting others. Run `/speckit.personalize specify` to create a user-scoped override in `.documentation/{git-user}/commands/`. Personalized prompts are committed to git so the team can review and share customizations. Delete the override to revert to the shared default.
+
+### 🔄 Full Lifecycle Coverage
+
+From greenfield project creation (`/speckit.specify`) through brownfield discovery (`/speckit.discover-constitution`), ongoing maintenance (`/speckit.quickfix`), documentation cleanup (`/speckit.harvest`), release management (`/speckit.release`), and constitution evolution (`/speckit.evolve-constitution`) — Spec Kit supports every phase of the software development lifecycle, not just the initial build.
+
+---
 
 ## 🎯 The ASLCD Vision
 
@@ -492,6 +513,8 @@ Want to see Spec Kit in action? Watch our [video overview](https://www.youtube.c
 
 ## 🤖 Supported AI Agents
 
+Spec Kit is **agent-agnostic by design**. Every agent below is a first-class citizen — canonical prompts live in `.documentation/commands/` and each platform receives a thin shim. Switch agents freely, use multiple agents on the same project, or let different team members choose their preferred tool.
+
 | Agent                                                                                | Support | Notes                                                                                                                                     |
 | ------------------------------------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | [Qoder CLI](https://qoder.com/cli)                                                   | ✅      |                                                                                                                                           |
@@ -625,6 +648,12 @@ These commands only require a constitution and work independently of the spec wo
 | `/speckit.evolve-constitution`  | Propose constitution amendments based on PR review patterns              |
 | `/speckit.repo-story`           | Analyze full commit history and produce a compelling narrative            |
 
+#### Personalization & Team Commands
+
+| Command                  | Description                                                              |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `/speckit.personalize`   | Create a per-user customized copy of any command prompt                  |
+
 #### Spec Workflow Commands
 
 Additional commands for the spec-driven development workflow:
@@ -653,6 +682,9 @@ Spec-Driven Development is a structured process that emphasizes:
 - **Rich specification creation** using guardrails and organizational principles
 - **Multi-step refinement** rather than one-shot code generation from prompts
 - **Heavy reliance** on advanced AI model capabilities for specification interpretation
+- **Agent-agnostic architecture** where canonical prompts are shared across all platforms, making every AI assistant a first-class citizen
+- **Multi-user collaboration** where teams share governance and workflows while individuals retain the freedom to personalize their experience
+- **Full lifecycle coverage** from initial specification through ongoing maintenance, release management, and constitution evolution
 
 ## 🌟 Development Phases
 
@@ -671,6 +703,20 @@ Our research and experimentation focus on:
 
 - Create applications using diverse technology stacks
 - Validate the hypothesis that Spec-Driven Development is a process not tied to specific technologies, programming languages, or frameworks
+
+### Agent-agnostic multi-agent support
+
+- Every AI coding assistant is a first-class citizen with identical capabilities
+- Canonical prompts live in `.documentation/commands/` — platform directories hold only thin shims
+- Teams can mix agents on the same project without workflow friction
+- Adding a new agent requires only a shim generator, not duplicating prompt content
+
+### Multi-user team collaboration
+
+- Shared governance (constitutions, specs, plans) with individual customization (personalized prompts)
+- `/speckit.personalize` lets each team member tailor commands to their workflow without affecting others
+- Personalized overrides committed to git for transparency and team review
+- Balance between team consistency and individual productivity
 
 ### Enterprise constraints
 
@@ -705,6 +751,8 @@ Spec Kit Spark is actively developed with a clear vision for the future:
 - ✅ Constitution evolution (`/speckit.evolve-constitution`)
 - ✅ Repository story generation (`/speckit.repo-story`)
 - ✅ 17+ AI agent integrations
+- ✅ Agent-agnostic architecture with canonical prompts and thin platform shims
+- ✅ Multi-user personalization (`/speckit.personalize`)
 
 ### Near-Term (v0.1.x)
 

@@ -70,6 +70,201 @@ function Rewrite-Paths {
     return $Content
 }
 
+function Generate-CanonicalCommands {
+    # Generate canonical command files in .documentation/commands/ (agent-agnostic)
+    param(
+        [string]$OutputDir,
+        [string]$ScriptVariant
+    )
+    
+    New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+    
+    $templates = Get-ChildItem -Path "templates/commands/*.md" -File -ErrorAction SilentlyContinue
+    
+    foreach ($template in $templates) {
+        $name = [System.IO.Path]::GetFileNameWithoutExtension($template.Name)
+        
+        # Read file content and normalize line endings
+        $fileContent = (Get-Content -Path $template.FullName -Raw) -replace "`r`n", "`n"
+        
+        # Extract script command from YAML frontmatter
+        $scriptCommand = ""
+        if ($fileContent -match "(?m)^\s*${ScriptVariant}:\s*(.+)$") {
+            $scriptCommand = $matches[1]
+        }
+        
+        if ([string]::IsNullOrEmpty($scriptCommand)) {
+            Write-Warning "No script command found for $ScriptVariant in $($template.Name)"
+            $scriptCommand = "(Missing script command for $ScriptVariant)"
+        }
+        
+        # Extract agent_script command from YAML frontmatter if present
+        $agentScriptCommand = ""
+        if ($fileContent -match "(?ms)agent_scripts:.*?^\s*${ScriptVariant}:\s*(.+?)$") {
+            $agentScriptCommand = $matches[1].Trim()
+        }
+        
+        # Replace {SCRIPT} placeholder with the script command
+        $body = $fileContent -replace '\{SCRIPT\}', $scriptCommand
+        
+        # Replace {AGENT_SCRIPT} placeholder with the agent script command if found
+        if (-not [string]::IsNullOrEmpty($agentScriptCommand)) {
+            $body = $body -replace '\{AGENT_SCRIPT\}', $agentScriptCommand
+        }
+        
+        # Remove the scripts: and agent_scripts: sections from frontmatter
+        $lines = $body -split "`n"
+        $outputLines = @()
+        $inFrontmatter = $false
+        $skipScripts = $false
+        $dashCount = 0
+        
+        foreach ($line in $lines) {
+            if ($line -match '^---$') {
+                $outputLines += $line
+                $dashCount++
+                if ($dashCount -eq 1) {
+                    $inFrontmatter = $true
+                } else {
+                    $inFrontmatter = $false
+                }
+                continue
+            }
+            
+            if ($inFrontmatter) {
+                if ($line -match '^(scripts|agent_scripts):$') {
+                    $skipScripts = $true
+                    continue
+                }
+                if ($line -match '^[a-zA-Z].*:' -and $skipScripts) {
+                    $skipScripts = $false
+                }
+                if ($skipScripts -and $line -match '^\s+') {
+                    continue
+                }
+            }
+            
+            $outputLines += $line
+        }
+        
+        $body = $outputLines -join "`n"
+        
+        # Apply argument substitution (canonical uses $ARGUMENTS as default) and path rewriting
+        $body = $body -replace '\{ARGS\}', '$ARGUMENTS'
+        $body = Rewrite-Paths -Content $body
+        
+        $outputFile = Join-Path $OutputDir "speckit.$name.md"
+        Set-Content -Path $outputFile -Value $body -NoNewline
+    }
+}
+
+function Generate-Shims {
+    # Generate thin platform shims that redirect to canonical commands in .documentation/commands/
+    param(
+        [string]$Agent,
+        [string]$Extension,
+        [string]$ArgFormat,
+        [string]$OutputDir
+    )
+    
+    New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+    
+    $templates = Get-ChildItem -Path "templates/commands/*.md" -File -ErrorAction SilentlyContinue
+    
+    foreach ($template in $templates) {
+        $name = [System.IO.Path]::GetFileNameWithoutExtension($template.Name)
+        
+        # Read file content and normalize line endings
+        $fileContent = (Get-Content -Path $template.FullName -Raw) -replace "`r`n", "`n"
+        
+        # Extract description from YAML frontmatter
+        $description = ""
+        if ($fileContent -match '(?m)^description:\s*(.+)$') {
+            $description = $matches[1]
+        }
+        
+        # Extract handoffs block from YAML frontmatter (for Copilot)
+        $handoffsBlock = ""
+        $inHandoffs = $false
+        foreach ($line in ($fileContent -split "`n")) {
+            if ($line -match '^handoffs:') {
+                $inHandoffs = $true
+                $handoffsBlock += "$line`n"
+                continue
+            }
+            if ($inHandoffs -and $line -match '^  ') {
+                $handoffsBlock += "$line`n"
+                continue
+            }
+            if ($inHandoffs -and $line -match '^[a-zA-Z]') {
+                $inHandoffs = $false
+            }
+        }
+        
+        $outputFile = Join-Path $OutputDir "speckit.$name.$Extension"
+        
+        switch ($Extension) {
+            'toml' {
+                $shimContent = @"
+description = "$description"
+
+prompt = """`n## Prompt Resolution
+
+Determine the current git user by running ``git config user.name``.
+Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
+
+Read and execute the instructions from the **first file that exists**:
+1. ``.documentation/{git-user}/commands/speckit.$name.md`` (personalized override)
+2. ``.documentation/commands/speckit.$name.md`` (shared default)
+
+Where ``{git-user}`` is the normalized slug from step above.
+
+## User Input
+
+``````text
+$ArgFormat
+``````
+
+Pass the user input above to the resolved prompt.
+"""
+"@
+                Set-Content -Path $outputFile -Value $shimContent -NoNewline
+            }
+            { $_ -eq 'md' -or $_ -eq 'agent.md' } {
+                $shimLines = @()
+                $shimLines += "---"
+                $shimLines += "description: $description"
+                if (-not [string]::IsNullOrEmpty($handoffsBlock.Trim())) {
+                    $shimLines += $handoffsBlock.TrimEnd()
+                }
+                $shimLines += "---"
+                $shimLines += ""
+                $shimLines += "## Prompt Resolution"
+                $shimLines += ""
+                $shimLines += "Determine the current git user by running ``git config user.name``."
+                $shimLines += "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars."
+                $shimLines += ""
+                $shimLines += "Read and execute the instructions from the **first file that exists**:"
+                $shimLines += "1. ``.documentation/{git-user}/commands/speckit.$name.md`` (personalized override)"
+                $shimLines += "2. ``.documentation/commands/speckit.$name.md`` (shared default)"
+                $shimLines += ""
+                $shimLines += "Where ``{git-user}`` is the normalized slug from step above."
+                $shimLines += ""
+                $shimLines += "## User Input"
+                $shimLines += ""
+                $shimLines += '```text'
+                $shimLines += $ArgFormat
+                $shimLines += '```'
+                $shimLines += ""
+                $shimLines += "Pass the user input above to the resolved prompt."
+                
+                $shimContent = $shimLines -join "`n"
+                Set-Content -Path $outputFile -Value $shimContent -NoNewline
+            }
+        }
+    }
+}
+
 function Generate-Commands {
     param(
         [string]$Agent,
@@ -267,22 +462,28 @@ function Build-Variant {
         Write-Host "Copied templates -> .documentation/templates"
     }
     
-    # Generate agent-specific command files
+    # Generate canonical command prompts in .documentation/commands/ (agent-agnostic)
+    $canonicalDir = Join-Path $specDir "commands"
+    Generate-CanonicalCommands -OutputDir $canonicalDir -ScriptVariant $Script
+    Write-Host "Generated canonical commands -> .documentation/commands"
+    
+    # Generate thin platform shims in agent-specific directories
+    # Shims redirect to .documentation/commands/ with user-override resolution
     switch ($Agent) {
         'claude' {
             $cmdDir = Join-Path $baseDir ".claude/commands"
-            Generate-Commands -Agent 'claude' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'claude' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'gemini' {
             $cmdDir = Join-Path $baseDir ".gemini/commands"
-            Generate-Commands -Agent 'gemini' -Extension 'toml' -ArgFormat '{{args}}' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'gemini' -Extension 'toml' -ArgFormat '{{args}}' -OutputDir $cmdDir
             if (Test-Path "agent_templates/gemini/GEMINI.md") {
                 Copy-Item -Path "agent_templates/gemini/GEMINI.md" -Destination (Join-Path $baseDir "GEMINI.md")
             }
         }
         'copilot' {
             $agentsDir = Join-Path $baseDir ".github/agents"
-            Generate-Commands -Agent 'copilot' -Extension 'agent.md' -ArgFormat '$ARGUMENTS' -OutputDir $agentsDir -ScriptVariant $Script
+            Generate-Shims -Agent 'copilot' -Extension 'agent.md' -ArgFormat '$ARGUMENTS' -OutputDir $agentsDir
             
             # Generate companion prompt files
             $promptsDir = Join-Path $baseDir ".github/prompts"
@@ -297,62 +498,62 @@ function Build-Variant {
         }
         'cursor-agent' {
             $cmdDir = Join-Path $baseDir ".cursor/commands"
-            Generate-Commands -Agent 'cursor-agent' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'cursor-agent' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'qwen' {
             $cmdDir = Join-Path $baseDir ".qwen/commands"
-            Generate-Commands -Agent 'qwen' -Extension 'toml' -ArgFormat '{{args}}' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'qwen' -Extension 'toml' -ArgFormat '{{args}}' -OutputDir $cmdDir
             if (Test-Path "agent_templates/qwen/QWEN.md") {
                 Copy-Item -Path "agent_templates/qwen/QWEN.md" -Destination (Join-Path $baseDir "QWEN.md")
             }
         }
         'opencode' {
             $cmdDir = Join-Path $baseDir ".opencode/command"
-            Generate-Commands -Agent 'opencode' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'opencode' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'windsurf' {
             $cmdDir = Join-Path $baseDir ".windsurf/workflows"
-            Generate-Commands -Agent 'windsurf' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'windsurf' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'codex' {
             $cmdDir = Join-Path $baseDir ".codex/prompts"
-            Generate-Commands -Agent 'codex' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'codex' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'kilocode' {
             $cmdDir = Join-Path $baseDir ".kilocode/workflows"
-            Generate-Commands -Agent 'kilocode' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'kilocode' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'auggie' {
             $cmdDir = Join-Path $baseDir ".augment/commands"
-            Generate-Commands -Agent 'auggie' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'auggie' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'roo' {
             $cmdDir = Join-Path $baseDir ".roo/commands"
-            Generate-Commands -Agent 'roo' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'roo' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'codebuddy' {
             $cmdDir = Join-Path $baseDir ".codebuddy/commands"
-            Generate-Commands -Agent 'codebuddy' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'codebuddy' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'amp' {
             $cmdDir = Join-Path $baseDir ".agents/commands"
-            Generate-Commands -Agent 'amp' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'amp' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'shai' {
             $cmdDir = Join-Path $baseDir ".shai/commands"
-            Generate-Commands -Agent 'shai' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'shai' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'q' {
             $cmdDir = Join-Path $baseDir ".amazonq/prompts"
-            Generate-Commands -Agent 'q' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'q' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'bob' {
             $cmdDir = Join-Path $baseDir ".bob/commands"
-            Generate-Commands -Agent 'bob' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'bob' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
         'qodercli' {
             $cmdDir = Join-Path $baseDir ".qoder/commands"
-            Generate-Commands -Agent 'qodercli' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir -ScriptVariant $Script
+            Generate-Shims -Agent 'qodercli' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
         }
     }
     

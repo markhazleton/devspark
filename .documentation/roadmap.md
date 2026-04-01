@@ -6,9 +6,11 @@
 
 ## Vision Statement
 
-Spec Kit Spark aims to become the definitive toolkit for AI-agent driven software development lifecycle management, providing teams with:
+Spec Kit Spark aims to become the definitive toolkit for AI-agent driven software development lifecycle management, built on three pillars:
 
-- **Complete lifecycle coverage** from project initiation through ongoing maintenance
+- **Agent-agnostic by default** — every AI assistant is a first-class citizen; canonical prompts live in `.documentation/commands/` with thin platform shims
+- **Multi-user personalization** — shared governance with individual customization via `/speckit.personalize` and per-user overrides in `.documentation/{git-user}/commands/`
+- **Complete lifecycle coverage** — from project initiation through ongoing maintenance, release management, and constitution evolution
 - **Adaptive workflows** that scale from quick fixes to complex features
 - **Living governance** where constitutions evolve with the systems they govern
 - **Measurable quality** through continuous compliance tracking
@@ -61,6 +63,8 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 #### Platform Support
 
+- ✅ Agent-agnostic architecture (canonical prompts + thin platform shims)
+- ✅ Multi-user personalization (`/speckit.personalize`)
 - ✅ 17+ AI agent integrations
 - ✅ Cross-platform scripts (Bash + PowerShell)
 - ✅ Greenfield and brownfield support

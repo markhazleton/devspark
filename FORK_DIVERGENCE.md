@@ -22,28 +22,41 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
 
 ### Major Enhancements (Spark-Specific)
 
-1. **New Commands**
+1. **Agent-Agnostic Architecture**
+   - Canonical prompts in `.documentation/commands/` — single source of truth
+   - Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) hold thin shims only
+   - 17+ AI agents supported as first-class citizens
+   - Mixed-agent teams work seamlessly on the same project
+
+2. **Multi-User Personalization**
+   - `/speckit.personalize` creates per-user command overrides
+   - User prompts stored in `.documentation/{git-user}/commands/`
+   - Committed to git for team transparency and review
+   - Shared governance with individual customization freedom
+
+3. **New Commands**
    - `/speckit.critic` - Adversarial risk analysis
    - `/speckit.pr-review` - Constitution-based PR reviews
    - `/speckit.site-audit` - Website health analysis
    - `/speckit.evolve-constitution` - Constitution amendment proposals
    - `/speckit.quickfix` - Lightweight fixes without full spec overhead
    - `/speckit.release` - Release documentation management
+   - `/speckit.personalize` - Per-user prompt customization
 
-2. **Documentation Structure**
+5. **Documentation Structure**
    - Renamed `.specify/` → `.documentation/` for clarity
    - Extensive migration guides and tooling
    - Constitution guide, critic usage guide, PR review implementation
    - Adaptive lifecycle documentation
 
-3. **Scripts & Automation**
+6. **Scripts & Automation**
    - `evolution-context.sh/ps1` - Constitution evolution support
    - `get-pr-context.sh/ps1` - PR context extraction
    - `quickfix-context.sh/ps1` - Lightweight fix workflow
    - `release-context.sh/ps1` - Release management
    - `site-audit.sh/ps1` - Website auditing
 
-4. **Repository Health**
+7. **Repository Health**
    - Git Spark reports (HTML/MD)
    - Enhanced branch protection documentation
    - Fork-specific release management

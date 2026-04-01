@@ -5,6 +5,9 @@ This guide will help you get started with Spec-Driven Development using Spec Kit
 > [!NOTE]
 > All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `specify` CLI auto-selects based on OS unless you pass `--script sh|ps`.
 
+> [!TIP]
+> **Agent-Agnostic**: Spec Kit works identically with any of 17+ supported AI agents. The workflow below applies regardless of which agent you choose — canonical prompts live in `.documentation/commands/` and your agent gets thin shims that redirect there.
+
 ## The 6-Step Process
 
 > [!TIP]
@@ -98,6 +101,18 @@ Then, use the `/speckit.implement` slash command to execute the plan.
 ```markdown
 /speckit.implement
 ```
+
+## Optional: Personalize Your Workflow
+
+If you want to customize any command for your individual working style without affecting your team:
+
+```markdown
+/speckit.personalize specify       # Personalize how you write specs
+/speckit.personalize plan          # Personalize your planning approach
+/speckit.personalize implement     # Personalize implementation behavior
+```
+
+This creates a copy of the shared prompt in `.documentation/{your-git-user}/commands/` that takes priority when you run the command. Your team sees the same shared defaults; you get your version. Delete the file to revert.
 
 ---
 

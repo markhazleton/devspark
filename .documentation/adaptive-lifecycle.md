@@ -64,6 +64,24 @@ Systems and documentation must evolve together:
 - Documentation lifecycle managed explicitly at release boundaries
 - Historical decisions preserved for future reference
 
+### 5. Agent-Agnostic First
+
+Every AI coding assistant is a first-class citizen:
+
+- Canonical prompts live in `.documentation/commands/` — a single source of truth
+- Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims
+- Teams can mix agents without workflow friction — the same governance applies to all
+- Adding new agent support requires only a shim, not content duplication
+
+### 6. Multi-User Collaboration
+
+Teams share governance while individuals retain customization freedom:
+
+- Shared constitutions, specs, plans, and quality gates provide team consistency
+- `/speckit.personalize` creates per-user prompt overrides in `.documentation/{git-user}/commands/`
+- Personalized overrides are committed to git for team transparency
+- Delete an override to revert to the shared default — no merge conflicts
+
 ---
 
 ## Functional Architecture

@@ -3,10 +3,12 @@
 ## Prerequisites
 
 - **Linux/macOS** (or Windows; PowerShell scripts now supported without WSL)
-- AI coding agent: [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Codebuddy CLI](https://www.codebuddy.ai/cli) or [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+- Any [supported AI coding agent](https://github.com/MarkHazleton/spec-kit#-supported-ai-agents) (17+ agents supported — Claude Code, GitHub Copilot, Gemini CLI, Cursor, and more)
 - [uv](https://docs.astral.sh/uv/) for package management
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
+
+> **Agent-Agnostic**: Spec Kit works identically with every supported agent. Canonical prompts live in `.documentation/commands/` — your chosen agent gets thin shims that redirect there. You can switch agents at any time or have different team members use different agents on the same project.
 
 ## Installation
 

@@ -10,6 +10,62 @@ The toolkit supports multiple AI coding assistants, allowing teams to use their 
 
 ---
 
+## Canonical Layout and Platform Shims
+
+Spec Kit uses an **agnostic-by-default** architecture. All command prompts, scripts, templates, and memory live under `.documentation/` — the single source of truth. Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only **thin shims** that redirect to the canonical content.
+
+### File Layout
+
+```
+.documentation/
+├── commands/                    ← Canonical command prompts (agent-agnostic)
+│   ├── speckit.specify.md
+│   ├── speckit.plan.md
+│   ├── speckit.implement.md
+│   ├── speckit.personalize.md
+│   └── ...
+├── {git-user}/                  ← Per-user personalized overrides
+│   └── commands/
+│       └── speckit.specify.md   ← Takes priority over shared default
+├── scripts/
+├── templates/
+├── memory/
+└── specs/
+
+.claude/commands/                ← Thin shims only
+.github/agents/                  ← Thin shims only
+.cursor/commands/                ← Thin shims only
+```
+
+### Shim Behavior
+
+Each platform shim:
+1. Resolves the current git user (`git config user.name`, slug-normalized)
+2. Checks for a personalized override at `.documentation/{git-user}/commands/speckit.{cmd}.md`
+3. Falls back to the shared default at `.documentation/commands/speckit.{cmd}.md`
+4. Passes through user input (`$ARGUMENTS` / `{{args}}`) to the resolved prompt
+
+### Multi-User Personalization
+
+Team members can customize any command prompt without affecting others:
+
+- Run `/speckit.personalize {command}` to create a user-scoped copy
+- Personalized prompts live in `.documentation/{git-user}/commands/`
+- Committed to git so team members can share and review customizations
+- Delete the personalized file to revert to the shared default
+
+### Personalize Command
+
+The `/speckit.personalize` command creates per-user prompt overrides:
+
+```bash
+/speckit.personalize specify       # Personalize the specify command
+/speckit.personalize plan          # Personalize the plan command
+/speckit.personalize implement     # Personalize the implement command
+```
+
+---
+
 ## General practices
 
 - Any changes to `__init__.py` for the Specify CLI require a version rev in `pyproject.toml` and addition of entries to `CHANGELOG.md`.

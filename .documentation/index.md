@@ -2,7 +2,23 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
-**An Adaptive System Life Cycle Development (ASLCD) Toolkit** - a community extension of Spec Kit that combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
+**An Adaptive System Life Cycle Development (ASLCD) Toolkit** - agent-agnostic, multi-user, and full-lifecycle. A community extension of Spec Kit that combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
+
+---
+
+## Three Pillars
+
+### 🔀 Agent-Agnostic by Default
+
+Every AI coding assistant is a first-class citizen. Canonical command prompts live in `.documentation/commands/` — a single source of truth — while each platform receives only thin shims. Switch agents, use multiple agents on the same project, or onboard new team members on different tools.
+
+### 👥 Multi-User Personalization
+
+Teams share prompts, but individuals can customize any command via `/speckit.personalize`. Personalized overrides live in `.documentation/{git-user}/commands/`, are committed to git, and take priority over shared defaults. Delete the override to revert.
+
+### 🔄 Full Lifecycle Coverage
+
+From greenfield creation through brownfield discovery, ongoing maintenance, documentation cleanup, release management, and constitution evolution — every phase of the SDLC is supported.
 
 ---
 
@@ -39,6 +55,8 @@ Traditional spec-driven development works well for greenfield projects with majo
 | `/speckit.release` | ❌ | ✅ Release documentation |
 | `/speckit.evolve-constitution` | ❌ | ✅ Constitution evolution |
 | `/speckit.harvest` | ❌ | ✅ Knowledge harvest and cleanup |
+| Agent-agnostic architecture | ❌ Duplicated prompts per agent | ✅ Canonical prompts + thin shims |
+| Multi-user personalization | ❌ | ✅ `/speckit.personalize` per-user overrides |
 | Multi-agent support | Limited | ✅ 17+ AI agents |
 
 Learn more: [Adaptive Lifecycle Documentation](adaptive-lifecycle.md)
@@ -174,6 +192,7 @@ Constitution-powered quality commands that work independently.
 | `/speckit.clarify` | Clarify specification requirements |
 | `/speckit.checklist` | Generate quality checklists |
 | `/speckit.analyze` | Artifact consistency checking |
+| `/speckit.personalize` | Create per-user prompt customizations |
 
 ---
 
