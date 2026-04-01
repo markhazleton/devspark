@@ -32,7 +32,12 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/get-next-version.sh
           .github/workflows/scripts/get-next-version.sh "${{ github.event.inputs.release_version || '' }}"
+      - name: Skip if nothing to release
+        if: steps.get_tag.outputs.skip_release == 'true'
+        run: |
+          echo "::notice::pyproject.toml version is already tagged. No release needed for this push."
       - name: Validate release version matches pyproject.toml
+        if: steps.get_tag.outputs.skip_release != 'true'
         run: |
           pyproject_version=$(grep -oE '^[[:space:]]*version[[:space:]]*=[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' pyproject.toml | head -n1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
           if [ -z "$pyproject_version" ]; then
@@ -51,6 +56,7 @@ jobs:
 
           echo "Version parity check passed: $release_version"
       - name: Check if release already exists
+        if: steps.get_tag.outputs.skip_release != 'true'
         id: check_release
         run: |
           chmod +x .github/workflows/scripts/check-release-exists.sh
@@ -58,18 +64,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release package variants
-        if: steps.check_release.outputs.exists == 'false'
+        if: steps.get_tag.outputs.skip_release != 'true' && steps.check_release.outputs.exists == 'false'
         run: |
           chmod +x .github/workflows/scripts/create-release-packages.sh
           .github/workflows/scripts/create-release-packages.sh ${{ steps.get_tag.outputs.new_version }}
       - name: Generate release notes
-        if: steps.check_release.outputs.exists == 'false'
+        if: steps.get_tag.outputs.skip_release != 'true' && steps.check_release.outputs.exists == 'false'
         id: release_notes
         run: |
           chmod +x .github/workflows/scripts/generate-release-notes.sh
           .github/workflows/scripts/generate-release-notes.sh ${{ steps.get_tag.outputs.new_version }} ${{ steps.get_tag.outputs.latest_tag }}
       - name: Create GitHub Release
-        if: steps.check_release.outputs.exists == 'false'
+        if: steps.get_tag.outputs.skip_release != 'true' && steps.check_release.outputs.exists == 'false'
         run: |
           chmod +x .github/workflows/scripts/create-github-release.sh
           .github/workflows/scripts/create-github-release.sh ${{ steps.get_tag.outputs.new_version }}

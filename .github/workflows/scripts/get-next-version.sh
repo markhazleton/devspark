@@ -78,6 +78,12 @@ if PYPROJECT_VERSION=$(get_pyproject_version); then
     echo "New version will be: $PYPROJECT_VERSION (source: pyproject.toml)"
     exit 0
   fi
+
+  # pyproject.toml version is already tagged — nothing new to release
+  echo "new_version=$PYPROJECT_VERSION" >> $GITHUB_OUTPUT
+  echo "skip_release=true" >> $GITHUB_OUTPUT
+  echo "pyproject.toml version $PYPROJECT_VERSION is already tagged. Nothing to release."
+  exit 0
 fi
 
 # 3) Fallback: increment latest tag

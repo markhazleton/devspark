@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Agent-agnostic canonical layout**: All command prompts now live in `.documentation/commands/` as the single source of truth. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims that redirect to canonical content with user-override resolution.
 - **Multi-user personalization**: New `/speckit.personalize` command creates per-user prompt overrides in `.documentation/{git-user}/commands/`. Users can customize any command without affecting team defaults; personalized files are committed to git for transparency.
 - **Personalize command template**: `templates/commands/personalize.md` — resolves git user identity, copies and annotates shared prompts for individual customization.
+- **Release template Step 10 — Update Public-Facing Version References**: `/speckit.release` now requires updating roadmap, release notes, and index docs to match the new version, plus a stale-version-string scan, preventing public documentation from drifting behind the actual release.
+
+### Fixed
+
+- **Release workflow fails on non-version pushes**: When `pyproject.toml` version was already tagged, `get-next-version.sh` would auto-increment to the next patch and the validation step would fail with a version mismatch. The script now detects the already-tagged condition, sets `skip_release=true`, and the workflow exits gracefully with a notice instead of failing.
 
 ### Changed
 
