@@ -7,6 +7,20 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-04-01
+
+### Added
+
+- **Agent-agnostic canonical layout**: All command prompts now live in `.documentation/commands/` as the single source of truth. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims that redirect to canonical content with user-override resolution.
+- **Multi-user personalization**: New `/speckit.personalize` command creates per-user prompt overrides in `.documentation/{git-user}/commands/`. Users can customize any command without affecting team defaults; personalized files are committed to git for transparency.
+- **Personalize command template**: `templates/commands/personalize.md` — resolves git user identity, copies and annotates shared prompts for individual customization.
+
+### Changed
+
+- **Build scripts updated for canonical + shim architecture**: Both `create-release-packages.sh` and `create-release-packages.ps1` now generate canonical commands in `.documentation/commands/` and thin platform shims in agent-specific directories, replacing the previous approach of duplicating full prompts per agent.
+- **Documentation refresh**: Updated README.md, AGENTS.md, spec-driven.md, FORK_DIVERGENCE.md, CONTRIBUTING.md, release_notes.md, and all GitHub Pages site docs (index.md, quickstart.md, installation.md, adaptive-lifecycle.md, roadmap.md) to consistently emphasize three pillars: agent-agnostic architecture, multi-user personalization, and full lifecycle coverage.
+- **Version bump**: 1.5.1 → 1.6.0.
+
 ## [1.5.1] - 2026-03-28
 
 ### Fixed

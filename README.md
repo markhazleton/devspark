@@ -739,7 +739,7 @@ Our research and experimentation focus on:
 
 Spec Kit Spark is actively developed with a clear vision for the future:
 
-### Current Release (v1.5.0)
+### Current Release (v1.6.0)
 
 - ✅ Full Spec-Driven Development workflow
 - ✅ Constitution-based PR review (`/speckit.pr-review`)

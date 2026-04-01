@@ -1,17 +1,16 @@
-# Spec Kit Spark v1.5.0
+# Spec Kit Spark v1.6.0
 
 Spec Kit Spark is an Adaptive System Life Cycle Development (ASLCD) toolkit with constitution-powered commands and right-sized workflows. Part of the WebSpark demonstration suite.
 
 ## Release Highlights
 
-This release (v1.5.0) introduces the new `/speckit.repo-story` command for generating evidence-based repository narratives, completes a branding alignment sweep, and syncs the README roadmap version with the actual CLI version.
+This release (v1.6.0) introduces agent-agnostic canonical layout, multi-user personalization, and a comprehensive documentation refresh emphasizing Spec Kit's three pillars.
 
-### What's New in v1.5.0
+### What's New in v1.6.0
 
-- **`/speckit.repo-story` Command**: Analyze full commit history and produce compelling narratives for business and technical audiences
-- **Repository History Context Scripts**: Paired Bash and PowerShell scripts generating commit-audit-ready JSON with anonymized roles, velocity metrics, quality signals, and governance maturity scores
-- **Branding Alignment**: Consistent "Spec Kit Spark — ASLCD Toolkit" messaging across all documentation, CLI, and release generators
-- **Version Sync**: README roadmap updated from stale v0.0.25 to v1.5.0
+- **Agent-Agnostic Canonical Layout**: Command prompts now live in `.documentation/commands/` as a single source of truth. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims that redirect to canonical content with user-override resolution. Switch agents freely or use multiple agents on the same project.
+- **Multi-User Personalization**: New `/speckit.personalize` command creates per-user prompt overrides in `.documentation/{git-user}/commands/`. Customize any command without affecting team defaults — personalized files are committed to git for team transparency.
+- **Three Pillars Documentation**: All repository and site documentation updated to consistently communicate agent-agnostic architecture, multi-user personalization, and full lifecycle coverage as the three reinforcing design pillars.
 
 ## Spark-Specific Features
 
