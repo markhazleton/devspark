@@ -4,7 +4,7 @@ This guide will help you get started with Spec-Driven Development using Spec Kit
 
 > [!NOTE]
 > All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `specify` CLI auto-selects based on OS unless you pass `--script sh|ps`.
-
+>
 > [!TIP]
 > **Agent-Agnostic**: Spec Kit works identically with any of 17+ supported AI agents. The workflow below applies regardless of which agent you choose — canonical prompts live in `.documentation/commands/` and your agent gets thin shims that redirect there.
 

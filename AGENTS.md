@@ -16,7 +16,7 @@ Spec Kit uses an **agnostic-by-default** architecture. All command prompts, scri
 
 ### File Layout
 
-```
+```text
 .documentation/
 ├── commands/                    ← Canonical command prompts (agent-agnostic)
 │   ├── speckit.specify.md
@@ -40,6 +40,7 @@ Spec Kit uses an **agnostic-by-default** architecture. All command prompts, scri
 ### Shim Behavior
 
 Each platform shim:
+
 1. Resolves the current git user (`git config user.name`, slug-normalized)
 2. Checks for a personalized override at `.documentation/{git-user}/commands/speckit.{cmd}.md`
 3. Falls back to the shared default at `.documentation/commands/speckit.{cmd}.md`

@@ -56,7 +56,7 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
 
 4. **Create the user directory structure**:
 
-   ```
+   ```text
    .documentation/{git-user}/commands/
    ```
 
@@ -85,7 +85,7 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
 
 7. **Inform the user**:
 
-   ```
+   ```text
    Created personalized prompt:
      .documentation/{git-user}/commands/speckit.{command}.md
    

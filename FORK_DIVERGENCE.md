@@ -43,20 +43,20 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
    - `/speckit.release` - Release documentation management
    - `/speckit.personalize` - Per-user prompt customization
 
-5. **Documentation Structure**
+4. **Documentation Structure**
    - Renamed `.specify/` → `.documentation/` for clarity
    - Extensive migration guides and tooling
    - Constitution guide, critic usage guide, PR review implementation
    - Adaptive lifecycle documentation
 
-6. **Scripts & Automation**
+5. **Scripts & Automation**
    - `evolution-context.sh/ps1` - Constitution evolution support
    - `get-pr-context.sh/ps1` - PR context extraction
    - `quickfix-context.sh/ps1` - Lightweight fix workflow
    - `release-context.sh/ps1` - Release management
    - `site-audit.sh/ps1` - Website auditing
 
-7. **Repository Health**
+6. **Repository Health**
    - Git Spark reports (HTML/MD)
    - Enhanced branch protection documentation
    - Fork-specific release management
