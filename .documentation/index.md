@@ -106,8 +106,8 @@ specify init --here --ai claude
 
 - [Installation Guide](installation.md) - Detailed setup for all scenarios
 - [Quick Start Guide](quickstart.md) - 6-step process walkthrough
-- [Upgrade Guide](upgrade.md) - Updating to latest version (NEW in v1.1.0)
-- [Migration Guide](migration-guide.md) - Migrate from old `.specify/` structure (NEW in v1.1.0)
+- [Upgrade Guide](upgrade.md) - Updating to latest version
+- [Migration Guide](migration-guide.md) - Migrate from old `.specify/` structure
 - [Local Development](local-development.md) - Contributing to Spec Kit
 
 ---
@@ -189,6 +189,8 @@ Constitution-powered quality commands that work independently.
 | Command | Purpose |
 |---------|---------|
 | `/speckit.release` | Archive artifacts, generate release docs |
+| `/speckit.harvest` | Knowledge-preserving cleanup for stale docs |
+| `/speckit.repo-story` | Evidence-based repository narrative generation |
 | `/speckit.clarify` | Clarify specification requirements |
 | `/speckit.checklist` | Generate quality checklists |
 | `/speckit.analyze` | Artifact consistency checking |
