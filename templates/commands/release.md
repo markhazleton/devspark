@@ -382,7 +382,33 @@ When running **Create Release** via `workflow_dispatch`, set `release_version` t
 `{NEXT_VERSION}` (or `v{NEXT_VERSION}`) so the workflow publishes the intended tag
 instead of auto-incrementing from the latest existing tag.
 
-### 10. Clean Slate Preparation
+### 10. Update Public-Facing Version References
+
+After bumping `pyproject.toml` (Step 9), update **all** public documents that mention the current release version so they stay in sync. **Skip if DRY_RUN** — but list the files that would change.
+
+#### A. Roadmap files
+
+Update **both** roadmap files to reflect the new current release:
+
+| File | Field to update |
+|------|-----------------|
+| `README.md` → `## 🗺️ Roadmap` | `### Current Release (v{NEXT_VERSION})` — add any new capabilities to the checked list |
+| `/.documentation/roadmap.md` | `## Current Release: v{NEXT_VERSION}` — move newly shipped items from Near-Term into Current, update version example |
+
+Ensure future roadmap section version ranges (`Near-Term`, `Medium-Term`, `Long-Term`) are **ahead** of `{NEXT_VERSION}`. If any future section uses a version number ≤ `{NEXT_VERSION}`, bump it forward.
+
+#### B. Release notes / index page
+
+| File | Field to update |
+|------|-----------------|
+| `release_notes.md` | Update highlights and "What's New" to `{NEXT_VERSION}` |
+| `/.documentation/index.md` | Update any version badges or "latest" references |
+
+#### C. Verify — no stale version strings
+
+Run a quick search for the **old** version string (`{CURRENT_VERSION}`) across `README.md`, `release_notes.md`, `.documentation/*.md`, and confirm every remaining reference is intentional (e.g., CHANGELOG history). Flag any stale occurrences for manual review.
+
+### 11. Clean Slate Preparation
 
 After archival (skip if DRY_RUN):
 
@@ -405,7 +431,7 @@ For each quickfix in QUICKFIXES:
 1. Create `/.documentation/specs/.gitkeep` if directory is empty
 2. Create `/.documentation/quickfixes/.gitkeep` if directory is empty
 
-### 11. Output Summary
+### 12. Output Summary
 
 #### Dry Run Output
 
@@ -471,7 +497,9 @@ To execute this release:
 
 1. Confirm `pyproject.toml` has been bumped to `{NEXT_VERSION}` (Step 9A above).
 
-2. Review generated documentation:
+2. Confirm roadmap and public docs reference `{NEXT_VERSION}` (Step 10 above).
+
+3. Review generated documentation:
    - `/.documentation/releases/v{NEXT_VERSION}/release-notes.md`
    - `CHANGELOG.md`
 

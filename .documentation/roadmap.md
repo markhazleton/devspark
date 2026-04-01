@@ -18,7 +18,7 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 ---
 
-## Current Release: v1.1.0
+## Current Release: v1.6.0
 
 ### What's Implemented
 
@@ -45,21 +45,21 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 - ✅ `/speckit.quickfix` - Lightweight workflow for bug fixes
 - ✅ `/speckit.release` - Release documentation and archival
 - ✅ `/speckit.evolve-constitution` - Constitution amendment proposals
+- ✅ `/speckit.harvest` - Knowledge-preserving cleanup for stale docs and completed specs
+- ✅ `/speckit.repo-story` - Evidence-based repository narrative generation
 
 #### CLI Commands
 
 - ✅ `specify init` - Initialize new or existing projects
-- ✅ `specify upgrade` - Upgrade existing projects (NEW in v1.1.0)
+- ✅ `specify upgrade` - Upgrade existing projects
 - ✅ `specify check` - Verify tool dependencies
 - ✅ `specify version` - Show version information
 
-#### Migration & Upgrade Tools (NEW in v1.1.0)
+#### Architecture (NEW in v1.6.0)
 
-- ✅ Migration scripts (PowerShell + Bash) - Automated migration from old structure
-- ✅ Dry-run mode - Preview changes before applying
-- ✅ Cleanup mode - Remove backup directories after verification
-- ✅ Auto-detection - Detect AI assistant and migration needs
-- ✅ Safety checks - Git status checks, confirmation prompts, backups
+- ✅ Agent-agnostic canonical layout — prompts in `.documentation/commands/` with thin platform shims
+- ✅ Multi-user personalization (`/speckit.personalize`) — per-user overrides in `.documentation/{git-user}/commands/`
+- ✅ SPECKIT_VERSION stamp — version tracking for consumer projects
 
 #### Platform Support
 
@@ -71,7 +71,7 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 ---
 
-## Near-Term Roadmap (v1.2.x)
+## Near-Term Roadmap (v1.7.x – v1.8.x)
 
 ### Enhanced Technical Debt Tracking
 
@@ -106,7 +106,7 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 ---
 
-## Medium-Term Roadmap (v0.2.x)
+## Medium-Term Roadmap (v1.9.x – v2.x)
 
 ### Constitution Evolution Automation
 
@@ -143,7 +143,7 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 ---
 
-## Long-Term Vision (v1.0+)
+## Long-Term Vision (v2.x+)
 
 ### Intelligent Context Management
 
@@ -245,8 +245,8 @@ Spec Kit Spark follows standard [Semantic Versioning 2.0.0](https://semver.org/)
 vMAJOR.MINOR.PATCH
 
 Examples:
-- v1.1.0  (current stable release)
-- v1.2.0  (next minor feature additions)
+- v1.6.0  (current stable release)
+- v1.7.0  (next minor feature additions)
 - v2.0.0  (breaking changes)
 ```
 
@@ -279,4 +279,4 @@ Examples:
 
 ---
 
-> Last updated: February 2026
+> Last updated: April 2026

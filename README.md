@@ -754,21 +754,21 @@ Spec Kit Spark is actively developed with a clear vision for the future:
 - ✅ Agent-agnostic architecture with canonical prompts and thin platform shims
 - ✅ Multi-user personalization (`/speckit.personalize`)
 
-### Near-Term (v0.1.x)
+### Near-Term (v1.7.x – v1.8.x)
 
 - 🔄 Enhanced technical debt tracking with metrics storage
 - 🔄 Trend visualization for compliance scores
 - 🔄 Improved quickfix-to-spec escalation workflow
 - 🔄 Constitution template library
 
-### Medium-Term (v0.2.x)
+### Medium-Term (v1.9.x – v2.x)
 
 - 📋 CI/CD pipeline integration (GitHub Actions, Azure DevOps)
 - 📋 Business value alignment documentation
 - 📋 Cross-project governance for organizations
 - 📋 Interactive constitution builder
 
-### Long-Term (v1.0+)
+### Long-Term (v2.x+)
 
 - 🎯 Spec-to-test generation pipeline
 - 🎯 Multi-repository constitution inheritance
