@@ -2,396 +2,86 @@
 
 <!-- markdownlint-disable MD024 -->
 
-All notable changes to the DevSpark CLI and templates are documented here.
+All notable changes to DevSpark are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.0] - 2026-04-01
-
-### Added
-
-- **Agent-agnostic canonical layout**: All command prompts now live in `.documentation/commands/` as the single source of truth. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims that redirect to canonical content with user-override resolution.
-- **Multi-user personalization**: New `/devspark.personalize` command creates per-user prompt overrides in `.documentation/{git-user}/commands/`. Users can customize any command without affecting team defaults; personalized files are committed to git for transparency.
-- **Personalize command template**: `templates/commands/personalize.md` — resolves git user identity, copies and annotates shared prompts for individual customization.
-- **Release template Step 10 — Update Public-Facing Version References**: `/devspark.release` now requires updating roadmap, release notes, and index docs to match the new version, plus a stale-version-string scan, preventing public documentation from drifting behind the actual release.
-
-### Fixed
-
-- **Release workflow fails on non-version pushes**: When `pyproject.toml` version was already tagged, `get-next-version.sh` would auto-increment to the next patch and the validation step would fail with a version mismatch. The script now detects the already-tagged condition, sets `skip_release=true`, and the workflow exits gracefully with a notice instead of failing.
-
-### Changed
-
-- **Build scripts updated for canonical + shim architecture**: Both `create-release-packages.sh` and `create-release-packages.ps1` now generate canonical commands in `.documentation/commands/` and thin platform shims in agent-specific directories, replacing the previous approach of duplicating full prompts per agent.
-- **Documentation refresh**: Updated README.md, AGENTS.md, spec-driven.md, FORK_DIVERGENCE.md, CONTRIBUTING.md, release_notes.md, and all GitHub Pages site docs (index.md, quickstart.md, installation.md, adaptive-lifecycle.md, roadmap.md) to consistently emphasize three pillars: agent-agnostic architecture, multi-user personalization, and full lifecycle coverage.
-- **Version bump**: 1.5.1 → 1.6.0.
-
-## [1.5.1] - 2026-03-28
-
-### Fixed
-
-- **Markdownlint errors in repo-story template**: Added missing blank lines around lists and headings in `templates/commands/repo-story.md` to resolve 15 MD022/MD032 lint failures.
-
-## [1.5.0] - 2026-03-28
-
-### Added
-
-- **New `/devspark.repo-story` command**: Analyzes full repository commit history and produces a compelling, evidence-based narrative for both business stakeholders and technical audiences. Uses paired context scripts (`repo-story-context.sh` / `repo-story-context.ps1`) that generate a `history.json` with commit-audit-ready schema including anonymized contributor roles, velocity metrics, quality signals, governance maturity scores, and milestone timelines. Supports `--scope` flags (full, velocity, quality, business, team), configurable history window (`--months`), and baseline comparison (`--compare-baseline`).
-- **`repo-story-context.ps1` and `repo-story-context.sh` context scripts**: Paired PowerShell and Bash scripts that gather full-repository historical context — commit timeline, contributor trends, tag milestones, file change hotspots, conventional commit metrics, test-to-source ratios, and governance signals — into a structured JSON payload consumed by the repo-story command template.
-
-### Changed
-
-- **Branding alignment**: Updated all documentation, CLI help text, and release generators to consistently use "DevSpark — Adaptive System Life Cycle Development (ASLCD) Toolkit" branding. Replaced legacy "GitHub DevSpark" and "Spec-Driven Development Toolkit" references across AGENTS.md, release notes generators, and supporting documentation.
-- **README roadmap version**: Updated current release section from stale v0.0.25 to v1.5.0 reflecting actual CLI version.
-
-## [1.4.6] - 2026-03-26
-
-### Fixed
-
-- **PowerShell runtime safety and compatibility**: Hardened PowerShell scripts for safer runtime behavior and improved PowerShell 7 compatibility.
-- **Markdownlint workflow failures**: Fixed documentation and template markdown issues that were causing markdownlint workflow failures.
-
-### Changed
-
-- **Spark command templates**: Aligned prompt and command template paths to canonical `.documentation` locations.
-- **Docs cleanup and branding**: Finalized markdownlint-oriented documentation cleanup and branding consistency updates.
-
-## [1.4.5] - 2026-03-25
-
-### Fixed
-
-- **`devspark upgrade` crash when AI assistant cannot be auto-detected**: `prompt_choice` (undefined) was called instead of `select_with_arrows`, causing a `NameError`. The `upgrade` command now uses the same `select_with_arrows` interactive picker used by `init`.
-
-## [1.4.0] - 2026-03-25
-
-### Added
-
-- **New `/devspark.harvest` command**: Knowledge-preserving cleanup for completed specs, stale documentation, and spec-linked code comments. The command scans `.documentation/specs/` for all-complete specs, triages `.documentation/` files into archive categories (completed reviews, stale drafts, session notes, impl plans, backup files, orphaned assets), and rewrites source-code comments that reference specs/tasks/FRs as self-contained behavior descriptions. An explicit approval gate presents the full harvest plan before any file is moved or edited. Files are moved to `.archive/YYYY-MM-DD/` (never deleted), and knowledge is extracted into `CHANGELOG.md` and `.documentation/Guide.md` before archival. Output: `/.documentation/copilot/harvest-YYYY-MM-DD.md`.
-- **`harvest.ps1` pre-scan script**: PowerShell context-gathering script (`scripts/powershell/harvest.ps1`) installed to `/.documentation/scripts/powershell/harvest.ps1` in consumer projects. Outputs JSON with spec completion status (completed/completed-needs-changelog/in-progress/draft), doc taxonomy scores, disposition recommendations, code comment hits, CHANGELOG gap analysis, and existing archive inventory. Supports `-Scope` (`full`, `specs`, `docs`, `comments`, `changelog`, `scan`) and `-Json` flags. Language-agnostic comment scanning covers Python, TypeScript, JavaScript, C#, Go, and Rust.
-
-## [1.3.0] - 2026-03-19
-
-### Fixed
-
-- **`/devspark.site-audit` performance on large repositories**: Reduced default PowerShell pre-scan JSON payload size by returning sampled file inventories and sampled pattern findings with full counts, while keeping full inventories available via an explicit opt-in switch (`--full-inventory` / `--include-full-inventory`).
-- **JSON rendering overhead in chat surfaces**: Switched site-audit pre-scan JSON output from compressed single-line output to multiline JSON to reduce UI/context processing pressure.
-- **Unbounded audit expansion risk**: Added explicit execution guardrails in the site-audit command template to limit findings, search breadth, and per-finding file reads, and to stop once high-signal evidence is sufficient.
-- **`/devspark.pr-review` large PR payload risk**: Added bounded file list output in PowerShell PR context pre-scan (`files_changed_total`, `files_changed_truncated`, sample limit) with an opt-in switch for full file inventory, and added prompt-level scope limits for deep file inspection.
-- **`/devspark.archive` large candidate-set expansion risk**: Added sampled candidate arrays with full counts and opt-in full inventory in PowerShell archive context output, plus prompt guardrails to avoid unbounded candidate reading in a single pass.
-- **Defensive JSON output standardization**: Converted remaining PowerShell context scripts from compressed single-line JSON to multiline JSON to reduce chat/UI rendering pressure and improve diagnostics readability.
-
-## [1.2.4] - 2026-03-07
-
-### Added
-
-- **`DEVSPARK_VERSION` stamp**: `devspark init` and `devspark upgrade` now write `.documentation/DEVSPARK_VERSION` into every consumer project after a successful install or upgrade. The file records the installed version, install date, and agent key — giving AI commands and scripts a single, offline source of truth for the installed version.
-- **New `/devspark.upgrade` AI command** (`templates/commands/upgrade.md`): A dedicated AI agent command that reads the version stamp, compares to the latest release, classifies files as framework-owned vs. user-owned, identifies stale paths, runs `devspark upgrade`, and verifies the stamp was updated after completion.
-- **Version check in `/devspark.site-audit`**: Audit reports now include a **DevSpark Version** section (Step 4) with `VER1`–`VER5` finding codes for missing stamps, outdated versions, and stale pre-migration paths.
-- **Release workflow version bump step** (`templates/commands/release.md`): New Step 9 — *Bump Version in Source Files* — instructs maintainers to update `pyproject.toml`, verifies three-way consistency (pyproject / CHANGELOG / git tag), and explains that consumer projects receive the new stamp automatically on their next `devspark upgrade`.
-- **`DEVSPARK_VERSION_PATH` and `INSTALLED_VERSION` in release-context scripts**: Both `release-context.ps1` and `release-context.sh` now surface the consumer project's installed version in JSON and human-readable output.
-- **`read_version_stamp()` helper**: New Python helper in the CLI that reads and parses `.documentation/DEVSPARK_VERSION` back as a dict; used in the post-upgrade summary to display the newly written version.
-
-### Changed
-
-- `devspark upgrade` post-completion output now shows the version stamp details (version, agent, install date).
-- `devspark init` progress tracker now includes a **Write version stamp** step, visible in the live progress display.
-- Release/package metadata is synchronized at `1.2.4` so the CLI version, changelog, and generated install/upgrade guidance align.
-
-## [1.1.0] - 2026-02-08
-
-### Fixed
-
-- **Python 3.14 / Homebrew compatibility**: Added explicit `click>=8.1` dependency so the resolver always selects a Click version compatible with Python 3.14 and avoids errors such as `TypeError: ParamType.get_metavar() got an unexpected keyword argument 'ctx'` when an older Click would otherwise be used. Note that broader uv/Homebrew environment isolation or `sys.path` bleed issues (see [#1631](https://github.com/github/spec-kit/issues/1631)) may still require environment-level workarounds.
-
-### Added
-
-- **New `devspark upgrade` command**: Simplified project upgrade with auto-detection of AI assistant, migration needs, and comprehensive safety checks
-  - Auto-detects AI assistant from existing project setup (no need to specify `--ai` manually)
-  - Auto-detects old structure migration needs (`.specify/`, root-level directories)
-  - Safety checks: warns about uncommitted Git changes before proceeding
-  - Dry-run mode: preview changes without modifying files (`--dry-run`)
-  - Constitution backup: optional backup before upgrade (`--backup`)
-  - Skip migration: bypass automatic migration check (`--skip-migration`)
-  - Guided upgrade process with helpful status messages and next steps
-- **Migration scripts**: Automated migration from old structure (`.specify/`, root-level `memory/`, `scripts/`, `templates/`) to new `.documentation/` structure
-  - PowerShell script for Windows (`.documentation/scripts/migrate-to-documentation.ps1`)
-  - Bash script for Linux/Mac (`.documentation/scripts/migrate-to-documentation.sh`)
-  - Support for dry-run mode to preview changes
-  - Cleanup mode to remove `.old` backup directories after verification
-  - Automatic path reference updates in agent files, scripts, and documentation
-  - Safety features: Git status checks, confirmation prompts, backup creation
-  - Detailed summary reports with statistics
-- **Migration documentation**: Comprehensive guides for upgrading from old structure
-  - Migration guide with step-by-step instructions (`.documentation/migration-guide.md`)
-  - Quick reference card for common migration tasks (`.documentation/MIGRATION-QUICKREF.md`)
-  - Specification document for upgrade command design (`.documentation/spec-upgrade-command.md`)
-  - Troubleshooting section with common issues and solutions
-
-### Changed
-
-- **Upgrade guide**: Now recommends `devspark upgrade` as the primary upgrade method instead of `devspark init --here --force`
-- **README**: Updated with comprehensive upgrade instructions including `devspark upgrade` command
-- **Documentation index**: Added migration guide references to documentation site
-
-## [1.0.3] - 2026-02-06
-
-### Fixed
-
-- **Critical: Double Documentation Path Bug**: Fixed path rewriting in release package scripts that caused `/.documentation.documentation/` instead of `/.documentation/`
-- **Path Capture Group**: Fixed missing capture group reference in `.specify/` to `.documentation/` conversion
-
-### Changed
-
-- Enhanced path transformation regex patterns to only match paths at line start, after whitespace, or after backtick to prevent double replacements
-
-## [1.0.2] - 2026-02-06
-
-### Notes
-
-- Version skipped - release artifacts contained path transformation bugs that were fixed in v1.0.3
-
-## [1.0.1] - 2026-02-05
-
-### Changed
-
-- **Fork Identifier**: Transitioned from `.specify/` to `.documentation/` as the Spark fork's directory identifier to better distinguish from upstream DevSpark
-- Corrected documentation build directory path references
-
-### Added
-
-- Draft document for ASLCD Toolkit: Tangible Next Steps
-
-## [1.0.0] - 2026-02-03
-
-### Changed
-
-- **Standard Semantic Versioning**: Adopted standard semantic versioning (MAJOR.MINOR.PATCH) for universal compatibility
-- **Enhanced Documentation**: Improved clarity and usability across command templates and documentation
-- **PEP 440 Compliance**: Ensured version format works with all Python packaging tools (pip, uvx, pipx)
-
-### Notes
-
-- This marks the first major Spark release, establishing the fork's identity as a community-driven extension with enhanced features
-- Maintains backward compatibility with all 0.0.x features while establishing new release versioning
-
-## [0.0.91] - 2026-02-02
-
-### Added
-
-- **New `/devspark.evolve-constitution` command**: Analyzes PR reviews and audits to identify recurring patterns, detect gaps in constitution coverage, and propose amendments via CAP (Constitution Amendment Proposal) documents. Supports approval/rejection workflow with history tracking.
-- **Detailed Roadmap**: Added comprehensive roadmap section outlining current and future releases for DevSpark
-
-### Changed
-
-- Enhanced documentation and roadmap for ASLCD (Adaptive System Life Cycle Development) Toolkit
-- Updated documentation paths and references to align with new project structure
-
-## [0.0.25] - 2026-01-30
-
-### Added
-
-- **New `/devspark.pr-review` command**: Constitution-aware pull request review with actionable feedback for any PR in the repository. Reviews stored in `/specs/pr-review/pr-{id}.md` with metadata.
-- **New `/devspark.site-audit` command**: Comprehensive codebase audit against project constitution/standards, producing structured compliance reports. Supports multiple scopes (full, constitution, packages, quality, unused, duplicate).
-
-### Changed
-
-- **DevSpark Branding**: Release packages now use `devspark-template-*` naming convention to differentiate from upstream github/spec-kit
-- **Repository References**: All references now point to `MarkHazleton/spec-kit` instead of `github/spec-kit`
-- Release title changed to "DevSpark Templates" to reflect fork identity
-
-### Enhanced
-
-- `/devspark.critic` command now included in all template packages
-
-## [0.0.24] - 2026-01-29
-
-### Added
-
-- **New `/devspark.discover-constitution` command**: For brownfield projects, analyzes existing codebase to discover implicit patterns and conventions, then guides users through interactive questions to build a constitution. Detects testing frameworks, security patterns, architecture conventions, and code quality standards. Generates draft constitution at `/memory/constitution-draft.md` for team review.
-
-### Changed
-
-- Rebranded as DevSpark, a community extension part of the WebSpark demonstration suite
-- Enhanced constitution guide with guidance on writing auditable principles and integrating with AI agent instruction files
-- All repository references updated to point to MarkHazleton/spec-kit
-
-## [0.0.23] - 2026-01-27
-
-### Added
-
-- **New `/devspark.critic` command**: Adversarial risk analysis that identifies technical flaws, implementation hazards, and failure modes across spec.md, plan.md, and tasks.md. Unlike `/devspark.analyze` (consistency checking), critic performs a "pre-mortem" analysis assuming the project will fail and explaining why. Framework-agnostic with stack-specific risk detection. Run after `/devspark.tasks` before `/devspark.implement`.
-
-## [0.0.22] - 2025-11-07
-
-- Support for VS Code/Copilot agents, and moving away from prompts to proper agents with hand-offs.
-- Move to use `AGENTS.md` for Copilot workloads, since it's already supported out-of-the-box.
-- Adds support for the version command. ([#486](https://github.com/github/spec-kit/issues/486))
-- Fixes potential bug with the `create-new-feature.ps1` script that ignores existing feature branches when determining next feature number ([#975](https://github.com/github/spec-kit/issues/975))
-- Add graceful fallback and logging for GitHub API rate-limiting during template fetch ([#970](https://github.com/github/spec-kit/issues/970))
-
-## [0.0.21] - 2025-10-21
-
-- Fixes [#975](https://github.com/github/spec-kit/issues/975) (thank you [@fgalarraga](https://github.com/fgalarraga)).
-- Adds support for Amp CLI.
-- Adds support for VS Code hand-offs and moves prompts to be full-fledged chat modes.
-- Adds support for `version` command (addresses [#811](https://github.com/github/spec-kit/issues/811) and [#486](https://github.com/github/spec-kit/issues/486), thank you [@mcasalaina](https://github.com/mcasalaina) and [@dentity007](https://github.com/dentity007)).
-- Adds support for rendering the rate limit errors from the CLI when encountered ([#970](https://github.com/github/spec-kit/issues/970), thank you [@psmman](https://github.com/psmman)).
-
-## [0.0.20] - 2025-10-14
-
-### Added
-
-- **Intelligent Branch Naming**: `create-new-feature` scripts now support `--short-name` parameter for custom branch names
-  - When `--short-name` provided: Uses the custom name directly (cleaned and formatted)
-  - When omitted: Automatically generates meaningful names using stop word filtering and length-based filtering
-  - Filters out common stop words (I, want, to, the, for, etc.)
-  - Removes words shorter than 3 characters (unless they're uppercase acronyms)
-  - Takes 3-4 most meaningful words from the description
-  - **Enforces GitHub's 244-byte branch name limit** with automatic truncation and warnings
-  - Examples:
-    - "I want to create user authentication" → `001-create-user-authentication`
-    - "Implement OAuth2 integration for API" → `001-implement-oauth2-integration-api`
-    - "Fix payment processing bug" → `001-fix-payment-processing`
-    - Very long descriptions are automatically truncated at word boundaries to stay within limits
-  - Designed for AI agents to provide semantic short names while maintaining standalone usability
-
-### Changed
-
-- Enhanced help documentation for `create-new-feature.sh` and `create-new-feature.ps1` scripts with examples
-- Branch names now validated against GitHub's 244-byte limit with automatic truncation if needed
-
-## [0.0.19] - 2025-10-10
-
-### Added
-
-- Support for CodeBuddy (thank you to [@lispking](https://github.com/lispking) for the contribution).
-- You can now see Git-sourced errors in the DevSpark CLI.
-
-### Changed
-
-- Fixed the path to the constitution in `plan.md` (thank you to [@lyzno1](https://github.com/lyzno1) for spotting).
-- Fixed backslash escapes in generated TOML files for Gemini (thank you to [@hsin19](https://github.com/hsin19) for the contribution).
-- Implementation command now ensures that the correct ignore files are added (thank you to [@sigent-amazon](https://github.com/sigent-amazon) for the contribution).
-
-## [0.0.18] - 2025-10-06
-
-### Added
-
-- Support for using `.` as a shorthand for current directory in `devspark init .` command, equivalent to `--here` flag but more intuitive for users.
-- Use the `/devspark.` command prefix to easily discover DevSpark-related commands.
-- Refactor the prompts and templates to simplify their capabilities and how they are tracked. No more polluting things with tests when they are not needed.
-- Ensure that tasks are created per user story (simplifies testing and validation).
-- Add support for Visual Studio Code prompt shortcuts and automatic script execution.
-
-### Changed
-
-- All command files now prefixed with `devspark.` (e.g., `devspark.specify.md`, `devspark.plan.md`) for better discoverability and differentiation in IDE/CLI command palettes and file explorers
-
-## [0.0.17] - 2025-09-22
-
-### Added
-
-- New `/clarify` command template to surface up to 5 targeted clarification questions for an existing spec and persist answers into a Clarifications section in the spec.
-- New `/analyze` command template providing a non-destructive cross-artifact discrepancy and alignment report (spec, clarifications, plan, tasks, constitution) inserted after `/tasks` and before `/implement`.
-  - Note: Constitution rules are explicitly treated as non-negotiable; any conflict is a CRITICAL finding requiring artifact remediation, not weakening of principles.
-
-## [0.0.16] - 2025-09-22
-
-### Added
-
-- `--force` flag for `init` command to bypass confirmation when using `--here` in a non-empty directory and proceed with merging/overwriting files.
-
-## [0.0.15] - 2025-09-21
-
-### Added
-
-- Support for Roo Code.
-
-## [0.0.14] - 2025-09-21
-
-### Changed
-
-- Error messages are now shown consistently.
-
-## [0.0.13] - 2025-09-21
-
-### Added
-
-- Support for Kilo Code. Thank you [@shahrukhkhan489](https://github.com/shahrukhkhan489) with [#394](https://github.com/github/spec-kit/pull/394).
-- Support for Auggie CLI. Thank you [@hungthai1401](https://github.com/hungthai1401) with [#137](https://github.com/github/spec-kit/pull/137).
-- Agent folder security notice displayed after project provisioning completion, warning users that some agents may store credentials or auth tokens in their agent folders and recommending adding relevant folders to `.gitignore` to prevent accidental credential leakage.
-
-### Changed
-
-- Warning displayed to ensure that folks are aware that they might need to add their agent folder to `.gitignore`.
-- Cleaned up the `check` command output.
-
-## [0.0.12] - 2025-09-21
-
-### Changed
-
-- Added additional context for OpenAI Codex users - they need to set an additional environment variable, as described in [#417](https://github.com/github/spec-kit/issues/417).
-
-## [0.0.11] - 2025-09-20
-
-### Added
-
-- Codex CLI support (thank you [@honjo-hiroaki-gtt](https://github.com/honjo-hiroaki-gtt) for the contribution in [#14](https://github.com/github/spec-kit/pull/14))
-- Codex-aware context update tooling (Bash and PowerShell) so feature plans refresh `AGENTS.md` alongside existing assistants without manual edits.
-
-## [0.0.10] - 2025-09-20
-
-### Fixed
-
-- Addressed [#378](https://github.com/github/spec-kit/issues/378) where a GitHub token may be attached to the request when it was empty.
-
-## [0.0.9] - 2025-09-19
-
-### Changed
-
-- Improved agent selector UI with cyan highlighting for agent keys and gray parentheses for full names
-
-## [0.0.8] - 2025-09-19
-
-### Added
-
-- Windsurf IDE support as additional AI assistant option (thank you [@raedkit](https://github.com/raedkit) for the work in [#151](https://github.com/github/spec-kit/pull/151))
-- GitHub token support for API requests to handle corporate environments and rate limiting (contributed by [@zryfish](https://github.com/@zryfish) in [#243](https://github.com/github/spec-kit/pull/243))
-
-### Changed
-
-- Updated README with Windsurf examples and GitHub token usage
-- Enhanced release workflow to include Windsurf templates
-
-## [0.0.7] - 2025-09-18
-
-### Changed
-
-- Updated command instructions in the CLI.
-- Cleaned up the code to not render agent-specific information when it's generic.
-
-## [0.0.6] - 2025-09-17
-
-### Added
-
-- opencode support as additional AI assistant option
-
-## [0.0.5] - 2025-09-17
-
-### Added
-
-- Qwen Code support as additional AI assistant option
-
-## [0.0.4] - 2025-09-14
-
-### Added
-
-- SOCKS proxy support for corporate environments via `httpx[socks]` dependency
-
-### Fixed
-
-N/A
-
-### Changed
-
-N/A
+## [0.1.0] - 2026-04-02
+
+**DevSpark Alpha — First standalone release.**
+
+DevSpark is now an independent project, no longer positioned as a fork. This release resets versioning and establishes the product identity.
+
+### What's Included
+
+#### 21 Slash Commands
+
+- `/devspark.constitution` — Establish project principles and guidelines
+- `/devspark.specify` — Define requirements and user stories
+- `/devspark.plan` — Create technical implementation plan
+- `/devspark.tasks` — Break plan into actionable task lists
+- `/devspark.implement` — Execute tasks and build the feature
+- `/devspark.pr-review` — Constitution-based pull request review
+- `/devspark.site-audit` — Codebase compliance audit
+- `/devspark.quickfix` — Lightweight bug fix workflow
+- `/devspark.harvest` — Knowledge-preserving cleanup for stale docs
+- `/devspark.release` — Release documentation and archival
+- `/devspark.critic` — Adversarial risk analysis
+- `/devspark.clarify` — Structured clarification questions
+- `/devspark.analyze` — Cross-artifact consistency check
+- `/devspark.checklist` — Quality validation checklists
+- `/devspark.personalize` — Per-user prompt overrides
+- `/devspark.discover-constitution` — Reverse-engineer constitution from code
+- `/devspark.evolve-constitution` — Constitution amendment proposals
+- `/devspark.repo-story` — Evidence-based repository narrative
+- `/devspark.archive` — Archive completed spec artifacts
+- `/devspark.upgrade` — Pull latest DevSpark prompts
+- `/devspark.taskstoissues` — Convert tasks to GitHub issues
+
+#### Architecture
+
+- **No install required** — Copy prompt files or use agent quickstart guides
+- **`.devspark/`** installation directory — framework files, safe to remove
+- **`.documentation/`** user artifacts — specs, constitution, decisions (never touched by DevSpark)
+- **3-tier override system** — personal > team > stock defaults
+- **17+ AI agents supported** — Copilot, Claude Code, Cursor, Windsurf, Gemini CLI, and more
+- **Agent quickstart guides** — Point your agent at a quickstart prompt to bootstrap without CLI
+- **Optional CLI** (`devspark-cli`) — automates setup via `devspark init` / `devspark upgrade`
+- **`devspark uninstall`** — clean removal that leaves user work intact
+
+### Changed (from prior Spec Kit lineage)
+
+- Rebranded from Spec Kit to DevSpark with full identity cleanup
+- Version reset from 1.6.0 to 0.1.0 (fresh semantic versioning)
+- Separated `.devspark/` (installation) from `.documentation/` (user work)
+- `SPECIFY_FEATURE` env var renamed to `DEVSPARK_FEATURE`
+- `[specify]` log prefix renamed to `[devspark]`
+- All old releases and tags purged
+
+---
+
+## Prior History
+
+DevSpark evolved from [github/spec-kit](https://github.com/github/spec-kit), an open-source project by the GitHub team. Versions 0.0.1 through 1.6.0 were released under the Spec Kit name. Key milestones from that era:
+
+- **v0.0.4** — SOCKS proxy support for corporate environments
+- **v0.0.8** — Windsurf IDE support, GitHub token support
+- **v0.0.13** — Kilo Code, Augment CLI support
+- **v0.0.16** — `--force` flag for init
+- **v0.0.17** — `/clarify` and `/analyze` commands
+- **v0.0.18** — `devspark.` command prefix, VS Code prompt shortcuts
+- **v0.0.20** — Intelligent branch naming with GitHub 244-byte limit enforcement
+- **v0.0.22** — VS Code/Copilot agent support, AGENTS.md
+- **v0.0.24** — `/discover-constitution` command, DevSpark branding begins
+- **v0.0.25** — `/pr-review` and `/site-audit` commands
+- **v0.0.91** — `/evolve-constitution` command
+- **v1.0.0** — Standard semantic versioning adopted
+- **v1.1.0** — `devspark upgrade` command, migration scripts
+- **v1.2.4** — `DEVSPARK_VERSION` stamp, `/upgrade` AI command
+- **v1.3.0** — Performance optimizations for large repos
+- **v1.4.0** — `/harvest` command
+- **v1.5.0** — `/repo-story` command
+- **v1.6.0** — Agent-agnostic layout, multi-user personalization
+
+Full history of upstream contributions is preserved in git.
