@@ -12,7 +12,7 @@
 
 When you fork an open-source project to add significant enhancements, you face a classic dilemma: **How do you stay synchronized with upstream improvements while preserving your innovations?**
 
-[DevSpark](https://github.com/MarkHazleton/devspark) is a fork of GitHub's [devspark](https://github.com/github/spec-kit) that adds Adaptive System Life Cycle Development (ASLCD) capabilities—including constitution-based PR reviews, site auditing, quickfix workflows, and release management. We've added six major commands, restructured directories, and created extensive new documentation. Yet we still want to benefit from upstream bug fixes, template improvements, and new agent support.
+[DevSpark](https://github.com/MarkHazleton/devspark) is inspired by GitHub's [spec-kit](https://github.com/github/spec-kit) and adds Adaptive System Life Cycle Development (ASLCD) capabilities—including constitution-based PR reviews, site auditing, quickfix workflows, and release management. We've added six major commands, restructured directories, and created extensive new documentation. Yet we still want to benefit from upstream bug fixes, template improvements, and new agent support.
 
 The traditional approach? Manually review `git log`, cherry-pick commits one by one, resolve conflicts, and hope you didn't miss anything important. **That's tedious, error-prone, and doesn't scale.**
 
