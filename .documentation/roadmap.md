@@ -18,7 +18,7 @@ DevSpark aims to become the definitive toolkit for AI-agent driven software deve
 
 ---
 
-## Current Release: v1.6.0
+## Current Release: v0.1.0 (Alpha)
 
 ### What's Implemented
 
@@ -55,9 +55,9 @@ DevSpark aims to become the definitive toolkit for AI-agent driven software deve
 - ✅ `devspark check` - Verify tool dependencies
 - ✅ `devspark version` - Show version information
 
-#### Architecture (NEW in v1.6.0)
+#### Architecture (NEW in v0.1.0)
 
-- ✅ Agent-agnostic canonical layout — prompts in `.documentation/commands/` with thin platform shims
+- ✅ Agent-agnostic canonical layout — prompts in `.devspark/defaults/commands/` with thin platform shims
 - ✅ Multi-user personalization (`/devspark.personalize`) — per-user overrides in `.documentation/{git-user}/commands/`
 - ✅ DEVSPARK_VERSION stamp — version tracking for consumer projects
 
@@ -245,9 +245,9 @@ DevSpark follows standard [Semantic Versioning 2.0.0](https://semver.org/):
 vMAJOR.MINOR.PATCH
 
 Examples:
-- v1.6.0  (current stable release)
-- v1.7.0  (next minor feature additions)
-- v2.0.0  (breaking changes)
+- v0.1.0  (current alpha release)
+- v0.2.0  (next minor feature additions)
+- v1.0.0  (stable release)
 ```
 
 ### Version Meaning
