@@ -60,9 +60,9 @@ Team members can customize any command prompt without affecting others:
 The `/devspark.personalize` command creates per-user prompt overrides:
 
 ```bash
-/devspark.personalize specify       # Personalize the specify command
-/devspark.personalize plan          # Personalize the plan command
-/devspark.personalize implement     # Personalize the implement command
+/devspark.personalize specify       # Personalize the /devspark.specify command
+/devspark.personalize plan          # Personalize the /devspark.plan command
+/devspark.personalize implement     # Personalize the /devspark.implement command
 ```
 
 ---
