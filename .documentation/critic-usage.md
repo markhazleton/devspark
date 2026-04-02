@@ -2,11 +2,11 @@
 
 ## Overview
 
-The `/speckit.critic` command performs adversarial risk analysis on your specification, implementation plan, and task breakdown. It acts as a skeptical technical expert identifying risks, architectural flaws, implementation hazards, and failure scenarios that could prevent successful delivery.
+The `/devspark.critic` command performs adversarial risk analysis on your specification, implementation plan, and task breakdown. It acts as a skeptical technical expert identifying risks, architectural flaws, implementation hazards, and failure scenarios that could prevent successful delivery.
 
 This is a **pre-mortem** analysis tool—it imagines the project has already failed in production and explains why.
 
-> **Note**: Unlike `/speckit.pr-review` and `/speckit.site-audit`, this command is **part of the Spec-Driven Development workflow**. It requires completed spec.md, plan.md, and tasks.md files to analyze. If you're not using the spec workflow, use `/speckit.site-audit` instead for codebase analysis.
+> **Note**: Unlike `/devspark.pr-review` and `/devspark.site-audit`, this command is **part of the Spec-Driven Development workflow**. It requires completed spec.md, plan.md, and tasks.md files to analyze. If you're not using the spec workflow, use `/devspark.site-audit` instead for codebase analysis.
 
 ## Prerequisites
 
@@ -17,10 +17,10 @@ This is a **pre-mortem** analysis tool—it imagines the project has already fai
 
 ## When to Use
 
-Run `/speckit.critic` **after** `/speckit.tasks` and **before** `/speckit.implement`:
+Run `/devspark.critic` **after** `/devspark.tasks` and **before** `/devspark.implement`:
 
 ```text
-/speckit.specify → /speckit.plan → /speckit.tasks → /speckit.critic → /speckit.implement
+/devspark.specify → /devspark.plan → /devspark.tasks → /devspark.critic → /devspark.implement
 ```
 
 Use this command when you want:
@@ -35,20 +35,20 @@ Use this command when you want:
 ### Basic Usage
 
 ```bash
-/speckit.critic
+/devspark.critic
 ```
 
 ### Focus on Specific Concerns
 
 ```bash
-/speckit.critic Focus on scalability and database performance
-/speckit.critic Review security aspects carefully
-/speckit.critic Analyze async/concurrency handling
+/devspark.critic Focus on scalability and database performance
+/devspark.critic Review security aspects carefully
+/devspark.critic Analyze async/concurrency handling
 ```
 
-## Key Distinction from /speckit.analyze
+## Key Distinction from /devspark.analyze
 
-| Aspect | /speckit.analyze | /speckit.critic |
+| Aspect | /devspark.analyze | /devspark.critic |
 |--------|------------------|-----------------|
 | **Purpose** | Consistency checking | Risk identification |
 | **Mindset** | Neutral validator | Adversarial skeptic |
@@ -58,8 +58,8 @@ Use this command when you want:
 
 **Summary**:
 
-- `/speckit.analyze` = Are the artifacts aligned and complete?
-- `/speckit.critic` = What will fail in production?
+- `/devspark.analyze` = Are the artifacts aligned and complete?
+- `/devspark.critic` = What will fail in production?
 
 ## Understanding Severity Levels
 
@@ -308,44 +308,44 @@ The critic applies stack-specific knowledge:
 
 ```bash
 # After completing plan and tasks
-/speckit.critic
+/devspark.critic
 
 # If showstoppers found:
 # - Fix issues in plan.md
 # - Regenerate tasks.md
 # - Re-run critic
 
-/speckit.critic
+/devspark.critic
 
 # When clean, proceed
-/speckit.implement
+/devspark.implement
 ```
 
 ### Workflow 2: Focus on Specific Concerns
 
 ```bash
 # Security-focused review
-/speckit.critic Pay special attention to authentication and authorization
+/devspark.critic Pay special attention to authentication and authorization
 
 # Performance-focused review
-/speckit.critic Focus on database performance and caching
+/devspark.critic Focus on database performance and caching
 
 # Scalability review
-/speckit.critic Analyze for high-traffic scenarios
+/devspark.critic Analyze for high-traffic scenarios
 ```
 
 ### Workflow 3: Team Review
 
 ```bash
 # Generate critic report for team discussion
-/speckit.critic
+/devspark.critic
 
 # Share findings in team meeting
 # Discuss and prioritize risks
 # Update plan based on team decisions
 
 # Re-run to verify improvements
-/speckit.critic
+/devspark.critic
 ```
 
 ## Interpreting the Go/No-Go Recommendation
@@ -359,7 +359,7 @@ Showstoppers are present. Implementation will likely fail or cause serious issue
 1. Address every showstopper finding
 2. Update plan.md with fixes
 3. Regenerate tasks.md
-4. Re-run `/speckit.critic`
+4. Re-run `/devspark.critic`
 5. Only proceed when clean
 
 ### CONDITIONAL
@@ -402,13 +402,13 @@ If you proceed with known risks, document them explicitly.
 
 When concerned about specific areas, use arguments to focus the analysis.
 
-### 5. Combine with /speckit.analyze
+### 5. Combine with /devspark.analyze
 
 Run both commands for comprehensive validation:
 
 ```bash
-/speckit.analyze  # Check consistency
-/speckit.critic   # Check risks
+/devspark.analyze  # Check consistency
+/devspark.critic   # Check risks
 ```
 
 ### 6. Learn from Findings
@@ -419,10 +419,10 @@ Use recurring findings to improve your constitution and planning process.
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/speckit.analyze` | Consistency check | After tasks, before critic |
-| `/speckit.critic` | Risk analysis | After tasks, before implement |
-| `/speckit.site-audit` | Codebase audit | After implementation, ongoing |
-| `/speckit.pr-review` | PR review | During code review |
+| `/devspark.analyze` | Consistency check | After tasks, before critic |
+| `/devspark.critic` | Risk analysis | After tasks, before implement |
+| `/devspark.site-audit` | Codebase audit | After implementation, ongoing |
+| `/devspark.pr-review` | PR review | During code review |
 
 ## Troubleshooting
 
@@ -433,10 +433,10 @@ Use recurring findings to improve your constitution and planning process.
 **Solution**: Run the prerequisite commands first:
 
 ```bash
-/speckit.specify [requirements]
-/speckit.plan [tech stack]
-/speckit.tasks
-/speckit.critic
+/devspark.specify [requirements]
+/devspark.plan [tech stack]
+/devspark.tasks
+/devspark.critic
 ```
 
 ### "Constitution missing"
@@ -446,7 +446,7 @@ Use recurring findings to improve your constitution and planning process.
 **Solution**:
 
 ```bash
-/speckit.constitution Create project principles
+/devspark.constitution Create project principles
 ```
 
 ### Too many showstoppers
@@ -476,9 +476,9 @@ Use recurring findings to improve your constitution and planning process.
 If you encounter issues:
 
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
+- Review [DevSpark Issues](https://github.com/MarkHazleton/spec-kit/issues)
 
 ---
 
-*Part of Spec Kit Spark - Adaptive System Life Cycle Development (ASLCD) Toolkit*
+*Part of DevSpark - Adaptive System Life Cycle Development (ASLCD) Toolkit*
 *For more information: <https://github.com/MarkHazleton/spec-kit>*

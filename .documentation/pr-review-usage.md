@@ -2,9 +2,9 @@
 
 ## Overview
 
-The `/speckit.pr-review` command performs automated, constitution-driven code reviews for GitHub Pull Requests. It evaluates code changes against your project's established principles and generates detailed feedback reports stored in your repository.
+The `/devspark.pr-review` command performs automated, constitution-driven code reviews for GitHub Pull Requests. It evaluates code changes against your project's established principles and generates detailed feedback reports stored in your repository.
 
-> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/speckit.specify`, `/speckit.plan`, and `/speckit.tasks`, PR review does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/.documentation/memory/constitution.md`) and works for any PR in any repository—whether or not you're using spec-driven development.
+> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/devspark.specify`, `/devspark.plan`, and `/devspark.tasks`, PR review does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/.documentation/memory/constitution.md`) and works for any PR in any repository—whether or not you're using spec-driven development.
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ gh auth login
 If you haven't created a project constitution yet:
 
 ```bash
-/speckit.constitution Create principles for code quality, testing standards, security practices, and documentation requirements
+/devspark.constitution Create principles for code quality, testing standards, security practices, and documentation requirements
 ```
 
 ## Basic Usage
@@ -51,7 +51,7 @@ If you haven't created a project constitution yet:
 If you're working on a PR branch, simply run:
 
 ```bash
-/speckit.pr-review
+/devspark.pr-review
 ```
 
 The command will:
@@ -67,13 +67,13 @@ The command will:
 To review any PR by number:
 
 ```bash
-/speckit.pr-review #123
+/devspark.pr-review #123
 ```
 
 or without the # symbol:
 
 ```bash
-/speckit.pr-review 123
+/devspark.pr-review 123
 ```
 
 This works for:
@@ -88,7 +88,7 @@ This works for:
 When a PR is updated with new commits:
 
 ```bash
-/speckit.pr-review #123
+/devspark.pr-review #123
 ```
 
 The command will:
@@ -257,23 +257,23 @@ Prioritized action items:
 
 ```bash
 # 1. Create feature spec and implementation
-/speckit.specify Build user authentication feature
-/speckit.plan Use Node.js with JWT tokens
-/speckit.implement
+/devspark.specify Build user authentication feature
+/devspark.plan Use Node.js with JWT tokens
+/devspark.implement
 
 # 2. Create PR on GitHub
 git push origin feature/auth
 gh pr create --title "Add user authentication" --body "Implements JWT-based auth"
 
 # 3. Review PR against constitution
-/speckit.pr-review
+/devspark.pr-review
 
 # 4. Address feedback
 # ... make changes ...
 git push
 
 # 5. Re-review to verify fixes
-/speckit.pr-review
+/devspark.pr-review
 ```
 
 ### Workflow 2: Code Review
@@ -286,7 +286,7 @@ git push
 gh pr checkout 456
 
 # 2. Run constitution-based review
-/speckit.pr-review #456
+/devspark.pr-review #456
 
 # 3. View the generated review
 cat specs/pr-review/pr-456.md
@@ -300,9 +300,9 @@ cat specs/pr-review/pr-456.md
 ```bash
 # Review recent merged PRs for quality trends
 
-/speckit.pr-review #100
-/speckit.pr-review #101
-/speckit.pr-review #102
+/devspark.pr-review #100
+/devspark.pr-review #101
+/devspark.pr-review #102
 
 # Analyze patterns in specs/pr-review/ directory
 ls specs/pr-review/
@@ -409,7 +409,7 @@ This produces vague reviews:
 **Solution**:
 
 ```bash
-/speckit.constitution Create project principles
+/devspark.constitution Create project principles
 ```
 
 ### "PR not found" or "Failed to fetch PR"
@@ -436,7 +436,7 @@ This produces vague reviews:
 **Solution**: Provide PR number explicitly:
 
 ```bash
-/speckit.pr-review #123
+/devspark.pr-review #123
 ```
 
 ### Review seems incomplete or superficial
@@ -450,7 +450,7 @@ This produces vague reviews:
 - Clear examples
 - Detailed standards
 
-Then re-run: `/speckit.pr-review #123`
+Then re-run: `/devspark.pr-review #123`
 
 ### Large PR takes too long
 
@@ -510,7 +510,7 @@ Then re-run: `/speckit.pr-review #123`
 
 ## Integration with Spec-Driven Development
 
-If using the full spec-kit workflow:
+If using the full devspark workflow:
 
 ### Feature PRs
 
@@ -604,17 +604,17 @@ Critical issues found that must be resolved before merge.
 - [Site Audit Guide](site-audit-usage.md)
 - [Critic Guide](critic-usage.md)
 - [GitHub CLI Documentation](https://cli.github.com/manual/)
-- [Spec Kit on GitHub](https://github.com/MarkHazleton/spec-kit)
+- [DevSpark on GitHub](https://github.com/MarkHazleton/spec-kit)
 
 ## Support
 
 If you encounter issues or have questions:
 
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
+- Review [DevSpark Issues](https://github.com/MarkHazleton/spec-kit/issues)
 - Consult [GitHub CLI Manual](https://cli.github.com/manual/)
 
 ---
 
-*Part of Spec Kit Spark - Adaptive System Life Cycle Development (ASLCD) Toolkit*  
+*Part of DevSpark - Adaptive System Life Cycle Development (ASLCD) Toolkit*  
 *For more information: <https://github.com/MarkHazleton/spec-kit>*

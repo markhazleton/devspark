@@ -1,11 +1,11 @@
 <div align="center">
-    <img src="./media/logo_large.webp" alt="Spec Kit Logo" width="200" height="200"/>
-    <h1>🌱 Spec Kit Spark</h1>
-    <h3><em>Build high-quality software faster.</em></h3>
+    <img src="./.documentation/media/logo_large.webp" alt="DevSpark Logo" width="200" height="200"/>
+    <h1>DevSpark</h1>
+    <h3><em>AI development lifecycle prompts that work with any coding assistant.<br/>No install required.</em></h3>
 </div>
 
 <p align="center">
-    <strong>An Adaptive System Life Cycle Development (ASLCD) Toolkit - agent-agnostic, multi-user, and full-lifecycle. Combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity. Part of the WebSpark suite.</strong>
+    <strong>21 reusable prompt templates + helper scripts that give AI coding assistants a structured workflow — from requirements to release. Works with Claude, Copilot, Cursor, Gemini, and 13 more. Part of the <a href="https://github.com/MarkHazleton?tab=repositories&q=webspark">WebSpark</a> suite.</strong>
 </p>
 
 <p align="center">
@@ -15,20 +15,81 @@
     <a href="https://markhazleton.github.io/spec-kit/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
-> **Note**: Spec Kit Spark is a community extension, part of the [WebSpark](https://github.com/MarkHazleton?tab=repositories&q=webspark) demonstration suite.
-> Looking for the original? Visit [github.com/github/spec-kit](https://github.com/github/spec-kit)
+---
+
+## What's In This Repo
+
+This repository contains **two deliverables** and their supporting documentation:
+
+### 1. Prompt Templates (`templates/`)
+
+The core product — **21 markdown prompt files** that give any AI coding assistant structured commands for specification-driven development:
+
+| Prompt | Purpose |
+|--------|---------|
+| [`/devspark.specify`](templates/commands/specify.md) | Define what you want to build (requirements & user stories) |
+| [`/devspark.plan`](templates/commands/plan.md) | Create a technical implementation plan |
+| [`/devspark.tasks`](templates/commands/tasks.md) | Break the plan into actionable task lists |
+| [`/devspark.implement`](templates/commands/implement.md) | Execute all tasks to build the feature |
+| [`/devspark.constitution`](templates/commands/constitution.md) | Establish project principles and guidelines |
+| [`/devspark.pr-review`](templates/commands/pr-review.md) | Constitution-based pull request review |
+| [`/devspark.site-audit`](templates/commands/site-audit.md) | Comprehensive codebase audit |
+| [`/devspark.quickfix`](templates/commands/quickfix.md) | Lightweight workflow for bug fixes |
+| [`/devspark.harvest`](templates/commands/harvest.md) | Clean stale docs and archive obsolete artifacts |
+| [`/devspark.release`](templates/commands/release.md) | Archive dev artifacts and prepare releases |
+| [`/devspark.evolve-constitution`](templates/commands/evolve-constitution.md) | Propose constitution amendments |
+| [`/devspark.repo-story`](templates/commands/repo-story.md) | Generate narrative from commit history |
+| [`/devspark.critic`](templates/commands/critic.md) | Adversarial risk analysis before implementation |
+| _...and more_ | `clarify`, `analyze`, `checklist`, `personalize`, `archive`, `upgrade`, `discover-constitution` |
+
+Helper scripts in `scripts/` (PowerShell + Bash) gather project context that the prompts consume.
+
+### 2. DevSpark CLI (`src/devspark_cli/`)
+
+A Python CLI that scaffolds new projects with the prompts, scripts, and agent configuration:
+
+```bash
+# Install
+uv tool install devspark-cli --from git+https://github.com/MarkHazleton/spec-kit.git
+
+# New project
+devspark init my-project --ai claude
+
+# Add to existing project
+devspark init --here --ai copilot
+```
+
+Supports **17+ AI agents**: Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Windsurf, Amp, and more. See [Supported Agents](#-supported-ai-agents).
+
+### 3. Documentation (`.documentation/`)
+
+Guides, migration docs, roadmap, and GitHub Pages site content live in `.documentation/`.
+
+```text
+devspark/
+├── templates/          ← Prompt templates & helper templates (THE PROMPTS)
+│   └── commands/       ← 21 slash-command prompt files
+├── scripts/            ← Context-gathering scripts (PowerShell + Bash)
+├── src/devspark_cli/    ← CLI source code
+├── .documentation/     ← Docs, guides, media, and GitHub Pages site
+├── pyproject.toml      ← CLI package definition
+├── README.md           ← You are here
+├── CHANGELOG.md        ← Release history
+└── (standard community files: LICENSE, CONTRIBUTING, SECURITY, etc.)
+```
 
 ---
 
 ## Table of Contents
 
+- [What's In This Repo](#whats-in-this-repo)
 - [Three Pillars](#three-pillars)
 - [🎯 The ASLCD Vision](#-the-aslcd-vision)
 - [🤔 What is Spec-Driven Development?](#-what-is-spec-driven-development)
 - [⚡ Get Started](#-get-started)
 - [📽️ Video Overview](#️-video-overview)
 - [🤖 Supported AI Agents](#-supported-ai-agents)
-- [🔧 Specify CLI Reference](#-specify-cli-reference)
+- [🔧 DevSpark CLI Reference](#-devspark-cli-reference)
 - [📚 Core Philosophy](#-core-philosophy)
 - [🌟 Development Phases](#-development-phases)
 - [🗺️ Roadmap](#️-roadmap)
@@ -45,7 +106,7 @@
 
 ## Three Pillars
 
-Spec Kit Spark is built on three reinforcing design principles:
+DevSpark is built on three reinforcing design principles:
 
 ### 🔀 Agent-Agnostic by Default
 
@@ -53,11 +114,11 @@ Every AI coding assistant is a first-class citizen. Canonical command prompts li
 
 ### 👥 Multi-User Personalization
 
-Teams share a common set of prompts, but individuals can customize any command without affecting others. Run `/speckit.personalize specify` to create a user-scoped override in `.documentation/{git-user}/commands/`. Personalized prompts are committed to git so the team can review and share customizations. Delete the override to revert to the shared default.
+Teams share a common set of prompts, but individuals can customize any command without affecting others. Run `/devspark.personalize specify` to create a user-scoped override in `.documentation/{git-user}/commands/`. Personalized prompts are committed to git so the team can review and share customizations. Delete the override to revert to the shared default.
 
 ### 🔄 Full Lifecycle Coverage
 
-From greenfield project creation (`/speckit.specify`) through brownfield discovery (`/speckit.discover-constitution`), ongoing maintenance (`/speckit.quickfix`), documentation cleanup (`/speckit.harvest`), release management (`/speckit.release`), and constitution evolution (`/speckit.evolve-constitution`) — Spec Kit supports every phase of the software development lifecycle, not just the initial build.
+From greenfield project creation (`/devspark.specify`) through brownfield discovery (`/devspark.discover-constitution`), ongoing maintenance (`/devspark.quickfix`), documentation cleanup (`/devspark.harvest`), release management (`/devspark.release`), and constitution evolution (`/devspark.evolve-constitution`) — DevSpark supports every phase of the software development lifecycle, not just the initial build.
 
 ---
 
@@ -67,11 +128,11 @@ From greenfield project creation (`/speckit.specify`) through brownfield discove
 
 | Challenge | Traditional Approach | ASLCD Solution |
 |-----------|---------------------|----------------|
-| **Greenfield Bias** | Works well for new projects | `/speckit.discover-constitution` generates constitutions from existing code |
-| **Task Overhead** | Full spec workflow for everything | `/speckit.quickfix` provides lightweight workflow for bug fixes |
-| **Documentation Drift** | Specs accumulate and become stale | `/speckit.release` archives artifacts and maintains living docs |
-| **Repo Clutter** | AI-generated docs and stale drafts accumulate | `/speckit.harvest` consolidates knowledge and archives obsolete artifacts |
-| **Constitution Staleness** | No formal update process | `/speckit.evolve-constitution` proposes amendments from findings |
+| **Greenfield Bias** | Works well for new projects | `/devspark.discover-constitution` generates constitutions from existing code |
+| **Task Overhead** | Full spec workflow for everything | `/devspark.quickfix` provides lightweight workflow for bug fixes |
+| **Documentation Drift** | Specs accumulate and become stale | `/devspark.release` archives artifacts and maintains living docs |
+| **Repo Clutter** | AI-generated docs and stale drafts accumulate | `/devspark.harvest` consolidates knowledge and archives obsolete artifacts |
+| **Constitution Staleness** | No formal update process | `/devspark.evolve-constitution` proposes amendments from findings |
 | **Context Management** | Same context for all tasks | Right-sized workflows optimize AI agent effectiveness |
 
 ### Design Principles
@@ -113,7 +174,7 @@ Spec-Driven Development **flips the script** on traditional software development
 
 ## ⚡ Get Started
 
-### 1. Install Specify CLI
+### 1. Install DevSpark CLI
 
 Choose your preferred installation method:
 
@@ -122,45 +183,45 @@ Choose your preferred installation method:
 Install once and use everywhere:
 
 ```bash
-uv tool install specify-cli --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --from git+https://github.com/MarkHazleton/spec-kit.git
 ```
 
 Then use the tool directly:
 
 ```bash
 # Greenfield: Create new project from scratch
-specify init <PROJECT_NAME>
+devspark init <PROJECT_NAME>
 
 # Brownfield: Add to existing project
 cd /path/to/your-existing-project
-specify init --here --ai claude
+devspark init --here --ai claude
 
 # Check installed tools
-specify check
+devspark check
 ```
 
-> **Brownfield Tip**: Use `/speckit.discover-constitution` after initialization to analyze existing code patterns and draft a constitution.
+> **Brownfield Tip**: Use `/devspark.discover-constitution` after initialization to analyze existing code patterns and draft a constitution.
 
-### Upgrading Spec Kit
+### Upgrading DevSpark
 
 To upgrade to the latest version:
 
 ```bash
 # Upgrade CLI tool
-uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
 
 # Upgrade project files (auto-detects your AI assistant)
-specify upgrade
+devspark upgrade
 
 # Or with options
-specify upgrade --dry-run          # Preview changes first
-specify upgrade --backup           # Backup constitution
-specify upgrade --ai claude        # Override detected agent
+devspark upgrade --dry-run          # Preview changes first
+devspark upgrade --backup           # Backup constitution
+devspark upgrade --ai claude        # Override detected agent
 ```
 
 See the [Upgrade Guide](./.documentation/upgrade.md) for detailed instructions.
 
-> **Migrating from old version?** If your project uses the old `.specify/` directory or root-level `memory/`, `scripts/`, `templates/` directories, see the [Migration Guide](./.documentation/migration-guide.md) for automated migration to the new `.documentation/` structure.
+> **Migrating from old version?** If your project uses the old `.specify/` directory structure, see the [Migration Guide](./.documentation/migration-guide.md) for automated migration to the new `.documentation/` structure.
 
 #### Option 2: One-time Usage
 
@@ -168,11 +229,11 @@ Run directly without installing:
 
 ```bash
 # Greenfield: New project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME>
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <PROJECT_NAME>
 
 # Brownfield: Existing project
 cd /path/to/your-existing-project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init --here
 ```
 
 **Benefits of persistent installation:**
@@ -184,47 +245,47 @@ uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
 
 ### 2. Establish project principles
 
-Launch your AI assistant in the project directory. The `/speckit.*` commands are available in the assistant.
+Launch your AI assistant in the project directory. The `/devspark.*` commands are available in the assistant.
 
-Use the **`/speckit.constitution`** command to create your project's governing principles and development guidelines that will guide all subsequent development.
+Use the **`/devspark.constitution`** command to create your project's governing principles and development guidelines that will guide all subsequent development.
 
 ```bash
-/speckit.constitution Create principles focused on code quality, testing standards, user experience consistency, and performance requirements
+/devspark.constitution Create principles focused on code quality, testing standards, user experience consistency, and performance requirements
 ```
 
 ### 3. Create the spec
 
-Use the **`/speckit.specify`** command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
+Use the **`/devspark.specify`** command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
 
 ```bash
-/speckit.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.
+/devspark.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.
 ```
 
 ### 4. Create a technical implementation plan
 
-Use the **`/speckit.plan`** command to provide your tech stack and architecture choices.
+Use the **`/devspark.plan`** command to provide your tech stack and architecture choices.
 
 ```bash
-/speckit.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
+/devspark.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
 ```
 
 ### 5. Break down into tasks
 
-Use **`/speckit.tasks`** to create an actionable task list from your implementation plan.
+Use **`/devspark.tasks`** to create an actionable task list from your implementation plan.
 
 ```bash
-/speckit.tasks
+/devspark.tasks
 ```
 
 ### 6. Execute implementation
 
-Use **`/speckit.implement`** to execute all tasks and build your feature according to the plan.
+Use **`/devspark.implement`** to execute all tasks and build your feature according to the plan.
 
 ```bash
-/speckit.implement
+/devspark.implement
 ```
 
-For detailed step-by-step instructions, see our [comprehensive guide](./spec-driven.md).
+For detailed step-by-step instructions, see our [comprehensive guide](./.documentation/spec-driven-development.md).
 
 ## Constitution-Powered Commands
 
@@ -232,26 +293,26 @@ These commands leverage your project constitution but are **independent of the S
 
 ### Site Audit
 
-Use the **`/speckit.site-audit`** command to perform a comprehensive codebase audit against your project constitution and standards:
+Use the **`/devspark.site-audit`** command to perform a comprehensive codebase audit against your project constitution and standards:
 
 ```bash
 # Full audit (default - all checks)
-/speckit.site-audit
+/devspark.site-audit
 
 # Constitution compliance only
-/speckit.site-audit --scope=constitution
+/devspark.site-audit --scope=constitution
 
 # Package/dependency analysis only
-/speckit.site-audit --scope=packages
+/devspark.site-audit --scope=packages
 
 # Code quality metrics only
-/speckit.site-audit --scope=quality
+/devspark.site-audit --scope=quality
 
 # Unused code/dependencies detection
-/speckit.site-audit --scope=unused
+/devspark.site-audit --scope=unused
 
 # Duplicate code detection
-/speckit.site-audit --scope=duplicate
+/devspark.site-audit --scope=duplicate
 ```
 
 **Key Features**:
@@ -273,14 +334,14 @@ For complete audit details, see the generated report in `/.documentation/copilot
 
 ### Critic (Adversarial Risk Analysis)
 
-Use the **`/speckit.critic`** command to perform adversarial risk analysis identifying technical flaws, implementation hazards, and failure modes:
+Use the **`/devspark.critic`** command to perform adversarial risk analysis identifying technical flaws, implementation hazards, and failure modes:
 
 ```bash
 # Run critic analysis after tasks are generated
-/speckit.critic
+/devspark.critic
 
 # Focus on specific concerns
-/speckit.critic Focus on scalability and security risks
+/devspark.critic Focus on scalability and security risks
 ```
 
 **Key Features**:
@@ -300,14 +361,14 @@ Use the **`/speckit.critic`** command to perform adversarial risk analysis ident
 
 **When to Use**:
 
-- After `/speckit.tasks` and before `/speckit.implement`
+- After `/devspark.tasks` and before `/devspark.implement`
 - When you want a skeptical review of your implementation plan
 - To identify risks the team may have overlooked
 
-**Key Distinction from `/speckit.analyze`**:
+**Key Distinction from `/devspark.analyze`**:
 
-- `/speckit.analyze` = Consistency & completeness checking (are artifacts aligned?)
-- `/speckit.critic` = Adversarial risk analysis (what will fail in production?)
+- `/devspark.analyze` = Consistency & completeness checking (are artifacts aligned?)
+- `/devspark.critic` = Adversarial risk analysis (what will fail in production?)
 
 **Prerequisites**:
 
@@ -316,17 +377,17 @@ Use the **`/speckit.critic`** command to perform adversarial risk analysis ident
 
 ### Pull Request Review
 
-Use the **`/speckit.pr-review`** command to perform constitution-based code reviews on any GitHub Pull Request:
+Use the **`/devspark.pr-review`** command to perform constitution-based code reviews on any GitHub Pull Request:
 
 ```bash
 # Review current PR (auto-detect from branch)
-/speckit.pr-review
+/devspark.pr-review
 
 # Review specific PR by number
-/speckit.pr-review #123
+/devspark.pr-review #123
 
 # Re-review after changes
-/speckit.pr-review #123
+/devspark.pr-review #123
 ```
 
 **Key Features**:
@@ -358,20 +419,20 @@ For complete usage guide, see [PR Review Documentation](./.documentation/pr-revi
 
 ### Quickfix (Lightweight Workflow)
 
-Use the **`/speckit.quickfix`** command for rapid bug fixes and small features without the overhead of full specification workflows:
+Use the **`/devspark.quickfix`** command for rapid bug fixes and small features without the overhead of full specification workflows:
 
 ```bash
 # Bug fix with auto-classification
-/speckit.quickfix fix null pointer exception in UserService.getProfile()
+/devspark.quickfix fix null pointer exception in UserService.getProfile()
 
 # Urgent hotfix
-/speckit.quickfix urgent: payment processing timeout in checkout flow
+/devspark.quickfix urgent: payment processing timeout in checkout flow
 
 # Mark as complete
-/speckit.quickfix complete QF-2026-001
+/devspark.quickfix complete QF-2026-001
 
 # List recent quickfixes
-/speckit.quickfix list
+/devspark.quickfix list
 ```
 
 **Key Features**:
@@ -397,17 +458,17 @@ Use the **`/speckit.quickfix`** command for rapid bug fixes and small features w
 
 ### Release Documentation
 
-Use the **`/speckit.release`** command to archive development artifacts and prepare for the next development cycle:
+Use the **`/devspark.release`** command to archive development artifacts and prepare for the next development cycle:
 
 ```bash
 # Auto-calculate version from completed work
-/speckit.release
+/devspark.release
 
 # Explicit version
-/speckit.release 2.0.0
+/devspark.release 2.0.0
 
 # Preview changes without writing
-/speckit.release --dry-run
+/devspark.release --dry-run
 ```
 
 **Key Features**:
@@ -428,20 +489,20 @@ Use the **`/speckit.release`** command to archive development artifacts and prep
 
 ### Harvest Documentation Cleanup
 
-Use the **`/speckit.harvest`** command to clean stale docs, rewrite spec-linked code comments, and archive obsolete artifacts after preserving useful knowledge in living documentation:
+Use the **`/devspark.harvest`** command to clean stale docs, rewrite spec-linked code comments, and archive obsolete artifacts after preserving useful knowledge in living documentation:
 
 ```bash
 # Full harvest
-/speckit.harvest
+/devspark.harvest
 
 # Documentation-only review and cleanup plan
-/speckit.harvest --scope=docs
+/devspark.harvest --scope=docs
 
 # Rewrite stale spec/task references in code comments only
-/speckit.harvest --scope=comments
+/devspark.harvest --scope=comments
 
 # Dry-run inventory and report only
-/speckit.harvest --scope=scan
+/devspark.harvest --scope=scan
 ```
 
 **Key Features**:
@@ -466,23 +527,23 @@ Use the **`/speckit.harvest`** command to clean stale docs, rewrite spec-linked 
 
 ### Constitution Evolution
 
-Use the **`/speckit.evolve-constitution`** command to analyze PR reviews and propose constitution amendments:
+Use the **`/devspark.evolve-constitution`** command to analyze PR reviews and propose constitution amendments:
 
 ```bash
 # Full analysis of PR reviews and audits
-/speckit.evolve-constitution
+/devspark.evolve-constitution
 
 # Analyze specific PR findings
-/speckit.evolve-constitution --from-pr #123
+/devspark.evolve-constitution --from-pr #123
 
 # Manual suggestion
-/speckit.evolve-constitution suggest "Add principle for API versioning standards"
+/devspark.evolve-constitution suggest "Add principle for API versioning standards"
 
 # Approve a proposal
-/speckit.evolve-constitution approve CAP-2026-001
+/devspark.evolve-constitution approve CAP-2026-001
 
 # Reject with reason
-/speckit.evolve-constitution reject CAP-2026-002 "Too restrictive for current team"
+/devspark.evolve-constitution reject CAP-2026-002 "Too restrictive for current team"
 ```
 
 **Key Features**:
@@ -507,13 +568,13 @@ Use the **`/speckit.evolve-constitution`** command to analyze PR reviews and pro
 
 ## 📽️ Video Overview
 
-Want to see Spec Kit in action? Watch our [video overview](https://www.youtube.com/watch?v=a9eR1xsfvHg&pp=0gcJCckJAYcqIYzv)!
+Want to see DevSpark in action? Watch our [video overview](https://www.youtube.com/watch?v=a9eR1xsfvHg&pp=0gcJCckJAYcqIYzv)!
 
-[![Spec Kit video header](/media/spec-kit-video-header.jpg)](https://www.youtube.com/watch?v=a9eR1xsfvHg&pp=0gcJCckJAYcqIYzv)
+[![DevSpark video header](./.documentation/media/devspark-video-header.jpg)](https://www.youtube.com/watch?v=a9eR1xsfvHg&pp=0gcJCckJAYcqIYzv)
 
 ## 🤖 Supported AI Agents
 
-Spec Kit is **agent-agnostic by design**. Every agent below is a first-class citizen — canonical prompts live in `.documentation/commands/` and each platform receives a thin shim. Switch agents freely, use multiple agents on the same project, or let different team members choose their preferred tool.
+DevSpark is **agent-agnostic by design**. Every agent below is a first-class citizen — canonical prompts live in `.documentation/commands/` and each platform receives a thin shim. Switch agents freely, use multiple agents on the same project, or let different team members choose their preferred tool.
 
 | Agent                                                                                | Support | Notes                                                                                                                                     |
 | ------------------------------------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -536,9 +597,9 @@ Spec Kit is **agent-agnostic by design**. Every agent below is a first-class cit
 | [SHAI (OVHcloud)](https://github.com/ovh/shai)                                       | ✅      |                                                                                                                                           |
 | [Windsurf](https://windsurf.com/)                                                    | ✅      |                                                                                                                                           |
 
-## 🔧 Specify CLI Reference
+## 🔧 DevSpark CLI Reference
 
-The `specify` command supports the following options:
+The `devspark` command supports the following options:
 
 ### Commands
 
@@ -546,11 +607,11 @@ The `specify` command supports the following options:
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `init`  | Initialize a new Specify project from the latest template                                                                                               |
 | `check` | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `cursor-agent`, `windsurf`, `qwen`, `opencode`, `codex`, `shai`, `qodercli`) |
-| `version` | Show Spec Kit Spark product/version information from local CLI metadata                                                                               |
+| `version` | Show DevSpark product/version information from local CLI metadata                                                                               |
 
-`specify version` reports a single local product version (`pyproject.toml`/installed package metadata). It does not compare against latest GitHub release to avoid confusing mismatches.
+`devspark version` reports a single local product version (`pyproject.toml`/installed package metadata). It does not compare against latest GitHub release to avoid confusing mismatches.
 
-### `specify init` Arguments & Options
+### `devspark init` Arguments & Options
 
 | Argument/Option        | Type     | Description                                                                                                                                                                                  |
 | ---------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -569,58 +630,58 @@ The `specify` command supports the following options:
 
 ```bash
 # Basic project initialization
-specify init my-project
+devspark init my-project
 
 # Initialize with specific AI assistant
-specify init my-project --ai claude
+devspark init my-project --ai claude
 
 # Initialize with Cursor support
-specify init my-project --ai cursor-agent
+devspark init my-project --ai cursor-agent
 
 # Initialize with Qoder support
-specify init my-project --ai qodercli
+devspark init my-project --ai qodercli
 
 # Initialize with Windsurf support
-specify init my-project --ai windsurf
+devspark init my-project --ai windsurf
 
 # Initialize with Amp support
-specify init my-project --ai amp
+devspark init my-project --ai amp
 
 # Initialize with SHAI support
-specify init my-project --ai shai
+devspark init my-project --ai shai
 
 # Initialize with IBM Bob support
-specify init my-project --ai bob
+devspark init my-project --ai bob
 
 # Initialize with PowerShell scripts (Windows/cross-platform)
-specify init my-project --ai copilot --script ps
+devspark init my-project --ai copilot --script ps
 
 # Initialize in current directory
-specify init . --ai copilot
+devspark init . --ai copilot
 # or use the --here flag
-specify init --here --ai copilot
+devspark init --here --ai copilot
 
 # Force merge into current (non-empty) directory without confirmation
-specify init . --force --ai copilot
+devspark init . --force --ai copilot
 # or
-specify init --here --force --ai copilot
+devspark init --here --force --ai copilot
 
 # Skip git initialization
-specify init my-project --ai gemini --no-git
+devspark init my-project --ai gemini --no-git
 
 # Enable debug output for troubleshooting
-specify init my-project --ai claude --debug
+devspark init my-project --ai claude --debug
 
 # Use GitHub token for API requests (helpful for corporate environments)
-specify init my-project --ai claude --github-token ghp_your_token_here
+devspark init my-project --ai claude --github-token ghp_your_token_here
 
 # Check system requirements
-specify check
+devspark check
 ```
 
 ### Available Slash Commands
 
-After running `specify init`, your AI coding agent will have access to these slash commands for structured development:
+After running `devspark init`, your AI coding agent will have access to these slash commands for structured development:
 
 #### Core Commands
 
@@ -628,11 +689,11 @@ Essential commands for the Spec-Driven Development workflow:
 
 | Command                 | Description                                                              |
 | ----------------------- | ------------------------------------------------------------------------ |
-| `/speckit.constitution` | Create or update project governing principles and development guidelines |
-| `/speckit.specify`      | Define what you want to build (requirements and user stories)            |
-| `/speckit.plan`         | Create technical implementation plans with your chosen tech stack        |
-| `/speckit.tasks`        | Generate actionable task lists for implementation                        |
-| `/speckit.implement`    | Execute all tasks to build the feature according to the plan             |
+| `/devspark.constitution` | Create or update project governing principles and development guidelines |
+| `/devspark.specify`      | Define what you want to build (requirements and user stories)            |
+| `/devspark.plan`         | Create technical implementation plans with your chosen tech stack        |
+| `/devspark.tasks`        | Generate actionable task lists for implementation                        |
+| `/devspark.implement`    | Execute all tasks to build the feature according to the plan             |
 
 #### Constitution-Powered Commands (No Spec Required)
 
@@ -640,19 +701,19 @@ These commands only require a constitution and work independently of the spec wo
 
 | Command                         | Description                                                              |
 | ------------------------------- | ------------------------------------------------------------------------ |
-| `/speckit.pr-review`            | Review pull requests against constitution (works for any PR, any branch) |
-| `/speckit.site-audit`           | Comprehensive codebase audit for security, quality, and compliance       |
-| `/speckit.quickfix`             | Rapid bug fixes and small features without full spec overhead            |
-| `/speckit.release`              | Archive dev artifacts at release and generate release documentation      |
-| `/speckit.harvest`              | Harvest living knowledge from stale docs and archive obsolete artifacts  |
-| `/speckit.evolve-constitution`  | Propose constitution amendments based on PR review patterns              |
-| `/speckit.repo-story`           | Analyze full commit history and produce a compelling narrative            |
+| `/devspark.pr-review`            | Review pull requests against constitution (works for any PR, any branch) |
+| `/devspark.site-audit`           | Comprehensive codebase audit for security, quality, and compliance       |
+| `/devspark.quickfix`             | Rapid bug fixes and small features without full spec overhead            |
+| `/devspark.release`              | Archive dev artifacts at release and generate release documentation      |
+| `/devspark.harvest`              | Harvest living knowledge from stale docs and archive obsolete artifacts  |
+| `/devspark.evolve-constitution`  | Propose constitution amendments based on PR review patterns              |
+| `/devspark.repo-story`           | Analyze full commit history and produce a compelling narrative            |
 
 #### Personalization & Team Commands
 
 | Command                  | Description                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `/speckit.personalize`   | Create a per-user customized copy of any command prompt                  |
+| `/devspark.personalize`   | Create a per-user customized copy of any command prompt                  |
 
 #### Spec Workflow Commands
 
@@ -660,19 +721,19 @@ Additional commands for the spec-driven development workflow:
 
 | Command              | Description                                                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `/speckit.clarify`   | Clarify underspecified areas (recommended before `/speckit.plan`; formerly `/quizme`)                                                |
-| `/speckit.analyze`   | Cross-artifact consistency & coverage analysis (run after `/speckit.tasks`, before `/speckit.implement`)                             |
-| `/speckit.critic`    | Adversarial risk analysis identifying showstoppers, security flaws, and production failure modes (run after `/speckit.tasks`)        |
-| `/speckit.site-audit`| Comprehensive codebase audit against constitution for security, quality, dependencies, and compliance issues                         |
-| `/speckit.checklist` | Generate custom quality checklists that validate requirements completeness, clarity, and consistency (like "unit tests for English") |
+| `/devspark.clarify`   | Clarify underspecified areas (recommended before `/devspark.plan`; formerly `/quizme`)                                                |
+| `/devspark.analyze`   | Cross-artifact consistency & coverage analysis (run after `/devspark.tasks`, before `/devspark.implement`)                             |
+| `/devspark.critic`    | Adversarial risk analysis identifying showstoppers, security flaws, and production failure modes (run after `/devspark.tasks`)        |
+| `/devspark.site-audit`| Comprehensive codebase audit against constitution for security, quality, dependencies, and compliance issues                         |
+| `/devspark.checklist` | Generate custom quality checklists that validate requirements completeness, clarity, and consistency (like "unit tests for English") |
 
-**Note**: `/speckit.pr-review` and `/speckit.site-audit` can be used at any time on any codebase—they only require a constitution and work independently of any spec workflow. `/speckit.critic` requires completed spec.md, plan.md, and tasks.md files.
+**Note**: `/devspark.pr-review` and `/devspark.site-audit` can be used at any time on any codebase—they only require a constitution and work independently of any spec workflow. `/devspark.critic` requires completed spec.md, plan.md, and tasks.md files.
 
 ### Environment Variables
 
 | Variable          | Description                                                                                                                                                                                                                                                                                            |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `SPECIFY_FEATURE` | Override feature detection for non-Git repositories. Set to the feature directory name (e.g., `001-photo-albums`) to work on a specific feature when not using Git branches.<br/>\*\*Must be set in the context of the agent you're working with prior to using `/speckit.plan` or follow-up commands. |
+| `SPECIFY_FEATURE` | Override feature detection for non-Git repositories. Set to the feature directory name (e.g., `001-photo-albums`) to work on a specific feature when not using Git branches.<br/>\*\*Must be set in the context of the agent you're working with prior to using `/devspark.plan` or follow-up commands. |
 
 ## 📚 Core Philosophy
 
@@ -714,7 +775,7 @@ Our research and experimentation focus on:
 ### Multi-user team collaboration
 
 - Shared governance (constitutions, specs, plans) with individual customization (personalized prompts)
-- `/speckit.personalize` lets each team member tailor commands to their workflow without affecting others
+- `/devspark.personalize` lets each team member tailor commands to their workflow without affecting others
 - Personalized overrides committed to git for transparency and team review
 - Balance between team consistency and individual productivity
 
@@ -737,22 +798,22 @@ Our research and experimentation focus on:
 
 ## 🗺️ Roadmap
 
-Spec Kit Spark is actively developed with a clear vision for the future:
+DevSpark is actively developed with a clear vision for the future:
 
 ### Current Release (v1.6.0)
 
 - ✅ Full Spec-Driven Development workflow
-- ✅ Constitution-based PR review (`/speckit.pr-review`)
-- ✅ Comprehensive site auditing (`/speckit.site-audit`)
-- ✅ Adversarial risk analysis (`/speckit.critic`)
-- ✅ Lightweight quickfix workflow (`/speckit.quickfix`)
-- ✅ Release documentation management (`/speckit.release`)
-- ✅ Documentation harvest and cleanup workflow (`/speckit.harvest`)
-- ✅ Constitution evolution (`/speckit.evolve-constitution`)
-- ✅ Repository story generation (`/speckit.repo-story`)
+- ✅ Constitution-based PR review (`/devspark.pr-review`)
+- ✅ Comprehensive site auditing (`/devspark.site-audit`)
+- ✅ Adversarial risk analysis (`/devspark.critic`)
+- ✅ Lightweight quickfix workflow (`/devspark.quickfix`)
+- ✅ Release documentation management (`/devspark.release`)
+- ✅ Documentation harvest and cleanup workflow (`/devspark.harvest`)
+- ✅ Constitution evolution (`/devspark.evolve-constitution`)
+- ✅ Repository story generation (`/devspark.repo-story`)
 - ✅ 17+ AI agent integrations
 - ✅ Agent-agnostic architecture with canonical prompts and thin platform shims
-- ✅ Multi-user personalization (`/speckit.personalize`)
+- ✅ Multi-user personalization (`/devspark.personalize`)
 
 ### Near-Term (v1.7.x – v1.8.x)
 
@@ -789,7 +850,7 @@ If you encounter issues with an agent, please open an issue so we can refine the
 
 ## 📖 Learn More
 
-- **[Complete Spec-Driven Development Methodology](./spec-driven.md)** - Deep dive into the full process
+- **[Complete Spec-Driven Development Methodology](./.documentation/spec-driven-development.md)** - Deep dive into the full process
 - **[Detailed Walkthrough](#-detailed-process)** - Step-by-step implementation guide
 
 ---
@@ -799,73 +860,73 @@ If you encounter issues with an agent, please open an issue so we can refine the
 <details>
 <summary>Click to expand the detailed step-by-step walkthrough</summary>
 
-You can use the Specify CLI to bootstrap your project, which will bring in the required artifacts in your environment. Run:
+You can use the DevSpark CLI to bootstrap your project, which will bring in the required artifacts in your environment. Run:
 
 ```bash
-specify init <project_name>
+devspark init <project_name>
 ```
 
 Or initialize in the current directory:
 
 ```bash
-specify init .
+devspark init .
 # or use the --here flag
-specify init --here
+devspark init --here
 # Skip confirmation when the directory already has files
-specify init . --force
+devspark init . --force
 # or
-specify init --here --force
+devspark init --here --force
 ```
 
-![Specify CLI bootstrapping a new project in the terminal](./media/specify_cli.gif)
+![DevSpark CLI bootstrapping a new project in the terminal](./.documentation/media/devspark_cli.gif)
 
 You will be prompted to select the AI agent you are using. You can also proactively specify it directly in the terminal:
 
 ```bash
-specify init <project_name> --ai claude
-specify init <project_name> --ai gemini
-specify init <project_name> --ai copilot
+devspark init <project_name> --ai claude
+devspark init <project_name> --ai gemini
+devspark init <project_name> --ai copilot
 
 # Or in current directory:
-specify init . --ai claude
-specify init . --ai codex
+devspark init . --ai claude
+devspark init . --ai codex
 
 # or use --here flag
-specify init --here --ai claude
-specify init --here --ai codex
+devspark init --here --ai claude
+devspark init --here --ai codex
 
 # Force merge into a non-empty current directory
-specify init . --force --ai claude
+devspark init . --force --ai claude
 
 # or
-specify init --here --force --ai claude
+devspark init --here --force --ai claude
 ```
 
 The CLI will check if you have Claude Code, Gemini CLI, Cursor CLI, Qwen CLI, opencode, Codex CLI, Qoder CLI, or Amazon Q Developer CLI installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
 
 ```bash
-specify init <project_name> --ai claude --ignore-agent-tools
+devspark init <project_name> --ai claude --ignore-agent-tools
 ```
 
 ### **STEP 1:** Establish project principles
 
 Go to the project folder and run your AI agent. In our example, we're using `claude`.
 
-![Bootstrapping Claude Code environment](./media/bootstrap-claude-code.gif)
+![Bootstrapping Claude Code environment](./.documentation/media/bootstrap-claude-code.gif)
 
-You will know that things are configured correctly if you see the `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement` commands available.
+You will know that things are configured correctly if you see the `/devspark.constitution`, `/devspark.specify`, `/devspark.plan`, `/devspark.tasks`, and `/devspark.implement` commands available.
 
-The first step should be establishing your project's governing principles using the `/speckit.constitution` command. This helps ensure consistent decision-making throughout all subsequent development phases:
+The first step should be establishing your project's governing principles using the `/devspark.constitution` command. This helps ensure consistent decision-making throughout all subsequent development phases:
 
 ```text
-/speckit.constitution Create principles focused on code quality, testing standards, user experience consistency, and performance requirements. Include governance for how these principles should guide technical decisions and implementation choices.
+/devspark.constitution Create principles focused on code quality, testing standards, user experience consistency, and performance requirements. Include governance for how these principles should guide technical decisions and implementation choices.
 ```
 
 This step creates or updates the `.documentation/memory/constitution.md` file with your project's foundational guidelines that the AI agent will reference during specification, planning, and implementation phases.
 
 ### **STEP 2:** Create project specifications
 
-With your project principles established, you can now create the functional specifications. Use the `/speckit.specify` command and then provide the concrete requirements for the project you want to develop.
+With your project principles established, you can now create the functional specifications. Use the `/devspark.specify` command and then provide the concrete requirements for the project you want to develop.
 
 > [!IMPORTANT]
 > Be as explicit as possible about *what* you are trying to build and *why*. **Do not focus on the tech stack at this point**.
@@ -926,12 +987,12 @@ You should run the structured clarification workflow **before** creating a techn
 
 Preferred order:
 
-1. Use `/speckit.clarify` (structured) – sequential, coverage-based questioning that records answers in a Clarifications section.
+1. Use `/devspark.clarify` (structured) – sequential, coverage-based questioning that records answers in a Clarifications section.
 2. Optionally follow up with ad-hoc free-form refinement if something still feels vague.
 
 If you intentionally want to skip clarification (e.g., spike or exploratory prototype), explicitly state that so the agent doesn't block on missing clarifications.
 
-Example free-form refinement prompt (after `/speckit.clarify` if still needed):
+Example free-form refinement prompt (after `/devspark.clarify` if still needed):
 
 ```text
 For each sample project or project that you create there should be a variable number of tasks between 5 and 15
@@ -949,7 +1010,7 @@ It's important to use the interaction with Claude Code as an opportunity to clar
 
 ### **STEP 4:** Generate a plan
 
-You can now be specific about the tech stack and other technical requirements. You can use the `/speckit.plan` command that is built into the project template with a prompt like this:
+You can now be specific about the tech stack and other technical requirements. You can use the `/devspark.plan` command that is built into the project template with a prompt like this:
 
 ```text
 We are going to generate this using .NET Aspire, using Postgres as the database. The frontend should use
@@ -1034,12 +1095,12 @@ You can also ask Claude Code (if you have the [GitHub CLI](https://docs.github.c
 > [!NOTE]
 > Before you have the agent implement it, it's also worth prompting Claude Code to cross-check the details to see if there are any over-engineered pieces (remember - it can be over-eager). If over-engineered components or decisions exist, you can ask Claude Code to resolve them. Ensure that Claude Code follows the [constitution](.documentation/memory/constitution.md) as the foundational piece that it must adhere to when establishing the plan.
 
-### **STEP 6:** Generate task breakdown with /speckit.tasks
+### **STEP 6:** Generate task breakdown with /devspark.tasks
 
-With the implementation plan validated, you can now break down the plan into specific, actionable tasks that can be executed in the correct order. Use the `/speckit.tasks` command to automatically generate a detailed task breakdown from your implementation plan:
+With the implementation plan validated, you can now break down the plan into specific, actionable tasks that can be executed in the correct order. Use the `/devspark.tasks` command to automatically generate a detailed task breakdown from your implementation plan:
 
 ```text
-/speckit.tasks
+/devspark.tasks
 ```
 
 This step creates a `tasks.md` file in your feature specification directory that contains:
@@ -1051,17 +1112,17 @@ This step creates a `tasks.md` file in your feature specification directory that
 - **Test-driven development structure** - If tests are requested, test tasks are included and ordered to be written before implementation
 - **Checkpoint validation** - Each user story phase includes checkpoints to validate independent functionality
 
-The generated tasks.md provides a clear roadmap for the `/speckit.implement` command, ensuring systematic implementation that maintains code quality and allows for incremental delivery of user stories.
+The generated tasks.md provides a clear roadmap for the `/devspark.implement` command, ensuring systematic implementation that maintains code quality and allows for incremental delivery of user stories.
 
 ### **STEP 7:** Implementation
 
-Once ready, use the `/speckit.implement` command to execute your implementation plan:
+Once ready, use the `/devspark.implement` command to execute your implementation plan:
 
 ```text
-/speckit.implement
+/devspark.implement
 ```
 
-The `/speckit.implement` command will:
+The `/devspark.implement` command will:
 
 - Validate that all prerequisites are in place (constitution, spec, plan, and tasks)
 - Parse the task breakdown from `tasks.md`
@@ -1079,13 +1140,13 @@ Once the implementation is complete, test the application and resolve any runtim
 Before merging your changes, run a constitution-based code review:
 
 ```text
-/speckit.pr-review
+/devspark.pr-review
 ```
 
 Or for a specific PR:
 
 ```text
-/speckit.pr-review #123
+/devspark.pr-review #123
 ```
 
 The PR review command will:
@@ -1116,12 +1177,12 @@ Throughout development, use these commands to maintain code quality:
 
 ```bash
 # Full audit covering all categories
-/speckit.site-audit
+/devspark.site-audit
 
 # Focus on specific areas
-/speckit.site-audit --scope=constitution  # Constitution compliance
-/speckit.site-audit --scope=packages      # Dependency analysis
-/speckit.site-audit --scope=quality       # Code quality metrics
+/devspark.site-audit --scope=constitution  # Constitution compliance
+/devspark.site-audit --scope=packages      # Dependency analysis
+/devspark.site-audit --scope=quality       # Code quality metrics
 ```
 
 The site audit produces detailed compliance reports saved to `/.documentation/copilot/audit/YYYY-MM-DD_results.md`, including:
@@ -1136,11 +1197,11 @@ For detailed usage, see the [Site Audit Guide](.documentation/site-audit-usage.m
 **Critic (Pre-Implementation)** - Run adversarial risk analysis before implementing:
 
 ```bash
-# Run after /speckit.tasks, before /speckit.implement
-/speckit.critic
+# Run after /devspark.tasks, before /devspark.implement
+/devspark.critic
 
 # Focus on specific concerns
-/speckit.critic Focus on scalability and security
+/devspark.critic Focus on scalability and security
 ```
 
 The critic command identifies showstoppers and provides a Go/No-Go recommendation:
@@ -1176,106 +1237,16 @@ rm gcm-linux_amd64.2.6.1.deb
 
 ## 👥 Maintainers
 
-- Den Delimarsky ([@localden](https://github.com/localden))
-- John Lam ([@jflam](https://github.com/jflam))
+- Mark Hazleton ([@MarkHazleton](https://github.com/MarkHazleton))
 
 ## 💬 Support
 
-For support, please open a [GitHub issue](https://github.com/MarkHazleton/spec-kit/issues/new). We welcome bug reports, feature requests, and questions about using Spec-Driven Development.
+For support, please open a [GitHub issue](https://github.com/MarkHazleton/spec-kit/issues/new). We welcome bug reports, feature requests, and questions.
 
 ## 🙏 Acknowledgements
 
-This project is heavily influenced by and based on the work and research of [John Lam](https://github.com/jflam).
+DevSpark is inspired by and builds upon [github/spec-kit](https://github.com/github/spec-kit) by [John Lam](https://github.com/jflam) and [Den Delimarsky](https://github.com/localden).
 
-## � Fork Sync & Maintenance
-
-**Spec Kit Spark** is a maintained fork of [github.com/github/spec-kit](https://github.com/github/spec-kit) with significant enhancements for Adaptive System Life Cycle Development. We actively track and selectively incorporate valuable improvements from upstream.
-
-### Fork Strategy
-
-We maintain this fork using documented decision criteria to:
-
-- **Auto-apply** bug fixes and security patches
-- **Adapt** template and documentation improvements
-- **Evaluate** major features for integration
-- **Ignore** changes incompatible with our structure
-
-See **[FORK_DIVERGENCE.md](./FORK_DIVERGENCE.md)** for:
-
-- Complete divergence history
-- Decision criteria framework
-- Absorbed changes log
-- Integration opportunities
-
-### Syncing with Upstream
-
-**For Contributors**: Run the sync script to review and apply upstream changes.
-
-**Interactive Mode** (Recommended): Review each commit with detailed implications:
-
-```powershell
-# PowerShell
-.\scripts\powershell\sync-upstream.ps1 -Mode interactive
-
-# Bash
-./.documentation/scripts/bash/sync-upstream.sh --mode interactive
-```
-
-This mode:
-
-- Shows full commit details and file changes
-- Explains implications for Spark architecture
-- Detects potential conflicts with Spark-specific files
-- Prompts for action: Apply, Skip, Defer, or View diff
-- Creates checkpoint branches for safe rollback
-
-**Quick Review**: See categorized commits:
-
-```powershell
-# PowerShell
-.\scripts\powershell\sync-upstream.ps1 -Mode review
-
-# Bash
-./.documentation/scripts/bash/sync-upstream.sh --mode review
-```
-
-**Automated Cherry-Picks**: Apply safe bug fixes automatically:
-
-```powershell
-# PowerShell
-.\scripts\powershell\sync-upstream.ps1 -Mode auto
-
-# Bash
-./.documentation/scripts/bash/sync-upstream.sh --mode auto
-```
-
-**Generate Report**: Create detailed analysis for team review:
-
-```powershell
-# PowerShell
-.\scripts\powershell\sync-upstream.ps1 --mode report > sync-report.md
-
-# Bash
-./.documentation/scripts/bash/sync-upstream.sh --mode report > sync-report.md
-```
-
-The sync script automatically:
-
-- Categories upstream commits by our decision criteria
-- Identifies safe auto-applicable changes
-- Generates reports for manual review
-- Updates FORK_DIVERGENCE.md with applied changes
-- Creates checkpoint branches for safe rollback
-
-### Contributing to Upstream
-
-We believe in contributing valuable innovations back to the community. If you've developed a feature that could benefit the upstream project:
-
-1. Create an upstream-compatible branch (adjust paths: `.documentation/` → `docs/`)
-2. Remove Spark-specific dependencies
-3. Submit PR to [github.com/github/spec-kit](https://github.com/github/spec-kit)
-4. Document in FORK_DIVERGENCE.md under "Contributed to Upstream"
-
-## �📄 License
+## 📄 License
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) file for the full terms.

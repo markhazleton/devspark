@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Sync Spec Kit Spark with upstream github.com/github/spec-kit repository
+# Sync DevSpark with upstream github.com/github/spec-kit repository
 #
-# This script helps maintain the Spec Kit Spark fork by:
+# This script helps maintain the DevSpark fork by:
 # - Fetching latest upstream changes
 # - Categorizing commits by decision criteria
 # - Auto-applying safe bug fixes (with --auto flag)
@@ -715,7 +715,7 @@ show_interactive_results() {
 }
 
 # Main execution
-log_header "Spec Kit Spark - Upstream Sync Tool"
+log_header "DevSpark - Upstream Sync Tool"
 log_info "Mode: $MODE"
 
 # Ensure upstream remote exists

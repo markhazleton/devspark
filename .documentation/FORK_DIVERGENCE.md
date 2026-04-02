@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD036 MD040 -->
 
-**Fork**: github.com/MarkHazleton/spec-kit (Spec Kit Spark)  
+**Fork**: github.com/MarkHazleton/spec-kit (DevSpark)  
 **Upstream**: github.com/github/spec-kit  
 **Last Sync**: 2026-02-20  
 **Upstream Commit**: `b562438` (base divergence point)  
@@ -12,9 +12,9 @@
 
 ## Overview
 
-This document tracks how **Spec Kit Spark** has diverged from and absorbed changes from the upstream spec-kit repository. We maintain this fork to provide enhanced features for Adaptive System Life Cycle Development (ASLCD) while staying aware of upstream improvements.
+This document tracks how **DevSpark** has diverged from and absorbed changes from the upstream devspark repository. We maintain this fork to provide enhanced features for Adaptive System Life Cycle Development (ASLCD) while staying aware of upstream improvements.
 
-## Fork Identity: Spec Kit Spark
+## Fork Identity: DevSpark
 
 **Version Scheme**: v1.x.x (vs upstream v0.x.x)  
 **Core Philosophy**: Adaptive, lightweight processes for varying task complexity  
@@ -29,19 +29,19 @@ This document tracks how **Spec Kit Spark** has diverged from and absorbed chang
    - Mixed-agent teams work seamlessly on the same project
 
 2. **Multi-User Personalization**
-   - `/speckit.personalize` creates per-user command overrides
+   - `/devspark.personalize` creates per-user command overrides
    - User prompts stored in `.documentation/{git-user}/commands/`
    - Committed to git for team transparency and review
    - Shared governance with individual customization freedom
 
 3. **New Commands**
-   - `/speckit.critic` - Adversarial risk analysis
-   - `/speckit.pr-review` - Constitution-based PR reviews
-   - `/speckit.site-audit` - Website health analysis
-   - `/speckit.evolve-constitution` - Constitution amendment proposals
-   - `/speckit.quickfix` - Lightweight fixes without full spec overhead
-   - `/speckit.release` - Release documentation management
-   - `/speckit.personalize` - Per-user prompt customization
+   - `/devspark.critic` - Adversarial risk analysis
+   - `/devspark.pr-review` - Constitution-based PR reviews
+   - `/devspark.site-audit` - Website health analysis
+   - `/devspark.evolve-constitution` - Constitution amendment proposals
+   - `/devspark.quickfix` - Lightweight fixes without full spec overhead
+   - `/devspark.release` - Release documentation management
+   - `/devspark.personalize` - Per-user prompt customization
 
 4. **Documentation Structure**
    - Renamed `.specify/` → `.documentation/` for clarity
@@ -280,10 +280,10 @@ f14a47e - Add modular extension system
 **Adaptations Made**:
 
 - All `github.com/github/spec-kit` → `github.com/MarkHazleton/spec-kit`
-- All `github.com/manfredseee/spec-kit` → `github.com/MarkHazleton/spec-kit`
+- All `github.com/manfredseee/devspark` → `github.com/MarkHazleton/spec-kit`
 - Removed "Antigravity" agent (not yet supported in Spark)
 - Updated agent lists to match current AGENTS.md (17 agents)
-- Branding updated from "Spec Kit" to "Spec Kit Spark" where appropriate
+- Branding updated from "DevSpark" to "DevSpark" where appropriate
 - Removed extension development guide link (feature not yet available)
 
 **Validation**:
@@ -408,21 +408,21 @@ Cherry-picked directly from upstream without modification. Changes align perfect
 | `.specify/` | `.documentation/` | DIVERGED |
 | `templates/` | `templates/` (enhanced) | ALIGNED |
 | `scripts/` | `scripts/` (extended) | COMPATIBLE |
-| `src/specify_cli/` | `src/specify_cli/` | MOSTLY ALIGNED |
+| `src/devspark_cli/` | `src/devspark_cli/` | MOSTLY ALIGNED |
 
 ### Commands
 
 | Upstream | Spark | Notes |
 |----------|-------|-------|
-| `/specify` | `/speckit.specify` | Different namespace |
-| `/plan` | `/speckit.plan` | Core commands aligned |
-| `/tasks` | `/speckit.tasks` | Core commands aligned |
-| - | `/speckit.critic` | Spark-only |
-| - | `/speckit.pr-review` | Spark-only |
-| - | `/speckit.site-audit` | Spark-only |
-| - | `/speckit.evolve-constitution` | Spark-only |
-| - | `/speckit.quickfix` | Spark-only |
-| - | `/speckit.release` | Spark-only |
+| `/specify` | `/devspark.specify` | Different namespace |
+| `/plan` | `/devspark.plan` | Core commands aligned |
+| `/tasks` | `/devspark.tasks` | Core commands aligned |
+| - | `/devspark.critic` | Spark-only |
+| - | `/devspark.pr-review` | Spark-only |
+| - | `/devspark.site-audit` | Spark-only |
+| - | `/devspark.evolve-constitution` | Spark-only |
+| - | `/devspark.quickfix` | Spark-only |
+| - | `/devspark.release` | Spark-only |
 
 ### Version Numbering
 
@@ -486,9 +486,9 @@ git cherry-pick --continue
 
 **Commands** (if generalized):
 
-- `/speckit.pr-review` - Valuable for any constitution-based review
-- `/speckit.site-audit` - Generic web accessibility/SEO tool
-- `/speckit.quickfix` - Lightweight workflow pattern
+- `/devspark.pr-review` - Valuable for any constitution-based review
+- `/devspark.site-audit` - Generic web accessibility/SEO tool
+- `/devspark.quickfix` - Lightweight workflow pattern
 
 **Documentation Improvements**:
 
@@ -591,7 +591,7 @@ These files frequently change in both repos:
 
 - `README.md` - Merge changes carefully
 - `AGENTS.md` - Agent additions compatible
-- `src/specify_cli/__init__.py` - Core CLI logic
+- `src/devspark_cli/__init__.py` - Core CLI logic
 - `templates/commands/*` - Enhance, don't replace
 - `.documentation/scripts/bash/*` - Usually compatible
 - `.documentation/scripts/powershell/*` - Usually compatible

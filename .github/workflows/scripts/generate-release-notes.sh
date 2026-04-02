@@ -28,9 +28,9 @@ fi
 
 # Create release notes
 cat > release_notes.md << EOF
-# Spec Kit Spark
+# DevSpark
 
-Spec Kit Spark is an Adaptive System Life Cycle Development (ASLCD) toolkit with constitution-powered commands and right-sized workflows. Part of the WebSpark demonstration suite.
+DevSpark is an Adaptive System Life Cycle Development (ASLCD) toolkit with constitution-powered commands and right-sized workflows. Part of the WebSpark demonstration suite.
 
 ## Spark-Specific Features
 
@@ -42,7 +42,7 @@ Spec Kit Spark is an Adaptive System Life Cycle Development (ASLCD) toolkit with
 
 ## Using This Release
 
-You can use these releases with your agent of choice. We recommend using the Specify CLI to scaffold your projects, however you can download these independently and manage them yourself.
+You can use these releases with your agent of choice. We recommend using the DevSpark CLI to scaffold your projects, however you can download these independently and manage them yourself.
 
 ## Changelog
 
@@ -50,7 +50,7 @@ $COMMITS
 
 ---
 
-*Maintained as a fork of github/spec-kit. Spec Kit Spark is independently evolved and may contain Spark-specific capabilities not present upstream.*
+*Maintained as a fork of github/devspark. DevSpark is independently evolved and may contain Spark-specific capabilities not present upstream.*
 
 EOF
 

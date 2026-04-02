@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD024 -->
 
-All notable changes to the Specify CLI and templates are documented here.
+All notable changes to the DevSpark CLI and templates are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,9 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Agent-agnostic canonical layout**: All command prompts now live in `.documentation/commands/` as the single source of truth. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims that redirect to canonical content with user-override resolution.
-- **Multi-user personalization**: New `/speckit.personalize` command creates per-user prompt overrides in `.documentation/{git-user}/commands/`. Users can customize any command without affecting team defaults; personalized files are committed to git for transparency.
+- **Multi-user personalization**: New `/devspark.personalize` command creates per-user prompt overrides in `.documentation/{git-user}/commands/`. Users can customize any command without affecting team defaults; personalized files are committed to git for transparency.
 - **Personalize command template**: `templates/commands/personalize.md` — resolves git user identity, copies and annotates shared prompts for individual customization.
-- **Release template Step 10 — Update Public-Facing Version References**: `/speckit.release` now requires updating roadmap, release notes, and index docs to match the new version, plus a stale-version-string scan, preventing public documentation from drifting behind the actual release.
+- **Release template Step 10 — Update Public-Facing Version References**: `/devspark.release` now requires updating roadmap, release notes, and index docs to match the new version, plus a stale-version-string scan, preventing public documentation from drifting behind the actual release.
 
 ### Fixed
 
@@ -36,12 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **New `/speckit.repo-story` command**: Analyzes full repository commit history and produces a compelling, evidence-based narrative for both business stakeholders and technical audiences. Uses paired context scripts (`repo-story-context.sh` / `repo-story-context.ps1`) that generate a `history.json` with commit-audit-ready schema including anonymized contributor roles, velocity metrics, quality signals, governance maturity scores, and milestone timelines. Supports `--scope` flags (full, velocity, quality, business, team), configurable history window (`--months`), and baseline comparison (`--compare-baseline`).
+- **New `/devspark.repo-story` command**: Analyzes full repository commit history and produces a compelling, evidence-based narrative for both business stakeholders and technical audiences. Uses paired context scripts (`repo-story-context.sh` / `repo-story-context.ps1`) that generate a `history.json` with commit-audit-ready schema including anonymized contributor roles, velocity metrics, quality signals, governance maturity scores, and milestone timelines. Supports `--scope` flags (full, velocity, quality, business, team), configurable history window (`--months`), and baseline comparison (`--compare-baseline`).
 - **`repo-story-context.ps1` and `repo-story-context.sh` context scripts**: Paired PowerShell and Bash scripts that gather full-repository historical context — commit timeline, contributor trends, tag milestones, file change hotspots, conventional commit metrics, test-to-source ratios, and governance signals — into a structured JSON payload consumed by the repo-story command template.
 
 ### Changed
 
-- **Branding alignment**: Updated all documentation, CLI help text, and release generators to consistently use "Spec Kit Spark — Adaptive System Life Cycle Development (ASLCD) Toolkit" branding. Replaced legacy "GitHub Spec Kit" and "Spec-Driven Development Toolkit" references across AGENTS.md, release notes generators, and supporting documentation.
+- **Branding alignment**: Updated all documentation, CLI help text, and release generators to consistently use "DevSpark — Adaptive System Life Cycle Development (ASLCD) Toolkit" branding. Replaced legacy "GitHub DevSpark" and "Spec-Driven Development Toolkit" references across AGENTS.md, release notes generators, and supporting documentation.
 - **README roadmap version**: Updated current release section from stale v0.0.25 to v1.5.0 reflecting actual CLI version.
 
 ## [1.4.6] - 2026-03-26
@@ -60,41 +60,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **`specify upgrade` crash when AI assistant cannot be auto-detected**: `prompt_choice` (undefined) was called instead of `select_with_arrows`, causing a `NameError`. The `upgrade` command now uses the same `select_with_arrows` interactive picker used by `init`.
+- **`devspark upgrade` crash when AI assistant cannot be auto-detected**: `prompt_choice` (undefined) was called instead of `select_with_arrows`, causing a `NameError`. The `upgrade` command now uses the same `select_with_arrows` interactive picker used by `init`.
 
 ## [1.4.0] - 2026-03-25
 
 ### Added
 
-- **New `/speckit.harvest` command**: Knowledge-preserving cleanup for completed specs, stale documentation, and spec-linked code comments. The command scans `.documentation/specs/` for all-complete specs, triages `.documentation/` files into archive categories (completed reviews, stale drafts, session notes, impl plans, backup files, orphaned assets), and rewrites source-code comments that reference specs/tasks/FRs as self-contained behavior descriptions. An explicit approval gate presents the full harvest plan before any file is moved or edited. Files are moved to `.archive/YYYY-MM-DD/` (never deleted), and knowledge is extracted into `CHANGELOG.md` and `.documentation/Guide.md` before archival. Output: `/.documentation/copilot/harvest-YYYY-MM-DD.md`.
+- **New `/devspark.harvest` command**: Knowledge-preserving cleanup for completed specs, stale documentation, and spec-linked code comments. The command scans `.documentation/specs/` for all-complete specs, triages `.documentation/` files into archive categories (completed reviews, stale drafts, session notes, impl plans, backup files, orphaned assets), and rewrites source-code comments that reference specs/tasks/FRs as self-contained behavior descriptions. An explicit approval gate presents the full harvest plan before any file is moved or edited. Files are moved to `.archive/YYYY-MM-DD/` (never deleted), and knowledge is extracted into `CHANGELOG.md` and `.documentation/Guide.md` before archival. Output: `/.documentation/copilot/harvest-YYYY-MM-DD.md`.
 - **`harvest.ps1` pre-scan script**: PowerShell context-gathering script (`scripts/powershell/harvest.ps1`) installed to `/.documentation/scripts/powershell/harvest.ps1` in consumer projects. Outputs JSON with spec completion status (completed/completed-needs-changelog/in-progress/draft), doc taxonomy scores, disposition recommendations, code comment hits, CHANGELOG gap analysis, and existing archive inventory. Supports `-Scope` (`full`, `specs`, `docs`, `comments`, `changelog`, `scan`) and `-Json` flags. Language-agnostic comment scanning covers Python, TypeScript, JavaScript, C#, Go, and Rust.
 
 ## [1.3.0] - 2026-03-19
 
 ### Fixed
 
-- **`/speckit.site-audit` performance on large repositories**: Reduced default PowerShell pre-scan JSON payload size by returning sampled file inventories and sampled pattern findings with full counts, while keeping full inventories available via an explicit opt-in switch (`--full-inventory` / `--include-full-inventory`).
+- **`/devspark.site-audit` performance on large repositories**: Reduced default PowerShell pre-scan JSON payload size by returning sampled file inventories and sampled pattern findings with full counts, while keeping full inventories available via an explicit opt-in switch (`--full-inventory` / `--include-full-inventory`).
 - **JSON rendering overhead in chat surfaces**: Switched site-audit pre-scan JSON output from compressed single-line output to multiline JSON to reduce UI/context processing pressure.
 - **Unbounded audit expansion risk**: Added explicit execution guardrails in the site-audit command template to limit findings, search breadth, and per-finding file reads, and to stop once high-signal evidence is sufficient.
-- **`/speckit.pr-review` large PR payload risk**: Added bounded file list output in PowerShell PR context pre-scan (`files_changed_total`, `files_changed_truncated`, sample limit) with an opt-in switch for full file inventory, and added prompt-level scope limits for deep file inspection.
-- **`/speckit.archive` large candidate-set expansion risk**: Added sampled candidate arrays with full counts and opt-in full inventory in PowerShell archive context output, plus prompt guardrails to avoid unbounded candidate reading in a single pass.
+- **`/devspark.pr-review` large PR payload risk**: Added bounded file list output in PowerShell PR context pre-scan (`files_changed_total`, `files_changed_truncated`, sample limit) with an opt-in switch for full file inventory, and added prompt-level scope limits for deep file inspection.
+- **`/devspark.archive` large candidate-set expansion risk**: Added sampled candidate arrays with full counts and opt-in full inventory in PowerShell archive context output, plus prompt guardrails to avoid unbounded candidate reading in a single pass.
 - **Defensive JSON output standardization**: Converted remaining PowerShell context scripts from compressed single-line JSON to multiline JSON to reduce chat/UI rendering pressure and improve diagnostics readability.
 
 ## [1.2.4] - 2026-03-07
 
 ### Added
 
-- **`SPECKIT_VERSION` stamp**: `specify init` and `specify upgrade` now write `.documentation/SPECKIT_VERSION` into every consumer project after a successful install or upgrade. The file records the installed version, install date, and agent key — giving AI commands and scripts a single, offline source of truth for the installed version.
-- **New `/speckit.upgrade` AI command** (`templates/commands/upgrade.md`): A dedicated AI agent command that reads the version stamp, compares to the latest release, classifies files as framework-owned vs. user-owned, identifies stale paths, runs `specify upgrade`, and verifies the stamp was updated after completion.
-- **Version check in `/speckit.site-audit`**: Audit reports now include a **Spec Kit Spark Version** section (Step 4) with `VER1`–`VER5` finding codes for missing stamps, outdated versions, and stale pre-migration paths.
-- **Release workflow version bump step** (`templates/commands/release.md`): New Step 9 — *Bump Version in Source Files* — instructs maintainers to update `pyproject.toml`, verifies three-way consistency (pyproject / CHANGELOG / git tag), and explains that consumer projects receive the new stamp automatically on their next `specify upgrade`.
-- **`SPECKIT_VERSION_PATH` and `INSTALLED_VERSION` in release-context scripts**: Both `release-context.ps1` and `release-context.sh` now surface the consumer project's installed version in JSON and human-readable output.
-- **`read_version_stamp()` helper**: New Python helper in the CLI that reads and parses `.documentation/SPECKIT_VERSION` back as a dict; used in the post-upgrade summary to display the newly written version.
+- **`DEVSPARK_VERSION` stamp**: `devspark init` and `devspark upgrade` now write `.documentation/DEVSPARK_VERSION` into every consumer project after a successful install or upgrade. The file records the installed version, install date, and agent key — giving AI commands and scripts a single, offline source of truth for the installed version.
+- **New `/devspark.upgrade` AI command** (`templates/commands/upgrade.md`): A dedicated AI agent command that reads the version stamp, compares to the latest release, classifies files as framework-owned vs. user-owned, identifies stale paths, runs `devspark upgrade`, and verifies the stamp was updated after completion.
+- **Version check in `/devspark.site-audit`**: Audit reports now include a **DevSpark Version** section (Step 4) with `VER1`–`VER5` finding codes for missing stamps, outdated versions, and stale pre-migration paths.
+- **Release workflow version bump step** (`templates/commands/release.md`): New Step 9 — *Bump Version in Source Files* — instructs maintainers to update `pyproject.toml`, verifies three-way consistency (pyproject / CHANGELOG / git tag), and explains that consumer projects receive the new stamp automatically on their next `devspark upgrade`.
+- **`DEVSPARK_VERSION_PATH` and `INSTALLED_VERSION` in release-context scripts**: Both `release-context.ps1` and `release-context.sh` now surface the consumer project's installed version in JSON and human-readable output.
+- **`read_version_stamp()` helper**: New Python helper in the CLI that reads and parses `.documentation/DEVSPARK_VERSION` back as a dict; used in the post-upgrade summary to display the newly written version.
 
 ### Changed
 
-- `specify upgrade` post-completion output now shows the version stamp details (version, agent, install date).
-- `specify init` progress tracker now includes a **Write version stamp** step, visible in the live progress display.
+- `devspark upgrade` post-completion output now shows the version stamp details (version, agent, install date).
+- `devspark init` progress tracker now includes a **Write version stamp** step, visible in the live progress display.
 - Release/package metadata is synchronized at `1.2.4` so the CLI version, changelog, and generated install/upgrade guidance align.
 
 ## [1.1.0] - 2026-02-08
@@ -105,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **New `specify upgrade` command**: Simplified project upgrade with auto-detection of AI assistant, migration needs, and comprehensive safety checks
+- **New `devspark upgrade` command**: Simplified project upgrade with auto-detection of AI assistant, migration needs, and comprehensive safety checks
   - Auto-detects AI assistant from existing project setup (no need to specify `--ai` manually)
   - Auto-detects old structure migration needs (`.specify/`, root-level directories)
   - Safety checks: warns about uncommitted Git changes before proceeding
@@ -129,8 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Upgrade guide**: Now recommends `specify upgrade` as the primary upgrade method instead of `specify init --here --force`
-- **README**: Updated with comprehensive upgrade instructions including `specify upgrade` command
+- **Upgrade guide**: Now recommends `devspark upgrade` as the primary upgrade method instead of `devspark init --here --force`
+- **README**: Updated with comprehensive upgrade instructions including `devspark upgrade` command
 - **Documentation index**: Added migration guide references to documentation site
 
 ## [1.0.3] - 2026-02-06
@@ -154,7 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Fork Identifier**: Transitioned from `.specify/` to `.documentation/` as the Spark fork's directory identifier to better distinguish from upstream Spec Kit
+- **Fork Identifier**: Transitioned from `.specify/` to `.documentation/` as the Spark fork's directory identifier to better distinguish from upstream DevSpark
 - Corrected documentation build directory path references
 
 ### Added
@@ -178,8 +178,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **New `/speckit.evolve-constitution` command**: Analyzes PR reviews and audits to identify recurring patterns, detect gaps in constitution coverage, and propose amendments via CAP (Constitution Amendment Proposal) documents. Supports approval/rejection workflow with history tracking.
-- **Detailed Roadmap**: Added comprehensive roadmap section outlining current and future releases for Spec Kit Spark
+- **New `/devspark.evolve-constitution` command**: Analyzes PR reviews and audits to identify recurring patterns, detect gaps in constitution coverage, and propose amendments via CAP (Constitution Amendment Proposal) documents. Supports approval/rejection workflow with history tracking.
+- **Detailed Roadmap**: Added comprehensive roadmap section outlining current and future releases for DevSpark
 
 ### Changed
 
@@ -190,28 +190,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **New `/speckit.pr-review` command**: Constitution-aware pull request review with actionable feedback for any PR in the repository. Reviews stored in `/specs/pr-review/pr-{id}.md` with metadata.
-- **New `/speckit.site-audit` command**: Comprehensive codebase audit against project constitution/standards, producing structured compliance reports. Supports multiple scopes (full, constitution, packages, quality, unused, duplicate).
+- **New `/devspark.pr-review` command**: Constitution-aware pull request review with actionable feedback for any PR in the repository. Reviews stored in `/specs/pr-review/pr-{id}.md` with metadata.
+- **New `/devspark.site-audit` command**: Comprehensive codebase audit against project constitution/standards, producing structured compliance reports. Supports multiple scopes (full, constitution, packages, quality, unused, duplicate).
 
 ### Changed
 
-- **Spec Kit Spark Branding**: Release packages now use `spec-kit-spark-template-*` naming convention to differentiate from upstream github/spec-kit
+- **DevSpark Branding**: Release packages now use `devspark-template-*` naming convention to differentiate from upstream github/spec-kit
 - **Repository References**: All references now point to `MarkHazleton/spec-kit` instead of `github/spec-kit`
-- Release title changed to "Spec Kit Spark Templates" to reflect fork identity
+- Release title changed to "DevSpark Templates" to reflect fork identity
 
 ### Enhanced
 
-- `/speckit.critic` command now included in all template packages
+- `/devspark.critic` command now included in all template packages
 
 ## [0.0.24] - 2026-01-29
 
 ### Added
 
-- **New `/speckit.discover-constitution` command**: For brownfield projects, analyzes existing codebase to discover implicit patterns and conventions, then guides users through interactive questions to build a constitution. Detects testing frameworks, security patterns, architecture conventions, and code quality standards. Generates draft constitution at `/memory/constitution-draft.md` for team review.
+- **New `/devspark.discover-constitution` command**: For brownfield projects, analyzes existing codebase to discover implicit patterns and conventions, then guides users through interactive questions to build a constitution. Detects testing frameworks, security patterns, architecture conventions, and code quality standards. Generates draft constitution at `/memory/constitution-draft.md` for team review.
 
 ### Changed
 
-- Rebranded as Spec Kit Spark, a community extension part of the WebSpark demonstration suite
+- Rebranded as DevSpark, a community extension part of the WebSpark demonstration suite
 - Enhanced constitution guide with guidance on writing auditable principles and integrating with AI agent instruction files
 - All repository references updated to point to MarkHazleton/spec-kit
 
@@ -219,7 +219,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **New `/speckit.critic` command**: Adversarial risk analysis that identifies technical flaws, implementation hazards, and failure modes across spec.md, plan.md, and tasks.md. Unlike `/speckit.analyze` (consistency checking), critic performs a "pre-mortem" analysis assuming the project will fail and explaining why. Framework-agnostic with stack-specific risk detection. Run after `/speckit.tasks` before `/speckit.implement`.
+- **New `/devspark.critic` command**: Adversarial risk analysis that identifies technical flaws, implementation hazards, and failure modes across spec.md, plan.md, and tasks.md. Unlike `/devspark.analyze` (consistency checking), critic performs a "pre-mortem" analysis assuming the project will fail and explaining why. Framework-agnostic with stack-specific risk detection. Run after `/devspark.tasks` before `/devspark.implement`.
 
 ## [0.0.22] - 2025-11-07
 
@@ -265,7 +265,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support for CodeBuddy (thank you to [@lispking](https://github.com/lispking) for the contribution).
-- You can now see Git-sourced errors in the Specify CLI.
+- You can now see Git-sourced errors in the DevSpark CLI.
 
 ### Changed
 
@@ -277,15 +277,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for using `.` as a shorthand for current directory in `specify init .` command, equivalent to `--here` flag but more intuitive for users.
-- Use the `/speckit.` command prefix to easily discover Spec Kit-related commands.
+- Support for using `.` as a shorthand for current directory in `devspark init .` command, equivalent to `--here` flag but more intuitive for users.
+- Use the `/devspark.` command prefix to easily discover DevSpark-related commands.
 - Refactor the prompts and templates to simplify their capabilities and how they are tracked. No more polluting things with tests when they are not needed.
 - Ensure that tasks are created per user story (simplifies testing and validation).
 - Add support for Visual Studio Code prompt shortcuts and automatic script execution.
 
 ### Changed
 
-- All command files now prefixed with `speckit.` (e.g., `speckit.specify.md`, `speckit.plan.md`) for better discoverability and differentiation in IDE/CLI command palettes and file explorers
+- All command files now prefixed with `devspark.` (e.g., `devspark.specify.md`, `devspark.plan.md`) for better discoverability and differentiation in IDE/CLI command palettes and file explorers
 
 ## [0.0.17] - 2025-09-22
 

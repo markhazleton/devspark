@@ -4,7 +4,7 @@
     Pre-scan repository for harvest targets: completed specs, stale docs, spec-linked code comments.
 
 .DESCRIPTION
-    This script collects inventory data for the /speckit.harvest agent:
+    This script collects inventory data for the /devspark.harvest agent:
     - Spec folders with completion status (tasks.md analysis, CHANGELOG cross-reference)
     - Documentation files categorized by staleness (reviews, audits, drafts, session notes, backups, orphans)
     - Source code comments that reference specs, plans, tasks, or FRs

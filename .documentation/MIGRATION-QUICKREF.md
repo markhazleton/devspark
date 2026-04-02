@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD036 -->
 
-**Migrating from old Spec Kit structure to .documentation/**
+**Migrating from old DevSpark structure to .documentation/**
 
 ---
 
@@ -11,13 +11,13 @@
 ### Bash (Linux/Mac/Git Bash)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.sh | bash
+curl -sSL https://raw.githubusercontent.com/MarkHazleton/devspark/main/.documentation/scripts/migrate-to-documentation.sh | bash
 ```
 
 ### PowerShell (Windows)
 
 ```powershell
-iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.ps1'))
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/MarkHazleton/devspark/main/.documentation/scripts/migrate-to-documentation.ps1'))
 ```
 
 ---
@@ -131,4 +131,4 @@ For detailed guide see: [.documentation/migration-guide.md](.documentation/migra
 
 ---
 
-*Quick reference for Spec Kit v1.0.0+ migration*
+*Quick reference for DevSpark v1.0.0+ migration*

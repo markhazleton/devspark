@@ -3,7 +3,7 @@
 description: Perform comprehensive codebase audit against project constitution/standards, producing structured compliance report
 handoffs:
   - label: View Audit History
-    agent: speckit.site-audit
+    agent: devspark.site-audit
     prompt: Show me previous audit reports in .documentation/copilot/audit/
 scripts:
   sh: .documentation/scripts/bash/site-audit.sh $ARGUMENTS --json
@@ -70,7 +70,7 @@ Execution limits (required):
 
 **Error Handling**:
 If the script fails:
-- **Constitution missing**: Guide user to run `/speckit.constitution`
+- **Constitution missing**: Guide user to run `/devspark.constitution`
 - **Script execution failed**: Provide PowerShell troubleshooting
 
 For single quotes in args like "I'm auditing", use escape syntax: e.g 'I'\''m auditing' (or double-quote if possible: "I'm auditing").
@@ -86,7 +86,7 @@ Read and parse `/.documentation/memory/constitution.md`:
 
 If constitution doesn't exist:
 - **STOP** and inform user that constitution is required
-- Provide guidance: "Run `/speckit.constitution` to create project principles first"
+- Provide guidance: "Run `/devspark.constitution` to create project principles first"
 - Do not proceed with audit
 
 ### 3. File Discovery and Categorization
@@ -108,14 +108,14 @@ Skip these by default:
 - `dist/`, `build/`, `bin/`, `obj/`
 - `*.min.js`, `*.map`
 
-### 4. Spec Kit Spark Version Check
+### 4. DevSpark Version Check
 
-Before auditing code, check whether the project's Spec Kit Spark installation is
+Before auditing code, check whether the project's DevSpark installation is
 current. Stale installations may have outdated command files or missing framework scripts.
 
 #### A. Read Version Stamp
 
-Check for `.documentation/SPECKIT_VERSION`:
+Check for `.documentation/DEVSPARK_VERSION`:
 
 - **If missing**: Flag `VER1` — stamp absent, version unknown (HIGH)
 - **If present**: Parse `version`, `installed`, and `agent` fields
@@ -129,16 +129,16 @@ Read the most recent `## [X.Y.Z]` entry in `CHANGELOG.md` (repo root) to get
 
 | Condition | Finding ID | Severity |
 |-----------|-----------|---------|
-| `.documentation/SPECKIT_VERSION` absent | VER1 | HIGH |
+| `.documentation/DEVSPARK_VERSION` absent | VER1 | HIGH |
 | Installed version < latest version | VER2 | MEDIUM |
 | Agent command files reference `.specify/` or root `memory/`, `scripts/`, `templates/`, or `specs/` paths | VER3 | HIGH |
 | Root-level `memory/`, `scripts/`, `templates/`, or `specs/` directories exist | VER4 | HIGH |
-| Old `speckit.*-old.md` files in agent folder | VER5 | LOW |
+| Old `devspark.*-old.md` files in agent folder | VER5 | LOW |
 
-Include in the audit report under a **Spec Kit Spark Version** section:
+Include in the audit report under a **DevSpark Version** section:
 
 ```markdown
-## Spec Kit Spark Version
+## DevSpark Version
 
 | Field | Value |
 |-------|-------|
@@ -150,7 +150,7 @@ Include in the audit report under a **Spec Kit Spark Version** section:
 ```
 
 If VER1 or VER2 is present, add to the Recommendations section:
-> Run `/speckit.upgrade` or `specify upgrade` to update Spec Kit Spark.
+> Run `/devspark.upgrade` or `devspark upgrade` to update DevSpark.
 
 ### 5. Constitution Compliance Audit
 
@@ -304,7 +304,7 @@ Use this format:
 
 - **Audit Date**: [YYYY-MM-DD HH:MM:SS UTC]
 - **Scope**: [full|constitution|packages|quality|unused|duplicate]
-- **Auditor**: speckit.site-audit
+- **Auditor**: devspark.site-audit
 - **Constitution Version**: [VERSION from constitution]
 - **Repository**: [REPO_NAME]
 
@@ -314,7 +314,7 @@ Use this format:
 
 | Category | Score | Status |
 |----------|-------|--------|
-| Spec Kit Version | [UP TO DATE / UPGRADE AVAILABLE / UNKNOWN] | [Status] |
+| DevSpark Version | [UP TO DATE / UPGRADE AVAILABLE / UNKNOWN] | [Status] |
 | Constitution Compliance | [X]% | [✅ PASS / ⚠️ PARTIAL / ❌ FAIL] |
 | Security | [X]% | [Status] |
 | Code Quality | [X]% | [Status] |
@@ -349,11 +349,11 @@ Use this format:
 |----|-----------|-----------|-------|----------|----------------|
 | SEC1 | Security | src/config.py:45 | Hardcoded API key | CRITICAL | Use environment variable |
 
-## Spec Kit Spark Version
+## DevSpark Version
 
 | Field | Value |
 |-------|-------|
-| Installed Version | [version from SPECKIT_VERSION, or "absent"] |
+| Installed Version | [version from DEVSPARK_VERSION, or "absent"] |
 | Latest Version | [LATEST_VERSION] |
 | Install Date | [installed field] |
 | Agent | [agent field] |
@@ -363,8 +363,8 @@ Use this format:
 
 | ID | Issue | Severity | Recommendation |
 |----|-------|----------|----------------|
-| VER1 | SPECKIT_VERSION absent | HIGH | Run `specify upgrade` to install version stamp |
-| VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/speckit.upgrade` to update |
+| VER1 | DEVSPARK_VERSION absent | HIGH | Run `devspark upgrade` to install version stamp |
+| VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/devspark.upgrade` to update |
 
 ## Security Findings
 
@@ -534,10 +534,10 @@ Use this format:
 
 ---
 
-*Audit generated by speckit.site-audit v1.0*
+*Audit generated by devspark.site-audit v1.0*
 *Constitution-driven codebase audit for [PROJECT_NAME]*
 *Next audit recommended: [DATE + 7 days]*
-*To re-run: `/speckit.site-audit` or `/speckit.site-audit --scope=constitution`*
+*To re-run: `/devspark.site-audit` or `/devspark.site-audit --scope=constitution`*
 ```
 
 ### 12. Output Summary to User
@@ -602,11 +602,11 @@ Every issue must include:
 
 The project constitution defines audit criteria. Create one first:
 
-1. Run: /speckit.constitution
+1. Run: /devspark.constitution
 2. Define your project's core principles
-3. Then retry: /speckit.site-audit
+3. Then retry: /devspark.site-audit
 
-Learn more: https://github.com/MarkHazleton/spec-kit
+Learn more: https://github.com/MarkHazleton/devspark
 ```
 
 **If no issues found**:

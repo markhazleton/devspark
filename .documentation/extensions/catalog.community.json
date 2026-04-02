@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-02-20T00:00:00Z",
-  "catalog_url": "https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/extensions/catalog.community.json",
+  "catalog_url": "https://raw.githubusercontent.com/MarkHazleton/devspark/main/.documentation/extensions/catalog.community.json",
   "extensions": {
     "v-model": {
       "name": "V-Model Extension Pack",
@@ -9,11 +9,11 @@
       "description": "Enforces V-Model paired generation of development specs and test specs with full traceability.",
       "author": "leocamello",
       "version": "0.2.0",
-      "download_url": "https://github.com/leocamello/spec-kit-v-model/archive/refs/tags/v0.2.0.zip",
-      "repository": "https://github.com/leocamello/spec-kit-v-model",
-      "homepage": "https://github.com/leocamello/spec-kit-v-model",
-      "documentation": "https://github.com/leocamello/spec-kit-v-model/blob/main/README.md",
-      "changelog": "https://github.com/leocamello/spec-kit-v-model/blob/main/CHANGELOG.md",
+      "download_url": "https://github.com/leocamello/devspark-v-model/archive/refs/tags/v0.2.0.zip",
+      "repository": "https://github.com/leocamello/devspark-v-model",
+      "homepage": "https://github.com/leocamello/devspark-v-model",
+      "documentation": "https://github.com/leocamello/devspark-v-model/blob/main/README.md",
+      "changelog": "https://github.com/leocamello/devspark-v-model/blob/main/CHANGELOG.md",
       "license": "MIT",
       "requires": {
         "speckit_version": ">=0.1.0"

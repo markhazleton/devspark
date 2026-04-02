@@ -16,40 +16,40 @@ VERSION="$1"
 VERSION_NO_V=${VERSION#v}
 
 gh release create "$VERSION" \
-  .genreleases/spec-kit-spark-template-copilot-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-copilot-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-claude-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-claude-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-gemini-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-gemini-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-cursor-agent-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-cursor-agent-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-opencode-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-opencode-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-qwen-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-qwen-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-windsurf-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-windsurf-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-codex-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-codex-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-kilocode-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-kilocode-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-auggie-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-auggie-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-roo-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-roo-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-codebuddy-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-codebuddy-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-qodercli-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-qodercli-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-amp-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-amp-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-shai-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-shai-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-q-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-q-ps-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-bob-sh-"$VERSION".zip \
-  .genreleases/spec-kit-spark-template-bob-ps-"$VERSION".zip \
-  --repo MarkHazleton/spec-kit \
-  --title "Spec Kit Spark Templates - $VERSION_NO_V" \
+  .genreleases/devspark-template-copilot-sh-"$VERSION".zip \
+  .genreleases/devspark-template-copilot-ps-"$VERSION".zip \
+  .genreleases/devspark-template-claude-sh-"$VERSION".zip \
+  .genreleases/devspark-template-claude-ps-"$VERSION".zip \
+  .genreleases/devspark-template-gemini-sh-"$VERSION".zip \
+  .genreleases/devspark-template-gemini-ps-"$VERSION".zip \
+  .genreleases/devspark-template-cursor-agent-sh-"$VERSION".zip \
+  .genreleases/devspark-template-cursor-agent-ps-"$VERSION".zip \
+  .genreleases/devspark-template-opencode-sh-"$VERSION".zip \
+  .genreleases/devspark-template-opencode-ps-"$VERSION".zip \
+  .genreleases/devspark-template-qwen-sh-"$VERSION".zip \
+  .genreleases/devspark-template-qwen-ps-"$VERSION".zip \
+  .genreleases/devspark-template-windsurf-sh-"$VERSION".zip \
+  .genreleases/devspark-template-windsurf-ps-"$VERSION".zip \
+  .genreleases/devspark-template-codex-sh-"$VERSION".zip \
+  .genreleases/devspark-template-codex-ps-"$VERSION".zip \
+  .genreleases/devspark-template-kilocode-sh-"$VERSION".zip \
+  .genreleases/devspark-template-kilocode-ps-"$VERSION".zip \
+  .genreleases/devspark-template-auggie-sh-"$VERSION".zip \
+  .genreleases/devspark-template-auggie-ps-"$VERSION".zip \
+  .genreleases/devspark-template-roo-sh-"$VERSION".zip \
+  .genreleases/devspark-template-roo-ps-"$VERSION".zip \
+  .genreleases/devspark-template-codebuddy-sh-"$VERSION".zip \
+  .genreleases/devspark-template-codebuddy-ps-"$VERSION".zip \
+  .genreleases/devspark-template-qodercli-sh-"$VERSION".zip \
+  .genreleases/devspark-template-qodercli-ps-"$VERSION".zip \
+  .genreleases/devspark-template-amp-sh-"$VERSION".zip \
+  .genreleases/devspark-template-amp-ps-"$VERSION".zip \
+  .genreleases/devspark-template-shai-sh-"$VERSION".zip \
+  .genreleases/devspark-template-shai-ps-"$VERSION".zip \
+  .genreleases/devspark-template-q-sh-"$VERSION".zip \
+  .genreleases/devspark-template-q-ps-"$VERSION".zip \
+  .genreleases/devspark-template-bob-sh-"$VERSION".zip \
+  .genreleases/devspark-template-bob-ps-"$VERSION".zip \
+  --repo MarkHazleton/devspark \
+  --title "DevSpark Templates - $VERSION_NO_V" \
   --notes-file release_notes.md

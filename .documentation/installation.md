@@ -8,26 +8,26 @@
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
 
-> **Agent-Agnostic**: Spec Kit works identically with every supported agent. Canonical prompts live in `.documentation/commands/` — your chosen agent gets thin shims that redirect there. You can switch agents at any time or have different team members use different agents on the same project.
+> **Agent-Agnostic**: DevSpark works identically with every supported agent. Canonical prompts live in `.documentation/commands/` — your chosen agent gets thin shims that redirect there. You can switch agents at any time or have different team members use different agents on the same project.
 
 ## Installation
 
-Spec Kit supports two installation scenarios:
+DevSpark supports two installation scenarios:
 
 | Scenario | Description | Command |
 |----------|-------------|--------|
-| **Greenfield** | Starting a brand new project from scratch | `specify init <PROJECT_NAME>` |
-| **Brownfield** | Adding Spec Kit to an existing codebase | `specify init --here` or `specify init .` |
+| **Greenfield** | Starting a brand new project from scratch | `devspark init <PROJECT_NAME>` |
+| **Brownfield** | Adding DevSpark to an existing codebase | `devspark init --here` or `devspark init .` |
 
 ### Greenfield: Initialize a New Project
 
-Starting fresh? Create a new project directory with all Spec Kit scaffolding:
+Starting fresh? Create a new project directory with all DevSpark scaffolding:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <PROJECT_NAME>
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <PROJECT_NAME>
 ```
 
-This creates a new directory with the complete Spec Kit structure ready for development.
+This creates a new directory with the complete DevSpark structure ready for development.
 
 ### Brownfield: Add to Existing Project
 
@@ -35,25 +35,25 @@ Already have a codebase? Navigate to your project root and initialize in place:
 
 ```bash
 cd /path/to/your-existing-project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init --here
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init --here
 # or equivalently
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init .
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init .
 ```
 
-This adds the Spec Kit structure (`.documentation/`, `.documentation/memory/`, templates, scripts) to your existing project without disrupting your current files.
+This adds the DevSpark structure (`.documentation/`, `.documentation/memory/`, templates, scripts) to your existing project without disrupting your current files.
 
 > [!TIP]
-> **Brownfield Tip**: After initialization, use the `/speckit.discover-constitution` command to help create a constitution from your existing codebase patterns. This analyzes your code conventions, architecture decisions, and established practices to draft a constitution that reflects how your project already works.
+> **Brownfield Tip**: After initialization, use the `/devspark.discover-constitution` command to help create a constitution from your existing codebase patterns. This analyzes your code conventions, architecture decisions, and established practices to draft a constitution that reflects how your project already works.
 
 ### Specify AI Agent
 
 You can proactively specify your AI agent during initialization:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --ai claude
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --ai gemini
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --ai copilot
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --ai codebuddy
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai claude
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai gemini
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai copilot
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai codebuddy
 ```
 
 ### Specify Script Type (Shell vs PowerShell)
@@ -69,8 +69,8 @@ Auto behavior:
 Force a specific script type:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --script sh
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --script ps
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --script sh
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --script ps
 ```
 
 ### Ignore Agent Tools Check
@@ -78,40 +78,40 @@ uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <projec
 If you prefer to get the templates without checking for the right tools:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify init <project_name> --ai claude --ignore-agent-tools
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai claude --ignore-agent-tools
 ```
 
-## Upgrading Spec Kit
+## Upgrading DevSpark
 
-To upgrade an existing Spec Kit project to the latest version:
+To upgrade an existing DevSpark project to the latest version:
 
 ### Upgrade CLI Tool
 
-First, upgrade the Specify CLI tool:
+First, upgrade the DevSpark CLI tool:
 
 ```bash
-uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
 ```
 
 ### Upgrade Project Files (Recommended)
 
-Use the `specify upgrade` command for a safe, guided upgrade:
+Use the `devspark upgrade` command for a safe, guided upgrade:
 
 ```bash
 # Simple upgrade (auto-detects AI assistant and migration needs)
-specify upgrade
+devspark upgrade
 
 # Preview changes without modifying files
-specify upgrade --dry-run
+devspark upgrade --dry-run
 
 # Override detected agent
-specify upgrade --ai claude
+devspark upgrade --ai claude
 
 # Create backup of constitution before upgrade
-specify upgrade --backup
+devspark upgrade --backup
 
 # Skip automatic migration check
-specify upgrade --skip-migration
+devspark upgrade --skip-migration
 ```
 
 The `upgrade` command will:
@@ -136,22 +136,22 @@ After initialization, you should see the following commands available in your AI
 
 These commands are used for the Spec-Driven Development process:
 
-- `/speckit.constitution` - Create project principles
-- `/speckit.specify` - Create specifications
-- `/speckit.plan` - Generate implementation plans  
-- `/speckit.tasks` - Break down into actionable tasks
-- `/speckit.implement` - Execute the implementation plan
-- `/speckit.critic` - Adversarial risk analysis (requires spec, plan, tasks)
-- `/speckit.analyze` - Cross-artifact consistency and coverage analysis
-- `/speckit.checklist` - Generate quality validation checklists
-- `/speckit.clarify` - Clarify underspecified areas
+- `/devspark.constitution` - Create project principles
+- `/devspark.specify` - Create specifications
+- `/devspark.plan` - Generate implementation plans  
+- `/devspark.tasks` - Break down into actionable tasks
+- `/devspark.implement` - Execute the implementation plan
+- `/devspark.critic` - Adversarial risk analysis (requires spec, plan, tasks)
+- `/devspark.analyze` - Cross-artifact consistency and coverage analysis
+- `/devspark.checklist` - Generate quality validation checklists
+- `/devspark.clarify` - Clarify underspecified areas
 
 ### Constitution-Powered Commands (No Spec Required)
 
 These commands only need a constitution and work independently on any codebase:
 
-- `/speckit.pr-review` - Review pull requests against constitution
-- `/speckit.site-audit` - Comprehensive codebase audit for security, quality, and compliance
+- `/devspark.pr-review` - Review pull requests against constitution
+- `/devspark.site-audit` - Comprehensive codebase audit for security, quality, and compliance
 
 The `.documentation/scripts` directory will contain both `.sh` and `.ps1` scripts.
 

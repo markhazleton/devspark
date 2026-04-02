@@ -2,11 +2,11 @@
 description: Perform adversarial risk analysis identifying technical flaws, implementation hazards, and failure modes across spec.md, plan.md, and tasks.md.
 handoffs:
   - label: Fix Critical Issues
-    agent: speckit.plan
+    agent: devspark.plan
     prompt: Revise plan to address critical architectural risks
     send: true
   - label: Update Tasks
-    agent: speckit.tasks
+    agent: devspark.tasks
     prompt: Regenerate tasks with missing operational items
     send: true
 scripts:
@@ -24,12 +24,12 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Goal
 
-Act as a skeptical technical expert identifying risks, architectural flaws, implementation hazards, and failure scenarios that will prevent successful delivery. This command assumes `/speckit.tasks` has completed and focuses on **what will go wrong** rather than consistency checking.
+Act as a skeptical technical expert identifying risks, architectural flaws, implementation hazards, and failure scenarios that will prevent successful delivery. This command assumes `/devspark.tasks` has completed and focuses on **what will go wrong** rather than consistency checking.
 
-**Key Distinction from `/speckit.analyze`:**
+**Key Distinction from `/devspark.analyze`:**
 
-- `/speckit.analyze` = Consistency & completeness checking (are artifacts aligned?)
-- `/speckit.critic` = Adversarial risk analysis (what will fail in production?)
+- `/devspark.analyze` = Consistency & completeness checking (are artifacts aligned?)
+- `/devspark.critic` = Adversarial risk analysis (what will fail in production?)
 
 ## Operating Constraints
 
@@ -444,11 +444,11 @@ End report with:
 - **Report zero issues gracefully** (emit success report with risk summary)
 - **Be brutally honest**: This is adversarial review - sugar-coating helps nobody
 
-## Key Differences from /speckit.analyze
+## Key Differences from /devspark.analyze
 
 This command produces a **"pre-mortem"** analysis - imagining the project has failed in production and explaining why.
 
-| Aspect | /speckit.analyze | /speckit.critic |
+| Aspect | /devspark.analyze | /devspark.critic |
 |--------|------------------|-----------------|
 | **Purpose** | Consistency checking | Risk identification |
 | **Mindset** | Neutral validator | Adversarial skeptic |

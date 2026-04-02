@@ -2,9 +2,9 @@
 
 ## Overview
 
-The `/speckit.site-audit` command performs comprehensive codebase audits against your project constitution and development standards. It scans your repository for compliance violations, security issues, code quality concerns, unused dependencies, and architectural problems.
+The `/devspark.site-audit` command performs comprehensive codebase audits against your project constitution and development standards. It scans your repository for compliance violations, security issues, code quality concerns, unused dependencies, and architectural problems.
 
-> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/speckit.specify`, `/speckit.plan`, and `/speckit.tasks`, site-audit does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/.documentation/memory/constitution.md`) and can be run on any codebase at any time.
+> **Note**: This command is **independent of the Spec-Driven Development workflow**. Unlike commands like `/devspark.specify`, `/devspark.plan`, and `/devspark.tasks`, site-audit does **not** require any spec, plan, or tasks to exist. It only requires a project constitution (`/.documentation/memory/constitution.md`) and can be run on any codebase at any time.
 
 ## Prerequisites
 
@@ -20,13 +20,13 @@ The `/speckit.site-audit` command performs comprehensive codebase audits against
 If you haven't created a project constitution yet:
 
 ```bash
-/speckit.constitution Create principles for code quality, testing standards, security practices, and documentation requirements
+/devspark.constitution Create principles for code quality, testing standards, security practices, and documentation requirements
 ```
 
 ### Run Full Audit
 
 ```bash
-/speckit.site-audit
+/devspark.site-audit
 ```
 
 This performs a complete audit covering all categories.
@@ -38,7 +38,7 @@ You can focus the audit on specific areas using the `--scope` flag:
 ### Full Audit (Default)
 
 ```bash
-/speckit.site-audit --scope=full
+/devspark.site-audit --scope=full
 ```
 
 Runs all checks including constitution compliance, security, packages, quality, unused code, and duplicates.
@@ -46,7 +46,7 @@ Runs all checks including constitution compliance, security, packages, quality, 
 ### Constitution Compliance Only
 
 ```bash
-/speckit.site-audit --scope=constitution
+/devspark.site-audit --scope=constitution
 ```
 
 Evaluates codebase against each principle in your constitution.
@@ -54,7 +54,7 @@ Evaluates codebase against each principle in your constitution.
 ### Package/Dependency Analysis
 
 ```bash
-/speckit.site-audit --scope=packages
+/devspark.site-audit --scope=packages
 ```
 
 Analyzes dependencies for:
@@ -68,7 +68,7 @@ Analyzes dependencies for:
 ### Code Quality Metrics
 
 ```bash
-/speckit.site-audit --scope=quality
+/devspark.site-audit --scope=quality
 ```
 
 Measures:
@@ -82,7 +82,7 @@ Measures:
 ### Unused Code Detection
 
 ```bash
-/speckit.site-audit --scope=unused
+/devspark.site-audit --scope=unused
 ```
 
 Identifies:
@@ -96,7 +96,7 @@ Identifies:
 ### Duplicate Code Detection
 
 ```bash
-/speckit.site-audit --scope=duplicate
+/devspark.site-audit --scope=duplicate
 ```
 
 Finds:
@@ -199,34 +199,34 @@ Prioritized action items:
 
 ```bash
 # Before releasing, run full audit
-/speckit.site-audit
+/devspark.site-audit
 
 # Review critical issues
 # Address all CRITICAL findings
 # Document any accepted risks
 
 # Re-run to verify fixes
-/speckit.site-audit
+/devspark.site-audit
 ```
 
 ### Workflow 2: Security Focus
 
 ```bash
 # Check for security issues and vulnerable dependencies
-/speckit.site-audit --scope=packages
+/devspark.site-audit --scope=packages
 
 # Then check for code-level security issues
-/speckit.site-audit --scope=constitution
+/devspark.site-audit --scope=constitution
 ```
 
 ### Workflow 3: Code Health Monitoring
 
 ```bash
 # Weekly quality check
-/speckit.site-audit --scope=quality
+/devspark.site-audit --scope=quality
 
 # Monthly duplicate check
-/speckit.site-audit --scope=duplicate
+/devspark.site-audit --scope=duplicate
 
 # Compare with previous audit reports for trends
 ```
@@ -235,12 +235,12 @@ Prioritized action items:
 
 ```bash
 # Find unused code and dependencies
-/speckit.site-audit --scope=unused
+/devspark.site-audit --scope=unused
 
 # Remove identified dead code
 # Re-audit to verify cleanup
 
-/speckit.site-audit --scope=unused
+/devspark.site-audit --scope=unused
 ```
 
 ## Working with Constitution
@@ -302,7 +302,7 @@ This helps track improvement over time.
 **Solution**:
 
 ```bash
-/speckit.constitution Create project principles
+/devspark.constitution Create project principles
 ```
 
 ### "Script execution failed"
@@ -373,17 +373,17 @@ pip install pip-audit
 
 ```bash
 # After completing a feature
-/speckit.site-audit --scope=constitution
+/devspark.site-audit --scope=constitution
 
 # Before creating PR
-/speckit.site-audit --scope=quality
+/devspark.site-audit --scope=quality
 ```
 
 ### Code Review
 
 ```bash
 # Audit before review
-/speckit.site-audit
+/devspark.site-audit
 
 # Include audit findings in review discussion
 ```
@@ -397,9 +397,9 @@ Integrate audit into your pipeline to catch issues early.
 If you encounter issues:
 
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
+- Review [DevSpark Issues](https://github.com/MarkHazleton/spec-kit/issues)
 
 ---
 
-*Part of Spec Kit Spark - Adaptive System Life Cycle Development (ASLCD) Toolkit*  
+*Part of DevSpark - Adaptive System Life Cycle Development (ASLCD) Toolkit*  
 *For more information: <https://github.com/MarkHazleton/spec-kit>*

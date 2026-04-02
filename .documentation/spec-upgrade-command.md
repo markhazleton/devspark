@@ -1,4 +1,4 @@
-# Spec: Add `specify upgrade` Command
+# Spec: Add `devspark upgrade` Command
 
 <!-- markdownlint-disable MD040 -->
 
@@ -6,7 +6,7 @@
 
 Current upgrade process is confusing:
 
-- Users must remember: `specify init --here --force --ai <agent>`
+- Users must remember: `devspark init --here --force --ai <agent>`
 - "init" implies initialization, not upgrade
 - Must manually specify the AI agent each time
 - No automatic migration detection
@@ -14,11 +14,11 @@ Current upgrade process is confusing:
 
 ## Solution
 
-Add a dedicated `specify upgrade` command that:
+Add a dedicated `devspark upgrade` command that:
 
 ### 1. Auto-Detection
 
-- Detects current directory is a Spec Kit project
+- Detects current directory is a DevSpark project
 - Auto-discovers AI agent from existing setup
 - Detects if old structure migration needed
 
@@ -33,12 +33,12 @@ Add a dedicated `specify upgrade` command that:
 
 ```bash
 # Simple upgrade command
-specify upgrade
+devspark upgrade
 
 # With options
-specify upgrade --dry-run          # Preview changes
-specify upgrade --ai claude        # Override detected agent
-specify upgrade --backup           # Create backup before upgrade
+devspark upgrade --dry-run          # Preview changes
+devspark upgrade --ai claude        # Override detected agent
+devspark upgrade --backup           # Create backup before upgrade
 ```
 
 ## Implementation Plan
@@ -55,7 +55,7 @@ def upgrade(
     github_token: str = typer.Option(None, "--github-token", help="GitHub token for API requests"),
 ):
     """
-    Upgrade an existing Spec Kit project to the latest version.
+    Upgrade an existing DevSpark project to the latest version.
 
     This command will:
     1. Detect your current AI assistant setup
@@ -65,20 +65,20 @@ def upgrade(
     5. Preserve your specs/ directory and customizations
 
     Examples:
-        specify upgrade                    # Auto-detect and upgrade
-        specify upgrade --dry-run          # Preview without changes
-        specify upgrade --ai claude        # Override detected agent
-        specify upgrade --backup           # Create safety backup
+        devspark upgrade                    # Auto-detect and upgrade
+        devspark upgrade --dry-run          # Preview without changes
+        devspark upgrade --ai claude        # Override detected agent
+        devspark upgrade --backup           # Create safety backup
     """
 ```
 
 ### Detection Logic
 
-#### 1. Detect Spec Kit Project
+#### 1. Detect DevSpark Project
 
 ```python
 def is_spec_kit_project() -> bool:
-    """Check if current directory is a Spec Kit project."""
+    """Check if current directory is a DevSpark project."""
     indicators = [
         Path(".documentation").exists(),
         Path(".specify").exists(),
@@ -131,12 +131,12 @@ def needs_migration() -> bool:
 ```python
 def upgrade(...):
     show_banner()
-    console.print("[bold]Upgrading Spec Kit project...[/bold]\n")
+    console.print("[bold]Upgrading DevSpark project...[/bold]\n")
 
-    # 1. Verify we're in a Spec Kit project
+    # 1. Verify we're in a DevSpark project
     if not is_spec_kit_project():
-        console.print("[red]Error:[/red] Current directory is not a Spec Kit project")
-        console.print("Run 'specify init --here' to initialize Spec Kit in this directory")
+        console.print("[red]Error:[/red] Current directory is not a DevSpark project")
+        console.print("Run 'devspark init --here' to initialize DevSpark in this directory")
         raise typer.Exit(1)
 
     # 2. Check for uncommitted changes
@@ -188,7 +188,7 @@ def upgrade(...):
     console.print("Next steps:")
     console.print("  1. Review changes: git diff")
     console.print("  2. Test slash commands in your AI assistant")
-    console.print("  3. Commit changes: git add -A && git commit -m 'chore: upgrade spec-kit'")
+    console.print("  3. Commit changes: git add -A && git commit -m 'chore: upgrade devspark'")
 ```
 
 ### Helper Functions
@@ -252,10 +252,10 @@ Upgrade to the latest version:
 
 ```bash
 # Upgrade CLI tool
-uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
 
 # Upgrade project files
-specify upgrade
+devspark upgrade
 ```
 
 That's it! The `upgrade` command will:
@@ -268,7 +268,7 @@ That's it! The `upgrade` command will:
 ```
 
 ### .documentation/upgrade.md
-Update guide to use `specify upgrade` instead of `specify init --here --force`
+Update guide to use `devspark upgrade` instead of `devspark init --here --force`
 
 ## Migration Path
 
@@ -282,7 +282,7 @@ Update guide to use `specify upgrade` instead of `specify init --here --force`
 - Add hint in `init` when used in existing directory:
   ```
 
-  Tip: Use 'specify upgrade' to upgrade existing projects
+  Tip: Use 'devspark upgrade' to upgrade existing projects
 
   ```
 
@@ -295,17 +295,17 @@ Update guide to use `specify upgrade` instead of `specify init --here --force`
 ```bash
 # Test auto-detection
 cd existing-project
-specify upgrade --dry-run
+devspark upgrade --dry-run
 
 # Test manual override
-specify upgrade --ai claude --dry-run
+devspark upgrade --ai claude --dry-run
 
 # Test migration
 cd project-with-old-structure
-specify upgrade --dry-run
+devspark upgrade --dry-run
 
 # Test backup
-specify upgrade --backup --dry-run
+devspark upgrade --backup --dry-run
 ```
 
 ## Alternative: Simpler Approach

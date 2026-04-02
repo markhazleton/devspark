@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD036 -->
 
-> This guide helps you migrate an existing Spec Kit project from the old `.specify/` directory structure to the new `.documentation/` structure introduced in v1.0.0.
+> This guide helps you migrate an existing DevSpark project from the old `.specify/` directory structure to the new `.documentation/` structure introduced in v1.0.0.
 
 ---
 
@@ -24,7 +24,7 @@ Choose your preferred method:
 
 | Old Location | New Location | Description |
 |--------------|--------------|-------------|
-| `.specify/` | `.documentation/` | Main Spec Kit directory |
+| `.specify/` | `.documentation/` | Main DevSpark directory |
 | `memory/` | `.documentation/memory/` | Constitution and context files |
 | `scripts/` | `.documentation/scripts/` | Helper scripts (bash/powershell) |
 | `templates/` | `.documentation/templates/` | Spec/plan/task templates |
@@ -34,7 +34,7 @@ Choose your preferred method:
 
 The migration from `.specify/` to `.documentation/` was made to:
 
-1. **Distinguish Spec Kit Spark from upstream** - Uses a different directory to avoid conflicts
+1. **Distinguish DevSpark from upstream** - Uses a different directory to avoid conflicts
 2. **Clearer semantics** - `.documentation/` better describes what lives there
 3. **Consolidate AI output** - All AI agent generated content lives under `.documentation/`
 4. **Separate concerns** - Documentation and scripts separate from source code
@@ -206,7 +206,7 @@ Update references in:
 
 ```bash
 # 1. Try running a slash command
-# Example: /speckit.constitution
+# Example: /devspark.constitution
 
 # 2. Verify scripts work
 bash .documentation/scripts/bash/setup-plan.sh
@@ -309,7 +309,7 @@ Use the template in `.documentation/templates/spec-template.md`
 
 ### "Migration script not found"
 
-The migration scripts are included in Spec Kit v1.0.0+. If you don't have them:
+The migration scripts are included in DevSpark v1.0.0+. If you don't have them:
 
 1. **Download from GitHub:**
 
@@ -317,10 +317,10 @@ The migration scripts are included in Spec Kit v1.0.0+. If you don't have them:
    curl -o migrate.sh https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.sh
    ```
 
-2. **Or upgrade your Spec Kit installation:**
+2. **Or upgrade your DevSpark installation:**
 
    ```bash
-   specify init --here --force --ai <your-agent>
+   devspark init --here --force --ai <your-agent>
    ```
 
 ### "Slash commands not working after migration"
@@ -389,7 +389,7 @@ After migration, verify:
 
 ### Do I need to migrate?
 
-**Yes, if you want the latest features.** Spec Kit v1.0.0+ uses `.documentation/` exclusively. Old versions using `.specify/` or root-level directories are deprecated.
+**Yes, if you want the latest features.** DevSpark v1.0.0+ uses `.documentation/` exclusively. Old versions using `.specify/` or root-level directories are deprecated.
 
 ### Will my specs be affected?
 
@@ -444,16 +444,16 @@ However, typically `.documentation/` should be committed to git (except for `_si
 
 After successful migration:
 
-1. **Upgrade to latest Spec Kit:**
+1. **Upgrade to latest DevSpark:**
 
    ```bash
-   uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+   uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
    ```
 
 2. **Update project files:**
 
    ```bash
-   specify init --here --force --ai <your-agent>
+   devspark init --here --force --ai <your-agent>
    ```
 
 3. **Review new features:**

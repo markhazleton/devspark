@@ -2,11 +2,11 @@
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
 handoffs: 
   - label: Create Tasks
-    agent: speckit.tasks
+    agent: devspark.tasks
     prompt: Break the plan into tasks
     send: true
   - label: Create Checklist
-    agent: speckit.checklist
+    agent: devspark.checklist
     prompt: Create a checklist for the following domain...
 scripts:
   sh: .documentation/scripts/bash/setup-plan.sh --json

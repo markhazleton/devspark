@@ -50,7 +50,7 @@ jobs:
 
           if [ "$pyproject_version" != "$release_version" ]; then
             echo "Version mismatch: pyproject.toml=$pyproject_version release=$release_version"
-            echo "Update pyproject.toml before creating a release to keep Spec Kit Spark and Specify CLI in sync."
+            echo "Update pyproject.toml before creating a release to keep DevSpark and DevSpark CLI in sync."
             exit 1
           fi
 

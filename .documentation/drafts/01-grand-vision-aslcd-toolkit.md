@@ -195,7 +195,7 @@ The constitution **grows with the project**. Start with 10 principles, not 100.
 **Brownfield (Legacy Systems):**
 
 ```text
-Existing Code → /speckit.discover-constitution → Extracted Patterns
+Existing Code → /devspark.discover-constitution → Extracted Patterns
                                                         ↓
                                                  Draft Constitution
                                                         ↓

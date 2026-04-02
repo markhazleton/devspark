@@ -10,18 +10,18 @@
 # ]
 # ///
 """
-Specify CLI - Setup tool for Specify projects
+DevSpark CLI — Scaffold projects with AI development lifecycle prompts
 
 Usage:
-    uvx specify-cli.py init <project-name>
-    uvx specify-cli.py init .
-    uvx specify-cli.py init --here
+    uvx devspark-cli.py init <project-name>
+    uvx devspark-cli.py init .
+    uvx devspark-cli.py init --here
 
 Or install globally:
-    uv tool install --from specify-cli.py specify-cli
-    specify init <project-name>
-    specify init .
-    specify init --here
+    uv tool install --from devspark-cli.py devspark-cli
+    devspark init <project-name>
+    devspark init .
+    devspark init --here
 """
 
 import os
@@ -241,7 +241,7 @@ BANNER = """
 ╚══════╝╚═╝     ╚══════╝ ╚═════╝╚═╝╚═╝        ╚═╝   
 """
 
-TAGLINE = "Spec Kit Spark - Spec-Driven SDLC Toolkit"
+TAGLINE = "DevSpark — AI Development Lifecycle Prompts"
 class StepTracker:
     """Track and render hierarchical steps without emojis, similar to Claude Code tree output.
     Supports live auto-refresh via an attached refresh callback.
@@ -434,8 +434,8 @@ class BannerGroup(TyperGroup):
 
 
 app = typer.Typer(
-    name="specify",
-    help="Setup tool for Spec Kit Spark ASLCD projects",
+    name="devspark",
+    help="Scaffold projects with DevSpark prompt templates and scripts",
     add_completion=False,
     invoke_without_command=True,
     cls=BannerGroup,
@@ -460,7 +460,7 @@ def callback(ctx: typer.Context):
     """Show banner when no subcommand is provided."""
     if ctx.invoked_subcommand is None and "--help" not in sys.argv and "-h" not in sys.argv:
         show_banner()
-        console.print(Align.center("[dim]Run 'specify --help' for usage information[/dim]"))
+        console.print(Align.center("[dim]Run 'devspark --help' for usage information[/dim]"))
         console.print()
 
 def run_command(cmd: list[str], check_return: bool = True, capture: bool = False, shell: bool = False) -> Optional[str]:
@@ -549,7 +549,7 @@ def init_git_repo(project_path: Path, quiet: bool = False) -> Tuple[bool, Option
             console.print("[cyan]Initializing git repository...[/cyan]")
         subprocess.run(["git", "init"], check=True, capture_output=True, text=True)
         subprocess.run(["git", "add", "."], check=True, capture_output=True, text=True)
-        subprocess.run(["git", "commit", "-m", "Initial commit from Specify template"], check=True, capture_output=True, text=True)
+        subprocess.run(["git", "commit", "-m", "Initial commit from DevSpark template"], check=True, capture_output=True, text=True)
         if not quiet:
             console.print("[green]✓[/green] Git repository initialized")
         return True, None
@@ -636,7 +636,7 @@ def merge_json_files(existing_path: Path, new_content: dict, verbose: bool = Fal
 
 def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Tuple[Path, dict]:
     repo_owner = "MarkHazleton"
-    repo_name = "spec-kit"
+    repo_name = "devspark"
     if client is None:
         client = httpx.Client(verify=ssl_context)
 
@@ -668,7 +668,7 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
         raise typer.Exit(1)
 
     assets = release_data.get("assets", [])
-    pattern = f"spec-kit-spark-template-{ai_assistant}-{script_type}"
+    pattern = f"devspark-template-{ai_assistant}-{script_type}"
     matching_assets = [
         asset for asset in assets
         if pattern in asset["name"] and asset["name"].endswith(".zip")
@@ -969,17 +969,17 @@ def init(
     6. Optionally set up AI assistant commands
     
     Examples:
-        specify init my-project
-        specify init my-project --ai claude
-        specify init my-project --ai copilot --no-git
-        specify init --ignore-agent-tools my-project
-        specify init . --ai claude         # Initialize in current directory
-        specify init .                     # Initialize in current directory (interactive AI selection)
-        specify init --here --ai claude    # Alternative syntax for current directory
-        specify init --here --ai codex
-        specify init --here --ai codebuddy
-        specify init --here
-        specify init --here --force  # Skip confirmation when current directory not empty
+        devspark init my-project
+        devspark init my-project --ai claude
+        devspark init my-project --ai copilot --no-git
+        devspark init --ignore-agent-tools my-project
+        devspark init . --ai claude         # Initialize in current directory
+        devspark init .                     # Initialize in current directory (interactive AI selection)
+        devspark init --here --ai claude    # Alternative syntax for current directory
+        devspark init --here --ai codex
+        devspark init --here --ai codebuddy
+        devspark init --here
+        devspark init --here --force  # Skip confirmation when current directory not empty
     """
 
     show_banner()
@@ -1226,11 +1226,11 @@ def init(
 
     steps_lines.append(f"{step_num}. Start using slash commands with your AI agent:")
 
-    steps_lines.append("   2.1 [cyan]/speckit.constitution[/] - Establish project principles")
-    steps_lines.append("   2.2 [cyan]/speckit.specify[/] - Create baseline specification")
-    steps_lines.append("   2.3 [cyan]/speckit.plan[/] - Create implementation plan")
-    steps_lines.append("   2.4 [cyan]/speckit.tasks[/] - Generate actionable tasks")
-    steps_lines.append("   2.5 [cyan]/speckit.implement[/] - Execute implementation")
+    steps_lines.append("   2.1 [cyan]/devspark.constitution[/] - Establish project principles")
+    steps_lines.append("   2.2 [cyan]/devspark.specify[/] - Create baseline specification")
+    steps_lines.append("   2.3 [cyan]/devspark.plan[/] - Create implementation plan")
+    steps_lines.append("   2.4 [cyan]/devspark.tasks[/] - Generate actionable tasks")
+    steps_lines.append("   2.5 [cyan]/devspark.implement[/] - Execute implementation")
 
     steps_panel = Panel("\n".join(steps_lines), title="Next Steps", border_style="cyan", padding=(1,2))
     console.print()
@@ -1239,10 +1239,10 @@ def init(
     enhancement_lines = [
         "Optional commands that you can use for your specs [bright_black](improve quality & confidence)[/bright_black]",
         "",
-        f"○ [cyan]/speckit.clarify[/] [bright_black](optional)[/bright_black] - Ask structured questions to de-risk ambiguous areas before planning (run before [cyan]/speckit.plan[/] if used)",
-        f"○ [cyan]/speckit.analyze[/] [bright_black](optional)[/bright_black] - Cross-artifact consistency & alignment report (after [cyan]/speckit.tasks[/], before [cyan]/speckit.implement[/])",
-        f"○ [cyan]/speckit.critic[/] [bright_black](optional)[/bright_black] - Adversarial risk analysis for technical flaws & failure modes (after [cyan]/speckit.tasks[/], before [cyan]/speckit.implement[/])",
-        f"○ [cyan]/speckit.checklist[/] [bright_black](optional)[/bright_black] - Generate quality checklists to validate requirements completeness, clarity, and consistency (after [cyan]/speckit.plan[/])"
+        f"○ [cyan]/devspark.clarify[/] [bright_black](optional)[/bright_black] - Ask structured questions to de-risk ambiguous areas before planning (run before [cyan]/devspark.plan[/] if used)",
+        f"○ [cyan]/devspark.analyze[/] [bright_black](optional)[/bright_black] - Cross-artifact consistency & alignment report (after [cyan]/devspark.tasks[/], before [cyan]/devspark.implement[/])",
+        f"○ [cyan]/devspark.critic[/] [bright_black](optional)[/bright_black] - Adversarial risk analysis for technical flaws & failure modes (after [cyan]/devspark.tasks[/], before [cyan]/devspark.implement[/])",
+        f"○ [cyan]/devspark.checklist[/] [bright_black](optional)[/bright_black] - Generate quality checklists to validate requirements completeness, clarity, and consistency (after [cyan]/devspark.plan[/])"
     ]
     enhancements_panel = Panel("\n".join(enhancement_lines), title="Enhancement Commands", border_style="cyan", padding=(1,2))
     console.print()
@@ -1254,7 +1254,7 @@ def init(
 # ============================================================================
 
 def is_spec_kit_project() -> bool:
-    """Check if current directory is a Spec Kit project."""
+    """Check if current directory is a DevSpark project."""
     indicators = [
         Path(".documentation").exists(),
         Path(".specify").exists(),
@@ -1417,7 +1417,7 @@ def backup_constitution() -> Optional[Path]:
 
 
 def write_version_stamp(project_path: Path, ai_assistant: str, release_version: str = "") -> None:
-    """Write .documentation/SPECKIT_VERSION to record the installed version and agent.
+    """Write .documentation/DEVSPARK_VERSION to record the installed version and agent.
 
     Uses release_version (the GitHub release tag that was downloaded) when available,
     falling back to the installed CLI metadata version.
@@ -1432,7 +1432,7 @@ def write_version_stamp(project_path: Path, ai_assistant: str, release_version: 
     if not version:
         import importlib.metadata
         try:
-            version = importlib.metadata.version("specify-cli")
+            version = importlib.metadata.version("devspark-cli")
         except Exception:
             try:
                 import tomllib
@@ -1448,7 +1448,7 @@ def write_version_stamp(project_path: Path, ai_assistant: str, release_version: 
     if not doc_dir.exists():
         return  # .documentation not present — skip silently
 
-    stamp_path = doc_dir / "SPECKIT_VERSION"
+    stamp_path = doc_dir / "DEVSPARK_VERSION"
     install_date = datetime.now().strftime("%Y-%m-%d")
 
     try:
@@ -1463,9 +1463,9 @@ def write_version_stamp(project_path: Path, ai_assistant: str, release_version: 
 
 
 def read_version_stamp(project_path: Path) -> Optional[dict]:
-    """Read .documentation/SPECKIT_VERSION and return a dict with version/date/agent,
+    """Read .documentation/DEVSPARK_VERSION and return a dict with version/date/agent,
     or None if the file is absent or unreadable."""
-    stamp_path = project_path / ".documentation" / "SPECKIT_VERSION"
+    stamp_path = project_path / ".documentation" / "DEVSPARK_VERSION"
     if not stamp_path.exists():
         return None
     try:
@@ -1498,7 +1498,7 @@ def upgrade(
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository operations"),
 ):
     """
-    Upgrade an existing Spec Kit project to the latest version.
+    Upgrade an existing DevSpark project to the latest version.
 
     This command will:
     1. Detect your current AI assistant setup
@@ -1508,23 +1508,23 @@ def upgrade(
     5. Preserve your specs/ directory and customizations
 
     Examples:
-        specify upgrade                    # Auto-detect and upgrade
-        specify upgrade --dry-run          # Preview without changes
-        specify upgrade --ai claude        # Override detected agent
-        specify upgrade --backup           # Create safety backup
-        specify upgrade --skip-migration   # Skip old structure migration
+        devspark upgrade                    # Auto-detect and upgrade
+        devspark upgrade --dry-run          # Preview without changes
+        devspark upgrade --ai claude        # Override detected agent
+        devspark upgrade --backup           # Create safety backup
+        devspark upgrade --skip-migration   # Skip old structure migration
     """
 
     show_banner()
-    console.print("[bold]Upgrading Spec Kit project...[/bold]\n")
+    console.print("[bold]Upgrading DevSpark project...[/bold]\n")
 
-    # Step 1: Verify we're in a Spec Kit project
-    console.print("[cyan]→[/cyan] Verifying Spec Kit project...")
+    # Step 1: Verify we're in a DevSpark project
+    console.print("[cyan]→[/cyan] Verifying DevSpark project...")
     if not is_spec_kit_project():
-        console.print("[red]✗ Error:[/red] Current directory is not a Spec Kit project")
-        console.print("[dim]Run 'specify init --here' to initialize Spec Kit in this directory[/dim]")
+        console.print("[red]✗ Error:[/red] Current directory is not a DevSpark project")
+        console.print("[dim]Run 'devspark init --here' to initialize DevSpark in this directory[/dim]")
         raise typer.Exit(1)
-    console.print("[green]✓[/green] Spec Kit project detected\n")
+    console.print("[green]✓[/green] DevSpark project detected\n")
 
     # Step 2: Check for uncommitted changes
     if not no_git:
@@ -1609,14 +1609,14 @@ def upgrade(
         console.print("="*60 + "\n")
 
         console.print("[bold]What would happen in actual upgrade:[/bold]")
-        console.print("  1. Download latest Spec Kit templates from GitHub")
+        console.print("  1. Download latest DevSpark templates from GitHub")
         console.print(f"  2. Update .{AGENT_CONFIG[ai_assistant]['folder'][:-1]}/ directory with new commands")
         console.print("  3. Update .documentation/ with latest scripts and templates")
         console.print("  4. Preserve your .documentation/specs/ directory (never touched)")
         console.print("  5. Preserve your constitution and customizations")
         console.print()
         console.print("[bold]To perform the actual upgrade:[/bold]")
-        console.print(f"  [cyan]specify upgrade --ai {ai_assistant}[/cyan]")
+        console.print(f"  [cyan]devspark upgrade --ai {ai_assistant}[/cyan]")
         console.print()
         return
 
@@ -1658,16 +1658,16 @@ def upgrade(
     # Show the stamped version
     stamp = read_version_stamp(Path.cwd())
     if stamp:
-        console.print(f"[green]✓[/green] Version stamp written: [cyan].documentation/SPECKIT_VERSION[/cyan]")
+        console.print(f"[green]✓[/green] Version stamp written: [cyan].documentation/DEVSPARK_VERSION[/cyan]")
         console.print(f"  Version: [bold]{stamp.get('version', 'unknown')}[/bold]  Agent: {stamp.get('agent', 'unknown')}  Date: {stamp.get('installed', 'unknown')}\n")
 
     console.print("[bold]Next steps:[/bold]")
     console.print("  1. Review changes: [cyan]git status[/cyan] and [cyan]git diff[/cyan]")
-    console.print("  2. Test slash commands in your AI assistant (e.g., [cyan]/speckit.constitution[/cyan])")
+    console.print("  2. Test slash commands in your AI assistant (e.g., [cyan]/devspark.constitution[/cyan])")
     console.print("  3. Verify your specs are intact: [cyan]ls .documentation/specs/[/cyan]")
     console.print("  4. If everything looks good, commit:")
     console.print("     [cyan]git add -A[/cyan]")
-    console.print("     [cyan]git commit -m 'chore: upgrade to latest spec-kit version'[/cyan]")
+    console.print("     [cyan]git commit -m 'chore: upgrade to latest devspark version'[/cyan]")
 
     if backup:
         console.print()
@@ -1710,7 +1710,7 @@ def check():
 
     console.print(tracker.render())
 
-    console.print("\n[bold green]Specify CLI is ready to use![/bold green]")
+    console.print("\n[bold green]DevSpark CLI is ready to use![/bold green]")
 
     if not git_ok:
         console.print("[dim]Tip: Install git for repository management[/dim]")
@@ -1729,7 +1729,7 @@ def version():
     # Get CLI version from package metadata
     cli_version = "unknown"
     try:
-        cli_version = importlib.metadata.version("specify-cli")
+        cli_version = importlib.metadata.version("devspark-cli")
     except Exception:
         # Fallback: try reading from pyproject.toml if running from source
         try:
@@ -1746,8 +1746,8 @@ def version():
     info_table.add_column("Key", style="cyan", justify="right")
     info_table.add_column("Value", style="white")
 
-    info_table.add_row("Product", "Spec Kit Spark")
-    info_table.add_row("CLI", "Specify CLI")
+    info_table.add_row("Product", "DevSpark")
+    info_table.add_row("CLI", "DevSpark CLI")
     info_table.add_row("Version", cli_version)
     info_table.add_row("", "")
     info_table.add_row("Python", platform.python_version())
@@ -1757,7 +1757,7 @@ def version():
 
     panel = Panel(
         info_table,
-        title="[bold cyan]Spec Kit Spark Information[/bold cyan]",
+        title="[bold cyan]DevSpark Information[/bold cyan]",
         border_style="cyan",
         padding=(1, 2)
     )

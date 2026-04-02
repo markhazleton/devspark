@@ -1,6 +1,6 @@
 # Local Development Guide
 
-This guide shows how to iterate on the `specify` CLI locally without publishing a release or committing to `main` first.
+This guide shows how to iterate on the `devspark` CLI locally without publishing a release or committing to `main` first.
 
 > Scripts now have both Bash (`.sh`) and PowerShell (`.ps1`) variants. The CLI auto-selects based on OS unless you pass `--script sh|ps`.
 
@@ -8,7 +8,7 @@ This guide shows how to iterate on the `specify` CLI locally without publishing 
 
 ```bash
 git clone https://github.com/MarkHazleton/spec-kit.git
-cd spec-kit
+cd devspark
 # Work on a feature branch
 git checkout -b your-feature-branch
 ```
@@ -19,14 +19,14 @@ You can execute the CLI via the module entrypoint without installing anything:
 
 ```bash
 # From repo root
-python -m src.specify_cli --help
-python -m src.specify_cli init demo-project --ai claude --ignore-agent-tools --script sh
+python -m src.devspark_cli --help
+python -m src.devspark_cli init demo-project --ai claude --ignore-agent-tools --script sh
 ```
 
 If you prefer invoking the script file style (uses shebang):
 
 ```bash
-python src/specify_cli/__init__.py init demo-project --script ps
+python src/devspark_cli/__init__.py init demo-project --script ps
 ```
 
 ## 3. Use Editable Install (Isolated Environment)
@@ -52,7 +52,7 @@ Re-running after code edits requires no reinstall because of editable mode.
 `uvx` can run from a local path (or a Git ref) to simulate user flows:
 
 ```bash
-uvx --from . specify init demo-uvx --ai copilot --ignore-agent-tools --script sh
+uvx --from . devspark init demo-uvx --ai copilot --ignore-agent-tools --script sh
 ```
 
 You can also point uvx at a specific branch without merging:
@@ -60,7 +60,7 @@ You can also point uvx at a specific branch without merging:
 ```bash
 # Push your working branch first
 git push origin your-feature-branch
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git@your-feature-branch specify init demo-branch-test --script ps
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git@your-feature-branch devspark init demo-branch-test --script ps
 ```
 
 ### 4a. Absolute Path uvx (Run From Anywhere)
@@ -69,14 +69,14 @@ If you're in another directory, use an absolute path instead of `.`:
 
 ```bash
 uvx --from /mnt/c/MarkHazleton/spec-kit specify --help
-uvx --from /mnt/c/MarkHazleton/spec-kit specify init demo-anywhere --ai copilot --ignore-agent-tools --script sh
+uvx --from /mnt/c/MarkHazleton/spec-kit devspark init demo-anywhere --ai copilot --ignore-agent-tools --script sh
 ```
 
 Set an environment variable for convenience:
 
 ```bash
 export SPEC_KIT_SRC=/mnt/c/MarkHazleton/spec-kit
-uvx --from "$SPEC_KIT_SRC" specify init demo-env --ai copilot --ignore-agent-tools --script ps
+uvx --from "$SPEC_KIT_SRC" devspark init demo-env --ai copilot --ignore-agent-tools --script ps
 ```
 
 (Optional) Define a shell function:
@@ -103,7 +103,7 @@ On Windows you will instead use the `.ps1` scripts (no chmod needed).
 Currently no enforced lint config is bundled, but you can quickly sanity check importability:
 
 ```bash
-python -c "import specify_cli; print('Import OK')"
+python -c "import devspark_cli; print('Import OK')"
 ```
 
 ## 7. Build a Wheel Locally (Optional)
@@ -123,7 +123,7 @@ When testing `init --here` in a dirty directory, create a temp workspace:
 
 ```bash
 mkdir /tmp/spec-test && cd /tmp/spec-test
-python -m src.specify_cli init --here --ai claude --ignore-agent-tools --script sh  # if repo copied here
+python -m src.devspark_cli init --here --ai claude --ignore-agent-tools --script sh  # if repo copied here
 ```
 
 Or copy only the modified CLI portion if you want a lighter sandbox.
@@ -133,8 +133,8 @@ Or copy only the modified CLI portion if you want a lighter sandbox.
 If you need to bypass TLS validation while experimenting:
 
 ```bash
-specify check --skip-tls
-specify init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
+devspark check --skip-tls
+devspark init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
 ```
 
 (Use only for local experimentation.)
@@ -143,7 +143,7 @@ specify init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
 
 | Action | Command |
 |--------|---------|
-| Run CLI directly | `python -m src.specify_cli --help` |
+| Run CLI directly | `python -m src.devspark_cli --help` |
 | Editable install | `uv pip install -e .` then `specify ...` |
 | Local uvx run (repo root) | `uvx --from . specify ...` |
 | Local uvx run (abs path) | `uvx --from /mnt/c/MarkHazleton/spec-kit specify ...` |

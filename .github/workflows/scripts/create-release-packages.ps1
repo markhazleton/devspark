@@ -3,11 +3,11 @@
 
 <#
 .SYNOPSIS
-    Build Spec Kit template release archives for each supported AI assistant and script type.
+    Build DevSpark template release archives for each supported AI assistant and script type.
 
 .DESCRIPTION
     create-release-packages.ps1 (workflow-local)
-    Build Spec Kit template release archives for each supported AI assistant and script type.
+    Build DevSpark template release archives for each supported AI assistant and script type.
     
 .PARAMETER Version
     Version string with leading 'v' (e.g., v1.0.0)
@@ -61,7 +61,7 @@ New-Item -ItemType Directory -Path $GenReleasesDir -Force | Out-Null
 function Rewrite-Paths {
     param([string]$Content)
 
-    # Spec Kit Spark uses .documentation/ instead of .specify/ to distinguish from upstream
+    # DevSpark uses .documentation/ instead of .specify/ to distinguish from upstream
     $Content = $Content -replace '(/?)\.specify/', '$1.documentation/'
     $Content = $Content -replace '(^|\s|`)/specs/', '$1/.documentation/specs/'
     $Content = $Content -replace '(^|\s|`)/memory/', '$1/.documentation/memory/'
@@ -153,7 +153,7 @@ function Generate-CanonicalCommands {
         $body = $body -replace '\{ARGS\}', '$ARGUMENTS'
         $body = Rewrite-Paths -Content $body
         
-        $outputFile = Join-Path $OutputDir "speckit.$name.md"
+        $outputFile = Join-Path $OutputDir "devspark.$name.md"
         Set-Content -Path $outputFile -Value $body -NoNewline
     }
 }
@@ -201,7 +201,7 @@ function Generate-Shims {
             }
         }
         
-        $outputFile = Join-Path $OutputDir "speckit.$name.$Extension"
+        $outputFile = Join-Path $OutputDir "devspark.$name.$Extension"
         
         switch ($Extension) {
             'toml' {
@@ -214,8 +214,8 @@ Determine the current git user by running ``git config user.name``.
 Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
 
 Read and execute the instructions from the **first file that exists**:
-1. ``.documentation/{git-user}/commands/speckit.$name.md`` (personalized override)
-2. ``.documentation/commands/speckit.$name.md`` (shared default)
+1. ``.documentation/{git-user}/commands/devspark.$name.md`` (personalized override)
+2. ``.documentation/commands/devspark.$name.md`` (shared default)
 
 Where ``{git-user}`` is the normalized slug from step above.
 
@@ -245,8 +245,8 @@ Pass the user input above to the resolved prompt.
                 $shimLines += "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars."
                 $shimLines += ""
                 $shimLines += "Read and execute the instructions from the **first file that exists**:"
-                $shimLines += "1. ``.documentation/{git-user}/commands/speckit.$name.md`` (personalized override)"
-                $shimLines += "2. ``.documentation/commands/speckit.$name.md`` (shared default)"
+                $shimLines += "1. ``.documentation/{git-user}/commands/devspark.$name.md`` (personalized override)"
+                $shimLines += "2. ``.documentation/commands/devspark.$name.md`` (shared default)"
                 $shimLines += ""
                 $shimLines += "Where ``{git-user}`` is the normalized slug from step above."
                 $shimLines += ""
@@ -358,7 +358,7 @@ function Generate-Commands {
         $body = Rewrite-Paths -Content $body
         
         # Generate output file based on extension
-        $outputFile = Join-Path $OutputDir "speckit.$name.$Extension"
+        $outputFile = Join-Path $OutputDir "devspark.$name.$Extension"
         
         switch ($Extension) {
             'toml' {
@@ -384,7 +384,7 @@ function Generate-CopilotPrompts {
     
     New-Item -ItemType Directory -Path $PromptsDir -Force | Out-Null
     
-    $agentFiles = Get-ChildItem -Path "$AgentsDir/speckit.*.agent.md" -File -ErrorAction SilentlyContinue
+    $agentFiles = Get-ChildItem -Path "$AgentsDir/devspark.*.agent.md" -File -ErrorAction SilentlyContinue
     
     foreach ($agentFile in $agentFiles) {
         $basename = $agentFile.Name -replace '\.agent\.md$', ''
@@ -558,7 +558,7 @@ function Build-Variant {
     }
     
     # Create zip archive
-    $zipFile = Join-Path $GenReleasesDir "spec-kit-spark-template-${Agent}-${Script}-${Version}.zip"
+    $zipFile = Join-Path $GenReleasesDir "devspark-template-${Agent}-${Script}-${Version}.zip"
     Compress-Archive -Path "$baseDir/*" -DestinationPath $zipFile -Force
     Write-Host "Created $zipFile"
 }
@@ -627,6 +627,6 @@ foreach ($agent in $AgentList) {
 }
 
 Write-Host "`nArchives in ${GenReleasesDir}:"
-Get-ChildItem -Path $GenReleasesDir -Filter "spec-kit-spark-template-*-${Version}.zip" | ForEach-Object {
+Get-ChildItem -Path $GenReleasesDir -Filter "devspark-template-*-${Version}.zip" | ForEach-Object {
     Write-Host "  $($_.Name)"
 }

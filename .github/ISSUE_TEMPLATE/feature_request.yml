@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature or enhancement for Specify CLI or Spec Kit Spark
+description: Suggest a new feature or enhancement for DevSpark CLI or DevSpark
 title: "[Feature]: "
 labels: ["enhancement", "needs-triage"]
 body:
@@ -39,7 +39,7 @@ body:
       label: Component
       description: Which component does this feature relate to?
       options:
-        - Specify CLI (initialization, commands)
+        - DevSpark CLI (initialization, commands)
         - Spec templates (BDD, Testing Strategy, etc.)
         - Agent integrations (command files, workflows)
         - Scripts (Bash/PowerShell utilities)

@@ -2,10 +2,10 @@
 description: Harvest knowledge from completed specs and stale docs into living documentation, rewrite stale spec-linked comments, then archive obsolete artifacts
 handoffs:
   - label: Review Release Artifacts
-    agent: speckit.release
+    agent: devspark.release
     prompt: Review completed specs and release documentation before archival
   - label: Run Documentation Audit
-    agent: speckit.site-audit
+    agent: devspark.site-audit
     prompt: Audit documentation quality and stale references before harvest
 scripts:
   sh: .documentation/scripts/bash/harvest.sh $ARGUMENTS --json

@@ -111,7 +111,7 @@ main() {
     if [[ -z "$PR_NUMBER" ]]; then
         if ! PR_NUMBER=$(detect_pr_number); then
             log_error "Unable to detect PR number" \
-                "Please provide PR number explicitly: /speckit.pr-review #123"
+                "Please provide PR number explicitly: /devspark.pr-review #123"
             exit 1
         fi
     fi

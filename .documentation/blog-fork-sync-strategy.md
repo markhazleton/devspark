@@ -1,4 +1,4 @@
-# Staying in Sync with Your Fork's Parent: How Spec Kit Spark Automates Upstream Integration
+# Staying in Sync with Your Fork's Parent: How DevSpark Automates Upstream Integration
 
 <!-- markdownlint-disable MD040 -->
 
@@ -12,7 +12,7 @@
 
 When you fork an open-source project to add significant enhancements, you face a classic dilemma: **How do you stay synchronized with upstream improvements while preserving your innovations?**
 
-[Spec Kit Spark](https://github.com/MarkHazleton/spec-kit) is a fork of GitHub's [spec-kit](https://github.com/github/spec-kit) that adds Adaptive System Life Cycle Development (ASLCD) capabilities—including constitution-based PR reviews, site auditing, quickfix workflows, and release management. We've added six major commands, restructured directories, and created extensive new documentation. Yet we still want to benefit from upstream bug fixes, template improvements, and new agent support.
+[DevSpark](https://github.com/MarkHazleton/spec-kit) is a fork of GitHub's [devspark](https://github.com/github/spec-kit) that adds Adaptive System Life Cycle Development (ASLCD) capabilities—including constitution-based PR reviews, site auditing, quickfix workflows, and release management. We've added six major commands, restructured directories, and created extensive new documentation. Yet we still want to benefit from upstream bug fixes, template improvements, and new agent support.
 
 The traditional approach? Manually review `git log`, cherry-pick commits one by one, resolve conflicts, and hope you didn't miss anything important. **That's tedious, error-prone, and doesn't scale.**
 
@@ -85,10 +85,10 @@ Here's a real example from today:
 - Expands "Project Type" from web/mobile to library/CLI/compiler/etc.
 
 **Upstream Problem Solved:**
-Removes web-centric bias from templates, making Spec Kit applicable 
+Removes web-centric bias from templates, making DevSpark applicable 
 to broader project types: CLI tools, libraries, compilers, desktop apps.
 
-## 2. Relevance to Spec Kit Spark
+## 2. Relevance to DevSpark
 
 **Does this apply to Spark?**  
 ☑ Yes - Directly applicable
@@ -125,7 +125,7 @@ Date: 2026-02-19 15:30:42
 Category: 🟢 AUTO-CHERRY-PICK - Safe to apply automatically
 
 Files changed (1):
-  M  src/specify_cli/__init__.py
+  M  src/devspark_cli/__init__.py
 
 Implications for Spark:
   ✓ Pure bug fix with no structural dependencies
@@ -246,7 +246,7 @@ Today we discovered something interesting: when executing an integration plan fo
 
 ```
 **IMPORTANT**: During execution of this integration plan, it was 
-discovered that these changes had already been applied to Spec Kit 
+discovered that these changes had already been applied to DevSpark 
 Spark earlier today.
 
 - Upstream Commit: 12405c0
@@ -302,8 +302,8 @@ Our fork isn't a dead end. When we create valuable features that could benefit u
 ### Candidates for Upstream Contribution
 
 **Commands** (if generalized):
-- `/speckit.pr-review` - Valuable for any constitution-based review
-- `/speckit.site-audit` - Generic web accessibility/SEO tool
+- `/devspark.pr-review` - Valuable for any constitution-based review
+- `/devspark.site-audit` - Generic web accessibility/SEO tool
 ```
 
 ---
@@ -425,7 +425,7 @@ In your `FORK_DIVERGENCE.md`, track absorbed changes:
 ### 2026-02-20: Qoder CLI Fix
 **Status**: ✅ Applied  
 **Upstream**: fc3b98e
-**Files**: src/specify_cli/__init__.py
+**Files**: src/devspark_cli/__init__.py
 **Notes**: Direct cherry-pick, no conflicts
 ```
 
@@ -470,8 +470,8 @@ The time you save on manual cherry-picking and conflict resolution? **Invest it 
 
 ## Resources
 
-- **Spec Kit Spark Repository**: [github.com/MarkHazleton/spec-kit](https://github.com/MarkHazleton/spec-kit)
-- **Upstream Spec Kit**: [github.com/github/spec-kit](https://github.com/github/spec-kit)
+- **DevSpark Repository**: [github.com/MarkHazleton/spec-kit](https://github.com/MarkHazleton/spec-kit)
+- **Upstream DevSpark**: [github.com/github/spec-kit](https://github.com/github/spec-kit)
 - **Sync Scripts**: [.documentation/scripts/bash/sync-upstream.sh](https://github.com/MarkHazleton/spec-kit/blob/main/.documentation/scripts/bash/sync-upstream.sh), [.documentation/scripts/powershell/sync-upstream.ps1](https://github.com/MarkHazleton/spec-kit/blob/main/.documentation/scripts/powershell/sync-upstream.ps1)
 - **Fork Divergence Docs**: [FORK_DIVERGENCE.md](https://github.com/MarkHazleton/spec-kit/blob/main/FORK_DIVERGENCE.md)
 - **Example Integration Plan**: [incoming/12405c0/integration-plan.md](https://github.com/MarkHazleton/spec-kit/blob/main/incoming/12405c0/integration-plan.md)
@@ -480,7 +480,7 @@ The time you save on manual cherry-picking and conflict resolution? **Invest it 
 
 **Questions? Comments?** Open an issue on our repository or reach out on Twitter [@MarkHazleton](https://twitter.com/MarkHazleton).
 
-**Want to contribute?** We welcome PRs for both Spec Kit Spark innovation and improvements to our sync automation!
+**Want to contribute?** We welcome PRs for both DevSpark innovation and improvements to our sync automation!
 
 ---
 

@@ -2,10 +2,10 @@
 #requires -Version 7.0
 <#
 .SYNOPSIS
-    Sync Spec Kit Spark with upstream github.com/github/spec-kit repository
+    Sync DevSpark with upstream github.com/github/spec-kit repository
 
 .DESCRIPTION
-    This script helps maintain the Spec Kit Spark fork by:
+    This script helps maintain the DevSpark fork by:
     - Fetching latest upstream changes
     - Categorizing commits by decision criteria
     - Auto-applying safe bug fixes (with --auto flag)
@@ -503,7 +503,7 @@ _What issue or need does this address in the upstream repository?_
 
 ---
 
-### 2. Relevance to Spec Kit Spark
+### 2. Relevance to DevSpark
 
 **Does this apply to Spark?**  
 - [ ] Yes - Directly applicable
@@ -961,7 +961,7 @@ function Invoke-InteractiveReview {
 }
 
 # Main execution
-Write-Header "Spec Kit Spark - Upstream Sync Tool"
+Write-Header "DevSpark - Upstream Sync Tool"
 Write-Info "Mode: $Mode"
 
 # Ensure we have upstream remote

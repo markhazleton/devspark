@@ -2,13 +2,13 @@
 description: Harvest knowledge from completed specs and stale docs into CHANGELOG and guides, clean stale code comments, then archive
 handoffs:
   - label: Run a site audit after harvesting
-    agent: speckit.site-audit
+    agent: devspark.site-audit
     prompt: Run a site audit to confirm the project is in good health after harvesting
   - label: Archive remaining stale docs
-    agent: speckit.archive
+    agent: devspark.archive
     prompt: Archive any remaining outdated documentation that was not covered by the harvest
   - label: Evolve the constitution
-    agent: speckit.evolve-constitution
+    agent: devspark.evolve-constitution
     prompt: Review the constitution in light of the cleaned-up documentation and harvested knowledge
 ---
 
@@ -350,5 +350,5 @@ Create `.documentation/copilot/harvest-YYYY-MM-DD.md`:
 4. **Archive in-progress specs** — Only specs with all tasks complete are eligible
 5. **Leave stale code comments** — Spec references must be rewritten or removed
 6. **Skip user confirmation** — The harvest plan must be approved before any execution
-7. **Update constitution directly** — Constitution changes require the `/speckit.evolve-constitution` process
+7. **Update constitution directly** — Constitution changes require the `/devspark.evolve-constitution` process
 8. **Read from `.archive/`** — The archive is write-only from an operational perspective
