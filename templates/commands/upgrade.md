@@ -96,20 +96,34 @@ If up to date, skip to Step 6 (Verify Files).
 Separate framework-owned files (overwritten on upgrade) from user-owned files (never
 touched). Use this classification:
 
-#### Framework-owned (safe to overwrite)
+#### Command Resolution Order
 
-These come from the DevSpark release package and should match the latest version:
+DevSpark uses a **3-tier override system** for command prompts. When an AI agent
+runs a `/devspark.*` command, it resolves the prompt in this order (first match wins):
 
+```text
+1. .documentation/{git-user}/commands/   ← Per-user overrides (via /devspark.personalize)
+2. .documentation/commands/              ← Team customizations (yours to edit freely)
+3. .documentation/defaults/commands/     ← Stock DevSpark prompts (upgrade overwrites ONLY this)
+```
+
+**Key principle: upgrades NEVER touch `.documentation/commands/`.** They only write
+to `.documentation/defaults/commands/`. Your team's customizations in
+`.documentation/commands/` always take priority and are never lost.
+
+After an upgrade, the team can compare `defaults/commands/` vs `commands/` to see
+what changed and selectively merge improvements they want.
+
+#### Framework-owned (safe to overwrite on upgrade)
+
+These are written to `.documentation/defaults/` and should match the latest version:
+
+- `.documentation/defaults/commands/devspark.*.md` — stock prompt templates
+- `.documentation/defaults/templates/` — stock helper templates
 - `.documentation/scripts/bash/*.sh`
 - `.documentation/scripts/powershell/*.ps1`
-- `.documentation/templates/`
 - `.documentation/DEVSPARK_VERSION`
-- `.documentation/README.md`
-- `.documentation/index.md`
-- `.documentation/upgrade.md`
-- `.documentation/migration-guide.md`
-- `.documentation/MIGRATION-QUICKREF.md`
-- Agent command files:
+- Agent shim files:
   - `.github/agents/*.agent.md`
   - `.github/prompts/*.prompt.md`
   - `.claude/commands/devspark.*.md`
@@ -121,6 +135,8 @@ These come from the DevSpark release package and should match the latest version
 
 These are written by the project team and must be preserved:
 
+- `.documentation/commands/` — team-customized command prompts (the working copies)
+- `.documentation/{git-user}/commands/` — per-user personalized prompts
 - `.documentation/specs/` — all feature specifications, plans, and tasks
 - `.documentation/memory/constitution.md` — project constitution
 - `.documentation/copilot/` — session artifacts and audit history
@@ -132,14 +148,11 @@ These are written by the project team and must be preserved:
 
 ### 5. Identify Stale Files
 
-Scan for signs that the install is outdated. Flag any of the following:
+Check for signs that the install needs updating:
 
 | Check | Issue | Severity |
 |-------|-------|----------|
 | `.documentation/DEVSPARK_VERSION` absent | No version stamp | HIGH |
-| Agent command files reference old paths (`.specify/`, root `memory/`, `scripts/`, `templates/`, or `specs/`) | Pre-migration paths | HIGH |
-| `.specify/` directory exists | Pre-v1.0 structure | HIGH |
-| Root-level `memory/`, `scripts/`, `templates/`, or `specs/` directories exist | Pre-v1.0 structure | HIGH |
 | `DEVSPARK_VERSION` present but older than `LATEST_VERSION` | Out of date | MEDIUM |
 | Old `devspark.*-old.md` command files in agent folder | Leftover duplicates | LOW |
 
@@ -165,74 +178,64 @@ MISSING: .github/agents/devspark.specify.agent.md
 
 #### 7a. Backup constitution (if `--backup` or constitution has been customized)
 
-Check if `constitution.md` differs from a template default — if the user has made
-substantial edits, recommend backing up:
+If `constitution.md` has been edited by the team, recommend backing up:
 
 ```bash
 cp .documentation/memory/constitution.md \
    .documentation/memory/constitution.md.YYYYMMDD.bak
 ```
 
-Or instruct the user to run:
+#### 7b. Update stock defaults
 
-```bash
-devspark upgrade --backup
-```
+Write the latest DevSpark prompt templates to `.documentation/defaults/commands/`.
+This directory is framework-owned and safe to overwrite completely.
 
-#### 7b. Run the CLI upgrade
+**Important**: Do NOT write to `.documentation/commands/`. That directory belongs
+to the team. Only `.documentation/defaults/commands/` is updated.
 
-Prefer `devspark upgrade` (v1.1.0+). Fall back to `devspark init --here --force --ai <INSTALLED_AGENT>` if needed.
-
-**Check for CLI availability:**
-
-```bash
-devspark version
-```
-
-If available, run:
+If the CLI is available:
 
 ```bash
 devspark upgrade --ai <INSTALLED_AGENT>
 ```
 
-If not installed, provide the install command:
+If not installed:
 
 ```bash
 uv tool install devspark-cli --force \
-  --from git+https://github.com/MarkHazleton/spec-kit.git
+  --from git+https://github.com/markhazleton/devspark.git
 ```
 
-#### 7c. Handle old structure migration
+#### 7c. Show what changed
 
-If stale paths were found in Step 5 (`.specify/`, root `memory/` etc.):
+After updating `defaults/commands/`, compare against the team's working copies:
 
-```bash
-# Windows
-.\.documentation\scripts\powershell\migrate-to-documentation.ps1
-
-# Linux/Mac
-bash .documentation/scripts/bash/migrate-to-documentation.sh
+```
+Changed prompts (defaults/ vs commands/):
+  devspark.specify.md   — 12 lines differ
+  devspark.release.md   — new prompt (not in commands/ yet)
+  devspark.critic.md    — identical (no action needed)
 ```
 
-Or ask the user to approve: "Migration detected. Run migration script now? [y/N]"
+Offer to show diffs for any changed files so the team can decide what to merge.
 
 ### 8. Post-Upgrade Verification
 
 After the upgrade completes:
 
-1. **Read `.documentation/DEVSPARK_VERSION` again** — confirm version changed to `LATEST_VERSION`
-2. **Check agent command files** — confirm they no longer reference old paths
-3. **Confirm `.documentation/specs/` is untouched** — user data must be preserved
+1. **Read `.documentation/DEVSPARK_VERSION` again** — confirm version updated
+2. **Verify `.documentation/defaults/commands/` has latest prompts**
+3. **Confirm `.documentation/commands/` is untouched** — team customizations preserved
 4. **Confirm `constitution.md` is intact** (or restored from backup)
 
 Report a post-upgrade summary:
 
 ```
 Post-Upgrade Verification
-  DEVSPARK_VERSION : 1.2.4  (was 1.1.0)
-  Agent commands  : updated
-  .documentation/specs/ : unchanged
-  constitution.md : preserved
+  DEVSPARK_VERSION   : 1.2.4  (was 1.1.0)
+  defaults/commands/ : updated (21 prompts)
+  commands/          : unchanged (team customizations preserved)
+  constitution.md    : preserved
 ```
 
 ### 9. Output Final Summary
@@ -246,12 +249,16 @@ DevSpark Upgrade Summary
   Agent            : <INSTALLED_AGENT>
   Date             : <TODAY>
 
-Framework files updated. User files preserved.
+Stock prompts updated in .documentation/defaults/commands/.
+Team customizations in .documentation/commands/ are untouched.
+
+To merge specific improvements into your team prompts:
+  Compare .documentation/defaults/commands/ vs .documentation/commands/
 
 Next steps:
-  1. git diff — review changes
-  2. Test /devspark.constitution in your AI assistant
-  3. git add -A && git commit -m "chore: upgrade devspark to vX.Y.Z"
+  1. Review changes: git diff
+  2. Test: run /devspark.constitution in your AI assistant
+  3. Commit: git add -A && git commit -m "chore: upgrade devspark to vX.Y.Z"
 ```
 
 #### Already up to date
@@ -284,12 +291,14 @@ To apply:
 
 Never modify or delete:
 
+- `.documentation/commands/` — team-customized prompts
+- `.documentation/{git-user}/commands/` — per-user personalized prompts
 - `.documentation/specs/` and all contents
 - `constitution.md`
 - `.documentation/copilot/`
 - `.documentation/decisions/`
 - `.documentation/releases/`
-- Any file the user created that is not a DevSpark framework file
+- Any file the user created that is not in `.documentation/defaults/`
 
 ### Non-Destructive by Default
 
