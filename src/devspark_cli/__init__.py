@@ -232,6 +232,22 @@ SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
 CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
 
+# Paths under .documentation/ that are never overwritten when the destination
+# file already exists.  This keeps user customizations (constitution, specs,
+# team command overrides) safe across init --here and upgrade.
+PROTECTED_PREFIXES = (
+    ".documentation/memory/",
+    ".documentation/specs/",
+    ".documentation/commands/",
+)
+
+
+def _is_protected(rel_path: str) -> bool:
+    """Return True if *rel_path* (forward-slash, relative to project root)
+    falls inside a protected directory that should never be overwritten."""
+    normalized = rel_path.replace("\\", "/")
+    return any(normalized.startswith(prefix) for prefix in PROTECTED_PREFIXES)
+
 BANNER = """
 ███████╗██████╗ ███████╗ ██████╗██╗███████╗██╗   ██╗
 ██╔════╝██╔══██╗██╔════╝██╔════╝██║██╔════╝╚██╗ ██╔╝
@@ -820,6 +836,8 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
                         elif verbose:
                             console.print(f"[cyan]Found nested directory structure[/cyan]")
 
+                    skipped_files: list[str] = []
+
                     for item in source_dir.iterdir():
                         dest_path = project_path / item.name
                         if item.is_dir():
@@ -828,8 +846,12 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
                                     console.print(f"[yellow]Merging directory:[/yellow] {item.name}")
                                 for sub_item in item.rglob('*'):
                                     if sub_item.is_file():
-                                        rel_path = sub_item.relative_to(item)
-                                        dest_file = dest_path / rel_path
+                                        rel_path = sub_item.relative_to(source_dir)
+                                        dest_file = project_path / rel_path
+                                        # Never overwrite existing files in protected directories
+                                        if dest_file.exists() and _is_protected(str(rel_path)):
+                                            skipped_files.append(str(rel_path))
+                                            continue
                                         dest_file.parent.mkdir(parents=True, exist_ok=True)
                                         # Special handling for .vscode/settings.json - merge instead of overwrite
                                         if dest_file.name == "settings.json" and dest_file.parent.name == ".vscode":
@@ -837,11 +859,29 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
                                         else:
                                             shutil.copy2(sub_item, dest_file)
                             else:
-                                shutil.copytree(item, dest_path)
+                                # New directory — but still check protected paths for individual files
+                                for sub_item in item.rglob('*'):
+                                    if sub_item.is_file():
+                                        rel_path = sub_item.relative_to(source_dir)
+                                        dest_file = project_path / rel_path
+                                        if dest_file.exists() and _is_protected(str(rel_path)):
+                                            skipped_files.append(str(rel_path))
+                                            continue
+                                        dest_file.parent.mkdir(parents=True, exist_ok=True)
+                                        shutil.copy2(sub_item, dest_file)
                         else:
                             if dest_path.exists() and verbose and not tracker:
                                 console.print(f"[yellow]Overwriting file:[/yellow] {item.name}")
                             shutil.copy2(item, dest_path)
+
+                    if skipped_files:
+                        if tracker:
+                            tracker.add("protected", "Preserved user customizations")
+                            tracker.complete("protected", f"{len(skipped_files)} file(s) kept")
+                        elif verbose:
+                            console.print(f"[green]Preserved {len(skipped_files)} customized file(s):[/green]")
+                            for sf in skipped_files:
+                                console.print(f"  [dim]{sf}[/dim]")
                     if verbose and not tracker:
                         console.print(f"[cyan]Template files merged into current directory[/cyan]")
             else:
@@ -1400,21 +1440,6 @@ def run_migration_script() -> bool:
     return True
 
 
-def backup_constitution() -> Optional[Path]:
-    """Create backup of constitution file. Returns backup path on success."""
-    constitution = Path(".documentation/memory/constitution.md")
-    if not constitution.exists():
-        return None
-
-    try:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_path = Path(f".documentation/memory/constitution.md.{timestamp}.bak")
-        shutil.copy2(constitution, backup_path)
-        return backup_path
-    except Exception as e:
-        console.print(f"[yellow]Failed to backup constitution: {e}[/yellow]")
-        return None
-
 
 def write_version_stamp(project_path: Path, ai_assistant: str, release_version: str = "") -> None:
     """Write .documentation/DEVSPARK_VERSION to record the installed version and agent.
@@ -1489,7 +1514,6 @@ def read_version_stamp(project_path: Path) -> Optional[dict]:
 def upgrade(
     ai_assistant: str = typer.Option(None, "--ai", help="Override AI assistant (auto-detected if not specified)"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview changes without modifying files"),
-    backup: bool = typer.Option(False, "--backup", help="Create backup of constitution before upgrade"),
     skip_migration: bool = typer.Option(False, "--skip-migration", help="Skip automatic migration check"),
     force: bool = typer.Option(False, "--force", help="Skip all confirmations"),
     github_token: str = typer.Option(None, "--github-token", help="GitHub token for API requests"),
@@ -1503,15 +1527,18 @@ def upgrade(
     This command will:
     1. Detect your current AI assistant setup
     2. Check for old structure (.specify/, memory/, etc.) and migrate if needed
-    3. Backup your constitution if requested
-    4. Download and apply latest templates
-    5. Preserve your specs/ directory and customizations
+    3. Download and apply latest templates (to .documentation/defaults/)
+    4. Preserve your constitution, specs, and team command customizations
+
+    Your customizations are NEVER overwritten:
+    - .documentation/memory/ (constitution, notes) — always preserved
+    - .documentation/specs/ — always preserved
+    - .documentation/commands/ (team overrides) — always preserved
 
     Examples:
         devspark upgrade                    # Auto-detect and upgrade
         devspark upgrade --dry-run          # Preview without changes
         devspark upgrade --ai claude        # Override detected agent
-        devspark upgrade --backup           # Create safety backup
         devspark upgrade --skip-migration   # Skip old structure migration
     """
 
@@ -1590,19 +1617,7 @@ def upgrade(
         else:
             console.print("[green]✓[/green] Already using .documentation/ structure\n")
 
-    # Step 5: Backup constitution if requested
-    if backup:
-        console.print("[cyan]→[/cyan] Backing up constitution...")
-        if dry_run:
-            console.print("[cyan]Would create constitution backup in actual upgrade[/cyan]\n")
-        else:
-            backup_path = backup_constitution()
-            if backup_path:
-                console.print(f"[green]✓[/green] Constitution backed up to: [dim]{backup_path}[/dim]\n")
-            else:
-                console.print("[yellow]⚠[/yellow] No constitution found or backup failed\n")
-
-    # Step 6: Show upgrade preview for dry run
+    # Step 5: Show upgrade preview for dry run
     if dry_run:
         console.print("\n" + "="*60)
         console.print("[bold cyan]DRY RUN COMPLETE - No changes made[/bold cyan]")
@@ -1610,10 +1625,11 @@ def upgrade(
 
         console.print("[bold]What would happen in actual upgrade:[/bold]")
         console.print("  1. Download latest DevSpark templates from GitHub")
-        console.print(f"  2. Update .{AGENT_CONFIG[ai_assistant]['folder'][:-1]}/ directory with new commands")
-        console.print("  3. Update .documentation/ with latest scripts and templates")
-        console.print("  4. Preserve your .documentation/specs/ directory (never touched)")
-        console.print("  5. Preserve your constitution and customizations")
+        console.print(f"  2. Update .{AGENT_CONFIG[ai_assistant]['folder'][:-1]}/ agent shims")
+        console.print("  3. Update .documentation/defaults/ with latest stock prompts and scripts")
+        console.print("  [green]✓[/green] .documentation/memory/ (constitution) — NEVER touched")
+        console.print("  [green]✓[/green] .documentation/specs/ — NEVER touched")
+        console.print("  [green]✓[/green] .documentation/commands/ (team overrides) — NEVER touched")
         console.print()
         console.print("[bold]To perform the actual upgrade:[/bold]")
         console.print(f"  [cyan]devspark upgrade --ai {ai_assistant}[/cyan]")
@@ -1668,10 +1684,6 @@ def upgrade(
     console.print("  4. If everything looks good, commit:")
     console.print("     [cyan]git add -A[/cyan]")
     console.print("     [cyan]git commit -m 'chore: upgrade to latest devspark version'[/cyan]")
-
-    if backup:
-        console.print()
-        console.print("[dim]Your constitution backup is preserved in .documentation/memory/[/dim]")
 
     console.print()
 
