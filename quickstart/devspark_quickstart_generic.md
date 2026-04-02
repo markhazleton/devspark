@@ -1,0 +1,270 @@
+# DevSpark Quickstart — Any AI Agent
+
+You are bootstrapping **DevSpark**, a spec-driven development process, into this repository.
+No CLI installation is required. You will pull prompt files from the DevSpark repo and place them in the correct directories.
+
+This guide works with any AI coding agent that supports slash commands or custom prompts.
+
+## Step 1: Gather Project Context
+
+Ask the user these questions before proceeding:
+
+1. **Project name** — What is this project called?
+2. **Tech stack** — What languages, frameworks, and tools does this project use?
+3. **AI agent** — Which AI agent are you using? (Copilot, Claude Code, Cursor, Windsurf, Gemini CLI, Codex, Roo Code, Amazon Q, or other)
+4. **Script preference** — Does this project use **PowerShell** (`ps`) or **Bash** (`sh`) for scripts?
+5. **Team or solo?** — Will multiple people use DevSpark on this repo, or just you?
+6. **Core principles** — Name 3–5 non-negotiable principles for this project (e.g., "test-first", "accessibility", "API-first", "simplicity"). If unsure, say "use defaults" and you'll get a starter set.
+
+Wait for answers before continuing.
+
+### Agent Directory Mapping
+
+Based on the user's answer, determine where command shims go:
+
+| Agent | Shim Directory | Format |
+|---|---|---|
+| GitHub Copilot | `.github/agents/` + `.github/prompts/` | `.agent.md` + `.prompt.md` |
+| Claude Code | `.claude/commands/` | `.md` |
+| Cursor | `.cursor/commands/` | `.md` |
+| Windsurf | `.windsurf/workflows/` | `.md` |
+| Gemini CLI | `.gemini/commands/` | `.toml` |
+| Qwen Code | `.qwen/commands/` | `.toml` |
+| opencode | `.opencode/command/` | `.md` |
+| Codex | `.codex/prompts/` | `.md` |
+| Kilo Code | `.kilocode/workflows/` | `.md` |
+| Roo Code | `.roo/commands/` | `.md` |
+| Amazon Q | `.amazonq/prompts/` | `.md` |
+| Amp | `.agents/commands/` | `.md` |
+| Augment | `.augment/commands/` | `.md` |
+
+If the agent is not listed, ask the user where their agent reads custom commands from and use that directory.
+
+---
+
+## Step 2: Detect Existing Installation
+
+Before creating anything, check for prior Spec Kit / DevSpark installations:
+
+| Check for | What it means |
+|---|---|
+| `.devspark/` exists | **DevSpark already installed.** Ask user: re-install or skip to verify (Step 11). |
+| `.documentation/` exists | **User artifacts exist.** Preserve everything — never overwrite. |
+| `.specify/` exists | **Old Spec Kit.** Needs migration. |
+| `.documentation/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
+| Root `memory/` (without `.documentation/memory/`) | **Legacy structure.** Needs migration. |
+| Root `scripts/` or `templates/` (without `.devspark/scripts/`) | **Legacy structure.** Needs migration. |
+| Agent shim directory with `specify.*` files | **Old Spec Kit shims.** Rename to `devspark.*` prefix. |
+
+**If nothing is found**, skip ahead to Step 3.
+
+### Migration: `.specify/` (old Spec Kit)
+
+Tell the user what you found and ask for confirmation before proceeding.
+
+1. Copy `.specify/memory/*` → `.documentation/memory/` (skip files that already exist at destination)
+2. Copy `.specify/specs/*` → `.documentation/specs/` (skip files that already exist)
+3. Copy any `.specify/` root-level `.md` files → `.documentation/` (skip files that already exist)
+4. Rename `.specify/` → `.specify.old/` (preserve as backup)
+5. Report: "Migrated .specify/ → .documentation/. Backup at .specify.old/"
+
+### Migration: `.documentation/defaults/` (pre-separation DevSpark)
+
+1. Create `.devspark/` directory structure
+2. Move `.documentation/defaults/commands/*` → `.devspark/defaults/commands/`
+3. Move `.documentation/defaults/templates/*` → `.devspark/defaults/templates/` if present
+4. Move `.documentation/scripts/*` → `.devspark/scripts/` (only stock DevSpark scripts with framework header comments — leave user-created scripts)
+5. Move `.documentation/templates/*` → `.devspark/templates/` (only stock DevSpark templates)
+6. Delete empty `.documentation/defaults/` if nothing remains
+7. Report: "Migrated framework files from .documentation/ → .devspark/"
+
+### Migration: Root-level directories (legacy Spec Kit)
+
+1. Copy `memory/*` → `.documentation/memory/` (skip existing)
+2. Copy `specs/*` → `.documentation/specs/` (skip existing)
+3. Rename migrated directories → `{name}.old/` (e.g., `memory.old/`)
+
+### Migration: Old agent shims
+
+1. In the agent's shim directory, rename any `specify.*` files → `devspark.*`
+2. In all shim files, replace `.documentation/defaults/commands/` → `.devspark/defaults/commands/`
+3. Check other agent directories too (`.github/agents/`, `.claude/commands/`, `.cursor/commands/`) — rename `specify.*` → `devspark.*` if found
+
+After migration, continue with Step 3.
+
+---
+
+## Step 3: Create Directory Structure
+
+Create these directories (skip any that already exist):
+
+```
+.devspark/
+├── defaults/commands/
+├── scripts/
+├── templates/
+└── memory/
+
+.documentation/
+├── memory/
+├── specs/
+├── commands/          ← team-level overrides (optional)
+└── decisions/
+
+{agent-shim-directory}/  ← from the mapping in Step 1
+```
+
+---
+
+## Step 4: Pull Stock Prompts
+
+Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/` and save to `.devspark/defaults/commands/` with the `devspark.` prefix:
+
+| Source file | Destination |
+|---|---|
+| `specify.md` | `.devspark/defaults/commands/devspark.specify.md` |
+| `plan.md` | `.devspark/defaults/commands/devspark.plan.md` |
+| `tasks.md` | `.devspark/defaults/commands/devspark.tasks.md` |
+| `implement.md` | `.devspark/defaults/commands/devspark.implement.md` |
+| `constitution.md` | `.devspark/defaults/commands/devspark.constitution.md` |
+| `pr-review.md` | `.devspark/defaults/commands/devspark.pr-review.md` |
+| `quickfix.md` | `.devspark/defaults/commands/devspark.quickfix.md` |
+| `harvest.md` | `.devspark/defaults/commands/devspark.harvest.md` |
+| `release.md` | `.devspark/defaults/commands/devspark.release.md` |
+| `critic.md` | `.devspark/defaults/commands/devspark.critic.md` |
+| `clarify.md` | `.devspark/defaults/commands/devspark.clarify.md` |
+| `analyze.md` | `.devspark/defaults/commands/devspark.analyze.md` |
+| `checklist.md` | `.devspark/defaults/commands/devspark.checklist.md` |
+| `personalize.md` | `.devspark/defaults/commands/devspark.personalize.md` |
+| `site-audit.md` | `.devspark/defaults/commands/devspark.site-audit.md` |
+| `evolve-constitution.md` | `.devspark/defaults/commands/devspark.evolve-constitution.md` |
+| `discover-constitution.md` | `.devspark/defaults/commands/devspark.discover-constitution.md` |
+| `repo-story.md` | `.devspark/defaults/commands/devspark.repo-story.md` |
+| `archive.md` | `.devspark/defaults/commands/devspark.archive.md` |
+| `upgrade.md` | `.devspark/defaults/commands/devspark.upgrade.md` |
+| `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
+
+---
+
+## Step 5: Pull Helper Templates
+
+Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/` and save to `.devspark/templates/`:
+
+- `spec-template.md`
+- `plan-template.md`
+- `tasks-template.md`
+- `checklist-template.md`
+- `agent-file-template.md`
+
+---
+
+## Step 6: Create Agent Command Shims
+
+For each command in `.devspark/defaults/commands/devspark.{name}.md`, create a shim file in the agent's directory.
+
+### For Markdown-format agents (most agents)
+
+Create `{agent-shim-directory}/devspark.{name}.md`:
+
+```markdown
+## Prompt Resolution
+
+Determine the current git user by running `git config user.name`.
+Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
+
+Read and execute the instructions from the **first file that exists**:
+1. `.documentation/{git-user}/commands/devspark.{name}.md` (personalized override)
+2. `.documentation/commands/devspark.{name}.md` (team customization)
+3. `.devspark/defaults/commands/devspark.{name}.md` (stock default)
+
+## User Input
+
+$ARGUMENTS
+
+Pass the user input above to the resolved prompt.
+```
+
+### For TOML-format agents (Gemini CLI, Qwen Code)
+
+Create `{agent-shim-directory}/devspark.{name}.toml`:
+
+```toml
+description = "{one-line description of the command}"
+
+prompt = """
+## Prompt Resolution
+
+Determine the current git user by running `git config user.name`.
+Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
+
+Read and execute the instructions from the **first file that exists**:
+1. `.documentation/{git-user}/commands/devspark.{name}.md` (personalized override)
+2. `.documentation/commands/devspark.{name}.md` (team customization)
+3. `.devspark/defaults/commands/devspark.{name}.md` (stock default)
+
+## User Input
+
+```text
+{{args}}
+```
+
+Pass the user input above to the resolved prompt.
+"""
+```
+
+### For GitHub Copilot (special: two files per command)
+
+Create both `.github/agents/devspark.{name}.agent.md` (with YAML frontmatter containing `name` and `description`) and `.github/prompts/devspark.{name}.prompt.md` (without frontmatter). Use `{{input}}` as the user input placeholder.
+
+Replace `{name}` in every file with the actual command name.
+
+---
+
+## Step 7: Seed the Constitution
+
+Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.documentation/memory/constitution.md` and save to `.devspark/memory/constitution.md`.
+
+Then copy to `.documentation/memory/constitution.md` — **only if that file does not already exist**. If the file was migrated from `.specify/` or already existed, skip this copy.
+
+Using the project name and principles from Step 1, customize `.documentation/memory/constitution.md`:
+- Replace `[PROJECT_NAME]` with the actual project name
+- Fill in the core principles the user provided
+- Add the tech stack as a "Technology" or "Stack" section
+
+---
+
+## Step 8: Write VERSION Stamp
+
+Create `.devspark/VERSION`:
+
+```
+version: quickstart
+installed: {today's date YYYY-MM-DD}
+method: {agent-name}-quickstart
+migrated-from: {specify | documentation-defaults | fresh}
+```
+
+---
+
+## Step 9: Update .gitignore
+
+Append to `.gitignore` if not already present:
+
+```
+# DevSpark — personal overrides (never commit)
+.documentation/*/commands/
+```
+
+---
+
+## Step 10: Verify & Report
+
+Confirm the installation:
+- **Migration summary**: What was migrated and where backups live (`.specify.old/`, etc.)
+- Number of stock commands in `.devspark/defaults/commands/`
+- Number of agent shims created in the agent's directory
+- Constitution status: seeded fresh, migrated, or already existed
+- Explain the 3-tier override system and that the personalize command creates per-user overrides
+- If backup directories exist, remind the user they can delete them once satisfied
+
+Tell the user how to invoke their first DevSpark command using their agent's syntax.
