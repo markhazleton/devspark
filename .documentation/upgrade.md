@@ -8,7 +8,7 @@
 
 | What to Upgrade | Command | When to Use |
 |----------------|---------|-------------|
-| **CLI Tool Only** | `uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git` | Get latest CLI features without touching project files |
+| **CLI Tool Only** | `uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git` | Get latest CLI features without touching project files |
 | **Project Files** (Recommended) | `devspark upgrade` | Update project with auto-detection and safety checks |
 | **Project Files** (Manual) | `devspark init --here --force --ai <your-agent>` | Update when you want to override agent selection |
 | **Both** | Run CLI upgrade, then `devspark upgrade` | Recommended for major version updates |
@@ -22,7 +22,7 @@ The CLI tool (`devspark`) is separate from your project files. Upgrade it to get
 ### If you installed with `uv tool install`
 
 ```bash
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
 ```
 
 ### If you use one-shot `uvx` commands
@@ -30,7 +30,7 @@ uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/
 No upgrade needed—`uvx` always fetches the latest version. Just run your commands as normal:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark upgrade
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark upgrade
 ```
 
 ### Verify the upgrade
@@ -113,7 +113,7 @@ If you prefer manual control or the `upgrade` command isn't available, you can u
 devspark init --here --force --ai <your-agent>
 ```
 
-Replace `<your-agent>` with your AI assistant. Refer to the list of [Supported AI Agents](https://github.com/MarkHazleton/spec-kit#-supported-ai-agents)
+Replace `<your-agent>` with your AI assistant. Refer to the list of [Supported AI Agents](https://github.com/MarkHazleton/devspark#-supported-ai-agents)
 
 **Example:**
 
@@ -213,7 +213,7 @@ Restart your IDE to refresh the command list.
 
 ```bash
 # Upgrade CLI (if using persistent install)
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
 
 # Update project files to get new commands
 devspark init --here --force --ai copilot
@@ -230,7 +230,7 @@ cp .documentation/memory/constitution.md /tmp/constitution-backup.md
 cp -r .documentation/templates /tmp/templates-backup
 
 # 2. Upgrade CLI
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
 
 # 3. Update project
 devspark init --here --force --ai copilot
@@ -431,7 +431,7 @@ If not found, reinstall:
 
 ```bash
 uv tool uninstall devspark-cli
-uv tool install devspark-cli --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --from git+https://github.com/MarkHazleton/devspark.git
 ```
 
 ### "Do I need to run devspark every time I open my project?"
@@ -487,6 +487,6 @@ DevSpark follows semantic versioning for major releases. The CLI and project fil
 After upgrading:
 
 - **Test new slash commands:** Run `/devspark.constitution` or another command to verify everything works
-- **Review release notes:** Check [GitHub Releases](https://github.com/MarkHazleton/spec-kit/releases) for new features and breaking changes
+- **Review release notes:** Check [GitHub Releases](https://github.com/MarkHazleton/devspark/releases) for new features and breaking changes
 - **Update workflows:** If new commands were added, update your team's development workflows
 - **Check documentation:** Visit [github.io/devspark](https://github.github.io/devspark/) for updated guides

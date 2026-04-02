@@ -16,7 +16,7 @@
       "changelog": "https://github.com/leocamello/devspark-v-model/blob/main/CHANGELOG.md",
       "license": "MIT",
       "requires": {
-        "speckit_version": ">=0.1.0"
+        "devspark_version": ">=0.1.0"
       },
       "provides": {
         "commands": 5,

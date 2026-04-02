@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD036 MD040 -->
 
-**Fork**: github.com/MarkHazleton/spec-kit (DevSpark)  
+**Fork**: github.com/MarkHazleton/devspark (DevSpark)  
 **Upstream**: github.com/github/spec-kit  
 **Last Sync**: 2026-02-20  
 **Upstream Commit**: `b562438` (base divergence point)  
@@ -279,8 +279,8 @@ f14a47e - Add modular extension system
 
 **Adaptations Made**:
 
-- All `github.com/github/spec-kit` → `github.com/MarkHazleton/spec-kit`
-- All `github.com/manfredseee/devspark` → `github.com/MarkHazleton/spec-kit`
+- All `github.com/github/spec-kit` → `github.com/MarkHazleton/devspark`
+- All `github.com/manfredseee/devspark` → `github.com/MarkHazleton/devspark`
 - Removed "Antigravity" agent (not yet supported in Spark)
 - Updated agent lists to match current AGENTS.md (17 agents)
 - Branding updated from "DevSpark" to "DevSpark" where appropriate
@@ -353,7 +353,7 @@ Cherry-picked directly from upstream without modification. Changes align perfect
 
 **Adaptations Made**:
 
-- Updated README links: `github.com/github/spec-kit` → `github.com/MarkHazleton/spec-kit`
+- Updated README links: `github.com/github/spec-kit` → `github.com/MarkHazleton/devspark`
 - Updated catalog URL to point to Spark's fork
 - Enhanced README with Spark-specific context about extensions working alongside built-in commands
 

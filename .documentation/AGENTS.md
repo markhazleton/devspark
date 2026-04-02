@@ -2,7 +2,7 @@
 
 ## About DevSpark
 
-**DevSpark** is an Adaptive System Life Cycle Development (ASLCD) toolkit and a maintained fork of `github/devspark`. It extends specification-driven workflows with constitution-powered quality gates, right-sized execution paths, and operational lifecycle guidance.
+**DevSpark** is an Adaptive System Life Cycle Development (ASLCD) toolkit. It provides specification-driven workflows with constitution-powered quality gates, right-sized execution paths, and operational lifecycle guidance.
 
 **DevSpark CLI** is the command-line interface that bootstraps projects with the DevSpark framework. It sets up the necessary directory structures, templates, and AI agent integrations to support ASLCD workflows.
 
@@ -326,7 +326,7 @@ gh release create "$VERSION" \
 Add file variable:
 
 ```bash
-WINDSURF_FILE="$REPO_ROOT/.windsurf/rules/specify-rules.md"
+WINDSURF_FILE="$REPO_ROOT/.windsurf/rules/devspark-rules.md"
 ```
 
 Add to case statement:
@@ -348,7 +348,7 @@ esac
 Add file variable:
 
 ```powershell
-$windsurfFile = Join-Path $repoRoot '.windsurf/rules/specify-rules.md'
+$windsurfFile = Join-Path $repoRoot '.windsurf/rules/devspark-rules.md'
 ```
 
 Add to switch statement:

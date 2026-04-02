@@ -222,7 +222,7 @@ We welcome contributions in all areas! Here's how to get involved:
 
 ### Feature Requests
 
-1. Open a [GitHub Issue](https://github.com/MarkHazleton/spec-kit/issues/new) with the `enhancement` label
+1. Open a [GitHub Issue](https://github.com/MarkHazleton/devspark/issues/new) with the `enhancement` label
 2. Describe the use case and expected behavior
 3. Include any relevant examples or mockups
 
@@ -264,13 +264,13 @@ Examples:
 
 ### Getting Help
 
-- [GitHub Discussions](https://github.com/MarkHazleton/spec-kit/discussions) - Questions and ideas
-- [GitHub Issues](https://github.com/MarkHazleton/spec-kit/issues) - Bug reports and feature requests
+- [GitHub Discussions](https://github.com/MarkHazleton/devspark/discussions) - Questions and ideas
+- [GitHub Issues](https://github.com/MarkHazleton/devspark/issues) - Bug reports and feature requests
 
 ### Staying Updated
 
-- Watch the [repository](https://github.com/MarkHazleton/spec-kit) for releases
-- Check the [CHANGELOG](https://github.com/MarkHazleton/spec-kit/blob/main/CHANGELOG.md) for updates
+- Watch the [repository](https://github.com/MarkHazleton/devspark) for releases
+- Check the [CHANGELOG](https://github.com/MarkHazleton/devspark/blob/main/CHANGELOG.md) for updates
 
 ### Related Projects
 

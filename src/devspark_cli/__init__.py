@@ -508,7 +508,7 @@ def check_tool(tool: str, tracker: StepTracker = None) -> bool:
         True if tool is found, False otherwise
     """
     # Special handling for Claude CLI after `claude migrate-installer`
-    # See: https://github.com/github/spec-kit/issues/123
+    # See: https://github.com/(claude migrate-installer removes original exe)
     # The migrate-installer command REMOVES the original executable from PATH
     # and creates an alias at ~/.claude/local/claude instead
     # This path should be prioritized over other claude executables in PATH
@@ -1293,7 +1293,7 @@ def init(
 # Helper Functions for Upgrade Command
 # ============================================================================
 
-def is_spec_kit_project() -> bool:
+def is_devspark_project() -> bool:
     """Check if current directory is a DevSpark project."""
     indicators = [
         Path(".documentation").exists(),
@@ -1547,7 +1547,7 @@ def upgrade(
 
     # Step 1: Verify we're in a DevSpark project
     console.print("[cyan]→[/cyan] Verifying DevSpark project...")
-    if not is_spec_kit_project():
+    if not is_devspark_project():
         console.print("[red]✗ Error:[/red] Current directory is not a DevSpark project")
         console.print("[dim]Run 'devspark init --here' to initialize DevSpark in this directory[/dim]")
         raise typer.Exit(1)

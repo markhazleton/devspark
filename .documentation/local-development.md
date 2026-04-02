@@ -7,7 +7,7 @@ This guide shows how to iterate on the `devspark` CLI locally without publishing
 ## 1. Clone and Switch Branches
 
 ```bash
-git clone https://github.com/MarkHazleton/spec-kit.git
+git clone https://github.com/MarkHazleton/devspark.git
 cd devspark
 # Work on a feature branch
 git checkout -b your-feature-branch
@@ -42,7 +42,7 @@ source .venv/bin/activate  # or on Windows PowerShell: .venv\Scripts\Activate.ps
 uv pip install -e .
 
 # Now 'specify' entrypoint is available
-specify --help
+devspark --help
 ```
 
 Re-running after code edits requires no reinstall because of editable mode.
@@ -60,7 +60,7 @@ You can also point uvx at a specific branch without merging:
 ```bash
 # Push your working branch first
 git push origin your-feature-branch
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git@your-feature-branch devspark init demo-branch-test --script ps
+uvx --from git+https://github.com/MarkHazleton/devspark.git@your-feature-branch devspark init demo-branch-test --script ps
 ```
 
 ### 4a. Absolute Path uvx (Run From Anywhere)
@@ -68,23 +68,23 @@ uvx --from git+https://github.com/MarkHazleton/spec-kit.git@your-feature-branch 
 If you're in another directory, use an absolute path instead of `.`:
 
 ```bash
-uvx --from /mnt/c/MarkHazleton/spec-kit specify --help
-uvx --from /mnt/c/MarkHazleton/spec-kit devspark init demo-anywhere --ai copilot --ignore-agent-tools --script sh
+uvx --from /mnt/c/MarkHazleton/devspark devspark --help
+uvx --from /mnt/c/MarkHazleton/devspark devspark init demo-anywhere --ai copilot --ignore-agent-tools --script sh
 ```
 
 Set an environment variable for convenience:
 
 ```bash
-export SPEC_KIT_SRC=/mnt/c/MarkHazleton/spec-kit
-uvx --from "$SPEC_KIT_SRC" devspark init demo-env --ai copilot --ignore-agent-tools --script ps
+export DEVSPARK_SRC=/mnt/c/MarkHazleton/devspark
+uvx --from "$DEVSPARK_SRC" devspark init demo-env --ai copilot --ignore-agent-tools --script ps
 ```
 
 (Optional) Define a shell function:
 
 ```bash
-specify-dev() { uvx --from /mnt/c/MarkHazleton/spec-kit specify "$@"; }
+devspark-dev() { uvx --from /mnt/c/MarkHazleton/devspark specify "$@"; }
 # Then
-specify-dev --help
+devspark-dev --help
 ```
 
 ## 5. Testing Script Permission Logic
@@ -146,7 +146,7 @@ devspark init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
 | Run CLI directly | `python -m src.devspark_cli --help` |
 | Editable install | `uv pip install -e .` then `specify ...` |
 | Local uvx run (repo root) | `uvx --from . specify ...` |
-| Local uvx run (abs path) | `uvx --from /mnt/c/MarkHazleton/spec-kit specify ...` |
+| Local uvx run (abs path) | `uvx --from /mnt/c/MarkHazleton/devspark specify ...` |
 | Git branch uvx | `uvx --from git+URL@branch specify ...` |
 | Build wheel | `uv build` |
 

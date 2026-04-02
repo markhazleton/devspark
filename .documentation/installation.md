@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - **Linux/macOS** (or Windows; PowerShell scripts now supported without WSL)
-- Any [supported AI coding agent](https://github.com/MarkHazleton/spec-kit#-supported-ai-agents) (17+ agents supported — Claude Code, GitHub Copilot, Gemini CLI, Cursor, and more)
+- Any [supported AI coding agent](https://github.com/MarkHazleton/devspark#-supported-ai-agents) (17+ agents supported — Claude Code, GitHub Copilot, Gemini CLI, Cursor, and more)
 - [uv](https://docs.astral.sh/uv/) for package management
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
@@ -24,7 +24,7 @@ DevSpark supports two installation scenarios:
 Starting fresh? Create a new project directory with all DevSpark scaffolding:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <PROJECT_NAME>
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME>
 ```
 
 This creates a new directory with the complete DevSpark structure ready for development.
@@ -35,9 +35,9 @@ Already have a codebase? Navigate to your project root and initialize in place:
 
 ```bash
 cd /path/to/your-existing-project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init --here
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init --here
 # or equivalently
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init .
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init .
 ```
 
 This adds the DevSpark structure (`.documentation/`, `.documentation/memory/`, templates, scripts) to your existing project without disrupting your current files.
@@ -50,10 +50,10 @@ This adds the DevSpark structure (`.documentation/`, `.documentation/memory/`, t
 You can proactively specify your AI agent during initialization:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai claude
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai gemini
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai copilot
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai codebuddy
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <project_name> --ai claude
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <project_name> --ai gemini
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <project_name> --ai copilot
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <project_name> --ai codebuddy
 ```
 
 ### Specify Script Type (Shell vs PowerShell)
@@ -69,8 +69,8 @@ Auto behavior:
 Force a specific script type:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --script sh
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --script ps
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <project_name> --script sh
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <project_name> --script ps
 ```
 
 ### Ignore Agent Tools Check
@@ -78,7 +78,7 @@ uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <proje
 If you prefer to get the templates without checking for the right tools:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <project_name> --ai claude --ignore-agent-tools
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <project_name> --ai claude --ignore-agent-tools
 ```
 
 ## Upgrading DevSpark
@@ -90,7 +90,7 @@ To upgrade an existing DevSpark project to the latest version:
 First, upgrade the DevSpark CLI tool:
 
 ```bash
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
 ```
 
 ### Upgrade Project Files (Recommended)

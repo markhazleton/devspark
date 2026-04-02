@@ -77,7 +77,7 @@ def upgrade(
 #### 1. Detect DevSpark Project
 
 ```python
-def is_spec_kit_project() -> bool:
+def is_devspark_project() -> bool:
     """Check if current directory is a DevSpark project."""
     indicators = [
         Path(".documentation").exists(),
@@ -134,7 +134,7 @@ def upgrade(...):
     console.print("[bold]Upgrading DevSpark project...[/bold]\n")
 
     # 1. Verify we're in a DevSpark project
-    if not is_spec_kit_project():
+    if not is_devspark_project():
         console.print("[red]Error:[/red] Current directory is not a DevSpark project")
         console.print("Run 'devspark init --here' to initialize DevSpark in this directory")
         raise typer.Exit(1)
@@ -252,7 +252,7 @@ Upgrade to the latest version:
 
 ```bash
 # Upgrade CLI tool
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
 
 # Upgrade project files
 devspark upgrade
