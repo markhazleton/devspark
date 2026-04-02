@@ -2,7 +2,7 @@
 description: Create a personalized copy of any published speckit command prompt for the current git user.
 handoffs:
   - label: List Available Commands
-    agent: speckit.discover-constitution
+    agent: devspark.discover-constitution
     prompt: Show available speckit commands
 scripts:
   sh: .documentation/scripts/bash/check-prerequisites.sh --json
@@ -41,17 +41,17 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
 
 2. **Parse the command name from user input** (`$ARGUMENTS`):
 
-   The argument should be a speckit command name, with or without the `speckit.` prefix.
+   The argument should be a speckit command name, with or without the `devspark.` prefix.
    Examples of valid input:
-   - `specify` → resolves to `speckit.specify.md`
-   - `speckit.plan` → resolves to `speckit.plan.md`
-   - `implement` → resolves to `speckit.implement.md`
+   - `devspark` → resolves to `devspark.specify.md`
+   - `devspark.plan` → resolves to `devspark.plan.md`
+   - `implement` → resolves to `devspark.implement.md`
 
    If no argument is given, list all available commands from `.documentation/commands/` and ask the user which one to personalize.
 
 3. **Verify the source prompt exists**:
 
-   Check that `.documentation/commands/speckit.{command}.md` exists.
+   Check that `.documentation/commands/devspark.{command}.md` exists.
    If not found, show available commands and ask the user to pick one.
 
 4. **Create the user directory structure**:
@@ -62,23 +62,23 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
 
 5. **Check if a personalized version already exists**:
 
-   If `.documentation/{git-user}/commands/speckit.{command}.md` already exists:
+   If `.documentation/{git-user}/commands/devspark.{command}.md` already exists:
    - Show the user and ask if they want to overwrite or edit the existing one
    - Default: open the existing file for review
 
 6. **Copy and annotate the prompt**:
 
-   Copy `.documentation/commands/speckit.{command}.md` to `.documentation/{git-user}/commands/speckit.{command}.md`.
+   Copy `.documentation/commands/devspark.{command}.md` to `.documentation/{git-user}/commands/devspark.{command}.md`.
 
    Add a header comment block at the very top of the personalized copy:
 
    ```markdown
    <!-- 
      Personalized prompt for: {git-user}
-     Based on: .documentation/commands/speckit.{command}.md
+     Based on: .documentation/commands/devspark.{command}.md
      Created: {date}
      
-     This file takes priority over the shared default when you run /speckit.{command}.
+     This file takes priority over the shared default when you run /devspark.{command}.
      Edit freely. To revert to the default, delete this file.
    -->
    ```
@@ -87,9 +87,9 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
 
    ```text
    Created personalized prompt:
-     .documentation/{git-user}/commands/speckit.{command}.md
+     .documentation/{git-user}/commands/devspark.{command}.md
    
-   This file will be used instead of the shared default whenever you run /speckit.{command}.
+   This file will be used instead of the shared default whenever you run /devspark.{command}.
    Edit it to customize the behavior for your workflow.
    
    To revert to the shared default, simply delete the personalized file.

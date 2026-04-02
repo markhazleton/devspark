@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Pre-scan repository for harvest targets and emit JSON for /speckit.harvest.
+# Pre-scan repository for harvest targets and emit JSON for /devspark.harvest.
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=common.sh

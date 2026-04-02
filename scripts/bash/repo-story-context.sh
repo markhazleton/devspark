@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build repository history context for /speckit.repo-story
+# Build repository history context for /devspark.repo-story
 # Usage:
 #   repo-story-context.sh [--output <path>] [--months <n>] [--scope <full|velocity|quality|business|team>] [--compare-baseline YYYY-MM] [--stdout]
 

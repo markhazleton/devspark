@@ -57,7 +57,7 @@ if [[ -n "$EXPLICIT_VERSION" ]]; then
     if PYPROJECT_VERSION=$(get_pyproject_version); then
       if [[ "$NEW_VERSION" != "$PYPROJECT_VERSION" ]]; then
         echo "Explicit version '$NEW_VERSION' does not match pyproject.toml version '$PYPROJECT_VERSION'." >&2
-        echo "Update pyproject.toml first to keep Spec Kit Spark and Specify CLI versions in sync." >&2
+        echo "Update pyproject.toml first to keep DevSpark and DevSpark CLI versions in sync." >&2
         exit 1
       fi
     fi

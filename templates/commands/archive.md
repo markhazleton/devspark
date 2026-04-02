@@ -2,10 +2,10 @@
 description: Archive outdated documentation to .archive/, update Guide.md and CHANGELOG.md so .documentation stays current and clean
 handoffs:
   - label: Run a site audit after archiving
-    agent: speckit.site-audit
+    agent: devspark.site-audit
     prompt: Run a site audit to confirm the project is in good health after archiving
   - label: Evolve the constitution
-    agent: speckit.evolve-constitution
+    agent: devspark.evolve-constitution
     prompt: Review the constitution in light of the cleaned-up documentation
 scripts:
   sh: .documentation/scripts/bash/archive-context.sh --json

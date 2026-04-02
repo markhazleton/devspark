@@ -1,3 +1,3 @@
 ---
-agent: speckit.harvest
+agent: devspark.harvest
 ---

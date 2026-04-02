@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-The **Adaptive System Life Cycle Development (ASLCD) Toolkit** extends Spec Kit to manage the complete software development life cycle using AI-driven agents. It addresses critical gaps in traditional spec-driven tools: brownfield implementation support, right-sized workflows for varying task complexity, and documentation lifecycle management.
+The **Adaptive System Life Cycle Development (ASLCD) Toolkit** extends DevSpark to manage the complete software development life cycle using AI-driven agents. It addresses critical gaps in traditional spec-driven tools: brownfield implementation support, right-sized workflows for varying task complexity, and documentation lifecycle management.
 
 The toolkit provides a balanced approach combining the rigor of traditional SDLC methodologies with the agility and efficiency of modern AI-driven development practices, creating a truly adaptive system that evolves alongside the applications it manages.
 
@@ -78,7 +78,7 @@ Every AI coding assistant is a first-class citizen:
 Teams share governance while individuals retain customization freedom:
 
 - Shared constitutions, specs, plans, and quality gates provide team consistency
-- `/speckit.personalize` creates per-user prompt overrides in `.documentation/{git-user}/commands/`
+- `/devspark.personalize` creates per-user prompt overrides in `.documentation/{git-user}/commands/`
 - Personalized overrides are committed to git for team transparency
 - Delete an override to revert to the shared default — no merge conflicts
 
@@ -108,9 +108,9 @@ Constitution Lifecycle:
 
 **Key Commands:**
 
-- `/speckit.constitution` - Create or update constitution
-- `/speckit.discover-constitution` - Generate from existing codebase (brownfield)
-- `/speckit.evolve-constitution` - Propose amendments based on findings
+- `/devspark.constitution` - Create or update constitution
+- `/devspark.discover-constitution` - Generate from existing codebase (brownfield)
+- `/devspark.evolve-constitution` - Propose amendments based on findings
 
 ### Development Workflow Support
 
@@ -151,17 +151,17 @@ Task Complexity Routing:
 **Full Spec Workflow:**
 
 ```bash
-/speckit.specify    # Define requirements
-/speckit.plan       # Technical planning
-/speckit.tasks      # Task breakdown
-/speckit.critic     # Risk analysis
-/speckit.implement  # Execute implementation
+/devspark.specify    # Define requirements
+/devspark.plan       # Technical planning
+/devspark.tasks      # Task breakdown
+/devspark.critic     # Risk analysis
+/devspark.implement  # Execute implementation
 ```
 
 **Lightweight Workflow:**
 
 ```bash
-/speckit.quickfix   # Create, validate, implement, complete
+/devspark.quickfix   # Create, validate, implement, complete
 ```
 
 ### Pull Request Integration
@@ -249,36 +249,36 @@ Documentation Lifecycle:
 
 | Command | Purpose | Requires |
 |---------|---------|----------|
-| `/speckit.constitution` | Create/update constitution | - |
-| `/speckit.discover-constitution` | Generate from existing code | Existing codebase |
-| `/speckit.evolve-constitution` | Propose amendments | Constitution, PR reviews |
+| `/devspark.constitution` | Create/update constitution | - |
+| `/devspark.discover-constitution` | Generate from existing code | Existing codebase |
+| `/devspark.evolve-constitution` | Propose amendments | Constitution, PR reviews |
 
 ### Development Workflow Commands
 
 | Command | Purpose | Requires |
 |---------|---------|----------|
-| `/speckit.specify` | Create feature specification | Constitution |
-| `/speckit.plan` | Technical implementation plan | Spec |
-| `/speckit.tasks` | Task breakdown | Plan |
-| `/speckit.implement` | Execute implementation | Tasks |
-| `/speckit.quickfix` | Lightweight fix workflow | Constitution |
+| `/devspark.specify` | Create feature specification | Constitution |
+| `/devspark.plan` | Technical implementation plan | Spec |
+| `/devspark.tasks` | Task breakdown | Plan |
+| `/devspark.implement` | Execute implementation | Tasks |
+| `/devspark.quickfix` | Lightweight fix workflow | Constitution |
 
 ### Quality Assurance Commands
 
 | Command | Purpose | Requires |
 |---------|---------|----------|
-| `/speckit.pr-review` | Review PR against constitution | Constitution, PR |
-| `/speckit.site-audit` | Codebase compliance audit | Constitution |
-| `/speckit.critic` | Adversarial risk analysis | Spec, Plan, Tasks |
-| `/speckit.analyze` | Artifact consistency check | Spec, Plan, Tasks |
+| `/devspark.pr-review` | Review PR against constitution | Constitution, PR |
+| `/devspark.site-audit` | Codebase compliance audit | Constitution |
+| `/devspark.critic` | Adversarial risk analysis | Spec, Plan, Tasks |
+| `/devspark.analyze` | Artifact consistency check | Spec, Plan, Tasks |
 
 ### Lifecycle Commands
 
 | Command | Purpose | Requires |
 |---------|---------|----------|
-| `/speckit.release` | Archive artifacts, generate release docs | Completed specs |
-| `/speckit.clarify` | Clarify specification requirements | Spec |
-| `/speckit.checklist` | Generate quality checklists | Spec |
+| `/devspark.release` | Archive artifacts, generate release docs | Completed specs |
+| `/devspark.clarify` | Clarify specification requirements | Spec |
+| `/devspark.checklist` | Generate quality checklists | Spec |
 
 ---
 
@@ -290,7 +290,7 @@ Documentation Lifecycle:
 |-------|-----------------|----------------|
 | **Project Initiation** | `constitution`, `discover-constitution` | Establish or discover governing principles |
 | **Baseline Assessment** | `site-audit` | Quantify existing technical debt |
-| **Feature Development** | `specify`, `plan`, `tasks`, `implement` | Full specification-driven development |
+| **Feature Development** | `devspark`, `plan`, `tasks`, `implement` | Full specification-driven development |
 | **Production Support** | `quickfix` | Rapid fixes with targeted validation |
 | **Code Review** | `pr-review` | Constitution compliance, evolution triggers |
 | **Risk Analysis** | `critic` | Pre-implementation risk assessment |

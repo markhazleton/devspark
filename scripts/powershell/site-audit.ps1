@@ -6,7 +6,7 @@
 
 .DESCRIPTION
     Pre-scans the repository to collect file listings, dependency information,
-    code metrics, and pattern detection results for the speckit.site-audit command.
+    code metrics, and pattern detection results for the devspark.site-audit command.
 
 .PARAMETER Scope
     Audit scope: full, constitution, packages, quality, unused, duplicate
@@ -473,7 +473,7 @@ function Get-PatternDetection {
 function Get-SpeckitVersion {
     param([string]$RepoRoot)
     
-    $stampPath = Join-Path $RepoRoot '.documentation/SPECKIT_VERSION'
+    $stampPath = Join-Path $RepoRoot '.documentation/DEVSPARK_VERSION'
     $info = @{
         stamp_exists = $false
         installed_version = $null
@@ -642,7 +642,7 @@ if ($OutputFormat -eq 'json') {
     Write-Output "Repository: $repoRoot"
     Write-Output "Scope: $Scope"
     Write-Output "Constitution: $(if ($constitutionInfo.exists) { 'Found' } else { 'MISSING' })"
-    Write-Output "Spec Kit Version: $(if ($speckitVersion.stamp_exists) { $speckitVersion.installed_version } else { 'absent' })"
+    Write-Output "DevSpark Version: $(if ($speckitVersion.stamp_exists) { $speckitVersion.installed_version } else { 'absent' })"
     Write-Output ""
     Write-Output "File Counts:"
     Write-Output "  Source files: $($fileCategories.source.Count)"

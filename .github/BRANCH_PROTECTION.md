@@ -92,7 +92,7 @@ After setting up protection rules:
 
 ## Current Versioning Strategy
 
-Spec Kit Spark uses standard semantic versioning:
+DevSpark uses standard semantic versioning:
 
 - Format: `vMAJOR.MINOR.PATCH` (e.g., v1.0.0, v1.1.0, v2.0.0)
 - Follows [Semantic Versioning 2.0.0](https://semver.org/)

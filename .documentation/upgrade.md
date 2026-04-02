@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-> You have Spec Kit installed and want to upgrade to the latest version to get new features, bug fixes, or updated slash commands. This guide covers both upgrading the CLI tool and updating your project files.
+> You have DevSpark installed and want to upgrade to the latest version to get new features, bug fixes, or updated slash commands. This guide covers both upgrading the CLI tool and updating your project files.
 
 ---
 
@@ -8,21 +8,21 @@
 
 | What to Upgrade | Command | When to Use |
 |----------------|---------|-------------|
-| **CLI Tool Only** | `uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git` | Get latest CLI features without touching project files |
-| **Project Files** (Recommended) | `specify upgrade` | Update project with auto-detection and safety checks |
-| **Project Files** (Manual) | `specify init --here --force --ai <your-agent>` | Update when you want to override agent selection |
-| **Both** | Run CLI upgrade, then `specify upgrade` | Recommended for major version updates |
+| **CLI Tool Only** | `uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git` | Get latest CLI features without touching project files |
+| **Project Files** (Recommended) | `devspark upgrade` | Update project with auto-detection and safety checks |
+| **Project Files** (Manual) | `devspark init --here --force --ai <your-agent>` | Update when you want to override agent selection |
+| **Both** | Run CLI upgrade, then `devspark upgrade` | Recommended for major version updates |
 
 ---
 
 ## Part 1: Upgrade the CLI Tool
 
-The CLI tool (`specify`) is separate from your project files. Upgrade it to get the latest features and bug fixes.
+The CLI tool (`devspark`) is separate from your project files. Upgrade it to get the latest features and bug fixes.
 
 ### If you installed with `uv tool install`
 
 ```bash
-uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
 ```
 
 ### If you use one-shot `uvx` commands
@@ -30,13 +30,13 @@ uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/s
 No upgrade needed—`uvx` always fetches the latest version. Just run your commands as normal:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git specify upgrade
+uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark upgrade
 ```
 
 ### Verify the upgrade
 
 ```bash
-specify version
+devspark version
 ```
 
 This shows CLI and template versions plus system information.
@@ -45,18 +45,18 @@ This shows CLI and template versions plus system information.
 
 ## Part 2: Updating Project Files (Recommended Method)
 
-Use the `specify upgrade` command for a safe, guided upgrade experience with auto-detection and safety checks.
+Use the `devspark upgrade` command for a safe, guided upgrade experience with auto-detection and safety checks.
 
 ### Simple Upgrade
 
 ```bash
 cd /path/to/your-project
-specify upgrade
+devspark upgrade
 ```
 
 **What it does:**
 
-1. ✅ Verifies you're in a Spec Kit project
+1. ✅ Verifies you're in a DevSpark project
 2. ✅ Checks for uncommitted git changes
 3. ✅ Auto-detects your AI assistant (claude, copilot, etc.)
 4. ✅ Detects old structure (.specify/, memory/) and offers to migrate
@@ -67,19 +67,19 @@ specify upgrade
 
 ```bash
 # Preview changes without modifying files
-specify upgrade --dry-run
+devspark upgrade --dry-run
 
 # Override auto-detected agent
-specify upgrade --ai claude
+devspark upgrade --ai claude
 
 # Create backup of constitution before upgrade
-specify upgrade --backup
+devspark upgrade --backup
 
 # Skip automatic migration check
-specify upgrade --skip-migration
+devspark upgrade --skip-migration
 
 # Skip all confirmations
-specify upgrade --force
+devspark upgrade --force
 ```
 
 ### What gets updated?
@@ -110,7 +110,7 @@ The `specs/` directory is completely excluded from upgrades and will never be mo
 If you prefer manual control or the `upgrade` command isn't available, you can update project files directly:
 
 ```bash
-specify init --here --force --ai <your-agent>
+devspark init --here --force --ai <your-agent>
 ```
 
 Replace `<your-agent>` with your AI assistant. Refer to the list of [Supported AI Agents](https://github.com/MarkHazleton/spec-kit#-supported-ai-agents)
@@ -118,7 +118,7 @@ Replace `<your-agent>` with your AI assistant. Refer to the list of [Supported A
 **Example:**
 
 ```bash
-specify init --here --force --ai copilot
+devspark init --here --force --ai copilot
 ```
 
 ### Understanding the `--force` flag
@@ -144,7 +144,7 @@ With `--force`, it skips the confirmation and proceeds immediately.
 **Recommendation:** Use the `--backup` flag when upgrading to automatically backup your constitution:
 
 ```bash
-specify upgrade --backup
+devspark upgrade --backup
 ```
 
 This creates a timestamped backup at `.documentation/memory/constitution.md.YYYYMMDD_HHMMSS.bak`.
@@ -156,7 +156,7 @@ This creates a timestamped backup at `.documentation/memory/constitution.md.YYYY
 cp .documentation/memory/constitution.md .documentation/memory/constitution-backup.md
 
 # 2. Run the upgrade
-specify upgrade
+devspark upgrade
 
 # 3. If needed, restore your customized constitution
 mv .documentation/memory/constitution-backup.md .documentation/memory/constitution.md
@@ -178,7 +178,7 @@ If you customized any templates in `.documentation/templates/`, the upgrade will
 cp -r .documentation/templates .documentation/templates-backup
 
 # Run upgrade
-specify upgrade
+devspark upgrade
 
 # After upgrade, merge your changes back manually
 ```
@@ -199,8 +199,8 @@ cd .kilocode/rules/
 ls -la
 
 # Delete old versions (example filenames - yours may differ)
-rm speckit.specify-old.md
-rm speckit.plan-v1.md
+rm devspark.specify-old.md
+rm devspark.plan-v1.md
 ```
 
 Restart your IDE to refresh the command list.
@@ -213,10 +213,10 @@ Restart your IDE to refresh the command list.
 
 ```bash
 # Upgrade CLI (if using persistent install)
-uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
 
 # Update project files to get new commands
-specify init --here --force --ai copilot
+devspark init --here --force --ai copilot
 
 # Restore your constitution if customized
 git restore .documentation/memory/constitution.md
@@ -230,10 +230,10 @@ cp .documentation/memory/constitution.md /tmp/constitution-backup.md
 cp -r .documentation/templates /tmp/templates-backup
 
 # 2. Upgrade CLI
-uv tool install specify-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
 
 # 3. Update project
-specify init --here --force --ai copilot
+devspark init --here --force --ai copilot
 
 # 4. Restore customizations
 mv /tmp/constitution-backup.md .documentation/memory/constitution.md
@@ -252,7 +252,7 @@ cd .kilocode/rules/
 ls -la
 
 # Delete old command files
-rm speckit.old-command-name.md
+rm devspark.old-command-name.md
 
 # Restart your IDE
 ```
@@ -266,7 +266,7 @@ If you initialized your project with `--no-git`, you can still upgrade:
 cp .documentation/memory/constitution.md /tmp/constitution-backup.md
 
 # Run upgrade
-specify init --here --force --ai copilot --no-git
+devspark init --here --force --ai copilot --no-git
 
 # Restore customizations
 mv /tmp/constitution-backup.md .documentation/memory/constitution.md
@@ -278,7 +278,7 @@ The `--no-git` flag skips git initialization but doesn't affect file updates.
 
 ## Using `--no-git` Flag
 
-The `--no-git` flag tells Spec Kit to **skip git repository initialization**. This is useful when:
+The `--no-git` flag tells DevSpark to **skip git repository initialization**. This is useful when:
 
 - You manage version control differently (Mercurial, SVN, etc.)
 - Your project is part of a larger monorepo with existing git setup
@@ -287,13 +287,13 @@ The `--no-git` flag tells Spec Kit to **skip git repository initialization**. Th
 **During initial setup:**
 
 ```bash
-specify init my-project --ai copilot --no-git
+devspark init my-project --ai copilot --no-git
 ```
 
 **During upgrade:**
 
 ```bash
-specify init --here --force --ai copilot --no-git
+devspark init --here --force --ai copilot --no-git
 ```
 
 ### What `--no-git` does NOT do
@@ -318,9 +318,9 @@ export SPECIFY_FEATURE="001-my-feature"
 $env:SPECIFY_FEATURE = "001-my-feature"
 ```
 
-This tells Spec Kit which feature directory to use when creating specs, plans, and tasks.
+This tells DevSpark which feature directory to use when creating specs, plans, and tasks.
 
-**Why this matters:** Without git, Spec Kit can't detect your current branch name to determine the active feature. The environment variable provides that context manually.
+**Why this matters:** Without git, DevSpark can't detect your current branch name to determine the active feature. The environment variable provides that context manually.
 
 ---
 
@@ -371,15 +371,15 @@ Do you want to continue? [y/N]
 
 **What this means:**
 
-This warning appears when you run `specify init --here` (or `specify init .`) in a directory that already has files. It's telling you:
+This warning appears when you run `devspark init --here` (or `devspark init .`) in a directory that already has files. It's telling you:
 
 1. **The directory has existing content** - In the example, 25 files/folders
 2. **Files will be merged** - New template files will be added alongside your existing files
-3. **Some files may be overwritten** - If you already have Spec Kit files (`.claude/`, `.documentation/`, etc.), they'll be replaced with the new versions
+3. **Some files may be overwritten** - If you already have DevSpark files (`.claude/`, `.documentation/`, etc.), they'll be replaced with the new versions
 
 **What gets overwritten:**
 
-Only Spec Kit infrastructure files:
+Only DevSpark infrastructure files:
 
 - Agent command files (`.claude/commands/`, `.github/prompts/`, etc.)
 - Scripts in `.documentation/scripts/`
@@ -391,7 +391,7 @@ Only Spec Kit infrastructure files:
 - Your `specs/` directory (specifications, plans, tasks)
 - Your source code files
 - Your `.git/` directory and git history
-- Any other files not part of Spec Kit templates
+- Any other files not part of DevSpark templates
 
 **How to respond:**
 
@@ -400,13 +400,13 @@ Only Spec Kit infrastructure files:
 - **Use `--force` flag** - Skip this confirmation entirely:
 
   ```bash
-  specify init --here --force --ai copilot
+  devspark init --here --force --ai copilot
   ```
 
 **When you see this warning:**
 
-- ✅ **Expected** when upgrading an existing Spec Kit project
-- ✅ **Expected** when adding Spec Kit to an existing codebase
+- ✅ **Expected** when upgrading an existing DevSpark project
+- ✅ **Expected** when adding DevSpark to an existing codebase
 - ⚠️ **Unexpected** if you thought you were creating a new project in an empty directory
 
 **Prevention tip:** Before upgrading, commit or back up your `.documentation/memory/constitution.md` if you customized it.
@@ -419,7 +419,7 @@ Verify the installation:
 # Check installed tools
 uv tool list
 
-# Should show specify-cli
+# Should show devspark-cli
 
 # Verify path
 which specify
@@ -430,23 +430,23 @@ which specify
 If not found, reinstall:
 
 ```bash
-uv tool uninstall specify-cli
-uv tool install specify-cli --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool uninstall devspark-cli
+uv tool install devspark-cli --from git+https://github.com/MarkHazleton/spec-kit.git
 ```
 
-### "Do I need to run specify every time I open my project?"
+### "Do I need to run devspark every time I open my project?"
 
-**Short answer:** No, you only run `specify init` once per project (or when upgrading).
+**Short answer:** No, you only run `devspark init` once per project (or when upgrading).
 
 **Explanation:**
 
-The `specify` CLI tool is used for:
+The `devspark` CLI tool is used for:
 
-- **Initial setup:** `specify init` to bootstrap Spec Kit in your project
-- **Upgrades:** `specify init --here --force` to update templates and commands
-- **Diagnostics:** `specify check` to verify tool installation
+- **Initial setup:** `devspark init` to bootstrap DevSpark in your project
+- **Upgrades:** `devspark init --here --force` to update templates and commands
+- **Diagnostics:** `devspark check` to verify tool installation
 
-Once you've run `specify init`, the slash commands (like `/speckit.specify`, `/speckit.plan`, etc.) are **permanently installed** in your project's agent folder (`.claude/`, `.github/prompts/`, etc.). Your AI assistant reads these command files directly—no need to run `specify` again.
+Once you've run `devspark init`, the slash commands (like `/devspark.specify`, `/devspark.plan`, etc.) are **permanently installed** in your project's agent folder (`.claude/`, `.github/prompts/`, etc.). Your AI assistant reads these command files directly—no need to run `devspark` again.
 
 **If your agent isn't recognizing slash commands:**
 
@@ -462,11 +462,11 @@ Once you've run `specify init`, the slash commands (like `/speckit.specify`, `/s
 
 2. **Restart your IDE/editor completely** (not just reload window)
 
-3. **Check you're in the correct directory** where you ran `specify init`
+3. **Check you're in the correct directory** where you ran `devspark init`
 
 4. **For some agents**, you may need to reload the workspace or clear cache
 
-**Related issue:** If Copilot can't open local files or uses PowerShell commands unexpectedly, this is typically an IDE context issue, not related to `specify`. Try:
+**Related issue:** If Copilot can't open local files or uses PowerShell commands unexpectedly, this is typically an IDE context issue, not related to `devspark`. Try:
 
 - Restarting VS Code
 - Checking file permissions
@@ -476,7 +476,7 @@ Once you've run `specify init`, the slash commands (like `/speckit.specify`, `/s
 
 ## Version Compatibility
 
-Spec Kit follows semantic versioning for major releases. The CLI and project files are designed to be compatible within the same major version.
+DevSpark follows semantic versioning for major releases. The CLI and project files are designed to be compatible within the same major version.
 
 **Best practice:** Keep both CLI and project files in sync by upgrading both together during major version changes.
 
@@ -486,7 +486,7 @@ Spec Kit follows semantic versioning for major releases. The CLI and project fil
 
 After upgrading:
 
-- **Test new slash commands:** Run `/speckit.constitution` or another command to verify everything works
+- **Test new slash commands:** Run `/devspark.constitution` or another command to verify everything works
 - **Review release notes:** Check [GitHub Releases](https://github.com/MarkHazleton/spec-kit/releases) for new features and breaking changes
 - **Update workflows:** If new commands were added, update your team's development workflows
-- **Check documentation:** Visit [github.io/spec-kit](https://github.github.io/spec-kit/) for updated guides
+- **Check documentation:** Visit [github.io/devspark](https://github.github.io/devspark/) for updated guides

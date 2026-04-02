@@ -1,6 +1,6 @@
 #!/bin/bash
 # migrate-to-documentation.sh
-# Migrates Spec Kit projects from old structure (.specify/, memory/, scripts/, templates/)
+# Migrates DevSpark projects from old structure (.specify/, memory/, scripts/, templates/)
 # to new .documentation/ structure
 #
 # Usage:
@@ -127,7 +127,7 @@ if [ "$DRY_RUN" = true ]; then
     echo -e "${CYAN}DRY RUN MODE - No files will be modified${NC}"
     echo -e "${BLUE}============================================${NC}"
 else
-    echo -e "${BLUE}Spec Kit Migration to .documentation/${NC}"
+    echo -e "${BLUE}DevSpark Migration to .documentation/${NC}"
     echo -e "${BLUE}============================================${NC}"
 fi
 echo ""
@@ -427,7 +427,7 @@ if [ -f ".gitignore" ]; then
             print_dry_run "Would add .documentation/_site/ to .gitignore"
         else
             echo "" >> .gitignore
-            echo "# Spec Kit documentation build output" >> .gitignore
+            echo "# DevSpark documentation build output" >> .gitignore
             echo ".documentation/_site/" >> .gitignore
             print_status "Added .documentation/_site/ to .gitignore"
         fi

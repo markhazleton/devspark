@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # create-release-packages.sh (workflow-local)
-# Build Spec Kit template release archives for each supported AI assistant and script type.
+# Build DevSpark template release archives for each supported AI assistant and script type.
 # Usage: .github/workflows/scripts/create-release-packages.sh <version>
 #   Version argument should include leading 'v' (e.g., v1.0.0).
 #   Optionally set AGENTS and/or SCRIPTS env vars to limit what gets built.
@@ -31,7 +31,7 @@ mkdir -p "$GENRELEASES_DIR"
 rm -rf "$GENRELEASES_DIR"/* || true
 
 rewrite_paths() {
-  # Spec Kit Spark uses .documentation/ instead of .specify/ to distinguish from upstream
+  # DevSpark uses .documentation/ instead of .specify/ to distinguish from upstream
   sed -E \
     -e 's@(/?)\.specify/@\1.documentation/@g' \
     -e 's@(^|[[:space:]]|`)/specs/@\1/.documentation/specs/@g' \
@@ -93,7 +93,7 @@ generate_canonical_commands() {
     # Apply argument substitution (canonical uses $ARGUMENTS as default) and path rewriting
     body=$(printf '%s\n' "$body" | sed 's/{ARGS}/$ARGUMENTS/g' | rewrite_paths)
     
-    echo "$body" > "$output_dir/speckit.$name.md"
+    echo "$body" > "$output_dir/devspark.$name.md"
   done
 }
 
@@ -121,7 +121,7 @@ generate_shims() {
     
     case $ext in
       toml)
-        cat > "$output_dir/speckit.$name.$ext" <<SHIMEOF
+        cat > "$output_dir/devspark.$name.$ext" <<SHIMEOF
 description = "$description"
 
 prompt = """
@@ -131,8 +131,8 @@ Determine the current git user by running \`git config user.name\`.
 Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
 
 Read and execute the instructions from the **first file that exists**:
-1. \`.documentation/{git-user}/commands/speckit.$name.md\` (personalized override)
-2. \`.documentation/commands/speckit.$name.md\` (shared default)
+1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)
+2. \`.documentation/commands/devspark.$name.md\` (shared default)
 
 Where \`{git-user}\` is the normalized slug from step above.
 
@@ -161,8 +161,8 @@ SHIMEOF
           echo "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars."
           echo ""
           echo "Read and execute the instructions from the **first file that exists**:"
-          echo "1. \`.documentation/{git-user}/commands/speckit.$name.md\` (personalized override)"
-          echo "2. \`.documentation/commands/speckit.$name.md\` (shared default)"
+          echo "1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)"
+          echo "2. \`.documentation/commands/devspark.$name.md\` (shared default)"
           echo ""
           echo "Where \`{git-user}\` is the normalized slug from step above."
           echo ""
@@ -173,7 +173,7 @@ SHIMEOF
           echo '```'
           echo ""
           echo "Pass the user input above to the resolved prompt."
-        } > "$output_dir/speckit.$name.$ext"
+        } > "$output_dir/devspark.$name.$ext"
         ;;
     esac
   done
@@ -234,11 +234,11 @@ generate_commands() {
     case $ext in
       toml)
         body=$(printf '%s\n' "$body" | sed 's/\\/\\\\/g')
-        { echo "description = \"$description\""; echo; echo "prompt = \"\"\""; echo "$body"; echo "\"\"\""; } > "$output_dir/speckit.$name.$ext" ;;
+        { echo "description = \"$description\""; echo; echo "prompt = \"\"\""; echo "$body"; echo "\"\"\""; } > "$output_dir/devspark.$name.$ext" ;;
       md)
-        echo "$body" > "$output_dir/speckit.$name.$ext" ;;
+        echo "$body" > "$output_dir/devspark.$name.$ext" ;;
       agent.md)
-        echo "$body" > "$output_dir/speckit.$name.$ext" ;;
+        echo "$body" > "$output_dir/devspark.$name.$ext" ;;
     esac
   done
 }
@@ -248,7 +248,7 @@ generate_copilot_prompts() {
   mkdir -p "$prompts_dir"
   
   # Generate a .prompt.md file for each .agent.md file
-  for agent_file in "$agents_dir"/speckit.*.agent.md; do
+  for agent_file in "$agents_dir"/devspark.*.agent.md; do
     [[ -f "$agent_file" ]] || continue
     
     local basename=$(basename "$agent_file" .agent.md)
@@ -361,8 +361,8 @@ SPEC_DIR="$base_dir/.documentation"
       mkdir -p "$base_dir/.bob/commands"
       generate_shims bob md "\$ARGUMENTS" "$base_dir/.bob/commands" ;;
   esac
-  ( cd "$base_dir" && zip -r "../spec-kit-spark-template-${agent}-${script}-${NEW_VERSION}.zip" . )
-  echo "Created $GENRELEASES_DIR/spec-kit-spark-template-${agent}-${script}-${NEW_VERSION}.zip"
+  ( cd "$base_dir" && zip -r "../devspark-template-${agent}-${script}-${NEW_VERSION}.zip" . )
+  echo "Created $GENRELEASES_DIR/devspark-template-${agent}-${script}-${NEW_VERSION}.zip"
 }
 
 # Determine agent list
@@ -412,5 +412,5 @@ for agent in "${AGENT_LIST[@]}"; do
 done
 
 echo "Archives in $GENRELEASES_DIR:"
-ls -1 "$GENRELEASES_DIR"/spec-kit-spark-template-*-"${NEW_VERSION}".zip
+ls -1 "$GENRELEASES_DIR"/devspark-template-*-"${NEW_VERSION}".zip
 

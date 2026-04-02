@@ -4,9 +4,9 @@
 
 ## Overview
 
-The `/speckit.harvest` command performs **knowledge-preserving cleanup** of your repository: completed specs, stale documentation, and draft artifacts are triaged and archived, while their valuable content is extracted into living documents (CHANGELOG, Guide.md, copilot-instructions) before anything moves.
+The `/devspark.harvest` command performs **knowledge-preserving cleanup** of your repository: completed specs, stale documentation, and draft artifacts are triaged and archived, while their valuable content is extracted into living documents (CHANGELOG, Guide.md, copilot-instructions) before anything moves.
 
-Additionally, `/speckit.harvest` scans source code for comments that reference completed specs, plans, or tasks — and rewrites them as self-contained code documentation.
+Additionally, `/devspark.harvest` scans source code for comments that reference completed specs, plans, or tasks — and rewrites them as self-contained code documentation.
 
 > **Note**: This command modifies files. Use `--scope=scan` to preview all harvest candidates without making any changes.
 
@@ -21,7 +21,7 @@ Additionally, `/speckit.harvest` scans source code for comments that reference c
 ### Preview Before Harvesting
 
 ```bash
-/speckit.harvest --scope=scan
+/devspark.harvest --scope=scan
 ```
 
 Runs the full pre-scan and presents a harvest plan — no files are moved or edited.
@@ -29,7 +29,7 @@ Runs the full pre-scan and presents a harvest plan — no files are moved or edi
 ### Full Harvest
 
 ```bash
-/speckit.harvest
+/devspark.harvest
 ```
 
 Performs all phases: spec archival, doc cleanup, comment rewriting, CHANGELOG updates, and archival.
@@ -41,7 +41,7 @@ Control what the harvest covers using the `--scope` flag:
 ### Full Harvest (Default)
 
 ```bash
-/speckit.harvest
+/devspark.harvest
 ```
 
 All phases enabled: specs, docs, comments, and CHANGELOG updates.
@@ -49,7 +49,7 @@ All phases enabled: specs, docs, comments, and CHANGELOG updates.
 ### Completed Specs Only
 
 ```bash
-/speckit.harvest --scope=specs
+/devspark.harvest --scope=specs
 ```
 
 Finds specs with all tasks marked `[x]` in `tasks.md`, harvests their knowledge into CHANGELOG, then archives the spec folder.
@@ -57,7 +57,7 @@ Finds specs with all tasks marked `[x]` in `tasks.md`, harvests their knowledge 
 ### Stale Documentation Only
 
 ```bash
-/speckit.harvest --scope=docs
+/devspark.harvest --scope=docs
 ```
 
 Triages `.documentation/` for completed reviews, stale drafts, session notes, impl plans, backup files, and orphaned assets. Archives eligible files.
@@ -65,7 +65,7 @@ Triages `.documentation/` for completed reviews, stale drafts, session notes, im
 ### Code Comment Cleanup Only
 
 ```bash
-/speckit.harvest --scope=comments
+/devspark.harvest --scope=comments
 ```
 
 Finds spec/task references in source code (e.g., `# FR-013`, `# spec 026 Phase 5`, `# T006`) and rewrites them as self-contained behavior descriptions. No file moves.
@@ -73,7 +73,7 @@ Finds spec/task references in source code (e.g., `# FR-013`, `# spec 026 Phase 5
 ### CHANGELOG Update Only
 
 ```bash
-/speckit.harvest --scope=changelog
+/devspark.harvest --scope=changelog
 ```
 
 Adds CHANGELOG entries for completed specs that lack them. No archival.
@@ -81,7 +81,7 @@ Adds CHANGELOG entries for completed specs that lack them. No archival.
 ### Scan / Dry Run
 
 ```bash
-/speckit.harvest --scope=scan
+/devspark.harvest --scope=scan
 ```
 
 Runs the full pre-scan and presents the plan — reads only, no writes.
@@ -89,7 +89,7 @@ Runs the full pre-scan and presents the plan — reads only, no writes.
 ### Combined Scopes
 
 ```bash
-/speckit.harvest --scope=specs,comments
+/devspark.harvest --scope=specs,comments
 ```
 
 Harvest completed specs and rewrite code comments in one pass.
@@ -181,10 +181,10 @@ After a release, archive completed specs and their review artifacts:
 
 ```bash
 # Preview what would be archived
-/speckit.harvest --scope=scan
+/devspark.harvest --scope=scan
 
 # Review the plan, then execute
-/speckit.harvest --scope=specs,docs
+/devspark.harvest --scope=specs,docs
 ```
 
 ### Workflow 2: Code Comment Cleanup Sprint
@@ -193,10 +193,10 @@ Clean up accumulated spec references in source code without moving any files:
 
 ```bash
 # Scan first to see all references
-/speckit.harvest --scope=scan
+/devspark.harvest --scope=scan
 
 # Then clean just the comments
-/speckit.harvest --scope=comments
+/devspark.harvest --scope=comments
 ```
 
 ### Workflow 3: CHANGELOG Catch-Up
@@ -204,7 +204,7 @@ Clean up accumulated spec references in source code without moving any files:
 Add CHANGELOG entries for completed specs that were missed:
 
 ```bash
-/speckit.harvest --scope=changelog
+/devspark.harvest --scope=changelog
 ```
 
 ### Workflow 4: Quarterly Full Harvest
@@ -213,19 +213,19 @@ Regular, comprehensive cleanup at the end of a development cycle:
 
 ```bash
 # 1. Preview everything
-/speckit.harvest --scope=scan
+/devspark.harvest --scope=scan
 
 # 2. Review and approve the plan
 # 3. Execute full harvest
-/speckit.harvest
+/devspark.harvest
 
 # 4. Run a site audit to confirm health
-/speckit.site-audit
+/devspark.site-audit
 ```
 
 ## Approval Gate
 
-`/speckit.harvest` always presents a **harvest plan** before making any changes:
+`/devspark.harvest` always presents a **harvest plan** before making any changes:
 
 ```markdown
 ## Harvest Plan — YYYY-MM-DD
@@ -273,7 +273,7 @@ Never reference archived files from active prompts, scripts, or documentation. T
 
 **Problem**: The pre-scan script is missing.
 
-**Solution**: Run `specify upgrade` to install the latest scripts, or copy `harvest.ps1` from the source repo's `scripts/powershell/` to `/.documentation/scripts/powershell/`.
+**Solution**: Run `devspark upgrade` to install the latest scripts, or copy `harvest.ps1` from the source repo's `scripts/powershell/` to `/.documentation/scripts/powershell/`.
 
 ### "No specs found to harvest"
 
@@ -304,30 +304,30 @@ Never reference archived files from active prompts, scripts, or documentation. T
 
 ```bash
 # When all tasks in a spec are complete and PR is merged
-/speckit.harvest --scope=specs
+/devspark.harvest --scope=specs
 
 # Clean up any code comments added during development
-/speckit.harvest --scope=comments
+/devspark.harvest --scope=comments
 ```
 
 ### Before Release
 
 ```bash
 # Ensure CHANGELOG is up to date for all completed specs
-/speckit.harvest --scope=changelog
+/devspark.harvest --scope=changelog
 
 # Then run release workflow
-/speckit.release
+/devspark.release
 ```
 
 ### Regular Maintenance
 
 ```bash
 # Monthly cleanup
-/speckit.harvest --scope=docs
+/devspark.harvest --scope=docs
 
 # Monitor for accumulated spec comments
-/speckit.harvest --scope=comments
+/devspark.harvest --scope=comments
 ```
 
 ## Support
@@ -335,9 +335,9 @@ Never reference archived files from active prompts, scripts, or documentation. T
 If you encounter issues:
 
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [Spec Kit Issues](https://github.com/MarkHazleton/spec-kit/issues)
+- Review [DevSpark Issues](https://github.com/MarkHazleton/spec-kit/issues)
 
 ---
 
-*Part of Spec Kit Spark - Adaptive System Life Cycle Development (ASLCD) Toolkit*
+*Part of DevSpark - Adaptive System Life Cycle Development (ASLCD) Toolkit*
 *For more information: <https://github.com/MarkHazleton/spec-kit>*

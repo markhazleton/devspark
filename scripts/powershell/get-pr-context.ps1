@@ -111,7 +111,7 @@ if ([string]::IsNullOrWhiteSpace($PrNumber)) {
     $PrNumber = Get-DetectedPrNumber
     if (-not $PrNumber) {
         Write-JsonError -Message "Unable to detect PR number" `
-            -Details "Please provide PR number explicitly: /speckit.pr-review #123"
+            -Details "Please provide PR number explicitly: /devspark.pr-review #123"
         exit 1
     }
 }

@@ -1,10 +1,10 @@
 # AGENTS.md
 
-## About Spec Kit and Specify
+## About DevSpark
 
-**Spec Kit Spark** is an Adaptive System Life Cycle Development (ASLCD) toolkit and a maintained fork of `github/spec-kit`. It extends specification-driven workflows with constitution-powered quality gates, right-sized execution paths, and operational lifecycle guidance.
+**DevSpark** is an Adaptive System Life Cycle Development (ASLCD) toolkit and a maintained fork of `github/devspark`. It extends specification-driven workflows with constitution-powered quality gates, right-sized execution paths, and operational lifecycle guidance.
 
-**Specify CLI** is the command-line interface that bootstraps projects with the Spec Kit Spark framework. It sets up the necessary directory structures, templates, and AI agent integrations to support ASLCD workflows.
+**DevSpark CLI** is the command-line interface that bootstraps projects with the DevSpark framework. It sets up the necessary directory structures, templates, and AI agent integrations to support ASLCD workflows.
 
 The toolkit supports multiple AI coding assistants, allowing teams to use their preferred tools while maintaining consistent project structure and development practices.
 
@@ -12,21 +12,21 @@ The toolkit supports multiple AI coding assistants, allowing teams to use their 
 
 ## Canonical Layout and Platform Shims
 
-Spec Kit uses an **agnostic-by-default** architecture. All command prompts, scripts, templates, and memory live under `.documentation/` — the single source of truth. Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only **thin shims** that redirect to the canonical content.
+DevSpark uses an **agnostic-by-default** architecture. All command prompts, scripts, templates, and memory live under `.documentation/` — the single source of truth. Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only **thin shims** that redirect to the canonical content.
 
 ### File Layout
 
 ```text
 .documentation/
 ├── commands/                    ← Canonical command prompts (agent-agnostic)
-│   ├── speckit.specify.md
-│   ├── speckit.plan.md
-│   ├── speckit.implement.md
-│   ├── speckit.personalize.md
+│   ├── devspark.specify.md
+│   ├── devspark.plan.md
+│   ├── devspark.implement.md
+│   ├── devspark.personalize.md
 │   └── ...
 ├── {git-user}/                  ← Per-user personalized overrides
 │   └── commands/
-│       └── speckit.specify.md   ← Takes priority over shared default
+│       └── devspark.specify.md   ← Takes priority over shared default
 ├── scripts/
 ├── templates/
 ├── memory/
@@ -42,34 +42,34 @@ Spec Kit uses an **agnostic-by-default** architecture. All command prompts, scri
 Each platform shim:
 
 1. Resolves the current git user (`git config user.name`, slug-normalized)
-2. Checks for a personalized override at `.documentation/{git-user}/commands/speckit.{cmd}.md`
-3. Falls back to the shared default at `.documentation/commands/speckit.{cmd}.md`
+2. Checks for a personalized override at `.documentation/{git-user}/commands/devspark.{cmd}.md`
+3. Falls back to the shared default at `.documentation/commands/devspark.{cmd}.md`
 4. Passes through user input (`$ARGUMENTS` / `{{args}}`) to the resolved prompt
 
 ### Multi-User Personalization
 
 Team members can customize any command prompt without affecting others:
 
-- Run `/speckit.personalize {command}` to create a user-scoped copy
+- Run `/devspark.personalize {command}` to create a user-scoped copy
 - Personalized prompts live in `.documentation/{git-user}/commands/`
 - Committed to git so team members can share and review customizations
 - Delete the personalized file to revert to the shared default
 
 ### Personalize Command
 
-The `/speckit.personalize` command creates per-user prompt overrides:
+The `/devspark.personalize` command creates per-user prompt overrides:
 
 ```bash
-/speckit.personalize specify       # Personalize the specify command
-/speckit.personalize plan          # Personalize the plan command
-/speckit.personalize implement     # Personalize the implement command
+/devspark.personalize specify       # Personalize the specify command
+/devspark.personalize plan          # Personalize the plan command
+/devspark.personalize implement     # Personalize the implement command
 ```
 
 ---
 
 ## General practices
 
-- Any changes to `__init__.py` for the Specify CLI require a version rev in `pyproject.toml` and addition of entries to `CHANGELOG.md`.
+- Any changes to `__init__.py` for the DevSpark CLI require a version rev in `pyproject.toml` and addition of entries to `CHANGELOG.md`.
 
 ## Lightweight Workflow Commands
 
@@ -77,7 +77,7 @@ These commands support the Adaptive System Life Cycle Development (ASLCD) approa
 
 ### Quickfix Command
 
-The `/speckit.quickfix` command enables rapid fixes without full spec overhead:
+The `/devspark.quickfix` command enables rapid fixes without full spec overhead:
 
 **Key Features:**
 
@@ -90,15 +90,15 @@ The `/speckit.quickfix` command enables rapid fixes without full spec overhead:
 **Usage:**
 
 ```bash
-/speckit.quickfix fix null pointer in UserService
-/speckit.quickfix urgent: payment timeout in checkout
-/speckit.quickfix complete QF-2026-001
-/speckit.quickfix list
+/devspark.quickfix fix null pointer in UserService
+/devspark.quickfix urgent: payment timeout in checkout
+/devspark.quickfix complete QF-2026-001
+/devspark.quickfix list
 ```
 
 ### Release Command
 
-The `/speckit.release` command manages documentation lifecycle at release boundaries:
+The `/devspark.release` command manages documentation lifecycle at release boundaries:
 
 **Key Features:**
 
@@ -112,14 +112,14 @@ The `/speckit.release` command manages documentation lifecycle at release bounda
 **Usage:**
 
 ```bash
-/speckit.release              # Auto-calculate version
-/speckit.release 2.0.0        # Explicit version
-/speckit.release --dry-run    # Preview only
+/devspark.release              # Auto-calculate version
+/devspark.release 2.0.0        # Explicit version
+/devspark.release --dry-run    # Preview only
 ```
 
 ### Harvest Command
 
-The `/speckit.harvest` command cleans up stale documentation and completed delivery artifacts while preserving useful knowledge in living docs:
+The `/devspark.harvest` command cleans up stale documentation and completed delivery artifacts while preserving useful knowledge in living docs:
 
 **Key Features:**
 
@@ -133,15 +133,15 @@ The `/speckit.harvest` command cleans up stale documentation and completed deliv
 **Usage:**
 
 ```bash
-/speckit.harvest
-/speckit.harvest --scope=docs
-/speckit.harvest --scope=comments
-/speckit.harvest --scope=scan
+/devspark.harvest
+/devspark.harvest --scope=docs
+/devspark.harvest --scope=comments
+/devspark.harvest --scope=scan
 ```
 
 ### Constitution Evolution Command
 
-The `/speckit.evolve-constitution` command facilitates constitution amendments:
+The `/devspark.evolve-constitution` command facilitates constitution amendments:
 
 **Key Features:**
 
@@ -154,18 +154,18 @@ The `/speckit.evolve-constitution` command facilitates constitution amendments:
 **Usage:**
 
 ```bash
-/speckit.evolve-constitution                          # Full analysis
-/speckit.evolve-constitution --from-pr #123           # From specific PR
-/speckit.evolve-constitution suggest "API versioning" # Manual suggestion
-/speckit.evolve-constitution approve CAP-2026-001     # Approve proposal
-/speckit.evolve-constitution reject CAP-2026-002 "Too restrictive"
+/devspark.evolve-constitution                          # Full analysis
+/devspark.evolve-constitution --from-pr #123           # From specific PR
+/devspark.evolve-constitution suggest "API versioning" # Manual suggestion
+/devspark.evolve-constitution approve CAP-2026-001     # Approve proposal
+/devspark.evolve-constitution reject CAP-2026-002 "Too restrictive"
 ```
 
 ---
 
 ## PR Review Command
 
-The `/speckit.pr-review` command is a special command that works independently of the spec-driven development workflow:
+The `/devspark.pr-review` command is a special command that works independently of the spec-driven development workflow:
 
 ### Unique Characteristics
 
@@ -185,7 +185,7 @@ The `/speckit.pr-review` command is a special command that works independently o
 
 ### Agent Integration
 
-When adding new agents, include `/speckit.pr-review` following the same pattern as other commands:
+When adding new agents, include `/devspark.pr-review` following the same pattern as other commands:
 
 - Markdown format for most agents
 - TOML format for Gemini/Qwen
@@ -198,7 +198,7 @@ See `templates/commands/pr-review.md` for the canonical template.
 
 ## Adding New Agent Support
 
-This section explains how to add support for new AI agents/assistants to the Specify CLI. Use this guide as a reference when integrating new AI tools into the Spec-Driven Development workflow.
+This section explains how to add support for new AI agents/assistants to the DevSpark CLI. Use this guide as a reference when integrating new AI tools into the Spec-Driven Development workflow.
 
 ### Overview
 
@@ -239,7 +239,7 @@ Follow these steps to add a new agent (using a hypothetical new agent as an exam
 
 **IMPORTANT**: Use the actual CLI tool name as the key, not a shortened version.
 
-Add the new agent to the `AGENT_CONFIG` dictionary in `src/specify_cli/__init__.py`. This is the **single source of truth** for all agent metadata:
+Add the new agent to the `AGENT_CONFIG` dictionary in `src/devspark_cli/__init__.py`. This is the **single source of truth** for all agent metadata:
 
 ```python
 AGENT_CONFIG = {
@@ -314,8 +314,8 @@ Modify `.github/workflows/scripts/create-github-release.sh` to include the new a
 ```bash
 gh release create "$VERSION" \
   # ... existing packages ...
-  .genreleases/spec-kit-template-windsurf-sh-"$VERSION".zip \
-  .genreleases/spec-kit-template-windsurf-ps-"$VERSION".zip \
+  .genreleases/devspark-template-windsurf-sh-"$VERSION".zip \
+  .genreleases/devspark-template-windsurf-ps-"$VERSION".zip \
   # Add new agent packages here
 ```
 
@@ -528,7 +528,7 @@ Command content with {SCRIPT} and $ARGUMENTS placeholders.
 ```markdown
 ---
 description: "Command description"
-mode: speckit.command-name
+mode: devspark.command-name
 ---
 
 Command content with {SCRIPT} and $ARGUMENTS placeholders.
@@ -566,7 +566,7 @@ Different agents use different argument placeholders:
 ## Testing New Agent Integration
 
 1. **Build test**: Run package creation script locally
-2. **CLI test**: Test `specify init --ai <agent>` command
+2. **CLI test**: Test `devspark init --ai <agent>` command
 3. **File generation**: Verify correct directory structure and files
 4. **Command validation**: Ensure generated commands work with the agent
 5. **Context update**: Test agent context update scripts

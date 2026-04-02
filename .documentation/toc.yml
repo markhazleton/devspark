@@ -45,7 +45,7 @@
       href: harvest-usage.md
 
 # About This Fork
-- name: About Spec Kit Spark
+- name: About DevSpark
   items:
-    - name: Why I Forked Spec Kit
-      href: why-i-forked-spec-kit.md
+    - name: Why I Forked DevSpark
+      href: why-i-forked-devspark.md

@@ -1,4 +1,4 @@
-# Spec Kit Spark Roadmap
+# DevSpark Roadmap
 
 > Future plans and development direction for the Adaptive System Life Cycle Development Toolkit
 
@@ -6,10 +6,10 @@
 
 ## Vision Statement
 
-Spec Kit Spark aims to become the definitive toolkit for AI-agent driven software development lifecycle management, built on three pillars:
+DevSpark aims to become the definitive toolkit for AI-agent driven software development lifecycle management, built on three pillars:
 
 - **Agent-agnostic by default** — every AI assistant is a first-class citizen; canonical prompts live in `.documentation/commands/` with thin platform shims
-- **Multi-user personalization** — shared governance with individual customization via `/speckit.personalize` and per-user overrides in `.documentation/{git-user}/commands/`
+- **Multi-user personalization** — shared governance with individual customization via `/devspark.personalize` and per-user overrides in `.documentation/{git-user}/commands/`
 - **Complete lifecycle coverage** — from project initiation through ongoing maintenance, release management, and constitution evolution
 - **Adaptive workflows** that scale from quick fixes to complex features
 - **Living governance** where constitutions evolve with the systems they govern
@@ -24,47 +24,47 @@ Spec Kit Spark aims to become the definitive toolkit for AI-agent driven softwar
 
 #### Core Spec-Driven Development
 
-- ✅ `/speckit.constitution` - Create and manage project principles
-- ✅ `/speckit.specify` - Feature specification creation
-- ✅ `/speckit.plan` - Technical implementation planning
-- ✅ `/speckit.tasks` - Task breakdown generation
-- ✅ `/speckit.implement` - Task execution
-- ✅ `/speckit.clarify` - Specification clarification
-- ✅ `/speckit.checklist` - Quality checklist generation
-- ✅ `/speckit.analyze` - Artifact consistency checking
+- ✅ `/devspark.constitution` - Create and manage project principles
+- ✅ `/devspark.specify` - Feature specification creation
+- ✅ `/devspark.plan` - Technical implementation planning
+- ✅ `/devspark.tasks` - Task breakdown generation
+- ✅ `/devspark.implement` - Task execution
+- ✅ `/devspark.clarify` - Specification clarification
+- ✅ `/devspark.checklist` - Quality checklist generation
+- ✅ `/devspark.analyze` - Artifact consistency checking
 
 #### Constitution-Powered Commands
 
-- ✅ `/speckit.discover-constitution` - Brownfield constitution discovery
-- ✅ `/speckit.pr-review` - Constitution-based PR review
-- ✅ `/speckit.site-audit` - Codebase compliance auditing
-- ✅ `/speckit.critic` - Adversarial risk analysis
+- ✅ `/devspark.discover-constitution` - Brownfield constitution discovery
+- ✅ `/devspark.pr-review` - Constitution-based PR review
+- ✅ `/devspark.site-audit` - Codebase compliance auditing
+- ✅ `/devspark.critic` - Adversarial risk analysis
 
 #### Adaptive Lifecycle Commands
 
-- ✅ `/speckit.quickfix` - Lightweight workflow for bug fixes
-- ✅ `/speckit.release` - Release documentation and archival
-- ✅ `/speckit.evolve-constitution` - Constitution amendment proposals
-- ✅ `/speckit.harvest` - Knowledge-preserving cleanup for stale docs and completed specs
-- ✅ `/speckit.repo-story` - Evidence-based repository narrative generation
+- ✅ `/devspark.quickfix` - Lightweight workflow for bug fixes
+- ✅ `/devspark.release` - Release documentation and archival
+- ✅ `/devspark.evolve-constitution` - Constitution amendment proposals
+- ✅ `/devspark.harvest` - Knowledge-preserving cleanup for stale docs and completed specs
+- ✅ `/devspark.repo-story` - Evidence-based repository narrative generation
 
 #### CLI Commands
 
-- ✅ `specify init` - Initialize new or existing projects
-- ✅ `specify upgrade` - Upgrade existing projects
-- ✅ `specify check` - Verify tool dependencies
-- ✅ `specify version` - Show version information
+- ✅ `devspark init` - Initialize new or existing projects
+- ✅ `devspark upgrade` - Upgrade existing projects
+- ✅ `devspark check` - Verify tool dependencies
+- ✅ `devspark version` - Show version information
 
 #### Architecture (NEW in v1.6.0)
 
 - ✅ Agent-agnostic canonical layout — prompts in `.documentation/commands/` with thin platform shims
-- ✅ Multi-user personalization (`/speckit.personalize`) — per-user overrides in `.documentation/{git-user}/commands/`
-- ✅ SPECKIT_VERSION stamp — version tracking for consumer projects
+- ✅ Multi-user personalization (`/devspark.personalize`) — per-user overrides in `.documentation/{git-user}/commands/`
+- ✅ DEVSPARK_VERSION stamp — version tracking for consumer projects
 
 #### Platform Support
 
 - ✅ Agent-agnostic architecture (canonical prompts + thin platform shims)
-- ✅ Multi-user personalization (`/speckit.personalize`)
+- ✅ Multi-user personalization (`/devspark.personalize`)
 - ✅ 17+ AI agent integrations
 - ✅ Cross-platform scripts (Bash + PowerShell)
 - ✅ Greenfield and brownfield support
@@ -216,7 +216,7 @@ We welcome contributions in all areas! Here's how to get involved:
 
 ### Documentation Contributions
 
-1. **Use Case Documentation** - Document how you use Spec Kit in your workflow
+1. **Use Case Documentation** - Document how you use DevSpark in your workflow
 2. **Tutorial Creation** - Create tutorials for specific scenarios
 3. **Translation** - Help translate documentation
 
@@ -239,7 +239,7 @@ We welcome contributions in all areas! Here's how to get involved:
 
 ## Versioning Strategy
 
-Spec Kit Spark follows standard [Semantic Versioning 2.0.0](https://semver.org/):
+DevSpark follows standard [Semantic Versioning 2.0.0](https://semver.org/):
 
 ```text
 vMAJOR.MINOR.PATCH
@@ -274,7 +274,7 @@ Examples:
 
 ### Related Projects
 
-- [Original Spec Kit](https://github.com/github/spec-kit) - GitHub's original toolkit
+- [Original devspark](https://github.com/github/spec-kit) - GitHub's original toolkit
 - [WebSpark Suite](https://github.com/MarkHazleton?tab=repositories&q=webspark) - Related demonstration projects
 
 ---

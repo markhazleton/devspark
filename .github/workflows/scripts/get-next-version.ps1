@@ -88,7 +88,7 @@ if ($ExplicitVersion) {
 
     $pyprojectVersion = Get-PyprojectVersion
     if ($pyprojectVersion -and $newVersion -ne $pyprojectVersion) {
-        throw "Explicit version '$newVersion' does not match pyproject.toml version '$pyprojectVersion'. Update pyproject.toml first to keep Spec Kit Spark and Specify CLI versions in sync."
+        throw "Explicit version '$newVersion' does not match pyproject.toml version '$pyprojectVersion'. Update pyproject.toml first to keep DevSpark and DevSpark CLI versions in sync."
     }
 
     if ($env:GITHUB_OUTPUT) {

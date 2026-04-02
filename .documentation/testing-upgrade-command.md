@@ -1,15 +1,15 @@
-# Testing Guide: `specify upgrade` Command
+# Testing Guide: `devspark upgrade` Command
 
 <!-- markdownlint-disable MD040 -->
 
-This guide helps test the new `specify upgrade` command implementation.
+This guide helps test the new `devspark upgrade` command implementation.
 
 ## Setup Test Environment
 
 ### 1. Install Development Version
 
 ```bash
-cd /path/to/spec-kit
+cd /path/to/devspark
 uv tool install --force --editable .
 ```
 
@@ -17,8 +17,8 @@ uv tool install --force --editable .
 
 ```bash
 # Create a fresh test directory
-mkdir ~/spec-kit-test
-cd ~/spec-kit-test
+mkdir ~/devspark-test
+cd ~/devspark-test
 
 # Test 1: New project with old structure
 mkdir test-old-structure
@@ -33,13 +33,13 @@ cd ..
 mkdir test-current-structure
 cd test-current-structure
 git init
-specify init --here --ai claude
+devspark init --here --ai claude
 cd ..
 
 # Test 3: Project without git
 mkdir test-no-git
 cd test-no-git
-specify init --here --ai copilot
+devspark init --here --ai copilot
 cd ..
 ```
 
@@ -49,7 +49,7 @@ cd ..
 
 ```bash
 cd test-current-structure
-specify upgrade --dry-run
+devspark upgrade --dry-run
 ```
 
 **Expected:**
@@ -62,7 +62,7 @@ specify upgrade --dry-run
 
 ```bash
 cd test-current-structure
-specify upgrade --dry-run
+devspark upgrade --dry-run
 ```
 
 **Expected:**
@@ -74,7 +74,7 @@ specify upgrade --dry-run
 
 ```bash
 cd test-old-structure
-specify upgrade --dry-run
+devspark upgrade --dry-run
 ```
 
 **Expected:**
@@ -87,7 +87,7 @@ specify upgrade --dry-run
 
 ```bash
 cd test-current-structure
-specify upgrade --backup --dry-run
+devspark upgrade --backup --dry-run
 ```
 
 **Expected:**
@@ -101,7 +101,7 @@ specify upgrade --backup --dry-run
 cd test-current-structure
 # Make uncommitted changes
 echo "test" >> README.md
-specify upgrade --force --dry-run
+devspark upgrade --force --dry-run
 ```
 
 **Expected:**
@@ -113,7 +113,7 @@ specify upgrade --force --dry-run
 
 ```bash
 cd test-current-structure
-specify upgrade --ai copilot --dry-run
+devspark upgrade --ai copilot --dry-run
 ```
 
 **Expected:**
@@ -125,7 +125,7 @@ specify upgrade --ai copilot --dry-run
 
 ```bash
 cd test-old-structure
-specify upgrade --skip-migration --dry-run
+devspark upgrade --skip-migration --dry-run
 ```
 
 **Expected:**
@@ -133,17 +133,17 @@ specify upgrade --skip-migration --dry-run
 - ✅ Doesn't check for old structure
 - ✅ Proceeds without migration
 
-### Test 8: Non-Spec Kit Project
+### Test 8: Non-DevSpark Project
 
 ```bash
 mkdir ~/temp-test
 cd ~/temp-test
-specify upgrade
+devspark upgrade
 ```
 
 **Expected:**
 
-- ✅ Shows error: "Current directory is not a Spec Kit project"
+- ✅ Shows error: "Current directory is not a DevSpark project"
 - ✅ Exits with code 1
 
 ### Test 9: No AI Agent Detected
@@ -151,7 +151,7 @@ specify upgrade
 ```bash
 cd test-no-git
 rm -rf .github
-specify upgrade --dry-run
+devspark upgrade --dry-run
 ```
 
 **Expected:**
@@ -166,7 +166,7 @@ specify upgrade --dry-run
 cd test-current-structure
 git add -A
 git commit -m "before upgrade"
-specify upgrade
+devspark upgrade
 ```
 
 **Expected:**
@@ -184,7 +184,7 @@ specify upgrade
 cd test-current-structure
 git add -A
 git commit -m "before upgrade with backup"
-specify upgrade --backup
+devspark upgrade --backup
 ```
 
 **Expected:**
@@ -247,7 +247,7 @@ mkdir test-multi-agent
 cd test-multi-agent
 git init
 mkdir -p .claude/commands .github/agents
-specify upgrade --dry-run
+devspark upgrade --dry-run
 ```
 
 **Expected:**
@@ -263,7 +263,7 @@ mkdir test-partial
 cd test-partial
 git init
 mkdir -p .documentation/memory memory
-specify upgrade --dry-run
+devspark upgrade --dry-run
 ```
 
 **Expected:**
@@ -275,9 +275,9 @@ specify upgrade --dry-run
 
 ```bash
 cd test-current-structure
-specify upgrade --backup
+devspark upgrade --backup
 # Run again
-specify upgrade --backup
+devspark upgrade --backup
 ```
 
 **Expected:**
@@ -289,7 +289,7 @@ specify upgrade --backup
 
 ```bash
 cd ~
-rm -rf ~/spec-kit-test
+rm -rf ~/devspark-test
 ```
 
 ## Automated Test Script
@@ -300,31 +300,31 @@ rm -rf ~/spec-kit-test
 
 set -e
 
-echo "Testing specify upgrade command..."
+echo "Testing devspark upgrade command..."
 echo ""
 
 # Test 1: Help
 echo "Test 1: Help message"
-specify upgrade --help
+devspark upgrade --help
 echo "✓ Help works"
 echo ""
 
 # Test 2: Version check
 echo "Test 2: Version"
-specify version
+devspark version
 echo "✓ Version works"
 echo ""
 
 # Test 3: Check command still works
 echo "Test 3: Check command"
-specify check
+devspark check
 echo "✓ Check works"
 echo ""
 
 # Test 4: Non-spec project
 echo "Test 4: Non-spec project detection"
 cd /tmp
-specify upgrade 2>&1 | grep -q "not a Spec Kit project" && echo "✓ Correctly detects non-spec project" || echo "✗ Failed"
+devspark upgrade 2>&1 | grep -q "not a DevSpark project" && echo "✓ Correctly detects non-spec project" || echo "✗ Failed"
 echo ""
 
 echo "Basic tests complete!"
@@ -358,7 +358,7 @@ If you find issues, report with:
 Example:
 
 ```
-Command: specify upgrade --dry-run
+Command: devspark upgrade --dry-run
 Expected: Shows dry run preview
 Actual: Error "module not found"
 Output: [paste output]

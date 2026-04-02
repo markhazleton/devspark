@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **project constitution** is the foundational document that defines your project's core principles, standards, and governance rules. It serves as the authoritative source of truth that all Spec Kit commands reference when making decisions, reviewing code, or auditing your codebase.
+The **project constitution** is the foundational document that defines your project's core principles, standards, and governance rules. It serves as the authoritative source of truth that all DevSpark commands reference when making decisions, reviewing code, or auditing your codebase.
 
 The constitution lives at `/.documentation/memory/constitution.md` in your project root.
 
@@ -17,26 +17,26 @@ Without clear guiding principles, AI agents and developers can make inconsistent
 
 ## Creating Your Constitution
 
-Use the `/speckit.constitution` command to create or update your constitution:
+Use the `/devspark.constitution` command to create or update your constitution:
 
 ```bash
-/speckit.constitution Create principles for code quality, testing standards, security practices, and documentation requirements
+/devspark.constitution Create principles for code quality, testing standards, security practices, and documentation requirements
 ```
 
 ### Greenfield vs. Brownfield Projects
 
-**Greenfield (new project)**: You know what principles you want. Use `/speckit.constitution` directly with your requirements.
+**Greenfield (new project)**: You know what principles you want. Use `/devspark.constitution` directly with your requirements.
 
-**Brownfield (existing codebase)**: Your code already has implicit patterns—you need to discover them first. Use `/speckit.discover-constitution` to analyze your codebase and build a constitution through guided discovery.
+**Brownfield (existing codebase)**: Your code already has implicit patterns—you need to discover them first. Use `/devspark.discover-constitution` to analyze your codebase and build a constitution through guided discovery.
 
 ```bash
 # For new projects - you define the principles
-/speckit.constitution Security-first, TDD required, 80% coverage
+/devspark.constitution Security-first, TDD required, 80% coverage
 
 # For existing projects - discover patterns first
-/speckit.discover-constitution
+/devspark.discover-constitution
 # or with focus areas
-/speckit.discover-constitution Focus on security and testing patterns
+/devspark.discover-constitution Focus on security and testing patterns
 ```
 
 The discover command will:
@@ -45,26 +45,26 @@ The discover command will:
 2. Report what it finds with confidence levels (high/medium/low consistency)
 3. Ask 8-10 targeted questions to validate findings and fill gaps
 4. Generate a draft constitution at `/.documentation/memory/constitution-draft.md`
-5. You review the draft and finalize with `/speckit.constitution`
+5. You review the draft and finalize with `/devspark.constitution`
 
 ### Example Prompts
 
 **Security-focused project**:
 
 ```bash
-/speckit.constitution Security-first principles: no hardcoded secrets, mandatory input validation, parameterized SQL queries, rate limiting required on all public endpoints
+/devspark.constitution Security-first principles: no hardcoded secrets, mandatory input validation, parameterized SQL queries, rate limiting required on all public endpoints
 ```
 
 **TDD-focused project**:
 
 ```bash
-/speckit.constitution Strict TDD with test-first development, minimum 80% coverage, integration tests for all API endpoints, red-green-refactor cycle enforced
+/devspark.constitution Strict TDD with test-first development, minimum 80% coverage, integration tests for all API endpoints, red-green-refactor cycle enforced
 ```
 
 **Enterprise project**:
 
 ```bash
-/speckit.constitution Enterprise standards: code review required, documentation for all public APIs, changelog updates mandatory, semantic versioning, accessibility compliance
+/devspark.constitution Enterprise standards: code review required, documentation for all public APIs, changelog updates mandatory, semantic versioning, accessibility compliance
 ```
 
 ## Constitution Structure
@@ -160,8 +160,8 @@ Define how the constitution itself is managed:
 
 | Command | Purpose | Best For |
 |---------|---------|----------|
-| `/speckit.constitution` | Create/update constitution from your requirements | Greenfield projects, known principles |
-| `/speckit.discover-constitution` | Analyze codebase and build constitution interactively | Brownfield projects, existing codebases |
+| `/devspark.constitution` | Create/update constitution from your requirements | Greenfield projects, known principles |
+| `/devspark.discover-constitution` | Analyze codebase and build constitution interactively | Brownfield projects, existing codebases |
 
 ### Constitution-Powered Commands (No Spec Required)
 
@@ -169,8 +169,8 @@ These commands only need a constitution and work on any codebase:
 
 | Command | How It Uses Constitution |
 |---------|-------------------------|
-| `/speckit.pr-review` | Evaluates PR changes against each principle |
-| `/speckit.site-audit` | Scans entire codebase for principle violations |
+| `/devspark.pr-review` | Evaluates PR changes against each principle |
+| `/devspark.site-audit` | Scans entire codebase for principle violations |
 
 ### Spec Workflow Commands
 
@@ -178,9 +178,9 @@ These commands also reference the constitution:
 
 | Command | How It Uses Constitution |
 |---------|-------------------------|
-| `/speckit.plan` | Ensures implementation plan aligns with principles |
-| `/speckit.critic` | Flags constitution violations as SHOWSTOPPERS |
-| `/speckit.implement` | Follows principles during code generation |
+| `/devspark.plan` | Ensures implementation plan aligns with principles |
+| `/devspark.critic` | Flags constitution violations as SHOWSTOPPERS |
+| `/devspark.implement` | Follows principles during code generation |
 
 ## Best Practices
 
@@ -226,7 +226,7 @@ Periodically review your constitution:
 
 ## Writing for Automated Review
 
-The `/speckit.pr-review` and `/speckit.site-audit` commands evaluate your codebase against your constitution. Writing principles that work well with automated analysis will make these commands more effective.
+The `/devspark.pr-review` and `/devspark.site-audit` commands evaluate your codebase against your constitution. Writing principles that work well with automated analysis will make these commands more effective.
 
 ### What Works Well in Automated Reviews
 
@@ -336,7 +336,7 @@ When using AI coding assistants like GitHub Copilot, Claude Code, or OpenAI Code
 
 | File | Agent | Purpose |
 |------|-------|---------|
-| `/.documentation/memory/constitution.md` | All (via Spec Kit) | Project principles, quality standards, governance |
+| `/.documentation/memory/constitution.md` | All (via DevSpark) | Project principles, quality standards, governance |
 | `.github/copilot-instructions.md` | GitHub Copilot | Agent-specific behavior, coding patterns |
 | `CLAUDE.md` or `.claude/settings.json` | Claude Code | Agent-specific context, preferences |
 | `.codex/` or `AGENTS.md` | OpenAI Codex | Agent configuration, project context |
@@ -531,7 +531,7 @@ Before generating or reviewing code, consult these documents:
 Commands require `/.documentation/memory/constitution.md` to exist:
 
 ```bash
-/speckit.constitution Create initial project principles
+/devspark.constitution Create initial project principles
 ```
 
 ### Findings seem irrelevant
