@@ -87,16 +87,28 @@ See [templates/README.md](templates/README.md) for full command details.
 
 ## Customization Without Risk
 
-DevSpark uses a **3-tier override system** so upgrades never touch your work:
+DevSpark cleanly separates **your work** from **its installation**:
 
 ```text
-Resolution order (first match wins):
-1. .documentation/{git-user}/commands/   ← Personal tweaks
-2. .documentation/commands/              ← Team customizations
-3. .documentation/defaults/commands/     ← Stock prompts (upgrades write here only)
+.devspark/                 ← Installation (removable, upgrade-safe)
+├── defaults/commands/     ← Stock prompts
+├── scripts/              ← Helper scripts
+├── templates/            ← Spec/plan templates
+└── VERSION               ← Installed version stamp
+
+.documentation/            ← Your work (never touched by DevSpark)
+├── memory/constitution.md
+├── specs/
+├── commands/             ← Team command overrides
+└── {git-user}/commands/  ← Personal overrides
 ```
 
-Your constitution, specs, and team commands are **never overwritten** — not by `init`, not by `upgrade`, not ever.
+**3-tier prompt resolution** (first match wins):
+1. `.documentation/{git-user}/commands/` — Personal tweaks
+2. `.documentation/commands/` — Team customizations
+3. `.devspark/defaults/commands/` — Stock prompts
+
+**Clean removal**: `devspark uninstall` removes `.devspark/` and agent shims, leaves `.documentation/` untouched.
 
 ---
 

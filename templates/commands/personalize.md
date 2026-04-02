@@ -21,7 +21,7 @@ the prompt is resolved in this order (first match wins):
 ```text
 1. .documentation/{git-user}/commands/   ← Per-user overrides (this command creates these)
 2. .documentation/commands/              ← Team customizations (shared, editable)
-3. .documentation/defaults/commands/     ← Stock DevSpark prompts (read-only, upgrade-safe)
+3. .devspark/defaults/commands/     ← Stock DevSpark prompts (read-only, upgrade-safe)
 ```
 
 Upgrades only write to `defaults/commands/`. Team and user customizations are never touched.
@@ -52,14 +52,14 @@ over both team customizations and stock defaults.
    Examples: `specify`, `devspark.plan`, `implement`
 
    If no argument is given, list all available commands from `.documentation/commands/`
-   (or `.documentation/defaults/commands/` if `commands/` is empty) and ask the user
+   (or `.devspark/defaults/commands/` if `commands/` is empty) and ask the user
    which one to personalize.
 
 3. **Resolve the source prompt** (follow the 3-tier order):
 
    Look for the prompt in this order:
    1. `.documentation/commands/devspark.{command}.md` (team version)
-   2. `.documentation/defaults/commands/devspark.{command}.md` (stock version)
+   2. `.devspark/defaults/commands/devspark.{command}.md` (stock version)
 
    Use the first one found as the base for the personalized copy.
    If neither exists, show available commands and ask the user to pick one.
@@ -102,7 +102,7 @@ over both team customizations and stock defaults.
    Resolution order for /devspark.{command}:
      1. ✅ .documentation/{git-user}/commands/  (this file — ACTIVE)
      2.    .documentation/commands/              (team default)
-     3.    .documentation/defaults/commands/     (stock DevSpark)
+     3.    .devspark/defaults/commands/     (stock DevSpark)
    
    Edit it to customize the behavior for your workflow.
    To revert to the team/stock default, simply delete this file.

@@ -232,13 +232,11 @@ SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
 CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
 
-# Paths under .documentation/ that are never overwritten when the destination
-# file already exists.  This keeps user customizations (constitution, specs,
-# team command overrides) safe across init --here and upgrade.
+# Paths that are never overwritten when the destination file already exists.
+# Everything under .documentation/ is user-owned work product.
+# .devspark/ is the removable installation — fully replaceable on upgrade.
 PROTECTED_PREFIXES = (
-    ".documentation/memory/",
-    ".documentation/specs/",
-    ".documentation/commands/",
+    ".documentation/",
 )
 
 
@@ -941,10 +939,10 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
 
 
 def ensure_executable_scripts(project_path: Path, tracker: StepTracker | None = None) -> None:
-    """Ensure POSIX .sh scripts under .documentation/scripts (recursively) have execute bits (no-op on Windows)."""
+    """Ensure POSIX .sh scripts under .devspark/scripts (recursively) have execute bits (no-op on Windows)."""
     if os.name == "nt":
         return  # Windows: skip silently
-    scripts_root = project_path / ".documentation" / "scripts"
+    scripts_root = project_path / ".devspark" / "scripts"
     if not scripts_root.is_dir():
         return
     failures: list[str] = []
@@ -1171,6 +1169,10 @@ def init(
 
             ensure_executable_scripts(project_path, tracker=tracker)
 
+            # Seed user artifacts (.documentation/) from templates in .devspark/
+            # Only copies files that don't already exist — never overwrites user work
+            _seed_user_artifacts(project_path)
+
             if not no_git:
                 tracker.start("git")
                 if is_git_repo(project_path):
@@ -1296,9 +1298,8 @@ def init(
 def is_devspark_project() -> bool:
     """Check if current directory is a DevSpark project."""
     indicators = [
+        Path(".devspark").exists(),
         Path(".documentation").exists(),
-        Path(".specify").exists(),
-        Path("specs").exists(),
     ]
 
     # Check for any agent command directories
@@ -1349,8 +1350,8 @@ def needs_migration() -> bool:
     old_paths = [
         Path(".specify"),
         Path("memory") if not Path(".documentation/memory").exists() else None,
-        Path("scripts") if not Path(".documentation/scripts").exists() else None,
-        Path("templates") if not Path(".documentation/templates").exists() else None,
+        Path("scripts") if not Path(".devspark/scripts").exists() else None,
+        Path("templates") if not Path(".devspark/templates").exists() else None,
         Path("specs") if not Path(".documentation/specs").exists() else None,
     ]
     # Filter out None values
@@ -1441,8 +1442,28 @@ def run_migration_script() -> bool:
 
 
 
+def _seed_user_artifacts(project_path: Path) -> None:
+    """On first init, copy seed templates from .devspark/ into .documentation/.
+
+    Only copies files that don't already exist — never overwrites user work.
+    Currently seeds:
+      .devspark/memory/constitution.md -> .documentation/memory/constitution.md
+    """
+    seeds = [
+        ("memory/constitution.md",),
+    ]
+    devspark_dir = project_path / ".devspark"
+    doc_dir = project_path / ".documentation"
+    for (rel_path,) in seeds:
+        src = devspark_dir / rel_path
+        dst = doc_dir / rel_path
+        if src.exists() and not dst.exists():
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+
+
 def write_version_stamp(project_path: Path, ai_assistant: str, release_version: str = "") -> None:
-    """Write .documentation/DEVSPARK_VERSION to record the installed version and agent.
+    """Write .devspark/VERSION to record the installed version and agent.
 
     Uses release_version (the GitHub release tag that was downloaded) when available,
     falling back to the installed CLI metadata version.
@@ -1469,11 +1490,11 @@ def write_version_stamp(project_path: Path, ai_assistant: str, release_version: 
             except Exception:
                 version = "unknown"
 
-    doc_dir = project_path / ".documentation"
-    if not doc_dir.exists():
-        return  # .documentation not present — skip silently
+    devspark_dir = project_path / ".devspark"
+    if not devspark_dir.exists():
+        return  # .devspark not present — skip silently
 
-    stamp_path = doc_dir / "DEVSPARK_VERSION"
+    stamp_path = devspark_dir / "VERSION"
     install_date = datetime.now().strftime("%Y-%m-%d")
 
     try:
@@ -1488,9 +1509,12 @@ def write_version_stamp(project_path: Path, ai_assistant: str, release_version: 
 
 
 def read_version_stamp(project_path: Path) -> Optional[dict]:
-    """Read .documentation/DEVSPARK_VERSION and return a dict with version/date/agent,
+    """Read .devspark/VERSION and return a dict with version/date/agent,
     or None if the file is absent or unreadable."""
-    stamp_path = project_path / ".documentation" / "DEVSPARK_VERSION"
+    stamp_path = project_path / ".devspark" / "VERSION"
+    # Fallback to old location for projects not yet migrated
+    if not stamp_path.exists():
+        stamp_path = project_path / ".documentation" / "DEVSPARK_VERSION"
     if not stamp_path.exists():
         return None
     try:
@@ -1527,13 +1551,12 @@ def upgrade(
     This command will:
     1. Detect your current AI assistant setup
     2. Check for old structure (.specify/, memory/, etc.) and migrate if needed
-    3. Download and apply latest templates (to .documentation/defaults/)
+    3. Download and apply latest templates (to .devspark/)
     4. Preserve your constitution, specs, and team command customizations
 
     Your customizations are NEVER overwritten:
-    - .documentation/memory/ (constitution, notes) — always preserved
-    - .documentation/specs/ — always preserved
-    - .documentation/commands/ (team overrides) — always preserved
+    - .documentation/ is entirely user-owned and never touched
+    - .devspark/ is the removable installation — fully replaced on upgrade
 
     Examples:
         devspark upgrade                    # Auto-detect and upgrade
@@ -1626,10 +1649,8 @@ def upgrade(
         console.print("[bold]What would happen in actual upgrade:[/bold]")
         console.print("  1. Download latest DevSpark templates from GitHub")
         console.print(f"  2. Update .{AGENT_CONFIG[ai_assistant]['folder'][:-1]}/ agent shims")
-        console.print("  3. Update .documentation/defaults/ with latest stock prompts and scripts")
-        console.print("  [green]✓[/green] .documentation/memory/ (constitution) — NEVER touched")
-        console.print("  [green]✓[/green] .documentation/specs/ — NEVER touched")
-        console.print("  [green]✓[/green] .documentation/commands/ (team overrides) — NEVER touched")
+        console.print("  3. Update .devspark/ with latest stock prompts and scripts")
+        console.print("  [green]✓[/green] .documentation/ — entirely user-owned, NEVER touched")
         console.print()
         console.print("[bold]To perform the actual upgrade:[/bold]")
         console.print(f"  [cyan]devspark upgrade --ai {ai_assistant}[/cyan]")
@@ -1674,7 +1695,7 @@ def upgrade(
     # Show the stamped version
     stamp = read_version_stamp(Path.cwd())
     if stamp:
-        console.print(f"[green]✓[/green] Version stamp written: [cyan].documentation/DEVSPARK_VERSION[/cyan]")
+        console.print(f"[green]✓[/green] Version stamp written: [cyan].devspark/VERSION[/cyan]")
         console.print(f"  Version: [bold]{stamp.get('version', 'unknown')}[/bold]  Agent: {stamp.get('agent', 'unknown')}  Date: {stamp.get('installed', 'unknown')}\n")
 
     console.print("[bold]Next steps:[/bold]")
@@ -1776,6 +1797,105 @@ def version():
 
     console.print(panel)
     console.print()
+
+
+@app.command()
+def uninstall(
+    force: bool = typer.Option(False, "--force", help="Skip confirmation prompt"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview what would be removed without deleting"),
+):
+    """
+    Remove DevSpark from the current project, leaving your work untouched.
+
+    Removes:
+    - .devspark/          (stock prompts, scripts, templates, version stamp)
+    - Agent shim dirs     (.claude/commands/, .github/agents/, .cursor/commands/, etc.)
+    - .vscode/settings.json entries added by DevSpark (if identifiable)
+
+    Preserves:
+    - .documentation/     (constitution, specs, commands, all your work)
+    - Any non-DevSpark files in agent directories
+
+    Examples:
+        devspark uninstall              # Interactive confirmation
+        devspark uninstall --dry-run    # Preview only
+        devspark uninstall --force      # Skip confirmation
+    """
+    show_banner()
+
+    cwd = Path.cwd()
+
+    if not is_devspark_project():
+        console.print("[red]Error:[/red] Current directory is not a DevSpark project")
+        raise typer.Exit(1)
+
+    # Collect directories to remove
+    removals: list[tuple[str, Path]] = []
+
+    devspark_dir = cwd / ".devspark"
+    if devspark_dir.exists():
+        removals.append(("DevSpark installation", devspark_dir))
+
+    # Collect agent shim directories
+    for agent_key, agent_config in AGENT_CONFIG.items():
+        agent_dir = cwd / agent_config["folder"]
+        if agent_dir.exists():
+            removals.append((f"{agent_config['name']} shims", agent_dir))
+
+    # Also check for .github/prompts (Copilot companion files)
+    prompts_dir = cwd / ".github" / "prompts"
+    if prompts_dir.exists():
+        removals.append(("Copilot prompt files", prompts_dir))
+
+    # Old version stamp (legacy location)
+    old_stamp = cwd / ".documentation" / "DEVSPARK_VERSION"
+    if old_stamp.exists():
+        removals.append(("Legacy version stamp", old_stamp))
+
+    if not removals:
+        console.print("[yellow]Nothing to remove — no DevSpark installation files found[/yellow]")
+        raise typer.Exit(0)
+
+    # Show what will be removed
+    console.print("[bold]The following will be removed:[/bold]\n")
+    for label, path in removals:
+        if path.is_dir():
+            count = sum(1 for _ in path.rglob("*") if _.is_file())
+            console.print(f"  [red]✗[/red] {label}: [cyan]{path.relative_to(cwd)}[/cyan] ({count} files)")
+        else:
+            console.print(f"  [red]✗[/red] {label}: [cyan]{path.relative_to(cwd)}[/cyan]")
+
+    console.print()
+    console.print("[green]✓[/green] .documentation/ — [bold]untouched[/bold] (your constitution, specs, and customizations)")
+    console.print()
+
+    if dry_run:
+        console.print("[cyan]DRY RUN — no files were deleted[/cyan]")
+        return
+
+    if not force:
+        response = typer.confirm("Remove DevSpark from this project?", default=False)
+        if not response:
+            console.print("[yellow]Uninstall cancelled[/yellow]")
+            raise typer.Exit(0)
+
+    # Perform removal
+    removed_count = 0
+    for label, path in removals:
+        try:
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
+            console.print(f"  [green]✓[/green] Removed: {path.relative_to(cwd)}")
+            removed_count += 1
+        except Exception as e:
+            console.print(f"  [red]✗[/red] Failed to remove {path.relative_to(cwd)}: {e}")
+
+    console.print(f"\n[bold green]DevSpark removed.[/bold green] {removed_count} item(s) deleted.")
+    console.print("[dim]Your .documentation/ directory and all your work is intact.[/dim]")
+    console.print()
+
 
 def main():
     app()
