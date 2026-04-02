@@ -1,29 +1,29 @@
 <div align="center">
     <img src="./.documentation/media/logo_large.webp" alt="DevSpark Logo" width="200" height="200"/>
     <h1>DevSpark</h1>
-    <h3><em>AI development lifecycle prompts that work with any coding assistant.<br/>No install required.</em></h3>
+    <h3><em>A structured development process for AI coding assistants.<br/>Just markdown files — no install required.</em></h3>
 </div>
 
 <p align="center">
-    <strong>21 reusable prompt templates + helper scripts that give AI coding assistants a structured workflow — from requirements to release. Works with Claude, Copilot, Cursor, Gemini, and 13 more. Part of the <a href="https://github.com/MarkHazleton?tab=repositories&q=webspark">WebSpark</a> suite.</strong>
+    <strong>DevSpark is a set of 21 prompt templates + helper scripts that give any AI coding assistant a repeatable workflow — from requirements through release. Copy them into your project and go. Works with Claude, Copilot, Cursor, Gemini, and 13 more.</strong>
 </p>
 
 <p align="center">
-    <a href="https://github.com/MarkHazleton/spec-kit/actions/workflows/release.yml"><img src="https://github.com/MarkHazleton/spec-kit/actions/workflows/release.yml/badge.svg" alt="Release"/></a>
-    <a href="https://github.com/MarkHazleton/spec-kit/stargazers"><img src="https://img.shields.io/github/stars/MarkHazleton/spec-kit?style=social" alt="GitHub stars"/></a>
-    <a href="https://github.com/MarkHazleton/spec-kit/blob/main/LICENSE"><img src="https://img.shields.io/github/license/MarkHazleton/spec-kit" alt="License"/></a>
+    <a href="https://github.com/markhazleton/devspark/actions/workflows/release.yml"><img src="https://github.com/markhazleton/devspark/actions/workflows/release.yml/badge.svg" alt="Release"/></a>
+    <a href="https://github.com/markhazleton/devspark/stargazers"><img src="https://img.shields.io/github/stars/markhazleton/devspark?style=social" alt="GitHub stars"/></a>
+    <a href="https://github.com/markhazleton/devspark/blob/main/LICENSE"><img src="https://img.shields.io/github/license/markhazleton/devspark" alt="License"/></a>
     <a href="https://markhazleton.github.io/spec-kit/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
+
+> **Not a program. Not a subscription.** DevSpark is a development *process* — a collection of prompt files and scripts that your AI assistant reads directly. Copy them into your project once and you're off to the races. There's nothing to install, no runtime, no dependencies, and no ongoing updates required. An optional CLI exists to automate the initial setup, but it's not required.
 
 ---
 
 ## What's In This Repo
 
-This repository contains **two deliverables** and their supporting documentation:
+### 1. Prompt Templates (`templates/commands/`)
 
-### 1. Prompt Templates (`templates/`)
-
-The core product — **21 markdown prompt files** that give any AI coding assistant structured commands for specification-driven development:
+**This is the core of DevSpark** — 21 markdown files that give any AI coding assistant structured slash commands:
 
 | Prompt | Purpose |
 |--------|---------|
@@ -42,40 +42,22 @@ The core product — **21 markdown prompt files** that give any AI coding assist
 | [`/devspark.critic`](templates/commands/critic.md) | Adversarial risk analysis before implementation |
 | _...and more_ | `clarify`, `analyze`, `checklist`, `personalize`, `archive`, `upgrade`, `discover-constitution` |
 
-Helper scripts in `scripts/` (PowerShell + Bash) gather project context that the prompts consume.
+### 2. Helper Scripts (`scripts/`)
 
-### 2. DevSpark CLI (`src/devspark_cli/`)
+PowerShell + Bash scripts that gather project context (git history, file structure, dependencies) for the prompts to consume. Not required but improve prompt quality.
 
-A Python CLI that scaffolds new projects with the prompts, scripts, and agent configuration:
+### 3. Optional CLI (`src/devspark_cli/`)
 
-```bash
-# Install
-uv tool install devspark-cli --from git+https://github.com/MarkHazleton/spec-kit.git
-
-# New project
-devspark init my-project --ai claude
-
-# Add to existing project
-devspark init --here --ai copilot
-```
-
-Supports **17+ AI agents**: Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Windsurf, Amp, and more. See [Supported Agents](#-supported-ai-agents).
-
-### 3. Documentation (`.documentation/`)
-
-Guides, migration docs, roadmap, and GitHub Pages site content live in `.documentation/`.
+A convenience tool that copies the prompts, scripts, and agent config into your project in one command. **You do not need this to use DevSpark.**
 
 ```text
 devspark/
-├── templates/          ← Prompt templates & helper templates (THE PROMPTS)
+├── templates/          ← THE PROMPTS (start here)
 │   └── commands/       ← 21 slash-command prompt files
 ├── scripts/            ← Context-gathering scripts (PowerShell + Bash)
-├── src/devspark_cli/    ← CLI source code
+├── src/devspark_cli/   ← Optional CLI source code
 ├── .documentation/     ← Docs, guides, media, and GitHub Pages site
-├── pyproject.toml      ← CLI package definition
-├── README.md           ← You are here
-├── CHANGELOG.md        ← Release history
-└── (standard community files: LICENSE, CONTRIBUTING, SECURITY, etc.)
+└── (standard community files: README, LICENSE, CHANGELOG, etc.)
 ```
 
 ---
@@ -174,21 +156,24 @@ Spec-Driven Development **flips the script** on traditional software development
 
 ## ⚡ Get Started
 
-### 1. Install DevSpark CLI
+**You do NOT need to install anything.** The prompts are markdown files and the scripts are standard PowerShell/Bash — your AI agent reads them directly. Copy once, use forever.
 
-Choose your preferred installation method:
+### Option A: Copy and Go (Recommended)
 
-#### Option 1: Persistent Installation (Recommended)
+1. Download the latest release zip for your agent from [Releases](https://github.com/markhazleton/devspark/releases) and unzip into your project
+2. **Or** clone this repo and copy `templates/commands/` → your project's `.documentation/commands/`, and `scripts/` → `.documentation/scripts/`
+3. Configure your agent's shim file (e.g., `CLAUDE.md`, `.github/copilot-instructions.md`) to point at `.documentation/commands/`
 
-Install once and use everywhere:
+That's it — your AI assistant now has the `/devspark.*` commands.
+
+### Option B: Use the CLI (Automated Scaffolding)
+
+The CLI automates Option A — it copies templates, scripts, and agent config into your project in one command:
 
 ```bash
-uv tool install devspark-cli --from git+https://github.com/MarkHazleton/spec-kit.git
-```
+# Install the CLI
+uv tool install devspark-cli --from git+https://github.com/markhazleton/devspark.git
 
-Then use the tool directly:
-
-```bash
 # Greenfield: Create new project from scratch
 devspark init <PROJECT_NAME>
 
@@ -202,46 +187,23 @@ devspark check
 
 > **Brownfield Tip**: Use `/devspark.discover-constitution` after initialization to analyze existing code patterns and draft a constitution.
 
-### Upgrading DevSpark
+### Upgrading (Optional)
 
-To upgrade to the latest version:
+Once you've copied the prompts into your project, they're yours — you can customize them freely and never look back. If you *want* to pull in newer prompt versions later, the CLI can help:
 
 ```bash
-# Upgrade CLI tool
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
-
-# Upgrade project files (auto-detects your AI assistant)
-devspark upgrade
-
-# Or with options
+devspark upgrade                    # Pull latest prompts into your project
 devspark upgrade --dry-run          # Preview changes first
-devspark upgrade --backup           # Backup constitution
-devspark upgrade --ai claude        # Override detected agent
+devspark upgrade --backup           # Backup constitution before upgrading
 ```
 
-See the [Upgrade Guide](./.documentation/upgrade.md) for detailed instructions.
+See the [Upgrade Guide](./.documentation/upgrade.md) for details.
 
-> **Migrating from old version?** If your project uses the old `.specify/` directory structure, see the [Migration Guide](./.documentation/migration-guide.md) for automated migration to the new `.documentation/` structure.
-
-#### Option 2: One-time Usage
-
-Run directly without installing:
+#### One-time Usage (no persistent install)
 
 ```bash
-# Greenfield: New project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <PROJECT_NAME>
-
-# Brownfield: Existing project
-cd /path/to/your-existing-project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init --here
+uvx --from git+https://github.com/markhazleton/devspark.git devspark init <PROJECT_NAME>
 ```
-
-**Benefits of persistent installation:**
-
-- Tool stays installed and available in PATH
-- No need to create shell aliases
-- Better tool management with `uv tool list`, `uv tool upgrade`, `uv tool uninstall`
-- Cleaner shell configuration
 
 ### 2. Establish project principles
 
@@ -597,15 +559,15 @@ DevSpark is **agent-agnostic by design**. Every agent below is a first-class cit
 | [SHAI (OVHcloud)](https://github.com/ovh/shai)                                       | ✅      |                                                                                                                                           |
 | [Windsurf](https://windsurf.com/)                                                    | ✅      |                                                                                                                                           |
 
-## 🔧 DevSpark CLI Reference
+## 🔧 DevSpark CLI Reference (Optional)
 
-The `devspark` command supports the following options:
+The CLI is a convenience tool — it automates copying prompts and scripts into your project. The `devspark` command supports:
 
 ### Commands
 
 | Command | Description                                                                                                                                             |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `init`  | Initialize a new Specify project from the latest template                                                                                               |
+| `init`  | Scaffold a new project with DevSpark prompts, scripts, and agent config                                                                                               |
 | `check` | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `cursor-agent`, `windsurf`, `qwen`, `opencode`, `codex`, `shai`, `qodercli`) |
 | `version` | Show DevSpark product/version information from local CLI metadata                                                                               |
 
