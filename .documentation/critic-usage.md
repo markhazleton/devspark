@@ -476,9 +476,9 @@ Use recurring findings to improve your constitution and planning process.
 If you encounter issues:
 
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [DevSpark Issues](https://github.com/MarkHazleton/spec-kit/issues)
+- Review [DevSpark Issues](https://github.com/MarkHazleton/devspark/issues)
 
 ---
 
 *Part of DevSpark - Adaptive System Life Cycle Development (ASLCD) Toolkit*
-*For more information: <https://github.com/MarkHazleton/spec-kit>*
+*For more information: <https://github.com/MarkHazleton/devspark>*

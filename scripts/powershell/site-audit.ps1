@@ -470,7 +470,7 @@ function Get-PatternDetection {
     return $patterns
 }
 
-function Get-SpeckitVersion {
+function Get-DevSparkVersion {
     param([string]$RepoRoot)
     
     $stampPath = Join-Path $RepoRoot '.documentation/DEVSPARK_VERSION'
@@ -547,7 +547,7 @@ function Get-SampledItems {
 # Main execution
 $repoRoot = Get-RepoRoot
 $constitutionInfo = Get-ConstitutionInfo -RepoRoot $repoRoot
-$speckitVersion = Get-SpeckitVersion -RepoRoot $repoRoot
+$devsparkVersion = Get-DevSparkVersion -RepoRoot $repoRoot
 
 # Build result object
 $result = @{
@@ -555,7 +555,7 @@ $result = @{
     scope = $Scope
     repo_root = $repoRoot
     constitution = $constitutionInfo
-    speckit = $speckitVersion
+    devspark = $devsparkVersion
     audit_dir = '.documentation/copilot/audit'
 }
 
@@ -642,7 +642,7 @@ if ($OutputFormat -eq 'json') {
     Write-Output "Repository: $repoRoot"
     Write-Output "Scope: $Scope"
     Write-Output "Constitution: $(if ($constitutionInfo.exists) { 'Found' } else { 'MISSING' })"
-    Write-Output "DevSpark Version: $(if ($speckitVersion.stamp_exists) { $speckitVersion.installed_version } else { 'absent' })"
+    Write-Output "DevSpark Version: $(if ($devsparkVersion.stamp_exists) { $devsparkVersion.installed_version } else { 'absent' })"
     Write-Output ""
     Write-Output "File Counts:"
     Write-Output "  Source files: $($fileCategories.source.Count)"

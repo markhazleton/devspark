@@ -604,17 +604,17 @@ Critical issues found that must be resolved before merge.
 - [Site Audit Guide](site-audit-usage.md)
 - [Critic Guide](critic-usage.md)
 - [GitHub CLI Documentation](https://cli.github.com/manual/)
-- [DevSpark on GitHub](https://github.com/MarkHazleton/spec-kit)
+- [DevSpark on GitHub](https://github.com/MarkHazleton/devspark)
 
 ## Support
 
 If you encounter issues or have questions:
 
 - Check [Troubleshooting](#troubleshooting) section above
-- Review [DevSpark Issues](https://github.com/MarkHazleton/spec-kit/issues)
+- Review [DevSpark Issues](https://github.com/MarkHazleton/devspark/issues)
 - Consult [GitHub CLI Manual](https://cli.github.com/manual/)
 
 ---
 
 *Part of DevSpark - Adaptive System Life Cycle Development (ASLCD) Toolkit*  
-*For more information: <https://github.com/MarkHazleton/spec-kit>*
+*For more information: <https://github.com/MarkHazleton/devspark>*

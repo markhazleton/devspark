@@ -22,7 +22,7 @@ This guide will help you get started with Spec-Driven Development using DevSpark
 Starting fresh? Create a new project directory:
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <PROJECT_NAME>
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME>
 ```
 
 #### Brownfield (Existing Project)
@@ -31,7 +31,7 @@ Adding DevSpark to an existing codebase? Navigate to your project and initialize
 
 ```bash
 cd /path/to/your-existing-project
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init --here
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init --here
 ```
 
 > [!TIP]
@@ -40,8 +40,8 @@ uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init --here
 #### Optional: Pick script type explicitly
 
 ```bash
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <PROJECT_NAME> --script ps  # Force PowerShell
-uvx --from git+https://github.com/MarkHazleton/spec-kit.git devspark init <PROJECT_NAME> --script sh  # Force POSIX shell
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --script ps  # Force PowerShell
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --script sh  # Force POSIX shell
 ```
 
 ### Step 2: Define Your Constitution
@@ -123,7 +123,7 @@ To upgrade to the latest version of DevSpark:
 ### 1. Upgrade CLI Tool
 
 ```bash
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
 ```
 
 ### 2. Upgrade Project Files
@@ -259,6 +259,6 @@ Run adversarial risk analysis (requires spec.md, plan.md, and tasks.md):
 
 ## Next Steps
 
-- Read the [complete methodology](https://github.com/MarkHazleton/spec-kit/blob/main/spec-driven.md) for in-depth guidance
-- Check out [more examples](https://github.com/MarkHazleton/spec-kit/tree/main/templates) in the repository
-- Explore the [source code on GitHub](https://github.com/MarkHazleton/spec-kit)
+- Read the [complete methodology](https://github.com/MarkHazleton/devspark/blob/main/spec-driven.md) for in-depth guidance
+- Check out [more examples](https://github.com/MarkHazleton/devspark/tree/main/templates) in the repository
+- Explore the [source code on GitHub](https://github.com/MarkHazleton/devspark)

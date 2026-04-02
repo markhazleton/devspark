@@ -50,7 +50,7 @@ The migration from `.specify/` to `.documentation/` was made to:
 cd /path/to/your/project
 
 # 2. Download the migration script (if not already present)
-curl -o migrate.sh https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.sh
+curl -o migrate.sh https://raw.githubusercontent.com/MarkHazleton/devspark/main/.documentation/scripts/migrate-to-documentation.sh
 
 # 3. Make it executable
 chmod +x migrate.sh
@@ -74,7 +74,7 @@ git commit -m "chore: migrate to .documentation/ structure"
 cd C:\path\to\your\project
 
 # 2. Download the migration script (if not already present)
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.ps1" -OutFile "migrate.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MarkHazleton/devspark/main/.documentation/scripts/migrate-to-documentation.ps1" -OutFile "migrate.ps1"
 
 # 3. Run the migration
 .\migrate.ps1
@@ -314,7 +314,7 @@ The migration scripts are included in DevSpark v1.0.0+. If you don't have them:
 1. **Download from GitHub:**
 
    ```bash
-   curl -o migrate.sh https://raw.githubusercontent.com/MarkHazleton/spec-kit/main/.documentation/scripts/migrate-to-documentation.sh
+   curl -o migrate.sh https://raw.githubusercontent.com/MarkHazleton/devspark/main/.documentation/scripts/migrate-to-documentation.sh
    ```
 
 2. **Or upgrade your DevSpark installation:**
@@ -447,7 +447,7 @@ After successful migration:
 1. **Upgrade to latest DevSpark:**
 
    ```bash
-   uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/spec-kit.git
+   uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
    ```
 
 2. **Update project files:**
@@ -467,9 +467,9 @@ After successful migration:
 
 If you encounter issues during migration:
 
-- **GitHub Issues:** [github.com/MarkHazleton/spec-kit/issues](https://github.com/MarkHazleton/spec-kit/issues)
-- **Discussions:** [github.com/MarkHazleton/spec-kit/discussions](https://github.com/MarkHazleton/spec-kit/discussions)
-- **Documentation:** [markhazleton.github.io/spec-kit/](https://markhazleton.github.io/spec-kit/)
+- **GitHub Issues:** [github.com/MarkHazleton/devspark/issues](https://github.com/MarkHazleton/devspark/issues)
+- **Discussions:** [github.com/MarkHazleton/devspark/discussions](https://github.com/MarkHazleton/devspark/discussions)
+- **Documentation:** [markhazleton.github.io/devspark/](https://markhazleton.github.io/devspark/)
 
 ---
 

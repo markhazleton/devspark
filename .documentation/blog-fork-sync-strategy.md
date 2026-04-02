@@ -12,7 +12,7 @@
 
 When you fork an open-source project to add significant enhancements, you face a classic dilemma: **How do you stay synchronized with upstream improvements while preserving your innovations?**
 
-[DevSpark](https://github.com/MarkHazleton/spec-kit) is a fork of GitHub's [devspark](https://github.com/github/spec-kit) that adds Adaptive System Life Cycle Development (ASLCD) capabilities—including constitution-based PR reviews, site auditing, quickfix workflows, and release management. We've added six major commands, restructured directories, and created extensive new documentation. Yet we still want to benefit from upstream bug fixes, template improvements, and new agent support.
+[DevSpark](https://github.com/MarkHazleton/devspark) is a fork of GitHub's [devspark](https://github.com/github/spec-kit) that adds Adaptive System Life Cycle Development (ASLCD) capabilities—including constitution-based PR reviews, site auditing, quickfix workflows, and release management. We've added six major commands, restructured directories, and created extensive new documentation. Yet we still want to benefit from upstream bug fixes, template improvements, and new agent support.
 
 The traditional approach? Manually review `git log`, cherry-pick commits one by one, resolve conflicts, and hope you didn't miss anything important. **That's tedious, error-prone, and doesn't scale.**
 
@@ -470,11 +470,11 @@ The time you save on manual cherry-picking and conflict resolution? **Invest it 
 
 ## Resources
 
-- **DevSpark Repository**: [github.com/MarkHazleton/spec-kit](https://github.com/MarkHazleton/spec-kit)
+- **DevSpark Repository**: [github.com/MarkHazleton/devspark](https://github.com/MarkHazleton/devspark)
 - **Upstream DevSpark**: [github.com/github/spec-kit](https://github.com/github/spec-kit)
-- **Sync Scripts**: [.documentation/scripts/bash/sync-upstream.sh](https://github.com/MarkHazleton/spec-kit/blob/main/.documentation/scripts/bash/sync-upstream.sh), [.documentation/scripts/powershell/sync-upstream.ps1](https://github.com/MarkHazleton/spec-kit/blob/main/.documentation/scripts/powershell/sync-upstream.ps1)
-- **Fork Divergence Docs**: [FORK_DIVERGENCE.md](https://github.com/MarkHazleton/spec-kit/blob/main/FORK_DIVERGENCE.md)
-- **Example Integration Plan**: [incoming/12405c0/integration-plan.md](https://github.com/MarkHazleton/spec-kit/blob/main/incoming/12405c0/integration-plan.md)
+- **Sync Scripts**: [.documentation/scripts/bash/sync-upstream.sh](https://github.com/MarkHazleton/devspark/blob/main/.documentation/scripts/bash/sync-upstream.sh), [.documentation/scripts/powershell/sync-upstream.ps1](https://github.com/MarkHazleton/devspark/blob/main/.documentation/scripts/powershell/sync-upstream.ps1)
+- **Fork Divergence Docs**: [FORK_DIVERGENCE.md](https://github.com/MarkHazleton/devspark/blob/main/FORK_DIVERGENCE.md)
+- **Example Integration Plan**: [incoming/12405c0/integration-plan.md](https://github.com/MarkHazleton/devspark/blob/main/incoming/12405c0/integration-plan.md)
 
 ---
 

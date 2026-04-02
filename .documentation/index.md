@@ -24,9 +24,7 @@ From greenfield creation through brownfield discovery, ongoing maintenance, docu
 
 ## About DevSpark
 
-> **Important**: This is **DevSpark**, a community extension that builds upon the original DevSpark project.
->
-> Part of the [WebSpark](https://github.com/MarkHazleton?tab=repositories&q=webspark) demonstration suite. Looking for the original? Visit **[github.com/github/spec-kit](https://github.com/github/spec-kit)**
+> **DevSpark** is a structured development process for AI coding assistants — 21 prompt templates + helper scripts that give any AI agent a repeatable workflow from requirements through release.
 
 ### The ASLCD Vision
 
@@ -41,23 +39,23 @@ Traditional spec-driven development works well for greenfield projects with majo
 | Constitution staleness | `/devspark.evolve-constitution` proposes amendments from PR findings |
 | Context management | Right-sized workflows optimize AI agent effectiveness |
 
-### What Makes Spark Different
+### What Makes DevSpark Different
 
-| Feature | Original devspark | DevSpark |
-|---------|-------------------|----------------|
-| Core SDD Workflow | ✅ Full support | ✅ Full support |
-| `/devspark.constitution` | ✅ Included | ✅ Included |
-| `/devspark.discover-constitution` | ❌ | ✅ Brownfield discovery |
-| `/devspark.pr-review` | ❌ | ✅ Constitution-based PR review |
-| `/devspark.site-audit` | ❌ | ✅ Full codebase auditing |
-| `/devspark.critic` | ❌ | ✅ Adversarial risk analysis |
-| `/devspark.quickfix` | ❌ | ✅ Lightweight workflow |
-| `/devspark.release` | ❌ | ✅ Release documentation |
-| `/devspark.evolve-constitution` | ❌ | ✅ Constitution evolution |
-| `/devspark.harvest` | ❌ | ✅ Knowledge harvest and cleanup |
-| Agent-agnostic architecture | ❌ Duplicated prompts per agent | ✅ Canonical prompts + thin shims |
-| Multi-user personalization | ❌ | ✅ `/devspark.personalize` per-user overrides |
-| Multi-agent support | Limited | ✅ 17+ AI agents |
+| Feature | DevSpark |
+|---------|----------|
+| Core SDD Workflow | ✅ Full support |
+| `/devspark.constitution` | ✅ Included |
+| `/devspark.discover-constitution` | ✅ Brownfield discovery |
+| `/devspark.pr-review` | ✅ Constitution-based PR review |
+| `/devspark.site-audit` | ✅ Full codebase auditing |
+| `/devspark.critic` | ✅ Adversarial risk analysis |
+| `/devspark.quickfix` | ✅ Lightweight workflow |
+| `/devspark.release` | ✅ Release documentation |
+| `/devspark.evolve-constitution` | ✅ Constitution evolution |
+| `/devspark.harvest` | ✅ Knowledge harvest and cleanup |
+| Agent-agnostic architecture | ✅ Canonical prompts + thin shims |
+| Multi-user personalization | ✅ `/devspark.personalize` per-user overrides |
+| Multi-agent support | ✅ 17+ AI agents |
 
 Learn more: [Adaptive Lifecycle Documentation](adaptive-lifecycle.md)
 
@@ -69,7 +67,7 @@ Learn more: [Adaptive Lifecycle Documentation](adaptive-lifecycle.md)
 
 ```bash
 # Install DevSpark CLI
-uv tool install devspark-cli --from git+https://github.com/MarkHazleton/spec-kit.git
+uv tool install devspark-cli --from git+https://github.com/MarkHazleton/devspark.git
 
 # New project (greenfield)
 devspark init my-project --ai claude
@@ -247,8 +245,8 @@ See the full [Roadmap](roadmap.md) for details.
 
 DevSpark welcomes contributions:
 
-- **Issues**: [Report bugs or request features](https://github.com/MarkHazleton/spec-kit/issues)
-- **Discussions**: [Ask questions or share ideas](https://github.com/MarkHazleton/spec-kit/discussions)
+- **Issues**: [Report bugs or request features](https://github.com/MarkHazleton/devspark/issues)
+- **Discussions**: [Ask questions or share ideas](https://github.com/MarkHazleton/devspark/discussions)
 - **Pull Requests**: Fork, branch, and submit
 
 See [Local Development](local-development.md) for setup instructions.
@@ -257,4 +255,4 @@ See [Local Development](local-development.md) for setup instructions.
 
 ## Credit & Attribution
 
-Full credit goes to the GitHub team for creating the Spec-Driven Development methodology and the original DevSpark toolkit. DevSpark is an extension of their work, not a replacement. For the official, GitHub-maintained version, visit [github.com/github/spec-kit](https://github.com/github/spec-kit).
+DevSpark was inspired by [github/spec-kit](https://github.com/github/spec-kit) by the GitHub team. It has since evolved into a standalone product with its own architecture, identity, and feature set.

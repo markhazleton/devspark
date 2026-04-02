@@ -1,6 +1,6 @@
 # DevSpark Community Extensions
 
-Community-contributed extensions for [DevSpark](https://github.com/MarkHazleton/spec-kit).
+Community-contributed extensions for [DevSpark](https://github.com/MarkHazleton/devspark).
 
 ## Available Extensions
 

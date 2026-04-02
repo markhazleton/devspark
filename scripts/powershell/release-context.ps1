@@ -163,11 +163,11 @@ $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 $releaseDate = Get-Date -Format "yyyy-MM-dd"
 
 # DevSpark version stamp info
-$specKitVersionPath = Join-Path $repoRoot ".documentation/DEVSPARK_VERSION"
+$versionStampPath = Join-Path $repoRoot ".documentation/DEVSPARK_VERSION"
 $installedVersion = ""
-if (Test-Path $specKitVersionPath) {
+if (Test-Path $versionStampPath) {
     try {
-        $installedVersion = (Get-Content $specKitVersionPath -TotalCount 1 -ErrorAction SilentlyContinue).Trim()
+        $installedVersion = (Get-Content $versionStampPath -TotalCount 1 -ErrorAction SilentlyContinue).Trim()
     } catch { }
 }
 
@@ -194,7 +194,7 @@ if ($Json) {
         TIMESTAMP              = $timestamp
         RELEASE_DATE           = $releaseDate
         DRY_RUN                = [bool]$DryRun
-        DEVSPARK_VERSION_PATH   = $specKitVersionPath
+        DEVSPARK_VERSION_PATH   = $versionStampPath
         INSTALLED_VERSION      = $installedVersion
     } | ConvertTo-Json
 }
