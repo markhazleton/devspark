@@ -137,14 +137,35 @@ These are written by the project team and must be preserved:
 
 - `.documentation/commands/` — team-customized command prompts (the working copies)
 - `.documentation/{git-user}/commands/` — per-user personalized prompts
+- `.documentation/scripts/` — team-customized script overrides (see Script Resolution below)
 - `.documentation/specs/` — all feature specifications, plans, and tasks
 - `.documentation/memory/constitution.md` — project constitution
+- `.documentation/devspark.json` — platform configuration (github/azdo/gitlab)
 - `.documentation/copilot/` — session artifacts and audit history
 - `.documentation/decisions/` — ADRs
 - `.documentation/releases/` — release archives
 - `.documentation/quickfixes/` — active quickfixes
 - `CHANGELOG.md` (repo root)
 - Any file not listed in the framework-owned category
+
+#### Script Resolution Order
+
+Scripts use a **2-tier override system**. When a command runs a script, it resolves
+the script in this order (first match wins):
+
+```text
+1. .documentation/scripts/{bash|powershell}/   ← Team overrides (yours to edit freely)
+2. .devspark/scripts/{bash|powershell}/        ← Stock scripts (upgrade overwrites ONLY this)
+```
+
+**Key principle: upgrades NEVER touch `.documentation/scripts/`.** They only write
+to `.devspark/scripts/`. Your team's script customizations in
+`.documentation/scripts/` always take priority and are never lost.
+
+Common reasons to override a script:
+- Platform adaptation (Azure DevOps instead of GitHub)
+- Custom CI/CD integration
+- Organization-specific authentication or tooling
 
 ### 5. Identify Stale Files
 
@@ -166,7 +187,7 @@ List any that are **missing** from the expected locations.
 Missing framework files should be reported as:
 
 ```
-MISSING: .documentation/scripts/powershell/setup-plan.ps1
+MISSING: .devspark/scripts/powershell/setup-plan.ps1
 MISSING: .github/agents/devspark.specify.agent.md
 ```
 
@@ -187,11 +208,13 @@ cp .documentation/memory/constitution.md \
 
 #### 7b. Update stock defaults
 
-Write the latest DevSpark prompt templates to `.devspark/defaults/commands/`.
-This directory is framework-owned and safe to overwrite completely.
+Write the latest DevSpark prompt templates to `.devspark/defaults/commands/`
+and stock scripts to `.devspark/scripts/`.
+These directories are framework-owned and safe to overwrite completely.
 
-**Important**: Do NOT write to `.documentation/commands/`. That directory belongs
-to the team. Only `.devspark/defaults/commands/` is updated.
+**Important**: Do NOT write to `.documentation/commands/` or `.documentation/scripts/`.
+Those directories belong to the team. Only `.devspark/defaults/commands/` and
+`.devspark/scripts/` are updated.
 
 If the CLI is available:
 
@@ -208,16 +231,29 @@ uv tool install devspark-cli --force \
 
 #### 7c. Show what changed
 
-After updating `defaults/commands/`, compare against the team's working copies:
+After updating `defaults/commands/` and `.devspark/scripts/`, compare against the
+team's working copies:
 
 ```
 Changed prompts (defaults/ vs commands/):
   devspark.specify.md   — 12 lines differ
   devspark.release.md   — new prompt (not in commands/ yet)
   devspark.critic.md    — identical (no action needed)
+
+Changed scripts (.devspark/scripts/ vs .documentation/scripts/):
+  get-pr-context.ps1    — 8 lines differ (team has custom override)
+  platform.ps1          — new script (not in team overrides)
+  common.ps1            — no team override (stock version used)
 ```
 
 Offer to show diffs for any changed files so the team can decide what to merge.
+
+**Script merge guidance:**
+- If the team has overridden a script that changed upstream, show the diff
+  and let the team decide whether to merge the upstream improvements
+- If a new stock script was added, inform the team — no action needed unless
+  they want to customize it
+- Never silently overwrite `.documentation/scripts/`
 
 ### 8. Post-Upgrade Verification
 
@@ -235,6 +271,8 @@ Post-Upgrade Verification
   DEVSPARK_VERSION   : 1.2.4  (was 1.1.0)
   defaults/commands/ : updated (21 prompts)
   commands/          : unchanged (team customizations preserved)
+  stock scripts/     : updated (14 scripts)
+  team scripts/      : unchanged (overrides preserved)
   constitution.md    : preserved
 ```
 
@@ -250,10 +288,13 @@ DevSpark Upgrade Summary
   Date             : <TODAY>
 
 Stock prompts updated in .devspark/defaults/commands/.
-Team customizations in .documentation/commands/ are untouched.
+Stock scripts updated in .devspark/scripts/.
+Team customizations in .documentation/commands/ and .documentation/scripts/ are untouched.
 
 To merge specific improvements into your team prompts:
   Compare .devspark/defaults/commands/ vs .documentation/commands/
+To merge script improvements:
+  Compare .devspark/scripts/ vs .documentation/scripts/
 
 Next steps:
   1. Review changes: git diff
@@ -293,12 +334,14 @@ Never modify or delete:
 
 - `.documentation/commands/` — team-customized prompts
 - `.documentation/{git-user}/commands/` — per-user personalized prompts
+- `.documentation/scripts/` — team-customized script overrides
 - `.documentation/specs/` and all contents
+- `.documentation/devspark.json` — platform configuration
 - `constitution.md`
 - `.documentation/copilot/`
 - `.documentation/decisions/`
 - `.documentation/releases/`
-- Any file the user created that is not in `.devspark/defaults/`
+- Any file the user created that is not in `.devspark/`
 
 ### Non-Destructive by Default
 

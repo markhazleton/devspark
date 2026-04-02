@@ -8,8 +8,8 @@ handoffs:
     agent: devspark.pr-review
     prompt: Review recent PRs to gather more data
 scripts:
-  sh: .documentation/scripts/bash/evolution-context.sh $ARGUMENTS --json
-  ps: .documentation/scripts/powershell/evolution-context.ps1 $ARGUMENTS -Json
+  sh: .devspark/scripts/bash/evolution-context.sh $ARGUMENTS --json
+  ps: .devspark/scripts/powershell/evolution-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

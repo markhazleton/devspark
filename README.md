@@ -102,7 +102,7 @@ DevSpark cleanly separates **your work** from **its installation**:
 ```text
 .devspark/                 ← Installation (removable, upgrade-safe)
 ├── defaults/commands/     ← Stock prompts
-├── scripts/              ← Helper scripts
+├── scripts/              ← Stock helper scripts
 ├── templates/            ← Spec/plan templates
 └── VERSION               ← Installed version stamp
 
@@ -110,6 +110,8 @@ DevSpark cleanly separates **your work** from **its installation**:
 ├── memory/constitution.md
 ├── specs/
 ├── commands/             ← Team command overrides
+├── scripts/              ← Team script overrides (optional)
+├── devspark.json         ← Platform config (optional)
 └── {git-user}/commands/  ← Personal overrides
 ```
 
@@ -118,6 +120,11 @@ DevSpark cleanly separates **your work** from **its installation**:
 1. `.documentation/{git-user}/commands/` — Personal tweaks
 2. `.documentation/commands/` — Team customizations
 3. `.devspark/defaults/commands/` — Stock prompts
+
+**2-tier script resolution** (first match wins):
+
+1. `.documentation/scripts/` — Team script overrides (e.g., Azure DevOps adapter)
+2. `.devspark/scripts/` — Stock scripts
 
 **Clean removal**: `devspark uninstall` removes `.devspark/` and agent shims, leaves `.documentation/` untouched.
 

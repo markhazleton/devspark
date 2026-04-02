@@ -8,8 +8,8 @@ handoffs:
     agent: devspark.site-audit
     prompt: Run a final site audit before release
 scripts:
-  sh: .documentation/scripts/bash/release-context.sh $ARGUMENTS --json
-  ps: .documentation/scripts/powershell/release-context.ps1 $ARGUMENTS -Json
+  sh: .devspark/scripts/bash/release-context.sh $ARGUMENTS --json
+  ps: .devspark/scripts/powershell/release-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

@@ -8,8 +8,8 @@ handoffs:
     agent: devspark.specify
     prompt: Create a full specification for this change
 scripts:
-  sh: .documentation/scripts/bash/quickfix-context.sh $ARGUMENTS --json
-  ps: .documentation/scripts/powershell/quickfix-context.ps1 $ARGUMENTS -Json
+  sh: .devspark/scripts/bash/quickfix-context.sh $ARGUMENTS --json
+  ps: .devspark/scripts/powershell/quickfix-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

@@ -32,12 +32,11 @@ $ErrorActionPreference = "Stop"
 #==============================================================================
 
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-$gitRoot = try { git rev-parse --show-toplevel 2>$null } catch { $null }
-if ($LASTEXITCODE -eq 0 -and $gitRoot) {
-    $repoRoot = $gitRoot.Trim()
-} else {
-    $repoRoot = (Resolve-Path "$scriptPath\..\..\..\").Path
-}
+
+# Load platform adapter
+. "$scriptPath/platform.ps1"
+
+$repoRoot = Get-RepoRoot
 
 #==============================================================================
 # Utility Functions
@@ -73,24 +72,43 @@ if ($FileSampleLimit -lt 1) {
 #==============================================================================
 
 function Get-DetectedPrNumber {
-    # Method 1: Check environment variables
-    if ($env:GITHUB_PR_NUMBER) {
-        return $env:GITHUB_PR_NUMBER
+    # Method 1: Check platform-specific environment variable
+    $platformEnv = [Environment]::GetEnvironmentVariable($DevSparkPlatform.PrEnvVar)
+    if ($platformEnv) {
+        return $platformEnv
     }
-    
+
+    # Method 2: Check generic env var
     if ($env:PR_NUMBER) {
         return $env:PR_NUMBER
     }
     
-    # Method 2: Try GitHub CLI for current branch
-    if (Get-Command gh -ErrorAction SilentlyContinue) {
-        try {
-            $prData = gh pr view --json number 2>$null | ConvertFrom-Json
-            if ($prData.number) {
-                return $prData.number
+    # Method 3: Try platform CLI for current branch
+    switch ($DevSparkPlatform.Name) {
+        'github' {
+            if (Get-Command gh -ErrorAction SilentlyContinue) {
+                try {
+                    $prData = gh pr view --json number 2>$null | ConvertFrom-Json
+                    if ($prData.number) { return $prData.number }
+                } catch { }
             }
-        } catch {
-            # Continue to next method
+        }
+        'azdo' {
+            if (Get-Command az -ErrorAction SilentlyContinue) {
+                try {
+                    $branch = git rev-parse --abbrev-ref HEAD 2>$null
+                    $prList = az repos pr list --source-branch $branch --status active --top 1 2>$null | ConvertFrom-Json
+                    if ($prList -and $prList.Count -gt 0) { return $prList[0].pullRequestId }
+                } catch { }
+            }
+        }
+        'gitlab' {
+            if (Get-Command glab -ErrorAction SilentlyContinue) {
+                try {
+                    $mrData = glab mr view --output json 2>$null | ConvertFrom-Json
+                    if ($mrData.iid) { return $mrData.iid }
+                } catch { }
+            }
         }
     }
     

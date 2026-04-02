@@ -134,7 +134,49 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 
 ---
 
-## Step 6: Create Cursor Command Shims
+## Step 6: Pull Scripts
+
+Fetch scripts from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` based on the user's script preference from Step 1.
+
+For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
+
+- `powershell/common.ps1`
+- `powershell/platform.ps1`
+- `powershell/check-prerequisites.ps1`
+- `powershell/create-new-feature.ps1`
+- `powershell/setup-plan.ps1`
+- `powershell/get-pr-context.ps1`
+- `powershell/update-agent-context.ps1`
+- `powershell/archive-context.ps1`
+- `powershell/evolution-context.ps1`
+- `powershell/harvest.ps1`
+- `powershell/quickfix-context.ps1`
+- `powershell/release-context.ps1`
+- `powershell/repo-story-context.ps1`
+- `powershell/site-audit.ps1`
+
+For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
+
+- `bash/common.sh`
+- `bash/platform.sh`
+- `bash/check-prerequisites.sh`
+- `bash/create-new-feature.sh`
+- `bash/setup-plan.sh`
+- `bash/get-pr-context.sh`
+- `bash/update-agent-context.sh`
+- `bash/archive-context.sh`
+- `bash/evolution-context.sh`
+- `bash/harvest.sh`
+- `bash/quickfix-context.sh`
+- `bash/release-context.sh`
+- `bash/repo-story-context.sh`
+- `bash/site-audit.sh`
+
+**Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.documentation/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.documentation/scripts/`.
+
+---
+
+## Step 7: Create Cursor Command Shims
 
 For each command in `.devspark/defaults/commands/devspark.{name}.md`, create a file at `.cursor/commands/devspark.{name}.md`:
 
@@ -160,7 +202,7 @@ Replace `{name}` with the actual command name (e.g., `specify`, `plan`, `impleme
 
 ---
 
-## Step 7: Create .cursorrules
+## Step 8: Create .cursorrules
 
 If `.cursorrules` does not exist in the project root, create it:
 
@@ -188,7 +230,7 @@ If `.cursorrules` already exists, append the DevSpark section.
 
 ---
 
-## Step 8: Seed the Constitution
+## Step 9: Seed the Constitution
 
 Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.documentation/memory/constitution.md` and save to `.devspark/memory/constitution.md`.
 
@@ -202,7 +244,7 @@ Using the project name and principles from Step 1, customize `.documentation/mem
 
 ---
 
-## Step 9: Write VERSION Stamp
+## Step 10: Write VERSION Stamp
 
 Create `.devspark/VERSION`:
 
@@ -215,7 +257,7 @@ migrated-from: {specify | documentation-defaults | fresh}
 
 ---
 
-## Step 10: Update .gitignore
+## Step 11: Update .gitignore
 
 Append to `.gitignore` if not already present:
 
@@ -226,7 +268,7 @@ Append to `.gitignore` if not already present:
 
 ---
 
-## Step 11: Verify & Report
+## Step 12: Verify & Report
 
 Confirm the installation:
 

@@ -5,8 +5,8 @@ handoffs:
     agent: devspark.pr-review
     prompt: Show me previous PR reviews in .documentation/specs/pr-review/
 scripts:
-  sh: .documentation/scripts/bash/get-pr-context.sh $ARGUMENTS --json
-  ps: .documentation/scripts/powershell/get-pr-context.ps1 $ARGUMENTS -Json
+  sh: .devspark/scripts/bash/get-pr-context.sh $ARGUMENTS --json
+  ps: .devspark/scripts/powershell/get-pr-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

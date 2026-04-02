@@ -8,8 +8,8 @@ handoffs:
     agent: devspark.evolve-constitution
     prompt: Review the constitution in light of the cleaned-up documentation
 scripts:
-  sh: .documentation/scripts/bash/archive-context.sh --json
-  ps: .documentation/scripts/powershell/archive-context.ps1 -Json
+  sh: .devspark/scripts/bash/archive-context.sh --json
+  ps: .devspark/scripts/powershell/archive-context.ps1 -Json
 ---
 
 ## User Input
@@ -143,7 +143,8 @@ Do not add historical content to Guide.md — it describes the present, not the 
 3. Move (do not copy) each file decided for archiving.
 4. If moving a directory would leave an empty parent, remove the empty parent only if it has no remaining files.
 5. **Do not move** `.documentation/memory/constitution.md` — it is never an archive candidate.
-6. **Do not move** `.documentation/scripts/` or `.documentation/templates/` — these are operational.
+6. **Do not move** `.devspark/scripts/` (stock scripts) or `.documentation/scripts/` (team script overrides) — these are operational.
+7. **Do not move** `.documentation/templates/` — these are operational.
 
 ### 7. Update .archive/README.md
 
@@ -190,6 +191,7 @@ Brief description of what remains and why it is all current.
 
 - **Never read `.archive/` in this or any other command.**
 - **Never archive `.documentation/memory/constitution.md`.**
+- **Never archive `.devspark/scripts/` or `.documentation/scripts/` — these are operational.**
 - **Never archive active specs in `.documentation/specs/` unless they are explicitly completed and superseded.**
 - Preserve directory structure inside `.archive/YYYY-MM-DD/` to maintain traceability.
 - One archive folder per run, named by today's date.
