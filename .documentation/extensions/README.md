@@ -24,4 +24,4 @@ Extensions provide a way to add specialized workflows and commands to DevSpark w
 - Install extensions to add domain-specific workflows (regulatory compliance, specialized testing, etc.)
 - Extensions work alongside Spark's built-in commands (`/devspark.critic`, `/devspark.quickfix`, etc.)
 
-See the upstream [Extension Publishing Guide](https://github.com/github/spec-kit/blob/main/docs/EXTENSION-PUBLISHING-GUIDE.md) for instructions on how to create and submit extensions.
+To create and submit an extension, package it as a GitHub repository and submit a pull request to add it to the community catalog.
