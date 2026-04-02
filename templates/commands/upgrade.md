@@ -116,13 +116,13 @@ what changed and selectively merge improvements they want.
 
 #### Framework-owned (safe to overwrite on upgrade)
 
-These are written to `.documentation/defaults/` and should match the latest version:
+These are written to `.devspark/` and should match the latest version:
 
 - `.devspark/defaults/commands/devspark.*.md` — stock prompt templates
-- `.documentation/defaults/templates/` — stock helper templates
-- `.documentation/scripts/bash/*.sh`
-- `.documentation/scripts/powershell/*.ps1`
-- `.documentation/DEVSPARK_VERSION`
+- `.devspark/defaults/templates/` — stock helper templates
+- `.devspark/scripts/bash/*.sh`
+- `.devspark/scripts/powershell/*.ps1`
+- `.devspark/VERSION`
 - Agent shim files:
   - `.github/agents/*.agent.md`
   - `.github/prompts/*.prompt.md`
@@ -298,7 +298,7 @@ Never modify or delete:
 - `.documentation/copilot/`
 - `.documentation/decisions/`
 - `.documentation/releases/`
-- Any file the user created that is not in `.documentation/defaults/`
+- Any file the user created that is not in `.devspark/defaults/`
 
 ### Non-Destructive by Default
 
