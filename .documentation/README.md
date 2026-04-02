@@ -29,7 +29,6 @@ To build the documentation locally:
 - `installation.md` - Installation guide
 - `quickstart.md` - Quick start guide
 - `upgrade.md` - Upgrade instructions
-- `local-development.md` - Local development setup
 - `constitution-guide.md` - Constitution creation and usage guide
 - `pr-review-usage.md` - PR review command guide
 - `site-audit-usage.md` - Site audit command guide  
