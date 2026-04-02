@@ -4,6 +4,11 @@
 
 **An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
+<video controls width="100%">
+  <source src="https://github.com/markhazleton/devspark/releases/download/v0.1.0/DevSpark__Giving_Your_AI_a_Process.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ---
 
 ## Three Pillars
