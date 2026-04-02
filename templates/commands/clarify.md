@@ -5,8 +5,8 @@ handoffs:
     agent: devspark.plan
     prompt: Create a plan for the spec. I am building with...
 scripts:
-   sh: .documentation/scripts/bash/check-prerequisites.sh --json --paths-only
-   ps: .documentation/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
+   sh: .devspark/scripts/bash/check-prerequisites.sh --json --paths-only
+   ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
 ---
 
 ## User Input

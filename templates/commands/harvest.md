@@ -8,8 +8,8 @@ handoffs:
     agent: devspark.site-audit
     prompt: Audit documentation quality and stale references before harvest
 scripts:
-  sh: .documentation/scripts/bash/harvest.sh $ARGUMENTS --json
-  ps: .documentation/scripts/powershell/harvest.ps1 $ARGUMENTS -Json
+  sh: .devspark/scripts/bash/harvest.sh $ARGUMENTS --json
+  ps: .devspark/scripts/powershell/harvest.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

@@ -27,6 +27,10 @@
     - name: Harvest Guide
       href: harvest-usage.md
 
+# FAQ
+- name: FAQ
+  href: faq.md
+
 # About
 - name: About DevSpark
   items:

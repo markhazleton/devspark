@@ -9,11 +9,11 @@ handoffs:
     agent: devspark.checklist
     prompt: Create a checklist for the following domain...
 scripts:
-  sh: .documentation/scripts/bash/setup-plan.sh --json
-  ps: .documentation/scripts/powershell/setup-plan.ps1 -Json
+  sh: .devspark/scripts/bash/setup-plan.sh --json
+  ps: .devspark/scripts/powershell/setup-plan.ps1 -Json
 agent_scripts:
-  sh: .documentation/scripts/bash/update-agent-context.sh __AGENT__
-  ps: .documentation/scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
+  sh: .devspark/scripts/bash/update-agent-context.sh __AGENT__
+  ps: .devspark/scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
 ---
 
 ## User Input

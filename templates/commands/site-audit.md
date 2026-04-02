@@ -6,8 +6,8 @@ handoffs:
     agent: devspark.site-audit
     prompt: Show me previous audit reports in .documentation/copilot/audit/
 scripts:
-  sh: .documentation/scripts/bash/site-audit.sh $ARGUMENTS --json
-  ps: .documentation/scripts/powershell/site-audit.ps1 $ARGUMENTS -Json
+  sh: .devspark/scripts/bash/site-audit.sh $ARGUMENTS --json
+  ps: .devspark/scripts/powershell/site-audit.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input

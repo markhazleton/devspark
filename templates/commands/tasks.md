@@ -10,8 +10,8 @@ handoffs:
     prompt: Start the implementation in phases
     send: true
 scripts:
-  sh: .documentation/scripts/bash/check-prerequisites.sh --json
-  ps: .documentation/scripts/powershell/check-prerequisites.ps1 -Json
+  sh: .devspark/scripts/bash/check-prerequisites.sh --json
+  ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json
 ---
 
 ## User Input
