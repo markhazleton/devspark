@@ -104,11 +104,11 @@ runs a `/devspark.*` command, it resolves the prompt in this order (first match 
 ```text
 1. .documentation/{git-user}/commands/   ← Per-user overrides (via /devspark.personalize)
 2. .documentation/commands/              ← Team customizations (yours to edit freely)
-3. .documentation/defaults/commands/     ← Stock DevSpark prompts (upgrade overwrites ONLY this)
+3. .devspark/defaults/commands/     ← Stock DevSpark prompts (upgrade overwrites ONLY this)
 ```
 
 **Key principle: upgrades NEVER touch `.documentation/commands/`.** They only write
-to `.documentation/defaults/commands/`. Your team's customizations in
+to `.devspark/defaults/commands/`. Your team's customizations in
 `.documentation/commands/` always take priority and are never lost.
 
 After an upgrade, the team can compare `defaults/commands/` vs `commands/` to see
@@ -118,7 +118,7 @@ what changed and selectively merge improvements they want.
 
 These are written to `.documentation/defaults/` and should match the latest version:
 
-- `.documentation/defaults/commands/devspark.*.md` — stock prompt templates
+- `.devspark/defaults/commands/devspark.*.md` — stock prompt templates
 - `.documentation/defaults/templates/` — stock helper templates
 - `.documentation/scripts/bash/*.sh`
 - `.documentation/scripts/powershell/*.ps1`
@@ -187,11 +187,11 @@ cp .documentation/memory/constitution.md \
 
 #### 7b. Update stock defaults
 
-Write the latest DevSpark prompt templates to `.documentation/defaults/commands/`.
+Write the latest DevSpark prompt templates to `.devspark/defaults/commands/`.
 This directory is framework-owned and safe to overwrite completely.
 
 **Important**: Do NOT write to `.documentation/commands/`. That directory belongs
-to the team. Only `.documentation/defaults/commands/` is updated.
+to the team. Only `.devspark/defaults/commands/` is updated.
 
 If the CLI is available:
 
@@ -224,7 +224,7 @@ Offer to show diffs for any changed files so the team can decide what to merge.
 After the upgrade completes:
 
 1. **Read `.documentation/DEVSPARK_VERSION` again** — confirm version updated
-2. **Verify `.documentation/defaults/commands/` has latest prompts**
+2. **Verify `.devspark/defaults/commands/` has latest prompts**
 3. **Confirm `.documentation/commands/` is untouched** — team customizations preserved
 4. **Confirm `constitution.md` is intact** (or restored from backup)
 
@@ -249,11 +249,11 @@ DevSpark Upgrade Summary
   Agent            : <INSTALLED_AGENT>
   Date             : <TODAY>
 
-Stock prompts updated in .documentation/defaults/commands/.
+Stock prompts updated in .devspark/defaults/commands/.
 Team customizations in .documentation/commands/ are untouched.
 
 To merge specific improvements into your team prompts:
-  Compare .documentation/defaults/commands/ vs .documentation/commands/
+  Compare .devspark/defaults/commands/ vs .documentation/commands/
 
 Next steps:
   1. Review changes: git diff

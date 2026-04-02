@@ -31,13 +31,13 @@ mkdir -p "$GENRELEASES_DIR"
 rm -rf "$GENRELEASES_DIR"/* || true
 
 rewrite_paths() {
-  # DevSpark uses .documentation/ instead of .specify/ to distinguish from upstream
+  # DevSpark uses .devspark/ for framework files and .documentation/ for user work
   sed -E \
     -e 's@(/?)\.specify/@\1.documentation/@g' \
     -e 's@(^|[[:space:]]|`)/specs/@\1/.documentation/specs/@g' \
     -e 's@(^|[[:space:]]|`)/memory/@\1/.documentation/memory/@g' \
-    -e 's@(^|[[:space:]]|`)/scripts/@\1/.documentation/scripts/@g' \
-    -e 's@(^|[[:space:]]|`)/templates/@\1/.documentation/templates/@g'
+    -e 's@(^|[[:space:]]|`)/scripts/@\1/.devspark/scripts/@g' \
+    -e 's@(^|[[:space:]]|`)/templates/@\1/.devspark/templates/@g'
 }
 
 generate_canonical_commands() {
@@ -133,7 +133,7 @@ Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip n
 Read and execute the instructions from the **first file that exists**:
 1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)
 2. \`.documentation/commands/devspark.$name.md\` (team customization)
-3. \`.documentation/defaults/commands/devspark.$name.md\` (stock default)
+3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)
 
 Where \`{git-user}\` is the normalized slug from step above.
 
@@ -164,7 +164,7 @@ SHIMEOF
           echo "Read and execute the instructions from the **first file that exists**:"
           echo "1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)"
           echo "2. \`.documentation/commands/devspark.$name.md\` (team customization)"
-          echo "3. \`.documentation/defaults/commands/devspark.$name.md\` (stock default)"
+          echo "3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)"
           echo ""
           echo "Where \`{git-user}\` is the normalized slug from step above."
           echo ""
@@ -271,35 +271,34 @@ build_variant() {
   echo "Building $agent ($script) package..."
   mkdir -p "$base_dir"
   
-  # Copy base structure but filter scripts by variant
-SPEC_DIR="$base_dir/.documentation"
-  mkdir -p "$SPEC_DIR"
+  # Framework files go into .devspark/ (removable installation)
+  DEVSPARK_DIR="$base_dir/.devspark"
+  mkdir -p "$DEVSPARK_DIR"
 
-  [[ -d memory ]] && { cp -r memory "$SPEC_DIR/"; echo "Copied memory -> .documentation"; }
+  # Seed constitution template into .devspark/ (CLI copies to .documentation/memory/ on first init)
+  [[ -d memory ]] && { cp -r memory "$DEVSPARK_DIR/"; echo "Copied memory -> .devspark (seed templates)"; }
   
   # Only copy the relevant script variant directory
   if [[ -d scripts ]]; then
-    mkdir -p "$SPEC_DIR/scripts"
+    mkdir -p "$DEVSPARK_DIR/scripts"
     case $script in
       sh)
-        [[ -d scripts/bash ]] && { cp -r scripts/bash "$SPEC_DIR/scripts/"; echo "Copied scripts/bash -> .documentation/scripts"; }
-        # Copy any script files that aren't in variant-specific directories
-        find scripts -maxdepth 1 -type f -exec cp {} "$SPEC_DIR/scripts/" \; 2>/dev/null || true
+        [[ -d scripts/bash ]] && { cp -r scripts/bash "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/bash -> .devspark/scripts"; }
+        find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
         ;;
       ps)
-        [[ -d scripts/powershell ]] && { cp -r scripts/powershell "$SPEC_DIR/scripts/"; echo "Copied scripts/powershell -> .documentation/scripts"; }
-        # Copy any script files that aren't in variant-specific directories
-        find scripts -maxdepth 1 -type f -exec cp {} "$SPEC_DIR/scripts/" \; 2>/dev/null || true
+        [[ -d scripts/powershell ]] && { cp -r scripts/powershell "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/powershell -> .devspark/scripts"; }
+        find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
         ;;
     esac
   fi
   
-  [[ -d templates ]] && { mkdir -p "$SPEC_DIR/templates"; find templates -type f -not -path "templates/commands/*" -not -name "vscode-settings.json" -exec cp --parents {} "$SPEC_DIR"/ \; ; echo "Copied templates -> .documentation/templates"; }
+  [[ -d templates ]] && { mkdir -p "$DEVSPARK_DIR/templates"; find templates -type f -not -path "templates/commands/*" -not -name "vscode-settings.json" -exec cp --parents {} "$DEVSPARK_DIR"/ \; ; echo "Copied templates -> .devspark/templates"; }
   
-  # Generate canonical command prompts in .documentation/defaults/commands/ (stock, upgrade-safe)
+  # Generate canonical command prompts in .devspark/defaults/commands/ (stock, upgrade-safe)
   # Team customizations live in .documentation/commands/ and are never overwritten.
-  generate_canonical_commands "$SPEC_DIR/defaults/commands" "$script"
-  echo "Generated canonical commands -> .documentation/defaults/commands"
+  generate_canonical_commands "$DEVSPARK_DIR/defaults/commands" "$script"
+  echo "Generated canonical commands -> .devspark/defaults/commands"
 
   # Generate thin platform shims in agent-specific directories
   # Shims redirect to .documentation/commands/ with user-override resolution
