@@ -24,12 +24,6 @@
     - name: Roadmap
       href: roadmap.md
 
-# Development workflows
-- name: Development
-  items:
-    - name: Local Development
-      href: local-development.md
-
 # Quality & Review commands
 - name: Constitution-Powered Commands
   items:

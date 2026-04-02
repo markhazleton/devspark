@@ -106,7 +106,6 @@ devspark init --here --ai claude
 - [Quick Start Guide](quickstart.md) - 6-step process walkthrough
 - [Upgrade Guide](upgrade.md) - Updating to latest version
 - [Migration Guide](migration-guide.md) - Migrate from old `.specify/` structure
-- [Local Development](local-development.md) - Contributing to DevSpark
 
 ---
 
@@ -249,7 +248,7 @@ DevSpark welcomes contributions:
 - **Discussions**: [Ask questions or share ideas](https://github.com/MarkHazleton/devspark/discussions)
 - **Pull Requests**: Fork, branch, and submit
 
-See [Local Development](local-development.md) for setup instructions.
+See [CONTRIBUTING.md](https://github.com/MarkHazleton/devspark/blob/main/CONTRIBUTING.md) for setup instructions.
 
 ---
 
