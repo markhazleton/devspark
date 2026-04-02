@@ -27,12 +27,22 @@ devspark/
 
 ## Get Started
 
-**Option A — Copy and Go** (recommended)
+**Option A — Agent Quickstart** (recommended — no install)
+
+Point your AI agent at the quickstart prompt for your platform:
+- [GitHub Copilot](quickstart/devspark_quickstart_copilot.md)
+- [Claude Code](quickstart/devspark_quickstart_claudecode.md)
+- [Cursor](quickstart/devspark_quickstart_cursor.md)
+- [Any other agent](quickstart/devspark_quickstart_generic.md)
+
+The agent asks a few questions, then pulls and installs all DevSpark prompts — including migration from Spec Kit if needed.
+
+**Option B — Download and Drop**
 
 1. Download the [latest release](https://github.com/markhazleton/devspark/releases) zip for your agent and unzip into your project
 2. Start using `/devspark.*` commands in your AI assistant
 
-**Option B — CLI** (automates Option A)
+**Option C — CLI** (automates Option A)
 
 ```bash
 uv tool install devspark-cli --from git+https://github.com/markhazleton/devspark.git
