@@ -11,18 +11,7 @@
       href: quickstart.md
     - name: Upgrade
       href: upgrade.md
-    - name: Migration Guide
-      href: migration-guide.md
 
-# SDD Methodology
-- name: Methodology
-  items:
-    - name: Spec-Driven Development
-      href: spec-driven-development.md
-    - name: Adaptive Lifecycle (ASLCD)
-      href: adaptive-lifecycle.md
-    - name: Roadmap
-      href: roadmap.md
 
 # Quality & Review commands
 - name: Constitution-Powered Commands

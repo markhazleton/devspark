@@ -488,5 +488,5 @@ fi
 if [ "$DRY_RUN" = false ]; then
     print_status "Migration script completed successfully"
     echo ""
-    echo -e "${CYAN}Need help? See .documentation/migration-guide.md${NC}"
+    echo -e "${CYAN}Need help? See .documentation/upgrade.md${NC}"
 fi

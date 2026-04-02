@@ -124,10 +124,6 @@ The `upgrade` command will:
 
 See the [Upgrade Guide](upgrade.md) for detailed instructions.
 
-### Migration from Old Structure
-
-If you're using the old `.specify/` directory or root-level `memory/`, `scripts/`, `templates/` directories, see the [Migration Guide](migration-guide.md) for automated migration to the new `.documentation/` structure.
-
 ## Verification
 
 After initialization, you should see the following commands available in your AI agent:

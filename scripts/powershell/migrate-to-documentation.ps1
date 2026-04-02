@@ -539,5 +539,5 @@ if ($script:WarningsCount -gt 0) {
 if (-not $DryRun) {
     Print-Status "Migration script completed successfully"
     Write-Host ""
-    Write-ColorOutput "Need help? See .documentation\migration-guide.md" "Cyan"
+    Write-ColorOutput "Need help? See .documentation\upgrade.md" "Cyan"
 }

@@ -57,8 +57,6 @@ Traditional spec-driven development works well for greenfield projects with majo
 | Multi-user personalization | ✅ `/devspark.personalize` per-user overrides |
 | Multi-agent support | ✅ 17+ AI agents |
 
-Learn more: [Adaptive Lifecycle Documentation](adaptive-lifecycle.md)
-
 ---
 
 ## Getting Started
@@ -105,7 +103,6 @@ devspark init --here --ai claude
 - [Installation Guide](installation.md) - Detailed setup for all scenarios
 - [Quick Start Guide](quickstart.md) - 6-step process walkthrough
 - [Upgrade Guide](upgrade.md) - Updating to latest version
-- [Migration Guide](migration-guide.md) - Migrate from old `.specify/` structure
 
 ---
 
@@ -149,7 +146,7 @@ Documentation evolves with your system:
 |---------|---------|-------|
 | `/devspark.constitution` | Create/update constitution | [Constitution Guide](constitution-guide.md) |
 | `/devspark.discover-constitution` | Generate from existing code | [Constitution Guide](constitution-guide.md) |
-| `/devspark.evolve-constitution` | Propose amendments | [Adaptive Lifecycle](adaptive-lifecycle.md) |
+| `/devspark.evolve-constitution` | Propose amendments | [Constitution Guide](constitution-guide.md) |
 
 ### Full Spec Workflow
 
@@ -235,8 +232,6 @@ DevSpark is actively developed with plans for:
 - **Business Value Alignment** - Link features to business goals
 - **CI/CD Integration** - Run audits as pipeline steps
 - **Cross-Project Governance** - Organizational-level consistency
-
-See the full [Roadmap](roadmap.md) for details.
 
 ---
 

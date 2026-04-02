@@ -1636,7 +1636,7 @@ def upgrade(
                 migration_confirmed = typer.confirm("Run migration after templates are installed?", default=True)
                 if not migration_confirmed:
                     console.print("[yellow]Skipping migration - you can run it later[/yellow]")
-                    console.print("[dim]See .documentation/migration-guide.md for manual steps[/dim]\n")
+                    console.print("[dim]See .documentation/upgrade.md for manual steps[/dim]\n")
         else:
             console.print("[green]✓[/green] Already using .documentation/ structure\n")
 
@@ -1685,7 +1685,7 @@ def upgrade(
         if success:
             console.print("[green]✓[/green] Migration completed\n")
         else:
-            console.print("[yellow]⚠[/yellow] Migration had issues. See .documentation/migration-guide.md for manual steps.\n")
+            console.print("[yellow]⚠[/yellow] Migration had issues. See .documentation/upgrade.md for manual steps.\n")
 
     # Step 8: Post-upgrade guidance
     console.print("\n" + "="*60)
