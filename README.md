@@ -1,5 +1,4 @@
 <div align="center">
-    <img src="./.documentation/media/logo_large.webp" alt="DevSpark Logo" width="200" height="200"/>
     <h1>DevSpark</h1>
     <h3><em>A structured development process for AI coding assistants.<br/>Just markdown files — no install required.</em></h3>
 </div>
