@@ -98,7 +98,7 @@ After migration, continue with Step 3.
 
 Create these directories (skip any that already exist):
 
-```
+```text
 .devspark/
 ├── defaults/commands/
 ├── scripts/
@@ -188,7 +188,7 @@ Pass the user input above to the resolved prompt.
 
 Create `{agent-shim-directory}/devspark.{name}.toml`:
 
-```toml
+````toml
 description = "{one-line description of the command}"
 
 prompt = """
@@ -210,7 +210,7 @@ Read and execute the instructions from the **first file that exists**:
 
 Pass the user input above to the resolved prompt.
 """
-```
+````
 
 ### For GitHub Copilot (special: two files per command)
 
@@ -227,6 +227,7 @@ Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.documentati
 Then copy to `.documentation/memory/constitution.md` — **only if that file does not already exist**. If the file was migrated from `.specify/` or already existed, skip this copy.
 
 Using the project name and principles from Step 1, customize `.documentation/memory/constitution.md`:
+
 - Replace `[PROJECT_NAME]` with the actual project name
 - Fill in the core principles the user provided
 - Add the tech stack as a "Technology" or "Stack" section
@@ -237,7 +238,7 @@ Using the project name and principles from Step 1, customize `.documentation/mem
 
 Create `.devspark/VERSION`:
 
-```
+```text
 version: quickstart
 installed: {today's date YYYY-MM-DD}
 method: {agent-name}-quickstart
@@ -250,7 +251,7 @@ migrated-from: {specify | documentation-defaults | fresh}
 
 Append to `.gitignore` if not already present:
 
-```
+```text
 # DevSpark — personal overrides (never commit)
 .documentation/*/commands/
 ```
@@ -260,6 +261,7 @@ Append to `.gitignore` if not already present:
 ## Step 10: Verify & Report
 
 Confirm the installation:
+
 - **Migration summary**: What was migrated and where backups live (`.specify.old/`, etc.)
 - Number of stock commands in `.devspark/defaults/commands/`
 - Number of agent shims created in the agent's directory

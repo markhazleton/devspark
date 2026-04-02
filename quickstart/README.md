@@ -18,12 +18,14 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 3. The agent will ask a few questions about your project, then pull and install all DevSpark prompts
 
 Example (Copilot):
-```
+
+```text
 @workspace Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_copilot.md
 ```
 
 Example (Claude Code):
-```
+
+```text
 /devspark Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_claudecode.md
 ```
 
@@ -36,6 +38,7 @@ Example (Claude Code):
 ## Migration Support
 
 Each quickstart automatically detects and migrates from:
+
 - **Spec Kit** (`.specify/` directory) → moves user content to `.documentation/`, renames old dir to `.specify.old/`
 - **Pre-separation DevSpark** (`.documentation/defaults/`) → moves framework files to `.devspark/`
 - **Legacy root-level dirs** (`memory/`, `specs/`) → consolidates into `.documentation/`
