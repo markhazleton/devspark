@@ -1,9 +1,5 @@
 ---
-description: Create a personalized copy of any published speckit command prompt for the current git user.
-handoffs:
-  - label: List Available Commands
-    agent: devspark.discover-constitution
-    prompt: Show available speckit commands
+description: Create a personalized copy of any DevSpark command prompt for the current git user.
 scripts:
   sh: .documentation/scripts/bash/check-prerequisites.sh --json
   ps: .documentation/scripts/powershell/check-prerequisites.ps1 -Json
@@ -17,11 +13,24 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Command Resolution Order
+
+DevSpark uses a **3-tier override system**. When a `/devspark.*` command runs,
+the prompt is resolved in this order (first match wins):
+
+```text
+1. .documentation/{git-user}/commands/   ← Per-user overrides (this command creates these)
+2. .documentation/commands/              ← Team customizations (shared, editable)
+3. .documentation/defaults/commands/     ← Stock DevSpark prompts (read-only, upgrade-safe)
+```
+
+Upgrades only write to `defaults/commands/`. Team and user customizations are never touched.
+
 ## Outline
 
-This command creates a per-user personalized copy of any published speckit command prompt.
+This command creates a per-user personalized copy of a DevSpark command prompt.
 Personalized prompts live in `.documentation/{git-user}/commands/` and take priority
-over the shared defaults in `.documentation/commands/` when any speckit command runs.
+over both team customizations and stock defaults.
 
 ### Steps
 
@@ -31,30 +40,31 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
    git config user.name
    ```
 
-   Normalize the result to a folder-safe slug:
-   - Lowercase
-   - Replace spaces with hyphens
-   - Strip characters that are not alphanumeric or hyphens
+   Normalize to a folder-safe slug:
+   - Lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen characters
    - Example: `"Mark Hazleton"` → `mark-hazleton`
 
-   If `git config user.name` is empty, fall back to `git config user.email` (take the local part before `@`).
+   Fallback: `git config user.email` (local part before `@`).
 
 2. **Parse the command name from user input** (`$ARGUMENTS`):
 
-   The argument should be a speckit command name, with or without the `devspark.` prefix.
-   Examples of valid input:
-   - `devspark` → resolves to `devspark.specify.md`
-   - `devspark.plan` → resolves to `devspark.plan.md`
-   - `implement` → resolves to `devspark.implement.md`
+   The argument should be a command name, with or without the `devspark.` prefix.
+   Examples: `specify`, `devspark.plan`, `implement`
 
-   If no argument is given, list all available commands from `.documentation/commands/` and ask the user which one to personalize.
+   If no argument is given, list all available commands from `.documentation/commands/`
+   (or `.documentation/defaults/commands/` if `commands/` is empty) and ask the user
+   which one to personalize.
 
-3. **Verify the source prompt exists**:
+3. **Resolve the source prompt** (follow the 3-tier order):
 
-   Check that `.documentation/commands/devspark.{command}.md` exists.
-   If not found, show available commands and ask the user to pick one.
+   Look for the prompt in this order:
+   1. `.documentation/commands/devspark.{command}.md` (team version)
+   2. `.documentation/defaults/commands/devspark.{command}.md` (stock version)
 
-4. **Create the user directory structure**:
+   Use the first one found as the base for the personalized copy.
+   If neither exists, show available commands and ask the user to pick one.
+
+4. **Create the user directory**:
 
    ```text
    .documentation/{git-user}/commands/
@@ -68,18 +78,18 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
 
 6. **Copy and annotate the prompt**:
 
-   Copy `.documentation/commands/devspark.{command}.md` to `.documentation/{git-user}/commands/devspark.{command}.md`.
+   Copy the resolved source to `.documentation/{git-user}/commands/devspark.{command}.md`.
 
-   Add a header comment block at the very top of the personalized copy:
+   Add a header comment block at the top:
 
    ```markdown
    <!-- 
      Personalized prompt for: {git-user}
-     Based on: .documentation/commands/devspark.{command}.md
+     Based on: {source-path}
      Created: {date}
      
-     This file takes priority over the shared default when you run /devspark.{command}.
-     Edit freely. To revert to the default, delete this file.
+     This file takes priority over team and stock defaults when you run /devspark.{command}.
+     Edit freely. To revert, delete this file.
    -->
    ```
 
@@ -89,10 +99,13 @@ over the shared defaults in `.documentation/commands/` when any speckit command 
    Created personalized prompt:
      .documentation/{git-user}/commands/devspark.{command}.md
    
-   This file will be used instead of the shared default whenever you run /devspark.{command}.
-   Edit it to customize the behavior for your workflow.
+   Resolution order for /devspark.{command}:
+     1. ✅ .documentation/{git-user}/commands/  (this file — ACTIVE)
+     2.    .documentation/commands/              (team default)
+     3.    .documentation/defaults/commands/     (stock DevSpark)
    
-   To revert to the shared default, simply delete the personalized file.
+   Edit it to customize the behavior for your workflow.
+   To revert to the team/stock default, simply delete this file.
    ```
 
 8. **Open the file** for editing so the user can customize it immediately.

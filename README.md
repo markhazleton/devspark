@@ -60,6 +60,19 @@ devspark/
 └── (standard community files: README, LICENSE, CHANGELOG, etc.)
 ```
 
+### Customization Without Risk
+
+DevSpark uses a **3-tier override system** so you never lose your work when upgrading:
+
+```text
+Resolution order (first match wins):
+1. .documentation/{git-user}/commands/   ← Your personal tweaks
+2. .documentation/commands/              ← Your team's customizations
+3. .documentation/defaults/commands/     ← Stock DevSpark (upgrades write here only)
+```
+
+Copy once, customize freely. Upgrades only touch `defaults/` — your team and personal customizations always win.
+
 ---
 
 ## Table of Contents
