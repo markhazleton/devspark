@@ -132,7 +132,8 @@ Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip n
 
 Read and execute the instructions from the **first file that exists**:
 1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)
-2. \`.documentation/commands/devspark.$name.md\` (shared default)
+2. \`.documentation/commands/devspark.$name.md\` (team customization)
+3. \`.documentation/defaults/commands/devspark.$name.md\` (stock default)
 
 Where \`{git-user}\` is the normalized slug from step above.
 
@@ -162,7 +163,8 @@ SHIMEOF
           echo ""
           echo "Read and execute the instructions from the **first file that exists**:"
           echo "1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)"
-          echo "2. \`.documentation/commands/devspark.$name.md\` (shared default)"
+          echo "2. \`.documentation/commands/devspark.$name.md\` (team customization)"
+          echo "3. \`.documentation/defaults/commands/devspark.$name.md\` (stock default)"
           echo ""
           echo "Where \`{git-user}\` is the normalized slug from step above."
           echo ""
@@ -294,9 +296,10 @@ SPEC_DIR="$base_dir/.documentation"
   
   [[ -d templates ]] && { mkdir -p "$SPEC_DIR/templates"; find templates -type f -not -path "templates/commands/*" -not -name "vscode-settings.json" -exec cp --parents {} "$SPEC_DIR"/ \; ; echo "Copied templates -> .documentation/templates"; }
   
-  # Generate canonical command prompts in .documentation/commands/ (agent-agnostic)
-  generate_canonical_commands "$SPEC_DIR/commands" "$script"
-  echo "Generated canonical commands -> .documentation/commands"
+  # Generate canonical command prompts in .documentation/defaults/commands/ (stock, upgrade-safe)
+  # Team customizations live in .documentation/commands/ and are never overwritten.
+  generate_canonical_commands "$SPEC_DIR/defaults/commands" "$script"
+  echo "Generated canonical commands -> .documentation/defaults/commands"
 
   # Generate thin platform shims in agent-specific directories
   # Shims redirect to .documentation/commands/ with user-override resolution
