@@ -2,7 +2,7 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
-**An Adaptive System Life Cycle Development (ASLCD) Toolkit** - agent-agnostic, multi-user, and full-lifecycle. A community extension of DevSpark that combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
+**An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. A community extension of DevSpark that combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
 ---
 
