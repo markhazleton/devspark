@@ -15,12 +15,14 @@ A clear description of the bug.
 **What did you expect?**
 What should have happened instead.
 
-**Steps to reproduce**
+## Steps to reproduce
+
 1. ...
 2. ...
 3. ...
 
-**Environment**
+## Environment
+
 - AI Agent: (Copilot / Claude Code / Cursor / other)
 - OS: (Windows / macOS / Linux)
 - CLI version (if applicable): `devspark version`

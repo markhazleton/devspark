@@ -73,7 +73,7 @@ After migration, continue with Step 3.
 
 Create these directories (skip any that already exist):
 
-```
+```text
 .devspark/
 ├── defaults/commands/
 ├── scripts/
@@ -164,7 +164,7 @@ Replace `{name}` with the actual command name (e.g., `specify`, `plan`, `impleme
 
 If `.cursorrules` does not exist in the project root, create it:
 
-```
+```markdown
 # DevSpark — Spec-Driven Development
 
 This project uses DevSpark for structured, spec-driven development.
@@ -195,6 +195,7 @@ Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.documentati
 Then copy to `.documentation/memory/constitution.md` — **only if that file does not already exist**. If the file was migrated from `.specify/` or already existed, skip this copy.
 
 Using the project name and principles from Step 1, customize `.documentation/memory/constitution.md`:
+
 - Replace `[PROJECT_NAME]` with the actual project name
 - Fill in the core principles the user provided
 - Add the tech stack as a "Technology" or "Stack" section
@@ -205,7 +206,7 @@ Using the project name and principles from Step 1, customize `.documentation/mem
 
 Create `.devspark/VERSION`:
 
-```
+```text
 version: quickstart
 installed: {today's date YYYY-MM-DD}
 method: cursor-quickstart
@@ -218,7 +219,7 @@ migrated-from: {specify | documentation-defaults | fresh}
 
 Append to `.gitignore` if not already present:
 
-```
+```text
 # DevSpark — personal overrides (never commit)
 .documentation/*/commands/
 ```
@@ -228,6 +229,7 @@ Append to `.gitignore` if not already present:
 ## Step 11: Verify & Report
 
 Confirm the installation:
+
 - **Migration summary**: What was migrated and where backups live (`.specify.old/`, etc.)
 - Number of stock commands in `.devspark/defaults/commands/`
 - Number of command shims in `.cursor/commands/`

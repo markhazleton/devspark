@@ -16,6 +16,7 @@ How should DevSpark handle this? (new command, template change, CLI feature, etc
 Any other approaches you've thought about.
 
 **Which agents does this affect?**
+
 - [ ] All agents
 - [ ] Copilot only
 - [ ] Claude Code only

@@ -29,6 +29,7 @@ devspark/
 **Option A — Agent Quickstart** (recommended — no install)
 
 Point your AI agent at the quickstart prompt for your platform:
+
 - [GitHub Copilot](quickstart/devspark_quickstart_copilot.md)
 - [Claude Code](quickstart/devspark_quickstart_claudecode.md)
 - [Cursor](quickstart/devspark_quickstart_cursor.md)
@@ -36,7 +37,7 @@ Point your AI agent at the quickstart prompt for your platform:
 
 The agent asks a few questions, then pulls and installs all DevSpark prompts — including migration from Spec Kit if needed.
 
-**Option B — Download and Drop**
+## Option B — Download and Drop
 
 1. Download the [latest release](https://github.com/markhazleton/devspark/releases) zip for your agent and unzip into your project
 2. Start using `/devspark.*` commands in your AI assistant
@@ -113,6 +114,7 @@ DevSpark cleanly separates **your work** from **its installation**:
 ```
 
 **3-tier prompt resolution** (first match wins):
+
 1. `.documentation/{git-user}/commands/` — Personal tweaks
 2. `.documentation/commands/` — Team customizations
 3. `.devspark/defaults/commands/` — Stock prompts
@@ -125,8 +127,8 @@ DevSpark cleanly separates **your work** from **its installation**:
 
 DevSpark is agent-agnostic. Every agent below gets thin shims that redirect to shared canonical prompts.
 
-| Agent | | Agent | | Agent |
-|-------|-|-------|-|-------|
+| Agent | | Agent | | Agent | |
+|-------|---|-------|---|-------|---|
 | [Claude Code](https://www.anthropic.com/claude-code) | ✅ | [Cursor](https://cursor.sh/) | ✅ | [Gemini CLI](https://github.com/google-gemini/gemini-cli) | ✅ |
 | [GitHub Copilot](https://code.visualstudio.com/) | ✅ | [Codex CLI](https://github.com/openai/codex) | ✅ | [Windsurf](https://windsurf.com/) | ✅ |
 | [Amp](https://ampcode.com/) | ✅ | [Roo Code](https://roocode.com/) | ✅ | [Kilo Code](https://github.com/Kilo-Org/kilocode) | ✅ |
