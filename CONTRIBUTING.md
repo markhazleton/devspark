@@ -152,7 +152,6 @@ Please be respectful to maintainers and disclose AI assistance.
 
 ## Resources
 
-- [Spec-Driven Development Methodology](./.documentation/spec-driven-development.md)
 - [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/)
 - [Using Pull Requests](https://help.github.com/articles/about-pull-requests/)
 - [GitHub Help](https://help.github.com)

@@ -49,7 +49,7 @@ devspark init my-project          # new project
 devspark init --here --ai claude  # existing project
 ```
 
-For a full walkthrough see the [Quickstart Guide](.documentation/quickstart.md) or the [Step-by-Step Tutorial](.documentation/spec-driven-development.md).
+For a full walkthrough see the [Quickstart Guide](.documentation/quickstart.md).
 
 ---
 
@@ -141,12 +141,9 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that redirect to s
 | Topic | Link |
 |-------|------|
 | Quickstart | [quickstart.md](.documentation/quickstart.md) |
-| Full methodology | [spec-driven-development.md](.documentation/spec-driven-development.md) |
-| Adaptive lifecycle (ASLCD) | [adaptive-lifecycle.md](.documentation/adaptive-lifecycle.md) |
 | Constitution guide | [constitution-guide.md](.documentation/constitution-guide.md) |
 | CLI reference | [installation.md](.documentation/installation.md) |
 | Upgrading | [upgrade.md](.documentation/upgrade.md) |
-| Roadmap | [roadmap.md](.documentation/roadmap.md) |
 | PR review guide | [pr-review-usage.md](.documentation/pr-review-usage.md) |
 | Site audit guide | [site-audit-usage.md](.documentation/site-audit-usage.md) |
 | Critic guide | [critic-usage.md](.documentation/critic-usage.md) |
