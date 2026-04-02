@@ -45,6 +45,9 @@ env/
 *.zip
 sdd-*/
 .tmp-*
+.claude/settings.local.json
+_site/
+.documentation/_site/
 
 # Generated reports
 reports/
