@@ -2,7 +2,7 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
-**An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. A community extension of DevSpark that combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
+**An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
 ---
 
@@ -39,10 +39,10 @@ Traditional spec-driven development works well for greenfield projects with majo
 | Constitution staleness | `/devspark.evolve-constitution` proposes amendments from PR findings |
 | Context management | Right-sized workflows optimize AI agent effectiveness |
 
-### What Makes DevSpark Different
+### What's Included
 
-| Feature | DevSpark |
-|---------|----------|
+| Feature | Status |
+|---------|--------|
 | Core SDD Workflow | ✅ Full support |
 | `/devspark.constitution` | ✅ Included |
 | `/devspark.discover-constitution` | ✅ Brownfield discovery |
