@@ -23,7 +23,7 @@ Before creating anything, check for prior Spec Kit / DevSpark installations:
 
 | Check for | What it means |
 |---|---|
-| `.devspark/` exists | **DevSpark already installed.** Ask user: re-install or skip to verify (Step 11). |
+| `.devspark/` exists | **DevSpark already installed.** See "Version Check" below. |
 | `.documentation/` exists | **User artifacts exist.** Preserve everything — never overwrite. |
 | `.specify/` exists | **Old Spec Kit.** Needs migration. |
 | `.documentation/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
@@ -67,6 +67,32 @@ Tell the user what you found and ask for confirmation before proceeding.
 4. Check `.claude/commands/specify.*` and `.cursor/commands/specify.*` — rename to `devspark.*` prefix if found
 
 After migration, continue with Step 3.
+
+### If `.devspark/` already exists — Version Check
+
+1. Read `.devspark/VERSION`. If the file is missing, treat the installed version as `unknown`.
+2. Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/CHANGELOG.md` and extract the most recent `## [X.Y.Z]` heading as `LATEST_VERSION`.
+3. Compare and act:
+
+| Installed version | Latest version | Action |
+|---|---|---|
+| Same as latest | — | Report: "DevSpark is already at vX.Y.Z — nothing to update." Skip to Step 12 (Verify & Report). |
+| Older than latest | Newer | Report the version gap, then run **update mode** below. |
+| `unknown` (VERSION missing) | Any | Treat as outdated. Run update mode. |
+
+#### Update Mode
+
+Tell the user: "Updating DevSpark from vX.Y.Z → vY.Y.Y. Your `.documentation/` files will not be touched."
+
+Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
+
+- **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite)
+- **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite)
+- **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite)
+- **Step 7** — Re-create all agent shim files (overwrite — shims are framework files)
+- **Step 10** — Update `.devspark/VERSION` with new version and today's date
+
+**Never touch** `.documentation/`, the constitution, `.gitignore`, or platform guide files (VS Code settings, etc.).
 
 ---
 
