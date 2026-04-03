@@ -157,6 +157,7 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that redirect to s
 | Site audit guide | [site-audit-usage.md](.documentation/site-audit-usage.md) |
 | Critic guide | [critic-usage.md](.documentation/critic-usage.md) |
 | Harvest guide | [harvest-usage.md](.documentation/harvest-usage.md) |
+| Repo story | [repo-story/](.documentation/repo-story/) |
 
 [![DevSpark video](./.documentation/media/devspark-video-header.jpg)](https://www.youtube.com/watch?v=a9eR1xsfvHg)
 
