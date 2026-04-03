@@ -50,38 +50,9 @@ DevSpark is now an independent project, no longer positioned as a fork. This rel
 - **Optional CLI** (`devspark-cli`) — automates setup via `devspark init` / `devspark upgrade`
 - **`devspark uninstall`** — clean removal that leaves user work intact
 
-### Changed (from prior Spec Kit lineage)
+### Architecture
 
-- Rebranded from Spec Kit to DevSpark with full identity cleanup
-- Version reset from 1.6.0 to 0.1.0 (fresh semantic versioning)
-- Separated `.devspark/` (installation) from `.documentation/` (user work)
-- `SPECIFY_FEATURE` env var renamed to `DEVSPARK_FEATURE`
-- `[specify]` log prefix renamed to `[devspark]`
-- All old releases and tags purged
-
----
-
-## Prior History
-
-DevSpark evolved from [github/spec-kit](https://github.com/github/spec-kit), an open-source project by the GitHub team. Versions 0.0.1 through 1.6.0 were released under the Spec Kit name. Key milestones from that era:
-
-- **v0.0.4** — SOCKS proxy support for corporate environments
-- **v0.0.8** — Windsurf IDE support, GitHub token support
-- **v0.0.13** — Kilo Code, Augment CLI support
-- **v0.0.16** — `--force` flag for init
-- **v0.0.17** — `/clarify` and `/analyze` commands
-- **v0.0.18** — `devspark.` command prefix, VS Code prompt shortcuts
-- **v0.0.20** — Intelligent branch naming with GitHub 244-byte limit enforcement
-- **v0.0.22** — VS Code/Copilot agent support, AGENTS.md
-- **v0.0.24** — `/discover-constitution` command, DevSpark branding begins
-- **v0.0.25** — `/pr-review` and `/site-audit` commands
-- **v0.0.91** — `/evolve-constitution` command
-- **v1.0.0** — Standard semantic versioning adopted
-- **v1.1.0** — `devspark upgrade` command, migration scripts
-- **v1.2.4** — `DEVSPARK_VERSION` stamp, `/upgrade` AI command
-- **v1.3.0** — Performance optimizations for large repos
-- **v1.4.0** — `/harvest` command
-- **v1.5.0** — `/repo-story` command
-- **v1.6.0** — Agent-agnostic layout, multi-user personalization
-
-Full history of upstream contributions is preserved in git.
+- `.devspark/` (installation) is separate from `.documentation/` (user work)
+- `DEVSPARK_FEATURE` env var for feature context
+- `[devspark]` log prefix
+- 3-tier prompt resolution: personal > team > stock defaults

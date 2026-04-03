@@ -49,7 +49,7 @@ DevSpark keeps its framework files (`.devspark/`) completely separate from your 
 
 ## Origin
 
-DevSpark was inspired by [spec-kit](https://github.com/github/spec-kit) by the GitHub team. It has since evolved into a standalone product with its own architecture, identity, and expanded feature set covering the full development lifecycle.
+DevSpark is an independent project maintained by [Mark Hazleton](https://github.com/markhazleton) and the open-source community. It provides a structured development process for AI coding assistants, covering the full development lifecycle from requirements through release.
 
 ## Links
 

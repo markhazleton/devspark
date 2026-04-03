@@ -48,7 +48,7 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 - Follow the project's coding conventions.
 - Write tests for new functionality.
-- Update documentation (`README.md`, `spec-driven.md`) if your changes affect user-facing features.
+- Update documentation (`README.md`, `.documentation/`) if your changes affect user-facing features.
 - Keep your change as focused as possible. If there are multiple changes you would like to make that are not dependent upon each other, consider submitting them as separate pull requests.
 - Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 - Test your changes with the Spec-Driven Development workflow to ensure compatibility.
@@ -76,7 +76,7 @@ To test your templates, commands, and other changes locally, follow these steps:
    Run the following command to generate the local packages:
 
    ```bash
-   ./.github/workflows/scripts/create-release-packages.sh v1.0.0
+   ./.github/workflows/scripts/create-release-packages.sh v0.1.0
    ```
 
 2. **Copy the relevant package to your test project**
@@ -89,9 +89,9 @@ To test your templates, commands, and other changes locally, follow these steps:
 
    Navigate to your test project folder and open the agent to verify your implementation.
 
-## Heritage
+## About DevSpark
 
-DevSpark was originally inspired by [github/spec-kit](https://github.com/github/spec-kit). It has since evolved into a standalone product with its own identity, architecture, and feature set. We gratefully acknowledge the original work by the spec-kit team.
+DevSpark is an independent, community-maintained project. It provides a structured, spec-driven development process for AI coding assistants through 21 prompt templates and helper scripts.
 
 ## AI contributions in DevSpark
 
