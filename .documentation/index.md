@@ -232,4 +232,4 @@ See [CONTRIBUTING.md](https://github.com/MarkHazleton/devspark/blob/main/CONTRIB
 
 ## Credit & Attribution
 
-DevSpark was inspired by [github/spec-kit](https://github.com/github/spec-kit) by the GitHub team. It has since evolved into a standalone product with its own architecture, identity, and feature set.
+DevSpark is maintained by [Mark Hazleton](https://github.com/markhazleton) and the open-source community.

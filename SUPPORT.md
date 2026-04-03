@@ -11,7 +11,7 @@ For help or questions about using this project, please:
 
 ## Project Status
 
-**DevSpark** is under active development and maintained by GitHub staff **AND THE COMMUNITY**. We will do our best to respond to support, feature requests, and community questions in a timely manner.
+**DevSpark** is under active development and maintained by [Mark Hazleton](https://github.com/markhazleton) and the community. We will do our best to respond to support, feature requests, and community questions in a timely manner.
 
 ## GitHub Support Policy
 

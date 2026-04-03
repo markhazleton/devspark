@@ -35,7 +35,7 @@ Point your AI agent at the quickstart prompt for your platform:
 - [Cursor](quickstart/devspark_quickstart_cursor.md)
 - [Any other agent](quickstart/devspark_quickstart_generic.md)
 
-The agent asks a few questions, then pulls and installs all DevSpark prompts — including migration from Spec Kit if needed.
+The agent asks a few questions, then pulls and installs all DevSpark prompts.
 
 ## Option B — Download and Drop
 
@@ -175,7 +175,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.
 
 ## Acknowledgements
 
-DevSpark is inspired by [github/spec-kit](https://github.com/github/spec-kit) by [John Lam](https://github.com/jflam) and [Den Delimarsky](https://github.com/localden).
+DevSpark is maintained by [Mark Hazleton](https://github.com/markhazleton) and the open-source community.
 
 ## License
 

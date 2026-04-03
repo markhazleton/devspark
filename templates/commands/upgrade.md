@@ -55,7 +55,7 @@ agent: <agent-key>
 **If the file is missing:**
 
 - Report: `DEVSPARK_VERSION not found — version unknown`
-- The project was installed before v1.2.4 or the stamp was not written
+- The VERSION file was not written during installation
 - Proceed to Step 2 to determine what version is actually present
 
 **If the file exists**, extract:
