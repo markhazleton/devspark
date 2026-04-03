@@ -255,7 +255,8 @@ Record saved: /.documentation/quickfixes/{NEXT_ID}.md
 1. Implement the fix on your current branch
 2. Run tests to verify the fix
 3. Mark record complete: `/devspark.quickfix complete {NEXT_ID}`
-4. Create PR (optional): `gh pr create`
+4. Create PR (optional) — **HARD RULE**: Before running `gh pr create`, verify the current branch is in sync with the target branch (usually `main`). Run `git fetch origin && git status` and confirm there are no commits to pull. If behind, run `git rebase origin/main` first.
+   `gh pr create`
 
 If scope expands beyond {MAX_EFFORT}:
 - Upgrade to full spec: `/devspark.specify {problem statement}`

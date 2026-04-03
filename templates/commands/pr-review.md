@@ -28,6 +28,7 @@ This command reviews GitHub Pull Requests against the project constitution. It w
 - Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
 - GitHub repository with PR context
 - GitHub CLI (`gh`) installed and authenticated (required)
+- **HARD RULE — Branch Sync**: The source (head) branch **MUST** be fully in sync with the target (base) branch. Do **NOT** proceed with review or approval if the source branch is behind the target. Instruct the user to rebase or merge the target branch into the source branch first.
 
 ## Outline
 
@@ -68,6 +69,9 @@ If the script fails:
 - **GitHub CLI not installed**: Provide installation instructions
 - **PR not found**: Ask user to verify PR number and `gh auth status`
 - **No PR number**: Ask user to provide PR number explicitly
+- **Branch out of sync** (`is_behind_target: true`): **STOP immediately.** Do not review or approve. Inform the user:
+  > "BLOCKED: The source branch `{source_branch}` is behind target branch `{target_branch}`. Sync it first before this PR can be reviewed or approved."
+  > Suggested fix: `gh pr update-branch {PR_NUMBER}` or `git fetch origin && git rebase origin/{target_branch}`
 
 For single quotes in args like "I'm reviewing", use escape syntax: e.g 'I'\''m reviewing' (or double-quote if possible: "I'm reviewing").
 
