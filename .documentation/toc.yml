@@ -5,10 +5,10 @@
 # Getting started section
 - name: Getting Started
   items:
-    - name: Installation
-      href: installation.md
     - name: Quick Start
       href: quickstart.md
+    - name: Other Ways to Get Started
+      href: installation.md
     - name: Upgrade
       href: upgrade.md
 

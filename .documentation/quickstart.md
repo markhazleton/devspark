@@ -1,82 +1,87 @@
 # Quick Start Guide
 
-This guide will help you get started with Spec-Driven Development using DevSpark.
+**The fastest way to get DevSpark running is the Prompt Bootstrap — no install required.**
+
+> [!TIP]
+> **Agent-Agnostic**: DevSpark works identically with any of 17+ supported AI agents. All canonical prompts live in `.documentation/commands/` — your agent gets lightweight shims that redirect there.
+
+---
+
+## Step 1: Bootstrap with a Prompt
+
+Open a chat with your AI agent inside the target repository and paste one of the commands below. The agent asks a few questions about your project, then pulls and installs all DevSpark prompts automatically.
+
+### GitHub Copilot
+
+```text
+@workspace Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_copilot.md
+```
+
+### Claude Code
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_claudecode.md
+```
+
+### Cursor
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_cursor.md
+```
+
+### Any other agent
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_generic.md
+```
+
+The agent will ask about your project name, tech stack, script preference, and core principles — then scaffold the full DevSpark structure with no CLI needed.
 
 > [!NOTE]
-> All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `devspark` CLI auto-selects based on OS unless you pass `--script sh|ps`.
->
-> [!TIP]
-> **Agent-Agnostic**: DevSpark works identically with any of 17+ supported AI agents. The workflow below applies regardless of which agent you choose — canonical prompts live in `.documentation/commands/` and your agent gets thin shims that redirect there.
+> Need CLI-based setup instead? See [Other Ways to Get Started](installation.md) for manual, script, and CLI options — ordered lightest to heaviest.
 
-## The 6-Step Process
+---
 
-> [!TIP]
-> **Context Awareness**: DevSpark commands automatically detect the active feature based on your current Git branch (e.g., `001-feature-name`). To switch between different specifications, simply switch Git branches.
+## The DevSpark Workflow (6 Steps)
 
-### Step 1: Install Specify
-
-**In your terminal**, run the `devspark` CLI command to initialize your project.
-
-#### Greenfield (New Project)
-
-Starting fresh? Create a new project directory:
-
-```bash
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME>
-```
-
-#### Brownfield (Existing Project)
-
-Adding DevSpark to an existing codebase? Navigate to your project and initialize in place:
-
-```bash
-cd /path/to/your-existing-project
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init --here
-```
+Once DevSpark is bootstrapped, use these slash commands in your AI agent's chat.
 
 > [!TIP]
-> **Brownfield Tip**: After initialization, use `/devspark.discover-constitution` to analyze your existing codebase and draft a constitution based on established patterns.
+> **Context Awareness**: DevSpark commands automatically detect the active feature based on your current Git branch (e.g., `001-feature-name`). Switch Git branches to switch between specs.
 
-#### Optional: Pick script type explicitly
+### Step 1: Define Your Constitution
 
-```bash
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --script ps  # Force PowerShell
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --script sh  # Force POSIX shell
-```
-
-### Step 2: Define Your Constitution
-
-**In your AI Agent's chat interface**, use the `/devspark.constitution` slash command to establish the core rules and principles for your project. You should provide your project's specific principles as arguments.
+**In your AI agent's chat**, use `/devspark.constitution` to establish the core rules and principles for your project. Provide your project's specific principles as arguments.
 
 ```markdown
 /devspark.constitution This project follows a "Library-First" approach. All features must be implemented as standalone libraries first. We use TDD strictly. We prefer functional programming patterns.
 ```
 
-### Step 3: Create the Spec
+### Step 2: Create the Spec
 
-**In the chat**, use the `/devspark.specify` slash command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
+**In the chat**, use `/devspark.specify` to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
 
 ```markdown
 /devspark.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.
 ```
 
-### Step 4: Refine the Spec
+### Step 3: Refine the Spec
 
-**In the chat**, use the `/devspark.clarify` slash command to identify and resolve ambiguities in your specification. You can provide specific focus areas as arguments.
+**In the chat**, use `/devspark.clarify` to identify and resolve ambiguities in your specification. You can provide specific focus areas as arguments.
 
 ```bash
 /devspark.clarify Focus on security and performance requirements.
 ```
 
-### Step 5: Create a Technical Implementation Plan
+### Step 4: Create a Technical Implementation Plan
 
-**In the chat**, use the `/devspark.plan` slash command to provide your tech stack and architecture choices.
+**In the chat**, use `/devspark.plan` to provide your tech stack and architecture choices.
 
 ```markdown
 /devspark.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
 ```
 
-### Step 6: Break Down and Implement
+### Step 5: Break Down and Implement
 
 **In the chat**, use the `/devspark.tasks` slash command to create an actionable task list.
 
@@ -118,37 +123,7 @@ This creates a copy of the shared prompt in `.documentation/{your-git-user}/comm
 
 ## Upgrading DevSpark
 
-To upgrade to the latest version of DevSpark:
-
-### 1. Upgrade CLI Tool
-
-```bash
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
-```
-
-### 2. Upgrade Project Files
-
-Use the `devspark upgrade` command:
-
-```bash
-# Simple upgrade with auto-detection
-devspark upgrade
-
-# Preview changes first
-devspark upgrade --dry-run
-
-# With constitution backup
-devspark upgrade --backup
-```
-
-The upgrade command will:
-
-- Auto-detect your AI assistant
-- Check for migration needs
-- Update all templates and scripts
-- Preserve your specs and customizations
-
-See the [Upgrade Guide](upgrade.md) for more details.
+To update to the latest prompts without reinstalling, use `/devspark.upgrade` in your AI agent's chat, or use the `devspark upgrade` command if you installed the CLI. See the [Upgrade Guide](upgrade.md) for details.
 
 ---
 

@@ -66,48 +66,26 @@ Traditional spec-driven development works well for greenfield projects with majo
 
 ## Getting Started
 
-### Quick Start
+### Prompt Bootstrap — The Fastest Way
 
-```bash
-# Install DevSpark CLI
-uv tool install devspark-cli --from git+https://github.com/MarkHazleton/devspark.git
+No installation required. Open a chat with your AI agent in your target repository and paste the command for your agent:
 
-# New project (greenfield)
-devspark init my-project --ai claude
+| Agent | Command to paste |
+|-------|-----------------|
+| **GitHub Copilot** | `@workspace Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_copilot.md` |
+| **Claude Code** | `Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_claudecode.md` |
+| **Cursor** | `Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_cursor.md` |
+| **Any other agent** | `Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_generic.md` |
 
-# Existing project (brownfield)
-cd /path/to/existing-project
-devspark init --here --ai claude
+The agent asks a few questions about your project, then scaffolds the full DevSpark structure. See the [Quick Start Guide](quickstart.md) for the full workflow.
 
-# Upgrade existing project
-devspark upgrade
-```
-
-### First Steps by Project Type
-
-#### Greenfield (New Project)
-
-```bash
-devspark init my-project --ai claude
-cd my-project
-/devspark.constitution        # Define governing principles
-/devspark.specify             # Create first feature spec
-```
-
-#### Brownfield (Existing Project)
-
-```bash
-cd /path/to/existing-project
-devspark init --here --ai claude
-/devspark.discover-constitution   # Analyze existing patterns
-/devspark.site-audit              # Baseline technical debt
-```
+> **Prefer a CLI or manual setup?** See [Other Ways to Get Started](installation.md) — ordered lightest to heaviest.
 
 ### Guides
 
-- [Installation Guide](installation.md) - Detailed setup for all scenarios
-- [Quick Start Guide](quickstart.md) - 6-step process walkthrough
-- [Upgrade Guide](upgrade.md) - Updating to latest version
+- [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
+- [Other Ways to Get Started](installation.md) — Manual, one-shot CLI, and installed CLI
+- [Upgrade Guide](upgrade.md) — Updating to the latest version
 
 ---
 
