@@ -141,49 +141,167 @@ if ($PrNumber -notmatch '^\d+$') {
     exit 1
 }
 
-# Check if GitHub CLI is available
-if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-    Write-JsonError -Message "GitHub CLI (gh) is required but not installed" `
-        -Details "Install from: https://cli.github.com/"
+# Check if platform CLI is available
+$cliCommand = $DevSparkPlatform.PrCli
+if (-not (Get-Command $cliCommand -ErrorAction SilentlyContinue)) {
+    Write-JsonError -Message "$($DevSparkPlatform.DisplayName) CLI ($cliCommand) is required but not installed" `
+        -Details "Install from: $($DevSparkPlatform.PrCliInstallUrl)"
     exit 1
 }
 
-# Check GitHub CLI authentication
-try {
-    gh auth status 2>$null | Out-Null
-} catch {
-    Write-JsonError -Message "GitHub CLI not authenticated" `
-        -Details "Run: gh auth login"
+# Check platform CLI authentication
+$authOk = & $DevSparkPlatform.AuthCheck
+if (-not $authOk) {
+    $authCmd = switch ($DevSparkPlatform.Name) {
+        'github' { 'gh auth login' }
+        'azdo'   { 'az login' }
+        'gitlab' { 'glab auth login' }
+        default  { 'See platform documentation' }
+    }
+    Write-JsonError -Message "$($DevSparkPlatform.DisplayName) CLI not authenticated" `
+        -Details "Run: $authCmd"
     exit 1
 }
 
-# Fetch PR data
-try {
-    $prDataJson = gh pr view $PrNumber --json number,title,body,state,author,headRefName,baseRefName,commits,files,additions,deletions,createdAt,updatedAt 2>$null
-    $prData = $prDataJson | ConvertFrom-Json
-} catch {
-    Write-JsonError -Message "Failed to fetch PR #$PrNumber" `
-        -Details "Verify PR exists and you have access. Error: $_"
+# Fetch PR data (platform-specific, normalized to common fields)
+$prNumber_int = [int]$PrNumber
+$prTitle = ""; $prBody = ""; $prState = ""; $prAuthor = ""
+$sourceBranch = ""; $targetBranch = ""
+$commitSha = "unknown"; $commitCount = 0
+$allFilesChanged = @(); $linesAdded = 0; $linesDeleted = 0
+$createdAt = ""; $updatedAt = ""
+$mergeStateStatus = "UNKNOWN"
+
+switch ($DevSparkPlatform.Name) {
+    'github' {
+        try {
+            $prDataJson = gh pr view $PrNumber --json number,title,body,state,author,headRefName,baseRefName,commits,files,additions,deletions,createdAt,updatedAt,mergeStateStatus 2>$null
+            $prData = $prDataJson | ConvertFrom-Json
+        } catch {
+            Write-JsonError -Message "Failed to fetch PR #$PrNumber" `
+                -Details "Verify PR exists and you have access. Error: $_"
+            exit 1
+        }
+        $prNumber_int  = $prData.number
+        $prTitle       = $prData.title
+        $prBody        = $prData.body ?? ""
+        $prState       = $prData.state
+        $prAuthor      = $prData.author.login
+        $sourceBranch  = $prData.headRefName
+        $targetBranch  = $prData.baseRefName
+        if ($prData.commits -and $prData.commits.Count -gt 0) { $commitSha = $prData.commits[-1].oid }
+        $commitCount   = $prData.commits.Count
+        $allFilesChanged = @($prData.files | ForEach-Object { $_.path })
+        $linesAdded    = $prData.additions ?? 0
+        $linesDeleted  = $prData.deletions ?? 0
+        $createdAt     = $prData.createdAt
+        $updatedAt     = $prData.updatedAt
+        $mergeStateStatus = $prData.mergeStateStatus ?? "UNKNOWN"
+    }
+    'azdo' {
+        try {
+            $prRaw = az repos pr show --id $PrNumber --output json 2>$null
+            $prData = $prRaw | ConvertFrom-Json
+        } catch {
+            Write-JsonError -Message "Failed to fetch PR #$PrNumber" `
+                -Details "Verify PR exists and you have access. Error: $_"
+            exit 1
+        }
+        $prNumber_int  = $prData.pullRequestId
+        $prTitle       = $prData.title
+        $prBody        = $prData.description ?? ""
+        $prState       = $prData.status
+        $prAuthor      = $prData.createdBy.uniqueName
+        $sourceBranch  = $prData.sourceRefName -replace '^refs/heads/', ''
+        $targetBranch  = $prData.targetRefName -replace '^refs/heads/', ''
+        if ($prData.commits -and $prData.commits.Count -gt 0) { $commitSha = $prData.commits[-1].commitId }
+        $commitCount   = if ($prData.commits) { $prData.commits.Count } else { 0 }
+        # AzDO mergeStatus: notSet | conflicts | succeeded | rejectedByPolicy | failure
+        $mergeStateStatus = ($prData.mergeStatus ?? "UNKNOWN").ToUpper()
+        $createdAt     = $prData.creationDate
+        $updatedAt     = $prData.completionQueueTime ?? $prData.creationDate
+        # Files not available directly from pr show; resolved via git below
+    }
+    'gitlab' {
+        try {
+            $mrRaw = glab mr view $PrNumber --output json 2>$null
+            $mrData = $mrRaw | ConvertFrom-Json
+        } catch {
+            Write-JsonError -Message "Failed to fetch MR !$PrNumber" `
+                -Details "Verify MR exists and you have access. Error: $_"
+            exit 1
+        }
+        $prNumber_int  = $mrData.iid
+        $prTitle       = $mrData.title
+        $prBody        = $mrData.description ?? ""
+        $prState       = $mrData.state
+        $prAuthor      = $mrData.author.username
+        $sourceBranch  = $mrData.source_branch
+        $targetBranch  = $mrData.target_branch
+        $mergeStateStatus = if ($mrData.merge_status -eq "can_be_merged") { "CLEAN" } else { ($mrData.merge_status ?? "UNKNOWN").ToUpper() }
+        $createdAt     = $mrData.created_at
+        $updatedAt     = $mrData.updated_at
+    }
+}
+
+# For non-GitHub platforms, resolve file list via git diff
+if ($DevSparkPlatform.Name -ne 'github' -and $sourceBranch -and $targetBranch) {
+    try {
+        git fetch origin $sourceBranch $targetBranch 2>$null | Out-Null
+        $allFilesChanged = @(git diff --name-only "origin/$targetBranch...origin/$sourceBranch" 2>$null)
+    } catch { $allFilesChanged = @() }
+}
+
+# If commit SHA still unknown, try git (works for all platforms after fetch)
+if ($commitSha -eq "unknown" -and $sourceBranch) {
+    try { $commitSha = git rev-parse "origin/$sourceBranch" 2>$null } catch {}
+}
+
+#==============================================================================
+# HARD RULE: Source branch MUST be in sync with target branch
+# GitHub's mergeStateStatus=="BEHIND" is treated as authoritative.
+# A universal git-based check covers AzDO, GitLab, and verifies GitHub.
+#==============================================================================
+$isBehindTarget = $false
+
+# Fast path: GitHub API already says BEHIND
+if ($mergeStateStatus -eq "BEHIND") {
+    $isBehindTarget = $true
+}
+
+# Universal git check — fetch both refs, count target commits absent from source
+if (-not $isBehindTarget -and $sourceBranch -and $targetBranch) {
+    try {
+        git fetch origin $sourceBranch $targetBranch 2>$null | Out-Null
+        $behindCount = git rev-list "origin/$targetBranch" "^origin/$sourceBranch" --count 2>$null
+        if ([int]($behindCount ?? "0") -gt 0) {
+            $isBehindTarget = $true
+        }
+    } catch {
+        # Git check failed; rely on API status only
+    }
+}
+
+if ($isBehindTarget) {
+    $fixHint = switch ($DevSparkPlatform.Name) {
+        'github' { "gh pr update-branch $PrNumber  OR  git fetch origin && git rebase origin/$targetBranch" }
+        default  { "git fetch origin && git rebase origin/$targetBranch" }
+    }
+    Write-JsonError -Message "BLOCKED: Source branch '$sourceBranch' is behind target branch '$targetBranch'" `
+        -Details "HARD RULE: PR review and approval are blocked until the source branch is in sync with the target branch. Fix with: $fixHint"
     exit 1
 }
 
-# Extract commit SHA (most recent commit)
-$commitSha = "unknown"
-if ($prData.commits -and $prData.commits.Count -gt 0) {
-    $commitSha = $prData.commits[-1].oid
-}
-
-# Check if diff is available
+# Check if diff is available (platform-specific)
 $diffAvailable = $false
 try {
-    gh pr diff $PrNumber 2>$null | Out-Null
-    $diffAvailable = $true
-} catch {
-    $diffAvailable = $false
-}
+    switch ($DevSparkPlatform.Name) {
+        'github' { gh pr diff $PrNumber 2>$null | Out-Null; $diffAvailable = $true }
+        default  { git diff "origin/$targetBranch...origin/$sourceBranch" 2>$null | Out-Null; $diffAvailable = $true }
+    }
+} catch { $diffAvailable = $false }
 
-# Extract file list
-$allFilesChanged = @($prData.files | ForEach-Object { $_.path })
+# Apply file sampling
 $filesChangedTotal = $allFilesChanged.Count
 $filesChangedTruncated = $false
 $filesChanged = $allFilesChanged
@@ -205,44 +323,47 @@ if ($Json) {
         REPO_ROOT = $repoRoot
         PR_CONTEXT = @{
             enabled = $true
-            pr_number = $prData.number
-            pr_title = $prData.title
-            pr_body = $prData.body ?? ""
-            pr_state = $prData.state
-            pr_author = $prData.author.login
-            source_branch = $prData.headRefName
-            target_branch = $prData.baseRefName
+            pr_number = $prNumber_int
+            pr_title = $prTitle
+            pr_body = $prBody
+            pr_state = $prState
+            pr_author = $prAuthor
+            source_branch = $sourceBranch
+            target_branch = $targetBranch
             commit_sha = $commitSha
-            commit_count = $prData.commits.Count
+            commit_count = $commitCount
             files_changed = $filesChanged
             files_changed_total = $filesChangedTotal
             files_changed_truncated = $filesChangedTruncated
-            lines_added = $prData.additions ?? 0
-            lines_deleted = $prData.deletions ?? 0
-            created_at = $prData.createdAt
-            updated_at = $prData.updatedAt
+            lines_added = $linesAdded
+            lines_deleted = $linesDeleted
+            created_at = $createdAt
+            updated_at = $updatedAt
             diff_available = $diffAvailable
             file_sample_limit = $FileSampleLimit
             include_all_files = [bool]$IncludeAllFiles
+            merge_state_status = $mergeStateStatus
+            is_behind_target = $isBehindTarget
         }
         CONSTITUTION_PATH = $constitutionPath
         CONSTITUTION_EXISTS = $constitutionExists
         REVIEW_DIR = $reviewDir
     } | ConvertTo-Json -Depth 10
-    
+
     Write-Output $output
 } else {
     # Human-readable output
-    Write-Output "PR Context for #$($prData.number)"
+    Write-Output "PR Context for #$prNumber_int"
     Write-Output "========================="
-    Write-Output "Title: $($prData.title)"
-    Write-Output "Author: $($prData.author.login)"
-    Write-Output "State: $($prData.state)"
-    Write-Output "Branch: $($prData.headRefName) → $($prData.baseRefName)"
+    Write-Output "Title:  $prTitle"
+    Write-Output "Author: $prAuthor"
+    Write-Output "State:  $prState"
+    Write-Output "Branch: $sourceBranch → $targetBranch"
+    Write-Output "Sync:   $(if ($isBehindTarget) { 'BEHIND (blocked)' } else { "In sync ($mergeStateStatus)" })"
     Write-Output "Commit: $commitSha"
-    Write-Output "Files: $($prData.files.Count)"
-    Write-Output "Lines: +$($prData.additions ?? 0) -$($prData.deletions ?? 0)"
+    Write-Output "Files:  $($filesChanged.Count)"
+    Write-Output "Lines:  +$linesAdded -$linesDeleted"
     Write-Output ""
     Write-Output "Constitution: $(if ($constitutionExists) { '✓ Found' } else { '✗ Missing' })"
-    Write-Output "Review will be saved to: $reviewDir\pr-$($prData.number).md"
+    Write-Output "Review will be saved to: $reviewDir\pr-$prNumber_int.md"
 }
