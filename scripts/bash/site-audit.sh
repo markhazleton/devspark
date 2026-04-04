@@ -56,7 +56,7 @@ CONSTITUTION_PRINCIPLES="[]"
 if [[ -f "$CONSTITUTION_PATH" ]]; then
     CONSTITUTION_EXISTS="true"
     # Extract version if present
-    CONSTITUTION_VERSION=$(sed -nE 's/\*\*Version\*\*:[[:space:]]*([^[:space:]|]+).*/\1/p' "$CONSTITUTION_PATH" 2>/dev/null | head -1 | tr -d ' ' || echo "")
+    CONSTITUTION_VERSION=$(sed -nE 's/\*\*Version\*\*:[[:space:]]*([^[:space:]|]+).*/\1/p' "$CONSTITUTION_PATH" 2>/dev/null | head -1 || echo "")
     # Extract principles (### headers)
     CONSTITUTION_PRINCIPLES=$(grep -E '^###\s+' "$CONSTITUTION_PATH" 2>/dev/null | sed 's/^###\s*//' | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo "[]")
 fi
