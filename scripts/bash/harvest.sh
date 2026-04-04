@@ -43,10 +43,22 @@ harvest_timestamp=$(date -u +%FT%TZ)
 report_path=".documentation/copilot/harvest-${harvest_date}.md"
 
 json_escape() {
-  python - <<'PY' "$1"
-import json, sys
-print(json.dumps(sys.argv[1]))
-PY
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\b'/\\b}"
+  s="${s//$'\f'/\\f}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '"%s"' "$s"
+}
+
+file_last_modified_utc_date() {
+  local file="$1"
+  local epoch
+  epoch=$(stat -c %Y "$file" 2>/dev/null || stat -f %m "$file" 2>/dev/null) || { echo "unknown"; return; }
+  date -u -r "$epoch" +%F 2>/dev/null || date -u -d "@$epoch" +%F 2>/dev/null || echo "unknown"
 }
 
 count_checked_tasks() {
@@ -74,7 +86,10 @@ if [[ "$scope" == "full" || "$scope" == "specs" || "$scope" == "scan" || "$scope
   specs_dir="$repo_root/.documentation/specs"
   reviews_dir="$repo_root/.documentation/specs/pr-review"
   if [[ -d "$specs_dir" ]]; then
+    _spec_count=0
     while IFS= read -r -d '' spec_dir; do
+      _spec_count=$((_spec_count + 1))
+      [[ $_spec_count -gt $sample_limit ]] && break
       spec_name=$(basename "$spec_dir")
       [[ "$spec_name" == "pr-review" ]] && continue
       spec_number=""
@@ -134,7 +149,7 @@ if [[ "$scope" == "full" || "$scope" == "specs" || "$scope" == "scan" || "$scope
       rel_path=${spec_dir#"$repo_root/"}
       spec_entries+=("{\"name\":$(json_escape "$spec_name"),\"number\":$(json_escape "$spec_number"),\"status\":$(json_escape "$status"),\"path\":$(json_escape "$rel_path"),\"has_spec\":$has_spec,\"has_plan\":$has_plan,\"has_tasks\":$has_tasks,\"total_tasks\":$total_tasks,\"completed_tasks\":$completed_tasks,\"incomplete_tasks\":$incomplete_tasks,\"in_changelog\":$in_changelog,\"pr_review\":$(json_escape "$pr_review")}")
       changelog_entries+=("{\"spec_name\":$(json_escape "$spec_name"),\"spec_number\":$(json_escape "$spec_number"),\"status\":$(json_escape "$status"),\"in_changelog\":$in_changelog,\"pr_review\":$(json_escape "$pr_review")}")
-    done < <(find "$specs_dir" -mindepth 1 -maxdepth 1 -type d -print0 | head -z -n "$sample_limit")
+    done < <(find "$specs_dir" -mindepth 1 -maxdepth 1 -type d -print0)
   fi
 fi
 
@@ -163,9 +178,12 @@ fi
 
 archive_existing=()
 if [[ -d "$repo_root/.archive" ]]; then
+  _archive_count=0
   while IFS= read -r -d '' archive_file; do
+    _archive_count=$((_archive_count + 1))
+    [[ $_archive_count -gt $sample_limit ]] && break
     archive_existing+=("$(json_escape "${archive_file#"$repo_root/"}")")
-  done < <(find "$repo_root/.archive" -type f -print0 | head -z -n "$sample_limit")
+  done < <(find "$repo_root/.archive" -type f -print0)
 fi
 
 docs_all=()
@@ -216,7 +234,7 @@ score_doc() {
     score=15
   fi
 
-  printf '%s|%s|%s' "$taxon" "$score" "$disposition"
+  printf '%s|%s|%s\n' "$taxon" "$score" "$disposition"
 }
 
 if [[ "$scope" == "full" || "$scope" == "docs" || "$scope" == "scan" || "$scope" == "changelog" ]]; then
@@ -228,7 +246,10 @@ if [[ "$scope" == "full" || "$scope" == "docs" || "$scope" == "scan" || "$scope"
     [[ -z "$root_info" ]] && continue
     root_path=${root_info%%:*}
     root_mode=${root_info##*:}
+    _doc_count=0
     while IFS= read -r -d '' file; do
+      _doc_count=$((_doc_count + 1))
+      [[ $_doc_count -gt $sample_limit ]] && break
       rel=${file#"$repo_root/"}
       name=$(basename "$file")
       ext=".${name##*.}"
@@ -262,11 +283,7 @@ if [[ "$scope" == "full" || "$scope" == "docs" || "$scope" == "scan" || "$scope"
       fi
 
       IFS='|' read -r taxon score disposition < <(score_doc "$category" "$rel")
-      entry="{\"path\":$(json_escape "$rel"),\"name\":$(json_escape "$name"),\"extension\":$(json_escape "$ext"),\"size_bytes\":$(stat -c %s "$file" 2>/dev/null || stat -f %z "$file" 2>/dev/null || echo 0),\"last_modified\":$(json_escape "$(date -u -r "$file" +%F 2>/dev/null || python - <<'PY' "$file"
-import datetime, os, sys
-print(datetime.datetime.utcfromtimestamp(os.path.getmtime(sys.argv[1])).strftime('%Y-%m-%d'))
-PY
-)"),\"category\":$(json_escape "$category"),\"taxon\":$(json_escape "$taxon"),\"usefulness_score\":$score,\"disposition\":$(json_escape "$disposition")}"
+      entry="{\"path\":$(json_escape "$rel"),\"name\":$(json_escape "$name"),\"extension\":$(json_escape "$ext"),\"size_bytes\":$(stat -c %s "$file" 2>/dev/null || stat -f %z "$file" 2>/dev/null || echo 0),\"last_modified\":$(json_escape "$(file_last_modified_utc_date "$file")"),\"category\":$(json_escape "$category"),\"taxon\":$(json_escape "$taxon"),\"usefulness_score\":$score,\"disposition\":$(json_escape "$disposition")}"
       docs_all+=("$entry")
 
       case "$category" in
@@ -282,7 +299,7 @@ PY
         quickfix_record) quickfix_records+=("$entry"); docs_to_archive=$((docs_to_archive + 1)) ;;
         legacy_root_doc) legacy_root_docs+=("$entry"); docs_to_archive=$((docs_to_archive + 1)) ;;
       esac
-    done < <(find "$root_path" -type f -print0 | head -z -n "$sample_limit")
+    done < <(find "$root_path" -type f -print0)
   done
 fi
 

@@ -46,11 +46,9 @@ list_files_json() {
 file_mtime() {
     local f="$REPO_ROOT/$1"
     if [[ -f "$f" ]]; then
-        if date --version >/dev/null 2>&1; then
-            date -r "$f" +%Y-%m-%d 2>/dev/null || echo "unknown"
-        else
-            stat -f "%Sm" -t "%Y-%m-%d" "$f" 2>/dev/null || echo "unknown"
-        fi
+        local epoch
+        epoch=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null) || { echo "unknown"; return; }
+        date -u -r "$epoch" +%Y-%m-%d 2>/dev/null || date -u -d "@$epoch" +%Y-%m-%d 2>/dev/null || echo "unknown"
     else
         echo "unknown"
     fi
