@@ -55,10 +55,10 @@ if [[ -f "$REPO_ROOT/package.json" ]]; then
     CURRENT_VERSION=$(jq -r '.version // "0.0.0"' "$REPO_ROOT/package.json" 2>/dev/null || echo "0.0.0")
     VERSION_SOURCE="package.json"
 elif [[ -f "$REPO_ROOT/pyproject.toml" ]]; then
-    CURRENT_VERSION=$(grep -oP 'version\s*=\s*"\K[^"]+' "$REPO_ROOT/pyproject.toml" 2>/dev/null || echo "0.0.0")
+    CURRENT_VERSION=$(sed -nE 's/^version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$REPO_ROOT/pyproject.toml" 2>/dev/null | head -1 || echo "0.0.0")
     VERSION_SOURCE="pyproject.toml"
 elif [[ -f "$REPO_ROOT/Cargo.toml" ]]; then
-    CURRENT_VERSION=$(grep -oP '^version\s*=\s*"\K[^"]+' "$REPO_ROOT/Cargo.toml" 2>/dev/null || echo "0.0.0")
+    CURRENT_VERSION=$(sed -nE 's/^version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$REPO_ROOT/Cargo.toml" 2>/dev/null | head -1 || echo "0.0.0")
     VERSION_SOURCE="Cargo.toml"
 fi
 
