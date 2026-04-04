@@ -141,15 +141,24 @@ fi
 code_comments=()
 code_comment_count=0
 if [[ "$scope" == "full" || "$scope" == "comments" || "$scope" == "scan" ]]; then
+  # docs/ is excluded because it is commonly used as a GitHub Pages or other
+  # static-site publish folder containing minified JS bundles. Scanning those
+  # files produces false-positive matches and can generate lines that are
+  # hundreds of KB long, resulting in invalid JSON output.
   while IFS= read -r match; do
     file=${match%%:*}
     rest=${match#*:}
     line=${rest%%:*}
     text=${rest#*:}
+    # Truncate matched text to 200 characters to prevent malformed JSON from
+    # minified source files that have very long single lines.
+    if [[ ${#text} -gt 200 ]]; then
+      text="${text:0:200}…"
+    fi
     rel=${file#"$repo_root/"}
     code_comments+=("{\"file\":$(json_escape "$rel"),\"line\":$line,\"text\":$(json_escape "$text"),\"type\":\"spec-reference\"}")
     code_comment_count=$((code_comment_count + 1))
-  done < <(grep -RInE --include='*.py' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.cs' --include='*.go' --include='*.rs' '(#|//)[[:space:]]*(spec[[:space:]]+[0-9]+|FR-[0-9]+|Phase[[:space:]]+[0-9]+|TODO\(spec|plan[[:space:]]+[0-9]{3}|T[0-9]{3})' "$repo_root" 2>/dev/null | head -n "$sample_limit" || true)
+  done < <(grep -RInE --exclude-dir='.archive' --exclude-dir='node_modules' --exclude-dir='docs' --include='*.py' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.cs' --include='*.go' --include='*.rs' '(#|//)[[:space:]]*(spec[[:space:]]+[0-9]+|FR-[0-9]+|Phase[[:space:]]+[0-9]+|TODO\(spec|plan[[:space:]]+[0-9]{3}|T[0-9]{3})' "$repo_root" 2>/dev/null | head -n "$sample_limit" || true)
 fi
 
 archive_existing=()

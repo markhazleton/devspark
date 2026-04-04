@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # migrate-to-documentation.sh
 # Migrates DevSpark projects from old structure (.specify/, memory/, scripts/, templates/)
 # to new .documentation/ structure
