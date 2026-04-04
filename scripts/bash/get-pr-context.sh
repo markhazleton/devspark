@@ -246,7 +246,7 @@ main() {
             if [[ "$raw_merge_status" == "can_be_merged" ]]; then
                 merge_state_status="CLEAN"
             else
-                merge_state_status="${raw_merge_status^^}"
+                merge_state_status=$(echo "$raw_merge_status" | tr '[:lower:]' '[:upper:]')
             fi
             # Files resolved via git diff below
             ;;
