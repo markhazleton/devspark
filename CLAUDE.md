@@ -27,9 +27,15 @@ Use `/devspark.{command}` to invoke workflows:
 
 Full list in `templates/commands/`.
 
+## Git Workflow Rules
+
+- **HARD RULE — Branch Sync**: Before creating a PR or running `/devspark.pr-review`, the source (head) branch **MUST** be fully in sync with the target (base) branch. If the source branch is behind the target, do **NOT** proceed — rebase or merge first.
+  - Check: `git fetch origin && git status`
+  - Fix: `git rebase origin/main` or `gh pr update-branch {PR_NUMBER}`
+
 ## Coding Standards
 
 - Python 3.11+, typed with typer/rich/click
 - Markdown linted via markdownlint-cli2 (config: `.markdownlint-cli2.jsonc`)
-- Scripts in both PowerShell and Bash (keep parity)
+- Scripts in both PowerShell and Bash (keep parity); context scripts support GitHub, AzDO, and GitLab
 - Never overwrite `.documentation/` user artifacts during CLI operations
