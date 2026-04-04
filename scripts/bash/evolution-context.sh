@@ -78,7 +78,7 @@ CONSTITUTION_EXISTS="false"
 CONSTITUTION_VERSION=""
 if [[ -f "$CONSTITUTION_PATH" ]]; then
     CONSTITUTION_EXISTS="true"
-    CONSTITUTION_VERSION=$(grep -oP '\*\*Version\*\*:\s*\K[^\s|]+' "$CONSTITUTION_PATH" 2>/dev/null || echo "1.0.0")
+    CONSTITUTION_VERSION=$(sed -nE 's/\*\*Version\*\*:[[:space:]]*([^[:space:]|]+).*/\1/p' "$CONSTITUTION_PATH" 2>/dev/null | head -1 || echo "1.0.0")
 fi
 
 # Extract constitution principles

@@ -16,7 +16,7 @@ fi
 detect_platform() {
     # 1. Explicit env var override
     if [[ -n "${DEVSPARK_PLATFORM:-}" ]]; then
-        echo "${DEVSPARK_PLATFORM,,}"
+        echo "$DEVSPARK_PLATFORM" | tr '[:upper:]' '[:lower:]'
         return
     fi
 
@@ -28,7 +28,7 @@ detect_platform() {
         local platform_val
         platform_val=$(jq -r '.platform // empty' "$config_file" 2>/dev/null || true)
         if [[ -n "$platform_val" ]]; then
-            echo "${platform_val,,}"
+            echo "$platform_val" | tr '[:upper:]' '[:lower:]'
             return
         fi
     fi
