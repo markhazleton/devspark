@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Site Audit Pre-Scan Script
 # Gathers codebase data as JSON for LLM context efficiency
 
@@ -56,46 +56,37 @@ CONSTITUTION_PRINCIPLES="[]"
 if [[ -f "$CONSTITUTION_PATH" ]]; then
     CONSTITUTION_EXISTS="true"
     # Extract version if present
-    CONSTITUTION_VERSION=$(grep -oP '\*\*Version\*\*:\s*\K[^\|]+' "$CONSTITUTION_PATH" 2>/dev/null | tr -d ' ' || echo "")
+    CONSTITUTION_VERSION=$(sed -nE 's/\*\*Version\*\*:[[:space:]]*([^[:space:]|]+).*/\1/p' "$CONSTITUTION_PATH" 2>/dev/null | head -1 || echo "")
     # Extract principles (### headers)
     CONSTITUTION_PRINCIPLES=$(grep -E '^###\s+' "$CONSTITUTION_PATH" 2>/dev/null | sed 's/^###\s*//' | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo "[]")
 fi
 
-# File patterns
-declare -A FILE_COUNTS
-FILE_COUNTS[source]=0
-FILE_COUNTS[config]=0
-FILE_COUNTS[documentation]=0
-FILE_COUNTS[tests]=0
-FILE_COUNTS[scripts]=0
-FILE_COUNTS[build]=0
-
-# Exclusion pattern for find
-EXCLUDE_DIRS="-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*' -o -path '*/.archive/*'"
+# Exclusion predicates for find (bash array for reliable word-splitting)
+EXCLUDE_DIRS=(-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*' -o -path '*/.archive/*')
 
 # Count files by category
 count_files() {
     local pattern="$1"
-    find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o -name "$pattern" -print 2>/dev/null | wc -l
+    find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o -name "$pattern" -print 2>/dev/null | wc -l | tr -d ' '
 }
 
 # Source files
-SOURCE_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.cs" -o -name "*.java" -o -name "*.go" -o -name "*.rs" \) -print 2>/dev/null | grep -v -E '(test_|_test\.|\.test\.|_spec\.)' | wc -l)
+SOURCE_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.cs" -o -name "*.java" -o -name "*.go" -o -name "*.rs" \) -print 2>/dev/null | grep -v -E '(test_|_test\.|\.test\.|_spec\.)' | wc -l | tr -d ' ')
 
 # Test files
-TEST_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -path '*/test/*' -o -path '*/tests/*' -o -name 'test_*' -o -name '*_test.*' -o -name '*.test.*' -o -name '*_spec.*' \) -print 2>/dev/null | wc -l)
+TEST_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -path '*/test/*' -o -path '*/tests/*' -o -name 'test_*' -o -name '*_test.*' -o -name '*.test.*' -o -name '*_spec.*' \) -print 2>/dev/null | wc -l | tr -d ' ')
 
 # Config files
-CONFIG_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "*.json" -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" -o -name "*.ini" -o -name ".env*" \) -print 2>/dev/null | wc -l)
+CONFIG_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.json" -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" -o -name "*.ini" -o -name ".env*" \) -print 2>/dev/null | wc -l | tr -d ' ')
 
 # Documentation
-DOC_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "*.md" -o -name "*.rst" -o -name "*.txt" \) -print 2>/dev/null | wc -l)
+DOC_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.md" -o -name "*.rst" -o -name "*.txt" \) -print 2>/dev/null | wc -l | tr -d ' ')
 
 # Scripts
-SCRIPT_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "*.sh" -o -name "*.ps1" -o -name "*.bash" \) -print 2>/dev/null | wc -l)
+SCRIPT_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.sh" -o -name "*.ps1" -o -name "*.bash" \) -print 2>/dev/null | wc -l | tr -d ' ')
 
 # Build files
-BUILD_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "Dockerfile*" -o -name "Makefile" -o -path '*/.github/workflows/*' \) -print 2>/dev/null | wc -l)
+BUILD_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "Dockerfile*" -o -name "Makefile" -o -path '*/.github/workflows/*' \) -print 2>/dev/null | wc -l | tr -d ' ')
 
 # Detect package manager
 PACKAGE_MANAGER="null"
@@ -129,7 +120,7 @@ fi
 # Calculate total lines of code (limit to first 100 files for performance)
 TOTAL_LINES=0
 if [[ "$SCOPE" == "full" || "$SCOPE" == "quality" ]]; then
-    TOTAL_LINES=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" \) -print 2>/dev/null | head -100 | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo 0)
+    TOTAL_LINES=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" \) -print 2>/dev/null | head -100 | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo 0)
 fi
 
 # Pattern detection (limited scan)
@@ -138,10 +129,10 @@ TODO_COUNT=0
 
 if [[ "$SCOPE" == "full" || "$SCOPE" == "constitution" || "$SCOPE" == "quality" ]]; then
     # Check for potential secrets (limited to 50 files)
-    SECRET_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.json" \) -print 2>/dev/null | head -50 | xargs grep -l -E '(api[_-]?key|password|secret|token)\s*[=:]\s*['"'"'"][^'"'"'"]{8,}['"'"'"]' 2>/dev/null | wc -l || echo 0)
+    SECRET_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.json" \) -print 2>/dev/null | head -50 | xargs grep -l -E '(api[_-]?key|password|secret|token)\s*[=:]\s*['"'"'"][^'"'"'"]{8,}['"'"'"]' 2>/dev/null | wc -l | tr -d ' ' || echo 0)
     
     # Count TODO/FIXME comments
-    TODO_COUNT=$(find "$REPO_ROOT" -type f \( $EXCLUDE_DIRS \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.md" \) -print 2>/dev/null | head -100 | xargs grep -c -E '(TODO|FIXME|HACK|XXX):' 2>/dev/null | awk -F: '{sum+=$1} END {print sum}' || echo 0)
+    TODO_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.md" \) -print 2>/dev/null | head -100 | xargs grep -c -E '(TODO|FIXME|HACK|XXX):' 2>/dev/null | awk -F: '{sum+=$1} END {print sum}' || echo 0)
 fi
 
 # Output

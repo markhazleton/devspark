@@ -21,6 +21,13 @@
 
 set -e
 
+# Verify minimum bash version (3.2+)
+if [[ "${BASH_VERSINFO[0]}" -lt 3 ]] || { [[ "${BASH_VERSINFO[0]}" -eq 3 ]] && [[ "${BASH_VERSINFO[1]}" -lt 2 ]]; }; then
+    echo "ERROR: bash 3.2 or newer is required (found bash ${BASH_VERSION})." >&2
+    echo "On macOS, install a newer bash via Homebrew: brew install bash" >&2
+    exit 1
+fi
+
 # Parse command line arguments
 JSON_MODE=false
 REQUIRE_TASKS=false
