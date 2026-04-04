@@ -526,12 +526,18 @@ if ($Scope -in @('full', 'comments', 'scan')) {
         @{ pattern = '(?:#|//)\s*SC-\d+';                         label = 'success-criteria-ref' }
     )
 
-    # Scan common source extensions, skip .archive/
+    # Scan common source extensions, skip .archive/, node_modules/, and docs/.
+    # docs/ is excluded because it is commonly used as a GitHub Pages or other
+    # static-site publish folder containing minified JS bundles. Scanning those
+    # files produces false-positive matches and can generate lines that are
+    # hundreds of KB long, causing ConvertTo-Json to produce malformed JSON.
+    $docsDir = Join-Path $repoRoot 'docs'
     $sourceExtensions = @('*.py', '*.ts', '*.tsx', '*.js', '*.jsx', '*.cs', '*.go', '*.rs')
     foreach ($ext in $sourceExtensions) {
         Get-ChildItem $repoRoot -Recurse -Filter $ext -ErrorAction SilentlyContinue |
             Where-Object { $_.FullName -notmatch [regex]::Escape('.archive') -and
-                           $_.FullName -notmatch [regex]::Escape('node_modules') } |
+                           $_.FullName -notmatch [regex]::Escape('node_modules') -and
+                           $_.FullName -notmatch [regex]::Escape($docsDir) } |
             Select-Object -First $SampleLimit |
             ForEach-Object {
             $srcFile      = $_
@@ -546,7 +552,7 @@ if ($Scope -in @('full', 'comments', 'scan')) {
                         $result.code_comments += @{
                             file    = $relativePath
                             line    = $lineNumber
-                            text    = $line.Trim()
+                            text    = ($line.Trim() -replace '(?s)(.{200}).*', '$1…')
                             type    = $p.label
                             pattern = $p.pattern
                         }
