@@ -138,7 +138,6 @@ echo ""
 
 # Check if we're in a git repository
 if [ -d ".git" ]; then
-    IN_GIT_REPO=true
     print_status "Git repository detected"
 
     # Check for uncommitted changes
@@ -158,7 +157,6 @@ if [ -d ".git" ]; then
         print_status "Working tree is clean"
     fi
 else
-    IN_GIT_REPO=false
     print_warning "Not a git repository - cannot preserve history"
 fi
 
@@ -273,7 +271,8 @@ copy_dir() {
     local name=$3
 
     if [ -d "$source" ]; then
-        local file_count=$(find "$source" -type f | wc -l)
+        local file_count
+        file_count=$(find "$source" -type f | wc -l)
 
         if [ "$DRY_RUN" = true ]; then
             print_dry_run "Would copy $file_count files from $name to $dest/"
