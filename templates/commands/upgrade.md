@@ -163,6 +163,7 @@ to `.devspark/scripts/`. Your team's script customizations in
 `.documentation/scripts/` always take priority and are never lost.
 
 Common reasons to override a script:
+
 - Platform adaptation (Azure DevOps instead of GitHub)
 - Custom CI/CD integration
 - Organization-specific authentication or tooling
@@ -249,6 +250,7 @@ Changed scripts (.devspark/scripts/ vs .documentation/scripts/):
 Offer to show diffs for any changed files so the team can decide what to merge.
 
 **Script merge guidance:**
+
 - If the team has overridden a script that changed upstream, show the diff
   and let the team decide whether to merge the upstream improvements
 - If a new stock script was added, inform the team — no action needed unless
