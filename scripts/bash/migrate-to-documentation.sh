@@ -272,7 +272,7 @@ copy_dir() {
 
     if [ -d "$source" ]; then
         local file_count
-        file_count=$(find "$source" -type f | wc -l)
+        file_count=$(find "$source" -type f | wc -l | tr -d ' ')
 
         if [ "$DRY_RUN" = true ]; then
             print_dry_run "Would copy $file_count files from $name to $dest/"
@@ -347,11 +347,11 @@ update_file_references() {
     if [ "$DRY_RUN" = true ]; then
         # Check if file would be modified
         cp "$file" "$file.bak.tmp"
-        sed -i.tmp \
-            -e 's@(/\?)\.specify/@\1.documentation/@g' \
-            -e 's@\(^\|[[:space:]]\|`\)/memory/@\1/.documentation/memory/@g' \
-            -e 's@\(^\|[[:space:]]\|`\)/scripts/@\1/.documentation/scripts/@g' \
-            -e 's@\(^\|[[:space:]]\|`\)/templates/@\1/.documentation/templates/@g' \
+        sed -E -i.tmp \
+            -e 's@(/?)\.specify/@\1.documentation/@g' \
+            -e 's@(^|[[:space:]]|`)/memory/@\1/.documentation/memory/@g' \
+            -e 's@(^|[[:space:]]|`)/scripts/@\1/.documentation/scripts/@g' \
+            -e 's@(^|[[:space:]]|`)/templates/@\1/.documentation/templates/@g' \
             -e 's@memory/constitution\.md@.documentation/memory/constitution.md@g' \
             "$file" 2>/dev/null || true
 
@@ -367,11 +367,11 @@ update_file_references() {
         cp "$file" "$file.bak"
 
         # Update references using sed with regex
-        sed -i.tmp \
-            -e 's@(/\?)\.specify/@\1.documentation/@g' \
-            -e 's@\(^\|[[:space:]]\|`\)/memory/@\1/.documentation/memory/@g' \
-            -e 's@\(^\|[[:space:]]\|`\)/scripts/@\1/.documentation/scripts/@g' \
-            -e 's@\(^\|[[:space:]]\|`\)/templates/@\1/.documentation/templates/@g' \
+        sed -E -i.tmp \
+            -e 's@(/?)\.specify/@\1.documentation/@g' \
+            -e 's@(^|[[:space:]]|`)/memory/@\1/.documentation/memory/@g' \
+            -e 's@(^|[[:space:]]|`)/scripts/@\1/.documentation/scripts/@g' \
+            -e 's@(^|[[:space:]]|`)/templates/@\1/.documentation/templates/@g' \
             -e 's@memory/constitution\.md@.documentation/memory/constitution.md@g' \
             "$file"
 
