@@ -121,7 +121,7 @@ fi
 YEAR=$(date +%Y)
 NEXT_CAP_NUM=1
 if [[ -d "$PROPOSALS_DIR" ]]; then
-    LATEST=$(ls "$PROPOSALS_DIR" 2>/dev/null | grep -E "^CAP-$YEAR-[0-9]+\.md$" | sort -r | head -1 || echo "")
+    LATEST=$(find "$PROPOSALS_DIR" -maxdepth 1 -name "CAP-${YEAR}-[0-9][0-9][0-9].md" 2>/dev/null | xargs -r basename | sort -r | head -1 || echo "")
     if [[ -n "$LATEST" ]]; then
         CURRENT_NUM=$(echo "$LATEST" | sed -E "s/CAP-$YEAR-0*([0-9]+)\.md/\1/")
         NEXT_CAP_NUM=$((CURRENT_NUM + 1))
