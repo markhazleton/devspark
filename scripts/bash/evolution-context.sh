@@ -96,7 +96,7 @@ if [[ -d "$PR_REVIEW_DIR" ]]; then
     PR_REVIEWS=$(ls "$PR_REVIEW_DIR"/pr-*.md 2>/dev/null | head -20 | while read -r f; do
         basename "$f" .md
     done | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
-    PR_REVIEW_COUNT=$(ls "$PR_REVIEW_DIR"/pr-*.md 2>/dev/null | wc -l || echo "0")
+    PR_REVIEW_COUNT=$(ls "$PR_REVIEW_DIR"/pr-*.md 2>/dev/null | wc -l | tr -d ' ' || echo "0")
 fi
 
 # List audit reports
@@ -106,7 +106,7 @@ if [[ -d "$AUDIT_DIR" ]]; then
     AUDIT_REPORTS=$(ls "$AUDIT_DIR"/*_results.md 2>/dev/null | head -10 | while read -r f; do
         basename "$f"
     done | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
-    AUDIT_COUNT=$(ls "$AUDIT_DIR"/*_results.md 2>/dev/null | wc -l || echo "0")
+    AUDIT_COUNT=$(ls "$AUDIT_DIR"/*_results.md 2>/dev/null | wc -l | tr -d ' ' || echo "0")
 fi
 
 # List existing proposals
@@ -136,12 +136,12 @@ HIGH_COUNT=0
 
 if [[ -d "$PR_REVIEW_DIR" ]]; then
     # Count severity levels across all reviews
-    CRITICAL_COUNT=$(grep -h "CRITICAL" "$PR_REVIEW_DIR"/*.md 2>/dev/null | wc -l || echo "0")
-    HIGH_COUNT=$(grep -h "HIGH" "$PR_REVIEW_DIR"/*.md 2>/dev/null | wc -l || echo "0")
+    CRITICAL_COUNT=$(grep -h "CRITICAL" "$PR_REVIEW_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+    HIGH_COUNT=$(grep -h "HIGH" "$PR_REVIEW_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ' || echo "0")
 
     # Extract principle violations (simplified pattern matching)
     PATTERN_SUMMARY=$(grep -h -E '^\| [A-Z]' "$PR_REVIEW_DIR"/*.md 2>/dev/null | \
-        grep -v "Principle\|Status\|--" | \
+        grep -Ev "Principle|Status|--" | \
         cut -d'|' -f2 | \
         sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | \
         sort | uniq -c | sort -rn | head -10 | \
