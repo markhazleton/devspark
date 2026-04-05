@@ -30,6 +30,7 @@ get_current_branch() {
     # For non-git repos, try to find the latest feature directory
     local repo_root
     repo_root=$(get_repo_root)
+    local specs_dir="$repo_root/.documentation/specs"
 
     if [[ -d "$specs_dir" ]]; then
         local latest_feature=""
