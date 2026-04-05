@@ -62,7 +62,7 @@ fi
 YEAR=$(date +%Y)
 NEXT_NUM=1
 if [[ -d "$QUICKFIX_DIR" ]]; then
-    LATEST=$(find "$QUICKFIX_DIR" -maxdepth 1 -name "QF-${YEAR}-[0-9][0-9][0-9].md" -exec basename {} \; 2>/dev/null | sort -r | head -1 || echo "")
+    LATEST=$(find "$QUICKFIX_DIR" -maxdepth 1 -name "QF-${YEAR}-[0-9]*.md" -exec basename {} \; 2>/dev/null | grep -E "^QF-${YEAR}-[0-9]+\.md$" | sort -r | head -1 || echo "")
     if [[ -n "$LATEST" ]]; then
         # Extract number from filename like QF-2026-001.md
         CURRENT_NUM=$(echo "$LATEST" | sed -E "s/QF-$YEAR-0*([0-9]+)\.md/\1/")
