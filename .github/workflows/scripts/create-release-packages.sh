@@ -28,7 +28,7 @@ echo "Building release packages for $NEW_VERSION"
 # Create and use .genreleases directory for all build artifacts
 GENRELEASES_DIR=".genreleases"
 mkdir -p "$GENRELEASES_DIR"
-rm -rf "$GENRELEASES_DIR"/* || true
+rm -rf "${GENRELEASES_DIR:?}"/* || true
 
 rewrite_paths() {
   # DevSpark uses .devspark/ for framework files and .documentation/ for user work
@@ -253,7 +253,8 @@ generate_copilot_prompts() {
   for agent_file in "$agents_dir"/devspark.*.agent.md; do
     [[ -f "$agent_file" ]] || continue
     
-    local basename=$(basename "$agent_file" .agent.md)
+    local basename
+    basename=$(basename "$agent_file" .agent.md)
     local prompt_file="$prompts_dir/${basename}.prompt.md"
     
     # Create prompt file with agent frontmatter

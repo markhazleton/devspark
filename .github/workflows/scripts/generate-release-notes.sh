@@ -11,6 +11,7 @@ if [[ $# -ne 2 ]]; then
 fi
 
 NEW_VERSION="$1"
+export NEW_VERSION
 LAST_TAG="$2"
 
 # Get commits since last tag
