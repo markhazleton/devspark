@@ -1,8 +1,8 @@
 # Feature Specification: Multi-Application Monorepo Support
 
-**Feature Branch**: `feature/monorepo-multi-app-support`  
-**Created**: 2026-04-06  
-**Status**: Draft for Technical Leadership Review  
+**Feature Branch**: `feature/monorepo-multi-app-support`
+**Created**: 2026-04-06
+**Status**: Draft for Technical Leadership Review
 **Input**: User description: "Update DevSpark to support multiple applications within a single repository using monorepo best practices, with repo-wide constitutions, prompts, and scripts plus application-specific overrides for constitution, prompts, and scripts when needed."
 
 ## Background
@@ -57,10 +57,11 @@ The solution must avoid hidden inference, duplicated framework installations, an
 - Allow app-level governance to weaken mandatory repository-wide governance
 - Fully solve shared library ownership or shared package release orchestration in this first iteration
 - Introduce a breaking change that forces existing single-app repositories to migrate immediately
+- Broader app lifecycle commands such as remove, rename, move, or split (deferred beyond v1)
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Govern a heterogeneous multi-app repository (Priority: P1)
+### User Story 1 — Govern a heterogeneous multi-app repository (Priority: P1)
 
 As a technical lead, I need DevSpark to distinguish between applications in the same repository so that
 reviews, plans, and specifications apply the correct governance rules for each application type.
@@ -83,7 +84,7 @@ app-specific constitutions and overrides while preserving repo-wide governance.
 
 ---
 
-### User Story 2 - Execute app-scoped workflows with explicit context (Priority: P1)
+### User Story 2 — Execute app-scoped workflows with explicit context (Priority: P1)
 
 As an engineer, I need to run DevSpark commands against a specific application so that specifications,
 plans, and implementation tasks land in the correct app scope instead of a single shared repo scope.
@@ -105,7 +106,7 @@ chain.
 
 ---
 
-### User Story 3 - Review cross-application changes safely (Priority: P1)
+### User Story 3 — Review cross-application changes safely (Priority: P1)
 
 As an architect or reviewer, I need DevSpark to recognize when a change affects more than one
 application so that the generated plan and review account for downstream dependencies and shared risks.
@@ -124,16 +125,17 @@ verify that impacted applications are identified and included in the plan or rev
 2. **Given** a change limited to one application with no downstream consumers, **When** a workflow runs,
    **Then** DevSpark keeps the scope local to that application.
 3. **Given** a pull request declared as single-app for `admin-web`, **When** the changed files touch only
-  `admin-web` plus approved shared paths, **Then** DevSpark reviews it as a single-app pull request.
+   `admin-web` plus approved shared paths, **Then** DevSpark reviews it as a single-app pull request.
 4. **Given** a pull request declared as single-app for `admin-web`, **When** the changed files also touch
-  `admin-api`, **Then** DevSpark fails validation or requires reclassification as cross-app or repo-scope.
+   `admin-api`, **Then** DevSpark fails validation or requires reclassification as cross-app or
+   repo-scope.
 5. **Given** a pull request declared as cross-app with primary app `admin-web` and affected app
-  `admin-api`, **When** the changed files touch both app paths, **Then** DevSpark reviews the pull
-  request using repo-wide governance plus the declared app scopes and emits the combined scope report.
+   `admin-api`, **When** the changed files touch both app paths, **Then** DevSpark reviews the pull
+   request using repo-wide governance plus the declared app scopes and emits the combined scope report.
 
 ---
 
-### User Story 4 - Keep single-application repositories unchanged (Priority: P2)
+### User Story 4 — Keep single-application repositories unchanged (Priority: P2)
 
 As an existing DevSpark user, I need current single-application repositories to continue working without
 restructure or behavior changes so that multi-app support is an additive capability, not a forced
@@ -154,7 +156,7 @@ registry or app directories and confirm that behavior matches the current single
 
 ---
 
-### User Story 5 - Limit customization drift through profile-based inheritance (Priority: P2)
+### User Story 5 — Limit customization drift through profile-based inheritance (Priority: P2)
 
 As a platform owner, I need a model that supports app-specific rules without requiring each application
 to fork every prompt and script so that DevSpark remains maintainable across large repositories.
@@ -174,6 +176,60 @@ expected behavior without duplicating all base prompts or scripts.
 2. **Given** an app-specific override that attempts to weaken a repo-wide mandatory rule, **When** the
    configuration is validated, **Then** DevSpark rejects or flags the conflict.
 
+---
+
+### User Story 6 — Add a new application to the registry (Priority: P2)
+
+As an engineer adding a new service to the monorepo, I need a guided workflow that registers the
+application in the authoritative registry so that DevSpark immediately recognizes the new app without
+manual JSON editing.
+
+**Why this priority**: Manual registry editing is error-prone. A validated command reduces onboarding
+friction for new applications and enforces uniqueness and path rules from the start.
+
+**Independent Test**: Run `/devspark.add-application` with valid metadata for a new `payments-api`,
+then verify the registry is updated and a subsequent `/devspark.list-applications` includes the new entry.
+
+**Acceptance Scenarios**:
+
+1. **Given** a multi-app repository, **When** a user runs `/devspark.add-application` with id
+   `payments-api`, a valid path, kind, owner, and profile references, **Then** the registry at
+   `.documentation/devspark.json` is updated with the new entry and passes validation.
+2. **Given** a multi-app repository where `admin-api` already exists, **When** a user runs
+   `/devspark.add-application` with id `admin-api`, **Then** the command fails with a duplicate-id error
+   and does not modify the registry.
+3. **Given** a valid add-application invocation with the `--scaffold` flag, **When** the command
+   completes, **Then** `{app.path}/.documentation/` is created with standard subdirectories, but
+   `.devspark/` is not modified.
+4. **Given** a valid add-application invocation without `--scaffold`, **When** the command completes,
+   **Then** only the registry file is updated; no directories are created.
+
+---
+
+### User Story 7 — List registered applications (Priority: P2)
+
+As a technical lead or reviewer, I need to see all registered applications, their paths, kinds, owners,
+and dependencies at a glance so that I can select the correct scope for DevSpark workflows.
+
+**Why this priority**: Without a quick reference, engineers guess app identifiers or skip app context
+entirely, which defeats multi-app governance.
+
+**Independent Test**: Run `/devspark.list-applications` on the example six-app registry and verify the
+output includes all six entries with correct metadata in a readable format.
+
+**Acceptance Scenarios**:
+
+1. **Given** a multi-app repository with six registered applications, **When** a user runs
+   `/devspark.list-applications`, **Then** the output displays each app's id, path, kind, owner,
+   criticality, inherited profiles, dependencies, and effective documentation root.
+2. **Given** a single-app repository with no registry, **When** a user runs
+   `/devspark.list-applications`, **Then** the output states no multi-app registry is configured and
+   the repository operates in single-app mode.
+3. **Given** a multi-app repository, **When** `/devspark.list-applications` runs, **Then** no files are
+   modified or created.
+
+---
+
 ### Edge Cases
 
 - A change affects both a runtime API and the client-facing application through a shared authentication
@@ -190,691 +246,282 @@ expected behavior without duplicating all base prompts or scripts.
 - A pull request is declared single-app but its changed files touch more than one registered app path.
 - A pull request touches shared contracts or shared libraries but declares only a single app scope.
 - A pull request is intentionally cross-app and must name a primary app plus all declared affected apps.
+- A registry entry references a profile that does not exist.
+- A registry entry creates a cyclic dependency chain.
+- An app inherits two profiles that declare conflicting values for the same setting.
 
 ## Requirements *(mandatory)*
 
-### Functional Requirements
+### Requirement Group A — Backward Compatibility
 
-- **FR-001**: DevSpark MUST support an explicit repository-level application registry that defines each
-  application's identifier, path, type, purpose, dependency relationships, and inheritance profile.
-- **FR-002**: DevSpark MUST continue to support a repository-wide constitution, prompts, scripts, and
-  templates as the default shared layer.
-- **FR-003**: DevSpark MUST support optional application-specific constitutions, prompts, scripts,
-  templates, and specification directories.
-- **FR-004**: DevSpark MUST require explicit app context for app-scoped workflows through a declared
-  parameter, configuration value, or equivalent explicit mechanism; it MUST NOT rely solely on implicit
-  inference from current directory or branch naming.
-- **FR-005**: DevSpark MUST support repo-scoped workflows that intentionally operate without an app
-  context.
-- **FR-006**: Constitution resolution MUST always load the repository constitution first and then apply
-  an application constitution as an additive overlay when one exists; app constitutions MUST NOT weaken
-  mandatory repo-wide rules.
-- **FR-007**: Prompt resolution for v1 MUST support a simple, explicit order: app team override,
-  repository user override, repository team override, then stock default.
-- **FR-008**: Script resolution for v1 MUST support a simple, explicit order: app team override,
-  repository team override, then stock default.
-- **FR-009**: Template resolution for v1 MUST support a simple, explicit order: app team override,
-  repository team override, then stock default.
-- **FR-010**: App-scoped specs, plans, tasks, and related artifacts MUST be stored under the owning
-  application's scope rather than a single shared specification directory.
-- **FR-011**: DevSpark MUST preserve a repo-wide specification scope for changes that are intentionally
-  cross-cutting or not owned by a single application.
-- **FR-012**: DevSpark MUST support dependency-aware scope analysis so that workflows can identify
-  directly impacted downstream applications for shared contract or shared module changes.
-- **FR-013**: DevSpark MUST support reusable inheritance profiles so different application classes, such
-  as runtime APIs, admin APIs, web applications, and QA harnesses, can share rule sets without copying
-  all prompts and scripts.
-- **FR-014**: DevSpark MUST prevent application-specific governance from silently weakening mandatory
+- **FR-A1**: DevSpark MUST preserve current single-application behavior for repositories that do not
+  define a multi-app registry; no directory restructure or configuration change may be required.
+- **FR-A2**: DevSpark MUST support repo-scoped workflows that intentionally operate without an app
+  context, even in multi-app repositories.
+
+### Requirement Group B — Registry and App Identity
+
+- **FR-B1**: DevSpark MUST support an explicit repository-level application registry at
+  `.documentation/devspark.json` that defines each application's identifier, path, type, purpose,
+  dependency relationships, and inheritance profile.
+- **FR-B2**: Application identifiers MUST be unique, lowercase, and path-safe; paths MUST point to
+  existing directories; profile and dependency references MUST resolve to declared entries.
+- **FR-B3**: DevSpark MUST validate the registry on load and fail fast for duplicate ids, invalid paths,
+  unresolved profile or dependency references, and cyclic dependencies.
+- **FR-B4**: Shared libraries that are not independently deployable MUST be modeled as registry entries
+  with `kind: "library"` and `deployable: false`. They participate in dependency tracking but are not
+  valid targets for app-scoped deployment or release workflows.
+- **FR-B5**: DevSpark MUST support `/devspark.add-application` to add a validated entry to the registry
+  and optionally scaffold `{app.path}/.documentation/` when explicitly requested; the command MUST NOT
+  modify `.devspark/`.
+- **FR-B6**: DevSpark MUST support `/devspark.list-applications` as a read-only command that renders
+  registered applications with id, path, kind, owner, dependencies, and effective documentation root.
+- **FR-B7**: v1 MUST limit multi-app command surface to `/devspark.add-application` and
+  `/devspark.list-applications`; broader lifecycle commands are deferred.
+
+### Requirement Group C — Resolution Model
+
+- **FR-C1**: DevSpark MUST support a repository-wide constitution, prompts, scripts, and templates as the
+  default shared layer.
+- **FR-C2**: DevSpark MUST support optional application-specific constitutions, prompts, scripts,
+  templates, and specification directories at `{app.path}/.documentation/`.
+- **FR-C3**: Constitution resolution MUST load the repository constitution first, then apply an
+  application constitution as an additive overlay; the application constitution MUST NOT weaken mandatory
+  repo-wide rules (see "Constitution Weakening Detection" below).
+- **FR-C4**: Prompt resolution MUST follow this order: app team override → repository user override →
+  repository team override → stock DevSpark default.
+- **FR-C5**: Script resolution MUST follow this order: app team override → repository team override →
+  stock DevSpark default.
+- **FR-C6**: Template resolution MUST follow this order: app team override → repository team override →
+  stock DevSpark default.
+- **FR-C7**: App-scoped artifacts (specs, plans, tasks) MUST be stored under the owning application's
+  `{app.path}/.documentation/specs/` rather than the shared repo-level specification directory.
+- **FR-C8**: DevSpark MUST make the resolved scope visible in workflow output so users can see whether
+  a command executed in repo scope, single-app scope, or multi-app scope.
+
+### Requirement Group D — Scope and PR Governance
+
+- **FR-D1**: DevSpark MUST require explicit app context for app-scoped workflows through a declared
+  parameter; it MUST NOT rely solely on implicit inference.
+- **FR-D2**: DevSpark MUST support explicit pull request scope declaration with three modes:
+  `single-app`, `cross-app`, and `repo-scope`.
+- **FR-D3**: A `single-app` PR MUST declare one primary application and MUST validate that changed files
+  touch only that app's path plus approved shared paths (see "Approved Shared Path Categories" below).
+- **FR-D4**: A `cross-app` PR MUST declare a primary application, all affected applications, and a reason
+  the change cannot be split into single-app PRs.
+- **FR-D5**: A `repo-scope` PR MUST be used for shared contracts, shared libraries consumed by multiple
+  apps, and infrastructure changes affecting multiple apps.
+- **FR-D6**: PR review workflows MUST compare declared scope against changed paths and dependency data
+  and MUST fail or require reclassification when the declaration does not match detected scope.
+- **FR-D7**: DevSpark MUST support dependency-aware scope analysis using declared `dependsOn` entries to
+  report directly impacted downstream applications for shared changes.
+
+### Requirement Group E — Profiles and Inheritance
+
+- **FR-E1**: DevSpark MUST support reusable inheritance profiles so application classes can share rule
+  sets without duplicating all prompts and scripts.
+- **FR-E2**: Profile composition MUST follow the order declared in an application's `inherits` array,
+  applying later profiles on top of earlier ones, with app-specific overrides applied last (see "Profile
+  Composition Model" below).
+- **FR-E3**: DevSpark MUST prevent application-specific governance from silently weakening mandatory
   repository-wide governance.
-- **FR-015**: DevSpark MUST provide validation for malformed multi-app configuration, including unknown
-  app identifiers, duplicate app identifiers, invalid paths, cyclic dependencies, and missing required
-  files.
-- **FR-016**: DevSpark MUST remain backward compatible for repositories that do not opt into multi-app
-  mode.
-- **FR-017**: DevSpark MUST define a documented on-disk layout for multi-app repositories.
-- **FR-018**: DevSpark MUST update packaged templates, quickstart guidance, and CLI behavior so the
-  multi-app capability is installable and discoverable, not only documented in source files.
-- **FR-019**: DevSpark MUST support platform-diverse applications in a single repository, including API,
-  web, internal tooling, and QA-oriented applications, without assuming a single runtime model.
-- **FR-020**: DevSpark MUST make the resolved scope visible in workflow output so users and reviewers can
-  see whether a command executed in repo scope, single-app scope, or multi-app scope.
-- **FR-021**: DevSpark MUST define deterministic scope-selection rules for app-owned changes,
-  cross-app changes, shared libraries, shared contracts, infrastructure changes, documentation-only
-  changes, and ambiguous root-level execution.
-- **FR-022**: v1 MUST use `.documentation/devspark.json` as the only authoritative application registry.
-- **FR-023**: v1 MUST derive standard app override paths by convention from the registered app path,
-  using `{app.path}/.documentation/` as the default application documentation root, and MUST only use
-  explicit path overrides when an application intentionally deviates from those conventions.
-- **FR-024**: v1 MUST include direct downstream dependency reporting for shared contract and shared module
-  changes before the feature is considered complete.
-- **FR-025**: DevSpark packaging, installation, and upgrade flows MUST deploy and update only `.devspark/`
-  and agent shim files; they MUST NOT add, remove, or modify files under any repo-owned `.documentation/`
-  directory.
-- **FR-026**: Multi-app repositories MUST support a two-level documentation model: one repository-level
-  `.documentation/` directory for shared governance and registry data, plus optional application-local
-  `.documentation/` directories rooted at `{app.path}/.documentation/` for app-owned overrides and
-  artifacts.
-- **FR-027**: DevSpark MUST support explicit pull request scope declaration with three modes: `single-app`,
-  `cross-app`, and `repo-scope`.
-- **FR-028**: A `single-app` pull request MUST declare one primary application and MUST validate that the
-  changed files touch only that application's registered path plus approved shared or repo-scoped paths.
-- **FR-029**: A `cross-app` pull request MUST declare one primary application, one or more affected
-  applications, and a reason the change cannot be cleanly split into separate single-app pull requests.
-- **FR-030**: A `repo-scope` pull request MUST be used for shared contracts, shared libraries used by
-  multiple apps, infrastructure changes affecting multiple apps, or other intentionally cross-cutting
-  changes that do not belong to one primary application alone.
-- **FR-031**: Pull request review workflows MUST compare the declared pull request scope against actual
-  changed paths and registered dependencies and MUST fail, warn, or require reclassification when the
-  declaration does not match the detected scope.
-- **FR-032**: Pull request review output MUST report the declared scope mode, the primary application when
-  one exists, affected applications, and any scope mismatches discovered during validation.
-- **FR-033**: Multi-application pull requests MUST be facilitated rather than forbidden, but they MUST
-  carry more explicit review metadata and validation than single-app pull requests.
-- **FR-034**: v1 MUST define approved shared or repo-scoped path categories that a `single-app` pull
-  request may touch without being automatically reclassified as `cross-app`.
-- **FR-035**: DevSpark MUST support a `/devspark.add-application` workflow that adds a new application to
-  the authoritative root registry, validates uniqueness and path rules, and optionally scaffolds the
-  repository-owned app-local `{app.path}/.documentation/` structure when explicitly requested.
-- **FR-036**: `/devspark.add-application` MUST update only repository-owned files and MUST NOT add,
-  remove, or mutate installed framework content under `.devspark/`.
-- **FR-037**: DevSpark MUST support a `/devspark.list-applications` workflow that reads the authoritative
-  root registry and displays registered applications, paths, kinds, owners, dependencies, and effective
-  documentation roots.
-- **FR-038**: v1 MUST limit new multi-app-specific command surface area to `/devspark.add-application`
-  and `/devspark.list-applications`; broader application lifecycle commands such as remove, rename, move,
-  or split application workflows are explicitly deferred.
-
-### Key Entities *(include if feature involves data)*
-
-- **Application Registry**: Repository-scoped configuration that declares applications, profiles,
-  ownership metadata, dependencies, and resolution hints.
-- **Application Definition**: A single registered application with an id, path, type, purpose,
-  inheritance chain, dependency list, and optional override settings.
-- **Profile**: A reusable rule bundle such as `api-profile`, `web-profile`, `admin-profile`, or
-  `qa-profile` that captures class-level governance and workflow behavior.
-- **Resolution Context**: The explicit execution scope used by DevSpark, including repo scope, app scope,
-  selected app id, inherited profiles, and impacted dependencies.
-- **Pull Request Scope Declaration**: Explicit metadata that identifies whether a pull request is
-  `single-app`, `cross-app`, or `repo-scope`, along with the primary app, affected apps, and validation
-  rationale.
-- **Application Registration Command**: A workflow that captures required app metadata, validates the
-  authoritative registry update, and optionally scaffolds the app-local documentation root.
-- **Governance Layer**: A constitution source at repo or app scope that contributes non-negotiable rules.
-- **Override Layer**: A prompt, script, or template source that can specialize behavior at app or repo
-  scope.
-- **Scope Report**: A generated summary that identifies the primary app context, affected downstream
-  applications, repo-wide implications, and the resolution chain used.
-
-## Proposed Solution
-
-### Operating Model
-
-DevSpark should treat a repository as a shared control plane with optional application overlays rather
-than a single project root.
-
-The recommended authority model is:
-
-- `.documentation/devspark.json` is the authoritative repository registry
-- `.devspark/` is the only DevSpark installation payload; `.documentation/` directories are repo-owned
-  work product and are never modified by install or upgrade flows
-- Repository governance remains authoritative over all applications
-- Application governance may extend or strengthen repo governance, but it may not weaken mandatory
-  repo-level rules
-- v1 does not require app-local manifests; all authoritative app configuration lives in the repo registry
-- v1 prefers convention-based paths over repeated per-app path declarations
-- v1 uses one repo-level `.documentation/` plus optional application-local `{app.path}/.documentation/`
-  directories instead of nesting application state under the repo-level `.documentation/`
-
-The recommended layout is:
-
-```text
-.devspark/
-├── defaults/
-├── scripts/
-└── templates/
-
-.documentation/
-├── memory/
-│   └── constitution.md
-├── commands/
-├── scripts/
-├── templates/
-├── specs/
-├── devspark.json
-└── {git-user}/commands/
-
-apps/
-├── runtime-api-a/
-│   └── .documentation/
-│       ├── memory/constitution.md
-│       ├── commands/
-│       ├── scripts/
-│       ├── templates/
-│       └── specs/
-├── runtime-api-b/
-│   └── .documentation/
-├── admin-api/
-│   └── .documentation/
-├── admin-web/
-│   └── .documentation/
-├── client-web/
-│   └── .documentation/
-└── qa-harness/
-    └── .documentation/
-```
-
-In this model:
-
-- the repo root `.documentation/` holds repo-scoped governance, registry, shared overrides, and repo-wide
-  specifications
-- each application may define its own `{app.path}/.documentation/` folder for app-scoped governance,
-  overrides, and specs
-- DevSpark resolves and consumes these folders, but it does not install, update, or remove them
-
-### Resolution Model
-
-For an app-scoped workflow, DevSpark resolves assets using these principles:
-
-#### Constitution resolution
-
-1. Load the repository constitution
-2. Load the application constitution if it exists
-3. Compose the effective governance by adding application-specific rules on top of repo-wide rules
-4. Reject the configuration if the application constitution weakens a mandatory repo-wide rule
-5. Error if a governance-requiring workflow cannot resolve a repository constitution
-
-#### Prompt, script, and template resolution
-
-Prompt resolution in v1:
-
-1. Application team override from `{app.path}/.documentation/commands/`
-2. Repository user override from `.documentation/{git-user}/commands/`
-3. Repository team override from `.documentation/commands/`
-4. Stock DevSpark default
-
-Script resolution in v1:
-
-1. Application team override from `{app.path}/.documentation/scripts/`
-2. Repository team override from `.documentation/scripts/`
-3. Stock DevSpark default
-
-Template resolution in v1:
-
-1. Application team override from `{app.path}/.documentation/templates/`
-2. Repository team override from `.documentation/templates/`
-3. Stock DevSpark default
-
-This ordering keeps v1 simple, preserves the current repo-user customization model where it already
-exists, and avoids introducing a new app-user override layer before the base model is proven.
-
-### Scope Selection Rules
-
-DevSpark must use explicit, deterministic scope selection. It must not guess silently.
-
-| Change Type | Required Scope | Expected Behavior |
-|-------------|----------------|------------------|
-| Application-owned code change | Explicit app scope | Run in that app's scope and write artifacts under that app |
-| Shared library used by one app | Explicit app scope | Run in the owning app's scope and include downstream dependency note if declared |
-| Shared library used by multiple apps | Repo scope | Require repo-scoped workflow and list impacted apps |
-| Shared API contract change | Repo scope | Require repo-scoped workflow and include direct downstream consumers |
-| Infrastructure or platform change affecting multiple apps | Repo scope | Require repo-scoped workflow and identify impacted apps |
-| Documentation-only repo change | Repo scope | Run without app selection |
-| Root-level execution with a provided app id | Explicit app scope | Use the declared app and print resolved scope |
-| Root-level execution with no app id and multiple candidate apps | Error | Refuse to guess and require explicit scope |
-
-### Direct Dependency Reporting
-
-Dependency-aware scope analysis is a v1 capability, but it is intentionally limited to direct,
-declared dependencies to keep the model simple and explicit.
-
-v1 behavior:
-
-- report the primary scope
-- report directly impacted downstream applications from the declared dependency graph
-- do not attempt inferred code-level dependency discovery
-- treat missing dependency declarations as configuration gaps, not inference opportunities
-
-### Repository Registry Schema
-
-The first implementation should standardize on a repository-level manifest at
-`.documentation/devspark.json`.
-
-Recommended top-level shape:
-
-```json
-{
-  "version": 1,
-  "mode": "multi-app",
-  "profiles": {},
-  "apps": []
-}
-```
-
-Recommended field definitions:
-
-- `version`: integer schema version for future migration and validation
-- `mode`: `single-app` or `multi-app`
-- `profiles`: reusable inheritance units for application classes and governance bundles
-- `apps`: registered application definitions
-
-Standard v1 conventions derive these paths from the registered app path:
-
-- app documentation root: `{app.path}/.documentation/`
-- constitution: `{app.path}/.documentation/memory/constitution.md`
-- commands: `{app.path}/.documentation/commands/`
-- scripts: `{app.path}/.documentation/scripts/`
-- templates: `{app.path}/.documentation/templates/`
-- specs: `{app.path}/.documentation/specs/`
-
-Recommended application definition shape:
-
-```json
-{
-  "id": "admin-web",
-  "name": "Admin Configuration UI",
-  "path": "apps/admin-web",
-  "kind": "web-admin",
-  "purpose": "Internal configuration and operational administration",
-  "runtime": "react",
-  "owner": "platform-admin",
-  "criticality": "medium",
-  "inherits": ["repo-default", "web-profile", "admin-profile"],
-  "dependsOn": ["admin-api"],
-  "tags": ["internal", "admin", "react"],
-  "platforms": ["web"],
-  "overrides": {}
-}
-```
-
-Recommended validation rules:
-
-- `id` MUST be unique, lowercase, and path-safe
-- `path` MUST point to a directory inside the repository
-- `inherits` entries MUST resolve to declared profiles
-- `dependsOn` entries MUST resolve to declared app ids
-- cyclic dependencies MUST be rejected
-- `overrides` MAY be omitted, but if present they MUST resolve inside the repository
-- governance-requiring workflows MUST always resolve a repository constitution
-
-### Example Repository Registry
-
-The following example covers the heterogeneous application set discussed in review:
-
-```json
-{
-  "version": 1,
-  "mode": "multi-app",
-  "profiles": {
-    "repo-default": {
-      "description": "Mandatory repository-wide governance and workflow defaults"
-    },
-    "api-profile": {
-      "description": "Contract-first API rules, backward compatibility, observability, and performance"
-    },
-    "admin-profile": {
-      "description": "Administrative auditability, authorization rigor, and change traceability"
-    },
-    "web-profile": {
-      "description": "Accessibility, browser support, frontend testing, and UX telemetry"
-    },
-    "qa-profile": {
-      "description": "Environment-safe test execution, fixture isolation, and diagnostic capture"
-    }
-  },
-  "apps": [
-    {
-      "id": "runtime-api-a",
-      "name": "Runtime API A",
-      "path": "apps/runtime-api-a",
-      "kind": "runtime-api",
-      "purpose": "Primary production runtime API",
-      "runtime": "dotnet",
-      "owner": "runtime-platform",
-      "criticality": "high",
-      "inherits": ["repo-default", "api-profile"],
-      "dependsOn": []
-    },
-    {
-      "id": "runtime-api-b",
-      "name": "Runtime API B",
-      "path": "apps/runtime-api-b",
-      "kind": "runtime-api",
-      "purpose": "Secondary production runtime API",
-      "runtime": "dotnet",
-      "owner": "runtime-platform",
-      "criticality": "high",
-      "inherits": ["repo-default", "api-profile"],
-      "dependsOn": []
-    },
-    {
-      "id": "admin-api",
-      "name": "Admin and Maintenance API",
-      "path": "apps/admin-api",
-      "kind": "admin-api",
-      "purpose": "Administrative and maintenance operations",
-      "runtime": "dotnet",
-      "owner": "platform-admin",
-      "criticality": "high",
-      "inherits": ["repo-default", "api-profile", "admin-profile"],
-      "dependsOn": ["runtime-api-a", "runtime-api-b"]
-    },
-    {
-      "id": "admin-web",
-      "name": "Admin Configuration Application",
-      "path": "apps/admin-web",
-      "kind": "web-admin",
-      "purpose": "Internal operational and configuration interface",
-      "runtime": "react",
-      "owner": "platform-admin",
-      "criticality": "medium",
-      "inherits": ["repo-default", "web-profile", "admin-profile"],
-      "dependsOn": ["admin-api"]
-    },
-    {
-      "id": "client-web",
-      "name": "Client Facing Application",
-      "path": "apps/client-web",
-      "kind": "web-client",
-      "purpose": "External user-facing application",
-      "runtime": "react",
-      "owner": "client-experience",
-      "criticality": "high",
-      "inherits": ["repo-default", "web-profile"],
-      "dependsOn": ["runtime-api-a", "runtime-api-b"]
-    },
-    {
-      "id": "qa-harness",
-      "name": "Runtime API Test Harness",
-      "path": "apps/qa-harness",
-      "kind": "qa-harness",
-      "purpose": "Quality assurance execution against runtime APIs",
-      "runtime": "node",
-      "owner": "quality-engineering",
-      "criticality": "medium",
-      "inherits": ["repo-default", "qa-profile"],
-      "dependsOn": ["runtime-api-a", "runtime-api-b", "admin-api"]
-    }
-  ]
-}
-```
-
-### Deferred Simplicity Decisions
-
-The following capabilities are intentionally out of scope for v1 to keep the first release simple and
-explicit:
-
-- app-local `app.json` manifests
-- app-specific user override layers
-- inferred dependency discovery from code or build systems
-- non-conventional path layouts unless explicitly overridden
-
-### Installation and Ownership Boundary
-
-DevSpark must preserve the existing product boundary:
-
-- `.devspark/` is the installed framework payload and is the only directory DevSpark packages, deploys,
-  upgrades, or removes
-- `.documentation/` at the repo root and `{app.path}/.documentation/` at the app level are owned by the
-  repository, not by the DevSpark installer
-- DevSpark may read and validate repo-owned `.documentation/` directories, but install and upgrade flows
-  must not add, remove, or rewrite files within them
-- quickstarts and docs may describe the expected `.documentation/` layout, but they must not blur the
-  ownership boundary by implying those folders are installed content
-
-This keeps installation upgrade-safe while allowing multi-app repositories to organize repo-level and
-app-level documentation explicitly.
-
-### App Context Propagation
-
-App context must propagate through the entire workflow chain. A command that targets `admin-web` must
-pass that scope to all invoked scripts, all generated artifacts, and all review or planning steps.
-
-The first implementation should prefer explicit scope selection over inference. Inference may be offered
-as a convenience only when it is deterministic and reviewable.
-
-For multi-app repositories, scope propagation must distinguish between two documentation levels:
-
-- repo scope uses the repository root `.documentation/`
-- app scope uses the selected application's `{app.path}/.documentation/`
-
-DevSpark must never remap app-scoped artifacts into nested folders under the repo root `.documentation/`
-when the application has its own documentation root.
-
-### Profile-Based Inheritance
-
-Applications should not be required to duplicate every prompt or script. Instead, the registry should
-support reusable profiles, for example:
-
-- `repo-default`
-- `api-profile`
-- `admin-profile`
-- `web-profile`
-- `qa-profile`
-
-An application such as `admin-web` could inherit `repo-default`, `web-profile`, and `admin-profile`,
-then add only the app-specific deltas that are truly unique.
-
-### Cross-App Dependency Awareness
-
-The registry must declare dependency relationships. That allows DevSpark to:
-
-- Expand review scope when an upstream app or shared contract changes
-- Flag downstream verification obligations
-- Distinguish local changes from ecosystem changes
-- Produce more accurate plans and implementation tasks
-
-### Pull Request Scope Model
-
-DevSpark should treat pull request scope as explicit metadata, not an inferred afterthought.
-
-The default and preferred mode is `single-app`:
-
-- declare one primary application
-- validate that changed files stay within that app's registered path plus approved shared paths
-- review using repo-wide governance plus the primary app context
-
-When a legitimate feature spans multiple applications, DevSpark should support `cross-app` pull requests:
-
-- declare one primary application
-- declare all additional affected applications
-- require a short reason that the work cannot be split cleanly into separate single-app pull requests
-- review using repo-wide governance plus all declared app contexts and the dependency report
-
-When the work is intentionally cross-cutting, DevSpark should support `repo-scope` pull requests:
-
-- no primary application is required
-- use this mode for shared contracts, shared libraries used by multiple apps, infrastructure or platform
-  changes affecting multiple apps, or other repo-owned work
-- review using repo-wide governance first and list impacted apps when they exist
-
-DevSpark must protect against undeclared multi-app pull requests rather than forbidding valid multi-app
-work outright.
-
-v1 should therefore enforce these behaviors:
-
-- a pull request declared as `single-app` must fail validation or require reclassification if changed files
-  touch additional registered app paths beyond approved shared categories
-- a pull request declared as `cross-app` must name all touched registered app paths that are in scope
-- a pull request touching shared contracts or shared libraries used by multiple apps must be `cross-app`
-  or `repo-scope`
-- review output must always show declared scope, detected scope, mismatches, and downstream app impact
-
-### Multi-App Command Surface
-
-The first multi-app-specific command surface should stay intentionally small.
-
-v1 should introduce only these two commands:
-
-- `/devspark.add-application`
-- `/devspark.list-applications`
-
-`/devspark.add-application` should:
-
-- collect required app metadata such as id, name, path, kind, purpose, owner, criticality, inherited
-  profiles, and dependencies
-- validate duplicate ids, invalid paths, invalid profile references, and invalid dependency references
-- update the authoritative root registry at `.documentation/devspark.json`
-- optionally scaffold `{app.path}/.documentation/` only when the repository owner explicitly asks for it
-- never install or modify `.devspark/`
-
-`/devspark.list-applications` should:
-
-- read the authoritative root registry
-- display registered apps in a human-readable form suitable for leadership review and workflow targeting
-- show id, path, kind, owner, dependencies, and effective documentation root
-- remain read-only
-
-To keep v1 simple, DevSpark should not introduce broader app lifecycle commands yet. Commands such as
-remove application, rename application, move application, or split application create policy and migration
-complexity that is not required to prove the multi-app operating model.
+
+### Requirement Group F — Ownership Boundary
+
+- **FR-F1**: DevSpark packaging, installation, and upgrade flows MUST deploy and update only `.devspark/`
+  and agent shim files; they MUST NOT add, remove, or modify files under any `.documentation/` directory.
+- **FR-F2**: DevSpark MUST define a documented on-disk layout for multi-app repositories using the
+  two-level documentation model: repo-level `.documentation/` plus optional `{app.path}/.documentation/`.
+- **FR-F3**: DevSpark MUST update packaged templates, quickstart guidance, and CLI behavior so the
+  multi-app capability is installable and discoverable.
+
+### Constitution Weakening Detection
+
+v1 uses a keyword-based detection model rather than requiring structured constitution formats:
+
+1. The repository constitution is parsed for lines containing `NON-NEGOTIABLE`, `MUST`, or `MANDATORY`
+   markers. These are extracted as the mandatory rule set.
+2. If an application constitution contains a line that explicitly contradicts, relaxes, or removes a
+   mandatory rule (detected via negation patterns such as "not required", "optional", "may skip",
+   or "does not apply"), validation emits a **CONFLICT** warning.
+3. In v1, detected conflicts produce a warning in validation output and scope reports. They do not
+   silently pass, but they also do not hard-block workflows — the assumption is that leadership
+   reviews and resolves conflicts.
+4. v2 may introduce structured YAML rules for machine-enforceable validation.
+
+### Approved Shared Path Categories
+
+The following path categories are approved for `single-app` pull requests without automatic
+reclassification to `cross-app`:
+
+| Category | Path Pattern | Rationale |
+|----------|-------------|-----------|
+| Repository documentation root | `.documentation/` (root-level only, not app-local) | Shared guides, memory, and governance |
+| GitHub configuration | `.github/` | Workflows, templates, issue forms |
+| DevSpark framework | `.devspark/` | Installed framework content |
+| Root configuration files | `*.md`, `*.json`, `*.yaml`, `*.toml`, `*.cfg` at repo root only | README, LICENSE, pyproject.toml, etc. |
+| CI/CD configuration | `.gitlab-ci.yml`, `Jenkinsfile`, `azure-pipelines.yml` at repo root | Pipeline definitions |
+
+Files outside these categories that belong to a different registered application's path trigger scope
+mismatch validation.
+
+### Profile Composition Model
+
+Profiles carry three types of content in v1:
+
+1. **Tags**: key-value metadata merged across the inheritance chain (last writer wins per key)
+2. **Rules**: governance statements added to the effective context (additive, never removed by override)
+3. **Hints**: non-binding suggestions for workflows (e.g., preferred test runner, default review depth)
+
+Composition order for an application with `"inherits": ["repo-default", "api-profile", "admin-profile"]`:
+
+1. Start with `repo-default` profile as the base
+2. Merge `api-profile` on top: tags overwrite, rules accumulate, hints overwrite
+3. Merge `admin-profile` on top: same merge behavior
+4. Apply app-specific overrides from the application's `overrides` field: same merge behavior
+
+Conflict resolution:
+
+- **Tags**: last-writer-wins within the inheritance chain; app override is always last
+- **Rules**: purely additive; no profile or app override may remove a rule contributed by an earlier
+  layer; rules contributed by the repo constitution (mandatory rules) are immutable across all layers
+- **Hints**: last-writer-wins; these are non-binding and do not require conflict detection
+
+Profile definitions are stored in the `profiles` section of `.documentation/devspark.json`. Each profile
+contains optional `tags`, `rules`, and `hints` objects.
+
+### Key Entities
+
+- **Application Registry**: Repository-scoped configuration in `.documentation/devspark.json` that
+  declares applications, profiles, ownership metadata, and dependencies.
+- **Application Definition**: A registered application with id, path, kind, purpose, inheritance chain,
+  dependency list, and optional override settings.
+- **Profile**: A reusable rule bundle (e.g., `api-profile`, `web-profile`) containing tags, rules,
+  and hints that apply to a class of applications.
+- **Resolution Context**: The execution scope used by DevSpark: repo scope or app scope, selected app id,
+  inherited profiles, and impacted dependencies.
+- **Pull Request Scope Declaration**: Metadata identifying whether a PR is `single-app`, `cross-app`, or
+  `repo-scope`, with primary app, affected apps, and validation rationale.
+- **Shared Library**: A registry entry with `kind: "library"` and `deployable: false` that participates
+  in dependency tracking but is not a valid target for deployment workflows.
+
+## Non-Functional Requirements
+
+- **NFR-001**: Registry validation and resolution MUST complete in under 500ms for repositories with up
+  to 20 registered applications.
+- **NFR-002**: v1 MUST be tested with fixture registries of up to 20 applications; no hard upper limit
+  is enforced, but performance beyond 20 apps is not guaranteed.
+- **NFR-003**: Resolution overhead MUST remain negligible relative to current single-app command startup
+  time (target: less than 100ms added latency).
+- **NFR-004**: The `devspark.json` registry schema MUST include a `version` integer to support future
+  schema migrations without breaking existing registries.
 
 ## Alternatives Considered
 
-### Alternative A - Independent DevSpark installation per application
+### Alternative A — Independent DevSpark installation per application
 
-This was rejected because it duplicates framework files, creates upgrade drift, and makes cross-app
-reviews harder rather than easier.
+Rejected: duplicates framework files, creates upgrade drift, and makes cross-app reviews harder.
 
-### Alternative B - Single repo-wide DevSpark with no app-specific overrides
+### Alternative B — Single repo-wide DevSpark with no app-specific overrides
 
-This was rejected because it does not reflect the operational and governance differences between runtime
-APIs, web applications, admin surfaces, and QA tooling.
+Rejected: does not reflect operational and governance differences between runtime APIs, web applications,
+admin surfaces, and QA tooling.
 
-### Alternative C - Infer app context only from working directory or branch naming
+### Alternative C — Infer app context only from working directory or branch naming
 
-This was rejected because it is brittle in CI, unclear for root-level workflows, and unsafe for
-leadership review or regulated environments.
+Rejected: brittle in CI, unclear for root-level workflows, unsafe for leadership review.
 
-### Alternative D - Allow app constitutions to fully override repo-wide governance
+### Alternative D — Allow app constitutions to fully override repo-wide governance
 
-This was rejected because it destroys the meaning of repo-wide governance and makes compliance
-non-deterministic.
+Rejected: destroys the meaning of repo-wide governance and makes compliance non-deterministic.
 
-## Architecture Risks and Critical Review Notes
+## Architecture Risks
 
-### Risk 1 - Customization drift
+### Risk 1 — Customization drift
 
-If every application forks prompts and scripts, DevSpark becomes expensive to upgrade and difficult to
-audit. The design therefore depends on inheritance and delta-based overrides.
+If every application forks prompts and scripts, DevSpark becomes expensive to upgrade. Mitigated by
+profile inheritance and delta-based overrides.
 
-### Risk 2 - False confidence through implicit scope
+### Risk 2 — False confidence through implicit scope
 
-If DevSpark guesses the application instead of making scope explicit, leadership will not be able to
-trust the resulting plans or reviews. Explicit scope must be visible in output.
+If DevSpark guesses the application, leadership cannot trust plans or reviews. Mitigated by requiring
+explicit scope visible in output.
 
-### Risk 3 - Governance fragmentation
+### Risk 3 — Governance fragmentation
 
-If app-level constitutions can contradict repo-wide mandatory rules, teams will create local exceptions
-that are hard to detect. Repo-wide rules must remain authoritative.
+If app constitutions can contradict repo-wide mandatory rules, teams create undetectable exceptions.
+Mitigated by keyword-based conflict detection in v1, structured rules in v2.
 
-### Risk 4 - Under-modeling dependencies
+### Risk 4 — Under-modeling dependencies
 
-A multi-app monorepo is not just a directory tree. Without dependency modeling, DevSpark will treat
-shared changes as local changes and miss downstream risk.
+Without dependency modeling, shared changes are treated as local. Mitigated by declared `dependsOn`
+entries and direct downstream reporting.
 
-### Risk 5 - Partial implementation that only updates docs
+### Risk 5 — Partial implementation that only updates docs
 
-This feature is not real unless prompt templates, helper scripts, packaging, quickstarts, and CLI
-install or update paths all become app-aware.
+Feature is not real unless prompts, scripts, packaging, quickstarts, and CLI all become app-aware.
+Mitigated by phased delivery with hard gates (v1a/v1b split in the plan).
 
-### Risk 6 - Breaking the installation ownership boundary
+### Risk 6 — Breaking the installation ownership boundary
 
-If multi-app support causes DevSpark to start creating or mutating repo-owned `.documentation/` folders,
-the product breaks its upgrade-safety promise and risks overwriting application-owned material.
+If multi-app support causes DevSpark to mutate repo-owned `.documentation/`, upgrade safety breaks.
+Mitigated by constitution principle III (Ownership Boundary) and regression tests.
 
-### Risk 7 - Undeclared multi-app pull requests
+### Risk 7 — Undeclared multi-app pull requests
 
-If a pull request claims to target one app but changes multiple registered app paths, reviewers will get a
-false sense of locality and miss downstream impact. Pull request scope must therefore be declared and
-validated against changed paths.
+A PR claiming single-app scope but changing multiple app paths gives false locality. Mitigated by
+mandatory scope validation against changed paths.
 
-### Risk 8 - Command surface explosion
+### Risk 8 — Stale dependency declarations
 
-If multi-app support ships with too many app lifecycle commands in the first release, DevSpark will add a
-lot of policy surface before the underlying registry and scope model are proven. The first release should
-stay limited to add and list operations.
-
-## Proposed Phasing
-
-### Phase 1 - Architecture and config foundations
-
-- Define the multi-app on-disk layout
-- Lock the ownership boundary: `.devspark/` is installed content, `.documentation/` is repo-owned content
-- Define the app registry schema
-- Define the `/devspark.add-application` and `/devspark.list-applications` command contracts
-- Define resolution order and scope rules
-- Define constitution composition semantics
-- Add direct downstream dependency reporting from declared dependencies
-- Preserve full backward compatibility for single-app repositories
-
-### Phase 2 - Workflow and script propagation
-
-- Make helper scripts app-aware
-- Make prompt templates app-aware
-- Make specs, plans, and tasks app-scoped when required
-- Add pull request scope declaration and validation behavior for single-app, cross-app, and repo-scope
-- Add scope reporting and validation
-
-### Phase 3 - Packaging, quickstarts, and CLI support
-
-- Update release packaging and generated shims
-- Ensure install and upgrade flows only deploy `.devspark/` and never mutate repo-owned `.documentation/`
-- Update quickstarts and installation guidance
-- Update CLI install and validation behavior
-- Ship only the limited multi-app command set: `/devspark.add-application` and `/devspark.list-applications`
-
-### Phase 4 - Hardening and migration guidance
-
-- Add migration guidance for existing monorepos
-- Add examples for mixed-platform repositories
-- Add optional future enhancements that were intentionally deferred from v1
-
-## Operational Constraints
-
-- The default single-application behavior must remain unchanged.
-- DevSpark installation and upgrade operations must only manage `.devspark/` and agent shims.
-- Repo-level `.documentation/` and app-level `{app.path}/.documentation/` folders are repository-owned.
-- Application selection must be explicit for ambiguous contexts.
-- Single-app pull requests are the default path, but legitimate cross-app pull requests must remain
-  supported through explicit declaration and stricter validation.
-- The first multi-app command set must remain limited to add and list application workflows.
-- Multi-app support must work across Bash and PowerShell script variants.
-- The design must tolerate applications that define only some local override layers.
-- Repo-wide workflows such as release or constitution evolution must continue to function.
+Teams fail to maintain `dependsOn` entries. Mitigated by treating missing declarations as config gaps
+surfaced in scope reports. A dependency audit command is deferred to v2.
 
 ## Open Questions for Leadership Review
 
 - Is the v1 simplicity boundary acceptable: authoritative repo registry, conventional paths,
   no app-local manifests, and no app-user overrides?
 - Is direct downstream dependency reporting sufficient for v1, with inferred dependency analysis deferred?
-- Should shared libraries be modeled as applications, components, or dependencies-only assets?
 - What is the minimum acceptable CLI support for the first release?
-- What set of shared or repo-scoped paths should remain valid inside `single-app` pull requests before
-  reclassification becomes mandatory?
+- What specific shared path categories should be added to or removed from the approved list?
 - Is optional scaffolding of `{app.path}/.documentation/` during `/devspark.add-application` acceptable,
   or should the command remain registry-only in the first release?
+
+## Operational Constraints
+
+- The default single-application behavior must remain unchanged.
+- DevSpark installation and upgrade operations must only manage `.devspark/` and agent shims.
+- Repo-level `.documentation/` and app-level `{app.path}/.documentation/` are repository-owned.
+- Application selection must be explicit for ambiguous contexts.
+- Single-app PRs are the default; cross-app PRs are supported through explicit declaration.
+- The first multi-app command set is limited to add and list application workflows.
+- Multi-app support must work across Bash and PowerShell script variants.
+- Repo-wide workflows such as release or constitution evolution must continue to function.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: A repository with at least five heterogeneous applications can configure DevSpark so that
-  each app resolves the correct governance and override layers during planning and review workflows.
-- **SC-002**: Existing single-application repositories require no directory restructure and show no
-  behavior regression in core DevSpark workflows.
-- **SC-003**: For a declared cross-app dependency change, DevSpark identifies the primary scope and at
-  least the directly impacted downstream applications in the generated scope report.
-- **SC-004**: A pull request declared as `single-app` is automatically flagged when its changed files touch
-  additional registered app paths outside approved shared categories.
-- **SC-005**: Technical leadership can review one written specification and determine the proposed
-  operating model, migration strategy, risks, and unresolved questions without requiring source-code
-  archaeology.
-- **SC-006**: The packaged DevSpark installation, quickstart flow, and documented layout all support the
-  same multi-app model.
-- **SC-007**: `/devspark.add-application` can add a valid application to the root registry and optionally
-  scaffold the app-local documentation root without modifying `.devspark/`.
-- **SC-008**: `/devspark.list-applications` can render the registered application set with enough detail to
-  support scope selection and leadership review.
+- **SC-001**: Given the six-app fixture registry (runtime-api-a, runtime-api-b, admin-api, admin-web,
+  client-web, qa-harness), running `/devspark.plan` with `--app runtime-api-a` produces a plan artifact
+  at `apps/runtime-api-a/.documentation/specs/` and the scope report output contains
+  `scope: single-app` and `app: runtime-api-a`.
+- **SC-002**: Given the same fixture, running `/devspark.plan` with `--app admin-web` does NOT include
+  any content from `runtime-api-a`'s constitution or overrides in the resolved context.
+- **SC-003**: Given a single-app fixture repository with no `devspark.json`, all existing DevSpark
+  commands produce identical output and artifact locations compared to the pre-feature baseline.
+- **SC-004**: Given a fixture registry where `admin-web` depends on `admin-api`, running a repo-scope
+  workflow for a shared contract change produces a scope report listing both `admin-api` and `admin-web`
+  in the impacted applications section.
+- **SC-005**: Given a PR declared as `single-app` for `admin-web` where changed files include a file
+  under `apps/admin-api/`, the PR review workflow emits a scope mismatch warning naming `admin-api`.
+- **SC-006**: Running `/devspark.add-application` with id `payments-api`, path `apps/payments-api`,
+  kind `runtime-api`, and valid profile references adds exactly one entry to `devspark.json` and the
+  file passes schema validation. Running it again with the same id fails with a duplicate error.
+- **SC-007**: Running `/devspark.list-applications` on the six-app fixture produces a table with six
+  rows, each showing id, path, kind, owner, and dependencies. No files are modified.
+- **SC-008**: The quickstart documents, CLI `--help` output, and packaged template README all reference
+  the multi-app capability with consistent terminology matching the spec.
 
 ## Recommended Leadership Decision
 
