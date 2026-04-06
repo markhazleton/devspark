@@ -2,22 +2,22 @@ name: Create Release
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - '.documentation/**'
-      - 'CHANGELOG.md'
-      - 'README.md'
-      - 'pyproject.toml'
-      - 'quickstart/**'
-      - 'src/**'
-      - 'memory/**'
-      - 'scripts/**'
-      - 'templates/**'
-      - '.github/workflows/**'
+      - ".documentation/**"
+      - "CHANGELOG.md"
+      - "README.md"
+      - "pyproject.toml"
+      - "quickstart/**"
+      - "src/**"
+      - "memory/**"
+      - "scripts/**"
+      - "templates/**"
+      - ".github/workflows/**"
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Optional release version (e.g., 1.4.6 or v1.4.6). If omitted, workflow auto-selects.'
+        description: "Optional release version (e.g., 1.4.6 or v1.4.6). If omitted, workflow auto-selects."
         required: false
         type: string
 
@@ -87,4 +87,3 @@ jobs:
           .github/workflows/scripts/create-github-release.sh ${{ steps.get_tag.outputs.new_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
