@@ -566,6 +566,113 @@ v1 introduces only two new commands:
   effective documentation root
 - Read-only; no file mutations
 
+## Design: Rationale Capture Pattern
+
+### Purpose
+
+Surface decision context at the top of every generated artifact so reviewers understand intent without
+reverse-engineering the document body. This is a documentation-layer enhancement: no runtime validation,
+no blocking gates, no schema enforcement.
+
+### Standard Rationale Block
+
+Every spec, plan, and tasks artifact renders this block immediately after the document header metadata:
+
+```markdown
+## Rationale Summary
+
+### Core Problem
+[What problem are we solving?]
+
+### Decision Summary
+[What was decided and why (1–3 sentences max)?]
+
+### Key Drivers
+- [Business driver]
+- [Technical constraint]
+- [User/operational impact]
+
+### Source Inputs
+- [Spec / ticket / discussion reference]
+- [System constraints or prior patterns]
+- [Relevant data or telemetry insights]
+
+### Tradeoffs Considered
+- Option A: [why not chosen]
+- Option B: [why not chosen]
+- Selected: [why chosen]
+
+### Architectural Impact
+- [What changes in system behavior or structure]
+- [Backward compatibility considerations]
+- [Dependencies introduced or avoided]
+
+### Reviewer Guidance
+[What should reviewers focus on?]
+```
+
+### Population Rules by Command
+
+| Command | Source | Rationale Sections Populated |
+|---------|--------|-----------------------------|
+| `/devspark.specify` | User feature description | All seven sections synthesized from user input |
+| `/devspark.plan` | spec.md + research.md | Carry forward from spec; augment with technical tradeoffs, research findings, architecture decisions |
+| `/devspark.tasks` | plan.md + spec.md | Carry forward Core Problem, Decision Summary, Key Drivers; set Reviewer Guidance to task-specific focus (ordering, dependencies, MVP scope) |
+| `/devspark.critic` | spec.md + plan.md + tasks.md | Validate presence and consistency across all three; flag gaps and drift |
+
+### Critic Enforcement Rules
+
+`/devspark.critic` adds a **Rationale & Traceability Risks** category to its risk detection framework:
+
+- **Missing Rationale Summary** in any artifact → HIGH severity
+- **Rationale drift** (Core Problem or Decision Summary contradicts between spec/plan/tasks) → CRITICAL severity
+- **Missing tradeoffs** for major architecture decisions → HIGH severity
+- **Placeholder or unfilled rationale sections** → HIGH severity
+
+The Architecture Red Flags checklist in the critic report adds:
+
+- [ ] Missing or incomplete Rationale Summary in spec.md
+- [ ] Missing or incomplete Rationale Summary in plan.md
+- [ ] Missing or incomplete Rationale Summary in tasks.md
+- [ ] Rationale drift between spec and plan (Core Problem mismatch)
+- [ ] Tradeoffs not documented for major architecture decisions
+
+### Template Changes Required
+
+The following template files need the Rationale Summary block injected:
+
+| Template | Block Placement | Sections Included |
+|----------|----------------|-------------------|
+| `templates/spec-template.md` | After header metadata, before User Scenarios | All seven sections |
+| `templates/plan-template.md` | After header metadata, before Summary | All seven sections (spec-aware placeholders) |
+| `templates/tasks-template.md` | After header metadata, before Format section | Core Problem, Decision Summary, Key Drivers, Reviewer Guidance |
+
+A standalone `templates/rationale-template.md` provides the canonical block for reference.
+
+### Command Instruction Changes Required
+
+| Command File | Change |
+|-------------|--------|
+| `templates/commands/specify.md` | Add step to populate Rationale Summary from user description |
+| `templates/commands/plan.md` | Add step to carry forward and augment rationale from spec |
+| `templates/commands/tasks.md` | Add step to carry forward rationale from plan |
+| `templates/commands/critic.md` | Add Rationale & Traceability Risks category; add rationale red flags to checklist |
+
+### Backward Compatibility
+
+This pattern is purely additive:
+
+- Existing artifacts without the block continue to work
+- No workflow produces an error for missing rationale
+- The critic reports missing rationale as a risk, not a gate failure
+- Single-app and multi-app repositories both benefit
+
+### Deferred Enhancements
+
+- **Machine-readable variant**: JSON rationale object for diff-based comparison and automated governance
+- **Rationale drift detection**: Automated spec-vs-plan-vs-tasks consistency checking beyond critic
+- **Critic enforcement rules**: Fail builds if rationale is weak or missing (governance gate)
+
 ## Delivery Strategy
 
 ### V1 Split: v1a and v1b
@@ -715,6 +822,37 @@ Exit criteria:
 - Quickstarts explain when to use repo-wide scope versus app scope
 - Upgrade paths do not overwrite user-owned `.documentation/` content
 
+### Workstream 5 — Rationale Capture Pattern (v1a) — Effort: S
+
+Deliverables:
+
+- Rationale Summary block added to `templates/spec-template.md`, `templates/plan-template.md`,
+  `templates/tasks-template.md`
+- Standalone `templates/rationale-template.md` for reference
+- `/devspark.specify` command updated to populate rationale from user description
+- `/devspark.plan` command updated to carry forward and augment rationale from spec
+- `/devspark.tasks` command updated to carry forward rationale from plan
+- `/devspark.critic` command updated with Rationale & Traceability Risks category and rationale
+  red flags in the Architecture Red Flags checklist
+
+Primary code surfaces:
+
+- `templates/spec-template.md`
+- `templates/plan-template.md`
+- `templates/tasks-template.md`
+- `templates/rationale-template.md` (new)
+- `templates/commands/specify.md`
+- `templates/commands/plan.md`
+- `templates/commands/tasks.md`
+- `templates/commands/critic.md`
+
+Exit criteria:
+
+- All four templates contain the Rationale Summary block in the correct position
+- All four commands reference and populate the block
+- Existing single-app workflows produce no errors with the new block present
+- Critic detects missing rationale and rationale drift between artifacts
+
 ### Workstream 4 — Validation, Fixtures, and Hardening (v1a + v1b) — Effort: L
 
 Deliverables:
@@ -747,6 +885,7 @@ Exit criteria:
 | WS2 — Script & Prompt Propagation | v1a + v1b | XL | 15+ script files × 2 platforms; highest divergence risk |
 | WS3 — Packaging & Quickstarts | v1b | M | Low technical risk; coordination with release tooling |
 | WS4 — Validation & Hardening | v1a + v1b | L | Fixture complexity; parity testing surface area |
+| WS5 — Rationale Capture Pattern | v1a | S | Low risk; pure template/command additions |
 
 ## Phase Plan
 

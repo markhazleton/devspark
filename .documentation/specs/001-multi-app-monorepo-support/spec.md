@@ -335,6 +335,27 @@ output includes all six entries with correct metadata in a readable format.
 - **FR-F3**: DevSpark MUST update packaged templates, quickstart guidance, and CLI behavior so the
   multi-app capability is installable and discoverable.
 
+### Requirement Group G — Rationale Capture
+
+- **FR-G1**: DevSpark MUST render a **Rationale Summary** block at the top of every generated spec,
+  plan, and tasks artifact, immediately after the document header metadata.
+- **FR-G2**: The Rationale Summary MUST contain these sections: Core Problem, Decision Summary,
+  Key Drivers, Source Inputs, Tradeoffs Considered, Architectural Impact, and Reviewer Guidance.
+- **FR-G3**: `/devspark.specify` MUST populate the Rationale Summary by synthesizing the user's feature
+  description into structured rationale (problem, drivers, scope tradeoffs, architectural impact).
+- **FR-G4**: `/devspark.plan` MUST carry forward the spec's rationale and augment it with technical
+  approach decisions, research findings, and architecture tradeoffs from the planning phase.
+- **FR-G5**: `/devspark.tasks` MUST carry forward Core Problem, Decision Summary, Key Drivers, and
+  Reviewer Guidance from the plan into the tasks artifact.
+- **FR-G6**: `/devspark.critic` MUST validate rationale completeness and consistency across all three
+  artifacts (spec, plan, tasks) and flag missing rationale as HIGH severity and rationale drift
+  (contradictions between artifacts) as CRITICAL severity.
+- **FR-G7**: The Rationale Summary MUST be a pure documentation-layer enhancement with zero runtime
+  impact; it adds no validation gates, no blocking checks, and no schema enforcement beyond
+  populating the template sections.
+- **FR-G8**: The rationale pattern MUST be backward compatible; existing repositories without rationale
+  blocks MUST continue to work without errors or warnings.
+
 ### Constitution Weakening Detection
 
 v1 uses a keyword-based detection model rather than requiring structured constitution formats:
@@ -404,6 +425,15 @@ contains optional `tags`, `rules`, and `hints` objects.
   `repo-scope`, with primary app, affected apps, and validation rationale.
 - **Shared Library**: A registry entry with `kind: "library"` and `deployable: false` that participates
   in dependency tracking but is not a valid target for deployment workflows.
+
+## Success Criteria — Rationale Capture
+
+- **SC-R1**: A reviewer can understand the Core Problem, Decision Summary, and Key Drivers of any
+  generated artifact in under 30 seconds by reading only the Rationale Summary block.
+- **SC-R2**: Rationale is traceable from spec through plan through tasks; the `/devspark.critic` command
+  detects and reports any drift or contradiction.
+- **SC-R3**: No existing single-app or multi-app workflow produces an error when the Rationale Summary
+  block is absent from legacy artifacts.
 
 ## Non-Functional Requirements
 
