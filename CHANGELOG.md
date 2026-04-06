@@ -7,6 +7,47 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-04-05
+
+**Bug fixes, macOS compatibility, and CI hardening.**
+
+### Fixed
+
+- macOS Bash 3.2 compatibility across all `scripts/bash/` scripts (harvest.sh, archive-context.sh, common.sh, and others)
+- BSD tool compatibility fixes for `find`, `sed`, and other POSIX utilities on macOS
+- Restored accidentally removed `latest_feature` declaration in common.sh
+- Excluded `docs/` from harvest scan and truncated text fields to prevent malformed JSON
+- Resolved all ShellCheck warnings across bash scripts and CI workflows
+- Resolved all markdownlint errors across 8 documentation files
+- Flexible digit pattern in `find` to match original `ls|grep` behavior
+
+### Added
+
+- ShellCheck CI job with bash version check for automated lint enforcement
+- Platform adapter and 2-tier script override system for team customization
+- Quickstart files now re-runnable with version-aware update logic
+- Developer FAQ section and README link step in `/devspark.repo-story`
+- Video embed on GitHub Pages home page
+- About page for documentation site
+- SC1091 exclusion comment in shellcheck workflow for clarity
+- Branch-sync hard rule enforcement for PR creation, review, and approval
+
+### Changed
+
+- Updated CLAUDE.md with branch-sync hard rule and platform support note
+- Aligned all content to v0.1.0 naming and removed legacy spec-kit references
+- Updated installation and quickstart guides for improved clarity and accessibility
+- Fixed documentation site navigation and removed self-referencing language
+
+### Removed
+
+- 12 fork-era files consolidated into new structure
+- 7 stale `.documentation` files with broken references cleaned up
+- `.devcontainer/` directory (unnecessary for markdown-first product)
+- Local cruft and gitignored Claude settings and `_site/`
+
+---
+
 ## [0.1.0] - 2026-04-02
 
 **DevSpark Alpha — First standalone release.**
