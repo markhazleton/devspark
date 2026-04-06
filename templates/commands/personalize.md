@@ -49,7 +49,7 @@ over both team customizations and stock defaults.
 2. **Parse the command name from user input** (`$ARGUMENTS`):
 
    The argument should be a command name, with or without the `devspark.` prefix.
-   Examples: `specify`, `devspark.plan`, `implement`
+   Examples: `constitution`, `devspark.plan`, `implement`
 
    If no argument is given, list all available commands from `.documentation/commands/`
    (or `.devspark/defaults/commands/` if `commands/` is empty) and ask the user

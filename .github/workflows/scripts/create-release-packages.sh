@@ -40,6 +40,17 @@ rewrite_paths() {
     -e 's@(^|[[:space:]]|`)/templates/@\1/.devspark/templates/@g'
 }
 
+copy_relative_files() {
+  local source_root=$1 destination_root=$2
+  shift 2
+
+  while IFS= read -r relative_path; do
+    [[ -n $relative_path ]] || continue
+    mkdir -p "$destination_root/$(dirname "$relative_path")"
+    cp "$source_root/$relative_path" "$destination_root/$relative_path"
+  done < <(find "$source_root" "$@" -print | sed "s#^$source_root/##")
+}
+
 generate_canonical_commands() {
   # Generate canonical command files in .documentation/commands/ (agent-agnostic)
   local output_dir=$1 script_variant=$2
@@ -294,7 +305,10 @@ build_variant() {
     esac
   fi
   
-  [[ -d templates ]] && { mkdir -p "$DEVSPARK_DIR/templates"; find templates -type f -not -path "templates/commands/*" -not -name "vscode-settings.json" -exec cp --parents {} "$DEVSPARK_DIR"/ \; ; echo "Copied templates -> .devspark/templates"; }
+  [[ -d templates ]] && {
+    copy_relative_files templates "$DEVSPARK_DIR" -type f -not -path "templates/commands/*" -not -name "vscode-settings.json"
+    echo "Copied templates -> .devspark/templates"
+  }
   
   # Generate canonical command prompts in .devspark/defaults/commands/ (stock, upgrade-safe)
   # Team customizations live in .documentation/commands/ and are never overwritten.

@@ -4,6 +4,12 @@ on:
   push:
     branches: [ main ]
     paths:
+      - '.documentation/**'
+      - 'CHANGELOG.md'
+      - 'README.md'
+      - 'pyproject.toml'
+      - 'quickstart/**'
+      - 'src/**'
       - 'memory/**'
       - 'scripts/**'
       - 'templates/**'

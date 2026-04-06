@@ -5,6 +5,8 @@
 # Getting started section
 - name: Getting Started
   items:
+    - name: Implementation Lifecycle
+      href: implementation-lifecycle.md
     - name: Quick Start
       href: quickstart.md
     - name: Other Ways to Get Started

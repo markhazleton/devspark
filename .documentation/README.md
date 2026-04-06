@@ -27,6 +27,7 @@ To build the documentation locally:
 - `index.md` - Main documentation homepage
 - `toc.yml` - Table of contents configuration
 - `installation.md` - Installation guide
+- `implementation-lifecycle.md` - Prompt-first lifecycle guide
 - `quickstart.md` - Quick start guide
 - `upgrade.md` - Upgrade instructions
 - `constitution-guide.md` - Constitution creation and usage guide

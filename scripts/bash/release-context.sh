@@ -171,10 +171,13 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_DATE=$(date +"%Y-%m-%d")
 
 # DevSpark version stamp info
-DEVSPARK_VERSION_PATH="$REPO_ROOT/.documentation/DEVSPARK_VERSION"
+DEVSPARK_VERSION_PATH="$REPO_ROOT/.devspark/VERSION"
+LEGACY_DEVSPARK_VERSION_PATH="$REPO_ROOT/.documentation/DEVSPARK_VERSION"
 INSTALLED_VERSION=""
 if [[ -f "$DEVSPARK_VERSION_PATH" ]]; then
-    INSTALLED_VERSION=$(head -1 "$DEVSPARK_VERSION_PATH" 2>/dev/null || echo "")
+    INSTALLED_VERSION=$(sed -nE 's/^version:[[:space:]]*([^[:space:]]+).*/\1/p' "$DEVSPARK_VERSION_PATH" 2>/dev/null | head -1 || echo "")
+elif [[ -f "$LEGACY_DEVSPARK_VERSION_PATH" ]]; then
+    INSTALLED_VERSION=$(head -1 "$LEGACY_DEVSPARK_VERSION_PATH" 2>/dev/null || echo "")
 fi
 
 # Output JSON if requested
@@ -201,7 +204,8 @@ if [[ "$JSON_MODE" == true ]]; then
   "TIMESTAMP": "$TIMESTAMP",
   "RELEASE_DATE": "$RELEASE_DATE",
   "DRY_RUN": $DRY_RUN,
-  "DEVSPARK_VERSION_PATH": "$DEVSPARK_VERSION_PATH",
+    "DEVSPARK_VERSION_PATH": "$DEVSPARK_VERSION_PATH",
+    "LEGACY_DEVSPARK_VERSION_PATH": "$LEGACY_DEVSPARK_VERSION_PATH",
   "INSTALLED_VERSION": "$INSTALLED_VERSION"
 }
 EOF
@@ -223,7 +227,7 @@ else
     if [[ -n "$INSTALLED_VERSION" ]]; then
         echo "Installed DevSpark Version: $INSTALLED_VERSION"
     else
-        echo "Installed DevSpark Version: (DEVSPARK_VERSION not found)"
+        echo "Installed DevSpark Version: (VERSION stamp not found)"
     fi
     if [[ "$DRY_RUN" == true ]]; then
         echo ""

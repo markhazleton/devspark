@@ -247,12 +247,12 @@ def _is_protected(rel_path: str) -> bool:
     return any(normalized.startswith(prefix) for prefix in PROTECTED_PREFIXES)
 
 BANNER = """
-███████╗██████╗ ███████╗ ██████╗██╗███████╗██╗   ██╗
-██╔════╝██╔══██╗██╔════╝██╔════╝██║██╔════╝╚██╗ ██╔╝
-███████╗██████╔╝█████╗  ██║     ██║█████╗   ╚████╔╝ 
-╚════██║██╔═══╝ ██╔══╝  ██║     ██║██╔══╝    ╚██╔╝  
-███████║██║     ███████╗╚██████╗██║██║        ██║   
-╚══════╝╚═╝     ╚══════╝ ╚═════╝╚═╝╚═╝        ╚═╝   
+██████╗ ███████╗██╗   ██╗███████╗██████╗  █████╗ ██████╗ ██╗  ██╗
+██╔══██╗██╔════╝██║   ██║██╔════╝██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝
+██║  ██║█████╗  ██║   ██║███████╗██████╔╝███████║██████╔╝█████╔╝ 
+██║  ██║██╔══╝  ╚██╗ ██╔╝╚════██║██╔═══╝ ██╔══██║██╔══██╗██╔═██╗ 
+██████╔╝███████╗ ╚████╔╝ ███████║██║     ██║  ██║██║  ██║██║  ██╗
+╚═════╝ ╚══════╝  ╚═══╝  ╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 """
 
 TAGLINE = "DevSpark — AI Development Lifecycle Prompts"
@@ -996,7 +996,7 @@ def init(
     github_token: str = typer.Option(None, "--github-token", help="GitHub token to use for API requests (or set GH_TOKEN or GITHUB_TOKEN environment variable)"),
 ):
     """
-    Initialize a new Specify project from the latest template.
+    Initialize a new DevSpark project from the latest template.
     
     This command will:
     1. Check that required tools are installed (git is optional)
@@ -1027,11 +1027,11 @@ def init(
         project_name = None  # Clear project_name to use existing validation logic
 
     if here and project_name:
-        console.print("[red]Error:[/red] Cannot specify both project name and --here flag")
+        console.print("[red]Error:[/red] Cannot use both project name and --here flag")
         raise typer.Exit(1)
 
     if not here and not project_name:
-        console.print("[red]Error:[/red] Must specify either a project name, use '.' for current directory, or use --here flag")
+        console.print("[red]Error:[/red] Provide a project name, use '.' for current directory, or use --here flag")
         raise typer.Exit(1)
 
     if here:
@@ -1066,7 +1066,7 @@ def init(
     current_dir = Path.cwd()
 
     setup_lines = [
-        "[cyan]Specify Project Setup[/cyan]",
+        "[cyan]DevSpark Project Setup[/cyan]",
         "",
         f"{'Project':<15} [green]{project_path.name}[/green]",
         f"{'Working Path':<15} [dim]{current_dir}[/dim]",
@@ -1131,9 +1131,9 @@ def init(
     console.print(f"[cyan]Selected AI assistant:[/cyan] {selected_ai}")
     console.print(f"[cyan]Selected script type:[/cyan] {selected_script}")
 
-    tracker = StepTracker("Initialize Specify Project")
+    tracker = StepTracker("Initialize DevSpark Project")
 
-    sys._specify_tracker_active = True
+    sys._devspark_tracker_active = True
 
     tracker.add("precheck", "Check required tools")
     tracker.complete("precheck", "ok")
@@ -1405,20 +1405,20 @@ def run_migration_script() -> bool:
                 dst_file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(str(item), str(dst_file))
 
-    # Handle .specify/ — copy known subdirs then root files, then rename
-    specify_dir = cwd / ".specify"
-    if specify_dir.exists():
+    # Handle legacy hidden folder (.specify/) — copy known subdirs then root files, then rename
+    legacy_spec_dir = cwd / ".specify"
+    if legacy_spec_dir.exists():
         for sub in ["memory", "scripts", "templates", "specs"]:
-            src = specify_dir / sub
+            src = legacy_spec_dir / sub
             if src.exists():
                 _merge_into(src, doc_dir / sub)
         # Copy any root-level files in .specify
-        for item in specify_dir.iterdir():
+        for item in legacy_spec_dir.iterdir():
             if item.is_file():
                 dst_file = doc_dir / item.name
                 if not dst_file.exists():
                     shutil.copy2(str(item), str(dst_file))
-        specify_dir.rename(cwd / ".specify.old")
+        legacy_spec_dir.rename(cwd / ".specify.old")
         console.print("[green]>[/green] .specify/ -> .specify.old/")
         moved += 1
 

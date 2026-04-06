@@ -44,19 +44,18 @@ if ($LastTag -eq "v0.0.0") {
 $releaseNotes = @"
 # DevSpark
 
-DevSpark is an Adaptive System Life Cycle Development (ASLCD) toolkit with constitution-powered commands and right-sized workflows. Part of the WebSpark demonstration suite.
+DevSpark is an Adaptive System Life Cycle Development (ASLCD) toolkit with constitution-powered commands, prompt-first onboarding, and right-sized workflows for AI coding assistants.
 
-## Spark-Specific Features
+## Highlights
 
-- **Discover Constitution**: Analyze existing codebases to reverse-engineer project principles
-- **PR Review Command**: Constitution-based pull request review workflow
-- **Site Audit**: Comprehensive codebase auditing against constitution principles
-- **Critic Command**: Adversarial risk analysis for spec artifacts
-- **Extended Agent Support**: 17+ AI coding assistants supported
+- **Prompt-first lifecycle**: Quickstart and upgrade flows work directly from remote prompt files
+- **Constitution-powered workflows**: Requirements, planning, review, and audit flows stay aligned with project rules
+- **Agent-agnostic architecture**: Shared stock prompts plus thin shims for 17+ AI coding assistants
+- **Safe customization model**: `.devspark/` stays replaceable while `.documentation/` preserves project work
 
 ## Using This Release
 
-You can use these releases with your agent of choice. We recommend using the DevSpark CLI to scaffold your projects, however you can download these independently and manage them yourself.
+For normal use, bootstrap and update DevSpark from your AI chat using the remote quickstart and upgrade prompt files. The CLI remains available for advanced terminal-driven automation.
 
 ## Changelog
 
@@ -64,7 +63,7 @@ $commits
 
 ---
 
-*Maintained as a fork of github/devspark. DevSpark is independently evolved and may contain Spark-specific capabilities not present upstream.*
+*DevSpark is independently maintained by Mark Hazleton and the open-source community.*
 "@
 
 # Write to file

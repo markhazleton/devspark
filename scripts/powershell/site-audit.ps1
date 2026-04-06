@@ -473,18 +473,33 @@ function Get-PatternDetection {
 function Get-DevSparkVersion {
     param([string]$RepoRoot)
     
-    $stampPath = Join-Path $RepoRoot '.documentation/DEVSPARK_VERSION'
+    $stampPath = Join-Path $RepoRoot '.devspark/VERSION'
+    $legacyStampPath = Join-Path $RepoRoot '.documentation/DEVSPARK_VERSION'
     $info = @{
         stamp_exists = $false
         installed_version = $null
         installed_date = $null
-        agent = $null
+        method = $null
     }
     
     if (Test-Path $stampPath) {
         $info.stamp_exists = $true
         try {
             $lines = @(Get-Content $stampPath -ErrorAction SilentlyContinue)
+            foreach ($line in $lines) {
+                if ($line -match '^version:\s*(.+)$') {
+                    $info.installed_version = $matches[1].Trim()
+                } elseif ($line -match '^installed:\s*(.+)$') {
+                    $info.installed_date = $matches[1].Trim()
+                } elseif ($line -match '^method:\s*(.+)$') {
+                    $info.method = $matches[1].Trim()
+                }
+            }
+        } catch { }
+    } elseif (Test-Path $legacyStampPath) {
+        $info.stamp_exists = $true
+        try {
+            $lines = @(Get-Content $legacyStampPath -ErrorAction SilentlyContinue)
             if ($lines.Count -gt 0) {
                 $info.installed_version = $lines[0].Trim()
             }
@@ -492,7 +507,7 @@ function Get-DevSparkVersion {
                 if ($line -match '^installed:\s*(.+)$') {
                     $info.installed_date = $matches[1].Trim()
                 } elseif ($line -match '^agent:\s*(.+)$') {
-                    $info.agent = $matches[1].Trim()
+                    $info.method = $matches[1].Trim()
                 }
             }
         } catch { }

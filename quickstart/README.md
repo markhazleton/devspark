@@ -16,6 +16,16 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 1. Open a chat with your AI agent in the target repository
 2. Paste the URL to the raw quickstart file, or copy its contents into the chat
 3. The agent will ask a few questions about your project, then pull and install all DevSpark prompts
+4. For upgrades, run the [remote upgrade prompt](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) (no CLI required)
+5. Use CLI only if you want advanced automation (`devspark upgrade`)
+
+## Upgrade Paths
+
+- Basic (recommended): remote upgrade prompt
+- Paste this [upgrade prompt URL](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) into your agent chat in the target repo
+- Tell the agent to run a dry run first, then apply the upgrade.
+- Advanced (optional): CLI
+- Run `devspark upgrade` if you have CLI tooling installed and prefer terminal-driven upgrades.
 
 Example (Copilot):
 
@@ -39,7 +49,7 @@ Example (Claude Code):
 
 Each quickstart automatically detects and migrates from:
 
-- **Spec Kit** (`.specify/` directory) → moves user content to `.documentation/`, renames old dir to `.specify.old/`
+- **Legacy `.specify/` layout** (`.specify/` directory) → moves user content to `.documentation/`, renames old dir to `.specify.old/`
 - **Pre-separation DevSpark** (`.documentation/defaults/`) → moves framework files to `.devspark/`
 - **Legacy root-level dirs** (`memory/`, `specs/`) → consolidates into `.documentation/`
 

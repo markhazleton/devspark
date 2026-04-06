@@ -61,17 +61,17 @@ New-Item -ItemType Directory -Path $GenReleasesDir -Force | Out-Null
 function Rewrite-Paths {
     param([string]$Content)
 
-    # DevSpark uses .documentation/ instead of .specify/ to distinguish from upstream
+    # DevSpark uses .devspark/ for framework files and .documentation/ for user work
     $Content = $Content -replace '(/?)\.specify/', '$1.documentation/'
     $Content = $Content -replace '(^|\s|`)/specs/', '$1/.documentation/specs/'
     $Content = $Content -replace '(^|\s|`)/memory/', '$1/.documentation/memory/'
-    $Content = $Content -replace '(^|\s|`)/scripts/', '$1/.documentation/scripts/'
-    $Content = $Content -replace '(^|\s|`)/templates/', '$1/.documentation/templates/'
+    $Content = $Content -replace '(^|\s|`)/scripts/', '$1/.devspark/scripts/'
+    $Content = $Content -replace '(^|\s|`)/templates/', '$1/.devspark/templates/'
     return $Content
 }
 
 function Generate-CanonicalCommands {
-    # Generate canonical command files in .documentation/commands/ (agent-agnostic)
+    # Generate canonical command files in .devspark/defaults/commands/ (stock, upgrade-safe)
     param(
         [string]$OutputDir,
         [string]$ScriptVariant
@@ -159,7 +159,7 @@ function Generate-CanonicalCommands {
 }
 
 function Generate-Shims {
-    # Generate thin platform shims that redirect to canonical commands in .documentation/commands/
+    # Generate thin platform shims that resolve personal -> team -> stock command files
     param(
         [string]$Agent,
         [string]$Extension,
@@ -215,7 +215,8 @@ Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip n
 
 Read and execute the instructions from the **first file that exists**:
 1. ``.documentation/{git-user}/commands/devspark.$name.md`` (personalized override)
-2. ``.documentation/commands/devspark.$name.md`` (shared default)
+2. ``.documentation/commands/devspark.$name.md`` (team customization)
+3. ``.devspark/defaults/commands/devspark.$name.md`` (stock default)
 
 Where ``{git-user}`` is the normalized slug from step above.
 
@@ -246,7 +247,8 @@ Pass the user input above to the resolved prompt.
                 $shimLines += ""
                 $shimLines += "Read and execute the instructions from the **first file that exists**:"
                 $shimLines += "1. ``.documentation/{git-user}/commands/devspark.$name.md`` (personalized override)"
-                $shimLines += "2. ``.documentation/commands/devspark.$name.md`` (shared default)"
+                $shimLines += "2. ``.documentation/commands/devspark.$name.md`` (team customization)"
+                $shimLines += "3. ``.devspark/defaults/commands/devspark.$name.md`` (stock default)"
                 $shimLines += ""
                 $shimLines += "Where ``{git-user}`` is the normalized slug from step above."
                 $shimLines += ""
@@ -409,32 +411,32 @@ function Build-Variant {
     Write-Host "Building $Agent ($Script) package..."
     New-Item -ItemType Directory -Path $baseDir -Force | Out-Null
     
-    # Copy base structure but filter scripts by variant
-    $specDir = Join-Path $baseDir ".documentation"
-    New-Item -ItemType Directory -Path $specDir -Force | Out-Null
+    # Framework files go into .devspark/ (removable installation)
+    $devsparkDir = Join-Path $baseDir ".devspark"
+    New-Item -ItemType Directory -Path $devsparkDir -Force | Out-Null
     
-    # Copy memory directory
+    # Seed constitution template into .devspark/ (quickstart/CLI copy it into .documentation on first install)
     if (Test-Path "memory") {
-        Copy-Item -Path "memory" -Destination $specDir -Recurse -Force
-        Write-Host "Copied memory -> .documentation"
+        Copy-Item -Path "memory" -Destination $devsparkDir -Recurse -Force
+        Write-Host "Copied memory -> .devspark"
     }
     
     # Only copy the relevant script variant directory
     if (Test-Path "scripts") {
-        $scriptsDestDir = Join-Path $specDir "scripts"
+        $scriptsDestDir = Join-Path $devsparkDir "scripts"
         New-Item -ItemType Directory -Path $scriptsDestDir -Force | Out-Null
         
         switch ($Script) {
             'sh' {
                 if (Test-Path "scripts/bash") {
                     Copy-Item -Path "scripts/bash" -Destination $scriptsDestDir -Recurse -Force
-                    Write-Host "Copied scripts/bash -> .documentation/scripts"
+                    Write-Host "Copied scripts/bash -> .devspark/scripts"
                 }
             }
             'ps' {
                 if (Test-Path "scripts/powershell") {
                     Copy-Item -Path "scripts/powershell" -Destination $scriptsDestDir -Recurse -Force
-                    Write-Host "Copied scripts/powershell -> .documentation/scripts"
+                    Write-Host "Copied scripts/powershell -> .devspark/scripts"
                 }
             }
         }
@@ -447,7 +449,7 @@ function Build-Variant {
     
     # Copy templates (excluding commands directory and vscode-settings.json)
     if (Test-Path "templates") {
-        $templatesDestDir = Join-Path $specDir "templates"
+        $templatesDestDir = Join-Path $devsparkDir "templates"
         New-Item -ItemType Directory -Path $templatesDestDir -Force | Out-Null
         
         Get-ChildItem -Path "templates" -Recurse -File | Where-Object {
@@ -459,16 +461,16 @@ function Build-Variant {
             New-Item -ItemType Directory -Path $destFileDir -Force | Out-Null
             Copy-Item -Path $_.FullName -Destination $destFile -Force
         }
-        Write-Host "Copied templates -> .documentation/templates"
+        Write-Host "Copied templates -> .devspark/templates"
     }
     
-    # Generate canonical command prompts in .documentation/commands/ (agent-agnostic)
-    $canonicalDir = Join-Path $specDir "commands"
+    # Generate canonical command prompts in .devspark/defaults/commands/ (stock, upgrade-safe)
+    $canonicalDir = Join-Path $devsparkDir "defaults/commands"
     Generate-CanonicalCommands -OutputDir $canonicalDir -ScriptVariant $Script
-    Write-Host "Generated canonical commands -> .documentation/commands"
+    Write-Host "Generated canonical commands -> .devspark/defaults/commands"
     
     # Generate thin platform shims in agent-specific directories
-    # Shims redirect to .documentation/commands/ with user-override resolution
+    # Shims redirect to .documentation/commands/ with user-override resolution and stock fallback
     switch ($Agent) {
         'claude' {
             $cmdDir = Join-Path $baseDir ".claude/commands"

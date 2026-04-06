@@ -4,7 +4,7 @@ This directory contains the **core deliverable** of DevSpark — prompt template
 
 ## Commands (`commands/`)
 
-Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`, `/devspark.plan`). When you run `devspark init`, these are deployed to your project's `.documentation/commands/` directory, where your AI agent picks them up.
+Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`, `/devspark.plan`). When you run `devspark init`, stock prompts are deployed to `.devspark/defaults/commands/`. AI shims then resolve prompts via the 3-tier order: personal override, team override, then stock default.
 
 | File | Command | Purpose |
 |------|---------|---------|
