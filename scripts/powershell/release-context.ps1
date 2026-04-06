@@ -163,11 +163,16 @@ $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 $releaseDate = Get-Date -Format "yyyy-MM-dd"
 
 # DevSpark version stamp info
-$versionStampPath = Join-Path $repoRoot ".documentation/DEVSPARK_VERSION"
+$versionStampPath = Join-Path $repoRoot ".devspark/VERSION"
+$legacyVersionStampPath = Join-Path $repoRoot ".documentation/DEVSPARK_VERSION"
 $installedVersion = ""
 if (Test-Path $versionStampPath) {
     try {
-        $installedVersion = (Get-Content $versionStampPath -TotalCount 1 -ErrorAction SilentlyContinue).Trim()
+        $installedVersion = ((Get-Content $versionStampPath -ErrorAction SilentlyContinue) | Select-String '^version:\s*(.+)$' | Select-Object -First 1).Matches.Groups[1].Value.Trim()
+    } catch { }
+} elseif (Test-Path $legacyVersionStampPath) {
+    try {
+        $installedVersion = (Get-Content $legacyVersionStampPath -TotalCount 1 -ErrorAction SilentlyContinue).Trim()
     } catch { }
 }
 
@@ -195,6 +200,7 @@ if ($Json) {
         RELEASE_DATE           = $releaseDate
         DRY_RUN                = [bool]$DryRun
         DEVSPARK_VERSION_PATH   = $versionStampPath
+        LEGACY_DEVSPARK_VERSION_PATH = $legacyVersionStampPath
         INSTALLED_VERSION      = $installedVersion
     } | ConvertTo-Json
 }
@@ -215,7 +221,7 @@ else {
     if ($installedVersion) {
         Write-Output "Installed DevSpark Version: $installedVersion"
     } else {
-        Write-Output "Installed DevSpark Version: (DEVSPARK_VERSION not found)"
+        Write-Output "Installed DevSpark Version: (VERSION stamp not found)"
     }
     if ($DryRun) {
         Write-Output ""

@@ -7,6 +7,32 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-04-06
+
+**Prompt-first lifecycle, release tooling alignment, and branding cleanup.**
+
+### Added
+
+- Prompt-first [implementation lifecycle guide](.documentation/implementation-lifecycle.md) covering quickstart, delivery workflow, and updates
+- Explicit remote-prompt upgrade path across README, quickstart guides, and GitHub Pages source docs
+
+### Changed
+
+- Repositioned quickstart and upgrade flows so remote prompt files are the primary experience and CLI is clearly advanced/optional
+- Quickstart prompts now stamp `.devspark/VERSION` with the latest semantic DevSpark version instead of `quickstart`
+- Updated GitHub Pages source docs for consistent prompt-first messaging across landing, quickstart, upgrade, installation, FAQ, and about pages
+- Completed DevSpark branding pass in CLI banner and user-facing setup text
+- Aligned upgrade command documentation around `.devspark/VERSION` as the authoritative installed-version stamp with legacy fallback support
+- Updated release workflow inputs, examples, and documentation to reflect `v0.1.2` and current DevSpark positioning
+
+### Fixed
+
+- Removed remaining legacy `Spec Kit` and non-essential `specify` branding from docs and onboarding copy
+- Corrected documentation architecture references for stock prompts, templates, and override layers
+- Resolved markdownlint issues introduced during prompt-first documentation updates
+
+---
+
 ## [0.1.1] - 2026-04-05
 
 **Bug fixes, macOS compatibility, and CI hardening.**
@@ -35,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated CLAUDE.md with branch-sync hard rule and platform support note
-- Aligned all content to v0.1.0 naming and removed legacy spec-kit references
+- Aligned all content to v0.1.0 naming and removed legacy fork terminology
 - Updated installation and quickstart guides for improved clarity and accessibility
 - Fixed documentation site navigation and removed self-referencing language
 

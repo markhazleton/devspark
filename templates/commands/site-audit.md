@@ -115,10 +115,10 @@ current. Stale installations may have outdated command files or missing framewor
 
 #### A. Read Version Stamp
 
-Check for `.documentation/DEVSPARK_VERSION`:
+Check for `.devspark/VERSION` first (fallback: legacy `.documentation/DEVSPARK_VERSION`):
 
-- **If missing**: Flag `VER1` — stamp absent, version unknown (HIGH)
-- **If present**: Parse `version`, `installed`, and `agent` fields
+- **If both are missing**: Flag `VER1` — stamp absent, version unknown (HIGH)
+- **If present**: Parse `version`, `installed`, and `method` fields (legacy stamp may use `agent`)
 
 #### B. Detect Latest Version
 
@@ -129,7 +129,7 @@ Read the most recent `## [X.Y.Z]` entry in `CHANGELOG.md` (repo root) to get
 
 | Condition | Finding ID | Severity |
 |-----------|-----------|---------|
-| `.documentation/DEVSPARK_VERSION` absent | VER1 | HIGH |
+| `.devspark/VERSION` absent and legacy stamp absent | VER1 | HIGH |
 | Installed version < latest version | VER2 | MEDIUM |
 | Agent command files reference `.specify/` or root `memory/`, `scripts/`, `templates/`, or `specs/` paths | VER3 | HIGH |
 | Root-level `memory/`, `scripts/`, `templates/`, or `specs/` directories exist | VER4 | HIGH |
@@ -145,12 +145,12 @@ Include in the audit report under a **DevSpark Version** section:
 | Installed Version | {version or "absent"} |
 | Latest Version    | {LATEST_VERSION} |
 | Install Date      | {installed field} |
-| Agent             | {agent field} |
+| Method            | {method or agent field} |
 | Status            | UP TO DATE / UPGRADE AVAILABLE / UNKNOWN |
 ```
 
 If VER1 or VER2 is present, add to the Recommendations section:
-> Run `/devspark.upgrade` or `devspark upgrade` to update DevSpark.
+> Run the remote upgrade prompt or `/devspark.upgrade` to update DevSpark.
 
 ### 5. Constitution Compliance Audit
 
@@ -353,7 +353,7 @@ Use this format:
 
 | Field | Value |
 |-------|-------|
-| Installed Version | [version from DEVSPARK_VERSION, or "absent"] |
+| Installed Version | [version from `.devspark/VERSION`, or "absent"] |
 | Latest Version | [LATEST_VERSION] |
 | Install Date | [installed field] |
 | Agent | [agent field] |
@@ -363,7 +363,7 @@ Use this format:
 
 | ID | Issue | Severity | Recommendation |
 |----|-------|----------|----------------|
-| VER1 | DEVSPARK_VERSION absent | HIGH | Run `devspark upgrade` to install version stamp |
+| VER1 | VERSION stamp absent | HIGH | Run the remote upgrade prompt to install or refresh the version stamp |
 | VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/devspark.upgrade` to update |
 
 ## Security Findings

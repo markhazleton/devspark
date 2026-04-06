@@ -1,11 +1,20 @@
 # Other Ways to Get Started
 
 > [!TIP]
-> **Recommended**: For most users the [Prompt Bootstrap](quickstart.md) is the fastest, zero-install way to get DevSpark running. This page covers alternatives, ordered from lightest to heaviest.
+> **Recommended**: For most users the [Prompt Bootstrap](quickstart.md) plus the remote upgrade prompt are all you need. This page covers advanced alternatives only.
+
+For the primary DevSpark experience, use:
+
+1. The [Quick Start Guide](quickstart.md) to install DevSpark with a remote prompt file
+2. The [Upgrade Guide](upgrade.md) to update DevSpark with a remote prompt file
+
+CLI is not required for normal use.
 
 ---
 
 ## Option 1 — Manual File Copy (No tools required)
+
+This is an advanced fallback for teams that do not want prompt-driven setup.
 
 Clone or download the DevSpark repository and copy only the files you need into your project. This requires nothing beyond Git.
 
@@ -30,6 +39,8 @@ Then create your `.documentation/` folder and add the agent shims for your AI ag
 ## Option 2 — One-Shot CLI via `uvx` (No global install)
 
 Run the DevSpark CLI once without permanently installing it. Requires [uv](https://docs.astral.sh/uv/) and [Python 3.11+](https://www.python.org/downloads/).
+
+This is an advanced option for users who prefer terminal-driven setup.
 
 ### Prerequisites
 
@@ -99,6 +110,8 @@ uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/
 ```
 
 ### Upgrade DevSpark in a project
+
+For normal use, prefer the remote upgrade prompt described in the [Upgrade Guide](upgrade.md). Use the CLI commands below only if you want advanced local automation.
 
 ```bash
 # Safe guided upgrade (recommended)

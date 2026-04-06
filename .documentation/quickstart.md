@@ -38,7 +38,7 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 The agent will ask about your project name, tech stack, script preference, and core principles — then scaffold the full DevSpark structure with no CLI needed.
 
 > [!NOTE]
-> Need CLI-based setup instead? See [Other Ways to Get Started](installation.md) for manual, script, and CLI options — ordered lightest to heaviest.
+> Need terminal-driven setup instead? See [Other Ways to Get Started](installation.md) for advanced manual and CLI options.
 
 ---
 
@@ -112,7 +112,7 @@ Then, use the `/devspark.implement` slash command to execute the plan.
 If you want to customize any command for your individual working style without affecting your team:
 
 ```markdown
-/devspark.personalize specify       # Personalize how you write specs
+/devspark.personalize plan          # Personalize how you write plans
 /devspark.personalize plan          # Personalize your planning approach
 /devspark.personalize implement     # Personalize implementation behavior
 ```
@@ -123,7 +123,13 @@ This creates a copy of the shared prompt in `.documentation/{your-git-user}/comm
 
 ## Upgrading DevSpark
 
-To update to the latest prompts without reinstalling, use `/devspark.upgrade` in your AI agent's chat, or use the `devspark upgrade` command if you installed the CLI. See the [Upgrade Guide](upgrade.md) for details.
+For normal use, update DevSpark with the remote upgrade prompt in your AI agent chat:
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
+```
+
+That keeps stock DevSpark files current without requiring CLI installation. If you explicitly prefer terminal-driven automation, `devspark upgrade` remains available as an advanced option. See the [Upgrade Guide](upgrade.md) for details.
 
 ---
 

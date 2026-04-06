@@ -19,21 +19,21 @@ Wait for answers before continuing.
 
 ## Step 2: Detect Existing Installation
 
-Before creating anything, check for prior Spec Kit / DevSpark installations:
+Before creating anything, check for prior legacy / DevSpark installations:
 
 | Check for | What it means |
 |---|---|
 | `.devspark/` exists | **DevSpark already installed.** See "Version Check" below. |
 | `.documentation/` exists | **User artifacts exist.** Preserve everything — never overwrite. |
-| `.specify/` exists | **Old Spec Kit.** Needs migration. |
+| `.specify/` exists | **Legacy layout detected.** Needs migration. |
 | `.documentation/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
 | Root `memory/` (without `.documentation/memory/`) | **Legacy structure.** Needs migration. |
 | Root `scripts/` or `templates/` (without `.devspark/scripts/`) | **Legacy structure.** Needs migration. |
-| `.claude/commands/specify.*.md` files | **Old Spec Kit shims.** Rename to `devspark.*` prefix. |
+| `.claude/commands/specify.*.md` files | **Legacy shims detected.** Rename to `devspark.*` prefix. |
 
 **If nothing is found**, skip ahead to Step 3.
 
-### Migration: `.specify/` (old Spec Kit)
+### Migration: `.specify/` (legacy layout)
 
 Tell the user what you found and ask for confirmation before proceeding.
 
@@ -53,7 +53,7 @@ Tell the user what you found and ask for confirmation before proceeding.
 6. Delete empty `.documentation/defaults/` if nothing remains
 7. Report: "Migrated framework files from .documentation/ → .devspark/"
 
-### Migration: Root-level directories (legacy Spec Kit)
+### Migration: Root-level directories (legacy layout)
 
 1. Copy `memory/*` → `.documentation/memory/` (skip existing)
 2. Copy `specs/*` → `.documentation/specs/` (skip existing)
@@ -69,7 +69,7 @@ After migration, continue with Step 3.
 
 ### If `.devspark/` already exists — Version Check
 
-1. Read `.devspark/VERSION`. If the file is missing, treat the installed version as `unknown`.
+1. Read `.devspark/VERSION`. If the file is missing or `version:` is not semver (`X.Y.Z`), treat the installed version as `unknown`.
 2. Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/CHANGELOG.md` and extract the most recent `## [X.Y.Z]` heading as `LATEST_VERSION`.
 3. Compare and act:
 
@@ -224,7 +224,7 @@ $ARGUMENTS
 Pass the user input above to the resolved prompt.
 ```
 
-Replace `{name}` in each file with the actual command name (e.g., `specify`, `plan`, `implement`).
+Replace `{name}` in each file with the actual command name (e.g., `constitution`, `plan`, `implement`).
 
 ---
 
@@ -273,13 +273,15 @@ If `CLAUDE.md` already exists, append the DevSpark section.
 
 ## Step 10: Write VERSION Stamp
 
+Use the `LATEST_VERSION` you already fetched in Step 2.
+
 Create `.devspark/VERSION`:
 
 ```text
-version: quickstart
+version: {LATEST_VERSION}
 installed: {today's date YYYY-MM-DD}
 method: claude-code-quickstart
-migrated-from: {specify | documentation-defaults | fresh}
+migrated-from: {legacy-layout | documentation-defaults | fresh}
 ```
 
 ---
@@ -307,3 +309,11 @@ Confirm the installation:
 - If backup directories exist, remind the user they can delete them once satisfied
 
 Tell the user: type `/devspark.specify` (or any command) in Claude Code to start using DevSpark.
+
+Add maintenance guidance (prompt-first):
+
+- Basic (recommended): run the remote upgrade prompt in chat
+- `/devspark Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md`
+- Advanced (optional): if CLI is installed, run `devspark upgrade`
+
+For either path, upgrades refresh `.devspark/` stock files and preserve `.documentation/` customizations.

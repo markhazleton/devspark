@@ -79,13 +79,22 @@ No installation required. Open a chat with your AI agent in your target reposito
 
 The agent asks a few questions about your project, then scaffolds the full DevSpark structure. See the [Quick Start Guide](quickstart.md) for the full workflow.
 
-> **Prefer a CLI or manual setup?** See [Other Ways to Get Started](installation.md) — ordered lightest to heaviest.
+For updates, use the same prompt-first approach:
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
+```
+
+This is the normal way to keep DevSpark current. CLI is optional and intended for advanced automation only.
+
+> **Need advanced or terminal-driven setup?** See [Other Ways to Get Started](installation.md) for manual and CLI options.
 
 ### Guides
 
+- [Implementation Lifecycle Guide](implementation-lifecycle.md) — Prompt-first quickstart, feature workflow, and updates
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
-- [Other Ways to Get Started](installation.md) — Manual, one-shot CLI, and installed CLI
-- [Upgrade Guide](upgrade.md) — Updating to the latest version
+- [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
+- [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
 
 ---
 

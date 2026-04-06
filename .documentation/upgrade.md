@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-> You have DevSpark installed and want to upgrade to the latest version to get new features, bug fixes, or updated slash commands. This guide covers both upgrading the CLI tool and updating your project files.
+> You have DevSpark installed and want to upgrade to the latest version to get new features, bug fixes, or updated slash commands. The normal path is the remote upgrade prompt in your AI chat. CLI is optional and intended for advanced workflows.
 
 ---
 
@@ -8,14 +8,32 @@
 
 | What to Upgrade | Command | When to Use |
 |----------------|---------|-------------|
+| **Project Files (Prompt-First, Recommended)** | Use remote prompt URL: `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md` | Normal upgrade path from AI chat with no CLI install |
 | **CLI Tool Only** | `uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git` | Get latest CLI features without touching project files |
-| **Project Files** (Recommended) | `devspark upgrade` | Update project with auto-detection and safety checks |
+| **Project Files (CLI, Advanced)** | `devspark upgrade` | Terminal-driven upgrade for teams that want local automation |
 | **Project Files** (Manual) | `devspark init --here --force --ai <your-agent>` | Update when you want to override agent selection |
 | **Both** | Run CLI upgrade, then `devspark upgrade` | Recommended for major version updates |
 
 ---
 
-## Part 1: Upgrade the CLI Tool
+## Part 0: Prompt-First Upgrade (Recommended)
+
+Run upgrade directly from AI chat without installing CLI tooling.
+
+1. Open your AI agent chat in the target repository.
+1. Paste this URL and ask the agent to follow it:
+
+```text
+https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
+```
+
+1. Ask for a dry run first, then apply changes.
+
+This is the simplest path and mirrors quickstart installation style.
+
+---
+
+## Part 1: Upgrade the CLI Tool (Advanced)
 
 The CLI tool (`devspark`) is separate from your project files. Upgrade it to get the latest features and bug fixes.
 
@@ -43,9 +61,9 @@ This shows CLI and template versions plus system information.
 
 ---
 
-## Part 2: Updating Project Files (Recommended Method)
+## Part 2: Updating Project Files with CLI (Advanced)
 
-Use the `devspark upgrade` command for a safe, guided upgrade experience with auto-detection and safety checks.
+Use the `devspark upgrade` command only if you prefer terminal-driven automation or need to script upgrades locally.
 
 ### Simple Upgrade
 
@@ -105,7 +123,7 @@ The `specs/` directory is completely excluded from upgrades and will never be mo
 
 ---
 
-## Part 3: Alternative Method (Manual Update)
+## Part 3: Alternative Method (Manual CLI Update)
 
 If you prefer manual control or the `upgrade` command isn't available, you can update project files directly:
 
@@ -211,16 +229,13 @@ Restart your IDE to refresh the command list.
 
 ### Scenario 1: "I just want new slash commands"
 
-```bash
-# Upgrade CLI (if using persistent install)
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
+Run the remote upgrade prompt in your AI chat:
 
-# Update project files to get new commands
-devspark init --here --force --ai copilot
-
-# Restore your constitution if customized
-git restore .documentation/memory/constitution.md
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
 ```
+
+If you use the advanced CLI workflow, run `devspark upgrade` instead.
 
 ### Scenario 2: "I customized templates and constitution"
 
@@ -229,13 +244,11 @@ git restore .documentation/memory/constitution.md
 cp .documentation/memory/constitution.md /tmp/constitution-backup.md
 cp -r .documentation/templates /tmp/templates-backup
 
-# 2. Upgrade CLI
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
+# 2. Apply upgrade
+# Preferred: run the remote upgrade prompt from AI chat
+# Advanced option: devspark upgrade
 
-# 3. Update project
-devspark init --here --force --ai copilot
-
-# 4. Restore customizations
+# 3. Restore customizations
 mv /tmp/constitution-backup.md .documentation/memory/constitution.md
 # Manually merge template changes if needed
 ```
@@ -265,8 +278,8 @@ If you initialized your project with `--no-git`, you can still upgrade:
 # Manually back up files you customized
 cp .documentation/memory/constitution.md /tmp/constitution-backup.md
 
-# Run upgrade
-devspark init --here --force --ai copilot --no-git
+# Preferred: run the remote upgrade prompt from AI chat
+# Advanced option: devspark upgrade
 
 # Restore customizations
 mv /tmp/constitution-backup.md .documentation/memory/constitution.md
@@ -371,7 +384,7 @@ Do you want to continue? [y/N]
 
 **What this means:**
 
-This warning appears when you run `devspark init --here` (or `devspark init .`) in a directory that already has files. It's telling you:
+This warning appears when you run the advanced CLI setup path with `devspark init --here` (or `devspark init .`) in a directory that already has files. It's telling you:
 
 1. **The directory has existing content** - In the example, 25 files/folders
 2. **Files will be merged** - New template files will be added alongside your existing files
@@ -411,7 +424,7 @@ Only DevSpark infrastructure files:
 
 **Prevention tip:** Before upgrading, commit or back up your `.documentation/memory/constitution.md` if you customized it.
 
-### "CLI upgrade doesn't seem to work"
+### "Advanced CLI upgrade doesn't seem to work"
 
 Verify the installation:
 
@@ -422,7 +435,7 @@ uv tool list
 # Should show devspark-cli
 
 # Verify path
-which specify
+which devspark
 
 # Should point to the uv tool installation directory
 ```
@@ -436,17 +449,17 @@ uv tool install devspark-cli --from git+https://github.com/MarkHazleton/devspark
 
 ### "Do I need to run devspark every time I open my project?"
 
-**Short answer:** No, you only run `devspark init` once per project (or when upgrading).
+**Short answer:** No. For normal use, you bootstrap once with the remote quickstart prompt and update later with the remote upgrade prompt. If you use the advanced CLI path, you only run `devspark init` once per project.
 
 **Explanation:**
 
-The `devspark` CLI tool is used for:
+The advanced `devspark` CLI tool is used for:
 
 - **Initial setup:** `devspark init` to bootstrap DevSpark in your project
-- **Upgrades:** `devspark init --here --force` to update templates and commands
+- **Upgrades:** `devspark upgrade` to refresh stock framework files
 - **Diagnostics:** `devspark check` to verify tool installation
 
-Once you've run `devspark init`, the slash commands (like `/devspark.specify`, `/devspark.plan`, etc.) are **permanently installed** in your project's agent folder (`.claude/`, `.github/prompts/`, etc.). Your AI assistant reads these command files directly—no need to run `devspark` again.
+Once DevSpark has been installed, the slash commands (like `/devspark.specify`, `/devspark.plan`, etc.) are available from your project's agent folders and stock prompt files. Your AI assistant reads those command files directly — no need to keep running CLI for normal use.
 
 **If your agent isn't recognizing slash commands:**
 
@@ -462,7 +475,7 @@ Once you've run `devspark init`, the slash commands (like `/devspark.specify`, `
 
 2. **Restart your IDE/editor completely** (not just reload window)
 
-3. **Check you're in the correct directory** where you ran `devspark init`
+3. **Check you're in the correct directory** where DevSpark was installed
 
 4. **For some agents**, you may need to reload the workspace or clear cache
 
@@ -478,7 +491,7 @@ Once you've run `devspark init`, the slash commands (like `/devspark.specify`, `
 
 DevSpark follows semantic versioning for major releases. The CLI and project files are designed to be compatible within the same major version.
 
-**Best practice:** Keep both CLI and project files in sync by upgrading both together during major version changes.
+**Best practice:** Keep project files current with the remote upgrade prompt. Only keep CLI in sync as well if your team intentionally uses the advanced CLI workflow.
 
 ---
 

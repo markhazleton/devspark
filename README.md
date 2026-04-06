@@ -37,12 +37,19 @@ Point your AI agent at the quickstart prompt for your platform:
 
 The agent asks a few questions, then pulls and installs all DevSpark prompts.
 
+For ongoing updates, use the same no-install approach:
+
+- Paste this [upgrade prompt URL](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) into your agent chat
+- Ask it to run an upgrade in your current repository
+
+This keeps upgrades prompt-first and does not require the CLI.
+
 ## Option B — Download and Drop
 
 1. Download the [latest release](https://github.com/markhazleton/devspark/releases) zip for your agent and unzip into your project
 2. Start using `/devspark.*` commands in your AI assistant
 
-**Option C — CLI** (automates Option A)
+### Option C — CLI (advanced/optional)
 
 ```bash
 uv tool install devspark-cli --from git+https://github.com/markhazleton/devspark.git
@@ -50,7 +57,7 @@ devspark init my-project          # new project
 devspark init --here --ai claude  # existing project
 ```
 
-For a full walkthrough see the [Quickstart Guide](.documentation/quickstart.md).
+For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/implementation-lifecycle.md).
 
 ---
 
@@ -149,6 +156,7 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that redirect to s
 
 | Topic | Link |
 |-------|------|
+| Implementation lifecycle | [implementation-lifecycle.md](.documentation/implementation-lifecycle.md) |
 | Quickstart | [quickstart.md](.documentation/quickstart.md) |
 | Constitution guide | [constitution-guide.md](.documentation/constitution-guide.md) |
 | CLI reference | [installation.md](.documentation/installation.md) |

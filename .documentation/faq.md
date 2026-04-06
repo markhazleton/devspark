@@ -26,7 +26,7 @@ Fair concern. DevSpark is designed with **right-sized workflows**:
 |-----------|---------------------|----------|
 | Typo / one-liner | Just fix it — no process needed | None |
 | Bug fix or small change | `/devspark.quickfix` — lightweight, minimal ceremony | ~2 minutes |
-| New feature, multi-file | Full spec workflow (`specify → plan → tasks → implement`) | ~10-15 minutes |
+| New feature, multi-file | Full planning workflow (`requirements → plan → tasks → implement`) | ~10-15 minutes |
 | Architectural change | Full spec + `/devspark.critic` for risk analysis | ~20 minutes |
 
 You wouldn't write a design doc for a CSS tweak, and DevSpark doesn't ask you to. Use the quickfix path for small stuff and the full workflow when the scope justifies it.
@@ -42,8 +42,8 @@ No. DevSpark is pure markdown. If you can read a `.md` file, you can use DevSpar
 ### I've never used an AI coding assistant before. Where do I start?
 
 1. **Pick an agent.** DevSpark works with 17+ AI agents — GitHub Copilot, Claude Code, Cursor, Gemini CLI, and many others. Start with whatever your editor already supports.
-2. **Install DevSpark** into your project (see the [Installation Guide](installation.md)).
-3. **Follow the [Quick Start Guide](quickstart.md)** — it walks you through the 6-step process end to end.
+2. **Bootstrap DevSpark with the remote quickstart prompt** (see the [Quick Start Guide](quickstart.md)).
+3. **Follow the [Implementation Lifecycle Guide](implementation-lifecycle.md)** — it walks through installation, feature delivery, and updates.
 
 You don't need to be an AI expert. The slash commands (`/devspark.specify`, `/devspark.plan`, etc.) guide you through each step.
 
@@ -201,7 +201,9 @@ They complement each other. You use DevSpark commands in Copilot Chat to plan an
 
 ### How do I add DevSpark to an existing project?
 
-Navigate to your project directory and run:
+Open your AI agent in the existing project and run the matching remote quickstart prompt from the [Quick Start Guide](quickstart.md).
+
+If you prefer the advanced CLI path instead, navigate to your project directory and run:
 
 ```bash
 cd /path/to/your-project
@@ -241,14 +243,14 @@ The specs are working documents that drive code generation, not shelf-ware that 
 
 For trivial changes, it would — which is why `/devspark.quickfix` exists for those cases.
 
-For non-trivial work, the upfront investment in specifying and planning typically *saves* time by reducing:
+For non-trivial work, the upfront investment in defining requirements and planning typically *saves* time by reducing:
 
 - Rework from misunderstood requirements
 - AI hallucinations from vague prompts
 - Inconsistent code quality across features
 - "What was the decision and why?" conversations months later
 
-Most teams report that the time spent specifying is recovered several times over during implementation and review.
+Most teams report that the time spent on requirements definition is recovered several times over during implementation and review.
 
 ### What if I'm a solo developer? Is this overkill for one person?
 
@@ -285,11 +287,11 @@ Make sure you've completed the setup for your specific AI agent. Each agent has 
 - **Claude Code**: Needs `CLAUDE.md` at the repo root
 - **Cursor**: Needs `.cursor/rules/` directory with rule files
 
-Run `devspark init` with the `--ai` flag for your agent to generate the correct config files. See the agent-specific [quickstart guides](quickstart.md) for details.
+Re-run the agent-specific remote quickstart prompt from the [Quick Start Guide](quickstart.md) to refresh the expected DevSpark files for your editor. Use `devspark init --ai ...` only if you intentionally want the advanced CLI path.
 
-### I ran `devspark init` but nothing seems different
+### I ran the advanced CLI setup but nothing seems different
 
-After initialization, the DevSpark files are in your repo but your AI agent may not be aware of them yet. Try:
+After CLI initialization, the DevSpark files are in your repo but your AI agent may not be aware of them yet. Try:
 
 1. Restart your editor or reload the window
 2. Open a new AI chat session
@@ -307,7 +309,13 @@ A few things to check:
 
 ### How do I upgrade DevSpark without losing my work?
 
-Run:
+For normal use, run the remote upgrade prompt in your AI chat:
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
+```
+
+If you explicitly use the advanced CLI workflow, run:
 
 ```bash
 devspark upgrade

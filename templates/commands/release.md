@@ -70,7 +70,7 @@ Run `{SCRIPT}` to gather context and parse JSON output for:
 - `COMMITS_SINCE_RELEASE`: Commit count since last release
 - `CONTRIBUTORS`: List of contributors
 - `DRY_RUN`: Whether this is a preview run
-- `DEVSPARK_VERSION_PATH`: Path to `.documentation/DEVSPARK_VERSION`
+- `DEVSPARK_VERSION_PATH`: Path to `.devspark/VERSION`
 - `INSTALLED_VERSION`: Version recorded in the stamp file (blank if absent)
 
 ### 2. Version Confirmation
@@ -355,11 +355,11 @@ version = "{NEXT_VERSION}"   # was {CURRENT_VERSION}
 
 Make this edit now if {NEXT_VERSION} differs from {CURRENT_VERSION}.
 
-#### B. Confirm `.documentation/DEVSPARK_VERSION` (consumer repos)
+#### B. Confirm `.devspark/VERSION` (consumer repos)
 
-`.documentation/DEVSPARK_VERSION` is **written automatically** by `devspark init` and
-`devspark upgrade` from the CLI version. Maintainers do not need to update it manually
-in the source repo — it is a per-consumer-project stamp.
+`.devspark/VERSION` is **written automatically** by quickstart, `devspark init`, and
+upgrade flows. Maintainers do not need to update it manually in the source repo — it is
+a per-consumer-project stamp. Legacy installs may still contain `.documentation/DEVSPARK_VERSION`.
 
 After bumping `pyproject.toml` and publishing the new release, consumer projects
 will receive the correct version stamp the next time they run `devspark upgrade`.

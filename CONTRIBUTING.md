@@ -76,7 +76,7 @@ To test your templates, commands, and other changes locally, follow these steps:
    Run the following command to generate the local packages:
 
    ```bash
-   ./.github/workflows/scripts/create-release-packages.sh v0.1.1
+   ./.github/workflows/scripts/create-release-packages.sh v0.1.2
    ```
 
 2. **Copy the relevant package to your test project**
