@@ -1006,6 +1006,11 @@ def init(
     5. Initialize a fresh git repository (if not --no-git and no existing repo)
     6. Optionally set up AI assistant commands
     
+    Multi-app monorepo support:
+        After init, use /devspark.add-application to register applications
+        in a multi-app repository. See .documentation/devspark.json for the
+        registry format.
+
     Examples:
         devspark init my-project
         devspark init my-project --ai claude
