@@ -278,12 +278,14 @@ parse_app_context() {
 
     # Export for downstream scripts
     export DEVSPARK_APP_ID DEVSPARK_REPO_SCOPE
-    # Set remaining args back
+    # Set remaining args back (used by callers after sourcing)
+    export DEVSPARK_REMAINING_ARGS
     DEVSPARK_REMAINING_ARGS=("${remaining_args[@]}")
 }
 
 # Resolve scope and validate (T028, T030)
-# Sets DEVSPARK_SCOPE, DEVSPARK_DOC_ROOT, DEVSPARK_SCOPE_ERROR
+# Sets DEVSPARK_SCOPE, DEVSPARK_DOC_ROOT, DEVSPARK_SCOPE_ERROR (used by callers)
+# shellcheck disable=SC2034
 resolve_app_scope() {
     local repo_root
     repo_root=$(get_repo_root)

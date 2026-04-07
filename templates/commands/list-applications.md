@@ -20,7 +20,7 @@ Read and display the DevSpark multi-app registry. This is a **read-only** comman
 
    | ID | Path | Kind | Owner | Criticality | Profiles | Dependencies | Doc Root |
    |----|------|------|-------|-------------|----------|--------------|----------|
-   | For each app in the registry, show all columns |
+   | *For each app in the registry, show all columns* | | | | | | | |
 
 3. **Display registered profiles** (summary):
    - List each profile name and description
