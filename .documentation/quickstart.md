@@ -121,6 +121,20 @@ This creates a copy of the shared prompt in `.documentation/{your-git-user}/comm
 
 ---
 
+## Optional: Multi-App Monorepo Support
+
+If your repository contains **multiple applications** with different platforms or governance rules, DevSpark offers optional multi-app support. Single-app repositories can skip this entirely.
+
+To get started with multi-app:
+
+1. Run `/devspark.add-application` to register each application in a registry at `.documentation/devspark.json`
+2. Use `--app <id>` with any command to scope it to a specific application
+3. Run `/devspark.validate-registry` to verify your registry is consistent
+
+Multi-app features include per-app constitutions, profile-based inheritance, dependency-aware scoping, and scoped PR reviews. For the full specification, see the [Multi-App Specification](https://github.com/markhazleton/devspark/blob/main/.documentation/specs/001-multi-app-monorepo-support/spec.md).
+
+---
+
 ## Upgrading DevSpark
 
 For normal use, update DevSpark with the remote upgrade prompt in your AI agent chat:

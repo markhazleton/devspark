@@ -328,6 +328,42 @@ The PR review and site audit commands work best when the constitution contains *
 
 Keep the constitution focused on *what must be true*, and put *how we do things* in coding standards documentation.
 
+## Multi-App Constitutions (Optional)
+
+If your repository uses DevSpark's optional [multi-app support](.documentation/specs/001-multi-app-monorepo-support/spec.md), each application can have its own constitution that extends the repository-wide constitution.
+
+### How It Works
+
+- **Repository constitution** (`/.documentation/memory/constitution.md`) — applies to all applications
+- **App-local constitution** (`{app-path}/.documentation/memory/constitution.md`) — adds app-specific rules
+
+App-local constitutions are **additive** — they can add new principles or tighten existing ones, but they cannot weaken or override repository-wide rules. DevSpark detects and warns about weakening attempts.
+
+### Example
+
+```markdown
+# apps/payment-api/.documentation/memory/constitution.md
+
+## App-Specific Principles (extends repo constitution)
+
+### PCI Compliance (MANDATORY)
+- All payment data MUST be encrypted at rest and in transit
+- Credit card numbers MUST NOT appear in logs
+- PCI DSS Level 1 compliance MUST be maintained
+
+### API Versioning
+- All endpoints MUST support version headers
+- Breaking changes MUST increment the major version
+```
+
+### When to Use App-Local Constitutions
+
+- Applications with **different compliance requirements** (PCI, HIPAA, SOC2)
+- Applications with **different technology constraints** (platform-specific rules)
+- Applications where the repository-wide constitution is insufficient for the app's risk profile
+
+Most multi-app repositories only need the repo-wide constitution. Add app-local constitutions only when there is a genuine need for differentiated governance.
+
 ## Integrating with AI Agent Instructions
 
 When using AI coding assistants like GitHub Copilot, Claude Code, or OpenAI Codex, you'll have multiple instruction files. Understanding how these work together with your constitution prevents duplication and conflicts.

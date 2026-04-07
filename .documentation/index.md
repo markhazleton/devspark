@@ -29,7 +29,7 @@ From greenfield creation through brownfield discovery, ongoing maintenance, docu
 
 ## About DevSpark
 
-> **DevSpark** is a structured development process for AI coding assistants — 21 prompt templates + helper scripts that give any AI agent a repeatable workflow from requirements through release.
+> **DevSpark** is a structured development process for AI coding assistants — 24 prompt templates + helper scripts that give any AI agent a repeatable workflow from requirements through release.
 
 ### The ASLCD Vision
 
@@ -61,6 +61,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | Agent-agnostic architecture | ✅ Canonical prompts + thin shims |
 | Multi-user personalization | ✅ `/devspark.personalize` per-user overrides |
 | Multi-agent support | ✅ 17+ AI agents |
+| Multi-app monorepo support | ✅ Optional — profile-based inheritance, scoped commands |
 
 ---
 
@@ -95,6 +96,7 @@ This is the normal way to keep DevSpark current. CLI is optional and intended fo
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
+- [Multi-App Support](specs/001-multi-app-monorepo-support/spec.md) — Optional multi-application monorepo support
 
 ---
 
@@ -181,6 +183,18 @@ Constitution-powered quality commands that work independently.
 | `/devspark.checklist` | Generate quality checklists |
 | `/devspark.analyze` | Artifact consistency checking |
 | `/devspark.personalize` | Create per-user prompt customizations |
+
+### Multi-App Commands (Optional)
+
+For repositories containing multiple applications with different platforms or governance rules. Single-app repositories can skip these entirely.
+
+| Command | Purpose |
+|---------|---------|
+| `/devspark.add-application` | Register a new application in the multi-app registry |
+| `/devspark.list-applications` | Display all registered applications and profiles |
+| `/devspark.validate-registry` | Validate registry schema, references, and consistency |
+
+> **Opt-in only**: Multi-app support is activated by creating a registry at `.documentation/devspark.json`. Without it, DevSpark operates in standard single-app mode with no behavior changes.
 
 ---
 

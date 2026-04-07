@@ -10,7 +10,7 @@
     <a href="https://markhazleton.github.io/devspark/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
-> **Not a program. Not a subscription.** Copy 21 prompt files into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 24 prompt files into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
 
 ---
 
@@ -18,7 +18,7 @@
 
 ```text
 devspark/
-├── templates/commands/   ← 21 slash-command prompt files (THE PRODUCT)
+├── templates/commands/   ← 24 slash-command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── src/devspark_cli/     ← Optional CLI for automated setup
 └── .documentation/       ← Guides, media, and GitHub Pages site
@@ -98,15 +98,49 @@ For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/i
 | `/devspark.archive` | Archive completed spec artifacts |
 | `/devspark.upgrade` | Pull latest DevSpark prompts into your project |
 
+### Multi-App (Optional)
+
+| Command | Purpose |
+|---------|---------|
+| `/devspark.add-application` | Register a new application in the multi-app registry |
+| `/devspark.list-applications` | Display all registered applications |
+| `/devspark.validate-registry` | Validate registry schema, references, and consistency |
+
 See [templates/README.md](templates/README.md) for full command details.
 
 ---
 
-## Multi-App Monorepo Support
+## Multi-App Monorepo Support (Optional)
 
-DevSpark supports repositories containing multiple applications with different platforms and governance rules. Define a registry at `.documentation/devspark.json`, assign profiles to each app, and use `--app <id>` to scope any command. New commands `/devspark.add-application`, `/devspark.list-applications`, and `/devspark.validate-registry` manage the registry.
+> **Single-app repositories need nothing here.** Multi-app is entirely optional — if your repo has one application, skip this section entirely. Everything works out of the box.
 
-For details, see the [Multi-App Specification](.documentation/specs/001-multi-app-monorepo-support/spec.md).
+For repositories containing **multiple applications** with different platforms, runtimes, or governance rules, DevSpark offers opt-in multi-app support:
+
+### When to Use Multi-App
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Single application or library | **Skip multi-app** — standard DevSpark is all you need |
+| Monorepo with shared conventions | **Skip multi-app** — one constitution covers everything |
+| Monorepo with different platforms (e.g., .NET API + React UI) | **Consider multi-app** — each app can have tailored rules |
+| Monorepo with different governance (e.g., PCI service + internal tool) | **Use multi-app** — app-specific constitutions and profiles |
+
+### How It Works
+
+1. **Create a registry** at `.documentation/devspark.json` — or run `/devspark.add-application` to create one interactively
+2. **Assign profiles** — reusable rule bundles (e.g., `api-profile`, `web-profile`) that apps inherit
+3. **Scope commands** — use `--app <id>` to target a specific application, or `--repo-scope` for repo-wide operations
+4. **App-local overrides** — each app can have its own `.documentation/` directory and optional `app.json` manifest
+
+### Multi-App Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/devspark.add-application` | Register a new application in the registry |
+| `/devspark.list-applications` | Display all registered applications and profiles |
+| `/devspark.validate-registry` | Validate registry schema, references, and consistency |
+
+For the full specification, see the [Multi-App Specification](.documentation/specs/001-multi-app-monorepo-support/spec.md).
 
 ---
 
@@ -126,9 +160,11 @@ DevSpark cleanly separates **your work** from **its installation**:
 ├── specs/
 ├── commands/             ← Team command overrides
 ├── scripts/              ← Team script overrides (optional)
-├── devspark.json         ← Platform config (optional)
+├── devspark.json         ← Multi-app registry (optional)
 └── {git-user}/commands/  ← Personal overrides
 ```
+
+> **Multi-app layout** (optional): When using multi-app, each application also gets `{app-path}/.documentation/` for app-local constitutions and overrides.
 
 **3-tier prompt resolution** (first match wins):
 

@@ -1,12 +1,13 @@
 # About DevSpark
 
-DevSpark is a structured development process for AI coding assistants. It provides 21 prompt templates and helper scripts that give any AI agent a repeatable workflow — from requirements through release.
+DevSpark is a structured development process for AI coding assistants. It provides 24 prompt templates and helper scripts that give any AI agent a repeatable workflow — from requirements through release.
 
 ## What It Is
 
 - **Not a program.** Not a subscription. Just markdown files you copy into your project.
 - **Agent-agnostic.** Works with Claude Code, GitHub Copilot, Cursor, Gemini CLI, and 13+ other AI agents.
 - **Constitution-powered.** Every project defines its principles once; all commands enforce them automatically.
+- **Multi-app ready.** Optionally manage multiple applications in a monorepo with per-app governance, profiles, and scoped commands.
 
 ## Core Idea
 
@@ -46,6 +47,7 @@ DevSpark keeps its framework files (`.devspark/`) completely separate from your 
 - **Solo developers** who want a repeatable process when working with AI assistants
 - **Teams** that need consistent AI-assisted workflows across different agents and editors
 - **Projects of any size** — the quickfix workflow handles small tasks; the full spec workflow handles major features
+- **Monorepo teams** — optional multi-app support provides per-application governance, profiles, and scoped commands without requiring any changes to single-app repositories
 
 ## Origin
 

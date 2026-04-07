@@ -145,6 +145,9 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `archive.md` | `.devspark/defaults/commands/devspark.archive.md` |
 | `upgrade.md` | `.devspark/defaults/commands/devspark.upgrade.md` |
 | `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
+| `add-application.md` | `.devspark/defaults/commands/devspark.add-application.md` |
+| `list-applications.md` | `.devspark/defaults/commands/devspark.list-applications.md` |
+| `validate-registry.md` | `.devspark/defaults/commands/devspark.validate-registry.md` |
 
 ---
 
@@ -320,13 +323,21 @@ For either path, upgrades refresh `.devspark/` stock files and preserve `.docume
 
 ---
 
-## Multi-App Monorepo Support
+## Multi-App Monorepo Support (Optional)
 
-DevSpark supports repositories containing multiple applications with different platforms and governance rules.
+> **This section is entirely optional.** If your repository contains a single application, skip this section — DevSpark works perfectly without it.
+
+For repositories containing **multiple applications** with different platforms, runtimes, or governance rules, DevSpark offers opt-in multi-app support.
+
+### When to Consider Multi-App
+
+- Your monorepo has apps with different tech stacks (e.g., .NET API + React UI)
+- Different apps need different governance rules or risk profiles
+- You want per-app constitutions, profiles, or code review scopes
 
 ### Quick Setup
 
-1. Create a registry file at `.documentation/devspark.json` — or run `/devspark.add-application` to create one interactively
+1. Run `/devspark.add-application` to create a registry at `.documentation/devspark.json` interactively
 2. Each application gets its own `.documentation/` directory at `{app-path}/.documentation/`
 3. Use `--app <id>` with any DevSpark command to scope it to a specific application
 4. Use `--repo-scope` for repository-wide operations
@@ -340,8 +351,10 @@ DevSpark supports repositories containing multiple applications with different p
 
 ### Commands
 
-- `/devspark.add-application` — Register a new application
-- `/devspark.list-applications` — View all registered applications
-- `/devspark.validate-registry` — Validate registry consistency
+| Command | Purpose |
+|---------|--------|
+| `/devspark.add-application` | Register a new application in the registry |
+| `/devspark.list-applications` | View all registered applications and profiles |
+| `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
-For details, see the [Multi-App Specification](.documentation/specs/001-multi-app-monorepo-support/spec.md).
+For details, see the [Multi-App Specification](https://github.com/markhazleton/devspark/blob/main/.documentation/specs/001-multi-app-monorepo-support/spec.md).

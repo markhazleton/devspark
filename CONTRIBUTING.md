@@ -91,7 +91,7 @@ To test your templates, commands, and other changes locally, follow these steps:
 
 ## About DevSpark
 
-DevSpark is an independent, community-maintained project. It provides a structured, spec-driven development process for AI coding assistants through 21 prompt templates and helper scripts.
+DevSpark is an independent, community-maintained project. It provides a structured, spec-driven development process for AI coding assistants through 24 prompt templates and helper scripts.
 
 ## AI contributions in DevSpark
 

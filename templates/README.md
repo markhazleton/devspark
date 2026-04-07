@@ -6,6 +6,8 @@ This directory contains the **core deliverable** of DevSpark — prompt template
 
 Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`, `/devspark.plan`). When you run `devspark init`, stock prompts are deployed to `.devspark/defaults/commands/`. AI shims then resolve prompts via the 3-tier order: personal override, team override, then stock default.
 
+The collection includes 21 core commands plus 3 optional multi-app commands (24 total).
+
 | File | Command | Purpose |
 |------|---------|---------|
 | `specify.md` | `/devspark.specify` | Define requirements and user stories |
@@ -29,9 +31,11 @@ Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`, `
 | `upgrade.md` | `/devspark.upgrade` | Upgrade project to latest templates |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
-| `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry |
-| `list-applications.md` | `/devspark.list-applications` | Display all registered applications |
-| `validate-registry.md` | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
+| `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry (optional) |
+| `list-applications.md` | `/devspark.list-applications` | Display all registered applications (optional) |
+| `validate-registry.md` | `/devspark.validate-registry` | Validate registry schema, references, and consistency (optional) |
+
+> **Note**: The three multi-app commands (`add-application`, `list-applications`, `validate-registry`) are only needed for repositories with multiple applications. Single-app repositories can ignore them entirely.
 
 ## Helper Templates
 
