@@ -437,6 +437,46 @@ print_scope_summary() {
     echo "---"
 }
 
+# Resolve inherited profile chain for an app (T052)
+# Composes all inherited profiles + overrides + app.json into one effective profile
+resolve_app_profiles() {
+    local repo_root="$1"
+    local app_id="$2"
+    local registry="$repo_root/.documentation/devspark.json"
+
+    if [[ ! -f "$registry" ]]; then
+        echo '{"tags":{},"rules":[],"hints":{}}'; return
+    fi
+
+    local app_path
+    app_path=$(jq -r --arg id "$app_id" '.apps[] | select(.id == $id) | .path // ""' "$registry" 2>/dev/null)
+    local app_json="$repo_root/$app_path/app.json"
+    local manifest='{}'
+    if [[ -f "$app_json" ]]; then
+        manifest=$(cat "$app_json")
+    fi
+
+    jq -n --arg id "$app_id" --argjson manifest "$manifest" --slurpfile reg "$registry" '
+        $reg[0] as $r |
+        ($r.apps[] | select(.id == $id)) as $app |
+        reduce ($app.inherits // [])[] as $pname (
+            { tags: {}, rules: [], hints: {} };
+            ($r.profiles[$pname] // {}) as $p |
+            .tags = (.tags * ($p.tags // {})) |
+            .rules = (.rules + (($p.rules // []) - .rules)) |
+            .hints = (.hints * ($p.hints // {}))
+        ) |
+        (($app.overrides // {}) as $o |
+            .tags = (.tags * ($o.tags // {})) |
+            .rules = (.rules + (($o.rules // []) - .rules)) |
+            .hints = (.hints * ($o.hints // {}))
+        ) |
+        .tags = (.tags * ($manifest.tags // {})) |
+        .rules = (.rules + (($manifest.rules // []) - .rules)) |
+        .hints = (.hints * ($manifest.hints // {}))
+    '
+}
+
 # Override get_feature_paths for app-scoped workflows (T028)
 get_feature_paths_app_aware() {
     local repo_root

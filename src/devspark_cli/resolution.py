@@ -314,3 +314,39 @@ def compose_profiles(
         effective.hints.update(app_manifest.hints)
 
     return effective, warnings
+
+
+# ---------------------------------------------------------------------------
+# Multi-profile validation and cross-app audit (T050)
+# ---------------------------------------------------------------------------
+
+def validate_profiles_across_apps(
+    registry: DevSparkRegistry,
+    repo_root: Path,
+) -> list[str]:
+    """
+    Validate that all apps using shared profiles resolve consistent effective rules.
+
+    Checks:
+    - All inherited profiles exist (already caught by registry validation)
+    - Profile-layer overrides don't weaken repo-wide mandatory rules (T051)
+
+    Returns a list of warnings/errors.
+    """
+    warnings: list[str] = []
+
+    # Compose profiles for each app and check for issues
+    for app in registry.apps:
+        manifest, _ = load_app_manifest(Path(app.path), repo_root)
+        effective, comp_warnings = compose_profiles(registry, app, manifest)
+        warnings.extend(comp_warnings)
+
+        # T051: Check if any effective rule weakens mandatory repo rules
+        for rule in effective.rules:
+            if _WEAKENING_PATTERNS.search(rule):
+                warnings.append(
+                    f"CONFLICT: app {app.id!r} effective rule may weaken mandatory "
+                    f"repo-wide rule: {rule!r}"
+                )
+
+    return warnings

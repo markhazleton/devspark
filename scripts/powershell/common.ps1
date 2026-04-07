@@ -424,6 +424,55 @@ function Write-ScopeSummary {
     Write-Output "---"
 }
 
+# Resolve inherited profile chain for an app (T053)
+function Resolve-AppProfiles {
+    param(
+        [string]$RepoRoot,
+        [string]$AppId
+    )
+
+    $registryPath = Join-Path $RepoRoot '.documentation/devspark.json'
+    if (-not (Test-Path $registryPath)) {
+        return [PSCustomObject]@{ tags = @{}; rules = @(); hints = @{} }
+    }
+
+    $config = Get-Content $registryPath -Raw | ConvertFrom-Json
+    $app = $config.apps | Where-Object { $_.id -eq $AppId } | Select-Object -First 1
+    if (-not $app) { throw "Unknown app: $AppId" }
+
+    $tags = @{}; $rules = @(); $hints = @{}
+
+    # Compose inherited profiles
+    if ($app.inherits) {
+        foreach ($profName in $app.inherits) {
+            $prof = $config.profiles.$profName
+            if ($prof) {
+                if ($prof.tags) { $prof.tags.PSObject.Properties | ForEach-Object { $tags[$_.Name] = $_.Value } }
+                if ($prof.rules) { foreach ($r in $prof.rules) { if ($r -notin $rules) { $rules += $r } } }
+                if ($prof.hints) { $prof.hints.PSObject.Properties | ForEach-Object { $hints[$_.Name] = $_.Value } }
+            }
+        }
+    }
+
+    # Apply app overrides
+    if ($app.overrides) {
+        if ($app.overrides.tags) { $app.overrides.tags.PSObject.Properties | ForEach-Object { $tags[$_.Name] = $_.Value } }
+        if ($app.overrides.rules) { foreach ($r in $app.overrides.rules) { if ($r -notin $rules) { $rules += $r } } }
+        if ($app.overrides.hints) { $app.overrides.hints.PSObject.Properties | ForEach-Object { $hints[$_.Name] = $_.Value } }
+    }
+
+    # Apply app.json
+    $appJson = Join-Path $RepoRoot "$($app.path)/app.json"
+    if (Test-Path $appJson) {
+        $manifest = Get-Content $appJson -Raw | ConvertFrom-Json
+        if ($manifest.tags) { $manifest.tags.PSObject.Properties | ForEach-Object { $tags[$_.Name] = $_.Value } }
+        if ($manifest.rules) { foreach ($r in $manifest.rules) { if ($r -notin $rules) { $rules += $r } } }
+        if ($manifest.hints) { $manifest.hints.PSObject.Properties | ForEach-Object { $hints[$_.Name] = $_.Value } }
+    }
+
+    return [PSCustomObject]@{ tags = $tags; rules = $rules; hints = $hints }
+}
+
 # App-aware feature paths (T029)
 function Get-FeaturePathsAppAware {
     param([PSCustomObject]$Scope)
