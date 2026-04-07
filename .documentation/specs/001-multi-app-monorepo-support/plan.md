@@ -108,7 +108,12 @@ scripts/
 
 src/
 └── devspark_cli/
-    └── __init__.py
+    ├── __init__.py
+    ├── registry.py            # new — Pydantic models, validation, app.json loading
+    ├── scope.py               # new — scope object, PR scope, dependency reporting
+    ├── resolution.py          # new — constitution/prompt/script/template resolution
+    ├── inference.py           # new — dependency inference from imports/build config
+    └── commands.py            # new — add-application, list-applications, validate-registry
 
 templates/
 ├── commands/
@@ -124,8 +129,10 @@ templates/
 │   ├── critic.md
 │   ├── constitution.md
 │   ├── upgrade.md
-│   ├── add-application.md    # new
-│   └── list-applications.md  # new
+│   ├── add-application.md       # new
+│   ├── list-applications.md     # new
+│   └── validate-registry.md    # new (Added 2026-04-07)
+├── rationale-template.md        # new
 └── *.md / vscode-settings.json
 ```
 
@@ -154,7 +161,9 @@ Authority model:
 - Repository governance remains authoritative over all applications
 - Application governance may extend or strengthen repo governance, but it may not weaken mandatory
   repo-level rules
-- v1 does not require app-local manifests; all authoritative app configuration lives in the repo registry
+- v1 supports optional app-local manifests (`{app.path}/app.json`) for app-specific overrides (tags,
+  hints, local rules); the registry remains authoritative for identity fields (id, path, kind, owner,
+  dependencies) *(Updated 2026-04-07: leadership decision Q1)*
 - v1 prefers convention-based paths over repeated per-app path declarations
 - v1 uses one repo-level `.documentation/` plus optional application-local `{app.path}/.documentation/`
   directories instead of nesting application state under the repo-level `.documentation/`
@@ -179,6 +188,7 @@ Authority model:
 
 apps/
 ├── runtime-api-a/
+│   ├── app.json                    # optional app-local manifest (tags, hints, local rules)
 │   └── .documentation/
 │       ├── memory/constitution.md
 │       ├── commands/
@@ -186,14 +196,19 @@ apps/
 │       ├── templates/
 │       └── specs/
 ├── runtime-api-b/
+│   ├── app.json
 │   └── .documentation/
 ├── admin-api/
+│   ├── app.json
 │   └── .documentation/
 ├── admin-web/
+│   ├── app.json
 │   └── .documentation/
 ├── client-web/
+│   ├── app.json
 │   └── .documentation/
 └── qa-harness/
+    ├── app.json
     └── .documentation/
 ```
 
@@ -279,14 +294,16 @@ Validation rules:
 - A `cross-app` PR must name all touched registered app paths
 - Review output always reports: declared scope, detected scope, mismatches, and downstream app impact
 
-### Direct Dependency Reporting
+### Dependency Reporting *(Updated 2026-04-07: leadership decision Q2)*
 
-v1 reports direct, declared dependencies only:
+v1 reports both declared and inferred dependencies:
 
 - Report the primary scope
 - Report directly impacted downstream applications from the declared dependency graph
-- Do not attempt inferred code-level dependency discovery
+- Report inferred dependencies from source imports and build configuration files, clearly labeled
+  as "inferred" and separate from declared dependencies (see "Design: Dependency Inference")
 - Treat missing dependency declarations as configuration gaps shown in scope reports
+- Inferred dependencies that match declared dependencies are deduplicated
 
 ## Design: Registry Schema
 
@@ -396,12 +413,15 @@ Shared libraries use `"deployable": false`:
 - `overrides` MAY be omitted; if present they MUST resolve inside the repository
 - Governance-requiring workflows MUST always resolve a repository constitution
 - `kind: "library"` entries with `deployable: false` MUST NOT be valid targets for deployment workflows
+- `{app.path}/app.json`, if present, MUST conform to the app-local manifest schema (tags, hints,
+  rules only); identity fields are ignored with a validation warning *(Added 2026-04-07)*
 
 ### Standard v1 Conventions
 
 These paths are derived from the registered app path:
 
 - App documentation root: `{app.path}/.documentation/`
+- App-local manifest: `{app.path}/app.json` (optional) *(Added 2026-04-07)*
 - Constitution: `{app.path}/.documentation/memory/constitution.md`
 - Commands: `{app.path}/.documentation/commands/`
 - Scripts: `{app.path}/.documentation/scripts/`
@@ -557,7 +577,7 @@ when the application has its own documentation root.
 
 ## Design: Multi-App Command Surface
 
-v1 introduces only two new commands:
+v1 introduces three new commands: *(Updated 2026-04-07: validate-registry added per leadership decision Q3)*
 
 ### `/devspark.add-application`
 
@@ -565,7 +585,8 @@ v1 introduces only two new commands:
   and dependencies
 - Validates: duplicate ids, invalid paths, invalid profile references, invalid dependency references
 - Updates the authoritative root registry at `.documentation/devspark.json`
-- Optionally scaffolds `{app.path}/.documentation/` only when explicitly requested (`--scaffold`)
+- Always scaffolds `{app.path}/.documentation/` with standard subdirectories
+  *(Updated 2026-04-07: scaffolding is always performed, no --scaffold flag per leadership decision Q5)*
 - Never installs or modifies `.devspark/`
 
 ### `/devspark.list-applications`
@@ -574,6 +595,92 @@ v1 introduces only two new commands:
 - Displays registered apps in a human-readable table: id, path, kind, owner, criticality, dependencies,
   effective documentation root
 - Read-only; no file mutations
+
+### `/devspark.validate-registry` *(Added 2026-04-07: leadership decision Q3)*
+
+- Standalone validation command for `.documentation/devspark.json`
+- Checks: JSON schema validity, unique ids, path existence, profile reference resolution, dependency
+  reference resolution, cyclic dependency detection, and app-local manifest (`app.json`) consistency
+- Produces structured validation output: list of errors, warnings, and pass/fail status
+- Read-only; no file mutations
+- Usable in CI pipelines as a pre-merge check
+
+## Design: App-Local Manifest (`app.json`) *(Added 2026-04-07: leadership decision Q1)*
+
+### Purpose
+
+Allow application teams to declare app-specific overrides (tags, hints, local rules) close to their
+code without requiring every change to go through the centralized registry file.
+
+### Schema
+
+```json
+{
+  "tags": { "deploy-target": "k8s-east", "feature-flags": "enabled" },
+  "hints": { "test-runner": "jest", "review-depth": "thorough" },
+  "rules": ["All API responses must include correlation-id header"]
+}
+```
+
+### Merge Behavior
+
+The app-local manifest is merged **after** profile composition and **before** final resolution:
+
+1. Load registry entry for the app (id, path, kind, owner, dependencies, inherits, overrides)
+2. Compose inherited profiles (tags/rules/hints from the `inherits` chain)
+3. Apply registry-level `overrides` field
+4. Load `{app.path}/app.json` if it exists
+5. Merge app.json content: tags overwrite (last-writer-wins), rules accumulate (additive),
+   hints overwrite (last-writer-wins)
+6. Run weakening detection on the final effective rule set against repo-wide mandatory rules
+
+### Constraints
+
+- `app.json` MUST NOT contain identity fields (id, path, kind, owner, dependencies, inherits) —
+  these are registry-only; if present they are ignored with a validation warning
+- `app.json` rules MUST NOT weaken mandatory repo-wide rules (same weakening detection as
+  constitution overlays)
+- Missing `app.json` is valid — the app uses only registry + profile composition
+- `/devspark.validate-registry` checks `app.json` files for schema conformance and
+  weakening conflicts
+
+## Design: Dependency Inference *(Added 2026-04-07: leadership decision Q2)*
+
+### Purpose
+
+Supplement declared `dependsOn` entries with basic inference from source code and build configuration
+so that scope reports surface undeclared cross-app dependencies.
+
+### Inference Sources
+
+| Source Type | Files Scanned | What Is Matched |
+|-------------|--------------|-----------------|
+| Source imports | `*.py`, `*.ts`, `*.js`, `*.cs`, `*.java` | Import/require paths containing another registered app's `path` segment |
+| Build config | `package.json`, `pyproject.toml`, `*.csproj` | Project references, workspace references, or dependency entries pointing to another registered app path |
+
+### Inference Rules
+
+1. For each registered app, extract its `path` value (e.g., `apps/admin-api`)
+2. Scan source and build files in the current app's `path` directory
+3. Match references that contain another registered app's path segment
+4. Report matched references as **inferred** dependencies, distinct from **declared** dependencies
+
+### Reporting
+
+Scope reports include two dependency sections:
+
+```text
+Declared dependencies: admin-api, shared-auth
+Inferred dependencies: runtime-api-a (from apps/admin-web/src/api-client.ts import)
+```
+
+### Constraints
+
+- Inference is best-effort and clearly labeled; it does not trigger hard failures
+- Inferred dependencies that match declared dependencies are deduplicated (shown only in declared)
+- Inference scanning respects `.gitignore` patterns to avoid scanning build artifacts
+- Performance: inference is scoped to the primary app's directory tree, not the entire repo
+- Inference runs only when a scope report is generated (not on every registry load)
 
 ## Design: Rationale Capture Pattern
 
@@ -694,13 +801,15 @@ feedback on the core model before building the full workflow surface.
 Scope:
 
 - Authoritative repository registry in `.documentation/devspark.json`
+- Optional app-local manifests (`{app.path}/app.json`) for app-specific overrides *(Added 2026-04-07)*
 - Pydantic-based schema validation (Python), jq-based checks (Bash), ConvertFrom-Json checks (PowerShell)
 - Convention-based app paths derived from the registered app path
 - Repository constitution plus additive app constitution overlay with weakening detection
 - Explicit app selection and explicit repo-scope execution
 - App-aware resolution for constitutions, prompts, scripts, and templates
 - App-scoped artifact directories (specs/plans/tasks at `{app.path}/.documentation/specs/`)
-- Direct downstream dependency reporting from declared dependencies
+- Declared dependency reporting plus basic dependency inference from source imports and build
+  configuration files *(Updated 2026-04-07)*
 - Scope report output (repo/single-app/multi-app) on every workflow
 - Full backward compatibility for single-app repositories
 
@@ -713,37 +822,40 @@ Scope (requires v1a merged and stable):
 
 - Pull request scope declaration and validation (`single-app`, `cross-app`, `repo-scope`)
 - Approved shared path categorization for single-app PR validation
-- `/devspark.add-application` and `/devspark.list-applications` commands
+- `/devspark.add-application`, `/devspark.list-applications`, and `/devspark.validate-registry`
+  commands *(Updated 2026-04-07: validate-registry added)*
 - Updated release packaging and shim content
 - Updated quickstart guidance for single-app and multi-app installs
 - CLI support for initializing or upgrading repos with multi-app mode
 - Migration guidance and examples
 
-Exit gate: PR scope validation tests pass; add/list commands pass; packaging produces consistent
-artifacts; quickstarts are updated; no regression in single-app behavior.
+Exit gate: PR scope validation tests pass; add/list/validate commands pass; packaging produces
+consistent artifacts; quickstarts are updated; no regression in single-app behavior.
 
 ### Deferred Beyond v1
 
-- App-local `app.json` manifests
 - App-specific user override layers
-- Inferred dependency discovery from code or build metadata
 - Complex non-conventional layouts unless explicitly overridden
 - Broader app lifecycle commands (remove, rename, move, split)
 - Dependency audit command
 - Structured YAML rules for constitution enforcement
+- Advanced dependency inference (transitive analysis, code-level call graph)
 
 ### Workstream 1 — Configuration and Resolution Model (v1a) — Effort: L
 
 Deliverables:
 
 - Registry loading and Pydantic validation (Python)
+- App-local manifest (`app.json`) loading, schema validation, and merge into resolution chain
+  *(Added 2026-04-07)*
 - jq-based registry validation (Bash), ConvertFrom-Json validation (PowerShell)
 - App-aware resolution contract for constitutions, prompts, scripts, and templates
 - Constitution composition with keyword-based weakening detection
 - Repo-scope versus app-scope execution rules
 - Scope-selection decision table implementation
-- Direct downstream impact report from declared dependencies
-- Scope report format for workflow output
+- Declared dependency reporting plus basic dependency inference from source imports and build
+  configuration files *(Updated 2026-04-07)*
+- Scope report format for workflow output (declared and inferred dependency sections)
 
 Primary code surfaces:
 
@@ -752,13 +864,18 @@ Primary code surfaces:
 - `scripts/powershell/common.ps1`
 - `scripts/powershell/platform.ps1`
 - `src/devspark_cli/__init__.py`
+- `src/devspark_cli/registry.py`
+- `src/devspark_cli/scope.py`
+- `src/devspark_cli/resolution.py`
+- `src/devspark_cli/inference.py` (new) *(Added 2026-04-07)*
 
 Exit criteria:
 
 - Single-app mode remains the default path
 - Multi-app mode is opt-in and validated
 - Resolution order is documented and testable
-- Direct downstream impacts are reported for shared changes
+- Declared and inferred downstream impacts are reported for shared changes *(Updated 2026-04-07)*
+- App-local manifests merge correctly into the resolution chain *(Added 2026-04-07)*
 - All Bash functions have a PowerShell equivalent (parity check)
 
 ### Workstream 2 — Script and Prompt Propagation (v1a + v1b) — Effort: XL
@@ -770,7 +887,8 @@ Deliverables:
 - Prompt templates updated to use app-aware paths and scope reporting
 - Pull request declaration and review behavior for three scope modes (v1b)
 - Validation comparing declared PR scope with changed paths (v1b)
-- `/devspark.add-application` and `/devspark.list-applications` flows (v1b)
+- `/devspark.add-application`, `/devspark.list-applications`, and `/devspark.validate-registry`
+  flows (v1b) *(Updated 2026-04-07)*
 - Fallback behavior for repo-scoped workflows
 
 Primary code surfaces:
@@ -786,6 +904,7 @@ Primary code surfaces:
 - `templates/commands/pr-review.md`
 - `templates/commands/add-application.md` (new, v1b)
 - `templates/commands/list-applications.md` (new, v1b)
+- `templates/commands/validate-registry.md` (new, v1b) *(Added 2026-04-07)*
 - `templates/commands/specify.md`
 - `templates/commands/plan.md`
 - `templates/commands/tasks.md`
@@ -801,8 +920,10 @@ Exit criteria:
 - No workflow writes app-scoped artifacts into `.devspark/` or into nested folders under root `.documentation/`
 - Missing or ambiguous app context fails clearly
 - Single-app PRs fail when changed paths show undeclared multi-app scope (v1b)
-- Add-application updates the registry safely (v1b)
+- Add-application updates the registry and always scaffolds `{app.path}/.documentation/` (v1b)
+  *(Updated 2026-04-07)*
 - List-applications remains read-only (v1b)
+- Validate-registry produces structured validation output and is read-only (v1b) *(Added 2026-04-07)*
 
 ### Workstream 3 — Packaging, Quickstarts, and CLI (v1b) — Effort: M
 
@@ -898,18 +1019,22 @@ Exit criteria:
 
 ## Phase Plan
 
-### Phase 0 — Finalize the design contract (v1a gate)
+### Phase 0 — Finalize the design contract (v1a gate) — **COMPLETE**
 
-Tasks:
+All leadership decisions resolved 2026-04-07 (see spec.md "Leadership Decisions" section):
 
-- Approve the authority model for `.documentation/devspark.json`
-- Approve the ownership model: `.devspark/` is installed, `.documentation/` is repo-owned
-- Approve the resolution order
-- Approve the explicit app scope decision
-- Approve the v1 decision to omit app-local manifests and app-user overrides
-- Approve the profile composition model (tags/rules/hints)
-- Approve the scope-selection decision table
-- Approve the v1a/v1b split boundary
+- [x] Approve the authority model for `.documentation/devspark.json`
+- [x] Approve the ownership model: `.devspark/` is installed, `.documentation/` is repo-owned
+- [x] Approve the resolution order
+- [x] Approve the explicit app scope decision
+- [x] Approve app-local manifests (`app.json`) as subset mirrors (Q1)
+- [x] Approve basic dependency inference from imports + build config (Q2)
+- [x] Approve v1 command surface: add + list + validate-registry (Q3)
+- [x] Approve shared path categories (Q4 — current list confirmed)
+- [x] Approve always-scaffold behavior for add-application (Q5)
+- [x] Approve the profile composition model (tags/rules/hints)
+- [x] Approve the scope-selection decision table
+- [x] Approve the v1a/v1b split boundary
 
 Output: approved design baseline for v1a implementation.
 
@@ -918,13 +1043,15 @@ Output: approved design baseline for v1a implementation.
 Tasks:
 
 - Add Pydantic model for registry loading and validation
+- Add app-local manifest (`app.json`) Pydantic model, loading, and merge logic *(Added 2026-04-07)*
 - Add jq-based validation helpers for Bash
 - Add ConvertFrom-Json validation helpers for PowerShell
 - Add app-aware helper functions to platform layers
 - Define standard scope object
 - Define repo-scope vs app-scope documentation root resolution
 - Implement constitution composition with weakening detection
-- Implement direct downstream dependency reporting
+- Implement declared dependency reporting plus basic dependency inference from source imports
+  and build configuration files *(Updated 2026-04-07)*
 
 Output: shared primitives used by workflows and CLI.
 
@@ -940,7 +1067,8 @@ Tasks (v1a):
 Tasks (v1b):
 
 - Update PR review flows to validate declared scope
-- Implement add-application and list-applications commands
+- Implement add-application (always-scaffold), list-applications, and validate-registry commands
+  *(Updated 2026-04-07)*
 - Define approved shared path validation
 
 Output: end-to-end app-aware workflows.
@@ -993,8 +1121,10 @@ Output: leadership-ready implementation confidence.
 
 | # | Fixture | Input | Expected Result | Pass Criteria |
 |---|---------|-------|-----------------|---------------|
-| D1 | full-monorepo | Repo-scope workflow touching `shared-auth` | Scope report lists admin-api, client-web as impacted | Downstream apps from `dependsOn` graph present |
+| D1 | full-monorepo | Repo-scope workflow touching `shared-auth` | Scope report lists admin-api, client-web as impacted (declared) | Downstream apps from `dependsOn` graph present |
 | D2 | full-monorepo | App-scope workflow for `admin-web` only | No downstream impact | Scope report shows empty impacted list |
+| D3 | full-monorepo | App with undeclared import of another app path | Inferred dependency shown in scope report, labeled "inferred" | Inferred section populated, declared section does not contain it |
+| D4 | full-monorepo | App with declared dep that also appears in imports | Dependency shown only in declared section, not duplicated in inferred | Deduplication works correctly |
 
 ### PR Scope Validation (v1b)
 
@@ -1016,16 +1146,21 @@ Output: leadership-ready implementation confidence.
 | V4 | Cyclic dependency (A→B→C→A) | Fail: "cyclic dependency detected" |
 | V5 | Missing repository constitution | Fail: "repository constitution required" |
 | V6 | Valid registry, all references resolve | Pass |
+| V7 | app.json with identity fields (id, path) | Warning: "identity fields ignored in app.json" | Validation passes but warns |
+| V8 | app.json with rule that weakens mandatory repo rule | Warning: "app.json rule weakens mandatory rule" | Weakening detection catches it |
+| V9 | app.json with valid tags/hints/rules only | Pass | Merged correctly into resolution |
 
 ### Command Validation (v1b)
 
 | # | Command | Input | Expected Result |
 |---|---------|-------|-----------------|
-| C1 | add-application | Valid new app | Registry updated, passes validation |
+| C1 | add-application | Valid new app | Registry updated + `{app.path}/.documentation/` scaffolded |
 | C2 | add-application | Duplicate id | Error, registry unchanged |
-| C3 | add-application --scaffold | Valid new app | Registry updated + `{app.path}/.documentation/` created |
-| C4 | list-applications | 6-app registry | Table with 6 rows, correct columns |
-| C5 | list-applications | No registry | "No multi-app registry configured" message |
+| C3 | list-applications | 6-app registry | Table with 6 rows, correct columns |
+| C4 | list-applications | No registry | "No multi-app registry configured" message |
+| C5 | validate-registry | Valid registry + valid app.json files | Pass with structured output |
+| C6 | validate-registry | Registry with errors (duplicate id, bad path) | Fail with itemized error list |
+| C7 | validate-registry | Registry valid but app.json has identity fields | Pass with warnings |
 
 ### Bash/PowerShell Parity Validation
 
@@ -1054,25 +1189,30 @@ This check runs as part of Workstream 4 for every modified script pair.
 | App-specific overrides proliferate and drift | Medium | High | Profile inheritance and validate override usage |
 | Scope ambiguity confuses users | High | High | Make app selection explicit and print scope in outputs |
 | Undeclared multi-app PRs reviewed as local | High | High | Require explicit PR scope and validate against changed paths |
-| Multi-app command surface grows prematurely | Medium | Medium | Limit v1 to add and list only |
+| Multi-app command surface grows prematurely | Medium | Medium | Limit v1 to add, list, and validate-registry only |
 | Bash and PowerShell behavior diverges | Medium | High | Parity validation on every PR |
 | CLI and prompt-template behavior drift | Medium | High | Registry contract as single source of truth |
 | v1a/v1b boundary shifts during implementation | Medium | Medium | Hard gate: v1b does not start until v1a passes all fixture tests |
 
-## Leadership Review Focus Areas
+## Leadership Review Focus Areas — **All Resolved 2026-04-07**
 
-- Is the repository registry the right authority model?
-- Is explicit app scope the right tradeoff versus convenience inference?
-- Is the v1a/v1b split boundary acceptable?
-- Is the profile composition model (tags/rules/hints) right for the first release?
-- Is keyword-based constitution weakening detection acceptable for v1?
-- Is direct downstream dependency reporting sufficient for v1?
-- Is the PR scope policy strict enough without making multi-app work too painful?
-- Is the proposed effort sizing realistic for the team?
+All items below were resolved via leadership decisions recorded in spec.md:
+
+- [x] Registry authority model — Approved
+- [x] Explicit app scope — Approved
+- [x] v1a/v1b split boundary — Approved
+- [x] Profile composition model — Approved
+- [x] Keyword-based weakening detection — Approved for v1
+- [x] Dependency reporting — Declared + basic inference approved (Q2)
+- [x] PR scope policy — Approved as specified
+- [x] App-local manifests — Subset mirrors approved (Q1)
+- [x] CLI command surface — Add + list + validate-registry approved (Q3)
+- [x] Shared path categories — Current list confirmed (Q4)
+- [x] Scaffolding — Always scaffold approved (Q5)
 
 ## Recommended Next Implementation Slice
 
-Start with Workstream 1 only (v1a): introduce the repository registry contract, Pydantic validation,
-app-aware resolution order, constitution composition, and direct downstream dependency reporting.
-Do not begin per-command rewrites until the leadership team approves the authority model, composition
-semantics, and scope propagation rules.
+Start with Workstream 1 (v1a): introduce the repository registry contract, app-local manifest
+support, Pydantic validation, app-aware resolution order, constitution composition, and declared
+plus inferred dependency reporting. Do not begin per-command rewrites until the core resolution
+primitives are proven against fixture tests.

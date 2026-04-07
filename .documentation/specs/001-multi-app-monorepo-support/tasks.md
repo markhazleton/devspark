@@ -12,8 +12,10 @@ applications that have different platforms, risk profiles, and governance needs.
 
 ### Decision Summary
 
-Add an authoritative repository registry, app-aware resolution for constitutions/prompts/scripts/templates,
-and dependency-aware scope reporting — all opt-in and backward compatible.
+Add an authoritative repository registry with optional app-local manifests (`app.json`), app-aware
+resolution for constitutions/prompts/scripts/templates, declared + inferred dependency reporting, and
+three v1 commands (add, list, validate-registry) — all opt-in and backward compatible.
+*(Updated 2026-04-07: reflects leadership decisions Q1-Q5.)*
 
 ### Key Drivers
 
@@ -38,7 +40,7 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Design approval, project structure, and foundational fixtures
 
-- [ ] T001 Obtain leadership approval on design contract (authority model, resolution order, v1a/v1b split, profile composition) per Phase 0 of plan.md
+- [x] T001 Obtain leadership approval on design contract (authority model, resolution order, v1a/v1b split, profile composition, app-local manifests, dependency inference, CLI scope, shared paths, scaffolding) per Phase 0 of plan.md *(Completed 2026-04-07: all 5 open questions resolved)*
 - [ ] T002 Create feature branch `feature/monorepo-multi-app-support`
 - [ ] T003 [P] Create fixture directory `tests/fixtures/fixture-single-app/` with current single-app repo structure (no registry)
 - [ ] T004 [P] Create fixture directory `tests/fixtures/fixture-two-api/` with 2 runtime API apps and a minimal `devspark.json`
@@ -64,8 +66,12 @@ user story can be independently tested after its phase completes.
 - [ ] T013 Implement repo-scope vs app-scope documentation root resolution: repo uses `.documentation/`, app uses `{app.path}/.documentation/` in `src/devspark_cli/scope.py`
 - [ ] T014 [P] Add app-aware helper functions to `scripts/bash/platform.sh` (detect mode, resolve app doc root, resolve scope)
 - [ ] T015 [P] Add app-aware helper functions to `scripts/powershell/platform.ps1` (detect mode, resolve app doc root, resolve scope)
+- [ ] T015a Define Pydantic v2 model for app-local manifest (`{app.path}/app.json`) in `src/devspark_cli/registry.py`: schema allows only `tags`, `hints`, `rules`; identity fields ignored with validation warning *(Added 2026-04-07: FR-B8)*
+- [ ] T015b Implement app.json loading and merge into resolution chain in `src/devspark_cli/registry.py`: load after profile composition, merge tags (last-writer-wins), rules (additive), hints (last-writer-wins) *(Added 2026-04-07: FR-B8)*
+- [ ] T015c Add app.json weakening detection: check app.json rules against mandatory repo-wide rules using same keyword-based detection as constitution overlays in `src/devspark_cli/registry.py` *(Added 2026-04-07: FR-B8)*
+- [ ] T015d [P] Add app.json fixtures to `tests/fixtures/fixture-full-monorepo/`: valid app.json for 2+ apps, one with identity fields (for warning test), one with weakening rule (for conflict test) *(Added 2026-04-07)*
 
-**Checkpoint**: Registry loads, validates, and the resolution primitives are operational
+**Checkpoint**: Registry loads, validates (including app.json), and the resolution primitives are operational
 
 ---
 
@@ -125,15 +131,18 @@ user story can be independently tested after its phase completes.
 ### Implementation for User Story 3
 
 - [ ] T037 [US3] Build inverse dependency lookup from `dependsOn` declarations (which point upstream from consumer → provider) to identify direct downstream consumers of a changed app in `src/devspark_cli/scope.py`
-- [ ] T038 [US3] Implement scope report generation: declared scope, detected scope, mismatches, downstream impact list in `src/devspark_cli/scope.py`
+- [ ] T037a [US3] Create `src/devspark_cli/inference.py` and implement basic dependency inference: scan source imports (`*.py`, `*.ts`, `*.js`, `*.cs`, `*.java`) and build config files (`package.json`, `pyproject.toml`, `*.csproj`) for references to other registered app paths *(Added 2026-04-07: FR-D8)*
+- [ ] T037b [US3] Integrate inferred dependencies into scope reporting: report inferred deps separately from declared deps, deduplicate matches, respect `.gitignore` patterns *(Added 2026-04-07: FR-D8)*
+- [ ] T037c [P] [US3] Add inference test fixtures to `tests/fixtures/fixture-full-monorepo/`: source files with cross-app imports and build configs with project references *(Added 2026-04-07)*
+- [ ] T038 [US3] Implement scope report generation: declared scope, detected scope, mismatches, declared downstream impact list, inferred downstream impact list in `src/devspark_cli/scope.py` *(Updated 2026-04-07: includes inferred deps)*
 - [ ] T039 [P] [US3] Add dependency reporting helpers to `scripts/bash/common.sh` (read dependsOn, walk direct downstream)
 - [ ] T040 [P] [US3] Add dependency reporting helpers to `scripts/powershell/common.ps1` (read dependsOn, walk direct downstream)
 - [ ] T041 [US3] Update `scripts/bash/get-pr-context.sh` to include dependency scope report in PR context output
 - [ ] T042 [P] [US3] Update `scripts/powershell/get-pr-context.ps1` to include dependency scope report in PR context output
 - [ ] T043 [US3] Update `templates/commands/pr-review.md` to consume scope report and apply governance per declared scope
-- [ ] T044 [US3] Validate fixture D1 (shared-auth change lists admin-api, client-web as impacted) and D2 (admin-web-only change shows no downstream) from Validation Matrix
+- [ ] T044 [US3] Validate fixture D1 (shared-auth change lists admin-api, client-web as declared impacted), D2 (admin-web-only change shows no downstream), D3 (undeclared import shows as inferred dependency), and D4 (declared dep in imports is deduplicated) from Validation Matrix *(Updated 2026-04-07: D3/D4 added for inference)*
 
-**Checkpoint**: Cross-app impact is reported; single-app changes stay scoped locally
+**Checkpoint**: Cross-app impact is reported with declared and inferred dependencies; single-app changes stay scoped locally
 
 ---
 
@@ -183,13 +192,14 @@ user story can be independently tested after its phase completes.
 ### Implementation for User Story 6
 
 - [ ] T056 [US6] Create `templates/commands/add-application.md` prompt template with guided metadata collection (id, name, path, kind, purpose, owner, criticality, profiles, dependencies)
-- [ ] T057 [US6] Create `src/devspark_cli/commands.py` and implement add-application logic: validate inputs, check duplicate ids, validate path/profile/dependency references, update `.documentation/devspark.json`
-- [ ] T058 [US6] Implement optional `--scaffold` flag that creates `{app.path}/.documentation/` directory structure in `src/devspark_cli/commands.py`
-- [ ] T059 [US6] Create `templates/commands/list-applications.md` prompt template that reads registry and displays human-readable table
-- [ ] T060 [US6] Implement list-applications logic: load registry, format table (id, path, kind, owner, criticality, dependencies, doc root) in `src/devspark_cli/commands.py`
-- [ ] T061 [US6] Validate fixture C1 (valid new app), C2 (duplicate id error), C3 (scaffold creates dirs), C4 (list shows all apps), C5 (list with no registry) from Validation Matrix
+- [ ] T057 [US6] Create `src/devspark_cli/commands.py` and implement add-application logic: validate inputs, check duplicate ids, validate path/profile/dependency references, update `.documentation/devspark.json`, always scaffold `{app.path}/.documentation/` with standard subdirectories *(Updated 2026-04-07: always scaffold, no --scaffold flag)*
+- [ ] T058 [US6] Create `templates/commands/list-applications.md` prompt template that reads registry and displays human-readable table
+- [ ] T059 [US6] Implement list-applications logic: load registry, format table (id, path, kind, owner, criticality, dependencies, doc root) in `src/devspark_cli/commands.py`
+- [ ] T059a [US6] Create `templates/commands/validate-registry.md` prompt template for standalone registry validation *(Added 2026-04-07: FR-B9)*
+- [ ] T059b [US6] Implement validate-registry logic in `src/devspark_cli/commands.py`: load registry, run all validators (schema, uniqueness, paths, profiles, dependencies, cycles, app.json consistency), produce structured pass/fail output *(Added 2026-04-07: FR-B9)*
+- [ ] T060 [US6] Validate fixture C1 (valid new app + scaffold), C2 (duplicate id error), C3 (list shows all apps), C4 (list with no registry), C5 (validate-registry passes valid registry), C6 (validate-registry fails invalid registry), C7 (validate-registry warns on app.json identity fields) from Validation Matrix *(Updated 2026-04-07: renumbered, added validate-registry scenarios)*
 
-**Checkpoint**: Add/list commands work; registry stays valid after mutations
+**Checkpoint**: Add/list/validate commands work; registry stays valid after mutations
 
 ---
 
@@ -272,14 +282,14 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Update install/upgrade surfaces and documentation
 
-- [ ] T095 Update `.github/workflows/scripts/create-release-packages.sh` to include multi-app templates and commands in release artifacts
+- [ ] T095g Update `.github/workflows/scripts/create-release-packages.sh` to include multi-app templates and commands (including `validate-registry.md`) in release artifacts *(ID changed from T095 to T095g to avoid collision with Phase 12 T095a-T095f)*
 - [ ] T096 [P] Update `quickstart/devspark_quickstart_copilot.md` with multi-app setup guidance
 - [ ] T097 [P] Update `quickstart/devspark_quickstart_claudecode.md` with multi-app setup guidance
 - [ ] T098 [P] Update `quickstart/devspark_quickstart_cursor.md` with multi-app setup guidance
 - [ ] T099 [P] Update `quickstart/devspark_quickstart_generic.md` with multi-app setup guidance
 - [ ] T100 Update `src/devspark_cli/__init__.py` with CLI support for initializing or upgrading repos with multi-app mode
 - [ ] T101 Update `README.md` with multi-app overview section
-- [ ] T102 Update `templates/README.md` to document new `add-application.md` and `list-applications.md` commands
+- [ ] T102 Update `templates/README.md` to document new `add-application.md`, `list-applications.md`, and `validate-registry.md` commands *(Updated 2026-04-07)*
 - [ ] T103 Verify install/upgrade never touches `.documentation/` content (regression test)
 
 **Checkpoint**: Release artifacts, quickstarts, and CLI support multi-app mode
@@ -290,11 +300,11 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Full validation matrix execution and parity checks
 
-- [ ] T104 Validate all Registry Validation scenarios V1–V6 (duplicate id, invalid path, unknown profile, cycle, missing constitution, valid)
+- [ ] T104 Validate all Registry Validation scenarios V1–V9 (duplicate id, invalid path, unknown profile, cycle, missing constitution, valid, app.json identity warning, app.json weakening, app.json valid) *(Updated 2026-04-07: V7-V9 added for app.json)*
 - [ ] T105 Validate all Resolution scenarios R1–R6 from Validation Matrix
-- [ ] T106 Validate all Dependency scenarios D1–D2 from Validation Matrix
+- [ ] T106 Validate all Dependency scenarios D1–D4 from Validation Matrix *(Updated 2026-04-07: D3-D4 added for inference)*
 - [ ] T107 Validate all PR Scope scenarios P1–P5 from Validation Matrix (v1b)
-- [ ] T108 Validate all Command scenarios C1–C5 from Validation Matrix (v1b)
+- [ ] T108 Validate all Command scenarios C1–C7 from Validation Matrix (v1b) *(Updated 2026-04-07: C5-C7 added for validate-registry)*
 - [ ] T109 Run Bash/PowerShell parity validation for all modified script pairs (JSON output comparison)
 - [ ] T110 Run single-app regression suite: confirm zero behavioral changes for repos without `devspark.json`
 - [ ] T111 Run install/upgrade regression: confirm `.documentation/` is never mutated by framework operations
@@ -377,15 +387,16 @@ and governance resolution. This proves the core model works before expanding to 
 6. v1b: PR scope, commands, packaging (Phases 8–9, 13)
 7. Full template/script updates and hardening (Phases 10–12, 14–15)
 
-## Summary
+## Summary *(Updated 2026-04-07: counts reflect leadership decision additions)*
 
 | Metric | Value |
 |--------|-------|
-| Total tasks | 127 |
+| Total tasks | ~140 |
 | Phase count | 15 |
 | User stories covered | 6 (US1–US6) |
 | Workstreams covered | 5 (WS1–WS5) |
-| v1a tasks | ~86 |
-| v1b tasks | ~41 |
+| v1a tasks | ~95 |
+| v1b tasks | ~45 |
 | Parallel opportunities | 12 groups |
-| MVP scope | Phases 1–3 (T001–T025) |
+| MVP scope | Phases 1–3 (T001–T025, T015a–T015d) |
+| New tasks added 2026-04-07 | T015a–T015d (app.json), T037a–T037c (inference), T059a–T059b (validate-registry), T095g (renumber) |
