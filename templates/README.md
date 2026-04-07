@@ -29,6 +29,9 @@ Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`, `
 | `upgrade.md` | `/devspark.upgrade` | Upgrade project to latest templates |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
+| `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry |
+| `list-applications.md` | `/devspark.list-applications` | Display all registered applications |
+| `validate-registry.md` | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
 ## Helper Templates
 

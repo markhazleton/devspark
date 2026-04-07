@@ -282,14 +282,14 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Update install/upgrade surfaces and documentation
 
-- [ ] T095g Update `.github/workflows/scripts/create-release-packages.sh` to include multi-app templates and commands (including `validate-registry.md`) in release artifacts *(ID changed from T095 to T095g to avoid collision with Phase 12 T095a-T095f)*
-- [ ] T096 [P] Update `quickstart/devspark_quickstart_copilot.md` with multi-app setup guidance
-- [ ] T097 [P] Update `quickstart/devspark_quickstart_claudecode.md` with multi-app setup guidance
-- [ ] T098 [P] Update `quickstart/devspark_quickstart_cursor.md` with multi-app setup guidance
-- [ ] T099 [P] Update `quickstart/devspark_quickstart_generic.md` with multi-app setup guidance
+- [x] T095g Verify `.github/workflows/scripts/create-release-packages.sh` includes multi-app templates via glob (`templates/commands/*.md`) — no changes needed *(ID changed from T095 to T095g)*
+- [x] T096 [P] Update `quickstart/devspark_quickstart_copilot.md` with multi-app setup guidance
+- [x] T097 [P] Update `quickstart/devspark_quickstart_claudecode.md` with multi-app setup guidance
+- [x] T098 [P] Update `quickstart/devspark_quickstart_cursor.md` with multi-app setup guidance
+- [x] T099 [P] Update `quickstart/devspark_quickstart_generic.md` with multi-app setup guidance
 - [x] T100 Update `src/devspark_cli/__init__.py` with CLI support for initializing or upgrading repos with multi-app mode
-- [ ] T101 Update `README.md` with multi-app overview section
-- [ ] T102 Update `templates/README.md` to document new `add-application.md`, `list-applications.md`, and `validate-registry.md` commands *(Updated 2026-04-07)*
+- [x] T101 Update `README.md` with multi-app overview section
+- [x] T102 Update `templates/README.md` to document new `add-application.md`, `list-applications.md`, and `validate-registry.md` commands *(Updated 2026-04-07)*
 - [x] T103 Verify install/upgrade never touches `.documentation/` content (regression test)
 
 **Checkpoint**: Release artifacts, quickstarts, and CLI support multi-app mode
