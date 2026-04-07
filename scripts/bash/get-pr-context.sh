@@ -27,6 +27,15 @@ fi
 # Load platform adapter (sets DEVSPARK_PLATFORM_NAME, DEVSPARK_PR_CLI, etc.)
 source "$SCRIPT_DIR/platform.sh"
 
+# Multi-app support (T041, T066)
+parse_app_context "$@" 2>/dev/null || true
+if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
+    resolve_app_scope 2>/dev/null || true
+    print_scope_summary >&2
+    # Include scope report in PR context
+    generate_scope_report >&2
+fi
+
 PR_NUMBER=""
 JSON_MODE=false
 
