@@ -119,9 +119,9 @@ Slash commands like `/devspark.specify` are typed into your AI agent's chat inte
 
 When you type `/devspark.specify Build a photo album organizer`, your AI agent reads the DevSpark prompt template for the `specify` command and uses it to guide the conversation.
 
-### Do I have to use all 21 commands?
+### Do I have to use all 24 commands?
 
-No. Most projects use a small subset regularly:
+No. Most projects use a small subset regularly. The 3 multi-app commands are only needed for monorepos with multiple applications.
 
 **Everyday commands:**
 
@@ -325,6 +325,43 @@ This updates the framework files in `.devspark/` while preserving your artifacts
 
 > [!TIP]
 > **Important:** After upgrading, verify your constitution file wasn't overwritten. If it was, restore from the `.bak` backup that the upgrade process creates. See the [Upgrade Guide](upgrade.md) for details.
+
+---
+
+## Multi-App Monorepo Support
+
+### What is multi-app support?
+
+Multi-app support lets DevSpark manage repositories containing multiple applications — for example, a monorepo with a .NET API, a React frontend, and a Python data pipeline. Each application can have its own constitution, governance rules, and code review scope while sharing a common repository.
+
+### Do I need multi-app support?
+
+**Most projects do not.** If your repository contains a single application, or a monorepo where all applications share the same conventions, standard DevSpark is all you need. Multi-app is entirely optional and changes nothing for single-app repositories.
+
+Consider multi-app when:
+
+- Your monorepo has applications with **different tech stacks** (e.g., .NET API + React UI)
+- Different applications need **different governance rules** (e.g., PCI-compliant service vs. internal tooling)
+- You want **per-app constitutions** that extend the repo-wide constitution with app-specific rules
+- You need **scoped code reviews** that understand which applications a PR affects
+
+### How do I enable multi-app support?
+
+1. Run `/devspark.add-application` in your AI agent chat — it creates a registry at `.documentation/devspark.json` and scaffolds the app's documentation directory
+2. Repeat for each application in your repository
+3. Use `--app <id>` with any DevSpark command to scope it to a specific application
+
+### Can I add multi-app support to an existing DevSpark project?
+
+Yes. Multi-app is additive — it builds on top of your existing DevSpark setup without requiring any migration or restructuring. Your existing constitution, specs, and decisions remain untouched.
+
+### What are profiles?
+
+Profiles are reusable rule bundles that applications can inherit. For example, you might define an `api-profile` with API-specific governance rules and a `web-profile` for frontend conventions. Applications declare which profiles they use, and DevSpark composes the rules automatically.
+
+### Does multi-app change how single-app repositories work?
+
+**No.** This is a non-negotiable design principle. Single-app repositories continue to work exactly as before with zero changes required. Multi-app functionality only activates when a registry file exists at `.documentation/devspark.json`.
 
 ---
 

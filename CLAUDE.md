@@ -8,7 +8,7 @@ Read `.documentation/memory/constitution.md` before making changes — it define
 
 ## Repository Structure
 
-- `templates/commands/` — 21 slash-command prompt files (the product)
+- `templates/commands/` — 24 slash-command prompt files (the product)
 - `scripts/` — Context-gathering scripts (PowerShell + Bash)
 - `src/devspark_cli/` — Optional CLI for automated setup
 - `quickstart/` — Agent-specific bootstrap guides
@@ -24,6 +24,9 @@ Use `/devspark.{command}` to invoke workflows:
 - `/devspark.implement` — Execute tasks
 - `/devspark.pr-review` — Constitution-based PR review
 - `/devspark.quickfix` — Lightweight bug fix workflow
+- `/devspark.add-application` — Register app in multi-app registry (optional)
+- `/devspark.list-applications` — Display registered applications (optional)
+- `/devspark.validate-registry` — Validate registry consistency (optional)
 
 Full list in `templates/commands/`.
 

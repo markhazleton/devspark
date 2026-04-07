@@ -45,6 +45,12 @@ Example (Claude Code):
 - **`.documentation/`** — Your project artifacts (constitution, specs, decisions). Never touched by DevSpark.
 - **Agent shims** — Platform-specific files that wire `/devspark.*` commands to the 3-tier resolution system.
 
+## Multi-App Support (Optional)
+
+If your repository contains multiple applications with different platforms or governance rules, each quickstart includes an **optional** multi-app section at the end. Single-application repositories can skip this entirely — no registry or extra configuration is needed.
+
+To opt in, run `/devspark.add-application` after installation to create a registry at `.documentation/devspark.json`.
+
 ## Migration Support
 
 Each quickstart automatically detects and migrates from:

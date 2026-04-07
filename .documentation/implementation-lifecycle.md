@@ -37,6 +37,16 @@ After bootstrap, run the standard implementation lifecycle in chat:
 6. `/devspark.analyze` and `/devspark.critic` (optional quality gates)
 7. `/devspark.implement`
 
+### Multi-App Workflows (Optional)
+
+If your repository contains multiple applications, you can scope any command to a specific application:
+
+- Use `--app <id>` with any command to target a specific application
+- Use `--repo-scope` for repository-wide operations
+- Run `/devspark.add-application` to register new applications in the multi-app registry
+
+Multi-app support is entirely optional. Single-application repositories use the standard workflow above with no changes.
+
 ## 3. Upgrade (Primary)
 
 Use the remote upgrade prompt in chat (no CLI required):

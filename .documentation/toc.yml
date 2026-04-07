@@ -13,6 +13,8 @@
       href: installation.md
     - name: Upgrade
       href: upgrade.md
+    - name: Multi-App Support (Optional)
+      href: specs/001-multi-app-monorepo-support/spec.md
 
 
 # Quality & Review commands

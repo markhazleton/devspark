@@ -7,13 +7,17 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - Multi-App Monorepo Support
+## [Unreleased] - Multi-App Monorepo Support (Optional)
 
-**Explicit multi-application monorepo support with profile-based inheritance and dependency-aware scoping.**
+**Optional multi-application monorepo support with profile-based inheritance and dependency-aware scoping.**
+
+> **Multi-app is entirely optional.** Single-application repositories continue to work with zero changes.
+> If your repository contains multiple applications with different platforms or governance rules,
+> you can opt in by creating a registry at `.documentation/devspark.json`.
 
 ### Added
 
-- Multi-app registry at `.documentation/devspark.json` with Pydantic v2 validation
+- **Optional** multi-app registry at `.documentation/devspark.json` with Pydantic v2 validation
 - App-local manifest support (`{app.path}/app.json`) for app-specific overrides
 - Profile-based inheritance model with tags/rules/hints composition
 - Constitution resolution with additive app overlays and weakening detection
@@ -27,17 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rationale & Traceability Risks category in `/devspark.critic`
 - App context propagation (`--app`, `--repo-scope`) across all Bash and PowerShell scripts
 - Four fixture repositories for testing (single-app, two-api, full-monorepo, 20-app)
+- Multi-app guidance added to all quickstart guides, README, FAQ, and GitHub Pages documentation
 
 ### Changed
 
-- All command templates updated with multi-app support instructions
+- All command templates updated with optional multi-app support instructions
 - `scripts/bash/platform.sh` script resolution now includes app-specific override tier
 - `pydantic>=2.0` added as a project dependency
+- Quickstart guides now include an optional multi-app setup step
+- README expanded with "When to Use Multi-App" guidance
+- FAQ updated with multi-app questions and answers
+- GitHub Pages documentation (index, quickstart, about, constitution guide) updated with multi-app references
 
 ### Compatibility
 
 - Full backward compatibility: single-app repositories require zero changes
-- Multi-app mode is opt-in via `.documentation/devspark.json`
+- Multi-app mode is **opt-in** via `.documentation/devspark.json` — never required
 
 ## [0.1.2] - 2026-04-06
 
