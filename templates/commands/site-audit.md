@@ -556,7 +556,7 @@ Display concise summary:
 Health Summary:
 - 🔴 {COUNT} Critical issues
 - 🟠 {COUNT} High priority
-- 🟡 {COUNT} Medium priority  
+- 🟡 {COUNT} Medium priority
 - 🔵 {COUNT} Low priority
 
 Constitution Compliance: {X}%

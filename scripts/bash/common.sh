@@ -195,10 +195,10 @@ validate_registry_json() {
     fi
 
     local version mode app_count profile_count
-    version=$(jq -r '.version // 0' "$registry_path")
-    mode=$(jq -r '.mode // ""' "$registry_path")
-    app_count=$(jq '.apps | length' "$registry_path")
-    profile_count=$(jq '.profiles | keys | length' "$registry_path")
+    version=$(jq -r '.version // 0' "$registry_path") || true
+    mode=$(jq -r '.mode // ""' "$registry_path") || true
+    app_count=$(jq '.apps | length' "$registry_path") || true
+    profile_count=$(jq '.profiles | keys | length' "$registry_path") || true
 
     # Check version
     if [[ "$version" != "1" ]]; then
@@ -207,8 +207,8 @@ validate_registry_json() {
 
     # Check unique IDs
     local unique_ids total_ids
-    total_ids=$(jq '.apps | length' "$registry_path")
-    unique_ids=$(jq '[.apps[].id] | unique | length' "$registry_path")
+    total_ids=$(jq '.apps | length' "$registry_path") || true
+    unique_ids=$(jq '[.apps[].id] | unique | length' "$registry_path") || true
     if [[ "$total_ids" != "$unique_ids" ]]; then
         echo '{"valid":false,"error":"Duplicate app IDs detected"}'; return 1
     fi
@@ -417,7 +417,7 @@ generate_scope_report() {
         if [[ -n "$downstream" ]]; then
             echo ""
             echo "### Declared downstream dependencies"
-            IFS=',' read -ra deps <<< "$downstream"
+            IFS=',' read -r -a deps <<< "$downstream"
             for dep in "${deps[@]}"; do
                 echo "- $dep"
             done
