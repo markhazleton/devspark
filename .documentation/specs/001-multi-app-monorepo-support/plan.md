@@ -207,6 +207,15 @@ In this model:
 
 ## Design: Resolution Model
 
+### Terminology Convention
+
+- **Overlay**: Additive composition of constitutions. An app constitution is *overlaid* on the repo
+  constitution. The repo rules remain authoritative; the overlay may extend or strengthen but never weaken.
+- **Override**: File-level replacement in the prompt, script, and template resolution chains. A file at a
+  higher-priority tier *overrides* the same-named file at a lower tier. Resolution uses exact filename
+  matching only — no glob patterns, no partial matches. If no exact match exists at a tier, that tier is
+  skipped.
+
 ### Constitution Resolution
 
 1. Load the repository constitution from `.documentation/memory/constitution.md`
