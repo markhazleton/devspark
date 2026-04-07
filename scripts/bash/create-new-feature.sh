@@ -181,7 +181,9 @@ source "$SCRIPT_DIR/common.sh" 2>/dev/null || source "$(dirname "${BASH_SOURCE[0
 
 # Multi-app support: parse --app and --repo-scope from ARGS (T031)
 parse_app_context "${ARGS[@]}" 2>/dev/null || true
-ARGS=("${DEVSPARK_REMAINING_ARGS[@]:-${ARGS[@]}}")
+if [[ ${#DEVSPARK_REMAINING_ARGS[@]} -gt 0 ]]; then
+    ARGS=("${DEVSPARK_REMAINING_ARGS[@]}")
+fi
 FEATURE_DESCRIPTION="${ARGS[*]}"
 
 # Determine specs directory based on app context

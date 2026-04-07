@@ -1,6 +1,6 @@
 ---
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
-handoffs: 
+handoffs:
   - label: Create Tasks
     agent: devspark.tasks
     prompt: Break the plan into tasks
