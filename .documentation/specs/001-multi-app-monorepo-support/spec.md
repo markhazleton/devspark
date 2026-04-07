@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feature/monorepo-multi-app-support`
 **Created**: 2026-04-06
-**Status**: Draft for Technical Leadership Review
+**Status**: Approved — Leadership Decisions Resolved 2026-04-07
 **Input**: User description: "Update DevSpark to support multiple applications within a single repository using monorepo best practices, with repo-wide constitutions, prompts, and scripts plus application-specific overrides for constitution, prompts, and scripts when needed."
 
 ## Background
@@ -194,15 +194,15 @@ then verify the registry is updated and a subsequent `/devspark.list-application
 
 1. **Given** a multi-app repository, **When** a user runs `/devspark.add-application` with id
    `payments-api`, a valid path, kind, owner, and profile references, **Then** the registry at
-   `.documentation/devspark.json` is updated with the new entry and passes validation.
+   `.documentation/devspark.json` is updated with the new entry, `{app.path}/.documentation/` is
+   created with standard subdirectories, and the registry passes validation.
+   *(Updated 2026-04-07: scaffolding is always performed.)*
 2. **Given** a multi-app repository where `admin-api` already exists, **When** a user runs
    `/devspark.add-application` with id `admin-api`, **Then** the command fails with a duplicate-id error
    and does not modify the registry.
-3. **Given** a valid add-application invocation with the `--scaffold` flag, **When** the command
-   completes, **Then** `{app.path}/.documentation/` is created with standard subdirectories, but
-   `.devspark/` is not modified.
-4. **Given** a valid add-application invocation without `--scaffold`, **When** the command completes,
-   **Then** only the registry file is updated; no directories are created.
+3. **Given** a successful add-application invocation, **When** the command completes, **Then**
+   `.devspark/` is not modified; only the registry and `{app.path}/.documentation/` are affected.
+   *(Updated 2026-04-07: consolidated from previous scenarios 3 and 4.)*
 
 ---
 
@@ -272,12 +272,22 @@ output includes all six entries with correct metadata in a readable format.
   with `kind: "library"` and `deployable: false`. They participate in dependency tracking but are not
   valid targets for app-scoped deployment or release workflows.
 - **FR-B5**: DevSpark MUST support `/devspark.add-application` to add a validated entry to the registry
-  and optionally scaffold `{app.path}/.documentation/` when explicitly requested; the command MUST NOT
-  modify `.devspark/`.
+  and always scaffold `{app.path}/.documentation/` with standard subdirectories; the command MUST NOT
+  modify `.devspark/`. *(Updated 2026-04-07: scaffolding is always performed, no --scaffold flag.)*
 - **FR-B6**: DevSpark MUST support `/devspark.list-applications` as a read-only command that renders
   registered applications with id, path, kind, owner, dependencies, and effective documentation root.
-- **FR-B7**: v1 MUST limit multi-app command surface to `/devspark.add-application` and
-  `/devspark.list-applications`; broader lifecycle commands are deferred.
+- **FR-B7**: v1 MUST include `/devspark.add-application`, `/devspark.list-applications`, and
+  `/devspark.validate-registry`; broader lifecycle commands are deferred.
+  *(Updated 2026-04-07: validate-registry added to v1 command surface.)*
+- **FR-B8**: DevSpark MUST support an optional app-local manifest at `{app.path}/app.json` containing
+  app-specific overrides (tags, hints, local rules). The registry remains authoritative for identity
+  fields (id, path, kind, owner, dependencies). Resolution MUST check `{app.path}/app.json` for
+  override content and merge it after profile composition but before final resolution.
+  *(Added 2026-04-07: leadership decision Q1.)*
+- **FR-B9**: DevSpark MUST support `/devspark.validate-registry` as a standalone command that validates
+  the registry schema, reference resolution, cycle detection, path existence, and app-local manifest
+  consistency. The command MUST be read-only and produce structured validation output.
+  *(Added 2026-04-07: leadership decision Q3.)*
 
 ### Requirement Group C — Resolution Model
 
@@ -315,6 +325,11 @@ output includes all six entries with correct metadata in a readable format.
   and MUST fail or require reclassification when the declaration does not match detected scope.
 - **FR-D7**: DevSpark MUST support dependency-aware scope analysis using declared `dependsOn` entries to
   report directly impacted downstream applications for shared changes.
+- **FR-D8**: DevSpark MUST support basic dependency inference by scanning source import/require
+  statements and build configuration files (package.json, pyproject.toml, .csproj project references)
+  for references to other registered application paths. Inferred dependencies MUST be reported
+  separately from declared dependencies in scope reports, clearly labeled as "inferred".
+  *(Added 2026-04-07: leadership decision Q2.)*
 
 ### Requirement Group E — Profiles and Inheritance
 
@@ -507,15 +522,57 @@ mandatory scope validation against changed paths.
 Teams fail to maintain `dependsOn` entries. Mitigated by treating missing declarations as config gaps
 surfaced in scope reports. A dependency audit command is deferred to v2.
 
-## Open Questions for Leadership Review
+## Leadership Decisions (Resolved 2026-04-07)
 
-- Is the v1 simplicity boundary acceptable: authoritative repo registry, conventional paths,
-  no app-local manifests, and no app-user overrides?
-- Is direct downstream dependency reporting sufficient for v1, with inferred dependency analysis deferred?
-- What is the minimum acceptable CLI support for the first release?
-- What specific shared path categories should be added to or removed from the approved list?
-- Is optional scaffolding of `{app.path}/.documentation/` during `/devspark.add-application` acceptable,
-  or should the command remain registry-only in the first release?
+### Q1: V1 simplicity boundary — app-local manifests and app-user overrides?
+
+**Decision**: Authoritative repo registry with conventional paths is accepted. No app-user overrides
+in v1. However, **app-local manifests are required** in v1 as subset mirrors: each app MAY have an
+`app.json` at `{app.path}/app.json` containing app-specific overrides (tags, hints, local rules).
+The registry remains authoritative for id, path, kind, owner, and dependencies. The app-local manifest
+provides a lightweight local override surface without duplicating registry identity fields.
+
+**Impact on spec**: FR-B1 is extended — the registry is still authoritative, but resolution must also
+check `{app.path}/app.json` for override content. A new requirement FR-B8 is needed for the manifest
+schema and merge behavior.
+
+### Q2: Dependency reporting — direct only or basic inference?
+
+**Decision**: v1 includes **basic dependency inference** in addition to declared `dependsOn` entries.
+Inference sources: both import/require statements in source files AND build configuration files
+(package.json, pyproject.toml, .csproj project references). Inferred dependencies are reported
+separately from declared dependencies in scope reports, clearly labeled as inferred.
+
+**Impact on spec**: FR-D7 is extended — scope analysis uses declared dependencies plus inferred
+dependencies from source imports and build config. A new requirement FR-D8 is needed for the
+inference mechanism and its reporting format.
+
+### Q3: Minimum CLI support for v1?
+
+**Decision**: **Add + List + Validate** commands. In addition to `/devspark.add-application` and
+`/devspark.list-applications`, v1 includes `/devspark.validate-registry` as a standalone registry
+validation command that checks schema, references, cycles, and path existence.
+
+**Impact on spec**: FR-B7 is updated — v1 command surface is add, list, and validate (not just
+add and list). A new requirement FR-B9 is needed for the validate command.
+
+### Q4: Approved shared path categories for single-app PRs?
+
+**Decision**: **Current list is correct** — no additions or removals. Approved shared paths remain:
+`.documentation/` (root-level), `.github/`, `.devspark/`, root configuration files, and CI/CD
+configuration files.
+
+**Impact on spec**: No change to the Approved Shared Path Categories table.
+
+### Q5: Scaffolding behavior for /devspark.add-application?
+
+**Decision**: **Always scaffold**. `/devspark.add-application` always creates
+`{app.path}/.documentation/` with standard subdirectories. No `--scaffold` flag needed — scaffolding
+is the default and only behavior.
+
+**Impact on spec**: FR-B5 is simplified — remove the optional `--scaffold` flag. The command always
+scaffolds. User Story 6 acceptance scenarios 3 and 4 are consolidated into one scenario (scaffold
+always happens).
 
 ## Operational Constraints
 
@@ -524,7 +581,7 @@ surfaced in scope reports. A dependency audit command is deferred to v2.
 - Repo-level `.documentation/` and app-level `{app.path}/.documentation/` are repository-owned.
 - Application selection must be explicit for ambiguous contexts.
 - Single-app PRs are the default; cross-app PRs are supported through explicit declaration.
-- The first multi-app command set is limited to add and list application workflows.
+- The first multi-app command set includes add, list, and validate-registry workflows.
 - Multi-app support must work across Bash and PowerShell script variants.
 - Repo-wide workflows such as release or constitution evolution must continue to function.
 
