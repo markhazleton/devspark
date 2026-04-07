@@ -1146,9 +1146,9 @@ Output: leadership-ready implementation confidence.
 | V4 | Cyclic dependency (A→B→C→A) | Fail: "cyclic dependency detected" |
 | V5 | Missing repository constitution | Fail: "repository constitution required" |
 | V6 | Valid registry, all references resolve | Pass |
-| V7 | app.json with identity fields (id, path) | Warning: "identity fields ignored in app.json" | Validation passes but warns |
-| V8 | app.json with rule that weakens mandatory repo rule | Warning: "app.json rule weakens mandatory rule" | Weakening detection catches it |
-| V9 | app.json with valid tags/hints/rules only | Pass | Merged correctly into resolution |
+| V7 | app.json with identity fields (id, path) | Warning: "identity fields ignored in app.json" — validation passes but warns |
+| V8 | app.json with rule that weakens mandatory repo rule | Warning: "app.json rule weakens mandatory rule" — weakening detection catches it |
+| V9 | app.json with valid tags/hints/rules only | Pass — merged correctly into resolution |
 
 ### Command Validation (v1b)
 
