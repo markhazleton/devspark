@@ -12,6 +12,26 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+## Rationale Summary
+
+### Core Problem
+
+[What problem are we solving?]
+
+### Decision Summary
+
+[What was decided and why (1-3 sentences max)?]
+
+### Key Drivers
+
+- [Business driver]
+- [Technical constraint]
+- [User/operational impact]
+
+### Reviewer Guidance
+
+[What should reviewers focus on?]
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)

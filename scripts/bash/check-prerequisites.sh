@@ -85,6 +85,13 @@ done
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
+# Multi-app support (T095e)
+parse_app_context "$@" 2>/dev/null || true
+if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
+    resolve_app_scope 2>/dev/null || true
+    print_scope_summary >&2
+fi
+
 # Get feature paths and validate branch
 eval "$(get_feature_paths)"
 check_feature_branch "$CURRENT_BRANCH" "$HAS_GIT" || exit 1

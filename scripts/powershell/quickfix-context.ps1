@@ -10,6 +10,11 @@ param(
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 
+# Multi-app support (T084)
+if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
+    . "$PSScriptRoot/common.ps1"
+}
+
 # Parse arguments
 $action = "create"
 $quickfixId = ""
