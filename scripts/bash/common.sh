@@ -382,6 +382,49 @@ $(cat "$app_constitution")"
     echo "$output"
 }
 
+# Get direct downstream consumers of an app (T039)
+get_downstream_apps() {
+    local repo_root="$1"
+    local app_id="$2"
+    local registry="$repo_root/.documentation/devspark.json"
+
+    if [[ ! -f "$registry" ]]; then
+        return
+    fi
+
+    # Find all apps whose dependsOn contains app_id
+    jq -r --arg id "$app_id" \
+        '[.apps[] | select(.dependsOn | index($id)) | .id] | join(",")' \
+        "$registry" 2>/dev/null || true
+}
+
+# Generate scope report (T039)
+generate_scope_report() {
+    local repo_root
+    repo_root=$(get_repo_root)
+
+    echo "## DevSpark Scope Report"
+    echo ""
+    echo "**Scope type**: ${DEVSPARK_SCOPE:-unknown}"
+    echo "**Documentation root**: ${DEVSPARK_DOC_ROOT:-unknown}"
+
+    if [[ -n "$DEVSPARK_APP_ID" ]]; then
+        echo "**Primary application**: $DEVSPARK_APP_ID"
+
+        # Declared downstream
+        local downstream
+        downstream=$(get_downstream_apps "$repo_root" "$DEVSPARK_APP_ID")
+        if [[ -n "$downstream" ]]; then
+            echo ""
+            echo "### Declared downstream dependencies"
+            IFS=',' read -ra deps <<< "$downstream"
+            for dep in "${deps[@]}"; do
+                echo "- $dep"
+            done
+        fi
+    fi
+}
+
 # Print scope summary (T035)
 print_scope_summary() {
     echo "--- DevSpark Scope ---"
