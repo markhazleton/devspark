@@ -59,13 +59,13 @@ user story can be independently tested after its phase completes.
 - [x] T006 Create `src/devspark_cli/registry.py` and define Pydantic v2 model for `devspark.json` registry schema (profiles, apps, validation rules)
 - [x] T007 Implement field validators: unique ids, path existence, profile reference resolution, dependency cycle detection in `src/devspark_cli/registry.py`
 - [x] T008 Implement registry loading function that reads `.documentation/devspark.json` and returns validated model in `src/devspark_cli/registry.py`
-- [ ] T009 [P] Add jq-based registry validation helpers (field presence, type checks, unique ids) in `scripts/bash/common.sh`
-- [ ] T010 [P] Add ConvertFrom-Json registry validation helpers (field presence, type checks, unique ids) in `scripts/powershell/common.ps1`
+- [x] T009 [P] Add jq-based registry validation helpers (field presence, type checks, unique ids) in `scripts/bash/common.sh`
+- [x] T010 [P] Add ConvertFrom-Json registry validation helpers (field presence, type checks, unique ids) in `scripts/powershell/common.ps1`
 - [x] T011 Implement mode detection: if `devspark.json` exists with `"mode": "multi-app"` → multi-app mode; otherwise → single-app mode in `src/devspark_cli/registry.py`
 - [x] T012 Create `src/devspark_cli/scope.py` and define standard scope object structure (scope type, primary app, affected apps, impacted downstream)
 - [x] T013 Implement repo-scope vs app-scope documentation root resolution: repo uses `.documentation/`, app uses `{app.path}/.documentation/` in `src/devspark_cli/scope.py`
-- [ ] T014 [P] Add app-aware helper functions to `scripts/bash/platform.sh` (detect mode, resolve app doc root, resolve scope)
-- [ ] T015 [P] Add app-aware helper functions to `scripts/powershell/platform.ps1` (detect mode, resolve app doc root, resolve scope)
+- [x] T014 [P] Add app-aware helper functions to `scripts/bash/platform.sh` (detect mode, resolve app doc root, resolve scope)
+- [x] T015 [P] Add app-aware helper functions to `scripts/powershell/platform.ps1` (detect mode, resolve app doc root, resolve scope)
 - [x] T015a Define Pydantic v2 model for app-local manifest (`{app.path}/app.json`) in `src/devspark_cli/registry.py`: schema allows only `tags`, `hints`, `rules`; identity fields ignored with validation warning *(Added 2026-04-07: FR-B8)*
 - [x] T015b Implement app.json loading and merge into resolution chain in `src/devspark_cli/registry.py`: load after profile composition, merge tags (last-writer-wins), rules (additive), hints (last-writer-wins) *(Added 2026-04-07: FR-B8)*
 - [ ] T015c Add app.json weakening detection: check app.json rules against mandatory repo-wide rules using same keyword-based detection as constitution overlays in `src/devspark_cli/registry.py` *(Added 2026-04-07: FR-B8)*
@@ -89,8 +89,8 @@ user story can be independently tested after its phase completes.
 - [x] T019 [US1] Implement script resolution chain (app team → repo team → stock default) in `src/devspark_cli/resolution.py`
 - [x] T020 [US1] Implement template resolution chain (app team → repo team → stock default) in `src/devspark_cli/resolution.py`
 - [x] T021 [US1] Implement **base** profile composition: merge inherited profile tags/rules/hints in declaration order to produce the effective profile for a single app in `src/devspark_cli/resolution.py`. Note: T050 (US5) extends this with multi-profile validation, conflict detection, and cross-app audit.
-- [ ] T022 [P] [US1] Add constitution resolution helpers (load repo + app overlay, compose) in `scripts/bash/common.sh`
-- [ ] T023 [P] [US1] Add constitution resolution helpers (load repo + app overlay, compose) in `scripts/powershell/common.ps1`
+- [x] T022 [P] [US1] Add constitution resolution helpers (load repo + app overlay, compose) in `scripts/bash/common.sh`
+- [x] T023 [P] [US1] Add constitution resolution helpers (load repo + app overlay, compose) in `scripts/powershell/common.ps1`
 - [x] T024 [US1] Add app-specific constitution fixtures to `tests/fixtures/fixture-full-monorepo/apps/runtime-api-a/.documentation/memory/constitution.md` and `apps/admin-web/.documentation/memory/constitution.md`
 - [x] T025 [US1] Validate fixture R3 *constitution resolution* (plan --app runtime-api-a resolves runtime-api-a constitution) and R4 *constitution resolution* (plan --app admin-web resolves admin-web constitution) from Validation Matrix
 
@@ -106,16 +106,16 @@ user story can be independently tested after its phase completes.
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Add `--app` parameter and `--repo-scope` flag to app-aware script entry points in `scripts/bash/common.sh`
-- [ ] T027 [US2] Add `--app` parameter and `--repo-scope` flag to app-aware script entry points in `scripts/powershell/common.ps1`
-- [ ] T028 [US2] Implement app context propagation: when `--app` is passed, set scope to that app and route all artifact writes to `{app.path}/.documentation/` in `scripts/bash/common.sh`
-- [ ] T029 [US2] Implement app context propagation: when `--app` is passed, set scope to that app and route all artifact writes to `{app.path}/.documentation/` in `scripts/powershell/common.ps1`
-- [ ] T030 [US2] When no `--app` and no `--repo-scope` and multiple apps registered: emit error "Multiple apps registered; specify --app or use --repo-scope" in `scripts/bash/common.sh` and `scripts/powershell/common.ps1`
+- [x] T026 [US2] Add `--app` parameter and `--repo-scope` flag to app-aware script entry points in `scripts/bash/common.sh`
+- [x] T027 [US2] Add `--app` parameter and `--repo-scope` flag to app-aware script entry points in `scripts/powershell/common.ps1`
+- [x] T028 [US2] Implement app context propagation: when `--app` is passed, set scope to that app and route all artifact writes to `{app.path}/.documentation/` in `scripts/bash/common.sh`
+- [x] T029 [US2] Implement app context propagation: when `--app` is passed, set scope to that app and route all artifact writes to `{app.path}/.documentation/` in `scripts/powershell/common.ps1`
+- [x] T030 [US2] When no `--app` and no `--repo-scope` and multiple apps registered: emit error "Multiple apps registered; specify --app or use --repo-scope" in `scripts/bash/common.sh` and `scripts/powershell/common.ps1`
 - [ ] T031 [US2] Update `scripts/bash/create-new-feature.sh` to accept app context and create feature dirs under app scope
 - [ ] T032 [P] [US2] Update `scripts/powershell/create-new-feature.ps1` to accept app context and create feature dirs under app scope
 - [ ] T033 [US2] Update `scripts/bash/setup-plan.sh` to resolve plan artifacts from app-scoped documentation root
 - [ ] T034 [P] [US2] Update `scripts/powershell/setup-plan.ps1` to resolve plan artifacts from app-scoped documentation root
-- [ ] T035 [US2] Add scope summary output to every workflow execution (print resolved scope, primary app, doc root)
+- [x] T035 [US2] Add scope summary output to every workflow execution (print resolved scope, primary app, doc root)
 - [ ] T036 [US2] Validate fixture R3 *artifact path* (app-scoped artifacts land at `apps/runtime-api-a/.documentation/specs/`), R5 (no-app error), R6 (repo-scope works) from Validation Matrix
 
 **Checkpoint**: App-scoped workflows execute end-to-end with explicit context and correct artifact placement
