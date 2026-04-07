@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "mode": "multi-app",
+  "profiles": {
+    "repo-default": {
+      "rules": [
+        "All services must follow semantic versioning for releases.",
+        "Every service must include a README.md with setup instructions."
+      ]
+    },
+    "api-profile": {
+      "rules": [
+        "API services must validate all input payloads against a JSON schema.",
+        "API responses must include standard error envelopes with correlation IDs."
+      ]
+    },
+    "web-profile": {
+      "rules": [
+        "Web apps must achieve Lighthouse accessibility score >= 90.",
+        "Web apps must implement CSP headers in production."
+      ]
+    }
+  },
+  "apps": {
+    "service-01": {
+      "path": "apps/service-01",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-01",
+      "criticality": "medium"
+    },
+    "service-02": {
+      "path": "apps/service-02",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": ["service-01"],
+      "deployable": true,
+      "owner": "team-02",
+      "criticality": "medium"
+    },
+    "service-03": {
+      "path": "apps/service-03",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-03",
+      "criticality": "medium"
+    },
+    "service-04": {
+      "path": "apps/service-04",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": ["service-03"],
+      "deployable": true,
+      "owner": "team-04",
+      "criticality": "medium"
+    },
+    "service-05": {
+      "path": "apps/service-05",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-05",
+      "criticality": "medium"
+    },
+    "service-06": {
+      "path": "apps/service-06",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-06",
+      "criticality": "medium"
+    },
+    "service-07": {
+      "path": "apps/service-07",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-07",
+      "criticality": "medium"
+    },
+    "service-08": {
+      "path": "apps/service-08",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-08",
+      "criticality": "medium"
+    },
+    "service-09": {
+      "path": "apps/service-09",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-09",
+      "criticality": "medium"
+    },
+    "service-10": {
+      "path": "apps/service-10",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-10",
+      "criticality": "medium"
+    },
+    "service-11": {
+      "path": "apps/service-11",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-11",
+      "criticality": "medium"
+    },
+    "service-12": {
+      "path": "apps/service-12",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-12",
+      "criticality": "medium"
+    },
+    "service-13": {
+      "path": "apps/service-13",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-13",
+      "criticality": "medium"
+    },
+    "service-14": {
+      "path": "apps/service-14",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-14",
+      "criticality": "medium"
+    },
+    "service-15": {
+      "path": "apps/service-15",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-15",
+      "criticality": "medium"
+    },
+    "service-16": {
+      "path": "apps/service-16",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-16",
+      "criticality": "medium"
+    },
+    "service-17": {
+      "path": "apps/service-17",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-17",
+      "criticality": "medium"
+    },
+    "service-18": {
+      "path": "apps/service-18",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-18",
+      "criticality": "medium"
+    },
+    "service-19": {
+      "path": "apps/service-19",
+      "kind": "runtime-api",
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-19",
+      "criticality": "medium"
+    },
+    "service-20": {
+      "path": "apps/service-20",
+      "kind": "web-app",
+      "inherits": ["repo-default", "web-profile"],
+      "dependsOn": [],
+      "deployable": true,
+      "owner": "team-20",
+      "criticality": "medium"
+    }
+  }
+}

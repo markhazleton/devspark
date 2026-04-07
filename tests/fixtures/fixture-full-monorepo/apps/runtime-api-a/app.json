@@ -1,0 +1,5 @@
+{
+  "tags": { "deploy-target": "k8s-east", "feature-flags": "enabled" },
+  "hints": { "test-runner": "pytest", "review-depth": "thorough" },
+  "rules": ["All API responses must include correlation-id header"]
+}
