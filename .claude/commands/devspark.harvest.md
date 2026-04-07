@@ -1,0 +1,1 @@
+../../templates/commands/harvest.md

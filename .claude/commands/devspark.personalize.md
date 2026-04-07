@@ -1,0 +1,1 @@
+../../templates/commands/personalize.md
