@@ -134,9 +134,9 @@ user story can be independently tested after its phase completes.
 - [x] T037a [US3] Create `src/devspark_cli/inference.py` and implement basic dependency inference: scan source imports (`*.py`, `*.ts`, `*.js`, `*.cs`, `*.java`) and build config files (`package.json`, `pyproject.toml`, `*.csproj`) for references to other registered app paths *(Added 2026-04-07: FR-D8)*
 - [x] T037b [US3] Integrate inferred dependencies into scope reporting: report inferred deps separately from declared deps, deduplicate matches, respect `.gitignore` patterns *(Added 2026-04-07: FR-D8)*
 - [x] T037c [P] [US3] Add inference test fixtures to `tests/fixtures/fixture-full-monorepo/`: source files with cross-app imports and build configs with project references *(Added 2026-04-07)*
-- [ ] T038 [US3] Implement scope report generation: declared scope, detected scope, mismatches, declared downstream impact list, inferred downstream impact list in `src/devspark_cli/scope.py` *(Updated 2026-04-07: includes inferred deps)*
-- [ ] T039 [P] [US3] Add dependency reporting helpers to `scripts/bash/common.sh` (read dependsOn, walk direct downstream)
-- [ ] T040 [P] [US3] Add dependency reporting helpers to `scripts/powershell/common.ps1` (read dependsOn, walk direct downstream)
+- [x] T038 [US3] Implement scope report generation: declared scope, detected scope, mismatches, declared downstream impact list, inferred downstream impact list in `src/devspark_cli/scope.py` *(Updated 2026-04-07: includes inferred deps)*
+- [x] T039 [P] [US3] Add dependency reporting helpers to `scripts/bash/common.sh` (read dependsOn, walk direct downstream)
+- [x] T040 [P] [US3] Add dependency reporting helpers to `scripts/powershell/common.ps1` (read dependsOn, walk direct downstream)
 - [ ] T041 [US3] Update `scripts/bash/get-pr-context.sh` to include dependency scope report in PR context output
 - [ ] T042 [P] [US3] Update `scripts/powershell/get-pr-context.ps1` to include dependency scope report in PR context output
 - [ ] T043 [US3] Update `templates/commands/pr-review.md` to consume scope report and apply governance per declared scope
@@ -154,11 +154,11 @@ user story can be independently tested after its phase completes.
 
 ### Implementation for User Story 4
 
-- [ ] T045 [US4] Ensure mode detection defaults to single-app when `devspark.json` is absent in `src/devspark_cli/registry.py`
-- [ ] T046 [US4] Ensure all updated Bash scripts in `scripts/bash/` fall through to current behavior when no registry is detected
-- [ ] T047 [P] [US4] Ensure all updated PowerShell scripts in `scripts/powershell/` fall through to current behavior when no registry is detected
-- [ ] T048 [US4] Validate fixture R1 (plan in single-app produces repo-scope artifacts at `.documentation/specs/`) and R2 (--app flag errors without registry) from Validation Matrix
-- [ ] T049 [US4] Run full single-app regression suite against fixture-single-app
+- [x] T045 [US4] Ensure mode detection defaults to single-app when `devspark.json` is absent in `src/devspark_cli/registry.py`
+- [x] T046 [US4] Ensure all updated Bash scripts in `scripts/bash/` fall through to current behavior when no registry is detected
+- [x] T047 [P] [US4] Ensure all updated PowerShell scripts in `scripts/powershell/` fall through to current behavior when no registry is detected
+- [x] T048 [US4] Validate fixture R1 (plan in single-app produces repo-scope artifacts at `.documentation/specs/`) and R2 (--app flag errors without registry) from Validation Matrix
+- [x] T049 [US4] Run full single-app regression suite against fixture-single-app
 
 **Checkpoint**: Zero behavioral changes for single-app repositories
 

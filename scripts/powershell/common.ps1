@@ -363,6 +363,53 @@ function Resolve-Constitution {
     return $output
 }
 
+# Get direct downstream consumers of an app (T040)
+function Get-DownstreamApps {
+    param(
+        [string]$RepoRoot,
+        [string]$AppId
+    )
+
+    $registryPath = Join-Path $RepoRoot '.documentation/devspark.json'
+    if (-not (Test-Path $registryPath)) { return @() }
+
+    $config = Get-Content $registryPath -Raw | ConvertFrom-Json
+    $downstream = @()
+
+    foreach ($app in $config.apps) {
+        if ($app.dependsOn -contains $AppId) {
+            $downstream += $app.id
+        }
+    }
+
+    return $downstream
+}
+
+# Generate scope report (T040)
+function Write-ScopeReport {
+    param([PSCustomObject]$Scope)
+
+    $repoRoot = Get-RepoRoot
+
+    Write-Output "## DevSpark Scope Report"
+    Write-Output ""
+    Write-Output "**Scope type**: $($Scope.Scope)"
+    Write-Output "**Documentation root**: $($Scope.DocRoot)"
+
+    if ($Scope.AppId) {
+        Write-Output "**Primary application**: $($Scope.AppId)"
+
+        $downstream = Get-DownstreamApps -RepoRoot $repoRoot -AppId $Scope.AppId
+        if ($downstream.Count -gt 0) {
+            Write-Output ""
+            Write-Output "### Declared downstream dependencies"
+            foreach ($dep in $downstream) {
+                Write-Output "- $dep"
+            }
+        }
+    }
+}
+
 # Print scope summary (T035)
 function Write-ScopeSummary {
     param([PSCustomObject]$Scope)

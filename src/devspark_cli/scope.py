@@ -189,3 +189,62 @@ def resolve_scope(
     ctx.doc_root = f"{app.path}/.documentation"
     ctx.declared_downstream = get_direct_downstream(registry, app.id)
     return ctx
+
+
+# ---------------------------------------------------------------------------
+# Scope report generation (T038)
+# ---------------------------------------------------------------------------
+
+def generate_scope_report(
+    ctx: ScopeContext,
+    registry: DevSparkRegistry | None = None,
+    inferred: list[tuple[str, str]] | None = None,
+) -> str:
+    """
+    Generate a structured scope report for workflow output.
+
+    Includes declared scope, detected scope, mismatches, declared downstream
+    impact list, and inferred downstream impact list.
+    """
+    lines = [
+        "## DevSpark Scope Report",
+        "",
+        f"**Scope type**: {ctx.scope_type}",
+        f"**Documentation root**: {ctx.doc_root}",
+    ]
+
+    if ctx.primary_app:
+        lines.append(f"**Primary application**: {ctx.primary_app}")
+
+    if ctx.affected_apps:
+        lines.append(f"**Affected applications**: {', '.join(ctx.affected_apps)}")
+
+    # Declared dependencies
+    if ctx.declared_downstream:
+        lines.append("")
+        lines.append("### Declared downstream dependencies")
+        for dep in ctx.declared_downstream:
+            lines.append(f"- {dep}")
+
+    # Inferred dependencies
+    if inferred:
+        lines.append("")
+        lines.append("### Inferred downstream dependencies")
+        for dep_id, evidence in inferred:
+            lines.append(f"- {dep_id} *(inferred: {evidence})*")
+
+    # Warnings
+    if ctx.warnings:
+        lines.append("")
+        lines.append("### Warnings")
+        for warning in ctx.warnings:
+            lines.append(f"- {warning}")
+
+    # Errors
+    if ctx.errors:
+        lines.append("")
+        lines.append("### Errors")
+        for error in ctx.errors:
+            lines.append(f"- {error}")
+
+    return "\n".join(lines)
