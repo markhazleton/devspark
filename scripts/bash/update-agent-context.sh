@@ -52,6 +52,13 @@ set -o pipefail
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
+# Multi-app support (T095c)
+parse_app_context "$@" 2>/dev/null || true
+if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
+    resolve_app_scope 2>/dev/null || true
+    print_scope_summary >&2
+fi
+
 # Get all paths and variables from common functions
 eval "$(get_feature_paths)"  # Alias for compatibility with existing code
 AGENT_TYPE="${1:-}"

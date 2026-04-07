@@ -112,9 +112,9 @@ user story can be independently tested after its phase completes.
 - [x] T029 [US2] Implement app context propagation: when `--app` is passed, set scope to that app and route all artifact writes to `{app.path}/.documentation/` in `scripts/powershell/common.ps1`
 - [x] T030 [US2] When no `--app` and no `--repo-scope` and multiple apps registered: emit error "Multiple apps registered; specify --app or use --repo-scope" in `scripts/bash/common.sh` and `scripts/powershell/common.ps1`
 - [x] T031 [US2] Update `scripts/bash/create-new-feature.sh` to accept app context and create feature dirs under app scope
-- [ ] T032 [P] [US2] Update `scripts/powershell/create-new-feature.ps1` to accept app context and create feature dirs under app scope
+- [x] T032 [P] [US2] Update `scripts/powershell/create-new-feature.ps1` to accept app context and create feature dirs under app scope
 - [x] T033 [US2] Update `scripts/bash/setup-plan.sh` to resolve plan artifacts from app-scoped documentation root
-- [ ] T034 [P] [US2] Update `scripts/powershell/setup-plan.ps1` to resolve plan artifacts from app-scoped documentation root
+- [x] T034 [P] [US2] Update `scripts/powershell/setup-plan.ps1` to resolve plan artifacts from app-scoped documentation root
 - [x] T035 [US2] Add scope summary output to every workflow execution (print resolved scope, primary app, doc root)
 - [ ] T036 [US2] Validate fixture R3 *artifact path* (app-scoped artifacts land at `apps/runtime-api-a/.documentation/specs/`), R5 (no-app error), R6 (repo-scope works) from Validation Matrix
 
@@ -139,7 +139,7 @@ user story can be independently tested after its phase completes.
 - [x] T040 [P] [US3] Add dependency reporting helpers to `scripts/powershell/common.ps1` (read dependsOn, walk direct downstream)
 - [ ] T041 [US3] Update `scripts/bash/get-pr-context.sh` to include dependency scope report in PR context output
 - [ ] T042 [P] [US3] Update `scripts/powershell/get-pr-context.ps1` to include dependency scope report in PR context output
-- [ ] T043 [US3] Update `templates/commands/pr-review.md` to consume scope report and apply governance per declared scope
+- [x] T043 [US3] Update `templates/commands/pr-review.md` to consume scope report and apply governance per declared scope
 - [ ] T044 [US3] Validate fixture D1 (shared-auth change lists admin-api, client-web as declared impacted), D2 (admin-web-only change shows no downstream), D3 (undeclared import shows as inferred dependency), and D4 (declared dep in imports is deduplicated) from Validation Matrix *(Updated 2026-04-07: D3/D4 added for inference)*
 
 **Checkpoint**: Cross-app impact is reported with declared and inferred dependencies; single-app changes stay scoped locally
@@ -207,14 +207,14 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Enforce declared PR scope against actual changed files
 
-- [ ] T062 Implement PR scope declaration model: `single-app`, `cross-app`, `repo-scope` in `src/devspark_cli/scope.py`
-- [ ] T063 Implement changed-path analysis: compare declared scope with actual changed file paths in `src/devspark_cli/scope.py`
-- [ ] T064 Define approved shared paths list (e.g., `.github/`, root config files) that don't trigger scope mismatch for single-app PRs
-- [ ] T065 Implement scope mismatch detection: single-app PR touching a second registered app path triggers warning in `src/devspark_cli/scope.py`
+- [x] T062 Implement PR scope declaration model: `single-app`, `cross-app`, `repo-scope` in `src/devspark_cli/scope.py`
+- [x] T063 Implement changed-path analysis: compare declared scope with actual changed file paths in `src/devspark_cli/scope.py`
+- [x] T064 Define approved shared paths list (e.g., `.github/`, root config files) that don't trigger scope mismatch for single-app PRs
+- [x] T065 Implement scope mismatch detection: single-app PR touching a second registered app path triggers warning in `src/devspark_cli/scope.py`
 - [ ] T066 Update `scripts/bash/get-pr-context.sh` to include PR scope validation output
 - [ ] T067 [P] Update `scripts/powershell/get-pr-context.ps1` to include PR scope validation output
-- [ ] T068 Update `templates/commands/pr-review.md` to consume PR scope validation and enforce three-mode review behavior. Note: this extends the scope report consumption added in T043 (v1a) — do not overwrite those changes.
-- [ ] T069 Validate fixtures P1–P5 from PR Scope Validation Matrix
+- [x] T068 Update `templates/commands/pr-review.md` to consume PR scope validation and enforce three-mode review behavior. Note: this extends the scope report consumption added in T043 (v1a) — do not overwrite those changes.
+- [x] T069 Validate fixtures P1–P5 from PR Scope Validation Matrix
 
 **Checkpoint**: PR scope enforcement catches undeclared cross-app impact
 
@@ -224,15 +224,15 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Update all prompt templates to support app-aware paths and scope reporting
 
-- [ ] T070 [P] Update `templates/commands/specify.md` to include app context parameter, scope-aware artifact paths, and Rationale Summary population
-- [ ] T071 [P] Update `templates/commands/plan.md` to include app context parameter, scope-aware artifact paths, and rationale carry-forward
-- [ ] T072 [P] Update `templates/commands/tasks.md` to include app context parameter, scope-aware artifact paths, and rationale carry-forward
-- [ ] T073 [P] Update `templates/commands/implement.md` to include app context parameter and scope-aware artifact resolution
-- [ ] T074 [P] Update `templates/commands/quickfix.md` to include app context parameter and scope-aware paths
-- [ ] T075 [P] Update `templates/commands/site-audit.md` to include app context parameter
-- [ ] T076 [P] Update `templates/commands/release.md` to include app context parameter
-- [ ] T077 [P] Update `templates/commands/harvest.md` to include app context parameter
-- [ ] T078 [P] Update `templates/commands/critic.md` to add Rationale & Traceability Risks category and rationale red flags checklist
+- [x] T070 [P] Update `templates/commands/specify.md` to include app context parameter, scope-aware artifact paths, and Rationale Summary population
+- [x] T071 [P] Update `templates/commands/plan.md` to include app context parameter, scope-aware artifact paths, and rationale carry-forward
+- [x] T072 [P] Update `templates/commands/tasks.md` to include app context parameter, scope-aware artifact paths, and rationale carry-forward
+- [x] T073 [P] Update `templates/commands/implement.md` to include app context parameter and scope-aware artifact resolution
+- [x] T074 [P] Update `templates/commands/quickfix.md` to include app context parameter and scope-aware paths
+- [x] T075 [P] Update `templates/commands/site-audit.md` to include app context parameter
+- [x] T076 [P] Update `templates/commands/release.md` to include app context parameter
+- [x] T077 [P] Update `templates/commands/harvest.md` to include app context parameter
+- [x] T078 [P] Update `templates/commands/critic.md` to add Rationale & Traceability Risks category and rationale red flags checklist
 
 ---
 
@@ -240,10 +240,10 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Surface decision context in every generated artifact
 
-- [ ] T079 [P] Add Rationale Summary block to `templates/spec-template.md` after header metadata, before User Scenarios
-- [ ] T080 [P] Add Rationale Summary block to `templates/plan-template.md` after header metadata, before Summary
-- [ ] T081 [P] Add Rationale Summary block (Core Problem, Decision Summary, Key Drivers, Reviewer Guidance) to `templates/tasks-template.md` after header metadata, before Format section
-- [ ] T082 Create `templates/rationale-template.md` with canonical Rationale Summary block
+- [x] T079 [P] Add Rationale Summary block to `templates/spec-template.md` after header metadata, before User Scenarios
+- [x] T080 [P] Add Rationale Summary block to `templates/plan-template.md` after header metadata, before Summary
+- [x] T081 [P] Add Rationale Summary block (Core Problem, Decision Summary, Key Drivers, Reviewer Guidance) to `templates/tasks-template.md` after header metadata, before Format section
+- [x] T082 Create `templates/rationale-template.md` with canonical Rationale Summary block
 
 **Checkpoint**: All templates include rationale; commands reference and populate the block
 
@@ -253,24 +253,24 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Update all context-gathering scripts for app-aware execution with Bash/PowerShell parity
 
-- [ ] T083 [P] Update `scripts/bash/quickfix-context.sh` to accept and propagate app context
-- [ ] T084 [P] Update `scripts/powershell/quickfix-context.ps1` to accept and propagate app context
-- [ ] T085 [P] Update `scripts/bash/release-context.sh` to accept and propagate app context
-- [ ] T086 [P] Update `scripts/powershell/release-context.ps1` to accept and propagate app context
-- [ ] T087 [P] Update `scripts/bash/repo-story-context.sh` to accept and propagate app context
-- [ ] T088 [P] Update `scripts/powershell/repo-story-context.ps1` to accept and propagate app context
-- [ ] T089 [P] Update `scripts/bash/site-audit.sh` to accept and propagate app context
-- [ ] T090 [P] Update `scripts/powershell/site-audit.ps1` to accept and propagate app context
-- [ ] T091 [P] Update `scripts/bash/evolution-context.sh` to accept and propagate app context
-- [ ] T092 [P] Update `scripts/powershell/evolution-context.ps1` to accept and propagate app context
-- [ ] T093 [P] Update `scripts/bash/harvest.sh` to accept and propagate app context
-- [ ] T094 [P] Update `scripts/powershell/harvest.ps1` to accept and propagate app context
-- [ ] T095a [P] Update `scripts/bash/archive-context.sh` to accept and propagate app context (scans `.documentation/` — needs app-scope awareness)
-- [ ] T095b [P] Update `scripts/powershell/archive-context.ps1` to accept and propagate app context
-- [ ] T095c [P] Update `scripts/bash/update-agent-context.sh` to accept and propagate app context (reads plan.md — needs app-scope path resolution)
-- [ ] T095d [P] Update `scripts/powershell/update-agent-context.ps1` to accept and propagate app context
-- [ ] T095e [P] Update `scripts/bash/check-prerequisites.sh` to detect multi-app mode and resolve app-scoped FEATURE_DIR when `--app` is passed
-- [ ] T095f [P] Update `scripts/powershell/check-prerequisites.ps1` to detect multi-app mode and resolve app-scoped FEATURE_DIR when `--app` is passed
+- [x] T083 [P] Update `scripts/bash/quickfix-context.sh` to accept and propagate app context
+- [x] T084 [P] Update `scripts/powershell/quickfix-context.ps1` to accept and propagate app context
+- [x] T085 [P] Update `scripts/bash/release-context.sh` to accept and propagate app context
+- [x] T086 [P] Update `scripts/powershell/release-context.ps1` to accept and propagate app context
+- [x] T087 [P] Update `scripts/bash/repo-story-context.sh` to accept and propagate app context
+- [x] T088 [P] Update `scripts/powershell/repo-story-context.ps1` to accept and propagate app context
+- [x] T089 [P] Update `scripts/bash/site-audit.sh` to accept and propagate app context
+- [x] T090 [P] Update `scripts/powershell/site-audit.ps1` to accept and propagate app context
+- [x] T091 [P] Update `scripts/bash/evolution-context.sh` to accept and propagate app context
+- [x] T092 [P] Update `scripts/powershell/evolution-context.ps1` to accept and propagate app context
+- [x] T093 [P] Update `scripts/bash/harvest.sh` to accept and propagate app context
+- [x] T094 [P] Update `scripts/powershell/harvest.ps1` to accept and propagate app context
+- [x] T095a [P] Update `scripts/bash/archive-context.sh` to accept and propagate app context (scans `.documentation/` — needs app-scope awareness)
+- [x] T095b [P] Update `scripts/powershell/archive-context.ps1` to accept and propagate app context
+- [x] T095c [P] Update `scripts/bash/update-agent-context.sh` to accept and propagate app context (reads plan.md — needs app-scope path resolution)
+- [x] T095d [P] Update `scripts/powershell/update-agent-context.ps1` to accept and propagate app context
+- [x] T095e [P] Update `scripts/bash/check-prerequisites.sh` to detect multi-app mode and resolve app-scoped FEATURE_DIR when `--app` is passed
+- [x] T095f [P] Update `scripts/powershell/check-prerequisites.ps1` to detect multi-app mode and resolve app-scoped FEATURE_DIR when `--app` is passed
 
 > **Note (C3)**: `scripts/bash/migrate-to-documentation.sh` / `.ps1` is a one-time migration utility for the old→new structure. It does not need app-context propagation.
 

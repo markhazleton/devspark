@@ -38,6 +38,11 @@ Options:
 
 $ErrorActionPreference = 'Stop'
 
+# Multi-app support (T088)
+if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
+    . "$PSScriptRoot/common.ps1"
+}
+
 if ($Months -lt 1) {
         Write-Error "Months must be >= 1"
         exit 1

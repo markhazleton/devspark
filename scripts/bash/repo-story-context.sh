@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+# Multi-app support (T087)
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh" 2>/dev/null || true
+parse_app_context "$@" 2>/dev/null || true
+if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
+    resolve_app_scope 2>/dev/null || true
+    print_scope_summary >&2
+fi
+
 OUTPUT_PATH=".documentation/repo-story/history.json"
 PRINT_STDOUT=false
 MONTHS=12

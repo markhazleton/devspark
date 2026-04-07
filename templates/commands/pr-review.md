@@ -227,6 +227,45 @@ Try to determine if this PR maps to a feature spec:
 
 **Note**: This is optional - PR review works without any spec.
 
+### 6b. PR Scope Validation (Multi-App Mode)
+
+If the repository operates in multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), perform scope validation on the PR:
+
+#### A. Check for Scope Declaration
+
+Look for a PR scope declaration in the PR description or in `.documentation/specs/` artifacts. A scope declaration specifies:
+
+- **mode**: `single-app`, `cross-app`, or `repo-scope`
+- **primary_app**: The primary application being changed
+- **affected_apps**: All applications intentionally touched by this PR
+
+If no scope declaration is present, infer scope from the changed files:
+
+- If all changed files belong to a single app (plus approved shared paths), infer `single-app` mode.
+- If changed files span multiple apps, infer `cross-app` mode.
+- If changes are purely in shared/repo-level paths, infer `repo-scope`.
+
+#### B. Validate Scope Against Changed Paths
+
+Using the PR's changed file list and the registry from `.documentation/devspark.json`:
+
+1. Map each changed file to its owning application (by matching `app.path` prefixes).
+2. Identify shared paths (`.documentation/`, `.github/`, `.devspark/`, root-level config files).
+3. Validate that the changed paths are consistent with the declared (or inferred) scope:
+   - **single-app**: Only the declared app's path and approved shared paths should be touched. Flag files in other apps as scope mismatches.
+   - **cross-app**: All touched app paths must be listed in `affected_apps`. Flag undeclared app paths.
+   - **repo-scope**: All paths are allowed.
+
+#### C. Report Scope Findings
+
+Include scope validation results in the review output:
+
+- If scope is valid, note it in the Executive Summary as a passing check.
+- If scope mismatches are detected, report them as **HIGH** severity findings:
+  - List which files violate the declared scope.
+  - Recommend updating the scope declaration or splitting the PR.
+- Add a row to the Constitution Alignment Details table for scope compliance.
+
 ### 7. Generate Review Report
 
 Create comprehensive report at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`:

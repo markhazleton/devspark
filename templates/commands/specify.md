@@ -25,6 +25,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 The text the user typed after `/devspark.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `{ARGS}` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
+**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+
 Given that feature description, do this:
 
 1. **Generate a concise short name** (2-4 words) for the branch:

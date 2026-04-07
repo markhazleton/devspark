@@ -248,3 +248,172 @@ def generate_scope_report(
             lines.append(f"- {error}")
 
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# PR Scope Validation (Phase 9 — T062–T065)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class PRScopeDeclaration:
+    """
+    Declares the intended scope of a pull request.
+
+    mode: "single-app" | "cross-app" | "repo-scope"
+    primary_app: The primary app being changed (required for single-app/cross-app).
+    affected_apps: All apps touched by this PR (used by cross-app mode).
+    reason: Human-readable explanation of why this scope was chosen.
+    """
+
+    mode: str
+    primary_app: Optional[str] = None
+    affected_apps: list[str] = field(default_factory=list)
+    reason: str = ""
+
+
+# Shared repository paths that any PR mode may touch without triggering
+# a scope mismatch.
+APPROVED_SHARED_PATHS: list[str] = [
+    ".documentation/",
+    ".github/",
+    ".devspark/",
+]
+
+# Root-level config file extensions that are always considered shared.
+_ROOT_CONFIG_EXTENSIONS: set[str] = {
+    ".md", ".json", ".yaml", ".yml", ".toml", ".cfg",
+}
+
+
+def is_approved_shared_path(
+    path: str,
+    repo_root: Path,
+    registry: DevSparkRegistry,
+) -> bool:
+    """
+    Return True if *path* is a recognised shared/repo-level path.
+
+    A path is shared when it:
+    - Starts with one of APPROVED_SHARED_PATHS prefixes.
+    - Is a root-level config file (no directory separator beyond the filename)
+      with an approved extension.
+    - Starts with a CI-config directory (e.g. .github/, .gitlab-ci/, .circleci/).
+    """
+    # Normalise to forward slash for consistent matching.
+    normalised = path.replace("\\", "/")
+
+    # Check explicit shared prefixes.
+    for prefix in APPROVED_SHARED_PATHS:
+        if normalised.startswith(prefix):
+            return True
+
+    # Root-level config files (no nested directory).
+    if "/" not in normalised:
+        suffix = Path(normalised).suffix
+        if suffix in _ROOT_CONFIG_EXTENSIONS:
+            return True
+
+    return False
+
+
+def analyze_changed_paths(
+    changed_paths: list[str],
+    registry: DevSparkRegistry,
+) -> dict[str, list[str]]:
+    """
+    Map each changed path to the app it belongs to.
+
+    Returns a dict keyed by app id (for paths inside an app.path prefix)
+    plus a ``"_shared"`` key for paths that don't fall under any app.
+    """
+    result: dict[str, list[str]] = {"_shared": []}
+
+    # Build a lookup sorted longest-prefix-first so nested apps match correctly.
+    app_prefixes: list[tuple[str, str]] = sorted(
+        [(a.path.rstrip("/") + "/", a.id) for a in registry.apps],
+        key=lambda t: len(t[0]),
+        reverse=True,
+    )
+
+    for p in changed_paths:
+        normalised = p.replace("\\", "/")
+        matched = False
+        for prefix, app_id in app_prefixes:
+            if normalised.startswith(prefix):
+                result.setdefault(app_id, []).append(p)
+                matched = True
+                break
+        if not matched:
+            result["_shared"].append(p)
+
+    return result
+
+
+def validate_pr_scope(
+    declaration: PRScopeDeclaration,
+    changed_paths: list[str],
+    registry: DevSparkRegistry,
+    repo_root: Path,
+) -> tuple[bool, list[str]]:
+    """
+    Validate that the actual changed paths honour the declared PR scope.
+
+    Returns ``(passed, messages)`` where *messages* lists any violations.
+    """
+    messages: list[str] = []
+    path_map = analyze_changed_paths(changed_paths, registry)
+
+    if declaration.mode == "repo-scope":
+        return True, ["repo-scope: all paths allowed"]
+
+    if declaration.mode == "single-app":
+        primary = declaration.primary_app
+        if not primary:
+            return False, ["single-app mode requires primary_app"]
+
+        for app_id, paths in path_map.items():
+            if app_id == "_shared":
+                # Check each shared path is actually approved.
+                for sp in paths:
+                    if not is_approved_shared_path(sp, repo_root, registry):
+                        messages.append(
+                            f"scope mismatch: '{sp}' is not an approved shared path"
+                        )
+                continue
+            if app_id != primary:
+                messages.append(
+                    f"scope mismatch: files touch app '{app_id}' but PR "
+                    f"is declared single-app for '{primary}'"
+                )
+
+        passed = len(messages) == 0
+        return passed, messages if messages else [
+            f"single-app scope OK: all changes within '{primary}' + shared paths"
+        ]
+
+    if declaration.mode == "cross-app":
+        declared_set = set(declaration.affected_apps)
+        if declaration.primary_app:
+            declared_set.add(declaration.primary_app)
+
+        for app_id, paths in path_map.items():
+            if app_id == "_shared":
+                for sp in paths:
+                    if not is_approved_shared_path(sp, repo_root, registry):
+                        messages.append(
+                            f"scope mismatch: '{sp}' is not an approved shared path"
+                        )
+                continue
+            if app_id not in declared_set:
+                messages.append(
+                    f"scope mismatch: files touch app '{app_id}' which is "
+                    f"not in declared affected_apps {sorted(declared_set)}"
+                )
+
+        passed = len(messages) == 0
+        return passed, messages if messages else [
+            f"cross-app scope OK: changes within declared apps"
+            f" {sorted(declared_set)} + shared paths"
+        ]
+
+    return False, [f"unknown PR scope mode: {declaration.mode!r}"]
