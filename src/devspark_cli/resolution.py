@@ -67,6 +67,33 @@ def detect_weakening(
     return conflicts
 
 
+def detect_app_json_weakening(
+    repo_root: Path,
+    app: AppDefinition,
+    manifest: "AppManifest",
+) -> list[str]:
+    """
+    Check if app.json rules weaken mandatory repo-wide rules (T015c).
+
+    Uses the same keyword-based detection as constitution overlays.
+    """
+    repo_constitution_path = repo_root / ".documentation" / "memory" / "constitution.md"
+    if not repo_constitution_path.is_file():
+        return []
+
+    repo_text = repo_constitution_path.read_text(encoding="utf-8")
+    mandatory_rules = extract_mandatory_rules(repo_text)
+
+    conflicts: list[str] = []
+    for rule in manifest.rules:
+        if _WEAKENING_PATTERNS.search(rule):
+            conflicts.append(
+                f"CONFLICT: app.json rule for {app.id!r} may weaken mandatory rule: {rule!r}"
+            )
+
+    return conflicts
+
+
 def resolve_constitution(
     repo_root: Path,
     app: AppDefinition | None = None,
