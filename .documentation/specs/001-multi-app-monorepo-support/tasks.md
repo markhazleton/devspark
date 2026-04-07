@@ -116,7 +116,7 @@ user story can be independently tested after its phase completes.
 - [x] T033 [US2] Update `scripts/bash/setup-plan.sh` to resolve plan artifacts from app-scoped documentation root
 - [x] T034 [P] [US2] Update `scripts/powershell/setup-plan.ps1` to resolve plan artifacts from app-scoped documentation root
 - [x] T035 [US2] Add scope summary output to every workflow execution (print resolved scope, primary app, doc root)
-- [ ] T036 [US2] Validate fixture R3 *artifact path* (app-scoped artifacts land at `apps/runtime-api-a/.documentation/specs/`), R5 (no-app error), R6 (repo-scope works) from Validation Matrix
+- [x] T036 [US2] Validate fixture R3 *artifact path* (app-scoped artifacts land at `apps/runtime-api-a/.documentation/specs/`), R5 (no-app error), R6 (repo-scope works) from Validation Matrix
 
 **Checkpoint**: App-scoped workflows execute end-to-end with explicit context and correct artifact placement
 
@@ -137,10 +137,10 @@ user story can be independently tested after its phase completes.
 - [x] T038 [US3] Implement scope report generation: declared scope, detected scope, mismatches, declared downstream impact list, inferred downstream impact list in `src/devspark_cli/scope.py` *(Updated 2026-04-07: includes inferred deps)*
 - [x] T039 [P] [US3] Add dependency reporting helpers to `scripts/bash/common.sh` (read dependsOn, walk direct downstream)
 - [x] T040 [P] [US3] Add dependency reporting helpers to `scripts/powershell/common.ps1` (read dependsOn, walk direct downstream)
-- [ ] T041 [US3] Update `scripts/bash/get-pr-context.sh` to include dependency scope report in PR context output
-- [ ] T042 [P] [US3] Update `scripts/powershell/get-pr-context.ps1` to include dependency scope report in PR context output
+- [x] T041 [US3] Update `scripts/bash/get-pr-context.sh` to include dependency scope report in PR context output
+- [x] T042 [P] [US3] Update `scripts/powershell/get-pr-context.ps1` to include dependency scope report in PR context output
 - [x] T043 [US3] Update `templates/commands/pr-review.md` to consume scope report and apply governance per declared scope
-- [ ] T044 [US3] Validate fixture D1 (shared-auth change lists admin-api, client-web as declared impacted), D2 (admin-web-only change shows no downstream), D3 (undeclared import shows as inferred dependency), and D4 (declared dep in imports is deduplicated) from Validation Matrix *(Updated 2026-04-07: D3/D4 added for inference)*
+- [x] T044 [US3] Validate fixture D1 (shared-auth change lists admin-api, client-web as declared impacted), D2 (admin-web-only change shows no downstream), D3 (undeclared import shows as inferred dependency), and D4 (declared dep in imports is deduplicated) from Validation Matrix *(Updated 2026-04-07: D3/D4 added for inference)*
 
 **Checkpoint**: Cross-app impact is reported with declared and inferred dependencies; single-app changes stay scoped locally
 
@@ -211,8 +211,8 @@ user story can be independently tested after its phase completes.
 - [x] T063 Implement changed-path analysis: compare declared scope with actual changed file paths in `src/devspark_cli/scope.py`
 - [x] T064 Define approved shared paths list (e.g., `.github/`, root config files) that don't trigger scope mismatch for single-app PRs
 - [x] T065 Implement scope mismatch detection: single-app PR touching a second registered app path triggers warning in `src/devspark_cli/scope.py`
-- [ ] T066 Update `scripts/bash/get-pr-context.sh` to include PR scope validation output
-- [ ] T067 [P] Update `scripts/powershell/get-pr-context.ps1` to include PR scope validation output
+- [x] T066 Update `scripts/bash/get-pr-context.sh` to include PR scope validation output
+- [x] T067 [P] Update `scripts/powershell/get-pr-context.ps1` to include PR scope validation output
 - [x] T068 Update `templates/commands/pr-review.md` to consume PR scope validation and enforce three-mode review behavior. Note: this extends the scope report consumption added in T043 (v1a) — do not overwrite those changes.
 - [x] T069 Validate fixtures P1–P5 from PR Scope Validation Matrix
 
@@ -300,15 +300,15 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Full validation matrix execution and parity checks
 
-- [ ] T104 Validate all Registry Validation scenarios V1–V9 (duplicate id, invalid path, unknown profile, cycle, missing constitution, valid, app.json identity warning, app.json weakening, app.json valid) *(Updated 2026-04-07: V7-V9 added for app.json)*
-- [ ] T105 Validate all Resolution scenarios R1–R6 from Validation Matrix
-- [ ] T106 Validate all Dependency scenarios D1–D4 from Validation Matrix *(Updated 2026-04-07: D3-D4 added for inference)*
-- [ ] T107 Validate all PR Scope scenarios P1–P5 from Validation Matrix (v1b)
-- [ ] T108 Validate all Command scenarios C1–C7 from Validation Matrix (v1b) *(Updated 2026-04-07: C5-C7 added for validate-registry)*
-- [ ] T109 Run Bash/PowerShell parity validation for all modified script pairs (JSON output comparison)
-- [ ] T110 Run single-app regression suite: confirm zero behavioral changes for repos without `devspark.json`
-- [ ] T111 Run install/upgrade regression: confirm `.documentation/` is never mutated by framework operations
-- [ ] T112 Refine error messages and add migration guidance for common failure scenarios
+- [x] T104 Validate all Registry Validation scenarios V1–V9 (duplicate id, invalid path, unknown profile, cycle, missing constitution, valid, app.json identity warning, app.json weakening, app.json valid) *(Updated 2026-04-07: V7-V9 added for app.json)*
+- [x] T105 Validate all Resolution scenarios R1–R6 from Validation Matrix
+- [x] T106 Validate all Dependency scenarios D1–D4 from Validation Matrix *(Updated 2026-04-07: D3-D4 added for inference)*
+- [x] T107 Validate all PR Scope scenarios P1–P5 from Validation Matrix (v1b)
+- [x] T108 Validate all Command scenarios C1–C7 from Validation Matrix (v1b) *(Updated 2026-04-07: C5-C7 added for validate-registry)*
+- [x] T109 Run Bash/PowerShell parity validation for all modified script pairs (JSON output comparison)
+- [x] T110 Run single-app regression suite: confirm zero behavioral changes for repos without `devspark.json`
+- [x] T111 Run install/upgrade regression: confirm `.documentation/` is never mutated by framework operations
+- [x] T112 Refine error messages and add migration guidance for common failure scenarios
 
 **Checkpoint**: All validation matrix rows pass; single-app regression clean; parity validated
 
@@ -318,9 +318,9 @@ user story can be independently tested after its phase completes.
 
 **Purpose**: Final cleanup, documentation, and release readiness
 
-- [ ] T113 Review all updated scripts for consistent error handling and user-facing messaging
-- [ ] T114 Verify performance targets: resolution and validation under 500ms for fixture-full-monorepo (6 apps) AND fixture-20-app (20 apps); less than 100ms added latency per command (see C2)
-- [ ] T115 Update CHANGELOG.md with multi-app monorepo support entry
+- [x] T113 Review all updated scripts for consistent error handling and user-facing messaging
+- [x] T114 Verify performance targets: resolution and validation under 500ms for fixture-full-monorepo (6 apps) AND fixture-20-app (20 apps); less than 100ms added latency per command (see C2)
+- [x] T115 Update CHANGELOG.md with multi-app monorepo support entry
 - [ ] T116 Final review: confirm v1a exit gates (all fixture tests pass, single-app regression clean, leadership approves)
 - [ ] T117 Final review: confirm v1b exit gates (PR scope validation, add/list commands, packaging, quickstarts updated)
 
