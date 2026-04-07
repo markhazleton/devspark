@@ -71,7 +71,7 @@ which undermines its value in the exact repositories that are hardest to manage.
 
 **Independent Test**: Configure a repository with at least one runtime API and one React admin
 application, then run equivalent DevSpark workflows for both and confirm the system resolves different
-app-specific constitutions and overrides while preserving repo-wide governance.
+app-specific constitution overlays and prompt/script/template overrides while preserving repo-wide governance.
 
 **Acceptance Scenarios**:
 
