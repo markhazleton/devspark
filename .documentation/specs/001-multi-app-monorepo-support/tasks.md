@@ -41,12 +41,12 @@ user story can be independently tested after its phase completes.
 **Purpose**: Design approval, project structure, and foundational fixtures
 
 - [x] T001 Obtain leadership approval on design contract (authority model, resolution order, v1a/v1b split, profile composition, app-local manifests, dependency inference, CLI scope, shared paths, scaffolding) per Phase 0 of plan.md *(Completed 2026-04-07: all 5 open questions resolved)*
-- [ ] T002 Create feature branch `feature/monorepo-multi-app-support`
-- [ ] T003 [P] Create fixture directory `tests/fixtures/fixture-single-app/` with current single-app repo structure (no registry)
-- [ ] T004 [P] Create fixture directory `tests/fixtures/fixture-two-api/` with 2 runtime API apps and a minimal `devspark.json`
-- [ ] T005 [P] Create fixture directory `tests/fixtures/fixture-full-monorepo/` with 6 apps + 1 library matching the registry example in plan.md
-- [ ] T005a [P] Create fixture directory `tests/fixtures/fixture-20-app/` with 20 registered apps for performance validation (see C2)
-- [ ] T005b Add `pydantic>=2.0` dependency to `pyproject.toml` under project dependencies (see C1)
+- [x] T002 Create feature branch `001-monorepo-implement`
+- [x] T003 [P] Create fixture directory `tests/fixtures/fixture-single-app/` with current single-app repo structure (no registry)
+- [x] T004 [P] Create fixture directory `tests/fixtures/fixture-two-api/` with 2 runtime API apps and a minimal `devspark.json`
+- [x] T005 [P] Create fixture directory `tests/fixtures/fixture-full-monorepo/` with 6 apps + 1 library matching the registry example in plan.md
+- [x] T005a [P] Create fixture directory `tests/fixtures/fixture-20-app/` with 20 registered apps for performance validation (see C2)
+- [x] T005b Add `pydantic>=2.0` dependency to `pyproject.toml` under project dependencies (see C1)
 
 ---
 
@@ -56,20 +56,20 @@ user story can be independently tested after its phase completes.
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create `src/devspark_cli/registry.py` and define Pydantic v2 model for `devspark.json` registry schema (profiles, apps, validation rules)
-- [ ] T007 Implement field validators: unique ids, path existence, profile reference resolution, dependency cycle detection in `src/devspark_cli/registry.py`
-- [ ] T008 Implement registry loading function that reads `.documentation/devspark.json` and returns validated model in `src/devspark_cli/registry.py`
+- [x] T006 Create `src/devspark_cli/registry.py` and define Pydantic v2 model for `devspark.json` registry schema (profiles, apps, validation rules)
+- [x] T007 Implement field validators: unique ids, path existence, profile reference resolution, dependency cycle detection in `src/devspark_cli/registry.py`
+- [x] T008 Implement registry loading function that reads `.documentation/devspark.json` and returns validated model in `src/devspark_cli/registry.py`
 - [ ] T009 [P] Add jq-based registry validation helpers (field presence, type checks, unique ids) in `scripts/bash/common.sh`
 - [ ] T010 [P] Add ConvertFrom-Json registry validation helpers (field presence, type checks, unique ids) in `scripts/powershell/common.ps1`
-- [ ] T011 Implement mode detection: if `devspark.json` exists with `"mode": "multi-app"` → multi-app mode; otherwise → single-app mode in `src/devspark_cli/registry.py`
-- [ ] T012 Create `src/devspark_cli/scope.py` and define standard scope object structure (scope type, primary app, affected apps, impacted downstream)
-- [ ] T013 Implement repo-scope vs app-scope documentation root resolution: repo uses `.documentation/`, app uses `{app.path}/.documentation/` in `src/devspark_cli/scope.py`
+- [x] T011 Implement mode detection: if `devspark.json` exists with `"mode": "multi-app"` → multi-app mode; otherwise → single-app mode in `src/devspark_cli/registry.py`
+- [x] T012 Create `src/devspark_cli/scope.py` and define standard scope object structure (scope type, primary app, affected apps, impacted downstream)
+- [x] T013 Implement repo-scope vs app-scope documentation root resolution: repo uses `.documentation/`, app uses `{app.path}/.documentation/` in `src/devspark_cli/scope.py`
 - [ ] T014 [P] Add app-aware helper functions to `scripts/bash/platform.sh` (detect mode, resolve app doc root, resolve scope)
 - [ ] T015 [P] Add app-aware helper functions to `scripts/powershell/platform.ps1` (detect mode, resolve app doc root, resolve scope)
-- [ ] T015a Define Pydantic v2 model for app-local manifest (`{app.path}/app.json`) in `src/devspark_cli/registry.py`: schema allows only `tags`, `hints`, `rules`; identity fields ignored with validation warning *(Added 2026-04-07: FR-B8)*
-- [ ] T015b Implement app.json loading and merge into resolution chain in `src/devspark_cli/registry.py`: load after profile composition, merge tags (last-writer-wins), rules (additive), hints (last-writer-wins) *(Added 2026-04-07: FR-B8)*
+- [x] T015a Define Pydantic v2 model for app-local manifest (`{app.path}/app.json`) in `src/devspark_cli/registry.py`: schema allows only `tags`, `hints`, `rules`; identity fields ignored with validation warning *(Added 2026-04-07: FR-B8)*
+- [x] T015b Implement app.json loading and merge into resolution chain in `src/devspark_cli/registry.py`: load after profile composition, merge tags (last-writer-wins), rules (additive), hints (last-writer-wins) *(Added 2026-04-07: FR-B8)*
 - [ ] T015c Add app.json weakening detection: check app.json rules against mandatory repo-wide rules using same keyword-based detection as constitution overlays in `src/devspark_cli/registry.py` *(Added 2026-04-07: FR-B8)*
-- [ ] T015d [P] Add app.json fixtures to `tests/fixtures/fixture-full-monorepo/`: valid app.json for 2+ apps, one with identity fields (for warning test), one with weakening rule (for conflict test) *(Added 2026-04-07)*
+- [x] T015d [P] Add app.json fixtures to `tests/fixtures/fixture-full-monorepo/`: valid app.json for 2+ apps, one with identity fields (for warning test), one with weakening rule (for conflict test) *(Added 2026-04-07)*
 
 **Checkpoint**: Registry loads, validates (including app.json), and the resolution primitives are operational
 
@@ -83,16 +83,16 @@ user story can be independently tested after its phase completes.
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Create `src/devspark_cli/resolution.py` and implement constitution resolution chain: load repo constitution from `.documentation/memory/constitution.md`, then app overlay from `{app.path}/.documentation/memory/constitution.md`
-- [ ] T017 [US1] Implement keyword-based weakening detection for the **constitution layer only**: emit CONFLICT warnings when an app constitution overlay weakens mandatory repo rules in `src/devspark_cli/resolution.py`
-- [ ] T018 [US1] Implement prompt resolution chain (app team → repo user → repo team → stock default) in `src/devspark_cli/resolution.py`
-- [ ] T019 [US1] Implement script resolution chain (app team → repo team → stock default) in `src/devspark_cli/resolution.py`
-- [ ] T020 [US1] Implement template resolution chain (app team → repo team → stock default) in `src/devspark_cli/resolution.py`
-- [ ] T021 [US1] Implement **base** profile composition: merge inherited profile tags/rules/hints in declaration order to produce the effective profile for a single app in `src/devspark_cli/resolution.py`. Note: T050 (US5) extends this with multi-profile validation, conflict detection, and cross-app audit.
+- [x] T016 [US1] Create `src/devspark_cli/resolution.py` and implement constitution resolution chain: load repo constitution from `.documentation/memory/constitution.md`, then app overlay from `{app.path}/.documentation/memory/constitution.md`
+- [x] T017 [US1] Implement keyword-based weakening detection for the **constitution layer only**: emit CONFLICT warnings when an app constitution overlay weakens mandatory repo rules in `src/devspark_cli/resolution.py`
+- [x] T018 [US1] Implement prompt resolution chain (app team → repo user → repo team → stock default) in `src/devspark_cli/resolution.py`
+- [x] T019 [US1] Implement script resolution chain (app team → repo team → stock default) in `src/devspark_cli/resolution.py`
+- [x] T020 [US1] Implement template resolution chain (app team → repo team → stock default) in `src/devspark_cli/resolution.py`
+- [x] T021 [US1] Implement **base** profile composition: merge inherited profile tags/rules/hints in declaration order to produce the effective profile for a single app in `src/devspark_cli/resolution.py`. Note: T050 (US5) extends this with multi-profile validation, conflict detection, and cross-app audit.
 - [ ] T022 [P] [US1] Add constitution resolution helpers (load repo + app overlay, compose) in `scripts/bash/common.sh`
 - [ ] T023 [P] [US1] Add constitution resolution helpers (load repo + app overlay, compose) in `scripts/powershell/common.ps1`
-- [ ] T024 [US1] Add app-specific constitution fixtures to `tests/fixtures/fixture-full-monorepo/apps/runtime-api-a/.documentation/memory/constitution.md` and `apps/admin-web/.documentation/memory/constitution.md`
-- [ ] T025 [US1] Validate fixture R3 *constitution resolution* (plan --app runtime-api-a resolves runtime-api-a constitution) and R4 *constitution resolution* (plan --app admin-web resolves admin-web constitution) from Validation Matrix
+- [x] T024 [US1] Add app-specific constitution fixtures to `tests/fixtures/fixture-full-monorepo/apps/runtime-api-a/.documentation/memory/constitution.md` and `apps/admin-web/.documentation/memory/constitution.md`
+- [x] T025 [US1] Validate fixture R3 *constitution resolution* (plan --app runtime-api-a resolves runtime-api-a constitution) and R4 *constitution resolution* (plan --app admin-web resolves admin-web constitution) from Validation Matrix
 
 **Checkpoint**: App-specific governance resolves correctly without cross-contamination
 
@@ -130,10 +130,10 @@ user story can be independently tested after its phase completes.
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Build inverse dependency lookup from `dependsOn` declarations (which point upstream from consumer → provider) to identify direct downstream consumers of a changed app in `src/devspark_cli/scope.py`
-- [ ] T037a [US3] Create `src/devspark_cli/inference.py` and implement basic dependency inference: scan source imports (`*.py`, `*.ts`, `*.js`, `*.cs`, `*.java`) and build config files (`package.json`, `pyproject.toml`, `*.csproj`) for references to other registered app paths *(Added 2026-04-07: FR-D8)*
-- [ ] T037b [US3] Integrate inferred dependencies into scope reporting: report inferred deps separately from declared deps, deduplicate matches, respect `.gitignore` patterns *(Added 2026-04-07: FR-D8)*
-- [ ] T037c [P] [US3] Add inference test fixtures to `tests/fixtures/fixture-full-monorepo/`: source files with cross-app imports and build configs with project references *(Added 2026-04-07)*
+- [x] T037 [US3] Build inverse dependency lookup from `dependsOn` declarations (which point upstream from consumer → provider) to identify direct downstream consumers of a changed app in `src/devspark_cli/scope.py`
+- [x] T037a [US3] Create `src/devspark_cli/inference.py` and implement basic dependency inference: scan source imports (`*.py`, `*.ts`, `*.js`, `*.cs`, `*.java`) and build config files (`package.json`, `pyproject.toml`, `*.csproj`) for references to other registered app paths *(Added 2026-04-07: FR-D8)*
+- [x] T037b [US3] Integrate inferred dependencies into scope reporting: report inferred deps separately from declared deps, deduplicate matches, respect `.gitignore` patterns *(Added 2026-04-07: FR-D8)*
+- [x] T037c [P] [US3] Add inference test fixtures to `tests/fixtures/fixture-full-monorepo/`: source files with cross-app imports and build configs with project references *(Added 2026-04-07)*
 - [ ] T038 [US3] Implement scope report generation: declared scope, detected scope, mismatches, declared downstream impact list, inferred downstream impact list in `src/devspark_cli/scope.py` *(Updated 2026-04-07: includes inferred deps)*
 - [ ] T039 [P] [US3] Add dependency reporting helpers to `scripts/bash/common.sh` (read dependsOn, walk direct downstream)
 - [ ] T040 [P] [US3] Add dependency reporting helpers to `scripts/powershell/common.ps1` (read dependsOn, walk direct downstream)

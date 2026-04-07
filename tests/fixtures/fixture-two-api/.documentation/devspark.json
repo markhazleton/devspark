@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "mode": "multi-app",
+  "profiles": {
+    "repo-default": {
+      "description": "Mandatory repository-wide governance and workflow defaults",
+      "tags": {},
+      "rules": ["All apps must pass repo-wide lint checks"],
+      "hints": {}
+    },
+    "api-profile": {
+      "description": "Contract-first API rules, backward compatibility, observability",
+      "tags": { "runtime-class": "api" },
+      "rules": ["API changes must include contract tests"],
+      "hints": { "test-runner": "pytest", "review-depth": "thorough" }
+    }
+  },
+  "apps": [
+    {
+      "id": "runtime-api-a",
+      "name": "Runtime API A",
+      "path": "apps/runtime-api-a",
+      "kind": "runtime-api",
+      "purpose": "Primary production runtime API",
+      "runtime": "dotnet",
+      "owner": "runtime-platform",
+      "criticality": "high",
+      "deployable": true,
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "tags": ["production", "runtime"],
+      "platforms": ["linux"],
+      "overrides": {}
+    },
+    {
+      "id": "runtime-api-b",
+      "name": "Runtime API B",
+      "path": "apps/runtime-api-b",
+      "kind": "runtime-api",
+      "purpose": "Secondary production runtime API",
+      "runtime": "dotnet",
+      "owner": "runtime-platform",
+      "criticality": "high",
+      "deployable": true,
+      "inherits": ["repo-default", "api-profile"],
+      "dependsOn": [],
+      "tags": ["production", "runtime"],
+      "platforms": ["linux"],
+      "overrides": {}
+    }
+  ]
+}
