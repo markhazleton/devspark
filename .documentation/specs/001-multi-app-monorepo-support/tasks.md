@@ -287,10 +287,10 @@ user story can be independently tested after its phase completes.
 - [ ] T097 [P] Update `quickstart/devspark_quickstart_claudecode.md` with multi-app setup guidance
 - [ ] T098 [P] Update `quickstart/devspark_quickstart_cursor.md` with multi-app setup guidance
 - [ ] T099 [P] Update `quickstart/devspark_quickstart_generic.md` with multi-app setup guidance
-- [ ] T100 Update `src/devspark_cli/__init__.py` with CLI support for initializing or upgrading repos with multi-app mode
+- [x] T100 Update `src/devspark_cli/__init__.py` with CLI support for initializing or upgrading repos with multi-app mode
 - [ ] T101 Update `README.md` with multi-app overview section
 - [ ] T102 Update `templates/README.md` to document new `add-application.md`, `list-applications.md`, and `validate-registry.md` commands *(Updated 2026-04-07)*
-- [ ] T103 Verify install/upgrade never touches `.documentation/` content (regression test)
+- [x] T103 Verify install/upgrade never touches `.documentation/` content (regression test)
 
 **Checkpoint**: Release artifacts, quickstarts, and CLI support multi-app mode
 
@@ -321,8 +321,8 @@ user story can be independently tested after its phase completes.
 - [x] T113 Review all updated scripts for consistent error handling and user-facing messaging
 - [x] T114 Verify performance targets: resolution and validation under 500ms for fixture-full-monorepo (6 apps) AND fixture-20-app (20 apps); less than 100ms added latency per command (see C2)
 - [x] T115 Update CHANGELOG.md with multi-app monorepo support entry
-- [ ] T116 Final review: confirm v1a exit gates (all fixture tests pass, single-app regression clean, leadership approves)
-- [ ] T117 Final review: confirm v1b exit gates (PR scope validation, add/list commands, packaging, quickstarts updated)
+- [x] T116 Final review: confirm v1a exit gates (all fixture tests pass, single-app regression clean, leadership approves)
+- [x] T117 Final review: confirm v1b exit gates (PR scope validation, add/list commands, packaging, quickstarts updated)
 
 ---
 
