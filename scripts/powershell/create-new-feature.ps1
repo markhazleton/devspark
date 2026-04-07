@@ -152,6 +152,11 @@ Set-Location $repoRoot
 $specsDir = Join-Path $repoRoot '.documentation' 'specs'
 New-Item -ItemType Directory -Path $specsDir -Force | Out-Null
 
+# Multi-app support (T032)
+if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
+    . "$PSScriptRoot/common.ps1"
+}
+
 # Function to generate branch name with stop word filtering and length filtering
 function Get-BranchName {
     param([string]$Description)

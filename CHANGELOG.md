@@ -7,6 +7,38 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - Multi-App Monorepo Support
+
+**Explicit multi-application monorepo support with profile-based inheritance and dependency-aware scoping.**
+
+### Added
+
+- Multi-app registry at `.documentation/devspark.json` with Pydantic v2 validation
+- App-local manifest support (`{app.path}/app.json`) for app-specific overrides
+- Profile-based inheritance model with tags/rules/hints composition
+- Constitution resolution with additive app overlays and weakening detection
+- Prompt, script, and template resolution chains with app-specific override tiers
+- Dependency-aware scope reporting (declared + inferred from imports/build config)
+- PR scope validation with `single-app`, `cross-app`, and `repo-scope` modes
+- `/devspark.add-application` command with automatic scaffolding
+- `/devspark.list-applications` command for registry overview
+- `/devspark.validate-registry` command for CI-friendly validation
+- Rationale Summary block in spec, plan, and tasks templates
+- Rationale & Traceability Risks category in `/devspark.critic`
+- App context propagation (`--app`, `--repo-scope`) across all Bash and PowerShell scripts
+- Four fixture repositories for testing (single-app, two-api, full-monorepo, 20-app)
+
+### Changed
+
+- All command templates updated with multi-app support instructions
+- `scripts/bash/platform.sh` script resolution now includes app-specific override tier
+- `pydantic>=2.0` added as a project dependency
+
+### Compatibility
+
+- Full backward compatibility: single-app repositories require zero changes
+- Multi-app mode is opt-in via `.documentation/devspark.json`
+
 ## [0.1.2] - 2026-04-06
 
 **Prompt-first lifecycle, release tooling alignment, and branding cleanup.**

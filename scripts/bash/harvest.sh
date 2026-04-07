@@ -7,6 +7,13 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=common.sh
 . "$SCRIPT_DIR/common.sh"
 
+# Multi-app support (T093)
+parse_app_context "$@" 2>/dev/null || true
+if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
+    resolve_app_scope 2>/dev/null || true
+    print_scope_summary >&2
+fi
+
 scope="full"
 json_only=false
 sample_limit=100

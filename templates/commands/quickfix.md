@@ -51,6 +51,8 @@ Parse `$ARGUMENTS` for action type:
 
 ## Outline
 
+**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+
 ### 1. Initialize Quickfix Context
 
 Run `{SCRIPT}` to gather context and parse JSON output for:

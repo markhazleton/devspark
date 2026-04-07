@@ -20,6 +20,11 @@ if ($Help) {
 # Load common functions
 . "$PSScriptRoot/common.ps1"
 
+# Multi-app support (T034)
+if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
+    . "$PSScriptRoot/common.ps1"
+}
+
 # Get all paths and variables from common functions
 $paths = Get-FeaturePathsEnv
 

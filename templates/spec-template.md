@@ -1,9 +1,47 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[###-feature-name]`  
-**Created**: [DATE]  
-**Status**: Draft  
+**Feature Branch**: `[###-feature-name]`
+**Created**: [DATE]
+**Status**: Draft
 **Input**: User description: "$ARGUMENTS"
+
+## Rationale Summary
+
+### Core Problem
+
+[What problem are we solving?]
+
+### Decision Summary
+
+[What was decided and why (1-3 sentences max)?]
+
+### Key Drivers
+
+- [Business driver]
+- [Technical constraint]
+- [User/operational impact]
+
+### Source Inputs
+
+- [Spec / ticket / discussion reference]
+- [System constraints or prior patterns]
+- [Relevant data or telemetry insights]
+
+### Tradeoffs Considered
+
+- Option A: [why not chosen]
+- Option B: [why not chosen]
+- Selected: [why chosen]
+
+### Architectural Impact
+
+- [What changes in system behavior or structure]
+- [Backward compatibility considerations]
+- [Dependencies introduced or avoided]
+
+### Reviewer Guidance
+
+[What should reviewers focus on?]
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -11,7 +49,7 @@
   IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
   Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
   you should still have a viable MVP (Minimum Viable Product) that delivers value.
-  
+
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
   Think of each story as a standalone slice of functionality that can be:
   - Developed independently
@@ -85,7 +123,7 @@
 ### Functional Requirements
 
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
+- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]

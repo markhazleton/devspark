@@ -1,0 +1,7 @@
+{
+  "id": "admin-web",
+  "path": "apps/admin-web",
+  "tags": { "deploy-target": "cdn-global" },
+  "hints": { "test-runner": "vitest" },
+  "rules": ["All admin forms must include CSRF tokens"]
+}

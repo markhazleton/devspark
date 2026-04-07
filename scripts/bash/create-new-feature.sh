@@ -176,7 +176,27 @@ fi
 
 cd "$REPO_ROOT"
 
-SPECS_DIR="$REPO_ROOT/.documentation/specs"
+# Load common for multi-app helpers
+source "$SCRIPT_DIR/common.sh" 2>/dev/null || source "$(dirname "${BASH_SOURCE[0]}")/common.sh" 2>/dev/null || true
+
+# Multi-app support: parse --app and --repo-scope from ARGS (T031)
+parse_app_context "${ARGS[@]}" 2>/dev/null || true
+if [[ ${#DEVSPARK_REMAINING_ARGS[@]} -gt 0 ]]; then
+    ARGS=("${DEVSPARK_REMAINING_ARGS[@]}")
+fi
+FEATURE_DESCRIPTION="${ARGS[*]}"
+
+# Determine specs directory based on app context
+if [[ -n "${DEVSPARK_APP_ID:-}" ]]; then
+    APP_DOC_ROOT=$(resolve_app_doc_root "$REPO_ROOT" "$DEVSPARK_APP_ID" 2>/dev/null || true)
+    if [[ -n "$APP_DOC_ROOT" && "$APP_DOC_ROOT" != ERROR* ]]; then
+        SPECS_DIR="$APP_DOC_ROOT/specs"
+    else
+        SPECS_DIR="$REPO_ROOT/.documentation/specs"
+    fi
+else
+    SPECS_DIR="$REPO_ROOT/.documentation/specs"
+fi
 mkdir -p "$SPECS_DIR"
 
 # Function to generate branch name with stop word filtering and length filtering

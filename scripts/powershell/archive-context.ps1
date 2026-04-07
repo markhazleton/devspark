@@ -14,6 +14,11 @@ param(
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 
+# Multi-app support (T095b)
+if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
+    . "$PSScriptRoot/common.ps1"
+}
+
 $repoRoot    = Get-RepoRoot
 $docDir      = Join-Path $repoRoot '.documentation'
 $archiveBase = Join-Path $repoRoot '.archive'
