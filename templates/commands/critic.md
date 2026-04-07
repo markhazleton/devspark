@@ -132,6 +132,16 @@ Analyze across these critical dimensions, applying stack-specific knowledge:
 - Missing proper dependency injection for testability
 - Hard-coded configuration values
 
+#### F. Rationale & Traceability Risks
+
+**RATIONALE COMPLETENESS:**
+
+- Missing or incomplete Rationale Summary in spec.md → HIGH
+- Missing or incomplete Rationale Summary in plan.md → HIGH
+- Missing or incomplete Rationale Summary in tasks.md → HIGH
+- Rationale drift between spec and plan (Core Problem mismatch) → CRITICAL
+- Tradeoffs not documented for major architecture decisions → HIGH
+
 #### B. Security & Compliance Risks
 
 **AUTHENTICATION/AUTHORIZATION:**

@@ -27,8 +27,19 @@ done
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# Get all paths and variables from common functions
-eval "$(get_feature_paths)"
+# Parse multi-app context if present (T033)
+parse_app_context "${ARGS[@]}" 2>/dev/null || true
+if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
+    resolve_app_scope 2>/dev/null || true
+fi
+
+# Get all paths and variables — use app-aware version if scope is resolved
+if [[ -n "${DEVSPARK_SCOPE:-}" ]]; then
+    eval "$(get_feature_paths_app_aware)"
+    print_scope_summary >&2
+else
+    eval "$(get_feature_paths)"
+fi
 
 # Check if we're on a proper feature branch (only for git repos)
 check_feature_branch "$CURRENT_BRANCH" "$HAS_GIT" || exit 1

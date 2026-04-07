@@ -5,6 +5,44 @@
 
 **Note**: This template is filled in by the `/devspark.plan` command. See `.documentation/templates/commands/plan.md` for the execution workflow.
 
+## Rationale Summary
+
+### Core Problem
+
+[What problem are we solving?]
+
+### Decision Summary
+
+[What was decided and why (1-3 sentences max)?]
+
+### Key Drivers
+
+- [Business driver]
+- [Technical constraint]
+- [User/operational impact]
+
+### Source Inputs
+
+- [Spec / ticket / discussion reference]
+- [System constraints or prior patterns]
+- [Relevant data or telemetry insights]
+
+### Tradeoffs Considered
+
+- Option A: [why not chosen]
+- Option B: [why not chosen]
+- Selected: [why chosen]
+
+### Architectural Impact
+
+- [What changes in system behavior or structure]
+- [Backward compatibility considerations]
+- [Dependencies introduced or avoided]
+
+### Reviewer Guidance
+
+[What should reviewers focus on?]
+
 ## Summary
 
 [Extract from feature spec: primary requirement + technical approach from research]
@@ -17,14 +55,14 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
 **Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
 **Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check

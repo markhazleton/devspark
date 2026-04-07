@@ -102,6 +102,14 @@ See [templates/README.md](templates/README.md) for full command details.
 
 ---
 
+## Multi-App Monorepo Support
+
+DevSpark supports repositories containing multiple applications with different platforms and governance rules. Define a registry at `.documentation/devspark.json`, assign profiles to each app, and use `--app <id>` to scope any command. New commands `/devspark.add-application`, `/devspark.list-applications`, and `/devspark.validate-registry` manage the registry.
+
+For details, see the [Multi-App Specification](.documentation/specs/001-multi-app-monorepo-support/spec.md).
+
+---
+
 ## Customization Without Risk
 
 DevSpark cleanly separates **your work** from **its installation**:

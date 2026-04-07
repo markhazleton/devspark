@@ -316,3 +316,31 @@ Add maintenance guidance (prompt-first):
 - Advanced (optional): if CLI is installed, run `devspark upgrade`
 
 For either path, upgrades refresh `.devspark/` stock files and preserve `.documentation/` customizations.
+
+---
+
+## Multi-App Monorepo Support
+
+DevSpark supports repositories containing multiple applications with different platforms and governance rules.
+
+### Quick Setup
+
+1. Create a registry file at `.documentation/devspark.json` — or run `/devspark.add-application` to create one interactively
+2. Each application gets its own `.documentation/` directory at `{app-path}/.documentation/`
+3. Use `--app <id>` with any DevSpark command to scope it to a specific application
+4. Use `--repo-scope` for repository-wide operations
+
+### Key Concepts
+
+- **Registry**: `.documentation/devspark.json` defines all applications, profiles, and dependencies
+- **Profiles**: Reusable rule bundles (e.g., `api-profile`, `web-profile`) that apps inherit
+- **App-local manifest**: Optional `{app-path}/app.json` for app-specific overrides
+- **Scope**: Every workflow runs in `repo`, `single-app`, or `cross-app` scope
+
+### Commands
+
+- `/devspark.add-application` — Register a new application
+- `/devspark.list-applications` — View all registered applications
+- `/devspark.validate-registry` — Validate registry consistency
+
+For details, see the [Multi-App Specification](.documentation/specs/001-multi-app-monorepo-support/spec.md).

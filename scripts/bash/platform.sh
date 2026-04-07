@@ -121,13 +121,23 @@ check_platform_auth() {
     esac
 }
 
-# Resolve script path: team override in .documentation/scripts/ takes priority
+# Resolve script path: app override → team override → stock default (FR-C5)
 resolve_devspark_script() {
     local script_name="$1"
     local shell="${2:-bash}"  # bash or powershell
 
     local repo_root
     repo_root=$(get_repo_root)
+
+    # App-specific override (if app context is set)
+    if [[ -n "${DEVSPARK_APP_ID:-}" ]]; then
+        local app_doc_root
+        app_doc_root=$(resolve_app_doc_root "$repo_root" "$DEVSPARK_APP_ID" 2>/dev/null || true)
+        if [[ -n "$app_doc_root" ]]; then
+            local app_path="$app_doc_root/scripts/$shell/$script_name"
+            if [[ -f "$app_path" ]]; then echo "$app_path"; return; fi
+        fi
+    fi
 
     local team_path="$repo_root/.documentation/scripts/$shell/$script_name"
     local stock_path="$repo_root/.devspark/scripts/$shell/$script_name"

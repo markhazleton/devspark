@@ -11,6 +11,11 @@ param(
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 
+# Multi-app support (T086)
+if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
+    . "$PSScriptRoot/common.ps1"
+}
+
 # Parse arguments
 $versionArg = ""
 foreach ($arg in $Arguments) {
