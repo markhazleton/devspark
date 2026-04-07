@@ -191,13 +191,13 @@ user story can be independently tested after its phase completes.
 
 ### Implementation for User Story 6
 
-- [ ] T056 [US6] Create `templates/commands/add-application.md` prompt template with guided metadata collection (id, name, path, kind, purpose, owner, criticality, profiles, dependencies)
-- [ ] T057 [US6] Create `src/devspark_cli/commands.py` and implement add-application logic: validate inputs, check duplicate ids, validate path/profile/dependency references, update `.documentation/devspark.json`, always scaffold `{app.path}/.documentation/` with standard subdirectories *(Updated 2026-04-07: always scaffold, no --scaffold flag)*
-- [ ] T058 [US6] Create `templates/commands/list-applications.md` prompt template that reads registry and displays human-readable table
-- [ ] T059 [US6] Implement list-applications logic: load registry, format table (id, path, kind, owner, criticality, dependencies, doc root) in `src/devspark_cli/commands.py`
-- [ ] T059a [US6] Create `templates/commands/validate-registry.md` prompt template for standalone registry validation *(Added 2026-04-07: FR-B9)*
-- [ ] T059b [US6] Implement validate-registry logic in `src/devspark_cli/commands.py`: load registry, run all validators (schema, uniqueness, paths, profiles, dependencies, cycles, app.json consistency), produce structured pass/fail output *(Added 2026-04-07: FR-B9)*
-- [ ] T060 [US6] Validate fixture C1 (valid new app + scaffold), C2 (duplicate id error), C3 (list shows all apps), C4 (list with no registry), C5 (validate-registry passes valid registry), C6 (validate-registry fails invalid registry), C7 (validate-registry warns on app.json identity fields) from Validation Matrix *(Updated 2026-04-07: renumbered, added validate-registry scenarios)*
+- [x] T056 [US6] Create `templates/commands/add-application.md` prompt template with guided metadata collection (id, name, path, kind, purpose, owner, criticality, profiles, dependencies)
+- [x] T057 [US6] Create `src/devspark_cli/commands.py` and implement add-application logic: validate inputs, check duplicate ids, validate path/profile/dependency references, update `.documentation/devspark.json`, always scaffold `{app.path}/.documentation/` with standard subdirectories *(Updated 2026-04-07: always scaffold, no --scaffold flag)*
+- [x] T058 [US6] Create `templates/commands/list-applications.md` prompt template that reads registry and displays human-readable table
+- [x] T059 [US6] Implement list-applications logic: load registry, format table (id, path, kind, owner, criticality, dependencies, doc root) in `src/devspark_cli/commands.py`
+- [x] T059a [US6] Create `templates/commands/validate-registry.md` prompt template for standalone registry validation *(Added 2026-04-07: FR-B9)*
+- [x] T059b [US6] Implement validate-registry logic in `src/devspark_cli/commands.py`: load registry, run all validators (schema, uniqueness, paths, profiles, dependencies, cycles, app.json consistency), produce structured pass/fail output *(Added 2026-04-07: FR-B9)*
+- [x] T060 [US6] Validate fixture C1 (valid new app + scaffold), C2 (duplicate id error), C3 (list shows all apps), C4 (list with no registry), C5 (validate-registry passes valid registry), C6 (validate-registry fails invalid registry), C7 (validate-registry warns on app.json identity fields) from Validation Matrix *(Updated 2026-04-07: renumbered, added validate-registry scenarios)*
 
 **Checkpoint**: Add/list/validate commands work; registry stays valid after mutations
 
