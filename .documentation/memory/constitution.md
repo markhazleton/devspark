@@ -1,50 +1,58 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# DevSpark Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Backward Compatibility (NON-NEGOTIABLE)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Existing single-application repositories must continue to work without restructure or behavior changes.
+New capabilities are additive; they must never force migration on repositories that do not opt in.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Explicit Over Implied (NON-NEGOTIABLE)
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+Application scope, review scope, and governance scope must be declared explicitly.
+DevSpark must not silently infer scope from working directory, branch naming, or heuristic detection.
+Ambiguous context must produce a clear error, not a guess.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### III. Ownership Boundary (NON-NEGOTIABLE)
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+`.devspark/` is the installed framework payload and the only directory DevSpark installs, upgrades, or
+removes. `.documentation/` directories at repo and app level are repository-owned work product.
+Install and upgrade flows must never add, remove, or modify files under any `.documentation/` directory.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Governance Authority
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Repository-wide governance is authoritative over all applications.
+Application-level governance may extend or strengthen repo-wide rules but must never weaken mandatory
+repo-wide rules. Constitution violations are showstopper severity in reviews.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### V. Simplicity
+
+Prefer conventions over configuration. Prefer simple resolution models over flexible ones.
+Complexity must be justified and tracked. Reject abstractions that serve only one use case.
+
+### VI. Platform Parity
+
+Bash and PowerShell script behavior must remain functionally equivalent.
+Packaged templates, quickstarts, and CLI behavior must stay aligned with source templates.
+
+## Additional Constraints
+
+- Python 3.11+ for CLI code, typed with typer/rich/click
+- Markdown linted via markdownlint-cli2
+- Scripts in both PowerShell and Bash; context scripts support GitHub, AzDO, and GitLab
+- Never overwrite `.documentation/` user artifacts during CLI operations
+
+## Development Workflow
+
+- All PRs and reviews must verify compliance with this constitution
+- Complexity additions require documented justification and a rejected-simpler-alternative rationale
+- Features must be spec-driven: specify first, plan second, implement third
+- Cross-cutting changes require leadership approval before implementation begins
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other development practices in the DevSpark repository.
+Amendments require: documentation of the change, leadership approval, and a migration plan for any
+affected workflows or repositories.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-06
