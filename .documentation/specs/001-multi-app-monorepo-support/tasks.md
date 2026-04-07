@@ -172,12 +172,12 @@ user story can be independently tested after its phase completes.
 
 ### Implementation for User Story 5
 
-- [ ] T050 [US5] Extend profile composition (built in T021) with **multi-profile validation and cross-app audit**: verify that all apps using shared profiles resolve consistent effective rules, and validate no profile creates conflicting requirements across apps in `src/devspark_cli/resolution.py`
-- [ ] T051 [US5] Implement **profile-layer** override conflict detection: flag when an app's profile overrides attempt to weaken repo-wide mandatory rules inherited through profile `rules` fields in `src/devspark_cli/resolution.py`. Note: T017 handles constitution-layer weakening; this task handles profile-layer weakening.
-- [ ] T052 [P] [US5] Add profile resolution helpers to `scripts/bash/common.sh` (resolve inherits chain, merge tags/rules/hints)
-- [ ] T053 [P] [US5] Add profile resolution helpers to `scripts/powershell/common.ps1` (resolve inherits chain, merge tags/rules/hints)
-- [ ] T054 [US5] Add profile fixtures to `tests/fixtures/fixture-full-monorepo/` validating correct composition for api-profile, web-profile, admin-profile, qa-profile
-- [ ] T055 [US5] Validate that all 6 apps + 1 library in fixture-full-monorepo resolve expected effective profiles without duplicated base content
+- [x] T050 [US5] Extend profile composition (built in T021) with **multi-profile validation and cross-app audit**: verify that all apps using shared profiles resolve consistent effective rules, and validate no profile creates conflicting requirements across apps in `src/devspark_cli/resolution.py`
+- [x] T051 [US5] Implement **profile-layer** override conflict detection: flag when an app's profile overrides attempt to weaken repo-wide mandatory rules inherited through profile `rules` fields in `src/devspark_cli/resolution.py`. Note: T017 handles constitution-layer weakening; this task handles profile-layer weakening.
+- [x] T052 [P] [US5] Add profile resolution helpers to `scripts/bash/common.sh` (resolve inherits chain, merge tags/rules/hints)
+- [x] T053 [P] [US5] Add profile resolution helpers to `scripts/powershell/common.ps1` (resolve inherits chain, merge tags/rules/hints)
+- [x] T054 [US5] Add profile fixtures to `tests/fixtures/fixture-full-monorepo/` validating correct composition for api-profile, web-profile, admin-profile, qa-profile
+- [x] T055 [US5] Validate that all 6 apps + 1 library in fixture-full-monorepo resolve expected effective profiles without duplicated base content
 
 **Checkpoint**: Profile inheritance works; no full-duplication needed per app
 
