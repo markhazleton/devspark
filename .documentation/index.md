@@ -96,7 +96,7 @@ This is the normal way to keep DevSpark current. CLI is optional and intended fo
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
-- [Multi-App Support](specs/001-multi-app-monorepo-support/spec.md) — Optional multi-application monorepo support
+- [Monorepo Guide](monorepo-guide.md) — Optional multi-application monorepo support
 
 ---
 
