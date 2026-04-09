@@ -101,7 +101,7 @@ Given that feature description, do this:
     7. Identify Key Entities (if data involved)
     8. Return: SUCCESS (spec ready for planning)
 
-5. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+5. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings. **Ensure the `**Status**:` field is explicitly set to `Draft`** — this is the starting state of the spec lifecycle (`Draft → In Progress → Complete`). The status will transition to `In Progress` when `/devspark.implement` starts and `Complete` when all tasks are done.
 
 6. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 

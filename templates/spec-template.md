@@ -2,7 +2,7 @@
 
 **Feature Branch**: `[###-feature-name]`
 **Created**: [DATE]
-**Status**: Draft
+**Status**: Draft <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "$ARGUMENTS"
 
 ## Rationale Summary

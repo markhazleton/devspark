@@ -105,9 +105,12 @@ Confirm this version or provide explicit version:
 
 For each spec in COMPLETED_SPECS:
 
+- Verify the `**Status**:` field in `spec.md` is `Complete` (not `Draft` or `In Progress`)
 - Verify all tasks are checked in `tasks.md`
 - Confirm associated PR merged (if trackable)
-- Mark for archival
+- If spec status is NOT `Complete` but tasks are all checked, **flag as inconsistency** — update spec status to `Complete` before archiving
+- If spec status is `Draft` or `In Progress` and tasks are incomplete, move to Pending Specs (section B)
+- Mark for archival only when both status is `Complete` AND all tasks are checked
 
 #### B. Pending Specs (Keep Active)
 
@@ -542,9 +545,12 @@ To execute this release:
 
 A spec is considered complete when:
 
+- The `**Status**:` field in `spec.md` is `Complete`
 - All tasks in `tasks.md` are checked (`[x]`)
 - At least one task exists (not an empty file)
 - `spec.md` exists in the directory
+
+If tasks are all checked but status is not `Complete`, this is a lifecycle inconsistency — update the status field to `Complete` before proceeding with archival.
 
 ### ADR Quality
 

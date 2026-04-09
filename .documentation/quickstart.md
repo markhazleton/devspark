@@ -86,6 +86,26 @@ Optionally validate first with `/devspark.analyze` or `/devspark.critic`, then:
 
 ---
 
+## Step 3: Review and Release
+
+After implementation completes (spec status becomes `Complete`), create a PR and review it:
+
+```text
+/devspark.pr-review
+```
+
+The review checks that the spec is `Complete` and all tasks are done before recommending approval. Merge the PR after approval.
+
+At the end of the sprint, archive completed specs and generate release notes:
+
+```text
+/devspark.release
+```
+
+See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec status lifecycle and sprint cadence.
+
+---
+
 ## What's Next
 
 - [Upgrade Guide](upgrade.md) -- keep DevSpark current

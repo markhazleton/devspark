@@ -103,10 +103,12 @@ Treat spec folders under `/.documentation/specs/` as:
 
 | Status | Criteria | Action |
 |--------|----------|--------|
-| `completed` | Tasks complete and reflected in CHANGELOG or review evidence | Harvest then archive |
-| `completed-needs-changelog` | Tasks complete but no CHANGELOG entry found | Harvest then add CHANGELOG entry |
-| `in-progress` | Some tasks incomplete | Keep active |
-| `draft` | Planning exists but implementation is incomplete or absent | Keep active |
+| `completed` | `**Status**: Complete` in spec.md AND tasks complete AND reflected in CHANGELOG or review evidence | Harvest then archive |
+| `completed-needs-changelog` | `**Status**: Complete` AND tasks complete but no CHANGELOG entry found | Harvest then add CHANGELOG entry |
+| `in-progress` | `**Status**: In Progress` OR some tasks incomplete | Keep active |
+| `draft` | `**Status**: Draft` OR planning exists but implementation is incomplete or absent | Keep active |
+
+**Lifecycle consistency check**: If the `**Status**:` field in spec.md disagrees with the task completion state (e.g., all tasks checked but status is `Draft`), flag the inconsistency and recommend running `/devspark.implement` to reconcile the status before harvesting.
 
 #### Documentation
 
