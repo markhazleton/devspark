@@ -287,8 +287,8 @@ build_variant() {
   DEVSPARK_DIR="$base_dir/.devspark"
   mkdir -p "$DEVSPARK_DIR"
 
-  # Seed constitution template into .devspark/ (CLI copies to .documentation/memory/ on first init)
-  [[ -d memory ]] && { cp -r memory "$DEVSPARK_DIR/"; echo "Copied memory -> .devspark (seed templates)"; }
+  # Constitution is user-owned and never included in release packages.
+  # Users create it via /devspark.constitution or /devspark.discover-constitution.
   
   # Only copy the relevant script variant directory
   if [[ -d scripts ]]; then

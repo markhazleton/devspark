@@ -330,7 +330,7 @@ Keep the constitution focused on *what must be true*, and put *how we do things*
 
 ## Multi-App Constitutions (Optional)
 
-If your repository uses DevSpark's optional [multi-app support](.documentation/specs/001-multi-app-monorepo-support/spec.md), each application can have its own constitution that extends the repository-wide constitution.
+If your repository uses DevSpark's optional [multi-app support](monorepo-guide.md), each application can have its own constitution that extends the repository-wide constitution.
 
 ### How It Works
 

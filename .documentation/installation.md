@@ -1,28 +1,18 @@
 # Other Ways to Get Started
 
-> [!TIP]
-> **Recommended**: For most users the [Prompt Bootstrap](quickstart.md) plus the remote upgrade prompt are all you need. This page covers advanced alternatives only.
-
-For the primary DevSpark experience, use:
-
-1. The [Quick Start Guide](quickstart.md) to install DevSpark with a remote prompt file
-2. The [Upgrade Guide](upgrade.md) to update DevSpark with a remote prompt file
-
-CLI is not required for normal use.
+> For most users the [Prompt Bootstrap](quickstart.md) is all you need. This page covers advanced CLI alternatives only.
 
 ---
 
-## Option 1 — Manual File Copy (No tools required)
+## Option 1: Manual File Copy
 
-This is an advanced fallback for teams that do not want prompt-driven setup.
-
-Clone or download the DevSpark repository and copy only the files you need into your project. This requires nothing beyond Git.
+Clone or download DevSpark and copy the files you need. No tools required beyond Git.
 
 ```bash
-# Clone the DevSpark repo temporarily
+# Clone temporarily
 git clone https://github.com/MarkHazleton/devspark.git devspark-tmp
 
-# Copy the framework files into your project
+# Copy framework files
 cp -r devspark-tmp/templates/commands   your-project/.devspark/defaults/commands
 cp -r devspark-tmp/templates            your-project/.devspark/defaults/templates
 cp -r devspark-tmp/scripts/bash         your-project/.devspark/scripts/bash
@@ -32,69 +22,46 @@ cp -r devspark-tmp/scripts/powershell   your-project/.devspark/scripts/powershel
 rm -rf devspark-tmp
 ```
 
-Then create your `.documentation/` folder and add the agent shims for your AI agent by hand per the [quickstart guides](https://github.com/MarkHazleton/devspark/tree/main/quickstart).
+Then create `.documentation/` and add agent shims by hand per the [quickstart guides](https://github.com/MarkHazleton/devspark/tree/main/quickstart).
 
 ---
 
-## Option 2 — One-Shot CLI via `uvx` (No global install)
+## Option 2: One-Shot CLI via `uvx`
 
-Run the DevSpark CLI once without permanently installing it. Requires [uv](https://docs.astral.sh/uv/) and [Python 3.11+](https://www.python.org/downloads/).
+Run the CLI once without permanently installing it. Requires [uv](https://docs.astral.sh/uv/) and Python 3.11+.
 
-This is an advanced option for users who prefer terminal-driven setup.
-
-### Prerequisites
-
-- [uv](https://docs.astral.sh/uv/) — Python package manager
-- [Python 3.11+](https://www.python.org/downloads/)
-- [Git](https://git-scm.com/downloads)
-- Any [supported AI coding agent](https://github.com/MarkHazleton/devspark#-supported-ai-agents)
-
-### Greenfield (New Project)
+### New project
 
 ```bash
 uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME>
 ```
 
-### Brownfield (Existing Project)
+### Existing project
 
 ```bash
 cd /path/to/your-existing-project
 uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init --here
 ```
 
-> [!TIP]
-> **Brownfield Tip**: After initialization, use `/devspark.discover-constitution` to analyze your existing codebase and draft a constitution that reflects how your project already works.
-
-### Specify AI Agent
+### Specify agent or script type
 
 ```bash
 uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --ai claude
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --ai gemini
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --ai copilot
+uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --script ps
 ```
 
-### Force Script Type
-
-```bash
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --script ps  # PowerShell
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init <PROJECT_NAME> --script sh  # POSIX shell
-```
+> After initialization on an existing codebase, use `/devspark.discover-constitution` to generate a constitution from your existing code patterns.
 
 ---
 
-## Option 3 — Installed CLI (Global install)
+## Option 3: Global CLI Install
 
-Install the DevSpark CLI globally so `devspark` is always available in your terminal. This is the heaviest option and is best suited for teams that run DevSpark frequently across many projects.
-
-### Install
+Install `devspark` permanently. Best for teams that run it across many projects.
 
 ```bash
+# Install
 uv tool install devspark-cli --from git+https://github.com/MarkHazleton/devspark.git
-```
 
-### Initialize a project
-
-```bash
 # New project
 devspark init my-project --ai claude
 
@@ -103,81 +70,17 @@ cd /path/to/existing-project
 devspark init --here --ai claude
 ```
 
-### Upgrade the CLI
-
-```bash
-uv tool install devspark-cli --force --from git+https://github.com/MarkHazleton/devspark.git
-```
-
-### Upgrade DevSpark in a project
-
-For normal use, prefer the remote upgrade prompt described in the [Upgrade Guide](upgrade.md). Use the CLI commands below only if you want advanced local automation.
-
-```bash
-# Safe guided upgrade (recommended)
-devspark upgrade
-
-# Preview changes without modifying files
-devspark upgrade --dry-run
-
-# Back up constitution before upgrade
-devspark upgrade --backup
-
-# Override detected agent
-devspark upgrade --ai claude
-
-# Skip automatic migration check
-devspark upgrade --skip-migration
-```
-
-The `upgrade` command will:
-
-- Auto-detect your AI assistant from existing setup
-- Check for uncommitted Git changes
-- Detect old structure and offer migration
-- Download and apply latest templates
-- Preserve your specs and customizations
-
-See the [Upgrade Guide](upgrade.md) for detailed instructions.
+For CLI upgrades and project file updates, see the [Upgrade Guide](upgrade.md).
 
 ---
-
-## Verification
-
-After any installation method, you should see these commands available in your AI agent:
-
-### Core Spec Workflow
-
-- `/devspark.constitution` — Create project principles
-- `/devspark.specify` — Create specifications
-- `/devspark.plan` — Generate implementation plans
-- `/devspark.tasks` — Break down into actionable tasks
-- `/devspark.implement` — Execute the implementation plan
-- `/devspark.critic` — Adversarial risk analysis
-- `/devspark.analyze` — Cross-artifact consistency checking
-- `/devspark.checklist` — Generate quality validation checklists
-- `/devspark.clarify` — Clarify underspecified areas
-
-### Constitution-Powered Commands (No Spec Required)
-
-- `/devspark.pr-review` — Review pull requests against constitution
-- `/devspark.site-audit` — Comprehensive codebase audit
 
 ## Troubleshooting
 
 ### Git Credential Manager on Linux
 
-If you're having issues with Git authentication on Linux, you can install Git Credential Manager:
-
 ```bash
-#!/usr/bin/env bash
-set -e
-echo "Downloading Git Credential Manager v2.6.1..."
 wget https://github.com/git-ecosystem/git-credential-manager/releases/download/v2.6.1/gcm-linux_amd64.2.6.1.deb
-echo "Installing Git Credential Manager..."
 sudo dpkg -i gcm-linux_amd64.2.6.1.deb
-echo "Configuring Git to use GCM..."
 git config --global credential.helper manager
-echo "Cleaning up..."
 rm gcm-linux_amd64.2.6.1.deb
 ```

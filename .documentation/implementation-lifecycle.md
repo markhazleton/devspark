@@ -37,6 +37,46 @@ After bootstrap, run the standard implementation lifecycle in chat:
 6. `/devspark.analyze` and `/devspark.critic` (optional quality gates)
 7. `/devspark.implement`
 
+### When to Use Technical Details vs. Product Language
+
+Each phase has a different audience and purpose. Mixing technical decisions into the wrong phase creates specs that lock you into solutions before you understand the problem, or plans that lack the detail needed to build anything.
+
+#### Specify and Clarify: Product language only
+
+These phases define **what** users need and **why**. Write as if explaining to a product manager. No frameworks, no databases, no APIs.
+
+| Anti-pattern (too technical) | Better (product-focused) |
+|------------------------------|--------------------------|
+| `/devspark.specify Build a React app with Redux state management and a PostgreSQL backend for managing tasks` | `/devspark.specify Build a task manager where teams create projects, assign tasks to members, and track progress on a Kanban board` |
+| `/devspark.specify Create a REST API with JWT auth that serves photo metadata from S3` | `/devspark.specify Build a photo album organizer. Albums grouped by date, drag-and-drop reordering, tile-based photo previews` |
+| `/devspark.clarify Should we use WebSockets or SSE for the real-time updates?` | `/devspark.clarify When a team member moves a task, how quickly should other users see the change? Instant, or is a short delay acceptable?` |
+| `/devspark.clarify Should the Redis cache TTL be 5 minutes or 15 minutes?` | `/devspark.clarify How fresh does the dashboard data need to be? Real-time, or is a few minutes of delay acceptable?` |
+
+**Why this matters:** If you say "use React" in the spec, the AI treats it as a requirement and won't consider whether Svelte, Vue, or vanilla JS might be a better fit. The spec becomes a solution document instead of a problem document. Keep the spec technology-agnostic so the plan phase can make informed technical choices.
+
+#### Plan: Technical details belong here
+
+This phase translates product requirements into architecture and technology choices. Now is the time for frameworks, databases, protocols, and infrastructure decisions.
+
+| Good plan input | Why it works |
+|-----------------|--------------|
+| `/devspark.plan Use Vite + vanilla JS, SQLite for local storage, no server needed` | Provides clear technology direction while the spec already defined what to build |
+| `/devspark.plan .NET Aspire with Blazor Server frontend, Postgres database, REST APIs for projects/tasks/notifications` | Specific stack choices that the plan phase can evaluate against the spec's requirements |
+| `/devspark.plan Existing Next.js app. Add this feature using the existing Prisma ORM and tRPC patterns` | Constrains the plan to work within an existing codebase's patterns |
+
+#### Tasks and Implement: Implementation specifics
+
+These phases work with concrete code. File paths, function signatures, migration scripts, test fixtures, and dependency versions all belong here.
+
+#### Quick reference: What goes where
+
+| Phase | Language | Example |
+|-------|----------|---------|
+| **Specify** | Product/user outcomes | "Users can drag tasks between columns" |
+| **Clarify** | Requirements and constraints | "Is there a maximum number of team members per project?" |
+| **Plan** | Architecture and technology | "Use Blazor Server with SignalR for real-time Kanban updates" |
+| **Tasks** | Implementation details | "Create `TaskCard.razor` component with drag-and-drop via `SortableJS`" |
+
 ### Multi-App Workflows (Optional)
 
 If your repository contains multiple applications, you can scope any command to a specific application:
