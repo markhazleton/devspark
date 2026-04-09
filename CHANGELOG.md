@@ -7,6 +7,33 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-04-09
+
+**Spec Lifecycle Enforcement — Prevent incomplete specs from being merged to main.**
+
+### Added
+
+- Spec status lifecycle (`Draft` -> `In Progress` -> `Complete`) enforced across all workflows
+- `implement.md` sets spec status to `In Progress` at start, `Complete` when all tasks are done
+- `pr-review.md` now **requires** spec validation for feature branches — blocks APPROVE unless spec is `Complete` with all tasks checked
+- `get-pr-context.sh` and `get-pr-context.ps1` detect spec status and task completion counts in PR context JSON output
+- `site-audit.md` new section: flags Draft or In Progress specs on main branch as CRITICAL anti-patterns
+- `release.md` validates `**Status**: Complete` field before archiving specs
+- `harvest.md` cross-checks `**Status**:` field against task completion state, flags inconsistencies
+- `spec-template.md` documents valid lifecycle values: `Draft | In Progress | Complete`
+- `specify.md` explicitly sets `Status: Draft` at spec creation
+- Sprint cadence documentation in `implementation-lifecycle.md` with per-feature and end-of-sprint release pattern
+- Spec status lifecycle FAQ entry in `faq.md`
+- Step 3 (Review and Release) added to `quickstart.md`
+
+### Changed
+
+- `pr-review.md` Section 6 rewritten from optional feature context to required Spec Lifecycle Validation
+- Executive Summary template in PR reviews now includes Spec Lifecycle and Task Completion fields
+- `release.md` Spec Completion Validation guidelines updated to include Status field check
+- `site-audit.md` Compliance Score table includes Spec Lifecycle row
+- Section numbering updated in `implement.md` (3-11) and `site-audit.md` (5-13) for new sections
+
 ## [1.3.0] - 2026-04-08
 
 **Multi-App Monorepo Support (Optional) — Major release with full monorepo capabilities.**
