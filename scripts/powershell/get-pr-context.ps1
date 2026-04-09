@@ -319,6 +319,51 @@ if (-not $IncludeAllFiles -and $filesChangedTotal -gt $FileSampleLimit) {
 $constitutionPath = Join-Path $repoRoot ".documentation\memory\constitution.md"
 $constitutionExists = Test-Path $constitutionPath
 
+#==============================================================================
+# Spec Lifecycle Detection
+# Extract feature identifier from branch name and check spec/task status
+#==============================================================================
+$specFeatureId = ""
+$specStatus = "N/A"
+$specPath = ""
+$tasksTotal = 0
+$tasksCompleted = 0
+$tasksIncomplete = 0
+$isFeatureBranch = $false
+
+# Detect feature branch pattern: digits-name (e.g., 001-feature-name)
+if ($sourceBranch -match '^(\d+-[a-zA-Z].*)$') {
+    $isFeatureBranch = $true
+    $specFeatureId = $sourceBranch
+
+    # Check for spec directory
+    $featureDir = Join-Path $repoRoot ".documentation\specs\$specFeatureId"
+    $specPath = Join-Path $featureDir "spec.md"
+
+    if (Test-Path $specPath) {
+        # Extract Status field from spec.md
+        $specContent = Get-Content $specPath -Raw
+        if ($specContent -match '\*\*Status\*\*:\s*([A-Za-z ]+?)(?:\s*<!--.*?-->)?\s*$') {
+            $specStatus = $Matches[1].Trim()
+        } else {
+            $specStatus = "Unknown"
+        }
+    } else {
+        $specStatus = "Missing"
+    }
+
+    # Check tasks.md completion
+    $tasksPath = Join-Path $featureDir "tasks.md"
+    if (Test-Path $tasksPath) {
+        $tasksContent = Get-Content $tasksPath
+        $taskLines = $tasksContent | Where-Object { $_ -match '^\s*- \[([ xX])\]' }
+        $tasksTotal = ($taskLines | Measure-Object).Count
+        $completedLines = $tasksContent | Where-Object { $_ -match '^\s*- \[[xX]\]' }
+        $tasksCompleted = ($completedLines | Measure-Object).Count
+        $tasksIncomplete = $tasksTotal - $tasksCompleted
+    }
+}
+
 # Prepare review directory
 $reviewDir = Join-Path $repoRoot ".documentation\specs\pr-review"
 
@@ -353,6 +398,15 @@ if ($Json) {
         CONSTITUTION_PATH = $constitutionPath
         CONSTITUTION_EXISTS = $constitutionExists
         REVIEW_DIR = $reviewDir
+        SPEC_LIFECYCLE = @{
+            is_feature_branch = $isFeatureBranch
+            feature_id = $specFeatureId
+            spec_status = $specStatus
+            spec_path = $specPath
+            tasks_total = $tasksTotal
+            tasks_completed = $tasksCompleted
+            tasks_incomplete = $tasksIncomplete
+        }
     } | ConvertTo-Json -Depth 10
 
     Write-Output $output
@@ -370,5 +424,12 @@ if ($Json) {
     Write-Output "Lines:  +$linesAdded -$linesDeleted"
     Write-Output ""
     Write-Output "Constitution: $(if ($constitutionExists) { '✓ Found' } else { '✗ Missing' })"
+    if ($isFeatureBranch) {
+        Write-Output ""
+        Write-Output "Spec Lifecycle:"
+        Write-Output "  Feature:  $specFeatureId"
+        Write-Output "  Status:   $specStatus"
+        Write-Output "  Tasks:    $tasksCompleted/$tasksTotal complete ($tasksIncomplete remaining)"
+    }
     Write-Output "Review will be saved to: $reviewDir\pr-$prNumber_int.md"
 }

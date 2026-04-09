@@ -36,6 +36,52 @@ After bootstrap, run the standard implementation lifecycle in chat:
 5. `/devspark.tasks`
 6. `/devspark.analyze` and `/devspark.critic` (optional quality gates)
 7. `/devspark.implement`
+8. Create PR and run `/devspark.pr-review`
+9. Merge PR after approval
+
+### Spec Status Lifecycle
+
+Every spec has a `**Status**:` field that tracks where it is in the lifecycle. Status transitions are enforced automatically by the commands:
+
+```text
+/devspark.specify     -->  Status: Draft
+/devspark.clarify     -->  (no change, still Draft)
+/devspark.plan        -->  (no change, still Draft)
+/devspark.tasks       -->  (no change, still Draft)
+/devspark.implement   -->  Status: In Progress (at start)
+                      -->  Status: Complete   (when all tasks marked [X])
+/devspark.pr-review   -->  Blocks APPROVE unless Complete + all tasks done
+/devspark.release     -->  Archives only Complete specs
+```
+
+Valid status values: `Draft`, `In Progress`, `Complete`.
+
+**Key rules:**
+
+- A spec must reach `Complete` before its PR can be approved
+- `/devspark.pr-review` will flag incomplete specs as CRITICAL findings
+- `/devspark.site-audit` flags Draft or In Progress specs on main as anti-patterns
+- `/devspark.release` will not archive specs that are not Complete
+
+### Sprint Cadence
+
+A typical sprint follows this pattern:
+
+```text
++--- Repeat per feature (N times during sprint) ------+
+|  /specify -> /clarify -> /plan -> /tasks -> /implement |
+|  -> git push -> gh pr create -> /pr-review -> merge    |
++--------------------------------------------------------+
+                         |
+                    (end of sprint)
+                         |
+                    /devspark.release
+```
+
+- **Per feature**: Run the full lifecycle from specify through implement, create a PR, review it, and merge.
+- **End of sprint**: Run `/devspark.release` once to archive all completed specs, generate release notes, and bump the version.
+- **Anytime**: Run `/devspark.site-audit` as a health check to catch lifecycle violations.
+- **Periodically**: Run `/devspark.harvest` to clean up stale documentation and ensure completed specs are captured in CHANGELOG.
 
 ### When to Use Technical Details vs. Product Language
 

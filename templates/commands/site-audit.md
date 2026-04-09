@@ -154,7 +154,53 @@ Include in the audit report under a **DevSpark Version** section:
 If VER1 or VER2 is present, add to the Recommendations section:
 > Run the remote upgrade prompt or `/devspark.upgrade` to update DevSpark.
 
-### 5. Constitution Compliance Audit
+### 5. Spec Lifecycle Audit (Anti-Pattern Detection)
+
+Scan `/.documentation/specs/` for spec directories and flag lifecycle violations. This is critical to prevent incomplete specs from being merged to main.
+
+#### A. Scan All Spec Directories
+
+For each directory in `/.documentation/specs/` (excluding `pr-review/`):
+1. Check if `spec.md` exists
+2. Read the `**Status**:` field (valid values: `Draft`, `In Progress`, `Complete`)
+3. Check if `tasks.md` exists and count completed vs incomplete tasks
+
+#### B. Flag Anti-Patterns
+
+| Condition | Finding ID | Severity | Description |
+|-----------|-----------|----------|-------------|
+| Spec with `Status: Draft` on main branch | SPEC1 | **CRITICAL** | Draft spec merged to main — must be Complete before merge |
+| Spec with `Status: In Progress` on main branch | SPEC2 | **CRITICAL** | In-progress spec merged to main — implementation not finished |
+| Spec with incomplete tasks (`- [ ]`) on main branch | SPEC3 | **HIGH** | Tasks not all checked off but spec is on main |
+| Spec exists but `tasks.md` missing | SPEC4 | **MEDIUM** | Spec has no task breakdown — may be abandoned or pre-planning |
+| Spec marked `Complete` but has incomplete tasks | SPEC5 | **HIGH** | Status/task mismatch — spec says Complete but tasks disagree |
+
+#### C. Include in Report
+
+Add a **Spec Lifecycle** section to the audit report:
+
+```markdown
+## Spec Lifecycle
+
+### Spec Status Summary
+
+| Spec Directory | Status | Tasks | Complete | Incomplete | Finding |
+|----------------|--------|-------|----------|------------|---------|
+| 001-feature-x  | Complete | 12  | 12       | 0          | ✅ OK   |
+| 002-feature-y  | In Progress | 8 | 5     | 3          | ❌ SPEC2, SPEC3 |
+| 003-feature-z  | Draft   | 0   | 0        | 0          | ❌ SPEC1, SPEC4 |
+
+### Spec Lifecycle Findings
+
+| ID | Spec | Issue | Severity | Recommendation |
+|----|------|-------|----------|----------------|
+| SPEC1 | 003-feature-z | Draft spec on main branch | CRITICAL | Complete implementation or remove spec |
+| SPEC2 | 002-feature-y | In-progress spec on main branch | CRITICAL | Complete all tasks and mark spec Complete |
+```
+
+If no spec lifecycle issues found, note: "All specs on main branch have Complete status with all tasks checked off."
+
+### 6. Constitution Compliance Audit
 
 For **each principle** in the constitution:
 
@@ -198,7 +244,7 @@ For each violation found:
 - **Issue**: Specific description
 - **Recommendation**: Concrete fix
 
-### 6. Package/Dependency Audit
+### 7. Package/Dependency Audit
 
 #### A. Detect Package Manager
 Identify from files present:
@@ -221,7 +267,7 @@ For each detected package manager:
 - Flag heavy transitive chains
 - Note conflicting version requirements
 
-### 7. Code Quality Metrics
+### 8. Code Quality Metrics
 
 Calculate and report:
 
@@ -242,7 +288,7 @@ Calculate and report:
 - Commented-out code blocks
 - Inconsistent formatting patterns
 
-### 8. Unused Code Detection
+### 9. Unused Code Detection
 
 Scan for potentially unused:
 
@@ -261,7 +307,7 @@ Scan for potentially unused:
 - Packages in requirements but never imported
 - DevDependencies in package.json unused
 
-### 9. Duplicate Code Detection
+### 10. Duplicate Code Detection
 
 Identify copy-paste patterns:
 
@@ -276,7 +322,7 @@ For each duplicate:
 - Similarity percentage
 - Suggested consolidation approach
 
-### 10. Severity Classification
+### 11. Severity Classification
 
 Apply consistent severity across all findings:
 
@@ -287,7 +333,7 @@ Apply consistent severity across all findings:
 | **MEDIUM** | Code quality concern, maintainability issue, missing tests |
 | **LOW** | Style suggestion, minor improvement, optimization opportunity |
 
-### 11. Generate Audit Report
+### 12. Generate Audit Report
 
 Create comprehensive report at `/.documentation/copilot/audit/YYYY-MM-DD_results.md`:
 
@@ -317,6 +363,7 @@ Use this format:
 | Category | Score | Status |
 |----------|-------|--------|
 | DevSpark Version | [UP TO DATE / UPGRADE AVAILABLE / UNKNOWN] | [Status] |
+| Spec Lifecycle | [X] specs on main | [✅ All Complete / ❌ Incomplete specs found] |
 | Constitution Compliance | [X]% | [✅ PASS / ⚠️ PARTIAL / ❌ FAIL] |
 | Security | [X]% | [Status] |
 | Code Quality | [X]% | [Status] |
@@ -542,7 +589,7 @@ Use this format:
 *To re-run: `/devspark.site-audit` or `/devspark.site-audit --scope=constitution`*
 ```
 
-### 12. Output Summary to User
+### 13. Output Summary to User
 
 Display concise summary:
 

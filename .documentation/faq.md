@@ -87,6 +87,18 @@ No. Most projects use a small subset:
 
 **Specialized:** `/devspark.critic`, `/devspark.harvest`, `/devspark.evolve-constitution`
 
+### What is the spec status lifecycle?
+
+Every spec has a `**Status**:` field that transitions through three states:
+
+| Status | Set by | Meaning |
+|--------|--------|---------|
+| **Draft** | `/devspark.specify` | Spec created, not yet implementing |
+| **In Progress** | `/devspark.implement` (start) | Implementation underway |
+| **Complete** | `/devspark.implement` (all tasks done) | Ready for PR review and merge |
+
+PR review blocks approval unless the spec is `Complete` with all tasks checked off. Site audit flags incomplete specs on main as critical anti-patterns.
+
 ### What's the difference between quickfix and the full workflow?
 
 **Quickfix** is for small, well-understood changes (one sentence, fewer than 3 files). **Full spec workflow** is for larger work where scope or design isn't immediately clear.

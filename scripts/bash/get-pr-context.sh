@@ -331,6 +331,45 @@ main() {
         constitution_exists="true"
     fi
 
+    #==========================================================================
+    # Spec Lifecycle Detection
+    # Extract feature identifier from branch name and check spec/task status
+    #==========================================================================
+    local spec_feature_id=""
+    local spec_status="N/A"
+    local spec_path=""
+    local tasks_total=0
+    local tasks_completed=0
+    local tasks_incomplete=0
+    local is_feature_branch="false"
+
+    # Detect feature branch pattern: digits-name (e.g., 001-feature-name)
+    if [[ "$source_branch" =~ ^([0-9]+-[a-zA-Z].*)$ ]]; then
+        is_feature_branch="true"
+        spec_feature_id="$source_branch"
+
+        # Check for spec directory
+        local feature_dir="$REPO_ROOT/.documentation/specs/$spec_feature_id"
+        spec_path="$feature_dir/spec.md"
+
+        if [[ -f "$spec_path" ]]; then
+            # Extract Status field from spec.md
+            spec_status=$(grep -oP '\*\*Status\*\*:\s*\K[A-Za-z ]+' "$spec_path" 2>/dev/null | head -1 | sed 's/[[:space:]]*$//' || echo "Unknown")
+            # Strip HTML comment if present
+            spec_status=$(echo "$spec_status" | sed 's/<!--.*//;s/[[:space:]]*$//')
+        else
+            spec_status="Missing"
+        fi
+
+        # Check tasks.md completion
+        local tasks_path="$feature_dir/tasks.md"
+        if [[ -f "$tasks_path" ]]; then
+            tasks_total=$(grep -cE '^\s*- \[([ xX])\]' "$tasks_path" 2>/dev/null || echo "0")
+            tasks_completed=$(grep -cE '^\s*- \[[xX]\]' "$tasks_path" 2>/dev/null || echo "0")
+            tasks_incomplete=$((tasks_total - tasks_completed))
+        fi
+    fi
+
     # Prepare review directory
     local review_dir="$REPO_ROOT/.documentation/specs/pr-review"
 
@@ -365,7 +404,16 @@ main() {
   },
   "CONSTITUTION_PATH": "$constitution_path",
   "CONSTITUTION_EXISTS": $constitution_exists,
-  "REVIEW_DIR": "$review_dir"
+  "REVIEW_DIR": "$review_dir",
+  "SPEC_LIFECYCLE": {
+    "is_feature_branch": $is_feature_branch,
+    "feature_id": $(echo "$spec_feature_id" | jq -R .),
+    "spec_status": $(echo "$spec_status" | jq -R .),
+    "spec_path": $(echo "$spec_path" | jq -R .),
+    "tasks_total": $tasks_total,
+    "tasks_completed": $tasks_completed,
+    "tasks_incomplete": $tasks_incomplete
+  }
 }
 EOF
     else
@@ -386,6 +434,13 @@ EOF
         echo "Lines:  +$lines_added -$lines_deleted"
         echo ""
         echo "Constitution: $([[ "$constitution_exists" == "true" ]] && echo "✓ Found" || echo "✗ Missing")"
+        if [[ "$is_feature_branch" == "true" ]]; then
+            echo ""
+            echo "Spec Lifecycle:"
+            echo "  Feature:  $spec_feature_id"
+            echo "  Status:   $spec_status"
+            echo "  Tasks:    $tasks_completed/$tasks_total complete ($tasks_incomplete remaining)"
+        fi
         echo "Review will be saved to: $review_dir/pr-$pr_number_int.md"
     fi
 }
