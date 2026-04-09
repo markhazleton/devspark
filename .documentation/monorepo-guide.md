@@ -1,5 +1,10 @@
 # Multi-Application Monorepo Support
 
+<video controls width="100%">
+  <source src="https://github.com/markhazleton/devspark/releases/download/v0.1.1/DevSpark__Taming_the_Monorepo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 DevSpark's multi-app monorepo support lets you manage multiple applications in a single repository with per-app governance, scoped workflows, and dependency-aware reviews — while keeping full backward compatibility with single-app repositories.
 
 ---
