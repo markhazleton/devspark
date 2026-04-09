@@ -30,16 +30,16 @@ This directory contains PowerShell versions of the GitHub Actions workflow scrip
 **Expected output:**
 
 ```text
-Latest tag: v0.1.1
-New version will be: v0.1.2
+Latest tag: v0.1.2
+New version will be: v1.3.0
 ```
 
 ### 2. Generate Release Notes
 
 ```powershell
 .\.github\workflows\scripts\generate-release-notes.ps1 `
-    -NewVersion "v0.1.2" `
-    -LastTag "v0.1.1"
+    -NewVersion "v1.3.0" `
+    -LastTag "v0.1.2"
 ```
 
 This creates `release_notes.md` with your fork-specific branding.
@@ -48,14 +48,14 @@ This creates `release_notes.md` with your fork-specific branding.
 
 ```powershell
 .\.github\workflows\scripts\check-release-exists.ps1 `
-    -Version "v0.1.2"
+    -Version "v1.3.0"
 ```
 
 ### 4. Create Release Packages (Local Test)
 
 ```powershell
 .\.github\workflows\scripts\create-release-packages.ps1 `
-    -Version "v0.1.2"
+    -Version "v1.3.0"
 ```
 
 This creates all agent-specific ZIP packages in `.genreleases/` directory.
@@ -68,7 +68,7 @@ gh auth status
 
 # Create the release
 .\.github\workflows\scripts\create-github-release.ps1 `
-    -Version "v0.1.2"
+    -Version "v1.3.0"
 ```
 
 ## Full Local Test Workflow

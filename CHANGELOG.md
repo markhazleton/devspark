@@ -7,9 +7,9 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - Multi-App Monorepo Support (Optional)
+## [1.3.0] - 2026-04-08
 
-**Optional multi-application monorepo support with profile-based inheritance and dependency-aware scoping.**
+**Multi-App Monorepo Support (Optional) — Major release with full monorepo capabilities.**
 
 > **Multi-app is entirely optional.** Single-application repositories continue to work with zero changes.
 > If your repository contains multiple applications with different platforms or governance rules,
