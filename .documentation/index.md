@@ -67,28 +67,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 
 ## Getting Started
 
-### Prompt Bootstrap — The Fastest Way
-
-No installation required. Open a chat with your AI agent in your target repository and paste the command for your agent:
-
-| Agent | Command to paste |
-|-------|-----------------|
-| **GitHub Copilot** | `@workspace Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_copilot.md` |
-| **Claude Code** | `Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_claudecode.md` |
-| **Cursor** | `Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_cursor.md` |
-| **Any other agent** | `Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_generic.md` |
-
-The agent asks a few questions about your project, then scaffolds the full DevSpark structure. See the [Quick Start Guide](quickstart.md) for the full workflow.
-
-For updates, use the same prompt-first approach:
-
-```text
-Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
-```
-
-This is the normal way to keep DevSpark current. CLI is optional and intended for advanced automation only.
-
-> **Need advanced or terminal-driven setup?** See [Other Ways to Get Started](installation.md) for manual and CLI options.
+Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a single prompt -- no CLI required. For updates, see the [Upgrade Guide](upgrade.md).
 
 ### Guides
 
@@ -174,15 +153,18 @@ Constitution-powered quality commands that work independently.
 
 ### Lifecycle Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/devspark.release` | Archive artifacts, generate release docs |
-| `/devspark.harvest` | Knowledge-preserving cleanup for stale docs |
-| `/devspark.repo-story` | Evidence-based repository narrative generation |
-| `/devspark.clarify` | Clarify specification requirements |
-| `/devspark.checklist` | Generate quality checklists |
-| `/devspark.analyze` | Artifact consistency checking |
-| `/devspark.personalize` | Create per-user prompt customizations |
+| Command | Purpose | Guide |
+|---------|---------|-------|
+| `/devspark.release` | Archive artifacts, generate release docs | |
+| `/devspark.harvest` | Knowledge-preserving cleanup for stale docs | [Harvest Guide](harvest-usage.md) |
+| `/devspark.archive` | Archive outdated docs, update Guide.md and CHANGELOG | |
+| `/devspark.repo-story` | Evidence-based repository narrative generation | [Repo Story Guide](repo-story-usage.md) |
+| `/devspark.taskstoissues` | Convert tasks.md into GitHub issues | |
+| `/devspark.clarify` | Clarify specification requirements | |
+| `/devspark.checklist` | Generate quality checklists | [Checklist Guide](checklist-usage.md) |
+| `/devspark.analyze` | Artifact consistency checking | |
+| `/devspark.personalize` | Create per-user prompt customizations | |
+| `/devspark.upgrade` | Check installed version and guide safe upgrade | [Upgrade Guide](upgrade.md) |
 
 ### Multi-App Commands (Optional)
 
@@ -195,38 +177,6 @@ For repositories containing multiple applications with different platforms or go
 | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
 > **Opt-in only**: Multi-app support is activated by creating a registry at `.documentation/devspark.json`. Without it, DevSpark operates in standard single-app mode with no behavior changes.
-
----
-
-## Development Phases
-
-| Phase | Commands | Activities |
-|-------|----------|------------|
-| **Project Initiation** | `constitution`, `discover-constitution` | Establish governing principles |
-| **Baseline Assessment** | `site-audit` | Quantify technical debt |
-| **Feature Development** | `devspark`, `plan`, `tasks`, `implement` | Full spec workflow |
-| **Production Support** | `quickfix` | Rapid fixes with validation |
-| **Code Review** | `pr-review` | Constitution compliance |
-| **Risk Analysis** | `critic` | Pre-implementation assessment |
-| **Release** | `release` | Archive and document |
-| **Maintenance** | `site-audit`, `evolve-constitution` | Monitor and evolve |
-
----
-
-## Technical Debt as a Metric
-
-Site audits quantify technical debt through compliance scores:
-
-```markdown
-| Category | Score | Status |
-|----------|-------|--------|
-| Constitution Compliance | 87% | ⚠️ PARTIAL |
-| Security | 95% | ✅ PASS |
-| Code Quality | 72% | ⚠️ PARTIAL |
-| Dependencies | 85% | ⚠️ PARTIAL |
-```
-
-Track trends over time by running regular audits and comparing results.
 
 ---
 

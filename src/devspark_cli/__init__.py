@@ -1448,23 +1448,15 @@ def run_migration_script() -> bool:
 
 
 def _seed_user_artifacts(project_path: Path) -> None:
-    """On first init, copy seed templates from .devspark/ into .documentation/.
+    """On first init, create the .documentation/memory/ directory structure.
 
-    Only copies files that don't already exist — never overwrites user work.
-    Currently seeds:
-      .devspark/memory/constitution.md -> .documentation/memory/constitution.md
+    The constitution is user-owned and NEVER seeded, copied, or overwritten
+    by install or upgrade operations. Users create it via /devspark.constitution
+    or /devspark.discover-constitution.
     """
-    seeds = [
-        ("memory/constitution.md",),
-    ]
-    devspark_dir = project_path / ".devspark"
     doc_dir = project_path / ".documentation"
-    for (rel_path,) in seeds:
-        src = devspark_dir / rel_path
-        dst = doc_dir / rel_path
-        if src.exists() and not dst.exists():
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, dst)
+    memory_dir = doc_dir / "memory"
+    memory_dir.mkdir(parents=True, exist_ok=True)
 
 
 def write_version_stamp(project_path: Path, ai_assistant: str, release_version: str = "") -> None:

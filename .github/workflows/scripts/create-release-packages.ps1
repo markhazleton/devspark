@@ -415,11 +415,8 @@ function Build-Variant {
     $devsparkDir = Join-Path $baseDir ".devspark"
     New-Item -ItemType Directory -Path $devsparkDir -Force | Out-Null
     
-    # Seed constitution template into .devspark/ (quickstart/CLI copy it into .documentation on first install)
-    if (Test-Path "memory") {
-        Copy-Item -Path "memory" -Destination $devsparkDir -Recurse -Force
-        Write-Host "Copied memory -> .devspark"
-    }
+    # Constitution is user-owned and never included in release packages.
+    # Users create it via /devspark.constitution or /devspark.discover-constitution.
     
     # Only copy the relevant script variant directory
     if (Test-Path "scripts") {

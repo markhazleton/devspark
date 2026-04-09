@@ -15,7 +15,6 @@ You **MUST** consider the user input before proceeding (if not empty). Supported
 | Option | Description |
 |--------|-------------|
 | `--dry-run` | Show what would change without modifying files |
-| `--backup` | Backup `constitution.md` before upgrading |
 | `--force` | Skip confirmations |
 
 ---
@@ -222,16 +221,7 @@ MISSING: .github/agents/devspark.specify.agent.md
 
 **Otherwise:**
 
-#### 7a. Backup constitution (if `--backup` or constitution has been customized)
-
-If `constitution.md` has been edited by the team, recommend backing up:
-
-```bash
-cp .documentation/memory/constitution.md \
-   .documentation/memory/constitution.md.YYYYMMDD.bak
-```
-
-#### 7b. Update stock defaults
+#### 7a. Update stock defaults
 
 Write the latest DevSpark prompt templates to `.devspark/defaults/commands/`
 and stock scripts to `.devspark/scripts/`.
@@ -254,7 +244,7 @@ uv tool install devspark-cli --force \
   --from git+https://github.com/markhazleton/devspark.git
 ```
 
-#### 7c. Show what changed
+#### 7b. Show what changed
 
 After updating `defaults/commands/` and `.devspark/scripts/`, compare against the
 team's working copies:
@@ -288,7 +278,7 @@ After the upgrade completes:
 1. **Read `.devspark/VERSION` again** — confirm version updated
 2. **Verify `.devspark/defaults/commands/` has latest prompts**
 3. **Confirm `.documentation/commands/` is untouched** — team customizations preserved
-4. **Confirm `constitution.md` is intact** (or restored from backup)
+4. **Confirm `constitution.md` is intact** (never touched by upgrades)
 
 Report a post-upgrade summary:
 
@@ -299,7 +289,7 @@ Post-Upgrade Verification
   commands/          : unchanged (team customizations preserved)
   stock scripts/     : updated (14 scripts)
   team scripts/      : unchanged (overrides preserved)
-  constitution.md    : preserved
+  constitution.md    : untouched (never modified by upgrades)
 ```
 
 ### 9. Output Final Summary
@@ -324,7 +314,7 @@ To merge script improvements:
 
 Next steps:
   1. Review changes: git diff
-  2. Test: run /devspark.constitution in your AI assistant
+  2. Test: run a slash command in your AI assistant (e.g., /devspark.specify)
   3. Commit: git add -A && git commit -m "chore: upgrade devspark to vX.Y.Z"
 ```
 
@@ -382,10 +372,10 @@ installs and should be read only as a fallback. After any successful upgrade,
 verify `.devspark/VERSION` was updated. If the stamp is absent after an upgrade,
 warn the user and suggest re-running `devspark upgrade`.
 
-### Constitution Backup Recommendation
+### Constitution is Never Touched
 
-If `constitution.md` has been customized (differs from the template default), always
-recommend a backup before upgrading — even if `--backup` was not specified.
+The constitution (`constitution.md`) is user-owned and NEVER modified by upgrades.
+No backup is needed because the upgrade process does not touch it.
 
 ## Context
 

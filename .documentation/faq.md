@@ -1,199 +1,117 @@
 # Frequently Asked Questions
 
-Welcome! If you're an experienced developer stepping into the world of AI-assisted, spec-driven development for the first time, you're in the right place. This FAQ covers the questions we hear most often — no jargon overload, just straight answers.
-
----
-
 ## Getting Started
 
 ### What exactly is DevSpark?
 
-DevSpark is a set of markdown files — prompt templates and helper scripts — that give your AI coding assistant a repeatable, structured workflow. Think of it as a process framework: it tells your AI agent *how* to help you go from requirements to shipped code, step by step.
+A set of markdown files -- prompt templates and helper scripts -- that give your AI coding assistant a repeatable workflow. It is not a program, a SaaS subscription, or an extension. Just files you drop into your repo.
 
-It is **not** a program you run, a SaaS subscription, or a VS Code extension. It's just files you drop into your repo.
+### What is "spec-driven development"?
 
-### What is "spec-driven development" and why should I care?
+You write a short specification (the *what* and *why*) before jumping to code. Your AI assistant uses that spec to generate a plan, break it into tasks, and implement -- all traceable back to the original requirements.
 
-Spec-driven development (SDD) means you write a short specification (the *what* and *why*) before jumping to code. Your AI assistant then uses that spec to generate a plan, break it into tasks, and implement — all traceable back to the original requirements.
+### Isn't this overkill for small changes?
 
-**Why it matters:** Without a spec, AI assistants produce code that *works* but may not do what you actually need. A spec keeps the AI focused, reduces rework, and gives you something concrete to review before a single line of code is written.
+DevSpark has right-sized workflows:
 
-### I've been writing software for 20 years without specs for every feature. Isn't this overkill?
+| Task Size | Workflow | Overhead |
+|-----------|---------|----------|
+| Typo / one-liner | Just fix it | None |
+| Bug fix or small change | `/devspark.quickfix` | ~2 minutes |
+| New feature, multi-file | Full spec workflow | ~10-15 minutes |
+| Architectural change | Full spec + `/devspark.critic` | ~20 minutes |
 
-Fair concern. DevSpark is designed with **right-sized workflows**:
+### Do I need to learn a new tool?
 
-| Task Size | Recommended Workflow | Overhead |
-|-----------|---------------------|----------|
-| Typo / one-liner | Just fix it — no process needed | None |
-| Bug fix or small change | `/devspark.quickfix` — lightweight, minimal ceremony | ~2 minutes |
-| New feature, multi-file | Full planning workflow (`requirements → plan → tasks → implement`) | ~10-15 minutes |
-| Architectural change | Full spec + `/devspark.critic` for risk analysis | ~20 minutes |
-
-You wouldn't write a design doc for a CSS tweak, and DevSpark doesn't ask you to. Use the quickfix path for small stuff and the full workflow when the scope justifies it.
-
-### Do I need to learn a new programming language or tool?
-
-No. DevSpark is pure markdown. If you can read a `.md` file, you can use DevSpark. The AI agent does the heavy lifting — you provide the intent and review the output.
+No. DevSpark is pure markdown. The AI agent does the heavy lifting.
 
 ---
 
 ## AI-Assisted Coding
 
-### I've never used an AI coding assistant before. Where do I start?
+### Where do I start with AI coding assistants?
 
-1. **Pick an agent.** DevSpark works with 17+ AI agents — GitHub Copilot, Claude Code, Cursor, Gemini CLI, and many others. Start with whatever your editor already supports.
-2. **Bootstrap DevSpark with the remote quickstart prompt** (see the [Quick Start Guide](quickstart.md)).
-3. **Follow the [Implementation Lifecycle Guide](implementation-lifecycle.md)** — it walks through installation, feature delivery, and updates.
-
-You don't need to be an AI expert. The slash commands (`/devspark.specify`, `/devspark.plan`, etc.) guide you through each step.
-
-### Will the AI write all my code for me?
-
-It can, but that's not the goal. Think of the AI as a very fast junior developer: it produces code quickly, but it needs direction, review, and guardrails. DevSpark provides those guardrails through the **constitution** and **spec workflow**.
-
-You stay in the driver's seat. You write the spec, review the plan, approve the tasks, and review the implementation. The AI accelerates the typing — you keep the thinking.
+1. Pick an agent (GitHub Copilot, Claude Code, Cursor, Gemini CLI, or any of 17+ supported agents).
+2. Bootstrap DevSpark with the [Quick Start Guide](quickstart.md).
+3. Follow the [Implementation Lifecycle](implementation-lifecycle.md).
 
 ### How do I know the AI-generated code is any good?
 
-Three mechanisms work together:
+Three mechanisms: the **constitution** (your project's rules, enforced by every command), **PR review** (`/devspark.pr-review` checks code against the constitution), and **site audit** (`/devspark.site-audit` scans the full codebase). None replace your own review -- they augment it.
 
-1. **The Constitution** — Your project's rules (coding standards, security requirements, test coverage targets) are defined once and enforced by every DevSpark command. The AI checks its own work against your standards.
-2. **PR Review** — `/devspark.pr-review` performs a constitution-based code review, catching violations before merge.
-3. **Site Audit** — `/devspark.site-audit` does a full-codebase scan against your constitution, surfacing technical debt and standards drift.
+### What if the AI makes a mistake?
 
-None of these replace your own code review. They augment it.
-
-### What if the AI makes a mistake or hallucinates something?
-
-It will. AI assistants sometimes generate incorrect code, invent APIs that don't exist, or misunderstand requirements. This is normal and expected.
-
-DevSpark mitigates this through structure:
-
-- **Specs** catch misunderstandings before coding starts (cheaper to fix a sentence than a module).
-- **The constitution** defines hard requirements the AI must follow.
-- **The critic command** (`/devspark.critic`) performs adversarial risk analysis on plans before implementation.
-- **You review everything.** DevSpark never auto-commits or auto-deploys.
-
-Treat AI output the way you'd treat a pull request from any team member — review it, test it, then merge it.
+It will. Specs catch misunderstandings before coding starts. The constitution defines hard requirements. The critic command (`/devspark.critic`) performs adversarial risk analysis. You review everything -- DevSpark never auto-commits or auto-deploys.
 
 ---
 
 ## The Constitution
 
-### What is a "constitution" in this context?
+### What is a "constitution"?
 
-It's a markdown file (`.documentation/memory/constitution.md`) that defines your project's non-negotiable principles: coding standards, security requirements, testing expectations, architecture decisions, and any other rules your codebase should follow.
+A markdown file (`.documentation/memory/constitution.md`) that defines your project's non-negotiable principles: coding standards, security requirements, testing expectations. Every DevSpark command reads and enforces it.
 
-Every DevSpark command reads the constitution and uses it as the benchmark for quality. When the AI reviews a PR, it checks against the constitution. When it generates code, it follows the constitution. When it audits your codebase, it reports violations against the constitution.
+### I already have coding standards in a wiki. Do I need this too?
 
-### I already have coding standards in a wiki somewhere. Do I need a constitution too?
-
-The constitution *is* your coding standards — just in a format your AI assistant can actually use. A wiki page that humans read is great for humans. A constitution that lives in your repo is great for both humans *and* AI agents.
-
-If you have existing standards, use `/devspark.discover-constitution` to analyze your codebase and generate a constitution draft. Then refine it with the principles you already have documented elsewhere.
+The constitution *is* your coding standards in a format your AI assistant can use. If you have existing standards, use `/devspark.discover-constitution` to generate a draft from your codebase.
 
 ### Can the constitution change over time?
 
-Absolutely. Codebases evolve, and the constitution should evolve with them. Use `/devspark.evolve-constitution` to propose amendments based on findings from PR reviews and audits. It follows a structured amendment process — no drive-by edits to your project's foundational rules.
+Yes. Use `/devspark.evolve-constitution` to propose amendments based on PR review findings. See the [Constitution Guide](constitution-guide.md) for details.
 
-### What goes in the constitution? Can you give me an example?
+### What goes in the constitution?
 
-A good constitution typically covers:
+Architecture, code quality, testing, security, dependencies, and documentation rules. Example:
 
-- **Architecture**: "This is a monorepo / microservices / modular monolith"
-- **Code quality**: "All public functions MUST have typed parameters"
-- **Testing**: "Unit test coverage MUST exceed 80%"
-- **Security**: "No hardcoded secrets. All SQL queries MUST be parameterized"
-- **Dependencies**: "New dependencies MUST be approved in a PR review"
-- **Documentation**: "All API endpoints MUST have OpenAPI documentation"
+- "All public functions MUST have typed parameters"
+- "Unit test coverage MUST exceed 80%"
+- "No hardcoded secrets. All SQL queries MUST be parameterized"
 
-The [Constitution Guide](constitution-guide.md) has detailed examples and best practices.
+See the [Constitution Guide](constitution-guide.md) for full examples.
 
 ---
 
-## Workflow & Commands
+## Workflow and Commands
 
-### What are these slash commands? Where do I type them?
+### Where do I type slash commands?
 
-Slash commands like `/devspark.specify` are typed into your AI agent's chat interface — the same place you'd normally talk to your AI assistant. They're not terminal commands.
-
-When you type `/devspark.specify Build a photo album organizer`, your AI agent reads the DevSpark prompt template for the `specify` command and uses it to guide the conversation.
+In your AI agent's chat interface -- the same place you normally talk to your assistant. They are not terminal commands.
 
 ### Do I have to use all 24 commands?
 
-No. Most projects use a small subset regularly. The 3 multi-app commands are only needed for monorepos with multiple applications.
+No. Most projects use a small subset:
 
-**Everyday commands:**
+**Everyday:** `/devspark.quickfix`, `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`, `/devspark.pr-review`
 
-- `/devspark.quickfix` — Small bug fixes and changes
-- `/devspark.specify` → `/devspark.plan` → `/devspark.tasks` → `/devspark.implement` — Feature development
-- `/devspark.pr-review` — Code review
+**Occasional:** `/devspark.constitution`, `/devspark.site-audit`, `/devspark.release`
 
-**Occasional commands:**
+**Specialized:** `/devspark.critic`, `/devspark.harvest`, `/devspark.evolve-constitution`
 
-- `/devspark.constitution` — Initial setup and periodic updates
-- `/devspark.site-audit` — Periodic codebase health checks
-- `/devspark.release` — Release documentation
+### What's the difference between quickfix and the full workflow?
 
-**Specialized commands:**
+**Quickfix** is for small, well-understood changes (one sentence, fewer than 3 files). **Full spec workflow** is for larger work where scope or design isn't immediately clear.
 
-- `/devspark.critic` — Risk analysis for complex changes
-- `/devspark.harvest` — Knowledge extraction and cleanup
-- `/devspark.evolve-constitution` — Constitution amendments
+### Can I customize commands for my team?
 
-Start with `quickfix` and the basic spec workflow. Add others as your comfort grows.
+Yes. DevSpark uses three-tier resolution:
 
-### What's the difference between `/devspark.quickfix` and the full spec workflow?
+1. **Personal** -- `.documentation/{git-user}/commands/`
+2. **Team** -- `.documentation/commands/`
+3. **Stock** -- `.devspark/defaults/commands/`
 
-**Quickfix** is for small, well-understood changes: "Fix the null reference in `UserService.GetById()`" or "Add a loading spinner to the dashboard page." It skips the full specification and planning steps because the scope is obvious.
-
-**Full spec workflow** is for larger work where the scope, design, or impact isn't immediately clear: "Add multi-tenant support" or "Replace the auth system with OAuth2." The extra upfront thinking pays off by preventing expensive rework mid-implementation.
-
-Rule of thumb: if you can describe the change in one sentence and it touches fewer than 3 files, use quickfix. Otherwise, use the full workflow.
-
-### Can I customize the commands for my team?
-
-Yes. DevSpark uses a three-tier resolution system:
-
-1. **Personal overrides** — `.documentation/{git-user}/commands/` — your individual customizations
-2. **Team customizations** — `.documentation/commands/` — shared by the whole team
-3. **Stock defaults** — `.devspark/defaults/commands/` — the built-in prompts
-
-Use `/devspark.personalize` to create your own overrides. They're committed to git, so they follow you across machines. Delete the override file to revert to the team or default version.
+Use `/devspark.personalize` to create personal overrides.
 
 ---
 
 ## Agent Compatibility
 
-### Which AI coding assistants does DevSpark work with?
+### Which AI assistants work with DevSpark?
 
-DevSpark is agent-agnostic and works with 17+ AI assistants, including:
+17+ agents including GitHub Copilot, Claude Code, Cursor, Gemini CLI, Windsurf, Amazon Q Developer, and more. See the [Quick Start Guide](quickstart.md) for the full list.
 
-- **GitHub Copilot** (VS Code, JetBrains, Neovim)
-- **Claude Code** (terminal-based)
-- **Cursor** (VS Code fork)
-- **Gemini CLI**
-- **Windsurf (Codeium)**
-- **Amazon Q Developer**
-- **Aider**
-- And many more — see the [Quick Start Guide](quickstart.md) for the full list
+### Can I use multiple agents on the same project?
 
-### Can I use multiple AI agents on the same project?
-
-Yes, and this is a key design goal. DevSpark's canonical prompts live in `.documentation/commands/` — a single source of truth. Each agent gets thin adapter files (shims) that point back to the canonical prompts.
-
-This means one team member can use Copilot while another uses Claude Code, and both follow the same spec-driven process with the same standards.
-
-### I'm already using GitHub Copilot for code completion. How is this different?
-
-Copilot's inline code completion (the gray ghost text) is great for line-by-line suggestions. DevSpark works at a higher level — it structures your *workflow*, not just your code completions.
-
-Think of it this way:
-
-- **Copilot completions** = autocomplete on steroids (tactical)
-- **DevSpark + Copilot Chat** = a structured development process with AI assistance (strategic)
-
-They complement each other. You use DevSpark commands in Copilot Chat to plan and manage work, while Copilot completions help you type faster in the editor.
+Yes. Canonical prompts live in `.documentation/commands/` as a single source of truth. Each agent gets thin shims that point there.
 
 ---
 
@@ -201,173 +119,66 @@ They complement each other. You use DevSpark commands in Copilot Chat to plan an
 
 ### How do I add DevSpark to an existing project?
 
-Open your AI agent in the existing project and run the matching remote quickstart prompt from the [Quick Start Guide](quickstart.md).
+Run the matching quickstart prompt from the [Quick Start Guide](quickstart.md). Then use `/devspark.discover-constitution` to generate a constitution from your existing code patterns.
 
-If you prefer the advanced CLI path instead, navigate to your project directory and run:
+### What files does DevSpark add?
 
-```bash
-cd /path/to/your-project
-uvx --from git+https://github.com/MarkHazleton/devspark.git devspark init --here
-```
+- **`.devspark/`** -- Framework files (prompt defaults, scripts). The "engine."
+- **`.documentation/`** -- Your project artifacts (specs, plans, constitution). "Your stuff."
 
-Then use `/devspark.discover-constitution` in your AI chat to generate a constitution based on your existing code patterns. This is the **brownfield** path — it respects what's already there instead of imposing new patterns blindly.
-
-### What files does DevSpark add to my repo?
-
-DevSpark creates two directories:
-
-- **`.devspark/`** — Framework files (prompt defaults, scripts). Think of this as the "engine."
-- **`.documentation/`** — Your project artifacts (specs, plans, constitution, decisions). Think of this as "your stuff."
-
-The separation is intentional: you can uninstall DevSpark (delete `.devspark/`) without losing any of your specifications, constitutions, or architectural decisions.
+Uninstall removes `.devspark/` without touching your work.
 
 ### Will DevSpark conflict with my existing tooling?
 
-No. DevSpark doesn't modify your build system, CI/CD pipeline, linter config, or any existing project files. It only adds its own directories (`.devspark/` and `.documentation/`) and optionally a few agent config files (like `.github/copilot-instructions.md`).
+No. It only adds `.devspark/`, `.documentation/`, and optionally a few agent config files. It doesn't modify your build system, CI/CD, or linter config.
 
 ### Can I use DevSpark with any programming language?
 
-Yes. DevSpark is language-agnostic. The specifications, plans, and constitutions are all markdown. The AI agent handles the language-specific implementation. Whether your project is Python, C#, TypeScript, Rust, Go, Java, or anything else makes no difference to the process.
+Yes. Specs and constitutions are markdown. The AI agent handles language-specific implementation.
 
----
+### Is my code sent anywhere?
 
-## Common Concerns
-
-### Isn't this just over-engineered documentation?
-
-We understand the skepticism. Here's the key difference: traditional documentation describes what *was* built (and often drifts out of date). DevSpark specs describe what *will* be built and are consumed by your AI agent in real-time during implementation.
-
-The specs are working documents that drive code generation, not shelf-ware that nobody reads after sprint planning.
-
-### Does this slow me down?
-
-For trivial changes, it would — which is why `/devspark.quickfix` exists for those cases.
-
-For non-trivial work, the upfront investment in defining requirements and planning typically *saves* time by reducing:
-
-- Rework from misunderstood requirements
-- AI hallucinations from vague prompts
-- Inconsistent code quality across features
-- "What was the decision and why?" conversations months later
-
-Most teams report that the time spent on requirements definition is recovered several times over during implementation and review.
-
-### What if I'm a solo developer? Is this overkill for one person?
-
-Solo developers are actually the primary audience. When you're working alone with an AI assistant, there's no team to catch misunderstandings or review your approach. The spec workflow serves as your thinking process, forcing you to clarify requirements before throwing them at the AI.
-
-The constitution is especially valuable for solo developers — it's your "future self" documentation. When you come back to a project after six months, the constitution tells you exactly what standards you set and why.
-
-### How is this different from just writing good prompts?
-
-Good prompts help for individual tasks. DevSpark provides a *system*:
-
-- **Continuity** — Specs and plans persist across chat sessions. Your AI doesn't forget what you discussed yesterday.
-- **Consistency** — The constitution ensures the same standards apply whether you're implementing feature A or fixing bug B.
-- **Traceability** — You can trace any piece of code back through tasks → plan → spec → requirements.
-- **Evolution** — The harvest and release commands keep your documentation current as the codebase changes.
-
-A good prompt gets you good code. A good process gets you a good codebase.
-
-### Is my code or data sent anywhere?
-
-DevSpark itself sends nothing anywhere. It's just markdown files in your repo. However, when you use an AI coding assistant (Copilot, Claude, etc.), your code and prompts are processed by that AI provider according to their terms of service and privacy policy.
-
-DevSpark doesn't add any additional data transmission, telemetry, or phone-home behavior. It's entirely local to your repository.
-
----
-
-## Troubleshooting
-
-### The slash commands aren't working in my editor
-
-Make sure you've completed the setup for your specific AI agent. Each agent has a slightly different configuration:
-
-- **GitHub Copilot**: Needs `.github/copilot-instructions.md` and prompt files in `.github/copilot/`
-- **Claude Code**: Needs `CLAUDE.md` at the repo root
-- **Cursor**: Needs `.cursor/rules/` directory with rule files
-
-Re-run the agent-specific remote quickstart prompt from the [Quick Start Guide](quickstart.md) to refresh the expected DevSpark files for your editor. Use `devspark init --ai ...` only if you intentionally want the advanced CLI path.
-
-### I ran the advanced CLI setup but nothing seems different
-
-After CLI initialization, the DevSpark files are in your repo but your AI agent may not be aware of them yet. Try:
-
-1. Restart your editor or reload the window
-2. Open a new AI chat session
-3. Type a DevSpark command like `/devspark.constitution` in the chat
-
-If your agent doesn't recognize the command, check that the agent-specific shim files were created (see the quickstart guide for your agent).
-
-### The AI isn't following my constitution
-
-A few things to check:
-
-- **Is the constitution file present?** Check `.documentation/memory/constitution.md` exists and isn't empty.
-- **Is it too vague?** Principles like "write good code" aren't actionable. Use specific, testable requirements: "All public API endpoints MUST return proper HTTP status codes."
-- **Is the AI context window full?** Very large codebases can push the constitution out of the AI's context. Try working in smaller scopes or referencing specific constitution sections.
-
-### How do I upgrade DevSpark without losing my work?
-
-For normal use, run the remote upgrade prompt in your AI chat:
-
-```text
-Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
-```
-
-If you explicitly use the advanced CLI workflow, run:
-
-```bash
-devspark upgrade
-```
-
-This updates the framework files in `.devspark/` while preserving your artifacts in `.documentation/`. Your constitution, specs, plans, and decisions are untouched.
-
-> [!TIP]
-> **Important:** After upgrading, verify your constitution file wasn't overwritten. If it was, restore from the `.bak` backup that the upgrade process creates. See the [Upgrade Guide](upgrade.md) for details.
+DevSpark itself sends nothing anywhere. When you use an AI assistant, your code is processed by that AI provider per their terms. DevSpark adds no telemetry or data transmission.
 
 ---
 
 ## Multi-App Monorepo Support
 
-### What is multi-app support?
-
-Multi-app support lets DevSpark manage repositories containing multiple applications — for example, a monorepo with a .NET API, a React frontend, and a Python data pipeline. Each application can have its own constitution, governance rules, and code review scope while sharing a common repository.
-
 ### Do I need multi-app support?
 
-**Most projects do not.** If your repository contains a single application, or a monorepo where all applications share the same conventions, standard DevSpark is all you need. Multi-app is entirely optional and changes nothing for single-app repositories.
+**Most projects do not.** Consider it only when your monorepo has applications with different tech stacks, different governance rules, or needs per-app constitutions.
 
-Consider multi-app when:
+### How do I enable it?
 
-- Your monorepo has applications with **different tech stacks** (e.g., .NET API + React UI)
-- Different applications need **different governance rules** (e.g., PCI-compliant service vs. internal tooling)
-- You want **per-app constitutions** that extend the repo-wide constitution with app-specific rules
-- You need **scoped code reviews** that understand which applications a PR affects
+1. Run `/devspark.add-application` for each application.
+2. Use `--app <id>` with any command to scope it.
+3. Run `/devspark.validate-registry` to verify consistency.
 
-### How do I enable multi-app support?
+Multi-app is additive -- it doesn't change existing single-app behavior. See the [Monorepo Guide](monorepo-guide.md).
 
-1. Run `/devspark.add-application` in your AI agent chat — it creates a registry at `.documentation/devspark.json` and scaffolds the app's documentation directory
-2. Repeat for each application in your repository
-3. Use `--app <id>` with any DevSpark command to scope it to a specific application
+---
 
-### Can I add multi-app support to an existing DevSpark project?
+## Troubleshooting
 
-Yes. Multi-app is additive — it builds on top of your existing DevSpark setup without requiring any migration or restructuring. Your existing constitution, specs, and decisions remain untouched.
+For upgrade-specific issues, see the [Upgrade Guide](upgrade.md#troubleshooting).
 
-### What are profiles?
+### Slash commands aren't working
 
-Profiles are reusable rule bundles that applications can inherit. For example, you might define an `api-profile` with API-specific governance rules and a `web-profile` for frontend conventions. Applications declare which profiles they use, and DevSpark composes the rules automatically.
+1. Restart your IDE/editor completely (not just reload window).
+2. Verify agent files exist (e.g., `ls .claude/commands/` or `ls .github/prompts/`).
+3. Re-run the quickstart prompt from the [Quick Start Guide](quickstart.md) to refresh files.
 
-### Does multi-app change how single-app repositories work?
+### The AI isn't following my constitution
 
-**No.** This is a non-negotiable design principle. Single-app repositories continue to work exactly as before with zero changes required. Multi-app functionality only activates when a registry file exists at `.documentation/devspark.json`.
+- Verify `.documentation/memory/constitution.md` exists and isn't empty.
+- Make principles specific and testable: "All public API endpoints MUST return proper HTTP status codes" not "write good code."
+- For large codebases, try working in smaller scopes.
 
 ---
 
 ## Still Have Questions?
 
-- Browse the [Getting Started](quickstart.md) guide for a hands-on walkthrough
-- Read the [Constitution Guide](constitution-guide.md) to understand the governance model
-- Check the [About page](about.md) for the project's design philosophy
-- Visit the [GitHub repository](https://github.com/MarkHazleton/devspark) to open an issue or start a discussion
+- [Quick Start Guide](quickstart.md) -- hands-on walkthrough
+- [Constitution Guide](constitution-guide.md) -- governance model
+- [About](about.md) -- design philosophy
+- [GitHub Issues](https://github.com/MarkHazleton/devspark/issues) -- report bugs or request features

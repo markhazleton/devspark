@@ -16,7 +16,6 @@
     - name: Monorepo Guide
       href: monorepo-guide.md
 
-
 # Quality & Review commands
 - name: Constitution-Powered Commands
   items:
@@ -30,6 +29,10 @@
       href: critic-usage.md
     - name: Harvest Guide
       href: harvest-usage.md
+    - name: Checklist Guide
+      href: checklist-usage.md
+    - name: Repo Story Guide
+      href: repo-story-usage.md
 
 # FAQ
 - name: FAQ
