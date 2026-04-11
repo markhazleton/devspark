@@ -260,7 +260,7 @@ required_gates: {Leave blank for low risk; otherwise checklist}
 
 Display to user:
 
-```markdown
+````markdown
 Quickfix Record Created: {NEXT_ID}
 
 - **Classification**: {CLASSIFICATION}
@@ -288,8 +288,9 @@ summary: "Targeted constitution check complete"
 5. If creating manually, verify the current branch is in sync with the target branch (usually `main`) before opening the PR
 
 If scope expands beyond {MAX_EFFORT}:
+
 - Upgrade to full spec: `/devspark.specify {problem statement}`
-```
+````
 
 ## Guidelines
 

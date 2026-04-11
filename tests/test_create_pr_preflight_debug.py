@@ -38,6 +38,8 @@ def _init_git_repo(repo_root: Path, branch_name: str) -> None:
     _run(["git", "config", "user.name", "DevSpark Test"], repo_root)
     _run(["git", "config", "user.email", "devspark@example.com"], repo_root)
     _run(["git", "checkout", "-b", branch_name], repo_root)
+    _run(["git", "add", "."], repo_root)
+    _run(["git", "commit", "-m", "initial commit"], repo_root)
 
 
 def _write(path: Path, content: str) -> None:

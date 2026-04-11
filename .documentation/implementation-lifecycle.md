@@ -38,7 +38,7 @@ After bootstrap, run the standard implementation lifecycle in chat:
 7. `/devspark.implement`
 8. `/devspark.create-pr`
 9. `/devspark.pr-review`
-9. Merge PR after approval
+10. Merge PR after approval
 
 ### Route-Aware Intake
 

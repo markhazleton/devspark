@@ -140,12 +140,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
 10. Completion validation:
-   - Verify all required tasks are completed
-   - Check that implemented features match the original specification
-   - Validate that tests pass and coverage meets requirements
-   - Confirm the implementation follows the technical plan
-   - Report final status with summary of completed work
-   - For quick-spec and full-spec routes, recommend `/devspark.create-pr` as the default next step after implementation
+    - Verify all required tasks are completed
+    - Check that implemented features match the original specification
+    - Validate that tests pass and coverage meets requirements
+    - Confirm the implementation follows the technical plan
+    - Report final status with summary of completed work
+    - For quick-spec and full-spec routes, recommend `/devspark.create-pr` as the default next step after implementation
 
 11. **Spec Lifecycle Status Update**:
     - After all tasks in tasks.md are marked `[X]` (complete):
