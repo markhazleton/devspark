@@ -19,7 +19,9 @@ Identify inconsistencies, duplications, ambiguities, and underspecified items ac
 
 ## Operating Constraints
 
-**STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
+The analysis itself is non-destructive. Do **not** edit `spec.md`, `plan.md`, `tasks.md`, or source files. The only file write allowed is refreshing the persisted gate artifact at `FEATURE_DIR/gates/analyze.md` with the final report from this command.
+
+Read the YAML frontmatter in `spec.md` before analyzing. Treat `classification`, `risk_level`, and `required_gates` as authoritative metadata.
 
 **Constitution Authority**: The project constitution (`/.documentation/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/devspark.analyze`.
 
@@ -125,7 +127,15 @@ Use this heuristic to prioritize findings:
 
 ### 6. Produce Compact Analysis Report
 
-Output a Markdown report (no file writes) with the following structure:
+Output a Markdown report with the following structure and write the same content to `FEATURE_DIR/gates/analyze.md` (create `FEATURE_DIR/gates/` if needed, replace the prior analyze gate artifact if it exists):
+
+```yaml
+gate: analyze
+status: pass | warn | fail
+blocking: true | false
+severity: info | warning | error | showstopper
+summary: "<concise outcome>"
+```
 
 ## Specification Analysis Report
 
@@ -165,6 +175,15 @@ At end of report, output a concise Next Actions block:
 
 Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
+### 9. Persist Gate Artifact
+
+After producing the report:
+
+- Ensure `FEATURE_DIR/gates/` exists
+- Save the report as `FEATURE_DIR/gates/analyze.md`
+- Treat the YAML gate block as authoritative for downstream commands such as `/devspark.tasks`, `/devspark.implement`, `/devspark.create-pr`, and `/devspark.pr-review`
+- When rerun, replace the previous `analyze.md` artifact instead of appending duplicate reports
+
 ## Operating Principles
 
 ### Context Efficiency
@@ -176,7 +195,7 @@ Ask the user: "Would you like me to suggest concrete remediation edits for the t
 
 ### Analysis Guidelines
 
-- **NEVER modify files** (this is read-only analysis)
+- **NEVER modify product artifacts outside the gate report**
 - **NEVER hallucinate missing sections** (if absent, report them accurately)
 - **Prioritize constitution violations** (these are always CRITICAL)
 - **Use examples over exhaustive rules** (cite specific instances, not generic patterns)

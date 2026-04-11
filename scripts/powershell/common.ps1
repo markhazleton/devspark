@@ -92,11 +92,43 @@ function Get-FeatureDir {
     Join-Path $RepoRoot ".documentation/specs/$Branch"
 }
 
+function Find-FeatureDirByPrefix {
+    param(
+        [string]$RepoRoot,
+        [string]$BranchName
+    )
+
+    $specsDir = Join-Path $RepoRoot '.documentation/specs'
+    if ($BranchName -notmatch '^(\d{3})-') {
+        return (Join-Path $specsDir $BranchName)
+    }
+
+    $prefixMatch = [regex]::Match($BranchName, '^(\d{3})-')
+    if (-not $prefixMatch.Success) {
+        return (Join-Path $specsDir $BranchName)
+    }
+
+    $prefix = $prefixMatch.Groups[1].Value
+    if (-not (Test-Path $specsDir)) {
+        return (Join-Path $specsDir $BranchName)
+    }
+
+    $matchesFound = @(Get-ChildItem -Path $specsDir -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -like "$prefix-*" } |
+        Select-Object -ExpandProperty Name)
+
+    if ($matchesFound.Count -eq 1) {
+        return (Join-Path $specsDir $matchesFound[0])
+    }
+
+    return (Join-Path $specsDir $BranchName)
+}
+
 function Get-FeaturePathsEnv {
     $repoRoot = Get-RepoRoot
     $currentBranch = Get-CurrentBranch
     $hasGit = Test-HasGit
-    $featureDir = Get-FeatureDir -RepoRoot $repoRoot -Branch $currentBranch
+    $featureDir = Find-FeatureDirByPrefix -RepoRoot $repoRoot -BranchName $currentBranch
     
     [PSCustomObject]@{
         REPO_ROOT     = $repoRoot
@@ -111,6 +143,49 @@ function Get-FeaturePathsEnv {
         QUICKSTART    = Join-Path $featureDir 'quickstart.md'
         CONTRACTS_DIR = Join-Path $featureDir 'contracts'
     }
+}
+
+function Get-MarkdownFrontmatter {
+    param([string]$Path)
+
+    if (-not (Test-Path $Path)) {
+        return $null
+    }
+
+    $lines = Get-Content -LiteralPath $Path -Encoding utf8
+    if ($lines.Count -lt 3 -or $lines[0] -ne '---') {
+        return $null
+    }
+
+    $frontmatter = New-Object System.Collections.Generic.List[string]
+    for ($i = 1; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -eq '---') {
+            return $frontmatter
+        }
+        $frontmatter.Add($lines[$i])
+    }
+
+    return $null
+}
+
+function Get-MarkdownFrontmatterValue {
+    param(
+        [string]$Path,
+        [string]$Key
+    )
+
+    $frontmatter = Get-MarkdownFrontmatter -Path $Path
+    if (-not $frontmatter) {
+        return $null
+    }
+
+    foreach ($line in $frontmatter) {
+        if ($line -match "^$([Regex]::Escape($Key)):\s*(.+)$") {
+            return $matches[1].Trim()
+        }
+    }
+
+    return $null
 }
 
 function Test-FileExists {
@@ -502,4 +577,5 @@ function Get-FeaturePathsAppAware {
         CONTRACTS_DIR  = Join-Path $featureDir 'contracts'
     }
 }
+
 

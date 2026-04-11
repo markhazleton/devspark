@@ -6,7 +6,12 @@ This directory contains the **core deliverable** of DevSpark — prompt template
 
 Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`, `/devspark.plan`). When you run `devspark init`, stock prompts are deployed to `.devspark/defaults/commands/`. AI shims then resolve prompts via the 3-tier order: personal override, team override, then stock default.
 
-The collection includes 21 core commands plus 3 optional multi-app commands (24 total).
+DevSpark ownership is strictly two-tier:
+
+- `.devspark/` is framework-managed stock content
+- `.documentation/` is repository-owned work product and overrides
+
+The collection includes 22 core commands plus 3 optional multi-app commands (25 total).
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -14,6 +19,7 @@ The collection includes 21 core commands plus 3 optional multi-app commands (24 
 | `plan.md` | `/devspark.plan` | Create technical implementation plan |
 | `tasks.md` | `/devspark.tasks` | Generate actionable task list |
 | `implement.md` | `/devspark.implement` | Execute tasks to build the feature |
+| `create-pr.md` | `/devspark.create-pr` | Draft or update a pull request with workflow context |
 | `constitution.md` | `/devspark.constitution` | Establish project principles |
 | `pr-review.md` | `/devspark.pr-review` | Review PRs against constitution |
 | `site-audit.md` | `/devspark.site-audit` | Comprehensive codebase audit |
@@ -42,6 +48,7 @@ The collection includes 21 core commands plus 3 optional multi-app commands (24 
 | File | Purpose |
 |------|---------|
 | `spec-template.md` | Template structure for feature specifications |
+| `quick-spec-template.md` | Template structure for lightweight quick specifications |
 | `plan-template.md` | Template structure for implementation plans |
 | `tasks-template.md` | Template structure for task breakdowns |
 | `checklist-template.md` | Template structure for quality checklists |

@@ -7,6 +7,31 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-04-10
+
+**Workflow evolution release with route-aware intake, shared agent registry, and frontmatter-driven contracts.**
+
+### Added
+
+- Shared `agents-registry.json` file as the canonical source of agent metadata across CLI, release packaging, and context generation
+- `src/devspark_cli/agent_registry.py` loader for the shared registry
+- `templates/quick-spec-template.md` for medium-sized work that needs structure without a full spec
+- Markdown frontmatter helpers in Bash and PowerShell common scripts for downstream route metadata consumption
+- Shared agent context hydration into generated agent files from `.documentation/AGENTS.md`
+
+### Changed
+
+- `/devspark.specify` now documents route-aware intake with explicit user confirmation for one-off fix, quick spec, and full spec paths
+- `/devspark.plan`, `/devspark.tasks`, `/devspark.implement`, `/devspark.analyze`, and `/devspark.critic` now treat spec frontmatter as authoritative metadata
+- Release packaging scripts now read supported agent metadata from the shared registry instead of hardcoded agent lists
+- Bash and PowerShell agent-context scripts now use the shared registry and refresh hydrated shared context blocks
+- PowerShell feature directory resolution now matches Bash prefix-based lookup behavior
+- Core docs now describe the two-tier ownership model consistently: `.devspark/` is framework-managed, `.documentation/` is repository-owned
+
+### Fixed
+
+- `scripts/bash/update-agent-context.sh` now binds `NEW_PLAN` correctly before validation
+
 ## [1.4.0] - 2026-04-09
 
 **Spec Lifecycle Enforcement — Prevent incomplete specs from being merged to main.**

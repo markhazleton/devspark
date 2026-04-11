@@ -23,6 +23,8 @@ Run `/devspark.critic` **after** `/devspark.tasks` and **before** `/devspark.imp
 /devspark.specify → /devspark.plan → /devspark.tasks → /devspark.critic → /devspark.implement
 ```
 
+Critic findings are advisory. The command surfaces severity and recommended action, persists the gate artifact at `.documentation/specs/<feature>/gates/critic.md`, and lets you proceed with an explicit acknowledgement. Downstream commands should carry that acknowledgement forward instead of silently discarding it.
+
 Use this command when you want:
 
 - A skeptical review of your implementation plan
@@ -60,6 +62,8 @@ Use this command when you want:
 
 - `/devspark.analyze` = Are the artifacts aligned and complete?
 - `/devspark.critic` = What will fail in production?
+
+If you choose to proceed with unresolved findings, note that decision in the active artifact so `/devspark.implement`, `/devspark.create-pr`, and `/devspark.pr-review` can reflect it.
 
 ## Understanding Severity Levels
 

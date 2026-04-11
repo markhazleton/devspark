@@ -15,7 +15,7 @@
 
 ### 🔀 Agent-Agnostic by Default
 
-Every AI coding assistant is a first-class citizen. Canonical command prompts live in `.documentation/commands/` — a single source of truth — while each platform receives only thin shims. Switch agents, use multiple agents on the same project, or onboard new team members on different tools.
+Every AI coding assistant is a first-class citizen. Stock command prompts live in `.devspark/defaults/commands/`, repository overrides live in `.documentation/commands/`, and each platform receives only thin shims. Switch agents, use multiple agents on the same project, or onboard new team members on different tools.
 
 ### 👥 Multi-User Personalization
 
@@ -58,7 +58,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | `/devspark.release` | ✅ Release documentation |
 | `/devspark.evolve-constitution` | ✅ Constitution evolution |
 | `/devspark.harvest` | ✅ Knowledge harvest and cleanup |
-| Agent-agnostic architecture | ✅ Canonical prompts + thin shims |
+| Agent-agnostic architecture | ✅ Stock prompts + repo overrides + thin shims |
 | Multi-user personalization | ✅ `/devspark.personalize` per-user overrides |
 | Multi-agent support | ✅ 17+ AI agents |
 | Multi-app monorepo support | ✅ Optional — profile-based inheritance, scoped commands |
@@ -75,6 +75,7 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
+- [Validation Matrix](validation-matrix.md) — Current evidence for v1.5.0 workflow scenarios
 - [Monorepo Guide](monorepo-guide.md) — Optional multi-application monorepo support
 
 ---
@@ -99,7 +100,9 @@ Match process overhead to task complexity:
 | Major Feature | Full Spec | Multiple files, architectural impact |
 | Bug Fix | Quickfix | Single file, clear root cause |
 | Hotfix | Quickfix (expedited) | Production emergency |
-| Minor Feature | Quickfix or Spec | Depends on scope |
+| Minor Feature | Quick Spec or Quickfix | Depends on scope |
+
+`/devspark.specify` is the default intake command for new work. It recommends the right route first, then asks the user to confirm or override that recommendation.
 
 ### Adaptive Documentation
 
@@ -131,7 +134,8 @@ For major features and architectural changes.
 | `/devspark.plan` | Technical planning | `/devspark.tasks` |
 | `/devspark.tasks` | Task breakdown | `/devspark.critic` |
 | `/devspark.critic` | Risk analysis | `/devspark.implement` |
-| `/devspark.implement` | Execute tasks | PR Review |
+| `/devspark.implement` | Execute tasks | `/devspark.create-pr` |
+| `/devspark.create-pr` | Draft or update the PR | `/devspark.pr-review` |
 
 ### Lightweight Workflow
 

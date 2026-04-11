@@ -21,6 +21,8 @@ DevSpark has right-sized workflows:
 | New feature, multi-file | Full spec workflow | ~10-15 minutes |
 | Architectural change | Full spec + `/devspark.critic` | ~20 minutes |
 
+`/devspark.specify` is the default intake command. It will recommend the lighter or heavier path before creating artifacts.
+
 ### Do I need to learn a new tool?
 
 No. DevSpark is pure markdown. The AI agent does the heavy lifting.
@@ -103,6 +105,8 @@ PR review blocks approval unless the spec is `Complete` with all tasks checked o
 
 **Quickfix** is for small, well-understood changes (one sentence, fewer than 3 files). **Full spec workflow** is for larger work where scope or design isn't immediately clear.
 
+A middle path also exists: `quick-spec`. That route keeps intent, scope, constraints, and an action plan without the full specification overhead.
+
 ### Can I customize commands for my team?
 
 Yes. DevSpark uses three-tier resolution:
@@ -123,7 +127,7 @@ Use `/devspark.personalize` to create personal overrides.
 
 ### Can I use multiple agents on the same project?
 
-Yes. Canonical prompts live in `.documentation/commands/` as a single source of truth. Each agent gets thin shims that point there.
+Yes. Stock prompts live in `.devspark/defaults/commands/`, repo overrides live in `.documentation/commands/`, and each agent gets thin shims that resolve personal, team, then stock prompts.
 
 ---
 

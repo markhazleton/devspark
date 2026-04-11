@@ -160,6 +160,25 @@ EOF
 check_file() { [[ -f "$1" ]] && echo "  ✓ $2" || echo "  ✗ $2"; }
 check_dir() { [[ -d "$1" && -n $(ls -A "$1" 2>/dev/null) ]] && echo "  ✓ $2" || echo "  ✗ $2"; }
 
+get_markdown_frontmatter() {
+    local file_path="$1"
+
+    [[ -f "$file_path" ]] || return 1
+
+    awk '
+        NR == 1 && $0 == "---" { in_block=1; next }
+        in_block && $0 == "---" { exit }
+        in_block { print }
+    ' "$file_path"
+}
+
+get_markdown_frontmatter_value() {
+    local file_path="$1"
+    local key="$2"
+
+    get_markdown_frontmatter "$file_path" | awk -F': ' -v wanted="$key" '$1 == wanted { print $2; exit }'
+}
+
 # ---------------------------------------------------------------------------
 # Multi-app support helpers (T009, T014, T022, T026-T030, T035)
 # ---------------------------------------------------------------------------

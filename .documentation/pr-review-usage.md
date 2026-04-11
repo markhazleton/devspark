@@ -259,11 +259,12 @@ Prioritized action items:
 # 1. Create feature spec and implementation
 /devspark.specify Build user authentication feature
 /devspark.plan Use Node.js with JWT tokens
+/devspark.tasks
 /devspark.implement
 
-# 2. Create PR on GitHub
+# 2. Draft or update the PR
 git push origin feature/auth
-gh pr create --title "Add user authentication" --body "Implements JWT-based auth"
+/devspark.create-pr --draft
 
 # 3. Review PR against constitution
 /devspark.pr-review
@@ -275,6 +276,8 @@ git push
 # 5. Re-review to verify fixes
 /devspark.pr-review
 ```
+
+If the feature proceeded with unresolved checklist, analyze, or critic findings, keep those acknowledgements visible in the PR description or linked artifacts. `/devspark.pr-review` treats them as advisory context, not hidden state.
 
 ### Workflow 2: Code Review
 

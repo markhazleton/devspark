@@ -88,6 +88,7 @@ if [ "$CLEANUP_MODE" = true ]; then
     [ -d "memory.old" ] && OLD_DIRS+=("memory.old")
     [ -d "scripts.old" ] && OLD_DIRS+=("scripts.old")
     [ -d "templates.old" ] && OLD_DIRS+=("templates.old")
+    [ -d "specs.old" ] && OLD_DIRS+=("specs.old")
 
     if [ ${#OLD_DIRS[@]} -eq 0 ]; then
         print_info "No .old backup directories found"
@@ -459,6 +460,7 @@ if [ "$DRY_RUN" = false ]; then
     [ -d "memory.old" ] && echo "  - memory.old/"
     [ -d "scripts.old" ] && echo "  - scripts.old/"
     [ -d "templates.old" ] && echo "  - templates.old/"
+    [ -d "specs.old" ] && echo "  - specs.old/"
     echo ""
 fi
 

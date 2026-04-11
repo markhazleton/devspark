@@ -19,6 +19,8 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 4. For upgrades, run the [remote upgrade prompt](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) (no CLI required)
 5. Use CLI only if you want advanced automation (`devspark upgrade`)
 
+After installation, start new work with `/devspark.specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
+
 ## Upgrade Paths
 
 - Basic (recommended): remote upgrade prompt
@@ -43,7 +45,9 @@ Example (Claude Code):
 
 - **`.devspark/`** — Framework files (stock prompts, templates, scripts). Safe to delete or upgrade.
 - **`.documentation/`** — Your project artifacts (constitution, specs, decisions). Never touched by DevSpark.
-- **Agent shims** — Platform-specific files that wire `/devspark.*` commands to the 3-tier resolution system.
+- **Agent shims** — Platform-specific files that wire `/devspark.*` commands to personal, team, and stock prompt resolution.
+
+DevSpark itself only writes to `.devspark/`. `.documentation/` remains repository-owned work product.
 
 ## Multi-App Support (Optional)
 

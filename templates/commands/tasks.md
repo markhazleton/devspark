@@ -33,6 +33,17 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **Optional**: data-model.md (entities), contracts/ (interface contracts), research.md (decisions), quickstart.md (test scenarios)
    - Note: Not all projects have all documents. Generate tasks based on what's available.
 
+   Before generating tasks, read the YAML frontmatter in `spec.md` and treat it as authoritative for `classification`, `risk_level`, and `required_gates`. If the prose implies a heavier or lighter route than the metadata, flag that mismatch to the user instead of guessing.
+
+   Before generating tasks, inspect any existing gate artifacts under FEATURE_DIR:
+   - `checklists/*.md`
+   - `analyze.md`, `critic.md`
+   - `gates/*.md`
+
+   If required gates exist and contain unresolved blocking findings, or a checklist has incomplete items, summarize the findings and recommend the next action. Ask the user whether to fix first, review findings, or proceed anyway. Do not hard-block.
+
+   If the user chooses to proceed anyway, record the decision in `tasks.md` under a `## Gate Acknowledgements` section with the gate name, the unresolved concern, and the user's explicit choice.
+
 3. **Execute task generation workflow**:
    - Load plan.md and extract tech stack, libraries, project structure
    - Load spec.md and extract user stories with their priorities (P1, P2, P3, etc.)
@@ -56,6 +67,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Dependencies section showing story completion order
    - Parallel execution examples per story
    - Implementation strategy section (MVP first, incremental delivery)
+   - `## Gate Acknowledgements` section when the user proceeds with unresolved findings
 
 5. **Report**: Output path to generated tasks.md and summary:
    - Total task count

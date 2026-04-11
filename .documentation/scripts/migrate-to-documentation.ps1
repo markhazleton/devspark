@@ -84,6 +84,7 @@ if ($Cleanup) {
     if (Test-Path "memory.old") { $oldDirs += "memory.old" }
     if (Test-Path "scripts.old") { $oldDirs += "scripts.old" }
     if (Test-Path "templates.old") { $oldDirs += "templates.old" }
+    if (Test-Path "specs.old") { $oldDirs += "specs.old" }
 
     if ($oldDirs.Count -eq 0) {
         Print-Info "No .old backup directories found"
@@ -503,6 +504,7 @@ if (-not $DryRun) {
     if (Test-Path "memory.old") { Write-Host "  - memory.old\" }
     if (Test-Path "scripts.old") { Write-Host "  - scripts.old\" }
     if (Test-Path "templates.old") { Write-Host "  - templates.old\" }
+    if (Test-Path "specs.old") { Write-Host "  - specs.old\" }
     Write-Host ""
 }
 
