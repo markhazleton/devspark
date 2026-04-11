@@ -8,7 +8,7 @@ Advanced option: CLI automation when you explicitly want terminal-driven operati
 ## Lifecycle at a Glance
 
 1. Bootstrap with quickstart prompt (no CLI)
-2. Run the implementation workflow (`/devspark.constitution` -> `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`)
+2. Run the implementation workflow (`/devspark.constitution` -> `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement` -> `/devspark.create-pr` -> `/devspark.pr-review`)
 3. Maintain with the remote upgrade prompt (no CLI)
 4. Use CLI only for advanced automation
 
@@ -30,14 +30,25 @@ This is the standard installation path for DevSpark.
 After bootstrap, run the standard implementation lifecycle in chat:
 
 1. `/devspark.constitution`
-2. `/devspark.specify`
+2. `/devspark.specify` (route-aware intake: one-off fix, quick spec, or full spec)
 3. `/devspark.clarify` (optional but recommended)
 4. `/devspark.plan`
 5. `/devspark.tasks`
 6. `/devspark.analyze` and `/devspark.critic` (optional quality gates)
 7. `/devspark.implement`
-8. Create PR and run `/devspark.pr-review`
-9. Merge PR after approval
+8. `/devspark.create-pr`
+9. `/devspark.pr-review`
+10. Merge PR after approval
+
+### Route-Aware Intake
+
+`/devspark.specify` is the canonical starting point for new work. It classifies the request, explains the recommendation, and asks the user to confirm or override it.
+
+- `one-off-fix` redirects to `/devspark.quickfix`
+- `quick-spec` creates a lightweight spec with frontmatter metadata
+- `full-spec` creates the full specification workflow
+
+Downstream commands must read the spec frontmatter first and treat that metadata as authoritative.
 
 ### Spec Status Lifecycle
 
@@ -50,9 +61,18 @@ Every spec has a `**Status**:` field that tracks where it is in the lifecycle. S
 /devspark.tasks       -->  (no change, still Draft)
 /devspark.implement   -->  Status: In Progress (at start)
                       -->  Status: Complete   (when all tasks marked [X])
+/devspark.create-pr   -->  Draft or update the PR using spec, task, and gate context
 /devspark.pr-review   -->  Blocks APPROVE unless Complete + all tasks done
 /devspark.release     -->  Archives only Complete specs
 ```
+
+Quality gate outputs are persisted under `.documentation/specs/<feature>/gates/`:
+
+- `analyze.md` for cross-artifact consistency review
+- `critic.md` for adversarial technical risk review
+- `checklist.md` as the current checklist gate summary across checklist files
+
+Downstream commands should treat the YAML gate block in those files as the shared source of truth.
 
 Valid status values: `Draft`, `In Progress`, `Complete`.
 
@@ -70,7 +90,7 @@ A typical sprint follows this pattern:
 ```text
 +--- Repeat per feature (N times during sprint) ------+
 |  /specify -> /clarify -> /plan -> /tasks -> /implement |
-|  -> git push -> gh pr create -> /pr-review -> merge    |
+|  -> git push -> /devspark.create-pr -> /devspark.pr-review -> merge |
 +--------------------------------------------------------+
                          |
                     (end of sprint)
@@ -78,7 +98,7 @@ A typical sprint follows this pattern:
                     /devspark.release
 ```
 
-- **Per feature**: Run the full lifecycle from specify through implement, create a PR, review it, and merge.
+- **Per feature**: Run the full lifecycle from specify through implement, draft the PR with `/devspark.create-pr`, review it, and merge.
 - **End of sprint**: Run `/devspark.release` once to archive all completed specs, generate release notes, and bump the version.
 - **Anytime**: Run `/devspark.site-audit` as a health check to catch lifecycle violations.
 - **Periodically**: Run `/devspark.harvest` to clean up stale documentation and ensure completed specs are captured in CHANGELOG.
@@ -149,6 +169,7 @@ Upgrade behavior:
 
 - Updates stock framework files in `.devspark/`
 - Preserves team and personal customizations in `.documentation/`
+- Warns when `.documentation/commands/` overrides may hide structural changes in updated stock prompts
 
 This is the standard update path for DevSpark.
 

@@ -10,7 +10,7 @@
     <a href="https://markhazleton.github.io/devspark/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
-> **Not a program. Not a subscription.** Copy 24 prompt files into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 25 prompt files into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
 
 ---
 
@@ -18,13 +18,15 @@
 
 ```text
 devspark/
-├── templates/commands/   ← 24 slash-command prompt files (THE PRODUCT)
+├── templates/commands/   ← 25 slash-command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── src/devspark_cli/     ← Optional CLI for automated setup
 └── .documentation/       ← Guides, media, and GitHub Pages site
 ```
 
 ## Get Started
+
+DevSpark has one entry command for new work: `/devspark.specify`. It classifies the request as a one-off fix, a quick spec, or a full spec, explains the recommendation, and lets the human confirm the route before proceeding.
 
 **Option A — Agent Quickstart** (recommended — no install)
 
@@ -72,6 +74,7 @@ For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/i
 | `/devspark.plan` | Create a technical implementation plan |
 | `/devspark.tasks` | Break the plan into actionable task lists |
 | `/devspark.implement` | Execute tasks and build the feature |
+| `/devspark.create-pr` | Draft or update a spec-aware pull request |
 
 ### Constitution-Powered (no spec required)
 
@@ -140,7 +143,7 @@ For repositories containing **multiple applications** with different platforms, 
 | `/devspark.list-applications` | Display all registered applications and profiles |
 | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
-For the full specification, see the [Multi-App Specification](.documentation/specs/001-multi-app-monorepo-support/spec.md).
+For the full specification, see the [Monorepo Guide](.documentation/monorepo-guide.md).
 
 ---
 
@@ -177,13 +180,15 @@ DevSpark cleanly separates **your work** from **its installation**:
 1. `.documentation/scripts/` — Team script overrides (e.g., Azure DevOps adapter)
 2. `.devspark/scripts/` — Stock scripts
 
+There is no third ownership tier. If an organization wants a shared baseline in `.documentation/`, it manages that through its own repo practices; DevSpark still only writes to `.devspark/`.
+
 **Clean removal**: `devspark uninstall` removes `.devspark/` and agent shims, leaves `.documentation/` untouched.
 
 ---
 
 ## Supported AI Agents
 
-DevSpark is agent-agnostic. Every agent below gets thin shims that redirect to shared canonical prompts.
+DevSpark is agent-agnostic. Every agent below gets thin shims that resolve personal overrides, team overrides, and stock prompts through the same command contract.
 
 | Agent | | Agent | | Agent | |
 |-------|---|-------|---|-------|---|
@@ -209,9 +214,9 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that redirect to s
 | Site audit guide | [site-audit-usage.md](.documentation/site-audit-usage.md) |
 | Critic guide | [critic-usage.md](.documentation/critic-usage.md) |
 | Harvest guide | [harvest-usage.md](.documentation/harvest-usage.md) |
-| Repo story | [repo-story/](.documentation/repo-story/) |
+| Repo story | [repo-story-usage.md](.documentation/repo-story-usage.md) |
 
-[![DevSpark video](./.documentation/media/devspark-video-header.jpg)](https://www.youtube.com/watch?v=a9eR1xsfvHg)
+[![DevSpark video](./.documentation/media/spec-kit-video-header.jpg)](https://www.youtube.com/watch?v=a9eR1xsfvHg)
 
 ---
 

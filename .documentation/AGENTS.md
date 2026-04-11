@@ -12,13 +12,35 @@ The toolkit supports multiple AI coding assistants, allowing teams to use their 
 
 ## Canonical Layout and Platform Shims
 
-DevSpark uses an **agnostic-by-default** architecture. All command prompts, scripts, templates, and memory live under `.documentation/` — the single source of truth. Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only **thin shims** that redirect to the canonical content.
+DevSpark uses a strict two-tier ownership model:
+
+- `.devspark/` holds framework-managed stock prompts, scripts, and templates
+- `.documentation/` holds repository-owned work product, overrides, constitutions, and specs
+
+Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims plus hydrated agent context.
+
+### Agent Registry (`agents-registry.json`)
+
+To prevent hardcoding AI agent identifiers across different workflow scripts and command templates, DevSpark leverages a centralized `agents-registry.json` file located in the repository root.
+
+**Key Features:**
+
+1. **Centralized Configuration**: Defines available agents (e.g., Copilot, Claude Code, Cursor) and their capabilities.
+2. **Cross-Editor Support**: Simplifies extending DevSpark to support new IDEs or agent implementations.
+3. **Workflow Integration**: Used dynamically by `create-pr` and other workspace scripts to understand which agent platforms are available or active.
+
+When adding a new AI assistant integration to DevSpark, simply append the agent's definition and configuration details to `agents-registry.json`.
 
 ### File Layout
 
 ```text
+`.devspark/`
+├── defaults/commands/           ← Stock command prompts (framework-managed)
+├── scripts/                     ← Stock helper scripts
+└── templates/                   ← Stock templates
+
 .documentation/
-├── commands/                    ← Canonical command prompts (agent-agnostic)
+├── commands/                    ← Team command overrides
 │   ├── devspark.specify.md
 │   ├── devspark.plan.md
 │   ├── devspark.implement.md
@@ -44,7 +66,8 @@ Each platform shim:
 1. Resolves the current git user (`git config user.name`, slug-normalized)
 2. Checks for a personalized override at `.documentation/{git-user}/commands/devspark.{cmd}.md`
 3. Falls back to the shared default at `.documentation/commands/devspark.{cmd}.md`
-4. Passes through user input (`$ARGUMENTS` / `{{args}}`) to the resolved prompt
+4. Falls back again to `.devspark/defaults/commands/devspark.{cmd}.md`
+5. Passes through user input (`$ARGUMENTS` / `{{args}}`) to the resolved prompt
 
 ### Multi-User Personalization
 
@@ -235,21 +258,25 @@ Specify supports multiple AI agents by generating agent-specific command files a
 
 Follow these steps to add a new agent (using a hypothetical new agent as an example):
 
-#### 1. Add to AGENT_CONFIG
+#### 1. Add to the shared registry
 
 **IMPORTANT**: Use the actual CLI tool name as the key, not a shortened version.
 
-Add the new agent to the `AGENT_CONFIG` dictionary in `src/devspark_cli/__init__.py`. This is the **single source of truth** for all agent metadata:
+Add the new agent to `agents-registry.json`. This is the single source of truth for CLI setup, release packaging, and context generation:
 
-```python
-AGENT_CONFIG = {
-    # ... existing agents ...
-    "new-agent-cli": {  # Use the ACTUAL CLI tool name (what users type in terminal)
-        "name": "New Agent Display Name",
-        "folder": ".newagent/",  # Directory for agent files
-        "install_url": "https://example.com/install",  # URL for installation docs (or None if IDE-based)
-        "requires_cli": True,  # True if CLI tool required, False for IDE-based agents
-    },
+```json
+{
+  "key": "new-agent-cli",
+  "name": "New Agent Display Name",
+  "folder": ".newagent/",
+  "context_file": "AGENTS.md",
+  "requires_cli": true,
+  "install_url": "https://example.com/install",
+  "release": {
+    "commands_dir": ".newagent/commands",
+    "extension": "md",
+    "arg_format": "$ARGUMENTS"
+  }
 }
 ```
 

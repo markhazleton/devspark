@@ -26,6 +26,8 @@ the prompt is resolved in this order (first match wins):
 
 Upgrades only write to `defaults/commands/`. Team and user customizations are never touched.
 
+This command only personalizes repository-owned overrides under `.documentation/`. It never edits stock prompts under `.devspark/defaults/commands/`.
+
 ## Outline
 
 This command creates a per-user personalized copy of a DevSpark command prompt.

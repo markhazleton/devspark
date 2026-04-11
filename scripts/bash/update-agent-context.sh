@@ -61,25 +61,13 @@ fi
 
 # Get all paths and variables from common functions
 eval "$(get_feature_paths)"  # Alias for compatibility with existing code
+NEW_PLAN="$IMPL_PLAN"
 AGENT_TYPE="${1:-}"
 
-# Agent-specific file paths  
-CLAUDE_FILE="$REPO_ROOT/CLAUDE.md"
-GEMINI_FILE="$REPO_ROOT/GEMINI.md"
-COPILOT_FILE="$REPO_ROOT/.github/agents/copilot-instructions.md"
-CURSOR_FILE="$REPO_ROOT/.cursor/rules/devspark-rules.mdc"
-QWEN_FILE="$REPO_ROOT/QWEN.md"
-AGENTS_FILE="$REPO_ROOT/AGENTS.md"
-WINDSURF_FILE="$REPO_ROOT/.windsurf/rules/devspark-rules.md"
-KILOCODE_FILE="$REPO_ROOT/.kilocode/rules/devspark-rules.md"
-AUGGIE_FILE="$REPO_ROOT/.augment/rules/devspark-rules.md"
-ROO_FILE="$REPO_ROOT/.roo/rules/devspark-rules.md"
-CODEBUDDY_FILE="$REPO_ROOT/CODEBUDDY.md"
-QODER_FILE="$REPO_ROOT/QODER.md"
-AMP_FILE="$REPO_ROOT/AGENTS.md"
-SHAI_FILE="$REPO_ROOT/SHAI.md"
-Q_FILE="$REPO_ROOT/AGENTS.md"
-BOB_FILE="$REPO_ROOT/AGENTS.md"
+AGENT_REGISTRY_FILE="$REPO_ROOT/agents-registry.json"
+SHARED_AGENT_CONTEXT_FILE="$REPO_ROOT/.documentation/AGENTS.md"
+SHARED_CONTEXT_START="<!-- DEVSPARK SHARED CONTEXT:START -->"
+SHARED_CONTEXT_END="<!-- DEVSPARK SHARED CONTEXT:END -->"
 
 # Template file
 TEMPLATE_FILE="$REPO_ROOT/.documentation/templates/agent-file-template.md"
@@ -108,6 +96,52 @@ log_error() {
 
 log_warning() {
     echo "WARNING: $1" >&2
+}
+
+get_agent_name() {
+    local agent_key="$1"
+    jq -r --arg key "$agent_key" '.agents[] | select(.key == $key) | .name' "$AGENT_REGISTRY_FILE"
+}
+
+get_agent_target_file() {
+    local agent_key="$1"
+    local relative_path
+    relative_path=$(jq -r --arg key "$agent_key" '.agents[] | select(.key == $key) | .context_file' "$AGENT_REGISTRY_FILE")
+    [[ -n "$relative_path" && "$relative_path" != "null" ]] || return 1
+    printf '%s/%s\n' "$REPO_ROOT" "$relative_path"
+}
+
+get_agent_keys() {
+    jq -r '.agents[].key' "$AGENT_REGISTRY_FILE"
+}
+
+refresh_shared_context_block() {
+    local target_file="$1"
+
+    [[ -f "$SHARED_AGENT_CONTEXT_FILE" ]] || return 0
+    [[ "$target_file" != "$SHARED_AGENT_CONTEXT_FILE" ]] || return 0
+
+    local temp_file
+    temp_file=$(mktemp) || {
+        log_error "Failed to create temporary file for shared context refresh"
+        return 1
+    }
+
+    awk -v start="$SHARED_CONTEXT_START" -v end="$SHARED_CONTEXT_END" '
+        $0 == start { skipping=1; next }
+        $0 == end { skipping=0; next }
+        !skipping { print }
+    ' "$target_file" > "$temp_file"
+
+    {
+        cat "$temp_file"
+        printf '\n%s\n' "$SHARED_CONTEXT_START"
+        cat "$SHARED_AGENT_CONTEXT_FILE"
+        printf '\n%s\n' "$SHARED_CONTEXT_END"
+    } > "$temp_file.rendered"
+
+    mv "$temp_file.rendered" "$target_file"
+    rm -f "$temp_file"
 }
 
 # Cleanup function for temporary files
@@ -147,10 +181,19 @@ validate_environment() {
         exit 1
     fi
     
+    if [[ ! -f "$AGENT_REGISTRY_FILE" ]]; then
+        log_error "Agent registry not found at $AGENT_REGISTRY_FILE"
+        exit 1
+    fi
+
     # Check if template exists (needed for new files)
     if [[ ! -f "$TEMPLATE_FILE" ]]; then
         log_warning "Template file not found at $TEMPLATE_FILE"
         log_warning "Creating new agent files will fail"
+    fi
+
+    if [[ ! -f "$SHARED_AGENT_CONTEXT_FILE" ]]; then
+        log_warning "Shared agent context not found at $SHARED_AGENT_CONTEXT_FILE"
     fi
 }
 
@@ -502,6 +545,11 @@ update_existing_agent_file() {
         rm -f "$temp_file"
         return 1
     fi
+
+    if ! refresh_shared_context_block "$target_file"; then
+        log_error "Failed to refresh shared context block in $target_file"
+        return 1
+    fi
     
     return 0
 }
@@ -585,150 +633,42 @@ update_agent_file() {
 
 update_specific_agent() {
     local agent_type="$1"
-    
-    case "$agent_type" in
-        claude)
-            update_agent_file "$CLAUDE_FILE" "Claude Code"
-            ;;
-        gemini)
-            update_agent_file "$GEMINI_FILE" "Gemini CLI"
-            ;;
-        copilot)
-            update_agent_file "$COPILOT_FILE" "GitHub Copilot"
-            ;;
-        cursor-agent)
-            update_agent_file "$CURSOR_FILE" "Cursor IDE"
-            ;;
-        qwen)
-            update_agent_file "$QWEN_FILE" "Qwen Code"
-            ;;
-        opencode)
-            update_agent_file "$AGENTS_FILE" "opencode"
-            ;;
-        codex)
-            update_agent_file "$AGENTS_FILE" "Codex CLI"
-            ;;
-        windsurf)
-            update_agent_file "$WINDSURF_FILE" "Windsurf"
-            ;;
-        kilocode)
-            update_agent_file "$KILOCODE_FILE" "Kilo Code"
-            ;;
-        auggie)
-            update_agent_file "$AUGGIE_FILE" "Auggie CLI"
-            ;;
-        roo)
-            update_agent_file "$ROO_FILE" "Roo Code"
-            ;;
-        codebuddy)
-            update_agent_file "$CODEBUDDY_FILE" "CodeBuddy CLI"
-            ;;
-        qodercli)
-            update_agent_file "$QODER_FILE" "Qoder CLI"
-            ;;
-        amp)
-            update_agent_file "$AMP_FILE" "Amp"
-            ;;
-        shai)
-            update_agent_file "$SHAI_FILE" "SHAI"
-            ;;
-        q)
-            update_agent_file "$Q_FILE" "Amazon Q Developer CLI"
-            ;;
-        bob)
-            update_agent_file "$BOB_FILE" "IBM Bob"
-            ;;
-        *)
-            log_error "Unknown agent type '$agent_type'"
-            log_error "Expected: claude|gemini|copilot|cursor-agent|qwen|opencode|codex|windsurf|kilocode|auggie|roo|codebuddy|amp|shai|q|bob|qodercli"
-            exit 1
-            ;;
-    esac
+
+    local target_file
+    local agent_name
+    target_file=$(get_agent_target_file "$agent_type") || {
+        log_error "Unknown agent type '$agent_type'"
+        log_error "Expected: $(get_agent_keys | paste -sd'|' -)"
+        exit 1
+    }
+    agent_name=$(get_agent_name "$agent_type")
+    update_agent_file "$target_file" "$agent_name"
 }
 
 update_all_existing_agents() {
     local found_agent=false
-    
-    # Check each possible agent file and update if it exists
-    if [[ -f "$CLAUDE_FILE" ]]; then
-        update_agent_file "$CLAUDE_FILE" "Claude Code"
-        found_agent=true
-    fi
-    
-    if [[ -f "$GEMINI_FILE" ]]; then
-        update_agent_file "$GEMINI_FILE" "Gemini CLI"
-        found_agent=true
-    fi
-    
-    if [[ -f "$COPILOT_FILE" ]]; then
-        update_agent_file "$COPILOT_FILE" "GitHub Copilot"
-        found_agent=true
-    fi
-    
-    if [[ -f "$CURSOR_FILE" ]]; then
-        update_agent_file "$CURSOR_FILE" "Cursor IDE"
-        found_agent=true
-    fi
-    
-    if [[ -f "$QWEN_FILE" ]]; then
-        update_agent_file "$QWEN_FILE" "Qwen Code"
-        found_agent=true
-    fi
-    
-    if [[ -f "$AGENTS_FILE" ]]; then
-        update_agent_file "$AGENTS_FILE" "Codex/opencode"
-        found_agent=true
-    fi
-    
-    if [[ -f "$WINDSURF_FILE" ]]; then
-        update_agent_file "$WINDSURF_FILE" "Windsurf"
-        found_agent=true
-    fi
-    
-    if [[ -f "$KILOCODE_FILE" ]]; then
-        update_agent_file "$KILOCODE_FILE" "Kilo Code"
-        found_agent=true
-    fi
 
-    if [[ -f "$AUGGIE_FILE" ]]; then
-        update_agent_file "$AUGGIE_FILE" "Auggie CLI"
-        found_agent=true
-    fi
-    
-    if [[ -f "$ROO_FILE" ]]; then
-        update_agent_file "$ROO_FILE" "Roo Code"
-        found_agent=true
-    fi
-
-    if [[ -f "$CODEBUDDY_FILE" ]]; then
-        update_agent_file "$CODEBUDDY_FILE" "CodeBuddy CLI"
-        found_agent=true
-    fi
-
-    if [[ -f "$SHAI_FILE" ]]; then
-        update_agent_file "$SHAI_FILE" "SHAI"
-        found_agent=true
-    fi
-
-    if [[ -f "$QODER_FILE" ]]; then
-        update_agent_file "$QODER_FILE" "Qoder CLI"
-        found_agent=true
-    fi
-
-    if [[ -f "$Q_FILE" ]]; then
-        update_agent_file "$Q_FILE" "Amazon Q Developer CLI"
-        found_agent=true
-    fi
-    
-    if [[ -f "$BOB_FILE" ]]; then
-        update_agent_file "$BOB_FILE" "IBM Bob"
-        found_agent=true
-    fi
+    local seen_targets='|'
+    local agent_key
+    while IFS= read -r agent_key; do
+        local target_file
+        local agent_name
+        target_file=$(get_agent_target_file "$agent_key") || continue
+        agent_name=$(get_agent_name "$agent_key")
+        if [[ "$seen_targets" == *"|$target_file|"* ]]; then
+            continue
+        fi
+        seen_targets+="$target_file|"
+        if [[ -f "$target_file" ]]; then
+            update_agent_file "$target_file" "$agent_name"
+            found_agent=true
+        fi
+    done < <(get_agent_keys)
     
     # If no agent files exist, create a default Claude file
     if [[ "$found_agent" == false ]]; then
         log_info "No existing agent files found, creating default Claude file..."
-        update_agent_file "$CLAUDE_FILE" "Claude Code"
+        update_agent_file "$REPO_ROOT/CLAUDE.md" "Claude Code"
     fi
 }
 print_summary() {
@@ -749,7 +689,7 @@ print_summary() {
     
     echo
 
-    log_info "Usage: $0 [claude|gemini|copilot|cursor-agent|qwen|opencode|codex|windsurf|kilocode|auggie|roo|codebuddy|amp|shai|q|bob|qodercli]"
+    log_info "Usage: $0 [$(get_agent_keys | paste -sd'|' -)]"
 }
 
 #==============================================================================

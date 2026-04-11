@@ -32,6 +32,7 @@ import tempfile
 import shutil
 import shlex
 import json
+import re
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -52,6 +53,8 @@ import readchar
 import ssl
 import truststore
 from datetime import datetime, timezone
+
+from .agent_registry import AGENT_CONFIG
 
 ssl_context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 client = httpx.Client(verify=ssl_context)
@@ -122,112 +125,6 @@ def _format_rate_limit_error(status_code: int, headers: httpx.Headers, url: str)
     
     return "\n".join(lines)
 
-# Agent configuration with name, folder, install URL, and CLI tool requirement
-AGENT_CONFIG = {
-    "copilot": {
-        "name": "GitHub Copilot",
-        "folder": ".github/",
-        "install_url": None,  # IDE-based, no CLI check needed
-        "requires_cli": False,
-    },
-    "claude": {
-        "name": "Claude Code",
-        "folder": ".claude/",
-        "install_url": "https://docs.anthropic.com/en/docs/claude-code/setup",
-        "requires_cli": True,
-    },
-    "gemini": {
-        "name": "Gemini CLI",
-        "folder": ".gemini/",
-        "install_url": "https://github.com/google-gemini/gemini-cli",
-        "requires_cli": True,
-    },
-    "cursor-agent": {
-        "name": "Cursor",
-        "folder": ".cursor/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-    "qwen": {
-        "name": "Qwen Code",
-        "folder": ".qwen/",
-        "install_url": "https://github.com/QwenLM/qwen-code",
-        "requires_cli": True,
-    },
-    "opencode": {
-        "name": "opencode",
-        "folder": ".opencode/",
-        "install_url": "https://opencode.ai",
-        "requires_cli": True,
-    },
-    "codex": {
-        "name": "Codex CLI",
-        "folder": ".codex/",
-        "install_url": "https://github.com/openai/codex",
-        "requires_cli": True,
-    },
-    "windsurf": {
-        "name": "Windsurf",
-        "folder": ".windsurf/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-    "kilocode": {
-        "name": "Kilo Code",
-        "folder": ".kilocode/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-    "auggie": {
-        "name": "Auggie CLI",
-        "folder": ".augment/",
-        "install_url": "https://docs.augmentcode.com/cli/setup-auggie/install-auggie-cli",
-        "requires_cli": True,
-    },
-    "codebuddy": {
-        "name": "CodeBuddy",
-        "folder": ".codebuddy/",
-        "install_url": "https://www.codebuddy.ai/cli",
-        "requires_cli": True,
-    },
-    "qodercli": {
-        "name": "Qoder CLI",
-        "folder": ".qoder/",
-        "install_url": "https://qoder.com/cli",
-        "requires_cli": True,
-    },
-    "roo": {
-        "name": "Roo Code",
-        "folder": ".roo/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-    "q": {
-        "name": "Amazon Q Developer CLI",
-        "folder": ".amazonq/",
-        "install_url": "https://aws.amazon.com/developer/learning/q-developer-cli/",
-        "requires_cli": True,
-    },
-    "amp": {
-        "name": "Amp",
-        "folder": ".agents/",
-        "install_url": "https://ampcode.com/manual#install",
-        "requires_cli": True,
-    },
-    "shai": {
-        "name": "SHAI",
-        "folder": ".shai/",
-        "install_url": "https://github.com/ovh/shai",
-        "requires_cli": True,
-    },
-    "bob": {
-        "name": "IBM Bob",
-        "folder": ".bob/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-}
-
 SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
 CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
@@ -237,6 +134,22 @@ CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
 # .devspark/ is the removable installation — fully replaceable on upgrade.
 PROTECTED_PREFIXES = (
     ".documentation/",
+)
+
+STRUCTURAL_OVERRIDE_COMMANDS = (
+    "specify",
+    "plan",
+    "tasks",
+    "implement",
+    "create-pr",
+)
+
+LEGACY_BACKUP_DIRS = (
+    ".specify.old",
+    "memory.old",
+    "scripts.old",
+    "templates.old",
+    "specs.old",
 )
 
 
@@ -1395,12 +1308,13 @@ def run_migration_script() -> bool:
     doc_dir.mkdir(exist_ok=True)
 
     moved = 0
+    skipped_overwrites: list[tuple[Path, Path]] = []
 
     def _merge_into(src: Path, dst: Path) -> None:
-        """Copy src tree into dst, overwriting existing files.
+        """Copy src tree into dst without overwriting existing .documentation files.
 
-        User files from the old structure always take priority over template
-        files that init() just installed.
+        Legacy files should replace stock files created during init, but they must
+        never clobber repo-owned work that already exists under .documentation/.
         """
         dst.mkdir(parents=True, exist_ok=True)
         for item in src.rglob("*"):
@@ -1408,6 +1322,9 @@ def run_migration_script() -> bool:
                 rel = item.relative_to(src)
                 dst_file = dst / rel
                 dst_file.parent.mkdir(parents=True, exist_ok=True)
+                if dst_file.exists():
+                    skipped_overwrites.append((item, dst_file))
+                    continue
                 shutil.copy2(str(item), str(dst_file))
 
     # Handle legacy hidden folder (.specify/) — copy known subdirs then root files, then rename
@@ -1423,6 +1340,8 @@ def run_migration_script() -> bool:
                 dst_file = doc_dir / item.name
                 if not dst_file.exists():
                     shutil.copy2(str(item), str(dst_file))
+                else:
+                    skipped_overwrites.append((item, dst_file))
         legacy_spec_dir.rename(cwd / ".specify.old")
         console.print("[green]>[/green] .specify/ -> .specify.old/")
         moved += 1
@@ -1440,6 +1359,16 @@ def run_migration_script() -> bool:
     if moved == 0:
         console.print("[yellow]Nothing to migrate — old directories not found.[/yellow]")
         return False
+
+    if skipped_overwrites:
+        console.print("[yellow]Preserved existing .documentation files during migration:[/yellow]")
+        for src_file, dst_file in skipped_overwrites[:10]:
+            console.print(
+                f"  - kept {dst_file.relative_to(cwd)}; skipped legacy copy from {src_file.relative_to(cwd)}"
+            )
+        if len(skipped_overwrites) > 10:
+            console.print(f"  - ... and {len(skipped_overwrites) - 10} more preserved file(s)")
+        console.print("[dim]Review legacy *.old/ backups and merge any skipped content manually if needed.[/dim]")
 
     console.print(f"[green]Migration complete.[/green] Moved {moved} item(s). Old directories renamed to *.old/")
     console.print("[dim]After verifying, delete *.old/ directories when ready.[/dim]")
@@ -1464,10 +1393,11 @@ def write_version_stamp(project_path: Path, ai_assistant: str, release_version: 
 
     Uses release_version (the GitHub release tag that was downloaded) when available,
     falling back to the installed CLI metadata version.
-    Format (plain text, three lines):
-        <version>
+    Format (key-value):
+        version: <version>
         installed: <YYYY-MM-DD>
-        agent: <agent-key>
+        method: <install-method>
+        migrated-from: <source>
     """
     # Prefer the release tag from the downloaded template (e.g. "v1.2.2")
     version = release_version.lstrip("v") if release_version else ""
@@ -1488,17 +1418,24 @@ def write_version_stamp(project_path: Path, ai_assistant: str, release_version: 
                 version = "unknown"
 
     devspark_dir = project_path / ".devspark"
-    if not devspark_dir.exists():
-        return  # .devspark not present — skip silently
+    devspark_dir.mkdir(parents=True, exist_ok=True)
 
     stamp_path = devspark_dir / "VERSION"
     install_date = datetime.now().strftime("%Y-%m-%d")
 
+    legacy_markers = []
+    if (project_path / ".specify").exists() or (project_path / ".specify.old").exists():
+        legacy_markers.append("legacy-specify")
+    if (project_path / ".documentation" / "defaults").exists():
+        legacy_markers.append("documentation-defaults")
+    migrated_from = ",".join(legacy_markers) if legacy_markers else "fresh"
+
     try:
         stamp_path.write_text(
-            f"{version}\n"
+            f"version: {version}\n"
             f"installed: {install_date}\n"
-            f"agent: {ai_assistant}\n",
+            f"method: {ai_assistant}-quickstart\n"
+            f"migrated-from: {migrated_from}\n",
             encoding="utf-8",
         )
     except Exception:
@@ -1516,15 +1453,175 @@ def read_version_stamp(project_path: Path) -> Optional[dict]:
         return None
     try:
         lines = stamp_path.read_text(encoding="utf-8").splitlines()
-        result = {"version": lines[0].strip() if lines else "unknown"}
-        for line in lines[1:]:
-            if line.startswith("installed:"):
-                result["installed"] = line.split(":", 1)[1].strip()
-            elif line.startswith("agent:"):
-                result["agent"] = line.split(":", 1)[1].strip()
+        result: dict[str, str] = {}
+        if lines and ":" not in lines[0]:
+            result["version"] = lines[0].strip() if lines else "unknown"
+            for line in lines[1:]:
+                if line.startswith("installed:"):
+                    result["installed"] = line.split(":", 1)[1].strip()
+                elif line.startswith("agent:"):
+                    result["agent"] = line.split(":", 1)[1].strip()
+                    result.setdefault("method", f"{result['agent']}-quickstart")
+        else:
+            for line in lines:
+                if ":" not in line:
+                    continue
+                key, value = line.split(":", 1)
+                result[key.strip()] = value.strip()
+            if "method" in result and "agent" not in result:
+                method = result["method"]
+                if method.endswith("-quickstart"):
+                    result["agent"] = method[: -len("-quickstart")]
+        if "version" not in result:
+            result["version"] = "unknown"
         return result
     except Exception:
         return None
+
+
+def _line_diff_count(path_a: Path, path_b: Path) -> int:
+    """Return a simple line delta count between two text files."""
+    try:
+        lines_a = path_a.read_text(encoding="utf-8").splitlines()
+        lines_b = path_b.read_text(encoding="utf-8").splitlines()
+    except Exception:
+        return 0
+
+    max_len = max(len(lines_a), len(lines_b))
+    changed = 0
+    for index in range(max_len):
+        left = lines_a[index] if index < len(lines_a) else ""
+        right = lines_b[index] if index < len(lines_b) else ""
+        if left != right:
+            changed += 1
+    return changed
+
+
+def collect_legacy_artifacts(project_path: Path) -> list[tuple[str, Path]]:
+    """Collect stale legacy artifacts that the user may want to clean up manually."""
+    artifacts: list[tuple[str, Path]] = []
+
+    for rel_path in LEGACY_BACKUP_DIRS:
+        path = project_path / rel_path
+        if path.exists():
+            artifacts.append(("Legacy backup", path))
+
+    legacy_defaults = project_path / ".documentation" / "defaults"
+    if legacy_defaults.exists():
+        artifacts.append(("Pre-separation stock defaults", legacy_defaults))
+
+    legacy_version = project_path / ".documentation" / "DEVSPARK_VERSION"
+    if legacy_version.exists():
+        artifacts.append(("Legacy version stamp", legacy_version))
+
+    for pattern in (
+        ".claude/commands/devspark.*-old.md",
+        ".github/agents/devspark.*-old.agent.md",
+        ".github/prompts/devspark.*-old.prompt.md",
+        ".cursor/commands/devspark.*-old.md",
+        ".windsurf/workflows/devspark.*-old.md",
+    ):
+        for match in project_path.glob(pattern):
+            artifacts.append(("Legacy shim duplicate", match))
+
+    return artifacts
+
+
+def collect_structural_override_warnings(project_path: Path) -> list[tuple[str, Path]]:
+    """Return override files that can mask structural stock command changes."""
+    warnings: list[tuple[str, Path]] = []
+    for command_name in STRUCTURAL_OVERRIDE_COMMANDS:
+        team_override = project_path / ".documentation" / "commands" / f"devspark.{command_name}.md"
+        if team_override.exists():
+            warnings.append((command_name, team_override))
+    return warnings
+
+
+def collect_script_override_summaries(project_path: Path) -> list[tuple[str, Path, Path | None, int]]:
+    """Compare team script overrides to stock scripts for upgrade reporting."""
+    overrides: list[tuple[str, Path, Path | None, int]] = []
+    for shell in ("bash", "powershell"):
+        override_dir = project_path / ".documentation" / "scripts" / shell
+        stock_dir = project_path / ".devspark" / "scripts" / shell
+        if not override_dir.exists():
+            continue
+        for override_path in sorted(p for p in override_dir.iterdir() if p.is_file()):
+            stock_path = stock_dir / override_path.name
+            diff_count = _line_diff_count(override_path, stock_path) if stock_path.exists() else 0
+            overrides.append((shell, override_path, stock_path if stock_path.exists() else None, diff_count))
+    return overrides
+
+
+def collect_pre_separation_framework_artifacts(project_path: Path) -> list[tuple[str, Path]]:
+    """Detect old framework-managed files that still live under .documentation/."""
+    findings: list[tuple[str, Path]] = []
+    for rel_path in (
+        ".documentation/defaults/commands",
+        ".documentation/defaults/templates",
+    ):
+        path = project_path / rel_path
+        if path.exists():
+            findings.append(("Pre-separation framework content", path))
+    return findings
+
+
+def render_upgrade_analysis(project_path: Path) -> dict:
+    """Collect upgrade analysis data for reporting before and after upgrade."""
+    return {
+        "legacy_artifacts": collect_legacy_artifacts(project_path),
+        "pre_separation": collect_pre_separation_framework_artifacts(project_path),
+        "structural_overrides": collect_structural_override_warnings(project_path),
+        "script_overrides": collect_script_override_summaries(project_path),
+        "stamp": read_version_stamp(project_path),
+    }
+
+
+def print_upgrade_analysis(analysis: dict, project_path: Path, ai_assistant: str, dry_run: bool = False) -> None:
+    """Render upgrade analysis guidance for dry-run and real upgrade flows."""
+    stamp = analysis.get("stamp") or {}
+    if stamp:
+        method = stamp.get("method") or stamp.get("agent") or "unknown"
+        console.print(
+            f"[bold]Installed Version:[/bold] {stamp.get('version', 'unknown')}  "
+            f"[bold]Method:[/bold] {method}"
+        )
+        if stamp.get("migrated-from"):
+            console.print(f"[dim]Migration marker:[/dim] {stamp['migrated-from']}")
+        console.print()
+
+    pre_separation = analysis.get("pre_separation", [])
+    if pre_separation:
+        console.print("[yellow]Pre-separation framework files detected under .documentation/:[/yellow]")
+        for label, path in pre_separation:
+            console.print(f"  - {path.relative_to(project_path)} ({label})")
+        console.print("[dim]Upgrade will refresh stock files under .devspark/ and leave these legacy copies untouched for manual cleanup.[/dim]\n")
+
+    structural_overrides = analysis.get("structural_overrides", [])
+    if structural_overrides:
+        console.print("[yellow]Team overrides that may mask structural stock changes:[/yellow]")
+        for command_name, path in structural_overrides:
+            console.print(f"  - /devspark.{command_name} -> {path.relative_to(project_path)}")
+        console.print("[dim]Review diffs against .devspark/defaults/commands/ after upgrade before assuming the new contract is active.[/dim]\n")
+
+    script_overrides = analysis.get("script_overrides", [])
+    if script_overrides:
+        console.print("[cyan]Team script overrides preserved during upgrade:[/cyan]")
+        for shell, override_path, stock_path, diff_count in script_overrides:
+            if stock_path is None:
+                console.print(f"  - {override_path.relative_to(project_path)} ({shell}, no stock counterpart)")
+            else:
+                console.print(
+                    f"  - {override_path.relative_to(project_path)} ({shell}, {diff_count} differing line(s) vs stock)"
+                )
+        console.print()
+
+    legacy_artifacts = analysis.get("legacy_artifacts", [])
+    if legacy_artifacts:
+        heading = "Legacy artifacts to review after upgrade:" if not dry_run else "Legacy artifacts already present:"
+        console.print(f"[yellow]{heading}[/yellow]")
+        for label, path in legacy_artifacts:
+            console.print(f"  - {path.relative_to(project_path)} ({label})")
+        console.print("[dim]DevSpark will not delete these automatically. Remove them manually after verification.[/dim]\n")
 
 
 # ============================================================================
@@ -1617,6 +1714,7 @@ def upgrade(
     # Step 4: Check for old structure migration (deferred — runs after templates are installed)
     migration_needed = False
     migration_confirmed = False
+    pre_upgrade_analysis = render_upgrade_analysis(Path.cwd())
     if not skip_migration:
         console.print("[cyan]→[/cyan] Checking for old structure...")
         if needs_migration():
@@ -1637,6 +1735,8 @@ def upgrade(
         else:
             console.print("[green]✓[/green] Already using .documentation/ structure\n")
 
+    print_upgrade_analysis(pre_upgrade_analysis, Path.cwd(), ai_assistant, dry_run=dry_run)
+
     # Step 5: Show upgrade preview for dry run
     if dry_run:
         console.print("\n" + "="*60)
@@ -1645,8 +1745,10 @@ def upgrade(
 
         console.print("[bold]What would happen in actual upgrade:[/bold]")
         console.print("  1. Download latest DevSpark templates from GitHub")
-        console.print(f"  2. Update .{AGENT_CONFIG[ai_assistant]['folder'][:-1]}/ agent shims")
-        console.print("  3. Update .devspark/ with latest stock prompts and scripts")
+        console.print(f"  2. Update {AGENT_CONFIG[ai_assistant]['folder']} agent shims")
+        console.print("  3. Update .devspark/ with latest stock prompts, scripts, templates, and VERSION stamp")
+        if migration_needed:
+            console.print("  4. Run legacy .specify/root-structure migration into .documentation/")
         console.print("  [green]✓[/green] .documentation/ — entirely user-owned, NEVER touched")
         console.print()
         console.print("[bold]To perform the actual upgrade:[/bold]")
@@ -1685,6 +1787,8 @@ def upgrade(
             console.print("[yellow]⚠[/yellow] Migration had issues. See .documentation/upgrade.md for manual steps.\n")
 
     # Step 8: Post-upgrade guidance
+    post_upgrade_analysis = render_upgrade_analysis(Path.cwd())
+
     console.print("\n" + "="*60)
     console.print("[bold green]✓ Upgrade Complete![/bold green]")
     console.print("="*60 + "\n")
@@ -1693,13 +1797,24 @@ def upgrade(
     stamp = read_version_stamp(Path.cwd())
     if stamp:
         console.print(f"[green]✓[/green] Version stamp written: [cyan].devspark/VERSION[/cyan]")
-        console.print(f"  Version: [bold]{stamp.get('version', 'unknown')}[/bold]  Agent: {stamp.get('agent', 'unknown')}  Date: {stamp.get('installed', 'unknown')}\n")
+        console.print(
+            f"  Version: [bold]{stamp.get('version', 'unknown')}[/bold]  "
+            f"Method: {stamp.get('method', stamp.get('agent', 'unknown'))}  "
+            f"Date: {stamp.get('installed', 'unknown')}"
+        )
+        if stamp.get("migrated-from"):
+            console.print(f"  Migrated From: {stamp.get('migrated-from')}\n")
+        else:
+            console.print()
+
+    print_upgrade_analysis(post_upgrade_analysis, Path.cwd(), ai_assistant)
 
     console.print("[bold]Next steps:[/bold]")
     console.print("  1. Review changes: [cyan]git status[/cyan] and [cyan]git diff[/cyan]")
     console.print("  2. Test slash commands in your AI assistant (e.g., [cyan]/devspark.constitution[/cyan])")
-    console.print("  3. Verify your specs are intact: [cyan]ls .documentation/specs/[/cyan]")
-    console.print("  4. If everything looks good, commit:")
+    console.print("  3. Diff stock vs overrides where needed: [cyan].devspark/defaults/commands/[/cyan] vs [cyan].documentation/commands/[/cyan]")
+    console.print("  4. Verify your specs are intact: [cyan]ls .documentation/specs/[/cyan]")
+    console.print("  5. If everything looks good, commit:")
     console.print("     [cyan]git add -A[/cyan]")
     console.print("     [cyan]git commit -m 'chore: upgrade to latest devspark version'[/cyan]")
 

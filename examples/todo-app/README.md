@@ -1,6 +1,6 @@
 # DevSpark Example: Todo App
 
-This is a minimal example showing what a project looks like **after** DevSpark is installed. Use it as a reference for the expected directory structure, file contents, and 3-tier override system.
+This is a minimal example showing what a project looks like **after** DevSpark is installed. Use it as a reference for the expected directory structure, file contents, and personal/team/stock prompt resolution.
 
 ## What's Here
 
@@ -29,7 +29,7 @@ examples/todo-app/
 
 1. **`.devspark/` vs `.documentation/`** — Framework files separate from user work
 2. **Constitution** — `.documentation/memory/constitution.md` is customized with project-specific principles; the stock seed template lives in `.devspark/memory/constitution.md`
-3. **Agent shim** — `.github/agents/devspark.specify.agent.md` shows the 3-tier resolution pattern
+3. **Agent shim** — `.github/agents/devspark.specify.agent.md` shows the personal/team/stock resolution pattern
 4. **VERSION stamp** — `.devspark/VERSION` records how and when DevSpark was installed
 
 ## Try It

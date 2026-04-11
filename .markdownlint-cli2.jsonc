@@ -25,6 +25,7 @@
   "ignores": [
     ".genreleases/",
     "incoming/**",
-    ".documentation/drafts/**"
+    ".documentation/drafts/**",
+    ".pytest_cache/**"
   ]
 }

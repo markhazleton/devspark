@@ -82,6 +82,7 @@
 ├── data-model.md        # Phase 1 output (/devspark.plan command)
 ├── quickstart.md        # Phase 1 output (/devspark.plan command)
 ├── contracts/           # Phase 1 output (/devspark.plan command)
+├── gates/               # Persisted gate artifacts from analyze/critic/checklist
 └── tasks.md             # Phase 2 output (/devspark.tasks command - NOT created by /devspark.plan)
 ```
 
