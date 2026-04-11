@@ -24,6 +24,7 @@ Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain
 To prevent hardcoding AI agent identifiers across different workflow scripts and command templates, DevSpark leverages a centralized `agents-registry.json` file located in the repository root.
 
 **Key Features:**
+
 1. **Centralized Configuration**: Defines available agents (e.g., Copilot, Claude Code, Cursor) and their capabilities.
 2. **Cross-Editor Support**: Simplifies extending DevSpark to support new IDEs or agent implementations.
 3. **Workflow Integration**: Used dynamically by `create-pr` and other workspace scripts to understand which agent platforms are available or active.
