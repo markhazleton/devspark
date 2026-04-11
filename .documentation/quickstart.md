@@ -52,6 +52,8 @@ Describe **what** you want to build and **why** -- no tech stack yet. Keep it pr
 /devspark.specify Build a photo album organizer. Albums grouped by date, drag-and-drop reordering, tile-based photo previews.
 ```
 
+`/devspark.specify` is route-aware. It recommends a one-off fix, quick spec, or full spec path, explains why, and asks you to confirm before it creates artifacts.
+
 > Anti-pattern: `/devspark.specify Build a React app with Redux and PostgreSQL for photo management` -- this locks you into a solution before the problem is fully understood.
 
 ### 2c. Refine the Spec (Optional)

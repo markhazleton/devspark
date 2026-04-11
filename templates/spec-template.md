@@ -1,3 +1,12 @@
+---
+classification: full-spec
+risk_level: medium
+target_workflow: specify-full
+required_artifacts: spec, plan, tasks
+recommended_next_step: plan
+required_gates: checklist, analyze, critic
+---
+
 # Feature Specification: [FEATURE NAME]
 
 **Feature Branch**: `[###-feature-name]`

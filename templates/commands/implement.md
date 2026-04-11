@@ -41,10 +41,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 
    - **If any checklist is incomplete**:
      - Display the table with incomplete item counts
-     - **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
+       - Ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
      - Wait for user response before continuing
      - If user says "no" or "wait" or "stop", halt execution
-     - If user says "yes" or "proceed" or "continue", proceed to step 3
+       - If user says "yes" or "proceed" or "continue", proceed to step 3 and record the explicit override in `tasks.md` under `## Gate Acknowledgements`
 
    - **If all checklists are complete**:
      - Display the table showing all checklists passed
@@ -63,6 +63,9 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
+
+   Before execution, read the YAML frontmatter in `spec.md`. The frontmatter classification and required gates are authoritative. If required gates are unresolved, surface them with context and recommendations, then ask the user whether to fix first, review findings, or proceed anyway.
+   If the user proceeds anyway, append or update a `## Gate Acknowledgements` section in `tasks.md` summarizing the unresolved gates and the user's explicit decision.
 
 5. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
@@ -137,11 +140,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
 10. Completion validation:
-   - Verify all required tasks are completed
-   - Check that implemented features match the original specification
-   - Validate that tests pass and coverage meets requirements
-   - Confirm the implementation follows the technical plan
-   - Report final status with summary of completed work
+    - Verify all required tasks are completed
+    - Check that implemented features match the original specification
+    - Validate that tests pass and coverage meets requirements
+    - Confirm the implementation follows the technical plan
+    - Report final status with summary of completed work
+    - For quick-spec and full-spec routes, recommend `/devspark.create-pr` as the default next step after implementation
 
 11. **Spec Lifecycle Status Update**:
     - After all tasks in tasks.md are marked `[X]` (complete):
@@ -150,6 +154,7 @@ You **MUST** consider the user input before proceeding (if not empty).
          - Find the line matching `**Status**:` and replace its value with `Complete`
          - Preserve the lifecycle comment if present: `**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->`
       3. Report: "Spec status updated to Complete — all tasks finished."
+      4. Recommend `/devspark.create-pr` to draft or update the pull request before `/devspark.pr-review`
     - If any tasks remain incomplete (`- [ ]`):
       1. Update spec status to `In Progress` (if currently `Draft`)
       2. Report which tasks are still incomplete

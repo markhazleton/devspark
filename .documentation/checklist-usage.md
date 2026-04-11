@@ -20,6 +20,8 @@ Run `/devspark.checklist` **after** `/devspark.specify` or `/devspark.clarify`, 
 /devspark.specify -> /devspark.clarify -> /devspark.checklist -> /devspark.plan
 ```
 
+Checklist outputs are gate artifacts. The checklist files live under `.documentation/specs/<feature>/checklists/`, and the current aggregate gate summary is persisted at `.documentation/specs/<feature>/gates/checklist.md`. Later commands such as `/devspark.tasks`, `/devspark.implement`, and `/devspark.create-pr` read them, summarize incomplete items, and ask whether you want to fix the gaps first or proceed with an explicit acknowledgement.
+
 Use this command when you want to:
 
 - Validate that a spec is ready for planning
@@ -123,3 +125,4 @@ Run the command multiple times with different focus areas to build comprehensive
 | `/devspark.clarify` | Resolves ambiguities the checklist identifies |
 | `/devspark.analyze` | Validates consistency across spec, plan, and tasks |
 | `/devspark.critic` | Adversarial risk analysis of the implementation plan |
+| `/devspark.create-pr` | Summarizes checklist completion in the PR draft |
