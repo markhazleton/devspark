@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/common.sh"
 source "$SCRIPT_DIR/platform.sh"
 
 MODE="preflight"
-JSON_MODE=false
+export JSON_MODE=false
 TITLE=""
 BODY=""
 BODY_FILE=""
@@ -293,11 +293,11 @@ collect_gate_acknowledgements_json() {
         printf '[]\n'
         return
     fi
-    printf '%s' "$section_text" | python - <<'PY'
+    SECTION_TEXT="$section_text" python <<'PY'
 import json
-import sys
+import os
 
-text = sys.stdin.read().strip()
+text = os.environ["SECTION_TEXT"].strip()
 entries = []
 current = []
 for line in text.splitlines():
@@ -536,7 +536,14 @@ run_create_or_update() {
         for assignee in "${ASSIGNEES[@]}"; do gh pr edit "$pr_to_edit" --add-assignee "$assignee" >/dev/null; done
         pr_view_json=$(gh pr view "$pr_to_edit" --json number,url,title,state,isDraft 2>/dev/null)
     else
-        gh_output=$(gh pr create --title "$TITLE" --body "$body_value" --base "${BASE_BRANCH:-$(echo "$preflight_json" | jq -r '.target_branch')}" $( $DRAFT && echo '--draft' ) $(printf ' --reviewer %q' "${REVIEWERS[@]}" 2>/dev/null) $(printf ' --label %q' "${LABELS[@]}" 2>/dev/null) $(printf ' --assignee %q' "${ASSIGNEES[@]}" 2>/dev/null) 2>/dev/null || true)
+        local -a gh_args=()
+        gh_args+=(--title "$TITLE" --body "$body_value")
+        gh_args+=(--base "${BASE_BRANCH:-$(echo "$preflight_json" | jq -r '.target_branch')}")
+        if $DRAFT; then gh_args+=(--draft); fi
+        for reviewer in "${REVIEWERS[@]}"; do gh_args+=(--reviewer "$reviewer"); done
+        for label in "${LABELS[@]}"; do gh_args+=(--label "$label"); done
+        for assignee in "${ASSIGNEES[@]}"; do gh_args+=(--assignee "$assignee"); done
+        gh_output=$(gh pr create "${gh_args[@]}" 2>/dev/null || true)
         pr_url=$(printf '%s\n' "$gh_output" | tail -n 1)
         if [[ -z "$pr_url" ]]; then
             json_error "Failed to create pull request" "$gh_output"
