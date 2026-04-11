@@ -19,6 +19,17 @@ DevSpark uses a strict two-tier ownership model:
 
 Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims plus hydrated agent context.
 
+### Agent Registry (`agents-registry.json`)
+
+To prevent hardcoding AI agent identifiers across different workflow scripts and command templates, DevSpark leverages a centralized `agents-registry.json` file located in the repository root.
+
+**Key Features:**
+1. **Centralized Configuration**: Defines available agents (e.g., Copilot, Claude Code, Cursor) and their capabilities.
+2. **Cross-Editor Support**: Simplifies extending DevSpark to support new IDEs or agent implementations.
+3. **Workflow Integration**: Used dynamically by `create-pr` and other workspace scripts to understand which agent platforms are available or active.
+
+When adding a new AI assistant integration to DevSpark, simply append the agent's definition and configuration details to `agents-registry.json`.
+
 ### File Layout
 
 ```text
