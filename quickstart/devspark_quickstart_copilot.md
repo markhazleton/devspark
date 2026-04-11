@@ -132,6 +132,7 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `plan.md` | `.devspark/defaults/commands/devspark.plan.md` |
 | `tasks.md` | `.devspark/defaults/commands/devspark.tasks.md` |
 | `implement.md` | `.devspark/defaults/commands/devspark.implement.md` |
+| `create-pr.md` | `.devspark/defaults/commands/devspark.create-pr.md` |
 | `constitution.md` | `.devspark/defaults/commands/devspark.constitution.md` |
 | `pr-review.md` | `.devspark/defaults/commands/devspark.pr-review.md` |
 | `quickfix.md` | `.devspark/defaults/commands/devspark.quickfix.md` |
@@ -180,6 +181,7 @@ For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
 - `powershell/create-new-feature.ps1`
 - `powershell/setup-plan.ps1`
 - `powershell/get-pr-context.ps1`
+- `powershell/create-pr.ps1`
 - `powershell/update-agent-context.ps1`
 - `powershell/archive-context.ps1`
 - `powershell/evolution-context.ps1`
@@ -197,6 +199,7 @@ For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
 - `bash/create-new-feature.sh`
 - `bash/setup-plan.sh`
 - `bash/get-pr-context.sh`
+- `bash/create-pr.sh`
 - `bash/update-agent-context.sh`
 - `bash/archive-context.sh`
 - `bash/evolution-context.sh`

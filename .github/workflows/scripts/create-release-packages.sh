@@ -25,6 +25,13 @@ fi
 
 echo "Building release packages for $NEW_VERSION"
 
+AGENT_REGISTRY_FILE="agents-registry.json"
+
+if [[ ! -f "$AGENT_REGISTRY_FILE" ]]; then
+  echo "Missing agent registry: $AGENT_REGISTRY_FILE" >&2
+  exit 1
+fi
+
 # Create and use .genreleases directory for all build artifacts
 GENRELEASES_DIR=".genreleases"
 mkdir -p "$GENRELEASES_DIR"
@@ -49,6 +56,26 @@ copy_relative_files() {
     mkdir -p "$destination_root/$(dirname "$relative_path")"
     cp "$source_root/$relative_path" "$destination_root/$relative_path"
   done < <(find "$source_root" "$@" -print | sed "s#^$source_root/##")
+}
+
+get_registered_agents() {
+  jq -r '.agents[].key' "$AGENT_REGISTRY_FILE"
+}
+
+get_agent_release_field() {
+  local agent_key=$1 field=$2
+  jq -r --arg key "$agent_key" --arg field "$field" '.agents[] | select(.key == $key) | .release[$field] // empty' "$AGENT_REGISTRY_FILE"
+}
+
+copy_agent_support_files() {
+  local agent_key=$1 base_dir=$2
+  jq -r --arg key "$agent_key" '.agents[] | select(.key == $key) | .release.support_files[]? | [.source, .destination] | @tsv' "$AGENT_REGISTRY_FILE" |
+    while IFS=$'\t' read -r source_file destination_file; do
+      [[ -n $source_file && -n $destination_file ]] || continue
+      [[ -f $source_file ]] || continue
+      mkdir -p "$base_dir/$(dirname "$destination_file")"
+      cp "$source_file" "$base_dir/$destination_file"
+    done
 }
 
 generate_canonical_commands() {
@@ -317,73 +344,30 @@ build_variant() {
 
   # Generate thin platform shims in agent-specific directories
   # Shims redirect to .documentation/commands/ with user-override resolution
-  case $agent in
-    claude)
-      mkdir -p "$base_dir/.claude/commands"
-      generate_shims claude md "\$ARGUMENTS" "$base_dir/.claude/commands" ;;
-    gemini)
-      mkdir -p "$base_dir/.gemini/commands"
-      generate_shims gemini toml "{{args}}" "$base_dir/.gemini/commands"
-      [[ -f agent_templates/gemini/GEMINI.md ]] && cp agent_templates/gemini/GEMINI.md "$base_dir/GEMINI.md" ;;
-    copilot)
-      mkdir -p "$base_dir/.github/agents"
-      generate_shims copilot agent.md "\$ARGUMENTS" "$base_dir/.github/agents"
-      # Generate companion prompt files
-      generate_copilot_prompts "$base_dir/.github/agents" "$base_dir/.github/prompts"
-      # Create VS Code workspace settings
-      mkdir -p "$base_dir/.vscode"
-      [[ -f templates/vscode-settings.json ]] && cp templates/vscode-settings.json "$base_dir/.vscode/settings.json"
-      ;;
-    cursor-agent)
-      mkdir -p "$base_dir/.cursor/commands"
-      generate_shims cursor-agent md "\$ARGUMENTS" "$base_dir/.cursor/commands" ;;
-    qwen)
-      mkdir -p "$base_dir/.qwen/commands"
-      generate_shims qwen toml "{{args}}" "$base_dir/.qwen/commands"
-      [[ -f agent_templates/qwen/QWEN.md ]] && cp agent_templates/qwen/QWEN.md "$base_dir/QWEN.md" ;;
-    opencode)
-      mkdir -p "$base_dir/.opencode/command"
-      generate_shims opencode md "\$ARGUMENTS" "$base_dir/.opencode/command" ;;
-    windsurf)
-      mkdir -p "$base_dir/.windsurf/workflows"
-      generate_shims windsurf md "\$ARGUMENTS" "$base_dir/.windsurf/workflows" ;;
-    codex)
-      mkdir -p "$base_dir/.codex/prompts"
-      generate_shims codex md "\$ARGUMENTS" "$base_dir/.codex/prompts" ;;
-    kilocode)
-      mkdir -p "$base_dir/.kilocode/workflows"
-      generate_shims kilocode md "\$ARGUMENTS" "$base_dir/.kilocode/workflows" ;;
-    auggie)
-      mkdir -p "$base_dir/.augment/commands"
-      generate_shims auggie md "\$ARGUMENTS" "$base_dir/.augment/commands" ;;
-    roo)
-      mkdir -p "$base_dir/.roo/commands"
-      generate_shims roo md "\$ARGUMENTS" "$base_dir/.roo/commands" ;;
-    codebuddy)
-      mkdir -p "$base_dir/.codebuddy/commands"
-      generate_shims codebuddy md "\$ARGUMENTS" "$base_dir/.codebuddy/commands" ;;
-    qodercli)
-      mkdir -p "$base_dir/.qoder/commands"
-      generate_shims qodercli md "\$ARGUMENTS" "$base_dir/.qoder/commands" ;;
-    amp)
-      mkdir -p "$base_dir/.agents/commands"
-      generate_shims amp md "\$ARGUMENTS" "$base_dir/.agents/commands" ;;
-    shai)
-      mkdir -p "$base_dir/.shai/commands"
-      generate_shims shai md "\$ARGUMENTS" "$base_dir/.shai/commands" ;;
-    q)
-      mkdir -p "$base_dir/.amazonq/prompts"
-      generate_shims q md "\$ARGUMENTS" "$base_dir/.amazonq/prompts" ;;
-    bob)
-      mkdir -p "$base_dir/.bob/commands"
-      generate_shims bob md "\$ARGUMENTS" "$base_dir/.bob/commands" ;;
-  esac
+  local commands_dir extension arg_format prompt_dir
+  commands_dir=$(get_agent_release_field "$agent" commands_dir)
+  extension=$(get_agent_release_field "$agent" extension)
+  arg_format=$(get_agent_release_field "$agent" arg_format)
+  prompt_dir=$(get_agent_release_field "$agent" prompt_dir)
+
+  if [[ -z $commands_dir || -z $extension || -z $arg_format ]]; then
+    echo "Incomplete release metadata for agent '$agent'" >&2
+    exit 1
+  fi
+
+  generate_shims "$agent" "$extension" "$arg_format" "$base_dir/$commands_dir"
+
+  if [[ -n $prompt_dir ]]; then
+    generate_copilot_prompts "$base_dir/$commands_dir" "$base_dir/$prompt_dir"
+  fi
+
+  copy_agent_support_files "$agent" "$base_dir"
   ( cd "$base_dir" && zip -r "../devspark-template-${agent}-${script}-${NEW_VERSION}.zip" . )
   echo "Created $GENRELEASES_DIR/devspark-template-${agent}-${script}-${NEW_VERSION}.zip"
 }
 
 # Determine agent list
-ALL_AGENTS=(claude gemini copilot cursor-agent qwen opencode windsurf codex kilocode auggie roo codebuddy amp shai q bob qodercli)
+mapfile -t ALL_AGENTS < <(get_registered_agents)
 ALL_SCRIPTS=(sh ps)
 
 norm_list() {

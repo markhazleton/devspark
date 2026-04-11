@@ -17,6 +17,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$AgentRegistryFile = 'agents-registry.json'
 
 # Check if gh CLI is available
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
@@ -24,15 +25,16 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
+if (-not (Test-Path $AgentRegistryFile)) {
+    Write-Error "Missing agent registry: $AgentRegistryFile"
+    exit 1
+}
+
 # Remove 'v' prefix from version for release title
 $versionNoV = $Version -replace '^v', ''
 
-# Define all agents
-$agents = @(
-    'copilot', 'claude', 'gemini', 'cursor-agent', 'opencode', 'qwen',
-    'windsurf', 'codex', 'kilocode', 'auggie', 'roo', 'codebuddy',
-    'qodercli', 'amp', 'shai', 'q', 'bob'
-)
+$agents = (Get-Content -LiteralPath $AgentRegistryFile -Raw -Encoding utf8 | ConvertFrom-Json).agents |
+    ForEach-Object { $_.key }
 
 # Build the list of files to upload
 $files = @()

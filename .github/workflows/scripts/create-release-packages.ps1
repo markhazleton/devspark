@@ -51,6 +51,12 @@ if ($Version -notmatch '^v\d+\.\d+\.\d+$') {
 
 Write-Host "Building release packages for $Version"
 
+$AgentRegistryFile = "agents-registry.json"
+if (-not (Test-Path $AgentRegistryFile)) {
+    Write-Error "Missing agent registry: $AgentRegistryFile"
+    exit 1
+}
+
 # Create and use .genreleases directory for all build artifacts
 $GenReleasesDir = ".genreleases"
 if (Test-Path $GenReleasesDir) {
@@ -68,6 +74,42 @@ function Rewrite-Paths {
     $Content = $Content -replace '(^|\s|`)/scripts/', '$1/.devspark/scripts/'
     $Content = $Content -replace '(^|\s|`)/templates/', '$1/.devspark/templates/'
     return $Content
+}
+
+function Get-AgentRegistry {
+    Get-Content -LiteralPath $AgentRegistryFile -Raw -Encoding utf8 | ConvertFrom-Json
+}
+
+function Get-RegisteredAgents {
+    (Get-AgentRegistry).agents | ForEach-Object { $_.key }
+}
+
+function Get-AgentMetadata {
+    param([string]$Agent)
+    return (Get-AgentRegistry).agents | Where-Object { $_.key -eq $Agent } | Select-Object -First 1
+}
+
+function Copy-AgentSupportFiles {
+    param(
+        [string]$Agent,
+        [string]$BaseDir
+    )
+
+    $metadata = Get-AgentMetadata -Agent $Agent
+    foreach ($supportFile in @($metadata.release.support_files)) {
+        if (-not $supportFile) {
+            continue
+        }
+        if (-not (Test-Path $supportFile.source)) {
+            continue
+        }
+        $destinationPath = Join-Path $BaseDir $supportFile.destination
+        $destinationDir = Split-Path -Parent $destinationPath
+        if (-not (Test-Path $destinationDir)) {
+            New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+        }
+        Copy-Item -Path $supportFile.source -Destination $destinationPath -Force
+    }
 }
 
 function Generate-CanonicalCommands {
@@ -466,95 +508,21 @@ function Build-Variant {
     Generate-CanonicalCommands -OutputDir $canonicalDir -ScriptVariant $Script
     Write-Host "Generated canonical commands -> .devspark/defaults/commands"
     
-    # Generate thin platform shims in agent-specific directories
-    # Shims redirect to .documentation/commands/ with user-override resolution and stock fallback
-    switch ($Agent) {
-        'claude' {
-            $cmdDir = Join-Path $baseDir ".claude/commands"
-            Generate-Shims -Agent 'claude' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'gemini' {
-            $cmdDir = Join-Path $baseDir ".gemini/commands"
-            Generate-Shims -Agent 'gemini' -Extension 'toml' -ArgFormat '{{args}}' -OutputDir $cmdDir
-            if (Test-Path "agent_templates/gemini/GEMINI.md") {
-                Copy-Item -Path "agent_templates/gemini/GEMINI.md" -Destination (Join-Path $baseDir "GEMINI.md")
-            }
-        }
-        'copilot' {
-            $agentsDir = Join-Path $baseDir ".github/agents"
-            Generate-Shims -Agent 'copilot' -Extension 'agent.md' -ArgFormat '$ARGUMENTS' -OutputDir $agentsDir
-            
-            # Generate companion prompt files
-            $promptsDir = Join-Path $baseDir ".github/prompts"
-            Generate-CopilotPrompts -AgentsDir $agentsDir -PromptsDir $promptsDir
-            
-            # Create VS Code workspace settings
-            $vscodeDir = Join-Path $baseDir ".vscode"
-            New-Item -ItemType Directory -Path $vscodeDir -Force | Out-Null
-            if (Test-Path "templates/vscode-settings.json") {
-                Copy-Item -Path "templates/vscode-settings.json" -Destination (Join-Path $vscodeDir "settings.json")
-            }
-        }
-        'cursor-agent' {
-            $cmdDir = Join-Path $baseDir ".cursor/commands"
-            Generate-Shims -Agent 'cursor-agent' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'qwen' {
-            $cmdDir = Join-Path $baseDir ".qwen/commands"
-            Generate-Shims -Agent 'qwen' -Extension 'toml' -ArgFormat '{{args}}' -OutputDir $cmdDir
-            if (Test-Path "agent_templates/qwen/QWEN.md") {
-                Copy-Item -Path "agent_templates/qwen/QWEN.md" -Destination (Join-Path $baseDir "QWEN.md")
-            }
-        }
-        'opencode' {
-            $cmdDir = Join-Path $baseDir ".opencode/command"
-            Generate-Shims -Agent 'opencode' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'windsurf' {
-            $cmdDir = Join-Path $baseDir ".windsurf/workflows"
-            Generate-Shims -Agent 'windsurf' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'codex' {
-            $cmdDir = Join-Path $baseDir ".codex/prompts"
-            Generate-Shims -Agent 'codex' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'kilocode' {
-            $cmdDir = Join-Path $baseDir ".kilocode/workflows"
-            Generate-Shims -Agent 'kilocode' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'auggie' {
-            $cmdDir = Join-Path $baseDir ".augment/commands"
-            Generate-Shims -Agent 'auggie' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'roo' {
-            $cmdDir = Join-Path $baseDir ".roo/commands"
-            Generate-Shims -Agent 'roo' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'codebuddy' {
-            $cmdDir = Join-Path $baseDir ".codebuddy/commands"
-            Generate-Shims -Agent 'codebuddy' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'amp' {
-            $cmdDir = Join-Path $baseDir ".agents/commands"
-            Generate-Shims -Agent 'amp' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'shai' {
-            $cmdDir = Join-Path $baseDir ".shai/commands"
-            Generate-Shims -Agent 'shai' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'q' {
-            $cmdDir = Join-Path $baseDir ".amazonq/prompts"
-            Generate-Shims -Agent 'q' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'bob' {
-            $cmdDir = Join-Path $baseDir ".bob/commands"
-            Generate-Shims -Agent 'bob' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
-        'qodercli' {
-            $cmdDir = Join-Path $baseDir ".qoder/commands"
-            Generate-Shims -Agent 'qodercli' -Extension 'md' -ArgFormat '$ARGUMENTS' -OutputDir $cmdDir
-        }
+    $metadata = Get-AgentMetadata -Agent $Agent
+    if (-not $metadata -or -not $metadata.release.commands_dir -or -not $metadata.release.extension -or -not $metadata.release.arg_format) {
+        Write-Error "Incomplete release metadata for agent '$Agent'"
+        exit 1
     }
+
+    $cmdDir = Join-Path $baseDir $metadata.release.commands_dir
+    Generate-Shims -Agent $Agent -Extension $metadata.release.extension -ArgFormat $metadata.release.arg_format -OutputDir $cmdDir
+
+    if ($metadata.release.prompt_dir) {
+        $promptsDir = Join-Path $baseDir $metadata.release.prompt_dir
+        Generate-CopilotPrompts -AgentsDir $cmdDir -PromptsDir $promptsDir
+    }
+
+    Copy-AgentSupportFiles -Agent $Agent -BaseDir $baseDir
     
     # Create zip archive
     $zipFile = Join-Path $GenReleasesDir "devspark-template-${Agent}-${Script}-${Version}.zip"
@@ -563,7 +531,7 @@ function Build-Variant {
 }
 
 # Define all agents and scripts
-$AllAgents = @('claude', 'gemini', 'copilot', 'cursor-agent', 'qwen', 'opencode', 'windsurf', 'codex', 'kilocode', 'auggie', 'roo', 'codebuddy', 'amp', 'shai', 'q', 'bob', 'qodercli')
+$AllAgents = @(Get-RegisteredAgents)
 $AllScripts = @('sh', 'ps')
 
 function Normalize-List {

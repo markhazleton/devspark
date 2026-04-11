@@ -23,6 +23,10 @@ This command reviews GitHub Pull Requests against the project constitution. It w
 
 **IMPORTANT**: This command **only provides suggestions** - it does not make any code changes.
 
+Reviews are advisory. The agent must explain constitution or lifecycle issues, recommend a disposition, and let the human decide the next action.
+
+`/devspark.create-pr` is the preferred predecessor for spec-driven work because it collects task, checklist, and gate context before review. If the PR was created manually, continue with review but call out any missing lifecycle context.
+
 ## Prerequisites
 
 - Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
@@ -125,6 +129,16 @@ Parse the full diff to:
 - Look for breaking change indicators
 
 ### 4. Perform Constitution-Based Review
+
+Start the review with a gate result block:
+
+```yaml
+gate: pr-review
+status: pass | warn | fail
+blocking: true | false
+severity: info | warning | error | showstopper
+summary: "<concise outcome>"
+```
 
 For **each principle** in the constitution:
 

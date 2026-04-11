@@ -91,6 +91,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 5. **Generate checklist** - Create "Unit Tests for Requirements":
    - Create `FEATURE_DIR/checklists/` directory if it doesn't exist
+   - Create or update `FEATURE_DIR/gates/checklist.md` with a concise checklist gate summary after writing the checklist file
    - Generate unique checklist filename:
      - Use short, descriptive name based on domain (e.g., `ux.md`, `api.md`, `security.md`)
      - Format: `[domain].md`
@@ -213,6 +214,18 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Depth level
    - Actor/timing
    - Any explicit user-specified must-have items incorporated
+
+   Also refresh `FEATURE_DIR/gates/checklist.md` with:
+
+   ```yaml
+   gate: checklist
+   status: pass | warn | fail
+   blocking: true | false
+   severity: info | warning | error | showstopper
+   summary: "<concise outcome>"
+   ```
+
+   Below the gate block, summarize all current checklist files under `FEATURE_DIR/checklists/` with total items, completed items, incomplete items, and the checklist purpose. Replace the prior gate summary instead of appending duplicates.
 
 **Important**: Each `/devspark.checklist` command invocation creates a checklist file using short, descriptive names unless file already exists. This allows:
 
