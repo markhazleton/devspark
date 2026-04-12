@@ -8,7 +8,7 @@ Read `.documentation/memory/constitution.md` before making changes — it define
 
 ## Repository Structure
 
-- `templates/commands/` — 25 slash-command prompt files (the product)
+- `templates/commands/` — 27 slash-command prompt files (the product)
 - `scripts/` — Context-gathering scripts (PowerShell + Bash)
 - `src/devspark_cli/` — Optional CLI for automated setup
 - `quickstart/` — Agent-specific bootstrap guides

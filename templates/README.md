@@ -11,7 +11,7 @@ DevSpark ownership is strictly two-tier:
 - `.devspark/` is framework-managed stock content
 - `.documentation/` is repository-owned work product and overrides
 
-The collection includes 22 core commands plus 3 optional multi-app commands (25 total).
+The collection includes 24 core commands plus 3 optional multi-app commands (27 total).
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -20,9 +20,11 @@ The collection includes 22 core commands plus 3 optional multi-app commands (25 
 | `tasks.md` | `/devspark.tasks` | Generate actionable task list |
 | `implement.md` | `/devspark.implement` | Execute tasks to build the feature |
 | `create-pr.md` | `/devspark.create-pr` | Draft or update a pull request with workflow context |
+| `update-pr.md` | `/devspark.update-pr` | Refresh an existing pull request description from the current branch delta |
 | `constitution.md` | `/devspark.constitution` | Establish project principles |
 | `pr-review.md` | `/devspark.pr-review` | Review PRs against constitution |
 | `site-audit.md` | `/devspark.site-audit` | Comprehensive codebase audit |
+| `commit-audit.md` | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
 | `quickfix.md` | `/devspark.quickfix` | Lightweight bug fix workflow |
 | `harvest.md` | `/devspark.harvest` | Clean and archive stale docs |
 | `release.md` | `/devspark.release` | Archive artifacts and prepare releases |
