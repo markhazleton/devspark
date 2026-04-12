@@ -5,13 +5,9 @@ No CLI installation is required. You will pull prompt files from the DevSpark re
 
 ## Step 1: Gather Project Context
 
-Ask the user these questions before proceeding:
+Ask only the install-critical questions before proceeding:
 
-1. **Project name** — What is this project called?
-2. **Tech stack** — What languages, frameworks, and tools does this project use?
-3. **Script preference** — Does this project use **PowerShell** (`ps`) or **Bash** (`sh`) for scripts? (Default: PowerShell on Windows, Bash on macOS/Linux)
-4. **Team or solo?** — Will multiple people use DevSpark on this repo, or just you?
-5. **Core principles** — Name 3–5 non-negotiable principles for this project (e.g., "test-first", "accessibility", "API-first", "simplicity"). If unsure, say "use defaults" and you'll get a starter set.
+1. **Script preference** — Does this project use **PowerShell** (`ps`) or **Bash** (`sh`) for scripts? (Default: PowerShell on Windows, Bash on macOS/Linux)
 
 Wait for answers before continuing.
 
@@ -68,6 +64,16 @@ Tell the user what you found and ask for confirmation before proceeding.
 
 After migration, continue with Step 3.
 
+### Constitution bootstrap questions (only if needed)
+
+After detection and any migration work above, check whether `.documentation/memory/constitution.md` already exists.
+
+- If it exists already, or was migrated into place, **do not** ask for project name, tech stack, or core principles.
+- If it does not exist, ask these additional questions before Step 3:
+  1. **Project name** — What is this project called?
+  2. **Tech stack** — What languages, frameworks, and tools does this project use?
+  3. **Core principles** — Name 3–5 non-negotiable principles for this project (e.g., "test-first", "accessibility", "API-first", "simplicity"). If unsure, say "use defaults" and you'll get a starter set.
+
 ### If `.devspark/` already exists — Version Check
 
 1. Read `.devspark/VERSION`. If the file is missing or `version:` is not semver (`X.Y.Z`), treat the installed version as `unknown`.
@@ -76,9 +82,9 @@ After migration, continue with Step 3.
 
 | Installed version | Latest version | Action |
 |---|---|---|
-| Same as latest | — | Report: "DevSpark is already at vX.Y.Z — nothing to update." Skip to Step 12 (Verify & Report). |
+| Same as latest | — | Verify framework files. If any stock prompt, template, script, or agent shim is missing, run **repair mode** below. Otherwise report: "DevSpark is already at vX.Y.Z — nothing to update." Skip to Step 12 (Verify & Report). |
 | Older than latest | Newer | Report the version gap, then run **update mode** below. |
-| `unknown` (VERSION missing) | Any | Treat as outdated. Run update mode. |
+| `unknown` (VERSION missing) | Any | Treat as outdated. Run **update mode**. |
 
 #### Update Mode
 
@@ -93,6 +99,18 @@ Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
 - **Step 10** — Update `.devspark/VERSION` with new version and today's date
 
 **Never touch** `.documentation/`, the constitution, `.gitignore`, or platform guide files (VS Code settings, etc.).
+
+#### Repair Mode
+
+If the installed version matches `LATEST_VERSION` but framework files are missing, tell the user: "DevSpark is already at vX.Y.Z, but the framework install is incomplete. Re-fetching stock files to repair it. Your `.documentation/` files will not be touched."
+
+Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
+
+- **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite missing or stale copies)
+- **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite missing or stale copies)
+- **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite missing or stale copies)
+- **Step 7** — Re-create all agent shim files (overwrite missing or stale copies)
+- **Step 10** — Re-write `.devspark/VERSION` using the current `LATEST_VERSION` and today's date
 
 ---
 
@@ -261,7 +279,7 @@ If `.documentation/memory/constitution.md` does not already exist, fetch `https:
 
 If the file was migrated from `.specify/` or already existed, preserve it and do not overwrite it.
 
-Using the project name and principles from Step 1, customize `.documentation/memory/constitution.md`:
+Only when creating a new constitution, use the project name, tech stack, and core principles collected after Step 2 to customize `.documentation/memory/constitution.md`:
 
 - Replace `[PROJECT_NAME]` with the actual project name
 - Fill in the core principles the user provided
@@ -299,10 +317,17 @@ Append to `.gitignore` if not already present:
 
 Confirm the installation:
 
+- Check that every stock prompt from Step 4 exists in `.devspark/defaults/commands/`
+- Check that every helper template from Step 5 exists in `.devspark/templates/`
+- Check that the selected script set from Step 6 exists under `.devspark/scripts/`
+- Check that the expected agent shim files from Step 7 exist in `.github/agents/` and `.github/prompts/`
+- If any expected framework file is missing, stop and run **Repair Mode** before reporting success
+
 - **Migration summary**: What was migrated and where backups live (`.specify.old/`, etc.)
 - Number of stock commands in `.devspark/defaults/commands/`
 - Number of agent shims in `.github/agents/`
 - Constitution status: seeded fresh, migrated, or already existed
+- Repair status: not needed, or repaired missing framework files
 - Explain the 3-tier override system and that `@devspark.personalize {command}` creates personal overrides
 - If backup directories exist (`.specify.old/`, `memory.old/`), remind the user they can delete them once satisfied
 

@@ -21,6 +21,8 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 
 After installation, start new work with `/devspark.specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
 
+The quickstart guides can handle fresh installs, legacy migrations, version-based upgrades, and repair of incomplete framework installs when expected stock files are missing.
+
 ## Upgrade Paths
 
 - Basic (recommended): remote upgrade prompt
