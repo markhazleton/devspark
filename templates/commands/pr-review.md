@@ -191,7 +191,11 @@ For each finding:
 
 Create structured findings with **stable IDs** that persist across re-reviews. Use zero-padded identifiers so status changes across revisions instead of being deleted:
 
-- **ID**: Stable identifier with zero-padded number (C-01, H-01, M-01, L-01, etc.)
+- **ID**: Stable identifier with zero-padded number. The prefix maps to severity tier:
+  - `C-NN` = Critical (blocking)
+  - `H-NN` = High priority
+  - `M-NN` = Medium priority
+  - `L-NN` = Low priority
 - **Status**: `🔴 Open` | `✅ Resolved` | `⚠️ Partial` | `➡️ Carried` (for re-reviews)
 - **Principle**: Name of constitution principle
 - **File:Line**: Exact location in code
@@ -238,7 +242,7 @@ Scan the diff for silent behavioral changes that may break callers or remove saf
 Before flagging a removed safety guard, complete all 4 steps:
 
 1. **Identify the guard**: Quote the removed code and describe what it was protecting against
-2. **Check if condition can still occur**: Determine whether the protected scenario is still possible in the current system state
+2. **Check if condition can still occur**: Determine whether the protected scenario is still possible based on what is observable in the PR diff and the PR context script output — do not speculate about runtime state not visible in the provided context
 3. **Check if protection moved elsewhere**: Search the PR diff for equivalent protection at a different layer (middleware, validator, caller site)
 4. **Flag only if genuinely removed**: Only create a finding if steps 2 and 3 confirm the protection is missing and the risk remains real
 
