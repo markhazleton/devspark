@@ -321,7 +321,7 @@ Detect comments that describe behavior that no longer matches the code:
 
 #### C. Commented-Out Code Blocks
 
-Flag commented-out code blocks exceeding 3 consecutive lines. These accumulate technical debt and should be either deleted or converted to proper dead-code removal with a git commit.
+Flag commented-out code blocks exceeding 3 consecutive lines. These accumulate technical debt and should either be deleted in a dedicated commit or restored as active code — use `git blame` to understand the original intent before removing.
 
 #### D. Version Migration Comments
 

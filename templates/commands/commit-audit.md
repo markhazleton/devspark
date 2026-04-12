@@ -96,7 +96,7 @@ Calculate commits per month across the analysis window:
 
 #### Phase Detection with Inflection Points
 
-Identify development phases by detecting significant velocity changes (>50% increase or decrease sustained for 2+ months):
+Identify development phases by detecting significant velocity changes (>50% increase or decrease sustained for 2+ months). For small teams or low-volume repositories (<10 commits/month average), lower the threshold to >30% sustained for 1+ month before detecting a phase change, and note the low-volume context in the report.
 
 | Phase | Period | Avg Monthly Commits | Characterization |
 |-------|--------|---------------------|-----------------|
@@ -162,7 +162,7 @@ Classify the team's AI-assisted development maturity based on commit patterns.
 
 #### Detection Signals
 
-- Commit messages mentioning "copilot", "claude", "chatgpt", "ai-generated", "co-authored-by"
+- Commit messages mentioning "Copilot", "Claude", "ChatGPT", "ai-generated", "co-authored-by"
 - Large batch commits (>500 lines in a single commit) with minimal message context
 - Presence of AI tool configuration files (`.github/copilot-instructions.md`, `CLAUDE.md`, `.cursor/`, etc.)
 - Short bursts of high-insertion commits followed by correction commits

@@ -127,6 +127,8 @@ Score each documentation artifact on 4 dimensions and compute a weighted total:
 
 **Weighted Score** = (Relevance × 0.40) + (Authority × 0.25) + (Uniqueness × 0.20) + (Freshness × 0.15)
 
+The result is always in the range 0–100.
+
 Score ranges drive dispositions:
 
 | Score Range | Disposition | Action |

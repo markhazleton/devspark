@@ -84,7 +84,13 @@ Read the current PR body using `gh pr view {PR_NUMBER} --json body,title,labels,
 
 ### 3. Compute Branch Delta
 
-Determine what changed since the last commit SHA recorded in the PR review file (if one exists at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`) or since PR creation:
+Determine what changed since the last commit SHA recorded in the PR review file (if one exists at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`) or since PR creation.
+
+**Finding the baseline commit SHA** (in order of preference):
+
+1. Parse the `**Reviewed Commit**:` metadata line in the PR review file — use as the baseline if present
+2. If the review file exists but contains no commit SHA (e.g., malformed or manually edited), fall back to the PR's first commit via `gh pr view {PR_NUMBER} --json commits --jq '.commits[0].oid'`
+3. If no review file exists, use the PR creation commit (the base of the branch)
 
 ```bash
 gh pr view {PR_NUMBER} --json commits --jq '.commits[-1].oid'
