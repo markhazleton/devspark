@@ -18,7 +18,7 @@
 
 ```text
 devspark/
-├── templates/commands/   ← 25 slash-command prompt files (THE PRODUCT)
+├── templates/commands/   ← 27 slash-command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── src/devspark_cli/     ← Optional CLI for automated setup
 └── .documentation/       ← Guides, media, and GitHub Pages site
@@ -75,6 +75,7 @@ For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/i
 | `/devspark.tasks` | Break the plan into actionable task lists |
 | `/devspark.implement` | Execute tasks and build the feature |
 | `/devspark.create-pr` | Draft or update a spec-aware pull request |
+| `/devspark.update-pr` | Refresh an existing pull request description from the current branch delta |
 
 ### Constitution-Powered (no spec required)
 
@@ -88,6 +89,7 @@ For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/i
 | `/devspark.harvest` | [Clean stale docs and archive obsolete artifacts](.documentation/harvest-usage.md) |
 | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `/devspark.repo-story` | Generate narrative from commit history |
+| `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
 
 ### Quality & Personalization
 
