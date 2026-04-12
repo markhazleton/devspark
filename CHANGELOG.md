@@ -7,6 +7,34 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-04-12
+
+**Consistency and install-hardening release with explicit repair flows, cleaner quickstarts, and standardized framework template resolution.**
+
+### Added
+
+- New `/devspark.update-pr` prompt template for refreshing an existing pull request description from the current branch delta
+- New `/devspark.commit-audit` prompt template for commit-history workflow and hygiene review
+- Claude Code command shims for the new `commit-audit` and `update-pr` prompts
+- Explicit repair mode in all quickstart guides for same-version installs that are missing stock framework files
+- Release archive for v1.6.0 under `.documentation/releases/v1.6.0/`
+
+### Changed
+
+- Standardized installed-repository template references on `.devspark/templates/` across command prompts and quickstarts
+- Quickstart guides now ask only install-critical questions up front and defer constitution bootstrap questions until they are actually needed
+- Existing constitutions are now preserved and reused during quickstart bootstrap instead of prompting again for project metadata
+- Quickstart and README guidance now distinguish initial artifact seeding from upgrade-safe framework refreshes more clearly
+- Release evidence docs now track v1.6.0 validation, documentation audit scope, and release readiness
+
+### Fixed
+
+- Resolved prompt/quickstart drift around helper template paths for installed repositories
+- Removed the duplicate constitution seeding model that wrote a second framework copy under `.devspark/`
+- Filled missing quickstart inventories for `quick-spec-template.md` and `update-pr.md`
+- Added same-version repair behavior so incomplete framework installs are repaired instead of only reported
+- Trimmed unused quickstart intake questions, removing the unconsumed team-or-solo prompt
+
 ## [1.5.0] - 2026-04-10
 
 **Workflow evolution release with route-aware intake, shared agent registry, and frontmatter-driven contracts.**
