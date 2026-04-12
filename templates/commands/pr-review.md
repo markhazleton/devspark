@@ -52,11 +52,22 @@ Treat script JSON as bounded context:
 
 Execution limits (required):
 
-- Max findings in report: 7 highest-signal items
+- Max findings in report: 20 highest-signal items
 - Max files to inspect deeply: 25
 - Max follow-up searches/reads beyond provided context: 8
 - Stop once evidence is sufficient for high-confidence conclusions
 - If confidence is low for a specific area, ask one clarifying question
+
+**Iteration Detection**:
+Before running a full review, check whether the user's input contains iteration keywords: "update", "re-review", "check my fixes", "revised", "changes made", "addressed". If detected:
+
+1. Load the existing review file at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`
+2. Extract all finding IDs and their last-known status
+3. Diff only what changed since the last reviewed commit SHA
+4. Carry forward all unresolved findings unchanged
+5. Mark previously flagged findings as `✅ Resolved`, `⚠️ Partially Addressed`, or `❌ Still Present` based on the new diff
+6. Append new findings (if any) introduced by the new commits
+7. Update the Revision Log section with the new commit SHA and pass/fail counts
 
 **PR Number Detection**:
 The script will try to determine PR number in this order:
@@ -99,18 +110,30 @@ If constitution doesn't exist:
 
 Using the PR_CONTEXT data from the script:
 
-#### A. Review Changed Files
+#### A. Risk-Tiered File Triage
+
+Assign each changed file a priority tier before reviewing, and apply the corresponding review depth:
+
+| Tier | File Types | Review Depth |
+|------|-----------|--------------|
+| **P0 — Critical** | Route handlers, middleware, auth, database clients, payment processing, security utilities | Full line-by-line review |
+| **P1 — Important** | Business logic, domain models, utilities, data transformations, API integrations | Function-level review |
+| **P2 — Standard** | Tests, configuration files, templates, migration scripts, build files | Spot-check only |
+| **P3 — Low** | Documentation, markdown, comments, formatting-only changes | Scan for obvious errors |
 
 For each file in `files_changed`:
 
+- Assign tier based on file path and purpose
 - Read the diff to understand what changed
+- Apply the corresponding review depth for that tier
 - Identify the type of change (new file, modified, deleted)
 - Note the scope of changes (lines added/removed)
-- Extract code snippets for analysis
+- Extract code snippets for analysis (depth depends on tier)
 
 Prioritization policy:
 
-- If `files_changed_truncated` is true, prioritize risky files first (auth, security, configuration, dependency manifests, migration scripts, CI/CD) before expanding scope.
+- Always start with P0 files regardless of context budget
+- If `files_changed_truncated` is true, skip P3 files and limit P2 to a quick scan before expanding scope to P0/P1 only.
 - Expand beyond sampled files only if necessary to validate a top-severity finding.
 
 #### B. Examine PR Diff
@@ -166,13 +189,18 @@ For each finding:
 
 #### C. Generate Findings
 
-Create structured findings with:
+Create structured findings with **stable IDs** that persist across re-reviews. Use zero-padded identifiers so status changes across revisions instead of being deleted:
 
-- **ID**: Unique identifier (C1, H1, M1, L1, etc.)
+- **ID**: Stable identifier with zero-padded number. The prefix maps to severity tier:
+  - `C-NN` = Critical (blocking)
+  - `H-NN` = High priority
+  - `M-NN` = Medium priority
+  - `L-NN` = Low priority
+- **Status**: `🔴 Open` | `✅ Resolved` | `⚠️ Partial` | `➡️ Carried` (for re-reviews)
 - **Principle**: Name of constitution principle
 - **File:Line**: Exact location in code
-- **Issue**: Specific description of the problem
-- **Recommendation**: Concrete action to resolve
+- **Issue**: Specific description of the problem, including broken code snippet for CRITICAL/HIGH
+- **Fix**: Concrete code fix for CRITICAL/HIGH findings (required); recommendation for others
 
 ### 5. Additional Review Dimensions
 
@@ -194,7 +222,31 @@ Create checklist:
 - [ ] No XSS vulnerabilities
 - [ ] Dependencies reviewed for vulnerabilities
 
-#### Code Quality Assessment
+#### Behavioral Regression Detection
+
+Scan the diff for silent behavioral changes that may break callers or remove safety guarantees:
+
+**Default Value Changes in Function Signatures**:
+
+- Detect changed default parameter values in function/method definitions
+- Flag when a previously-required argument gains a default (could mask missing args)
+- Flag when a default changes in a way that silently alters behavior
+
+**Return Type Changes**:
+
+- Detect when a function's return type annotation changes (e.g., `str` → `Optional[str]`, `List` → `None`)
+- Flag implicit return type changes where `None` may now be returned without a type annotation update
+- Note downstream callers that may be broken
+
+**Removed Defensive Code (4-Step Verification)**:
+Before flagging a removed safety guard, complete all 4 steps:
+
+1. **Identify the guard**: Quote the removed code and describe what it was protecting against
+2. **Check if condition can still occur**: Determine whether the protected scenario is still possible based on what is observable in the PR diff and the PR context script output — do not speculate about runtime state not visible in the provided context
+3. **Check if protection moved elsewhere**: Search the PR diff for equivalent protection at a different layer (middleware, validator, caller site)
+4. **Flag only if genuinely removed**: Only create a finding if steps 2 and 3 confirm the protection is missing and the risk remains real
+
+Include behavioral regression findings in the Critical or High section as appropriate.
 
 If constitution has code quality principles:
 
@@ -314,10 +366,13 @@ If file already exists:
    - Replace the entire file with updated review
    - Keep the original review date, update "Last Updated" date
 5. **If commit SHA is different (PR was updated)**:
-   - Keep existing content
-   - Insert new review at the top
-   - Move previous review to "Previous Review History" section at bottom
-   - Add clear separators between reviews
+   - Load all existing finding IDs and their statuses
+   - Diff only what changed since the previous reviewed commit
+   - Carry forward unresolved findings with status `➡️ Carried`
+   - Update findings resolved by the new commits to `✅ Resolved`
+   - Add new findings with `🔴 Open` status
+   - Append a new row to the Revision Log table
+   - Move previous review content to "Previous Review History" section at bottom
 
 #### Report Structure
 
@@ -336,6 +391,14 @@ Use this exact format:
 - **Reviewed Commit**: [COMMIT_SHA]
 - **Reviewer**: devspark.pr-review
 - **Constitution Version**: [VERSION from constitution]
+
+## Revision Log
+
+| Rev | Commit | Date | Critical | High | Medium | Low | Test Command | Result |
+|-----|--------|------|----------|------|--------|-----|--------------|--------|
+| 1 | [SHA_SHORT] | [DATE] | [N] | [N] | [N] | [N] | [pytest / N/A] | [pass/fail/N/A] |
+
+*Add a row for each re-review. Keep the same test command across all revisions to prevent flaky baselines.*
 
 ## PR Summary
 
@@ -361,37 +424,68 @@ Use this exact format:
 **Approval Recommendation**: [✅ APPROVE | ⚠️ REQUEST CHANGES | ❌ REJECT]
 *Note: APPROVE is blocked if Spec Lifecycle is not Complete or tasks are incomplete for feature branches.*
 
-## Critical Issues (Blocking)
+## Action Items
+
+*All findings ordered by severity. CRITICAL and HIGH items include broken code and the fix.*
+
+### Immediate Actions (Blocking — must resolve before merge)
 
 [If none, write "None found."]
 
-| ID | Principle | File:Line | Issue | Recommendation |
-|----|-----------|-----------|-------|----------------|
-| C1 | [Name] | path/file.ext:45 | [Specific violation with code quote] | [Specific action to fix] |
+- [ ] **C-01** `path/file.ext:45` — [One-line description]
+  - **Broken code**: `[code snippet]`
+  - **Fix**: `[corrected code snippet]`
+- [ ] **H-01** `path/file.ext:67` — [One-line description]
+  - **Broken code**: `[code snippet]`
+  - **Fix**: `[corrected code snippet]`
 
-## High Priority Issues
+### Recommended Improvements
+
+- [ ] **M-01** `path/file.ext:89` — [One-line description]
+- [ ] **L-01** `path/file.ext:123` — [Optional improvement]
+
+## What's Good
+
+*Skip this section if there is nothing noteworthy. Maximum 5 bullets.*
+
+- [Positive aspect 1 with specific file/pattern reference]
+- [Positive aspect 2]
+
+## Findings Detail
+
+*Stable IDs persist across re-reviews. Status updates instead of deleting.*
+
+### Critical Issues (Blocking)
 
 [If none, write "None found."]
 
-| ID | Principle | File:Line | Issue | Recommendation |
-|----|-----------|-----------|-------|----------------|
-| H1 | [Name] | path/file.ext:67 | [Issue description] | [Action to fix] |
+| ID | Status | Principle | File:Line | Issue | Fix |
+|----|--------|-----------|-----------|-------|-----|
+| C-01 | 🔴 Open | [Name] | path/file.ext:45 | [Specific violation] | [Specific fix] |
 
-## Medium Priority Suggestions
-
-[If none, write "None found."]
-
-| ID | Principle | File:Line | Issue | Recommendation |
-|----|-----------|-----------|-------|----------------|
-| M1 | [Name] | path/file.ext:89 | [Suggestion] | [Improvement] |
-
-## Low Priority Improvements
+### High Priority Issues
 
 [If none, write "None found."]
 
-| ID | Principle | File:Line | Issue | Recommendation |
-|----|-----------|-----------|-------|----------------|
-| L1 | [Name] | path/file.ext:123 | [Minor suggestion] | [Optional improvement] |
+| ID | Status | Principle | File:Line | Issue | Fix |
+|----|--------|-----------|-----------|-------|-----|
+| H-01 | 🔴 Open | [Name] | path/file.ext:67 | [Issue description] | [Fix] |
+
+### Medium Priority Suggestions
+
+[If none, write "None found."]
+
+| ID | Status | Principle | File:Line | Issue | Recommendation |
+|----|--------|-----------|-----------|-------|----------------|
+| M-01 | 🔴 Open | [Name] | path/file.ext:89 | [Suggestion] | [Improvement] |
+
+### Low Priority Improvements
+
+[If none, write "None found."]
+
+| ID | Status | Principle | File:Line | Issue | Recommendation |
+|----|--------|-----------|-----------|-------|----------------|
+| L-01 | 🔴 Open | [Name] | path/file.ext:123 | [Minor suggestion] | [Optional improvement] |
 
 ## Constitution Alignment Details
 
@@ -413,16 +507,6 @@ Use this exact format:
 
 [Add notes for any checked/unchecked items]
 
-## Code Quality Assessment
-
-### Strengths
-- [Positive aspect 1]
-- [Positive aspect 2]
-
-### Areas for Improvement
-- [Specific improvement 1]
-- [Specific improvement 2]
-
 ## Testing Coverage
 
 **Status**: [ADEQUATE | INADEQUATE | N/A]
@@ -437,51 +521,12 @@ Use this exact format:
 
 ## Changed Files Summary
 
-| File | Changes | Type | Constitution Issues |
-|------|---------|------|---------------------|
-| src/api.ts | +45 -12 | Modified | 2 issues (C1, H1) |
-| tests/api.test.ts | +120 -0 | Added | None |
-| README.md | +8 -2 | Modified | None |
-
-## Detailed Findings by File
-
-[For each file with issues, provide detailed explanation]
-
-### src/api.ts
-
-**Lines 45-67**: [Issue description]
-```javascript
-// Quote the problematic code here
-const apiKey = "hardcoded-secret-key";
-```
-
-- **Principle Violated**: Security - No hardcoded credentials
-- **Severity**: CRITICAL
-- **Recommendation**: Move API key to environment variable: `process.env.API_KEY`
-
-[Continue for each significant finding]
-
-## Next Steps
-
-### Immediate Actions (Required)
-
-[If critical issues exist]
-
-- [ ] [Action 1 - reference issue ID]
-- [ ] [Action 2 - reference issue ID]
-
-[If no critical issues]
-No immediate blocking actions required.
-
-### Recommended Improvements
-
-- [ ] [Improvement 1 - reference issue ID]
-- [ ] [Improvement 2 - reference issue ID]
-
-### Future Considerations (Optional)
-
-- [ ] [Enhancement 1]
-- [ ] [Enhancement 2]
+| File | Tier | Changes | Type | Findings |
+|------|------|---------|------|---------|
+| src/auth/handler.py | P0 | +45 -12 | Modified | C-01, H-01 |
+| src/models/user.py | P1 | +22 -5 | Modified | M-01 |
+| tests/test_auth.py | P2 | +120 -0 | Added | None |
+| README.md | P3 | +8 -2 | Modified | None |
 
 ## Approval Decision
 
@@ -490,7 +535,7 @@ No immediate blocking actions required.
 **Reasoning**:
 [Provide clear reasoning based on findings. Examples:
 
-- "PR violates mandatory Test-First principle (C1). Must add tests before merge."
+- "PR violates mandatory Test-First principle (C-01). Must add tests before merge."
 - "No critical issues found. Minor suggestions provided but not blocking."
 - "Excellent PR - follows all constitution principles and includes comprehensive tests."]
 
@@ -498,9 +543,9 @@ No immediate blocking actions required.
 
 ---
 
-*Review generated by devspark.pr-review v1.0*
+*Review generated by devspark.pr-review v1.1*
 *Constitution-driven code review for [PROJECT_NAME]*
-*To update this review after changes: `/devspark.pr-review #[PR_NUMBER]`*
+*To re-review after fixes: `/devspark.pr-review #[PR_NUMBER] re-review`*
 
 ---
 
@@ -561,8 +606,8 @@ Recommendation: {APPROVE/REQUEST CHANGES/REJECT}
 
 {If critical issues:}
 Critical issues must be resolved before merge:
-- C1: {Brief description}
-- C2: {Brief description}
+- C-01: {Brief description}
+- C-02: {Brief description}
 
 View full review: /.documentation/specs/pr-review/pr-{NUMBER}.md
 ```
@@ -667,10 +712,13 @@ If PR is excellent:
 
 When re-reviewing an updated PR:
 
-- Explicitly note what changed since last review
-- Acknowledge fixed issues: "✅ Fixed: C1 (tests added)"
-- Note new issues introduced: "⚠️ New: H3 (missing validation)"
-- Compare commit SHAs and summarize delta
+- Load existing finding IDs and their statuses before running the new review
+- Carry forward all unresolved findings unchanged with status `➡️ Carried`
+- Mark resolved findings as `✅ Resolved` with a brief note (e.g., "✅ Resolved: C-01 (tests added in commit abc123)")
+- Flag partially addressed findings as `⚠️ Partial` with explanation
+- Note any new findings introduced since last review with `🔴 Open`
+- Append a new row to the Revision Log table with the new commit SHA
+- Keep the same test command from the first review row to maintain a consistent baseline
 
 ## Context
 
