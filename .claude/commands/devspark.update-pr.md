@@ -1,0 +1,1 @@
+../../templates/commands/update-pr.md
