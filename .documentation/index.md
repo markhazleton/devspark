@@ -75,7 +75,7 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
-- [Validation Matrix](validation-matrix.md) — Current evidence for v1.5.0 workflow scenarios
+- [Validation Matrix](validation-matrix.md) — Current evidence for v1.6.0 workflow scenarios
 - [Monorepo Guide](monorepo-guide.md) — Optional multi-application monorepo support
 
 ---
