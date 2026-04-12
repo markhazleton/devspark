@@ -103,8 +103,8 @@ Given that feature description, do this:
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot")
 
 3. Load the correct template based on the confirmed route:
-   - `full-spec` -> `/.documentation/templates/spec-template.md` in installed repos, or `templates/spec-template.md` in source repos
-   - `quick-spec` -> `/.documentation/templates/quick-spec-template.md` in installed repos, or `templates/quick-spec-template.md` in source repos
+   - `full-spec` -> `/.devspark/templates/spec-template.md` in installed repos, or `templates/spec-template.md` in source repos
+   - `quick-spec` -> `/.devspark/templates/quick-spec-template.md` in installed repos, or `templates/quick-spec-template.md` in source repos
 
 4. Follow this execution flow:
 

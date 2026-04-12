@@ -44,10 +44,10 @@ Example (Claude Code):
 ## What Gets Installed
 
 - **`.devspark/`** — Framework files (stock prompts, templates, scripts). Safe to delete or upgrade.
-- **`.documentation/`** — Your project artifacts (constitution, specs, decisions). Never touched by DevSpark.
+- **`.documentation/`** — Your project artifacts (constitution, specs, decisions). Seeded during initial setup and preserved afterward.
 - **Agent shims** — Platform-specific files that wire `/devspark.*` commands to personal, team, and stock prompt resolution.
 
-DevSpark itself only writes to `.devspark/`. `.documentation/` remains repository-owned work product.
+Framework upgrades only write to `.devspark/`. `.documentation/` remains repository-owned work product after the initial quickstart seeds project artifacts.
 
 ## Multi-App Support (Optional)
 
