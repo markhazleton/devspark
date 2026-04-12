@@ -144,7 +144,7 @@ Do not add historical content to Guide.md — it describes the present, not the 
 4. If moving a directory would leave an empty parent, remove the empty parent only if it has no remaining files.
 5. **Do not move** `.documentation/memory/constitution.md` — it is never an archive candidate.
 6. **Do not move** `.devspark/scripts/` (stock scripts) or `.documentation/scripts/` (team script overrides) — these are operational.
-7. **Do not move** `.documentation/templates/` — these are operational.
+7. **Do not move** `.devspark/templates/` — these are operational.
 
 ### 7. Update .archive/README.md
 

@@ -47,7 +47,7 @@ Tell the user what you found and ask for confirmation before proceeding.
 
 1. Create `.devspark/` directory structure
 2. Move `.documentation/defaults/commands/*` → `.devspark/defaults/commands/`
-3. Move `.documentation/defaults/templates/*` → `.devspark/defaults/templates/` if present
+3. Move `.documentation/defaults/templates/*` → `.devspark/templates/` if present
 4. Move `.documentation/scripts/*` → `.devspark/scripts/` (only stock DevSpark scripts with framework header comments — leave user-created scripts)
 5. Move `.documentation/templates/*` → `.devspark/templates/` (only stock DevSpark templates)
 6. Delete empty `.documentation/defaults/` if nothing remains
@@ -103,8 +103,7 @@ Create these directories (skip any that already exist):
 .devspark/
 ├── defaults/commands/
 ├── scripts/
-├── templates/
-└── memory/
+└── templates/
 
 .documentation/
 ├── memory/
@@ -145,6 +144,7 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `repo-story.md` | `.devspark/defaults/commands/devspark.repo-story.md` |
 | `archive.md` | `.devspark/defaults/commands/devspark.archive.md` |
 | `upgrade.md` | `.devspark/defaults/commands/devspark.upgrade.md` |
+| `update-pr.md` | `.devspark/defaults/commands/devspark.update-pr.md` |
 | `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
 | `add-application.md` | `.devspark/defaults/commands/devspark.add-application.md` |
 | `list-applications.md` | `.devspark/defaults/commands/devspark.list-applications.md` |
@@ -159,6 +159,7 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 - `spec-template.md`
 - `plan-template.md`
 - `tasks-template.md`
+- `quick-spec-template.md`
 - `checklist-template.md`
 - `agent-file-template.md`
 
@@ -236,9 +237,9 @@ Replace `{name}` in each file with the actual command name (e.g., `constitution`
 
 ## Step 8: Seed the Constitution
 
-Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.documentation/memory/constitution.md` and save to `.devspark/memory/constitution.md`.
+If `.documentation/memory/constitution.md` does not already exist, fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.documentation/memory/constitution.md` and save it there.
 
-Then copy to `.documentation/memory/constitution.md` — **only if that file does not already exist**. If the file was migrated from `.specify/` or already existed, skip this copy.
+If the file was migrated from `.specify/` or already existed, preserve it and do not overwrite it.
 
 Using the project name and principles from Step 1, customize `.documentation/memory/constitution.md`:
 
