@@ -56,6 +56,7 @@ Given that feature description, do this:
    - Present the recommendation and reasoning to the user
    - Ask the user to confirm or override the route before creating artifacts
    - If the confirmed route is `one-off-fix`, stop and instruct the user to run `/devspark.quickfix` unless they explicitly want to continue here
+   - If `/.documentation/memory/constitution.md` exists, load it so the generated spec can reference mandatory principles and constraints
 
 1. **Generate a concise short name** (2-4 words) for the branch:
    - Analyze the feature description and extract the most meaningful keywords
@@ -229,7 +230,7 @@ Given that feature description, do this:
 
 **NOTE:** The script creates and checks out the new branch and initializes the spec file before writing.
 
-## General Guidelines
+## Guidelines
 
 ## Quick Guidelines
 

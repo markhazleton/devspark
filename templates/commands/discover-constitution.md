@@ -17,20 +17,20 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty). User may provide focus areas (e.g., "focus on security and testing") or specific directories to analyze.
 
-## Goal
+## Overview
 
 Help brownfield projects reverse-engineer a project constitution by analyzing existing source code patterns, identifying implicit conventions, and guiding the user through interactive questions to formalize principles.
 
 This command is designed for teams adopting DevSpark on **existing codebases** where principles exist implicitly in the code but have never been documented.
 
-## Operating Principles
+## Guidelines
 
 - **Discovery-first**: Analyze code before asking questions—ground questions in actual patterns found
 - **Interactive refinement**: Use targeted questions to validate discoveries and fill gaps
 - **Draft output**: Produce a draft constitution for user review, not a final document
 - **Respect existing work**: Treat discovered patterns as valuable—the team chose them for reasons
 
-## Execution Steps
+## Outline
 
 ### 1. Initialize Discovery Context
 

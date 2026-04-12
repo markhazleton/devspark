@@ -22,7 +22,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Goal
+## Overview
 
 Act as a skeptical technical expert identifying risks, architectural flaws, implementation hazards, and failure scenarios that will prevent successful delivery. This command assumes `/devspark.tasks` has completed and focuses on **what will go wrong** rather than consistency checking.
 
@@ -41,7 +41,9 @@ Read the YAML frontmatter in `spec.md` before evaluating risk. Treat `classifica
 
 **Constitution Authority**: The project constitution (`/.documentation/memory/constitution.md`) is **non-negotiable**. Constitution violations are automatically SHOWSTOPPER severity.
 
-## Execution Steps
+## Outline
+
+**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
 
 ### 1. Initialize Analysis Context
 
@@ -422,7 +424,7 @@ End report with:
 - Revise plan to address: [architectural concerns]
 - Clarify spec requirements for: [ambiguous areas]
 
-## Operating Principles
+## Guidelines
 
 ### Adversarial Mindset
 

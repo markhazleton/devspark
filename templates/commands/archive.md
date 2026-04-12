@@ -20,7 +20,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty). If the user names specific files or directories, prioritize those as archive candidates.
 
-## Purpose
+## Overview
 
 Keep `.documentation/` current and authoritative. Move outdated, completed, or contradicting material to `.archive/` with a date-stamped folder. Before moving anything, extract important information into `CHANGELOG.md` and `.documentation/Guide.md` so no knowledge is lost.
 
@@ -31,7 +31,7 @@ Keep `.documentation/` current and authoritative. Move outdated, completed, or c
 - Git repository (recommended but not required)
 - `.documentation/` directory exists
 
-## Execution Steps
+## Outline
 
 ### 1. Gather Context
 
@@ -187,7 +187,7 @@ Output a summary to the user:
 Brief description of what remains and why it is all current.
 ```
 
-## Rules
+## Constraints
 
 - **Never read `.archive/` in this or any other command.**
 - **Never archive `.documentation/memory/constitution.md`.**
