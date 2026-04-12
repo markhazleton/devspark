@@ -20,7 +20,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Goal
+## Overview
 
 Harvest valuable knowledge from completed specs, stale documentation, and in-process drafts into living project documentation, then archive obsolete source material.
 
@@ -248,7 +248,7 @@ Write a report to the script-provided `report_path` containing:
 - harvested knowledge destinations
 - active items intentionally left in place
 
-## Anti-Patterns
+## Constraints
 
 Do not:
 

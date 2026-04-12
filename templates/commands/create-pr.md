@@ -1,5 +1,9 @@
 ---
 description: Draft or update a spec-aware pull request with task, checklist, and gate visibility before review.
+handoffs:
+  - label: Review Pull Request
+    agent: devspark.pr-review
+    prompt: Review the pull request for constitution compliance
 scripts:
   sh: .devspark/scripts/bash/create-pr.sh --mode preflight --json $ARGUMENTS
   ps: .devspark/scripts/powershell/create-pr.ps1 -Mode Preflight -Json $ARGUMENTS
@@ -28,6 +32,8 @@ If the spec body and frontmatter disagree, surface the inconsistency to the user
 This command is advisory. Dirty trees, missing specs, incomplete tasks, unresolved gates, and explicit gate acknowledgements are warnings that the agent must explain, not hard blocks. The user decides whether to proceed, adjust the draft, or stop.
 
 ## Outline
+
+**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
 
 ### 1. Run Preflight Context
 
@@ -148,7 +154,7 @@ After creation or update, report:
 - whether it is draft or ready for review
 - any warnings that still remain unresolved
 
-## Notes
+## Guidelines
 
 - Branches with no spec are valid. If a quickfix record exists for the current branch, use it before falling back to branch name, diff stats, and commit subjects.
 - If task or checklist artifacts are missing, report that plainly and continue with a lighter draft.
