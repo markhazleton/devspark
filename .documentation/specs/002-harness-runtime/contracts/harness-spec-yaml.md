@@ -48,7 +48,7 @@ scope:
 # Optional: defaults applied to all steps unless overridden per-step
 defaults:
   adapter: noop        # default adapter; overridden by --adapter flag or user config
-  mode: agent          # "agent" | "shell" | "manual"
+  mode: agent          # "agent" | "manual"
   retry:
     maxAttempts: 1
     backoff: none
@@ -62,7 +62,7 @@ telemetry:
 steps:
   - id: specify
     name: Write Feature Specification
-    type: agent_task           # "agent_task" | "validation" | "function" | "human_gate"
+    type: agent_task           # "agent_task" | "validation" | "human_gate"
     mode: agent                # inherits from defaults if omitted
     adapter: noop              # overrides defaults.adapter for this step
     prompt_file: prompts/specify.md    # resolved relative to spec file location
@@ -133,13 +133,12 @@ steps:
   - id: human-review
     name: Human Review Gate
     type: human_gate
-    mode: manual             # Displays copy/paste panel in IDE; waits for keypress
+    mode: manual             # Displays copy/paste panel in IDE; waits for keypress; fails in non-TTY runs
     prompt_file: prompts/review-gate.md
 
-  - id: shell-check
-    name: Run linter
-    type: function
-    mode: shell
+  - id: repo-checks
+    name: Validate Lint And Formatting Signals
+    type: validation
     validation:
       - id: lint-passes
         type: command.exit_code
@@ -181,7 +180,7 @@ steps:
 | Field | Type | Default |
 |-------|------|---------|
 | `adapter` | string | `"noop"` |
-| `mode` | `"agent"` \| `"shell"` \| `"manual"` | `"agent"` |
+| `mode` | `"agent"` \| `"manual"` | `"agent"` |
 | `retry` | object | `{maxAttempts: 1, backoff: "none"}` |
 
 ### Telemetry Fields
@@ -197,10 +196,10 @@ steps:
 |-------|------|----------|-------|
 | `id` | string | Yes | Unique within spec; used in routing and trace output |
 | `name` | string | No | Human-readable label |
-| `type` | string | Yes | `"agent_task"` \| `"validation"` \| `"function"` \| `"human_gate"` |
-| `mode` | string | No | `"agent"` \| `"shell"` \| `"manual"`; inherits from defaults |
+| `type` | string | Yes | `"agent_task"` \| `"validation"` \| `"human_gate"` |
+| `mode` | string | No | `"agent"` \| `"manual"`; inherits from defaults; `validation` steps do not invoke an adapter |
 | `adapter` | string | No | Overrides `defaults.adapter` for this step |
-| `prompt_file` | string | No | Path to `.md` prompt file; resolved relative to spec file location |
+| `prompt_file` | string | No | Path to `.md` prompt file for `agent_task` or `human_gate`; resolved relative to spec file location |
 | `inputs` | list[string] | No | Glob patterns for input files; recorded in artifact delta |
 | `outputs` | list[string] | No | Glob patterns for output files; verified post-execution |
 | `validation` | list | No | Rules evaluated after step execution |
@@ -234,6 +233,8 @@ steps:
 | `json.schema` | `target_file` is valid JSON conforming to `schema_file` |
 | `git.clean` | `git status --porcelain [path]` returns empty output |
 | `regex.match` | `path` content matches `pattern` |
+
+Lint, build, and test checks are modeled as `command.exit_code` validation rules in v1 rather than standalone shell/function step types.
 
 ### Retry Policy Fields
 

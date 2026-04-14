@@ -11,13 +11,13 @@ DevSpark orchestrates AI-assisted development via prompts and slash commands tha
 
 ### Decision Summary
 
-Add an optional `harness` CLI subcommand group and supporting runtime modules to DevSpark. Users author declarative YAML specs; the harness executes steps, validates results, retries with injected feedback, and persists structured run artifacts to `.documentation/devspark/runs/`. All existing CLI behavior is unchanged.
+Add an optional `harness` CLI subcommand group and supporting runtime modules to DevSpark. Users author declarative YAML specs; the harness executes steps, validates results, retries with injected feedback, and persists structured run artifacts to `.documentation/devspark/runs/`. To keep the first release simple and internally consistent, v1 supports three step types only: `agent_task`, `validation`, and `human_gate`. All existing CLI behavior is unchanged.
 
 ### Key Drivers
 
 - Repeatability: teams want a single command to execute a full specify→plan→implement→validate cycle
 - Observability: structured event logs (`events.jsonl`) and result summaries (`result.json`) are inspectable after the fact
-- CI integration: noop and manual adapters make harness specs runnable without an AI tool
+- CI integration: noop and `--dry-run` make harness specs usable in testing and authoring contexts without an AI tool
 
 ### Source Inputs
 
@@ -167,6 +167,7 @@ sample.harness.yaml                  ← repo root reference file (Phase 1)
 - `apiVersion: devspark.ai/v1` only; CLI constant `SUPPORTED_API_VERSION = "devspark.ai/v1"`; any other value → FR-027 error
 - YAML loaded with `PyYAML` `safe_load`; JSON as fallback detected by `.json` extension
 - Relative paths in spec normalized to absolute against `repo_root` at load time
+- V1 step surface is intentionally limited to `agent_task`, `validation`, and `human_gate`; shell/build/test checks use `command.exit_code` validation rules instead of standalone shell/function steps
 - Schema generated via `HarnessSpec.model_json_schema()` and written by a `make-schema` helper or Phase 2 `validate` command
 
 ---
@@ -188,7 +189,7 @@ sample.harness.yaml                  ← repo root reference file (Phase 1)
 **Key decisions**:
 - Run ID: `run_<YYYYMMDDTHHMMSSZ>_<6-char-hex>` e.g. `run_20260414T193000Z_a1b2c3`
 - Retention: after each run, scan `.documentation/devspark/runs/`, sort by mtime, delete oldest when count > limit; never delete status `running`
-- Manual adapter: render Rich Panel with step prompt, call `readchar.readkey()` (existing dep) to wait for keypress, then record `complete`; if no TTY → record `skipped_no_tty` without blocking
+- Manual adapter: render Rich Panel with step prompt, call `readchar.readkey()` (existing dep) to wait for keypress, then record `complete`; if no TTY → emit `harness.policy.blocked`, fail the step/run with a clear manual-gate-requires-TTY message, and instruct users to use `--dry-run` for CI prechecks
 - TTY detection: `sys.stdout.isatty()` → rich output when True, plain-text when False
 - User config: `platformdirs.user_config_dir("devspark") / "config.json"` as JSON dict
 
@@ -211,7 +212,7 @@ sample.harness.yaml                  ← repo root reference file (Phase 1)
 - `command.exit_code`: `subprocess.run(shell=True)`; stdout/stderr captured to `steps/<step-id>/stdout.txt`
 - `git.clean`: `git status --porcelain`; fail if non-empty output; configurable path filter via rule `path` field
 - `always.pass`: returns `passed` unconditionally (wiring and dry-run testing)
-- `doctor` checks (in order): Python ≥3.11, pydantic importable, `.devspark/` exists, `agents-registry.json` readable, git (`shutil.which("git")`), then per-agent checks from registry `requires_cli` + `install_url`
+- `doctor` checks (in order): Python ≥3.11, pydantic importable, compatible project layout present (`.devspark/` for installed projects, or `.documentation/` + `pyproject.toml` + `src/devspark_cli/` for source checkouts), `agents-registry.json` readable, git (`shutil.which("git")`), then per-agent checks from registry `requires_cli` + `install_url`
 
 ---
 
@@ -229,7 +230,7 @@ sample.harness.yaml                  ← repo root reference file (Phase 1)
 **Key decisions**:
 - Claude Code adapter: `subprocess.run(["claude", "--print", prompt_text])`, capture output to step artifact
 - `is_available()`: `shutil.which(agent_cli_name) is not None`
-- App scope resolution: reuse `scope.resolve_doc_root(app, repo_root)` from existing `scope.py` — no new resolution logic needed
+- App scope resolution: load the registry, resolve explicit app scope through existing `scope.resolve_scope()` validation, then derive `doc_root` from the resolved app definition via `scope.resolve_doc_root(app, repo_root)`
 
 ---
 
@@ -255,7 +256,7 @@ Each phase is independently shippable. Phase N can be in production while Phase 
 |------|-----------|--------|-----------|
 | `__init__.py` change breaks existing commands | Low | High | Single `add_typer()` only; run full existing command suite in contract tests |
 | Path separator differences on Windows | Medium | Medium | All paths via `pathlib.Path`; test fixtures use forward-slash strings |
-| `manual` adapter blocks indefinitely in CI | Medium | High | TTY detection before `readchar`; no-TTY path records `skipped_no_tty` without blocking |
+| `manual` adapter is reached in CI/non-TTY mode | Medium | High | TTY detection before `readchar`; no-TTY path fails fast with `harness.policy.blocked` and a clear remediation to use `--dry-run` |
 | PyYAML `safe_load` rejects valid YAML edge cases | Low | Low | Pydantic validation gives clear field-level errors regardless |
 | Retention pruning deletes in-use run directory | Low | Medium | Never delete status `running`; sort by mtime; atomic directory rename before delete |
 | Phase 4 agent CLIs change their invocation API | Medium | Medium | Adapter per agent; change is isolated to one file; `is_available()` guards at runtime |

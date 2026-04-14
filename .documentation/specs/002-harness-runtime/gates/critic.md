@@ -1,9 +1,9 @@
 ---
 gate: critic
-status: fail
-blocking: true
-severity: showstopper
-summary: "Two showstoppers and two high-severity delivery risks remain: the current model cannot express executable shell/function steps, manual gates are bypassed in non-TTY runs, doctor hard-codes an installed .devspark payload check, and app-scope integration calls the wrong scope API."
+status: pass
+blocking: false
+severity: info
+summary: "All four critic findings were validated and resolved in-place: v1 step execution was narrowed to supported step types, manual gates now fail explicitly in non-TTY runs, doctor accepts installed and source-checkout layouts, and app-scope planning now reuses the existing scope-resolution API."
 ---
 
 # Technical Risk Assessment: DevSpark Harness Runtime
@@ -13,34 +13,25 @@ summary: "Two showstoppers and two high-severity delivery risks remain: the curr
 **Artifacts scanned**: `spec.md`, `plan.md`, `tasks.md`, `data-model.md`, `contracts/harness-spec-yaml.md`, `contracts/cli-commands.md`, `contracts/events-schema.md`, `/.documentation/memory/constitution.md`
 **Detected stack**: Python 3.11+, Typer, Rich, Pydantic v2, platformdirs, readchar, PyYAML, local filesystem artifacts, Git, optional external agent CLIs
 
-## Findings
+## Resolution Summary
 
-| ID | Severity | Location(s) | Risk | Why this fails in practice | Required remediation |
-|----|----------|-------------|------|----------------------------|----------------------|
-| S1 | SHOWSTOPPER | `spec.md` Step/Adapter entities; `data-model.md` StepSpec; `contracts/harness-spec-yaml.md` full example; `tasks.md` T011/T023 | The design claims support for `function` + `shell` steps, but the actual step model has no execution payload for them. | The spec says a Step can be `agent_task`, `validation`, `function`, or `human_gate`, and that adapters execute both `agent_task` and `shell` steps. The sample contract includes a `shell-check` step. But StepSpec only carries `prompt_file`, `inputs`, `outputs`, `validation`, and routing; there is no field for a shell command, callable name, or function reference. The task plan then routes shell execution through `command.exit_code` validation instead of step execution itself. As written, Phase 2 cannot truthfully execute all supported step types or generate a faithful sample/schema pair. | Add an explicit execution contract for non-agent steps before implementation begins. At minimum, define the executable payload for `mode: shell` and `type: function`, decide whether they are step kinds or adapters, and update the data model, YAML contract, sample spec, and task list together. |
-| S2 | SHOWSTOPPER | `spec.md` FR-037; `contracts/cli-commands.md` non-TTY output example; `plan.md` Phase 2 key decisions; `tasks.md` T013 | Manual review gates are bypassed in CI/non-TTY mode. | FR-037 requires the run to pause and wait for user confirmation before continuing. The CLI contract's non-TTY example shows a manual step failing the run. But the plan and task list implement the opposite behavior: `skipped_no_tty` without blocking. That converts a required human gate into an automatic pass-through in CI, which is exactly where teams are most likely to rely on exit codes alone. This creates false-positive successful runs for workflows that were explicitly intended to stop for human review. | Define a blocking non-TTY policy now. The safest default is: manual/human-gate steps fail or abort in non-interactive mode unless the user explicitly opts into a bypass mode in the spec. Reflect that in FR-037, CLI contracts, exit codes, and tests. |
-| H1 | HIGH | `plan.md` Phase 3 key decisions; `tasks.md` T026; `src/devspark_cli/__init__.py` project detection | `devspark doctor` is specified against the installed `.devspark/` payload rather than the environments this repository already supports. | The planned doctor command treats `.devspark/` presence as a required health check. In the current source repository, there is no `.devspark/` directory at repo root, while the existing CLI already considers either `.devspark/` or `.documentation/` sufficient to identify a DevSpark project. That means doctor will report a broken environment for editable/source checkouts that the product itself currently recognizes as valid. This will create noisy false negatives for contributors and for any workflow that runs the CLI from source. | Split health checks into environment-level and installation-layout checks. Reuse the existing project detection rules instead of hard-coding `.devspark/` as mandatory, or explicitly scope doctor to installed-project validation and document a separate source-dev mode. |
-| H2 | HIGH | `tasks.md` T029; `plan.md` Phase 4 key decisions; `src/devspark_cli/scope.py` `resolve_doc_root`; `src/devspark_cli/scope.py` `resolve_scope` | App-scope integration is planned against the wrong API and ignores existing ambiguity validation. | T029 says the runner can call `scope.resolve_doc_root(app_id, repo_root)` with no new resolution logic. The actual function takes an `AppDefinition | None`, not an app ID, and the repo already has `resolve_scope()` to validate app existence and explicit scope selection. If implemented as currently written, Phase 4 will either not compile, or it will re-implement a partial scope resolver and miss the existing error paths for unknown/ambiguous apps. | Change the plan before coding: the harness runner should resolve app scope through the same registry + scope-resolution path used elsewhere, then derive `doc_root` from the resolved app object. Add a contract test for unknown app IDs and multi-app ambiguity, not just the happy path. |
+| ID | Original status | Validation | Resolution |
+|----|-----------------|------------|------------|
+| S1 | Valid | The spec/contract claimed unsupported `function` and `shell` execution surfaces without a matching data model. | Resolved by narrowing v1 to `agent_task`, `validation`, and `human_gate`, and by documenting `command.exit_code` as the v1 mechanism for command-based checks. |
+| S2 | Valid | The plan/tasks contradicted FR-037 by skipping manual gates in non-TTY runs. | Resolved by making non-TTY manual gates fail explicitly with `harness.policy.blocked` and a clear remediation to use `--dry-run`. |
+| H1 | Valid | Doctor planning was stricter than the current repo's supported source-checkout layout. | Resolved by defining a compatible-layout check that accepts either installed `.devspark/` projects or source checkouts with `.documentation/`, `pyproject.toml`, and `src/devspark_cli/`. |
+| H2 | Valid | The app-scope task referenced the wrong scope API and bypassed existing validation. | Resolved by updating plan/tasks to reuse `load_registry()` + `scope.resolve_scope()` + `scope.resolve_doc_root()` and to test unknown-app and ambiguity paths. |
 
-## Additional Risk Notes
+## Outcome
 
-- Backward compatibility is under-tested relative to the claim in SC-002. `tasks.md` only checks `devspark init --help`, `devspark registry list`, and `devspark upgrade --help`, which is materially weaker than "the existing command suite" for a monolithic CLI entrypoint.
-- Using directory mtime as the sole source of truth for `trace latest` and retention pruning is brittle after artifact copies/restores or manual edits. It is serviceable for a prototype, but not a stable definition of recency.
-- The spec's assumptions explicitly defer non-interactive `human_gate` behavior, but the plan and tasks already bake in one behavior. That drift needs to be closed before Phase 2 implementation.
+The original findings were correct. The active artifacts now describe a coherent v1 execution surface, an explicit non-TTY manual-gate policy, a doctor command compatible with this repository's current source layout, and an app-scope integration path that matches the existing codebase API.
 
 ## Constitution Check
 
-No direct constitution violation is documented in the current artifacts. The primary issue is delivery viability: the current plan leaves required behavior underspecified or contradictory in ways that will fail during implementation and CI usage.
+No constitution violations remain in the reviewed artifacts.
 
 ## Go/No-Go Recommendation
 
-**NO-GO** for `/devspark.implement` in the current state.
+**GO** for `/devspark.implement` on the corrected artifacts.
 
-Address S1 and S2 first, then regenerate the plan/tasks sections that depend on execution semantics and app-scope resolution. After that, rerun `/devspark.analyze` only if the artifacts materially change, and rerun `/devspark.critic` before implementation starts.
-
-## Evidence Pointers
-
-- Step kinds and adapter scope are declared in `spec.md` (Step and Adapter entities) and exemplified in `contracts/harness-spec-yaml.md` (`shell-check`), but StepSpec in `data-model.md` lacks any executable payload field.
-- Manual-gate intent is defined in `spec.md` FR-037 and `contracts/cli-commands.md`, while `plan.md` and `tasks.md` currently implement `skipped_no_tty` instead.
-- Scope integration assumptions in `tasks.md` T029 do not match the actual signature and validation flow in `src/devspark_cli/scope.py`.
-- Doctor's required `.devspark/` check in `plan.md` and `tasks.md` is stricter than the current project-detection logic in `src/devspark_cli/__init__.py`.
+If further structural changes are made to scope resolution or step semantics, rerun `/devspark.analyze` and `/devspark.critic` before implementation starts.

@@ -81,7 +81,7 @@ run_start run_20260414T193000Z_a1b2c3 specify-plan-implement cycle
 step_pass specify noop 0.3s
 step_pass plan noop 0.2s
 step_warn validate-outputs noop 0.1s
-step_fail human-review manual 0 retries_exhausted
+step_fail human-review manual 0 manual_gate_requires_tty
 run_fail 3/4 passed
 ```
 
@@ -90,6 +90,7 @@ run_fail 3/4 passed
 - Writes run artifacts to `.documentation/devspark/runs/<run-id>/` (created on first run)
 - After completing, prunes oldest runs when count exceeds retention limit (default 20)
 - On Ctrl+C: sets run status to `aborted`, preserves all artifacts written so far, exits code `2`
+- If a `human_gate` / `manual` step is reached without a TTY, the run emits `harness.policy.blocked`, fails with a clear manual-gate-requires-TTY message, and exits non-zero
 - `--dry-run`: parses spec, resolves context, skips all step execution, writes artifacts with `skipped_dry_run` status; exits `0` on any valid spec
 
 ---

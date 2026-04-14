@@ -152,7 +152,8 @@ A developer setting up DevSpark on a new machine wants to confirm their environm
 
 1. **Given** all prerequisites are met, **When** the user runs `devspark doctor`, **Then** every check shows pass and the command exits successfully
 2. **Given** a required CLI tool is not installed, **When** the user runs `devspark doctor`, **Then** that check shows fail with an install URL or install command for that tool
-3. **Given** the framework install directory is missing, **When** the user runs `devspark doctor`, **Then** the command reports the missing directory and instructs the user to run `devspark init`
+3. **Given** the user is working from a source checkout that has `.documentation/`, `pyproject.toml`, and `src/devspark_cli/` but no installed `.devspark/` payload, **When** the user runs `devspark doctor`, **Then** the command recognizes the source-checkout layout as valid and does not fail solely because `.devspark/` is absent
+4. **Given** neither an installed `.devspark/` payload nor a compatible source-checkout layout is present, **When** the user runs `devspark doctor`, **Then** the command reports the missing layout and instructs the user to run `devspark init`
 
 ---
 
@@ -175,7 +176,7 @@ A developer who has never used the harness feature continues using `devspark ini
 
 - What happens when a harness spec references a prompt file that does not exist on disk?
 - What happens when the run artifacts directory is not writable?
-- What happens when a `human_gate` step is encountered in a non-interactive (CI) context?
+- When a `human_gate` step is encountered in a non-interactive (CI) context, the run fails with a clear manual-gate-requires-TTY message rather than skipping the gate; users should use `--dry-run` for CI authoring checks.
 - When the user interrupts a run mid-step (Ctrl+C), the harness preserves all artifacts written so far, sets the run status to `aborted`, and `devspark harness trace` displays the partial event log up to the point of interruption.
 - What happens when `devspark harness trace latest` is called but the most recent run's event log is corrupted or incomplete?
 - What happens when `devspark adapter default` is called with a valid adapter name whose CLI is not currently installed?
@@ -254,7 +255,7 @@ A developer who has never used the harness feature continues using `devspark ini
 **Manual Adapter**
 
 - **FR-036**: The `manual` adapter MUST render a formatted prompt block to the terminal that the user can copy and paste into any IDE agent; it MUST NOT require any installed AI tool or CLI
-- **FR-037**: When a step uses the `manual` adapter, the run MUST pause and wait for the user to signal completion (e.g., press a key) before recording the step result and continuing
+- **FR-037**: When a step uses the `manual` adapter in an interactive session, the run MUST pause and wait for the user to signal completion (e.g., press a key) before recording the step result and continuing; when no TTY is present, the run MUST fail with a clear explanation rather than skipping the gate
 
 **Multi-App Scope**
 
@@ -273,13 +274,13 @@ A developer who has never used the harness feature continues using `devspark ini
 
 ### Key Entities *(feature involves data)*
 
-- **HarnessSpec**: A declarative definition of a multi-step automated workflow. Fields: `apiVersion` (e.g. `devspark.ai/v1`), `kind` (`HarnessSpec`), `name`, `scope` (repo or app), `defaults`, `steps`, and `telemetry`. The `apiVersion` field is enforced: a spec whose version exceeds the CLI's supported maximum is rejected with a clear mismatch error rather than silently misinterpreted. The `scope` field integrates with the multi-app registry so a harness spec can be scoped to a specific registered application using `--app <id>`.
-- **Step**: A single unit of work within a HarnessSpec. Has a type (`agent_task`, `validation`, `function`, `human_gate`), an execution mode (`agent`, `shell`, `manual`), an optional adapter override, an optional prompt reference, explicit `inputs` and `outputs` file lists, validation rules, a retry policy, and routing for success and failure.
-- **ValidationRule**: A single check applied after a step completes. Supported types: `file.exists`, `file.contains`, `command.exit_code`, `json.schema`, `git.clean`, `regex.match`, `always.pass`. Each rule has a severity (`error` stops the run; `warning` is recorded but does not block). Higher-level validations (build, unit-tests, lint) are expressed as `command.exit_code` rules.
+- **HarnessSpec**: A declarative definition of a multi-step automated workflow. Fields: `apiVersion` (e.g. `devspark.ai/v1`), `kind` (`HarnessSpec`), `name`, `scope` (repo or app), `defaults`, `steps`, and `telemetry`. The `apiVersion` field is enforced: a spec whose declared `apiVersion` does not equal the CLI's supported version constant is rejected with a clear mismatch error rather than silently misinterpreted. The `scope` field integrates with the multi-app registry so a harness spec can be scoped to a specific registered application using `--app <id>`.
+- **Step**: A single unit of work within a HarnessSpec. Has a type (`agent_task`, `validation`, `human_gate`), an execution mode (`agent`, `manual`), an optional adapter override, an optional prompt reference, explicit `inputs` and `outputs` file lists, validation rules, a retry policy, and routing for success and failure. Validation steps are rule-driven and do not invoke an adapter.
+- **ValidationRule**: A single check applied after a step completes. Supported types: `file.exists`, `file.contains`, `command.exit_code`, `json.schema`, `git.clean`, `regex.match`, `always.pass`. Each rule has a severity (`error` stops the run; `warning` is recorded but does not block). Higher-level validations (build, unit-tests, lint) are expressed as `command.exit_code` rules rather than standalone shell/function steps in v1.
 - **RetryPolicy**: Declares `maxAttempts`, `backoff` strategy (`none`, `fixed`, `exponential`), `retryOn` triggers (`validation_fail`, `tool_error`, `timeout`), `requireHumanAfter` (attempt threshold at which execution pauses for human review), and an optional `repairPrompt` file injected on retry.
 - **Run**: A single execution of a HarnessSpec. Has a unique ID, a status (`running`, `complete`, `failed`, `aborted`), start/finish timestamps, summary metrics, and a list of StepResults. Status `aborted` is set when the user interrupts execution; status `failed` is set when a step exhausts its retry attempts.
 - **StepResult**: The outcome of one attempt at a step. Records attempt number, status, duration, adapter used, per-rule validation findings, and artifact delta (`created`, `modified`, `deleted` file lists).
-- **Adapter**: The execution target for `agent_task` and `shell` steps. Three built-in adapters: `noop` (always succeeds, no AI required — for wiring and CI); `manual` (renders a formatted copy/paste prompt block for the user to execute in their IDE agent); named adapters (`claude_code`, `copilot`, `cursor`) that invoke the corresponding agent CLI (Phase 4).
+- **Adapter**: The execution target for `agent_task` steps. Three built-in adapters: `noop` (always succeeds, no AI required — for wiring and CI); `manual` (renders a formatted copy/paste prompt block for the user to execute in their IDE agent and blocks the run when no TTY is present); named adapters (`claude_code`, `copilot`, `cursor`) that invoke the corresponding agent CLI (Phase 4).
 - **TelemetryEvent**: A single append-only entry in `events.jsonl`. Named event types: `harness.run.started`, `harness.run.finished`, `harness.step.started`, `harness.step.finished`, `harness.step.validation`, `harness.tool.called`, `harness.policy.blocked`.
 - **RunArtifact**: The complete set of files written to `.documentation/devspark/runs/<run-id>/` for a given run, including `spec.resolved.yaml`, `context.json`, `events.jsonl`, per-step outputs under `steps/`, and `result.json`. The system retains at most N run directories (default 20, configurable); the oldest is deleted when the limit is exceeded.
 
@@ -302,9 +303,8 @@ A developer who has never used the harness feature continues using `devspark ini
 
 ## Assumptions
 
-- The framework install directory (`.devspark/`) is writable by the user running the CLI
+- If the CLI is running against an installed project layout, the framework install directory (`.devspark/`) is writable by the user running the CLI
 - The user-level config directory is writable on all supported platforms (Windows, macOS, Linux)
-- `human_gate` step behavior in non-interactive (CI) environments is deferred to a future spec
 - Concurrent run safety is out of scope for Phases 1–3; run IDs use timestamp and random suffix to avoid collision in practice
 - `context.kind: registry` is deferred — not in scope for Phases 1–3
 - Stretch goals (run replay, output diff, telemetry export, parallel step execution) are out of scope for this spec
