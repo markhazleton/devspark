@@ -48,6 +48,8 @@ This command updates an **existing** pull request description based on the curre
 
 ### 1. Initialize PR Context
 
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+
 Run `{SCRIPT}` and parse its JSON output for:
 
 - `PR_CONTEXT`: Current PR metadata (number, title, branches, commit SHA, files, diff)
