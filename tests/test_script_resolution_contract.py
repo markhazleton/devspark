@@ -23,16 +23,13 @@ def _get_templates_with_script() -> list[Path]:
     templates = []
     for path in sorted(COMMANDS_DIR.glob("*.md")):
         content = path.read_text(encoding="utf-8")
-        # Strip frontmatter: split on '---' and take everything after the second delimiter
+        # Strip frontmatter: split on '---' with maxsplit=2.
+        # A well-formed YAML front matter yields 3 parts:
+        #   ["", "<frontmatter>", "<body>"]
+        # Any other split count means the file lacks proper closed frontmatter;
+        # fall back to searching the full content to avoid false negatives.
         parts = content.split("---", 2)
-        if len(parts) >= 3:
-            # Normal case: opening and closing '---' found; body is the third part
-            body = parts[2]
-        elif len(parts) == 2:
-            # Only an opening '---' with no closing delimiter; treat rest as body
-            body = parts[1]
-        else:
-            body = content
+        body = parts[2] if len(parts) == 3 else content
         if "{SCRIPT}" in body or "{AGENT_SCRIPT}" in body:
             templates.append(path)
     return templates
