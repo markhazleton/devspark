@@ -37,6 +37,8 @@ This command is advisory. Dirty trees, missing specs, incomplete tasks, unresolv
 
 ### 1. Run Preflight Context
 
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+
 Run `{SCRIPT}` once from the repository root and parse the returned JSON.
 
 Use the script output as the source of truth for:

@@ -35,6 +35,8 @@ Keep `.documentation/` current and authoritative. Move outdated, completed, or c
 
 ### 1. Gather Context
 
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+
 Run `{SCRIPT}` from the repo root. Parse the JSON output:
 
 - `REPO_ROOT` — absolute path to the repository root
