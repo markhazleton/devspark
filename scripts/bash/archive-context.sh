@@ -1,158 +1,191 @@
 #!/usr/bin/env bash
-# Archive context gathering script
-# Scans .documentation/ for archive candidates (never reads .archive/)
-# Outputs inventory for the AI to review and act on
+# Deprecated compatibility wrapper for the legacy archive-context pre-scan.
+# /devspark.archive now routes through /devspark.harvest. This wrapper calls
+# harvest with docs scope and reshapes the result into the old archive-context
+# contract for one migration window.
 
-set -e
-set -u
-set -o pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# Load optional app-scoped context before scanning for archive candidates.
-parse_app_context "$@" 2>/dev/null || true
-if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
-    resolve_app_scope 2>/dev/null || true
-    print_scope_summary >&2
+PYTHON_CMD=""
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+    PYTHON_CMD="python"
+else
+    echo "ERROR: python3/python is required to generate JSON output." >&2
+    exit 1
 fi
 
 JSON_MODE=false
+INCLUDE_FULL_INVENTORY=false
+SAMPLE_LIMIT=50
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --json) JSON_MODE=true; shift ;;
-        *) shift ;;
+        --json)
+            JSON_MODE=true
+            shift
+            ;;
+        --include-full-inventory)
+            INCLUDE_FULL_INVENTORY=true
+            shift
+            ;;
+        --sample-limit=*)
+            SAMPLE_LIMIT="${1#--sample-limit=}"
+            shift
+            ;;
+        *)
+            shift
+            ;;
     esac
 done
 
+if [[ "$SAMPLE_LIMIT" -lt 1 ]]; then
+    SAMPLE_LIMIT=50
+fi
+
 REPO_ROOT=$(get_repo_root)
-DOC_DIR="$REPO_ROOT/.documentation"
 ARCHIVE_BASE="$REPO_ROOT/.archive"
-TODAY=$(date +%Y-%m-%d)
-ARCHIVE_DIR=".archive/$TODAY"
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ARCHIVE_DIR=".archive/$(date +%Y-%m-%d)"
 GUIDE_PATH=".documentation/Guide.md"
 CHANGELOG_PATH="CHANGELOG.md"
+GUIDE_EXISTS=false
+CHANGELOG_EXISTS=false
+ARCHIVE_EXISTS=false
+[[ -f "$REPO_ROOT/$GUIDE_PATH" ]] && GUIDE_EXISTS=true
+[[ -f "$REPO_ROOT/$CHANGELOG_PATH" ]] && CHANGELOG_EXISTS=true
+[[ -d "$ARCHIVE_BASE" ]] && ARCHIVE_EXISTS=true
 
-# Helper: list files in a dir as JSON array (relative to repo root), never crossing .archive
-list_files_json() {
-    local dir="$1"
-    if [[ -d "$REPO_ROOT/$dir" ]]; then
-        find "$REPO_ROOT/$dir" -type f -name "*.md" 2>/dev/null \
-            | grep -v '/.archive/' \
-            | sed "s|$REPO_ROOT/||" \
-            | sort \
-            | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]'
-    else
-        echo '[]'
-    fi
-}
-
-# Helper: file modified date (ISO format)
-file_mtime() {
-    local f="$REPO_ROOT/$1"
-    if [[ -f "$f" ]]; then
-        local epoch
-        epoch=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null) || { echo "unknown"; return; }
-        date -u -r "$epoch" +%Y-%m-%d 2>/dev/null || date -u -d "@$epoch" +%Y-%m-%d 2>/dev/null || echo "unknown"
-    else
-        echo "unknown"
-    fi
-}
-
-# Scan candidate categories inside .documentation/ (never .archive/)
-DRAFTS_JSON=$(list_files_json ".documentation/drafts")
-
-# Session docs: .documentation/copilot/session=*/
-SESSION_JSON='[]'
-if [[ -d "$DOC_DIR/copilot" ]]; then
-    SESSION_JSON=$(find "$DOC_DIR/copilot" -maxdepth 2 -type f -name "*.md" 2>/dev/null \
-        | grep -v '/.archive/' \
-        | sed "s|$REPO_ROOT/||" \
-        | sort \
-        | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
+EFFECTIVE_SAMPLE_LIMIT="$SAMPLE_LIMIT"
+if [[ "$INCLUDE_FULL_INVENTORY" == true && "$EFFECTIVE_SAMPLE_LIMIT" -lt 10000 ]]; then
+    EFFECTIVE_SAMPLE_LIMIT=10000
 fi
 
-# Implementation plans and historical planning docs (top-level in .documentation/)
-IMPL_PLANS_JSON=$(find "$DOC_DIR" -maxdepth 1 -name "*-implementation-plan.md" -o -name "*-plan.md" 2>/dev/null \
-    | grep -v '/.archive/' \
-    | sed "s|$REPO_ROOT/||" \
-    | sort \
-    | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
+HARVEST_JSON=$("$SCRIPT_DIR/harvest.sh" --scope=docs --json --sample-limit="$EFFECTIVE_SAMPLE_LIMIT")
 
-# Release docs
-RELEASES_JSON=$(list_files_json ".documentation/releases")
+tmp_dir=$(mktemp -d)
+cleanup() {
+    rm -rf "$tmp_dir"
+}
+trap cleanup EXIT
 
-# Quickfix records (candidates: completed QF records)
-QUICKFIXES_JSON=$(list_files_json ".documentation/quickfixes")
+HARVEST_JSON_FILE="$tmp_dir/harvest.json"
+ARCHIVES_FILE="$tmp_dir/existing_archives.txt"
 
-# PR review records
-PR_REVIEWS_JSON=$(list_files_json ".documentation/specs/pr-review")
+printf '%s' "$HARVEST_JSON" > "$HARVEST_JSON_FILE"
 
-# Current doc files (top-level .documentation/*.md, excluding already-caught items)
-CURRENT_DOCS_JSON=$(find "$DOC_DIR" -maxdepth 1 -type f -name "*.md" 2>/dev/null \
-    | grep -v '/.archive/' \
-    | grep -v -- '-implementation-plan\.md' \
-    | grep -v -- '-plan\.md' \
-    | sed "s|$REPO_ROOT/||" \
-    | sort \
-    | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
-
-# Existing archive folders
-EXISTING_ARCHIVES_JSON='[]'
-ARCHIVE_EXISTS="false"
 if [[ -d "$ARCHIVE_BASE" ]]; then
-    ARCHIVE_EXISTS="true"
-    EXISTING_ARCHIVES_JSON=$(find "$ARCHIVE_BASE" -maxdepth 1 -mindepth 1 -type d 2>/dev/null \
+    find "$ARCHIVE_BASE" -maxdepth 1 -mindepth 1 -type d 2>/dev/null \
         | sed "s|$REPO_ROOT/||" \
-        | sort \
-        | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
+        | sort > "$ARCHIVES_FILE"
+else
+    : > "$ARCHIVES_FILE"
 fi
 
-# Check key files
-GUIDE_EXISTS="false"
-[[ -f "$REPO_ROOT/$GUIDE_PATH" ]] && GUIDE_EXISTS="true"
+JSON_OUTPUT=$("$PYTHON_CMD" - "$HARVEST_JSON_FILE" "$ARCHIVES_FILE" "$GUIDE_PATH" "$CHANGELOG_PATH" "$ARCHIVE_DIR" "$ARCHIVE_EXISTS" "$GUIDE_EXISTS" "$CHANGELOG_EXISTS" "$SAMPLE_LIMIT" "$INCLUDE_FULL_INVENTORY" <<'PY'
+import json
+import sys
 
-CHANGELOG_EXISTS="false"
-[[ -f "$REPO_ROOT/$CHANGELOG_PATH" ]] && CHANGELOG_EXISTS="true"
+
+def read_lines(path: str) -> list[str]:
+    with open(path, encoding="utf-8") as handle:
+        return [line.strip() for line in handle if line.strip()]
+
+
+harvest_path, archives_path, guide_path, changelog_path, archive_dir, archive_exists, guide_exists, changelog_exists, sample_limit, include_full_inventory = sys.argv[1:]
+
+with open(harvest_path, encoding="utf-8") as handle:
+    harvest = json.load(handle)
+
+existing_archives = read_lines(archives_path)
+sample_limit_int = int(sample_limit)
+include_full_inventory_bool = include_full_inventory.lower() == "true"
+
+
+def sample_paths(entries: list[dict]) -> list[str]:
+    return [entry["path"] for entry in entries[:sample_limit_int]]
+
+
+def all_paths(entries: list[dict]) -> list[str]:
+    return [entry["path"] for entry in entries]
+
+
+result = {
+    "REPO_ROOT": harvest["repo_root"],
+    "TIMESTAMP": harvest["harvest_timestamp"],
+    "ARCHIVE_DIR": archive_dir,
+    "ARCHIVE_EXISTS": archive_exists.lower() == "true",
+    "EXISTING_ARCHIVES": existing_archives[:sample_limit_int],
+    "EXISTING_ARCHIVES_COUNT": len(existing_archives),
+    "GUIDE_PATH": guide_path,
+    "GUIDE_EXISTS": guide_exists.lower() == "true",
+    "CHANGELOG_PATH": changelog_path,
+    "CHANGELOG_EXISTS": changelog_exists.lower() == "true",
+    "SAMPLE_LIMIT": sample_limit_int,
+    "INCLUDE_FULL_INVENTORY": include_full_inventory_bool,
+    "CANDIDATE_COUNTS": {
+        "drafts": len(harvest["docs"]["stale_drafts"]),
+        "session_docs": len(harvest["docs"]["session_notes"]),
+        "implementation_plans": len(harvest["docs"]["impl_plans"]),
+        "release_docs": len(harvest["docs"]["release_docs"]),
+        "quickfix_records": len(harvest["docs"]["quickfix_records"]),
+        "pr_reviews": len(harvest["docs"]["completed_reviews"]),
+    },
+    "CANDIDATES": {
+        "drafts": sample_paths(harvest["docs"]["stale_drafts"]),
+        "session_docs": sample_paths(harvest["docs"]["session_notes"]),
+        "implementation_plans": sample_paths(harvest["docs"]["impl_plans"]),
+        "release_docs": sample_paths(harvest["docs"]["release_docs"]),
+        "quickfix_records": sample_paths(harvest["docs"]["quickfix_records"]),
+        "pr_reviews": sample_paths(harvest["docs"]["completed_reviews"]),
+    },
+    "CURRENT_DOCS": sample_paths(harvest["docs"]["living_reference"]),
+    "CURRENT_DOCS_COUNT": len(harvest["docs"]["living_reference"]),
+    "FULL_INVENTORY": None,
+}
+
+if include_full_inventory_bool:
+    result["FULL_INVENTORY"] = {
+        "existing_archives": existing_archives,
+        "candidates": {
+            "drafts": all_paths(harvest["docs"]["stale_drafts"]),
+            "session_docs": all_paths(harvest["docs"]["session_notes"]),
+            "implementation_plans": all_paths(harvest["docs"]["impl_plans"]),
+            "release_docs": all_paths(harvest["docs"]["release_docs"]),
+            "quickfix_records": all_paths(harvest["docs"]["quickfix_records"]),
+            "pr_reviews": all_paths(harvest["docs"]["completed_reviews"]),
+        },
+        "current_docs": all_paths(harvest["docs"]["living_reference"]),
+    }
+
+print(json.dumps(result))
+PY
+)
 
 if [[ "$JSON_MODE" == true ]]; then
-    cat <<EOF
-{
-  "REPO_ROOT": "$REPO_ROOT",
-  "TIMESTAMP": "$TIMESTAMP",
-  "ARCHIVE_DIR": "$ARCHIVE_DIR",
-  "ARCHIVE_EXISTS": $ARCHIVE_EXISTS,
-  "EXISTING_ARCHIVES": $EXISTING_ARCHIVES_JSON,
-  "GUIDE_PATH": "$GUIDE_PATH",
-  "GUIDE_EXISTS": $GUIDE_EXISTS,
-  "CHANGELOG_PATH": "$CHANGELOG_PATH",
-  "CHANGELOG_EXISTS": $CHANGELOG_EXISTS,
-  "CANDIDATES": {
-    "drafts": $DRAFTS_JSON,
-    "session_docs": $SESSION_JSON,
-    "implementation_plans": $IMPL_PLANS_JSON,
-    "release_docs": $RELEASES_JSON,
-    "quickfix_records": $QUICKFIXES_JSON,
-    "pr_reviews": $PR_REVIEWS_JSON
-  },
-  "CURRENT_DOCS": $CURRENT_DOCS_JSON
-}
-EOF
+    printf '%s\n' "$JSON_OUTPUT"
 else
     echo "Archive Context"
     echo "==============="
-    echo "Repository:   $REPO_ROOT"
-    echo "Archive dir:  $ARCHIVE_DIR (exists: $ARCHIVE_EXISTS)"
-    echo "Guide.md:     $GUIDE_PATH (exists: $GUIDE_EXISTS)"
-    echo "CHANGELOG.md: $CHANGELOG_PATH (exists: $CHANGELOG_EXISTS)"
+    REPO_ROOT_VALUE=$("$PYTHON_CMD" -c 'import json,sys; print(json.load(sys.stdin)["REPO_ROOT"])' <<<"$JSON_OUTPUT")
+    ARCHIVE_DIR_VALUE=$("$PYTHON_CMD" -c 'import json,sys; data=json.load(sys.stdin); print("{} (exists: {})".format(data["ARCHIVE_DIR"], data["ARCHIVE_EXISTS"]))' <<<"$JSON_OUTPUT")
+    GUIDE_VALUE=$("$PYTHON_CMD" -c 'import json,sys; data=json.load(sys.stdin); print("{} (exists: {})".format(data["GUIDE_PATH"], data["GUIDE_EXISTS"]))' <<<"$JSON_OUTPUT")
+    CHANGELOG_VALUE=$("$PYTHON_CMD" -c 'import json,sys; data=json.load(sys.stdin); print("{} (exists: {})".format(data["CHANGELOG_PATH"], data["CHANGELOG_EXISTS"]))' <<<"$JSON_OUTPUT")
+    COUNTS=$("$PYTHON_CMD" -c 'import json,sys; c=json.load(sys.stdin)["CANDIDATE_COUNTS"]; print("\n".join(str(c[k]) for k in ("drafts","session_docs","implementation_plans","release_docs","quickfix_records","pr_reviews")))' <<<"$JSON_OUTPUT")
+    mapfile -t COUNT_LINES <<<"$COUNTS"
+    echo "Repository:   $REPO_ROOT_VALUE"
+    echo "Archive dir:  $ARCHIVE_DIR_VALUE"
+    echo "Guide.md:     $GUIDE_VALUE"
+    echo "CHANGELOG.md: $CHANGELOG_VALUE"
     echo ""
     echo "Candidates:"
-    echo "  Drafts:              $(echo "$DRAFTS_JSON" | jq 'length' 2>/dev/null || echo 0)"
-    echo "  Session docs:        $(echo "$SESSION_JSON" | jq 'length' 2>/dev/null || echo 0)"
-    echo "  Implementation plans: $(echo "$IMPL_PLANS_JSON" | jq 'length' 2>/dev/null || echo 0)"
-    echo "  Release docs:        $(echo "$RELEASES_JSON" | jq 'length' 2>/dev/null || echo 0)"
-    echo "  Quickfix records:    $(echo "$QUICKFIXES_JSON" | jq 'length' 2>/dev/null || echo 0)"
-    echo "  PR reviews:          $(echo "$PR_REVIEWS_JSON" | jq 'length' 2>/dev/null || echo 0)"
+    echo "  Drafts:               ${COUNT_LINES[0]:-0}"
+    echo "  Session docs:         ${COUNT_LINES[1]:-0}"
+    echo "  Implementation plans: ${COUNT_LINES[2]:-0}"
+    echo "  Release docs:         ${COUNT_LINES[3]:-0}"
+    echo "  Quickfix records:     ${COUNT_LINES[4]:-0}"
+    echo "  PR reviews:           ${COUNT_LINES[5]:-0}"
 fi

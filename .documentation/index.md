@@ -161,8 +161,7 @@ Constitution-powered quality commands that work independently.
 | Command | Purpose | Guide |
 |---------|---------|-------|
 | `/devspark.release` | Archive artifacts, generate release docs | |
-| `/devspark.harvest` | Knowledge-preserving cleanup for stale docs | [Harvest Guide](harvest-usage.md) |
-| `/devspark.archive` | Archive outdated docs, update Guide.md and CHANGELOG | |
+| `/devspark.harvest` | Canonical knowledge-preserving cleanup and archival workflow | [Harvest Guide](harvest-usage.md) |
 | `/devspark.repo-story` | Evidence-based repository narrative generation | [Repo Story Guide](repo-story-usage.md) |
 | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals | |
 | `/devspark.taskstoissues` | Convert tasks.md into GitHub issues | |
@@ -171,6 +170,8 @@ Constitution-powered quality commands that work independently.
 | `/devspark.analyze` | Artifact consistency checking | |
 | `/devspark.personalize` | Create per-user prompt customizations | |
 | `/devspark.upgrade` | Check installed version and guide safe upgrade | [Upgrade Guide](upgrade.md) |
+
+`/devspark.harvest` is the only lifecycle cleanup command documented for ongoing use. `/devspark.archive` remains as a deprecated compatibility alias.
 
 ### Multi-App Commands (Optional)
 
