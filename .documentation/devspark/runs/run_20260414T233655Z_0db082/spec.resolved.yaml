@@ -1,0 +1,35 @@
+apiVersion: devspark.ai/v1
+kind: HarnessSpec
+name: retry-test
+scope:
+  type: repo
+defaults:
+  adapter: noop
+  retry:
+    maxAttempts: 1
+    backoff: none
+    retryOn:
+    - validation_fail
+  mode: agent
+steps:
+- id: retry-step
+  name: ''
+  type: agent_task
+  prompt_file: C:\Users\markh\AppData\Local\Temp\tmppiyyn0l_\prompts\base.md
+  inputs: []
+  outputs: []
+  validation:
+  - id: missing-output
+    type: file.exists
+    severity: error
+    path: C:\Users\markh\AppData\Local\Temp\tmppiyyn0l_\missing.txt
+    expected_exit: 0
+  retry:
+    maxAttempts: 2
+    backoff: none
+    retryOn:
+    - validation_fail
+    repairPrompt: C:\Users\markh\AppData\Local\Temp\tmppiyyn0l_\prompts\repair.md
+telemetry:
+  emit_jsonl: true
+  run_dir: .documentation/devspark/runs

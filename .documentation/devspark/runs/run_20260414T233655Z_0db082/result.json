@@ -1,0 +1,49 @@
+{
+  "run_id": "run_20260414T233655Z_0db082",
+  "status": "failed",
+  "harness_name": "retry-test",
+  "api_version": "devspark.ai/v1",
+  "scope": {
+    "type": "repo"
+  },
+  "started_at": "2026-04-14T23:36:55.521Z",
+  "finished_at": "2026-04-14T23:36:55.528Z",
+  "steps": [
+    {
+      "step_id": "retry-step",
+      "status": "failed",
+      "attempts": 2,
+      "adapter": "noop",
+      "duration_ms": 2,
+      "validation_findings": [
+        {
+          "rule_id": "missing-output",
+          "type": "file.exists",
+          "status": "failed",
+          "severity": "error",
+          "message": "File C:\\Users\\markh\\AppData\\Local\\Temp\\tmppiyyn0l_\\missing.txt is missing"
+        }
+      ],
+      "artifacts": {
+        "created": [],
+        "modified": [],
+        "deleted": []
+      }
+    }
+  ],
+  "metrics": {
+    "duration_ms": 4,
+    "steps_total": 1,
+    "steps_passed": 0,
+    "steps_failed": 1,
+    "validation_failures": 1
+  },
+  "context": {
+    "run_id": "run_20260414T233655Z_0db082",
+    "repo_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmppiyyn0l_",
+    "spec_path": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmppiyyn0l_\\retry.harness.yaml",
+    "doc_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmppiyyn0l_\\.documentation",
+    "adapter": "noop",
+    "dry_run": false
+  }
+}

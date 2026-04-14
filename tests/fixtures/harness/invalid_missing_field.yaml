@@ -1,0 +1,3 @@
+apiVersion: devspark.ai/v1
+kind: HarnessSpec
+name: invalid-harness

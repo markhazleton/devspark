@@ -1,0 +1,411 @@
+{
+  "$defs": {
+    "RetryPolicy": {
+      "description": "Retry behavior for a harness step.",
+      "properties": {
+        "maxAttempts": {
+          "default": 1,
+          "title": "Maxattempts",
+          "type": "integer"
+        },
+        "backoff": {
+          "default": "none",
+          "enum": [
+            "none",
+            "fixed",
+            "exponential"
+          ],
+          "title": "Backoff",
+          "type": "string"
+        },
+        "retryOn": {
+          "items": {
+            "enum": [
+              "validation_fail",
+              "tool_error",
+              "timeout"
+            ],
+            "type": "string"
+          },
+          "title": "Retryon",
+          "type": "array"
+        },
+        "requireHumanAfter": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requirehumanafter"
+        },
+        "repairPrompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repairprompt"
+        }
+      },
+      "title": "RetryPolicy",
+      "type": "object"
+    },
+    "ScopeDeclaration": {
+      "description": "Repository or application scope for a harness run.",
+      "properties": {
+        "type": {
+          "default": "repo",
+          "enum": [
+            "repo",
+            "app"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "app": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "App"
+        }
+      },
+      "title": "ScopeDeclaration",
+      "type": "object"
+    },
+    "StepDefaults": {
+      "description": "Default execution attributes applied to steps.",
+      "properties": {
+        "adapter": {
+          "default": "noop",
+          "title": "Adapter",
+          "type": "string"
+        },
+        "retry": {
+          "$ref": "#/$defs/RetryPolicy"
+        },
+        "mode": {
+          "default": "agent",
+          "enum": [
+            "agent",
+            "manual"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "title": "StepDefaults",
+      "type": "object"
+    },
+    "StepSpec": {
+      "description": "A single harness workflow step.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "agent_task",
+            "validation",
+            "human_gate"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "agent",
+                "manual"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mode"
+        },
+        "adapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Adapter"
+        },
+        "prompt_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt File"
+        },
+        "inputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "outputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "validation": {
+          "items": {
+            "$ref": "#/$defs/ValidationRule"
+          },
+          "title": "Validation",
+          "type": "array"
+        },
+        "retry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RetryPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "on_success": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "On Success"
+        },
+        "on_failure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "On Failure"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "title": "StepSpec",
+      "type": "object"
+    },
+    "TelemetryConfig": {
+      "description": "Telemetry output configuration.",
+      "properties": {
+        "emit_jsonl": {
+          "default": true,
+          "title": "Emit Jsonl",
+          "type": "boolean"
+        },
+        "run_dir": {
+          "default": ".documentation/devspark/runs",
+          "title": "Run Dir",
+          "type": "string"
+        }
+      },
+      "title": "TelemetryConfig",
+      "type": "object"
+    },
+    "ValidationRule": {
+      "description": "Post-step validation rule.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "always.pass",
+            "file.exists",
+            "file.contains",
+            "command.exit_code",
+            "json.schema",
+            "git.clean",
+            "regex.match"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contains"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Command"
+        },
+        "expected_exit": {
+          "default": 0,
+          "title": "Expected Exit",
+          "type": "integer"
+        },
+        "schema_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schema File"
+        },
+        "target_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target File"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "severity"
+      ],
+      "title": "ValidationRule",
+      "type": "object"
+    }
+  },
+  "description": "Top-level harness specification.",
+  "properties": {
+    "apiVersion": {
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "kind": {
+      "const": "HarnessSpec",
+      "title": "Kind",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/ScopeDeclaration"
+    },
+    "defaults": {
+      "$ref": "#/$defs/StepDefaults"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/StepSpec"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "telemetry": {
+      "$ref": "#/$defs/TelemetryConfig"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "name",
+    "steps"
+  ],
+  "title": "HarnessSpec",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
