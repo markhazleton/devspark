@@ -40,6 +40,8 @@ Reviews are advisory. The agent must explain constitution or lifecycle issues, r
 
 ### 1. Initialize Review Context
 
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+
 Run `{SCRIPT}` to extract PR context and parse JSON output for:
 
 - `PR_CONTEXT`: PR metadata (number, title, branches, commit SHA, files, diff)
