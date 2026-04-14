@@ -36,8 +36,13 @@ Execution steps:
    - If JSON parsing fails, abort and instruct user to re-run `/devspark.specify` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
    - If `/.documentation/memory/constitution.md` exists, load it. Cross-reference constitution principles when scanning for underspecified areas — flag requirements that conflict with or omit mandated principles.
+   - Load the shared validation contract from `/.devspark/templates/spec-validation-contract.md` in installed repos, or `templates/spec-validation-contract.md` in source repos.
 
-2. Load the current spec file. Perform a structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do not output raw map unless no questions will be asked).
+2. Load the current spec file and validate it against the shared specification validation contract before ambiguity scanning.
+
+   - If the spec has minor structural drift that can be repaired safely from existing content or authoritative frontmatter, repair it first.
+   - If required route metadata or required top-level sections are missing and cannot be inferred safely, stop and instruct the user to rerun `/devspark.specify` or repair the spec manually before continuing.
+   - Then perform the structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do not output raw map unless no questions will be asked).
 
    Functional Scope & Behavior:
    - Core user goals & success criteria
@@ -159,6 +164,7 @@ Execution steps:
     - Keep each inserted clarification minimal and testable (avoid narrative drift).
 
 6. Validation (performed after EACH write plus final pass):
+   - Spec still satisfies the shared specification validation contract after each update.
    - Clarifications session contains exactly one bullet per accepted answer (no duplicates).
    - Total asked (accepted) questions ≤ 5.
    - Updated sections contain no lingering vague placeholders the new answer was meant to resolve.
