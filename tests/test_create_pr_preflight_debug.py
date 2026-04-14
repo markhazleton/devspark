@@ -40,6 +40,10 @@ def _init_git_repo(repo_root: Path, branch_name: str) -> None:
     _run(["git", "checkout", "-b", branch_name], repo_root)
     _run(["git", "add", "."], repo_root)
     _run(["git", "commit", "-m", "initial commit"], repo_root)
+    remote_root = repo_root.parent / f"{repo_root.name}-origin.git"
+    subprocess.run(["git", "init", "--bare", remote_root.as_posix()], cwd=repo_root, text=True, capture_output=True, check=True)
+    _run(["git", "remote", "add", "origin", remote_root.as_posix()], repo_root)
+    _run(["git", "push", "-u", "origin", branch_name], repo_root)
 
 
 def _write(path: Path, content: str) -> None:
@@ -179,6 +183,8 @@ def main() -> None:
 
         ps_preflight = _run_powershell_preflight(spec_repo); print(json.dumps(ps_preflight, indent=2))
         assert ps_preflight["feature"]["classification"] == "quick-spec"
+        assert ps_preflight["prerequisites"]["clean_worktree"] is True
+        assert ps_preflight["prerequisites"]["branch_pushed_to_remote"] is True
         assert ps_preflight["feature"]["tasks_total"] == 2
         assert len(ps_preflight["feature"]["gate_artifacts"]) == 2
         assert any(item["gate"] == "critic" and item["blocking"] for item in ps_preflight["feature"]["gate_artifacts"])
