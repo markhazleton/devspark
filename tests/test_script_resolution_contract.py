@@ -23,9 +23,16 @@ def _get_templates_with_script() -> list[Path]:
     templates = []
     for path in sorted(COMMANDS_DIR.glob("*.md")):
         content = path.read_text(encoding="utf-8")
-        # Strip frontmatter (between first two '---' lines)
+        # Strip frontmatter: split on '---' and take everything after the second delimiter
         parts = content.split("---", 2)
-        body = parts[2] if len(parts) >= 3 else content
+        if len(parts) >= 3:
+            # Normal case: opening and closing '---' found; body is the third part
+            body = parts[2]
+        elif len(parts) == 2:
+            # Only an opening '---' with no closing delimiter; treat rest as body
+            body = parts[1]
+        else:
+            body = content
         if "{SCRIPT}" in body or "{AGENT_SCRIPT}" in body:
             templates.append(path)
     return templates

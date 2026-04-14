@@ -88,8 +88,9 @@ Given that feature description, do this:
       - Find the highest number N
       - Use N+1 for the new branch number
 
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+
    d. Run the script `{SCRIPT}` with the calculated number and short-name:
-      > **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
       - Pass `--number N+1` and `--short-name "your-short-name"` along with the feature description
       - Bash example: `{SCRIPT} --json --number 5 --short-name "user-auth" "Add user authentication"`
       - PowerShell example: `{SCRIPT} -Json -Number 5 -ShortName "user-auth" "Add user authentication"`
