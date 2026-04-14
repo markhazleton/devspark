@@ -132,7 +132,7 @@ Additional fields:
 |-------|------|-------|
 | `step_id` | string | |
 | `attempt` | integer | |
-| `status` | string | `"passed"` \| `"failed"` \| `"skipped_dry_run"` \| `"skipped_no_tty"` \| `"aborted"` |
+| `status` | string | `"passed"` \| `"failed"` \| `"skipped_dry_run"` \| `"aborted"` |
 | `duration_ms` | integer | Wall-clock time for this attempt only |
 
 ---
@@ -170,16 +170,16 @@ Additional fields:
 
 #### `harness.tool.called`
 
-Emitted when an adapter invokes a tool (e.g., runs a shell command or calls an AI agent CLI).
+Emitted when an adapter invokes a tool (e.g., renders a manual prompt or calls an AI agent CLI).
 
 ```json
 {
   "event": "harness.tool.called",
   "run_id": "run_20260414T193000Z_a1b2c3",
   "ts": "2026-04-14T19:30:00.200Z",
-  "step_id": "shell-check",
-  "tool": "shell",
-  "command_preview": "markdownlint-cli2 .documentation/specs/001-feature/spec.md"
+  "step_id": "human-review",
+  "tool": "manual",
+  "command_preview": "Review the generated spec and confirm it is ready to continue"
 }
 ```
 
@@ -188,7 +188,7 @@ Additional fields:
 | Field | Type | Notes |
 |-------|------|-------|
 | `step_id` | string | |
-| `tool` | string | e.g. `"shell"`, `"claude_code"`, `"copilot"`, `"noop"` |
+| `tool` | string | e.g. `"manual"`, `"claude_code"`, `"copilot"`, `"noop"` |
 | `command_preview` | string | First 200 chars of the command or prompt |
 
 ---
@@ -329,7 +329,7 @@ A single JSON object written on run completion. Contains the full run summary in
 | Field | Type | Notes |
 |-------|------|-------|
 | `step_id` | string | Matches `StepSpec.id` |
-| `status` | string | `"passed"` \| `"failed"` \| `"skipped_dry_run"` \| `"skipped_no_tty"` \| `"aborted"` |
+| `status` | string | `"passed"` \| `"failed"` \| `"skipped_dry_run"` \| `"aborted"` |
 | `attempts` | integer | Total attempts made |
 | `adapter` | string | Adapter used for this step |
 | `duration_ms` | integer | Total wall-clock across all attempts |

@@ -67,7 +67,7 @@ Applied to every step that does not override the field.
 |-------|------|---------|
 | `adapter` | `str` | `"noop"` |
 | `retry` | `RetryPolicy` | `{maxAttempts: 1, backoff: "none"}` |
-| `mode` | `"agent" \| "shell" \| "manual"` | `"agent"` |
+| `mode` | `"agent" \| "manual"` | `"agent"` |
 
 ---
 
@@ -86,13 +86,13 @@ Applied to every step that does not override the field.
 |-------|------|----------|-------|
 | `id` | `str` | Yes | Unique within spec; used in `on_success`/`on_failure` routing and trace output |
 | `name` | `str` | No | Human-readable label for display |
-| `type` | `"agent_task" \| "validation" \| "function" \| "human_gate"` | Yes | What kind of work this step represents |
-| `mode` | `"agent" \| "shell" \| "manual"` | No | How the step is executed; inherits from `defaults.mode` |
+| `type` | `"agent_task" \| "validation" \| "human_gate"` | Yes | What kind of work this step represents |
+| `mode` | `"agent" \| "manual"` | No | How the step is executed; inherits from `defaults.mode`; `validation` steps do not invoke an adapter |
 | `adapter` | `str` | No | Overrides `defaults.adapter` for this step |
-| `prompt_file` | `str` | No | Path to prompt `.md` file; resolved relative to spec file location |
+| `prompt_file` | `str` | No | Path to prompt `.md` file for `agent_task` or `human_gate`; resolved relative to spec file location |
 | `inputs` | `list[str]` | No | Glob patterns for files this step reads; recorded in artifact delta |
 | `outputs` | `list[str]` | No | Glob patterns for files this step produces; verified post-execution |
-| `validation` | `list[ValidationRule]` | No | Rules evaluated after step execution |
+| `validation` | `list[ValidationRule]` | No | Rules evaluated after step execution; for `validation` steps, these rules are the step payload |
 | `retry` | `RetryPolicy` | No | Overrides `defaults.retry` |
 | `on_success` | `str` | No | ID of next step on success; if absent, proceed sequentially |
 | `on_failure` | `str` | No | ID of next step on failure after retries exhausted; if absent, run fails |
@@ -178,7 +178,7 @@ Resolved at run start, passed through all step executions.
 | Field | Type | Notes |
 |-------|------|-------|
 | `step_id` | `str` | Matches `StepSpec.id` |
-| `status` | `"passed" \| "failed" \| "skipped_dry_run" \| "skipped_no_tty" \| "aborted"` | |
+| `status` | `"passed" \| "failed" \| "skipped_dry_run" \| "aborted"` | |
 | `attempts` | `int` | Number of execution attempts made |
 | `adapter` | `str` | Adapter used for this step |
 | `duration_ms` | `int` | Total wall-clock time across all attempts |
@@ -240,7 +240,7 @@ Named event types and their additional fields:
 | `harness.step.started` | `step_id`, `attempt`, `adapter` |
 | `harness.step.finished` | `step_id`, `attempt`, `status`, `duration_ms` |
 | `harness.step.validation` | `step_id`, `rule_id`, `rule_type`, `status`, `severity`, `message` |
-| `harness.tool.called` | `step_id`, `tool` (e.g. `shell`, `claude_code`), `command_preview` |
+| `harness.tool.called` | `step_id`, `tool` (e.g. `noop`, `manual`, `claude_code`), `command_preview` |
 | `harness.policy.blocked` | `step_id`, `reason` |
 
 ---
@@ -289,7 +289,7 @@ executing ──── validation passed ──→ passed
    │
    ├── dry_run=true ──────────────→ skipped_dry_run
    │
-   ├── manual + no TTY ────────────→ skipped_no_tty
+   ├── manual + no TTY ────────────→ failed
    │
    └── Ctrl+C ──────────────────────→ aborted
 ```
