@@ -40,6 +40,10 @@ def _init_git_repo(repo_root: Path, branch_name: str) -> None:
     _run(["git", "checkout", "-b", branch_name], repo_root)
     _run(["git", "add", "."], repo_root)
     _run(["git", "commit", "-m", "Initialize test fixture"], repo_root)
+    remote_root = repo_root.parent / f"{repo_root.name}-origin.git"
+    subprocess.run(["git", "init", "--bare", remote_root.as_posix()], cwd=repo_root, text=True, capture_output=True, check=True)
+    _run(["git", "remote", "add", "origin", remote_root.as_posix()], repo_root)
+    _run(["git", "push", "-u", "origin", branch_name], repo_root)
 
 
 def _write(path: Path, content: str) -> None:
@@ -208,6 +212,8 @@ def main() -> None:
         ps_preflight = _run_powershell_preflight(spec_repo)
         assert ps_preflight["feature"]["classification"] == "quick-spec"
         assert ps_preflight["feature"]["tasks_total"] == 2
+        assert ps_preflight["prerequisites"]["clean_worktree"] is True
+        assert ps_preflight["prerequisites"]["branch_pushed_to_remote"] is True
         assert len(ps_preflight["feature"]["gate_artifacts"]) == 2
         assert any(item["gate"] == "critic" and item["blocking"] for item in ps_preflight["feature"]["gate_artifacts"])
         assert ps_preflight["feature"]["gate_acknowledgements"]
@@ -216,6 +222,8 @@ def main() -> None:
         if bash_preflight is not None:
             assert bash_preflight["feature"]["classification"] == "quick-spec"
             assert bash_preflight["feature"]["tasks_total"] == 2
+            assert bash_preflight["prerequisites"]["clean_worktree"] is True
+            assert bash_preflight["prerequisites"]["branch_pushed_to_remote"] is True
             assert bash_preflight["feature"]["gate_acknowledgements"]
 
         full_spec_repo = Path(temp_dir) / "full-spec-repo"
@@ -228,6 +236,7 @@ def main() -> None:
         assert full_preflight["feature"]["classification"] == "full-spec"
         assert full_preflight["feature"]["tasks_total"] == 2
         assert full_preflight["feature"]["tasks_incomplete"] == 0
+        assert full_preflight["prerequisites"]["branch_pushed_to_remote"] is True
 
         quickfix_repo = Path(temp_dir) / "quickfix-repo"
         quickfix_repo.mkdir()
@@ -238,7 +247,39 @@ def main() -> None:
         quickfix_preflight = _run_powershell_preflight(quickfix_repo)
         assert quickfix_preflight["feature"]["classification"] == "one-off-fix"
         assert quickfix_preflight["quickfix_record"]["id"] == "QF-001"
+        assert quickfix_preflight["prerequisites"]["branch_pushed_to_remote"] is True
         assert quickfix_preflight["feature"]["gate_acknowledgements"]
+
+        dirty_repo = Path(temp_dir) / "dirty-repo"
+        dirty_repo.mkdir()
+        _copy_script_set(dirty_repo)
+        _build_spec_repo(dirty_repo)
+        _init_git_repo(dirty_repo, "003-dirty-feature")
+        _write(dirty_repo / "README.md", "dirty repo changed\n")
+
+        dirty_preflight = _run_powershell_preflight(dirty_repo)
+        assert dirty_preflight["dirty_worktree"] is True
+        assert dirty_preflight["prerequisites"]["clean_worktree"] is False
+        assert dirty_preflight["prerequisites"]["branch_pushed_to_remote"] is True
+
+        unpushed_repo = Path(temp_dir) / "unpushed-repo"
+        unpushed_repo.mkdir()
+        _copy_script_set(unpushed_repo)
+        _build_spec_repo(unpushed_repo)
+        _init_git_repo(unpushed_repo, "004-unpushed-feature")
+        _write(unpushed_repo / "notes.txt", "local change to commit and push\n")
+        _run(["git", "add", "notes.txt"], unpushed_repo)
+        _run(["git", "commit", "-m", "Add local note"], unpushed_repo)
+
+        unpushed_preflight = _run_powershell_preflight(unpushed_repo)
+        assert unpushed_preflight["dirty_worktree"] is False
+        assert unpushed_preflight["prerequisites"]["clean_worktree"] is True
+        assert unpushed_preflight["prerequisites"]["branch_pushed_to_remote"] is False
+
+        if shutil.which("bash") and shutil.which("jq"):
+            unpushed_bash_preflight = _run_bash_preflight(unpushed_repo)
+            assert unpushed_bash_preflight is not None
+            assert unpushed_bash_preflight["prerequisites"]["branch_pushed_to_remote"] is False
 
     print("create-pr preflight lifecycle validated.")
 

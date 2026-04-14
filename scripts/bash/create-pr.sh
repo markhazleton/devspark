@@ -320,6 +320,7 @@ PY
 
 collect_preflight() {
     local repo_root current_branch target_branch dirty auth_ok cli_available creation_supported
+    local local_head remote_head origin_exists remote_branch_exists branch_pushed_to_remote branch_push_details clean_worktree
     local feature_dir spec_path plan_path tasks_path checklist_dir quickfix_path
     local spec_exists=false plan_exists=false tasks_exists=false
     local spec_title="" classification="" risk_level="" required_gates="" recommended_next_step=""
@@ -330,10 +331,40 @@ collect_preflight() {
     repo_root=$(get_repo_root)
     current_branch=$(get_current_branch)
     target_branch="${BASE_BRANCH:-$(get_default_base_branch)}"
+    local_head=$(git rev-parse HEAD 2>/dev/null || echo "")
     if [[ -n "$(git status --porcelain 2>/dev/null || true)" ]]; then
         dirty=true
     else
         dirty=false
+    fi
+    if [[ "$dirty" == "true" ]]; then
+        clean_worktree=false
+    else
+        clean_worktree=true
+    fi
+
+    origin_exists=false
+    remote_branch_exists=false
+    branch_pushed_to_remote=false
+    remote_head=""
+    branch_push_details=""
+    if git remote get-url origin >/dev/null 2>&1; then
+        origin_exists=true
+        remote_head=$(git ls-remote --heads origin "refs/heads/$current_branch" 2>/dev/null | awk 'NR==1 {print $1}')
+        if [[ -n "$remote_head" ]]; then
+            remote_branch_exists=true
+        fi
+    fi
+
+    if [[ "$origin_exists" != true ]]; then
+        branch_push_details="Remote 'origin' is not configured"
+    elif [[ "$remote_branch_exists" != true ]]; then
+        branch_push_details="Branch '$current_branch' has not been pushed to origin"
+    elif [[ -n "$local_head" && "$local_head" == "$remote_head" ]]; then
+        branch_pushed_to_remote=true
+        branch_push_details="Branch '$current_branch' is pushed to origin"
+    else
+        branch_push_details="Push the latest commits from '$current_branch' to origin before creating a PR"
     fi
 
     if command -v gh >/dev/null 2>&1; then
@@ -431,10 +462,17 @@ collect_preflight() {
         --arg existing_pr_url "$existing_pr_url" \
         --arg existing_pr_title "$existing_pr_title" \
         --arg existing_pr_state "$existing_pr_state" \
+        --arg local_head "$local_head" \
+        --arg remote_head "$remote_head" \
+        --arg branch_push_details "$branch_push_details" \
         --argjson dirty "$dirty" \
+        --argjson clean_worktree "$clean_worktree" \
         --argjson auth_ok "$auth_ok" \
         --argjson cli_available "$cli_available" \
         --argjson creation_supported "$creation_supported" \
+        --argjson origin_exists "$origin_exists" \
+        --argjson remote_branch_exists "$remote_branch_exists" \
+        --argjson branch_pushed_to_remote "$branch_pushed_to_remote" \
         --argjson spec_exists "$spec_exists" \
         --argjson plan_exists "$plan_exists" \
         --argjson tasks_exists "$tasks_exists" \
@@ -455,6 +493,19 @@ collect_preflight() {
             current_branch: $current_branch,
             target_branch: $target_branch,
             dirty_worktree: $dirty,
+            prerequisites: {
+                clean_worktree: $clean_worktree,
+                branch_pushed_to_remote: $branch_pushed_to_remote
+            },
+            remote: {
+                name: "origin",
+                exists: $origin_exists,
+                branch_exists: $remote_branch_exists,
+                branch_pushed_to_remote: $branch_pushed_to_remote,
+                local_head: $local_head,
+                remote_head: $remote_head,
+                details: $branch_push_details
+            },
             cli_available: $cli_available,
             auth_ok: $auth_ok,
             creation_supported: $creation_supported,
@@ -500,6 +551,15 @@ run_create_or_update() {
     local action="$1"
     local preflight_json body_value pr_to_edit gh_output pr_url pr_view_json
     preflight_json=$(collect_preflight)
+
+    if [[ "$(echo "$preflight_json" | jq -r '.prerequisites.clean_worktree')" != "true" ]]; then
+        json_error "Working tree has unmanaged changes" "Commit, stash, or discard all changes before creating or updating a PR"
+        return 1
+    fi
+    if [[ "$(echo "$preflight_json" | jq -r '.prerequisites.branch_pushed_to_remote')" != "true" ]]; then
+        json_error "Current branch is not pushed to remote" "$(echo "$preflight_json" | jq -r '.remote.details')"
+        return 1
+    fi
 
     if [[ "$(echo "$preflight_json" | jq -r '.creation_supported')" != "true" ]]; then
         json_error "Automated PR creation is only supported for GitHub in this release" "Platform: $DEVSPARK_PLATFORM_NAME"
