@@ -79,9 +79,9 @@ See the [Constitution Guide](constitution-guide.md) for full examples.
 
 In your AI agent's chat interface -- the same place you normally talk to your assistant. They are not terminal commands.
 
-### Do I have to use all 24 commands?
+### Do I have to use all 27 commands?
 
-No. Most projects use a small subset:
+No. Most projects use a small subset of the 27 stock commands:
 
 **Everyday:** `/devspark.quickfix`, `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`, `/devspark.pr-review`
 
@@ -141,6 +141,7 @@ Run the matching quickstart prompt from the [Quick Start Guide](quickstart.md). 
 
 - **`.devspark/`** -- Framework files (prompt defaults, scripts). The "engine."
 - **`.documentation/`** -- Your project artifacts (specs, plans, constitution). "Your stuff."
+- **Agent shims** -- Platform-specific command files such as `.claude/commands/` or `.github/agents/`
 
 Uninstall removes `.devspark/` without touching your work.
 

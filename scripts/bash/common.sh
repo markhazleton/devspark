@@ -180,10 +180,10 @@ get_markdown_frontmatter_value() {
 }
 
 # ---------------------------------------------------------------------------
-# Multi-app support helpers (T009, T014, T022, T026-T030, T035)
+# Multi-app support helpers
 # ---------------------------------------------------------------------------
 
-# Detect multi-app or single-app mode (T014)
+# Detect whether the repository is operating in multi-app mode.
 detect_devspark_mode() {
     local repo_root
     repo_root=$(get_repo_root)
@@ -200,7 +200,7 @@ detect_devspark_mode() {
     echo "single-app"
 }
 
-# Validate registry basics using jq (T009)
+# Validate the registry structure with jq before deeper processing.
 validate_registry_json() {
     local registry_path="$1"
 

@@ -41,7 +41,7 @@ _SCAFFOLD_DIRS = [
 
 
 # ---------------------------------------------------------------------------
-# add-application (T057)
+# Multi-app registry creation helpers
 # ---------------------------------------------------------------------------
 
 def add_application(
@@ -169,7 +169,7 @@ def add_application(
 
 
 # ---------------------------------------------------------------------------
-# list-applications (T059, T060)
+# Multi-app registry inspection helpers
 # ---------------------------------------------------------------------------
 
 def list_applications(repo_root: Path) -> dict[str, Any]:
@@ -234,7 +234,7 @@ def list_applications(repo_root: Path) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# validate-registry (T059b)
+# Multi-app registry validation helpers
 # ---------------------------------------------------------------------------
 
 def validate_registry(repo_root: Path) -> dict[str, Any]:

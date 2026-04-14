@@ -1,4 +1,4 @@
-"""Current-state documentation audit for v1.5.0.
+"""Current-state documentation audit for the repository and docs site.
 
 Run with: python tests/test_documentation_audit.py
 """

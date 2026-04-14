@@ -186,6 +186,8 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 - `agent-file-template.md`
 - `vscode-settings.json`
 
+Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-registry.json` and save it to `agents-registry.json` at the repository root.
+
 ---
 
 ## Step 6: Pull Scripts

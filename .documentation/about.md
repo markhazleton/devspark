@@ -1,6 +1,6 @@
 # About DevSpark
 
-DevSpark is a structured development process for AI coding assistants. It provides 25 prompt templates and helper scripts that give any AI agent a repeatable workflow — from requirements through release.
+DevSpark is a structured development process for AI coding assistants. It provides 27 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow — from requirements through release.
 
 ## What It Is
 

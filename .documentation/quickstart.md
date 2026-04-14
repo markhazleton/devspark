@@ -28,7 +28,7 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_generic.md
 ```
 
-The agent asks about your project name, tech stack, and core principles, then scaffolds the full DevSpark structure. No CLI required.
+The agent first asks only the install-critical questions, checks for existing DevSpark or legacy layouts, and only asks for project name, tech stack, and core principles when a constitution still needs to be created. No CLI required.
 
 > Need terminal-driven setup? See [Other Ways to Get Started](installation.md).
 
@@ -90,11 +90,14 @@ Optionally validate first with `/devspark.analyze` or `/devspark.critic`, then:
 
 ## Step 3: Review and Release
 
-After implementation completes (spec status becomes `Complete`), create a PR and review it:
+After implementation completes (spec status becomes `Complete`), draft the PR and review it:
 
 ```text
+/devspark.create-pr
 /devspark.pr-review
 ```
+
+If you push more commits after review feedback or a rebase, refresh the description with `/devspark.update-pr` before re-reviewing.
 
 The review checks that the spec is `Complete` and all tasks are done before recommending approval. Merge the PR after approval.
 
@@ -114,4 +117,4 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 - [Implementation Lifecycle](implementation-lifecycle.md) -- full workflow overview
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
-- [Command Reference](index.md#command-categories) -- all 24 commands
+- [Command Reference](index.md#command-categories) -- all 27 commands

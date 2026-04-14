@@ -10,7 +10,7 @@
     <a href="https://markhazleton.github.io/devspark/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
-> **Not a program. Not a subscription.** Copy 25 prompt files into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 27 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
 
 ---
 
@@ -18,6 +18,7 @@
 
 ```text
 devspark/
+├── agents-registry.json  ← Canonical metadata for supported agent integrations
 ├── templates/commands/   ← 27 slash-command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── src/devspark_cli/     ← Optional CLI for automated setup

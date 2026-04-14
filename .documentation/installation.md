@@ -14,15 +14,17 @@ git clone https://github.com/MarkHazleton/devspark.git devspark-tmp
 
 # Copy framework files
 cp -r devspark-tmp/templates/commands   your-project/.devspark/defaults/commands
-cp -r devspark-tmp/templates            your-project/.devspark/defaults/templates
+cp -r devspark-tmp/templates/*.md       your-project/.devspark/templates/
+cp -r devspark-tmp/templates/*.json     your-project/.devspark/templates/
 cp -r devspark-tmp/scripts/bash         your-project/.devspark/scripts/bash
 cp -r devspark-tmp/scripts/powershell   your-project/.devspark/scripts/powershell
+cp devspark-tmp/agents-registry.json    your-project/agents-registry.json
 
 # Clean up
 rm -rf devspark-tmp
 ```
 
-Then create `.documentation/` and add agent shims by hand per the [quickstart guides](https://github.com/MarkHazleton/devspark/tree/main/quickstart).
+Then create `.documentation/`, add agent shims by hand per the [quickstart guides](https://github.com/MarkHazleton/devspark/tree/main/quickstart), and keep `agents-registry.json` at the repository root so shared agent metadata remains available to context-generation scripts.
 
 ---
 

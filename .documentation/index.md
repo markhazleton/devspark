@@ -29,7 +29,7 @@ From greenfield creation through brownfield discovery, ongoing maintenance, docu
 
 ## About DevSpark
 
-> **DevSpark** is a structured development process for AI coding assistants — 24 prompt templates + helper scripts that give any AI agent a repeatable workflow from requirements through release.
+> **DevSpark** is a structured development process for AI coding assistants — 27 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
 
 ### The ASLCD Vision
 
@@ -135,7 +135,8 @@ For major features and architectural changes.
 | `/devspark.tasks` | Task breakdown | `/devspark.critic` |
 | `/devspark.critic` | Risk analysis | `/devspark.implement` |
 | `/devspark.implement` | Execute tasks | `/devspark.create-pr` |
-| `/devspark.create-pr` | Draft or update the PR | `/devspark.pr-review` |
+| `/devspark.create-pr` | Draft or update the PR with workflow context | `/devspark.pr-review` |
+| `/devspark.update-pr` | Refresh an existing PR description after new commits or review fixes | `/devspark.pr-review` |
 
 ### Lightweight Workflow
 
@@ -163,6 +164,7 @@ Constitution-powered quality commands that work independently.
 | `/devspark.harvest` | Knowledge-preserving cleanup for stale docs | [Harvest Guide](harvest-usage.md) |
 | `/devspark.archive` | Archive outdated docs, update Guide.md and CHANGELOG | |
 | `/devspark.repo-story` | Evidence-based repository narrative generation | [Repo Story Guide](repo-story-usage.md) |
+| `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals | |
 | `/devspark.taskstoissues` | Convert tasks.md into GitHub issues | |
 | `/devspark.clarify` | Clarify specification requirements | |
 | `/devspark.checklist` | Generate quality checklists | [Checklist Guide](checklist-usage.md) |

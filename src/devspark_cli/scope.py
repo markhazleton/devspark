@@ -192,7 +192,7 @@ def resolve_scope(
 
 
 # ---------------------------------------------------------------------------
-# Scope report generation (T038)
+# Scope report generation helpers
 # ---------------------------------------------------------------------------
 
 def generate_scope_report(
@@ -251,7 +251,7 @@ def generate_scope_report(
 
 
 # ---------------------------------------------------------------------------
-# PR Scope Validation (Phase 9 — T062–T065)
+# Pull request scope declaration and validation helpers
 # ---------------------------------------------------------------------------
 
 @dataclass
