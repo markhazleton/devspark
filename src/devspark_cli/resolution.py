@@ -73,7 +73,7 @@ def detect_app_json_weakening(
     manifest: "AppManifest",
 ) -> list[str]:
     """
-    Check if app.json rules weaken mandatory repo-wide rules (T015c).
+    Check whether app.json rules weaken mandatory repo-wide rules.
 
     Uses the same keyword-based detection as constitution overlays.
     """
@@ -147,7 +147,7 @@ def resolve_constitution(
 
 
 # ---------------------------------------------------------------------------
-# File-based resolution chains (FR-C4, FR-C5, FR-C6)
+# File-based resolution chain helpers
 # ---------------------------------------------------------------------------
 
 def resolve_file(
@@ -173,7 +173,7 @@ def build_prompt_chain(
     git_user: str | None = None,
 ) -> list[Path]:
     """
-    Build the prompt resolution chain (FR-C4):
+    Build the prompt resolution chain:
 
     1. App team override: {app.path}/.documentation/commands/
     2. Repo user override: .documentation/{git-user}/commands/
@@ -199,7 +199,7 @@ def build_script_chain(
     app: AppDefinition | None = None,
 ) -> list[Path]:
     """
-    Build the script resolution chain (FR-C5):
+    Build the script resolution chain:
 
     1. App team override: {app.path}/.documentation/scripts/
     2. Repo team override: .documentation/scripts/
@@ -221,7 +221,7 @@ def build_template_chain(
     app: AppDefinition | None = None,
 ) -> list[Path]:
     """
-    Build the template resolution chain (FR-C6):
+    Build the template resolution chain:
 
     1. App team override: {app.path}/.documentation/templates/
     2. Repo team override: .documentation/templates/
@@ -239,7 +239,7 @@ def build_template_chain(
 
 
 # ---------------------------------------------------------------------------
-# Profile composition (FR-E2)
+# Profile composition helpers
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -317,7 +317,7 @@ def compose_profiles(
 
 
 # ---------------------------------------------------------------------------
-# Multi-profile validation and cross-app audit (T050)
+# Multi-profile validation and cross-app audit helpers
 # ---------------------------------------------------------------------------
 
 def validate_profiles_across_apps(
@@ -341,7 +341,7 @@ def validate_profiles_across_apps(
         effective, comp_warnings = compose_profiles(registry, app, manifest)
         warnings.extend(comp_warnings)
 
-        # T051: Check if any effective rule weakens mandatory repo rules
+        # Flag any effective rule that appears to weaken mandatory repo rules.
         for rule in effective.rules:
             if _WEAKENING_PATTERNS.search(rule):
                 warnings.append(

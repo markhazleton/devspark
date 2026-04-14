@@ -205,6 +205,8 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 - `checklist-template.md`
 - `agent-file-template.md`
 
+Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-registry.json` and save it to `agents-registry.json` at the repository root.
+
 ---
 
 ## Step 6: Pull Scripts

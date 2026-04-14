@@ -7,7 +7,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=common.sh
 . "$SCRIPT_DIR/common.sh"
 
-# Multi-app support (T093)
+# Load optional app-scoped context before scanning harvest candidates.
 parse_app_context "$@" 2>/dev/null || true
 if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
     resolve_app_scope 2>/dev/null || true

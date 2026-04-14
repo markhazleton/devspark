@@ -14,7 +14,7 @@ param(
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-# Multi-app support (T095b)
+# Load optional app-scoped context before scanning for archive candidates.
 if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
     . "$PSScriptRoot/common.ps1"
 }

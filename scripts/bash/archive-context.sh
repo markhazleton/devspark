@@ -10,7 +10,7 @@ set -o pipefail
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# Multi-app support (T095a)
+# Load optional app-scoped context before scanning for archive candidates.
 parse_app_context "$@" 2>/dev/null || true
 if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
     resolve_app_scope 2>/dev/null || true
