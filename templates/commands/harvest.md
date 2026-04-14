@@ -1,5 +1,5 @@
 ---
-description: Harvest knowledge from completed specs and stale docs into living documentation, rewrite stale spec-linked comments, then archive obsolete artifacts
+description: Canonical knowledge-preserving cleanup workflow for completed specs, stale docs, comment cleanup, and archival
 handoffs:
   - label: Review Release Artifacts
     agent: devspark.release
@@ -23,6 +23,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Overview
 
 Harvest valuable knowledge from completed specs, stale documentation, and in-process drafts into living project documentation, then archive obsolete source material.
+
+`/devspark.harvest` is the canonical lifecycle cleanup command. `/devspark.archive` is a deprecated compatibility alias and should be treated as an invocation of `/devspark.harvest`, not as a separate workflow.
 
 This command is a **knowledge-preserving cleanup** workflow:
 

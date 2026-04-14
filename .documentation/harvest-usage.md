@@ -8,6 +8,8 @@ The `/devspark.harvest` command performs **knowledge-preserving cleanup** of you
 
 Additionally, `/devspark.harvest` scans source code for comments that reference completed specs, plans, or tasks — and rewrites them as self-contained code documentation.
 
+`/devspark.harvest` is the canonical cleanup-and-archival workflow. `/devspark.archive` now exists only as a deprecated compatibility alias and should not be used in new documentation or examples.
+
 > **Note**: This command modifies files. Use `--scope=scan` to preview all harvest candidates without making any changes.
 
 ## Prerequisites

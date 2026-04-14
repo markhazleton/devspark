@@ -184,7 +184,7 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `evolve-constitution.md` | `.devspark/defaults/commands/devspark.evolve-constitution.md` |
 | `discover-constitution.md` | `.devspark/defaults/commands/devspark.discover-constitution.md` |
 | `repo-story.md` | `.devspark/defaults/commands/devspark.repo-story.md` |
-| `archive.md` | `.devspark/defaults/commands/devspark.archive.md` |
+| `archive.md` | `.devspark/defaults/commands/devspark.archive.md` (deprecated compatibility alias for harvest) |
 | `upgrade.md` | `.devspark/defaults/commands/devspark.upgrade.md` |
 | `update-pr.md` | `.devspark/defaults/commands/devspark.update-pr.md` |
 | `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
@@ -223,7 +223,7 @@ For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
 - `powershell/get-pr-context.ps1`
 - `powershell/create-pr.ps1`
 - `powershell/update-agent-context.ps1`
-- `powershell/archive-context.ps1`
+- `powershell/archive-context.ps1` (deprecated compatibility wrapper around harvest)
 - `powershell/evolution-context.ps1`
 - `powershell/harvest.ps1`
 - `powershell/quickfix-context.ps1`
@@ -241,7 +241,7 @@ For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
 - `bash/get-pr-context.sh`
 - `bash/create-pr.sh`
 - `bash/update-agent-context.sh`
-- `bash/archive-context.sh`
+- `bash/archive-context.sh` (deprecated compatibility wrapper around harvest)
 - `bash/evolution-context.sh`
 - `bash/harvest.sh`
 - `bash/quickfix-context.sh`

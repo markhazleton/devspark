@@ -87,7 +87,7 @@ For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/i
 | `/devspark.quickfix` | Lightweight workflow for bug fixes |
 | `/devspark.critic` | [Adversarial risk analysis](.documentation/critic-usage.md) |
 | `/devspark.release` | Archive dev artifacts and prepare releases |
-| `/devspark.harvest` | [Clean stale docs and archive obsolete artifacts](.documentation/harvest-usage.md) |
+| `/devspark.harvest` | [Canonical knowledge-preserving cleanup and archival workflow](.documentation/harvest-usage.md) |
 | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `/devspark.repo-story` | Generate narrative from commit history |
 | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
@@ -101,8 +101,9 @@ For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/i
 | `/devspark.checklist` | Generate quality validation checklists |
 | `/devspark.personalize` | Create per-user command overrides |
 | `/devspark.discover-constitution` | Generate a constitution from existing code |
-| `/devspark.archive` | Archive completed spec artifacts |
 | `/devspark.upgrade` | Pull latest DevSpark prompts into your project |
+
+`/devspark.harvest` is the canonical cleanup and archival workflow. `/devspark.archive` remains available only as a deprecated compatibility alias during migration.
 
 ### Multi-App (Optional)
 

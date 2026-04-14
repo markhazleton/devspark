@@ -22,6 +22,8 @@ def main() -> None:
     ps_update = _read('scripts/powershell/update-agent-context.ps1')
     bash_create_pr = _read('scripts/bash/create-pr.sh')
     ps_create_pr = _read('scripts/powershell/create-pr.ps1')
+    bash_archive = _read('scripts/bash/archive-context.sh')
+    ps_archive = _read('scripts/powershell/archive-context.ps1')
 
     assert 'get_markdown_frontmatter()' in bash_common
     assert 'get_markdown_frontmatter_value()' in bash_common
@@ -36,6 +38,12 @@ def main() -> None:
     for token in ('gate_acknowledgements', 'quickfix_record', 'required_gates', 'recommended_next_step'):
         assert token in bash_create_pr
         assert token in ps_create_pr
+
+    assert 'harvest.sh' in bash_archive
+    assert '--scope=docs' in bash_archive
+    assert 'jq' not in bash_archive
+    assert 'harvest.ps1' in ps_archive
+    assert '-Scope docs' in ps_archive
 
     print('Script parity contract validated.')
 

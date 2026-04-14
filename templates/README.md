@@ -11,7 +11,7 @@ DevSpark ownership is strictly two-tier:
 - `.devspark/` is framework-managed stock content
 - `.documentation/` is repository-owned work product and overrides
 
-The collection includes 24 core commands plus 3 optional multi-app commands (27 total).
+The collection includes 26 active commands plus 1 deprecated compatibility alias.
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -26,7 +26,7 @@ The collection includes 24 core commands plus 3 optional multi-app commands (27 
 | `site-audit.md` | `/devspark.site-audit` | Comprehensive codebase audit |
 | `commit-audit.md` | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
 | `quickfix.md` | `/devspark.quickfix` | Lightweight bug fix workflow |
-| `harvest.md` | `/devspark.harvest` | Clean and archive stale docs |
+| `harvest.md` | `/devspark.harvest` | Canonical knowledge-preserving cleanup and archival workflow |
 | `release.md` | `/devspark.release` | Archive artifacts and prepare releases |
 | `evolve-constitution.md` | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `repo-story.md` | `/devspark.repo-story` | Narrative from commit history |
@@ -35,7 +35,7 @@ The collection includes 24 core commands plus 3 optional multi-app commands (27 
 | `analyze.md` | `/devspark.analyze` | Cross-artifact consistency check |
 | `checklist.md` | `/devspark.checklist` | Quality validation checklists |
 | `personalize.md` | `/devspark.personalize` | Create per-user prompt overrides |
-| `archive.md` | `/devspark.archive` | Archive completed work |
+| `archive.md` | `/devspark.archive` | Deprecated alias for `/devspark.harvest` |
 | `upgrade.md` | `/devspark.upgrade` | Upgrade project to latest templates |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
@@ -54,5 +54,6 @@ The collection includes 24 core commands plus 3 optional multi-app commands (27 
 | `plan-template.md` | Template structure for implementation plans |
 | `tasks-template.md` | Template structure for task breakdowns |
 | `checklist-template.md` | Template structure for quality checklists |
+| `spec-validation-contract.md` | Shared validation contract for spec structure and required content |
 | `agent-file-template.md` | Template for agent configuration files |
 | `vscode-settings.json` | Recommended VS Code settings |
