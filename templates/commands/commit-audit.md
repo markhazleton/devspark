@@ -51,6 +51,8 @@ Multiple scope flags may be combined: `--scope=velocity,hygiene`
 
 ### 1. Initialize Audit Context
 
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+
 Run `{SCRIPT}` and parse its JSON output.
 
 Expected fields include:
