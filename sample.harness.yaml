@@ -1,0 +1,84 @@
+apiVersion: devspark.ai/v1
+kind: HarnessSpec
+name: sample-harness
+
+scope:
+  type: repo
+
+defaults:
+  adapter: noop
+  mode: agent
+  retry:
+    maxAttempts: 2
+    backoff: fixed
+
+telemetry:
+  emit_jsonl: true
+  run_dir: .documentation/devspark/runs
+
+steps:
+  - id: specify
+    name: Write Feature Specification
+    type: agent_task
+    prompt_file: .documentation/specs/002-harness-runtime/contracts/harness-spec-yaml.md
+    inputs:
+      - .documentation/memory/constitution.md
+      - .documentation/specs/002-harness-runtime/spec.md
+    outputs:
+      - .documentation/specs/002-harness-runtime/spec.md
+    validation:
+      - id: spec-present
+        type: file.exists
+        severity: error
+        path: .documentation/specs/002-harness-runtime/spec.md
+      - id: spec-has-rationale
+        type: file.contains
+        severity: warning
+        path: .documentation/specs/002-harness-runtime/spec.md
+        contains: "## Rationale Summary"
+    retry:
+      maxAttempts: 3
+      backoff: exponential
+      retryOn:
+        - validation_fail
+      requireHumanAfter: 2
+      repairPrompt: .documentation/specs/002-harness-runtime/contracts/cli-commands.md
+    on_success: validate
+
+  - id: validate
+    name: Validate Outputs
+    type: validation
+    validation:
+      - id: schema-file-exists
+        type: file.exists
+        severity: error
+        path: .devspark/schemas/harness.schema.json
+      - id: lint-contract
+        type: command.exit_code
+        severity: error
+        command: git --version
+      - id: schema-shape
+        type: json.schema
+        severity: warning
+        schema_file: .devspark/schemas/harness.schema.json
+        target_file: sample.harness.yaml
+      - id: repo-clean
+        type: git.clean
+        severity: warning
+        path: .documentation/specs/002-harness-runtime/
+      - id: spec-heading
+        type: regex.match
+        severity: warning
+        path: .documentation/specs/002-harness-runtime/spec.md
+        pattern: "Feature Specification"
+      - id: wiring-ok
+        type: always.pass
+        severity: warning
+    on_success: human-review
+
+  - id: human-review
+    name: Human Review Gate
+    type: human_gate
+    mode: manual
+    adapter: manual
+    prompt_file: .documentation/specs/002-harness-runtime/contracts/cli-commands.md

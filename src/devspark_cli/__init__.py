@@ -55,6 +55,8 @@ import truststore
 from datetime import datetime, timezone
 
 from .agent_registry import AGENT_CONFIG
+from .agent_registry import load_agent_registry
+from .harness.cli import adapter_app, harness_app
 
 ssl_context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 client = httpx.Client(verify=ssl_context)
@@ -367,6 +369,9 @@ app = typer.Typer(
     invoke_without_command=True,
     cls=BannerGroup,
 )
+
+app.add_typer(harness_app, name="harness")
+app.add_typer(adapter_app, name="adapter")
 
 def show_banner():
     """Display the ASCII art banner."""
@@ -1909,6 +1914,64 @@ def version():
 
     console.print(panel)
     console.print()
+
+
+@app.command()
+def doctor():
+    """Check whether the current environment is ready for DevSpark harness workflows."""
+    show_banner()
+
+    cwd = Path.cwd()
+    checks: list[tuple[str, bool, str]] = []
+
+    python_ok = sys.version_info >= (3, 11)
+    checks.append(("python", python_ok, f"Python {sys.version.split()[0]}" if python_ok else "Python 3.11 or newer is required"))
+
+    try:
+        import pydantic  # noqa: F401
+
+        checks.append(("pydantic", True, "pydantic is importable"))
+    except Exception:
+        checks.append(("pydantic", False, "Install pydantic: pip install pydantic"))
+
+    installed_layout = (cwd / ".devspark").is_dir()
+    source_layout = (cwd / ".documentation").is_dir() and (cwd / "pyproject.toml").is_file() and (cwd / "src" / "devspark_cli").is_dir()
+    layout_ok = installed_layout or source_layout
+    if installed_layout:
+        layout_detail = "Installed project layout detected (.devspark/)"
+    elif source_layout:
+        layout_detail = "Source checkout layout detected (.documentation + pyproject.toml + src/devspark_cli/)"
+    else:
+        layout_detail = "Missing DevSpark project layout. Run devspark init or use a compatible source checkout."
+    checks.append(("layout", layout_ok, layout_detail))
+
+    try:
+        load_agent_registry()
+        checks.append(("agents-registry", True, "agents-registry.json is readable and valid"))
+    except Exception as exc:
+        checks.append(("agents-registry", False, f"agents-registry.json invalid: {exc}"))
+
+    git_ok = shutil.which("git") is not None
+    checks.append(("git", git_ok, "git available" if git_ok else "Install git: https://git-scm.com/downloads"))
+
+    for agent_key, agent_config in AGENT_CONFIG.items():
+        if not agent_config.get("requires_cli"):
+            continue
+        available = shutil.which(agent_key) is not None
+        detail = f"{agent_config['name']} available" if available else f"Install {agent_config['name']}: {agent_config.get('install_url') or 'see vendor docs'}"
+        checks.append((agent_key, available, detail))
+
+    failures = [item for item in checks if not item[1]]
+    if console.is_terminal:
+        for name, ok, detail in checks:
+            symbol = "✓" if ok else "✗"
+            color = "green" if ok else "red"
+            console.print(f"[{color}]{symbol}[/{color}] {name}: {detail}")
+    else:
+        for name, ok, detail in checks:
+            print(f"{'pass' if ok else 'fail'}\t{name}\t{detail}")
+
+    raise typer.Exit(1 if failures else 0)
 
 
 @app.command()
