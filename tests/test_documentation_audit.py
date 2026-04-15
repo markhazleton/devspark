@@ -31,6 +31,7 @@ EXCLUDED_PARTS = {
     ".claude",
     ".github/agents",
     ".github/prompts",
+    ".documentation/devspark/runs",
 }
 
 FORBIDDEN_PHRASES = [
