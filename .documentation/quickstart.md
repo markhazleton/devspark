@@ -30,7 +30,7 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 
 The agent first asks only the install-critical questions, checks for existing DevSpark or legacy layouts, and only asks for project name, tech stack, and core principles when a constitution still needs to be created. No CLI required.
 
-> Need terminal-driven setup? See [Other Ways to Get Started](installation.md).
+> Need terminal-driven setup or execution? See [Other Ways to Get Started](installation.md) for CLI installation options, then use the runtime guidance in [Harness Engineering](harness-engineering.md).
 
 ---
 
@@ -115,6 +115,7 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 
 - [Upgrade Guide](upgrade.md) -- keep DevSpark current
 - [Implementation Lifecycle](implementation-lifecycle.md) -- full workflow overview
+- [Harness Engineering](harness-engineering.md) -- optional CLI runtime for declarative workflows
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
 - [Command Reference](index.md#command-categories) -- all 27 commands
