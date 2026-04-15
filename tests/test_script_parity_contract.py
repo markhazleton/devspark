@@ -24,6 +24,10 @@ def main() -> None:
     ps_create_pr = _read('scripts/powershell/create-pr.ps1')
     bash_archive = _read('scripts/bash/archive-context.sh')
     ps_archive = _read('scripts/powershell/archive-context.ps1')
+    bash_release_context = _read('scripts/bash/release-context.sh')
+    ps_release_context = _read('scripts/powershell/release-context.ps1')
+    bash_release_history = _read('scripts/bash/release-history-context.sh')
+    ps_release_history = _read('scripts/powershell/release-history-context.ps1')
 
     assert 'get_markdown_frontmatter()' in bash_common
     assert 'get_markdown_frontmatter_value()' in bash_common
@@ -44,6 +48,26 @@ def main() -> None:
     assert 'jq' not in bash_archive
     assert 'harvest.ps1' in ps_archive
     assert '-Scope docs' in ps_archive
+
+    assert 'release-history-context.sh' in bash_release_context
+    assert 'ARCHIVE_RECOVERY_USED' in bash_release_context
+    assert 'RELEASE_FROM' in bash_release_context
+    assert 'MERGED_PR_COUNT' in bash_release_context
+    assert 'PR_REVIEW_SUMMARY' in bash_release_context
+    assert 'release-history-context.ps1' in ps_release_context
+    assert 'ARCHIVE_RECOVERY_USED' in ps_release_context
+    assert 'RELEASE_FROM' in ps_release_context
+    assert 'MERGED_PR_COUNT' in ps_release_context
+    assert 'PR_REVIEW_SUMMARY' in ps_release_context
+
+    assert 'RECOVERED_SPECS' in bash_release_history
+    assert 'RECOVERED_QUICKFIXES' in bash_release_history
+    assert 'MERGED_PR_NUMBERS' in bash_release_history
+    assert 'PR_REVIEW_SUMMARY' in bash_release_history
+    assert 'RECOVERED_SPECS' in ps_release_history
+    assert 'RECOVERED_QUICKFIXES' in ps_release_history
+    assert 'MERGED_PR_NUMBERS' in ps_release_history
+    assert 'PR_REVIEW_SUMMARY' in ps_release_history
 
     print('Script parity contract validated.')
 
