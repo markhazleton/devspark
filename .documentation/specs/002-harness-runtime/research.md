@@ -1,5 +1,7 @@
 # Harness Engineering and Agent Development Patterns for DevSpark
 
+<!-- markdownlint-disable MD032 MD036 -->
+
 ## Executive summary
 
 Harness engineering is emerging as the next practical layer after prompt and context engineering: instead of optimizing *only* what you say to a model (prompts) or what information you feed it (context), you optimize the *entire operating environment* in which agents work—tooling, constraints, validation, feedback loops, traces, governance, and durable, repo-native knowledge artifacts. citeturn32view3turn32view4turn32view5turn32view1turn27view0

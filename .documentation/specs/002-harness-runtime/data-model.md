@@ -1,5 +1,7 @@
 # Data Model: DevSpark Harness Runtime
 
+<!-- markdownlint-disable MD032 MD040 -->
+
 **Feature**: 002-harness-runtime | **Date**: 2026-04-14 | **Source**: [spec.md](spec.md)
 
 ---

@@ -7,6 +7,8 @@ recommended_next_step: plan
 required_gates: checklist, analyze, critic
 ---
 
+<!-- markdownlint-disable MD036 -->
+
 # Feature Specification: DevSpark Harness Runtime
 
 **Feature Branch**: `002-harness-runtime`

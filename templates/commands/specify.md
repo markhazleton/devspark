@@ -192,10 +192,10 @@ Given that feature description, do this:
       - **If all items pass**: Mark checklist complete and proceed to step 6
 
          - **If items fail (excluding [NEEDS CLARIFICATION])**:
-        1. List the failing items and specific issues
+            1. List the failing items and specific issues
             2. Update the spec to address each issue, using the shared validation contract as the repair target
-        3. Re-run validation until all items pass (max 3 iterations)
-        4. If still failing after 3 iterations, document remaining issues in checklist notes and warn user
+            3. Re-run validation until all items pass (max 3 iterations)
+            4. If still failing after 3 iterations, document remaining issues in checklist notes and warn user
 
       - **If [NEEDS CLARIFICATION] markers remain**:
         1. Extract all [NEEDS CLARIFICATION: ...] markers from the spec

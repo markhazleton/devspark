@@ -1,5 +1,7 @@
 # Contract: HarnessSpec YAML Format
 
+<!-- markdownlint-disable MD040 -->
+
 **Feature**: 002-harness-runtime | **Date**: 2026-04-14 | **Source**: [data-model.md](../data-model.md)
 
 ---
