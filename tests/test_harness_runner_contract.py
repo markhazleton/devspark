@@ -60,6 +60,8 @@ def _prepare_repo(temp_root: Path) -> Path:
 def main() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         repo = _prepare_repo(Path(temp_dir))
+        outside_dir = Path(temp_dir) / "outside"
+        outside_dir.mkdir()
         before_gitignore = (repo / ".gitignore").read_text(encoding="utf-8")
         previous_cwd = Path.cwd()
 
@@ -103,6 +105,19 @@ def main() -> None:
             help_result = RUNNER.invoke(app, ["harness", "run", "--help"], catch_exceptions=False)
             assert help_result.exit_code == 0
             assert "Exit codes: 0 complete, 1 failed, 2 aborted, 3 validation error." in help_result.output
+
+            os.chdir(outside_dir)
+            outside_result = RUNNER.invoke(
+                app,
+                ["harness", "run", str(repo / "sample.harness.yaml"), "--adapter", "noop"],
+                catch_exceptions=False,
+            )
+            assert outside_result.exit_code == 0, outside_result.output
+            outside_run_dir = _latest_run_dir(runs_root)
+            outside_context = json.loads((outside_run_dir / "context.json").read_text(encoding="utf-8"))
+            assert Path(outside_context["repo_root"]) == repo.resolve()
+
+            os.chdir(repo)
 
             init_help = RUNNER.invoke(app, ["init", "--help"], catch_exceptions=False)
             version_help = RUNNER.invoke(app, ["version"], catch_exceptions=False)

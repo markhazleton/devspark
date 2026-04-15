@@ -66,7 +66,7 @@ def main() -> None:
         prompt_dir = repo / "prompts"
         prompt_dir.mkdir(parents=True, exist_ok=True)
         prompt_path = prompt_dir / "agent.md"
-        prompt_text = "Generate a concise implementation summary."
+        prompt_text = "Generate a concise implementation summary.\n" * 2000
         prompt_path.write_text(prompt_text, encoding="utf-8")
 
         context = RunContext(
@@ -94,16 +94,18 @@ def main() -> None:
             telemetry = DummyTelemetry()
             captured: dict[str, object] = {}
 
-            def fake_run(command, cwd, capture_output, text, check):
+            def fake_run(command, cwd, input, capture_output, text, check):
                 captured["command"] = command
                 captured["cwd"] = cwd
+                captured["input"] = input
                 return subprocess.CompletedProcess(command, 0, stdout=f"{adapter_name} output", stderr="")
 
             with patch("shutil.which", return_value=f"/tmp/{executable}"), patch("subprocess.run", side_effect=fake_run):
                 response = adapter.execute(_make_step(prompt_path), context, telemetry)
 
-            assert captured["command"] == [executable, "--print", prompt_text]
+            assert captured["command"] == [executable, "--print"]
             assert captured["cwd"] == context.repo_root
+            assert captured["input"] == prompt_text
             assert response.output_text == f"{adapter_name} output"
             assert response.prompt_text == prompt_text
             assert any(event == "harness.tool.called" for event, _ in telemetry.events)
@@ -159,6 +161,40 @@ steps:
         ambiguity = resolve_scope(registry, None, False, repo)
         assert ambiguity.errors
         assert "Multiple apps registered" in ambiguity.errors[0]
+
+        invalid_registry_spec = repo / "invalid-registry.harness.yaml"
+        invalid_registry_spec.write_text(
+            """apiVersion: devspark.ai/v1
+kind: HarnessSpec
+name: invalid-registry
+scope:
+  type: app
+  app: todo
+steps:
+  - id: scoped-step
+    type: agent_task
+    prompt_file: prompts/agent.md
+""",
+            encoding="utf-8",
+        )
+        (repo / ".documentation" / "devspark.json").write_text(
+            json.dumps(
+                {
+                    "version": 1,
+                    "mode": "multi-app",
+                    "apps": [{"id": "todo", "path": "apps/missing"}],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        try:
+            HarnessRunner(invalid_registry_spec, adapter_override="noop", repo_root=repo).resolve_context()
+        except HarnessSpecError as exc:
+            assert "Registry path validation failed" in str(exc)
+        else:
+            raise AssertionError("Expected invalid registry to fail explicitly")
 
     print("Harness adapter contract validated.")
 
