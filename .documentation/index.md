@@ -25,6 +25,10 @@ Teams share prompts, but individuals can customize any command via `/devspark.pe
 
 From greenfield creation through brownfield discovery, ongoing maintenance, documentation cleanup, release management, and constitution evolution — every phase of the SDLC is supported.
 
+### ⚙️ Optional Harness Runtime
+
+For teams that want terminal-driven execution, DevSpark also ships an additive CLI runtime for declarative workflow specs, adapter management, validation, tracing, and environment diagnostics. See [Harness Engineering](harness-engineering.md) for the runtime model and operator guidance.
+
 ---
 
 ## About DevSpark
@@ -62,6 +66,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | Multi-user personalization | ✅ `/devspark.personalize` per-user overrides |
 | Multi-agent support | ✅ 17+ AI agents |
 | Multi-app monorepo support | ✅ Optional — profile-based inheritance, scoped commands |
+| Harness runtime | ✅ `devspark harness`, `devspark adapter`, `devspark doctor` |
 
 ---
 
@@ -75,6 +80,7 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
+- [Harness Engineering](harness-engineering.md) — Declarative runtime, adapters, artifacts, and operator guidance
 - [Validation Matrix](validation-matrix.md) — Current evidence for v1.6.0 workflow scenarios
 - [Monorepo Guide](monorepo-guide.md) — Optional multi-application monorepo support
 
@@ -173,6 +179,19 @@ Constitution-powered quality commands that work independently.
 
 `/devspark.harvest` is the only lifecycle cleanup command documented for ongoing use. `/devspark.archive` remains as a deprecated compatibility alias.
 
+### Optional CLI Runtime
+
+These are terminal commands, not slash commands. They are available when you install `devspark` via the optional CLI or work from a compatible source checkout.
+
+| Command | Purpose | Guide |
+|---------|---------|-------|
+| `devspark harness run` | Execute a declarative harness workflow spec | [Harness Engineering](harness-engineering.md) |
+| `devspark harness validate` | Validate a harness spec without executing steps | [Harness Engineering](harness-engineering.md) |
+| `devspark harness trace` | Inspect persisted events from a prior run | [Harness Engineering](harness-engineering.md) |
+| `devspark adapter list` | Show built-in adapters and local availability | [Harness Engineering](harness-engineering.md) |
+| `devspark adapter default` | Persist the default adapter in user config | [Harness Engineering](harness-engineering.md) |
+| `devspark doctor` | Check the current machine for harness prerequisites | [Harness Engineering](harness-engineering.md) |
+
 ### Multi-App Commands (Optional)
 
 For repositories containing multiple applications with different platforms or governance rules. Single-app repositories can skip these entirely.
@@ -184,6 +203,21 @@ For repositories containing multiple applications with different platforms or go
 | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
 > **Opt-in only**: Multi-app support is activated by creating a registry at `.documentation/devspark.json`. Without it, DevSpark operates in standard single-app mode with no behavior changes.
+
+### Harness Runtime at a Glance
+
+The harness runtime lets you author a YAML or JSON spec, execute it through the CLI, and collect a structured audit trail under `.documentation/devspark/runs/`.
+
+Typical flow:
+
+```text
+devspark doctor
+devspark harness validate sample.harness.yaml
+devspark harness run sample.harness.yaml --dry-run
+devspark harness trace latest
+```
+
+Built-in adapters are `noop`, `manual`, `claude_code`, `copilot`, and `cursor`. The saved default adapter is stored in the user config directory, not in `.devspark/` or `.documentation/`, so upgrades do not overwrite it.
 
 ---
 

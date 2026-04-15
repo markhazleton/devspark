@@ -27,6 +27,8 @@ DevSpark has right-sized workflows:
 
 No. DevSpark is pure markdown. The AI agent does the heavy lifting.
 
+If you want terminal-driven execution, there is an optional CLI runtime as well. That runtime adds `devspark doctor`, `devspark harness ...`, and `devspark adapter ...`, but the prompt-first workflow remains the default way to use DevSpark.
+
 ---
 
 ## AI-Assisted Coding
@@ -144,6 +146,28 @@ Run the matching quickstart prompt from the [Quick Start Guide](quickstart.md). 
 - **Agent shims** -- Platform-specific command files such as `.claude/commands/` or `.github/agents/`
 
 Uninstall removes `.devspark/` without touching your work.
+
+When you run the harness runtime, it also writes execution artifacts under `.documentation/devspark/runs/` by default. Those are generated run records, not stock framework files.
+
+### What is the harness runtime?
+
+An optional CLI execution layer for declarative engineering workflows. You define a YAML or JSON spec, validate it with `devspark harness validate`, execute it with `devspark harness run`, and inspect its event log with `devspark harness trace`.
+
+See [Harness Engineering](harness-engineering.md) for the full model.
+
+### Is the harness runtime part of the slash-command workflow?
+
+No. The 27 stock slash commands remain prompt-driven. The harness runtime is additive and lives in the optional CLI.
+
+### What adapters are built in?
+
+`noop`, `manual`, `claude_code`, `copilot`, and `cursor`.
+
+- `noop` is the safe default for dry runs, CI, and contract testing.
+- `manual` pauses for a human and requires a TTY.
+- `claude_code`, `copilot`, and `cursor` call their corresponding local CLIs when available.
+
+Use `devspark adapter list` to inspect availability on the current machine and `devspark adapter default <name>` to save a local default.
 
 ### Will DevSpark conflict with my existing tooling?
 

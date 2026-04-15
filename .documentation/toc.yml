@@ -13,6 +13,8 @@
       href: installation.md
     - name: Upgrade
       href: upgrade.md
+    - name: Harness Engineering
+      href: harness-engineering.md
     - name: Monorepo Guide
       href: monorepo-guide.md
 
