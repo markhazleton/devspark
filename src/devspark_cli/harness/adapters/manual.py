@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 import readchar
 from rich.console import Console
 from rich.panel import Panel
 
 from ..spec_models import StepSpec
-from .base import AgentResponse
+from .base import AgentResponse, load_prompt_text
 
 
 class ManualAdapter:
     name = "manual"
+    description = "Copy/paste workflow for IDE agents"
 
     def __init__(self, console: Console | None = None) -> None:
         self.console = console or Console(stderr=True)
@@ -33,7 +33,7 @@ class ManualAdapter:
             )
             raise RuntimeError(reason)
 
-        effective_prompt = prompt_text or (Path(step.prompt_file).read_text(encoding="utf-8") if step.prompt_file else "")
+        effective_prompt = load_prompt_text(step, prompt_text)
         preview = effective_prompt[:200] if effective_prompt else f"manual:{step.id}"
         telemetry.emit(
             "harness.tool.called",

@@ -12,9 +12,9 @@ import yaml
 
 from ..registry import get_app, load_registry
 from ..scope import resolve_doc_root, resolve_scope
+from .adapters import get_registered_adapters
 from .adapters.base import AgentAdapter
 from .adapters.manual import ManualAdapter
-from .adapters.noop import NoopAdapter
 from .config import load_adapter_default, load_run_retention_limit
 from .spec_loader import HarnessSpecError, default_retry_policy, discover_repo_root, load_harness_spec
 from .spec_models import (
@@ -111,10 +111,7 @@ class HarnessRunner:
         return self.adapter_override or step.adapter or stored_default or spec.defaults.adapter or "noop"
 
     def get_adapter(self, name: str) -> AgentAdapter:
-        adapters: dict[str, AgentAdapter] = {
-            "noop": NoopAdapter(),
-            "manual": ManualAdapter(),
-        }
+        adapters = get_registered_adapters()
         if name not in adapters:
             raise HarnessSpecError(f"Unknown adapter: {name}")
         return adapters[name]

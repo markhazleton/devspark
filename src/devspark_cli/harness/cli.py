@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 import time
 from pathlib import Path
 
@@ -11,6 +10,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from .adapters import get_registered_adapters, get_registered_adapter_names
 from .config import load_adapter_default, save_adapter_default
 from .runner import HarnessRunner, run_status_to_exit_code
 from .spec_loader import HarnessSpecError, load_harness_spec
@@ -166,13 +166,11 @@ def list_adapters() -> None:
     """List built-in adapters and availability."""
 
     default_adapter = load_adapter_default() or "noop"
-    known = [
-        ("noop", True, "Always available (no AI required)"),
-        ("manual", True, "Always available (copy/paste for IDE agents)"),
-        ("claude_code", shutil.which("claude") is not None, "Requires claude CLI"),
-        ("copilot", shutil.which("gh") is not None, "Requires gh CLI with Copilot extension"),
-        ("cursor", shutil.which("cursor") is not None, "Requires Cursor IDE"),
-    ]
+    known = []
+    for name, adapter in get_registered_adapters().items():
+        available, reason = adapter.is_available()
+        detail = getattr(adapter, "description", "Available") if available else (reason or "Unavailable")
+        known.append((name, available, detail))
     if _is_tty():
         console.print("Available adapters:")
         for name, available, reason in known:
@@ -191,7 +189,7 @@ def list_adapters() -> None:
 def set_default_adapter(name: str = typer.Argument(..., help="Adapter name.")) -> None:
     """Persist the default adapter used by harness runs."""
 
-    if name not in {"noop", "manual", "claude_code", "copilot", "cursor"}:
+    if name not in set(get_registered_adapter_names()):
         console.print(f"Unknown adapter: {name}")
         raise typer.Exit(1)
     path = save_adapter_default(name)
