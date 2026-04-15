@@ -53,7 +53,7 @@ class HarnessRunner:
         repo_root: str | Path | None = None,
     ) -> None:
         self.spec_path = Path(spec_file).resolve()
-        self.repo_root = Path(repo_root).resolve() if repo_root is not None else discover_repo_root(self.spec_path, Path.cwd())
+        self.repo_root = Path(repo_root).resolve() if repo_root is not None else discover_repo_root(self.spec_path)
         self.adapter_override = adapter_override
         self.use_adapter_default = use_adapter_default
         self.dry_run = dry_run
@@ -75,8 +75,11 @@ class HarnessRunner:
         registry = None
         try:
             registry = load_registry(self.repo_root)
-        except ValueError:
-            registry = None
+        except ValueError as exc:
+            if "No multi-app registry found at" in str(exc):
+                registry = None
+            else:
+                raise HarnessSpecError(str(exc)) from exc
 
         repo_scope = spec.scope.type == "repo"
         scope_ctx = resolve_scope(registry, spec.scope.app, repo_scope, self.repo_root)

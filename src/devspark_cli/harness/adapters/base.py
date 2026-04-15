@@ -51,12 +51,12 @@ class CommandLineAdapter:
             return True, None
         return False, f"Missing required CLI '{self.executable}' for adapter '{self.name}'"
 
-    def build_command(self, prompt_text: str) -> list[str]:
-        return [self.executable, "--print", prompt_text]
+    def build_command(self) -> list[str]:
+        return [self.executable, "--print"]
 
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         effective_prompt = load_prompt_text(step, prompt_text)
-        command = self.build_command(effective_prompt)
+        command = self.build_command()
         preview = shlex.join(command)
         telemetry.emit(
             "harness.tool.called",
@@ -68,6 +68,7 @@ class CommandLineAdapter:
         completed = subprocess.run(
             command,
             cwd=context.repo_root,
+            input=effective_prompt,
             capture_output=True,
             text=True,
             check=False,
