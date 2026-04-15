@@ -121,21 +121,26 @@ if (-not (Test-HasGit)) {
 
 $repoRoot = Get-RepoRoot
 if (-not $BaseRef) {
-    $latestTag = Invoke-GitSafe @('describe', '--tags', '--abbrev=0')
+    $latestTag = @(Invoke-GitSafe @('describe', '--tags', '--abbrev=0'))
     if ($latestTag.Count -gt 0) {
-        $BaseRef = $latestTag[0].Trim()
+        $BaseRef = "$($latestTag[0])".Trim()
     }
 }
 
 if (-not $FromDate -and $BaseRef) {
-    $tagDate = Invoke-GitSafe @('log', '-1', '--format=%cs', $BaseRef)
+    $tagDate = @(Invoke-GitSafe @('log', '-1', '--format=%cs', $BaseRef))
     if ($tagDate.Count -gt 0) {
-        $FromDate = $tagDate[0].Trim()
+        $FromDate = "$($tagDate[0])".Trim()
     }
 }
 
 if (-not $ToDate) {
-    $ToDate = (Get-Date -Format 'yyyy-MM-dd')
+    $headDate = @(Invoke-GitSafe @('log', '-1', '--format=%cs', $HeadRef))
+    if ($headDate.Count -gt 0) {
+        $ToDate = "$($headDate[0])".Trim()
+    } else {
+        $ToDate = (Get-Date -Format 'yyyy-MM-dd')
+    }
 }
 
 $rangeSpec = if ($BaseRef) { "$BaseRef..$HeadRef" } else { $HeadRef }
