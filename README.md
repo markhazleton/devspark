@@ -246,8 +246,6 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 | Harvest guide | [harvest-usage.md](.documentation/harvest-usage.md) |
 | Repo story | [repo-story-usage.md](.documentation/repo-story-usage.md) |
 
-[![DevSpark video](./.documentation/media/spec-kit-video-header.jpg)](https://www.youtube.com/watch?v=a9eR1xsfvHg)
-
 ---
 
 ## Prerequisites
