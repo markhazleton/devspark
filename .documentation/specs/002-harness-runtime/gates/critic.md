@@ -18,6 +18,7 @@ summary: "All four critic findings were validated and resolved in-place: v1 step
 | ID | Original status | Validation | Resolution |
 |----|-----------------|------------|------------|
 | S1 | Valid | The spec/contract claimed unsupported `function` and `shell` execution surfaces without a matching data model. | Resolved by narrowing v1 to `agent_task`, `validation`, and `human_gate`, and by documenting `command.exit_code` as the v1 mechanism for command-based checks. |
+
 | S2 | Valid | The plan/tasks contradicted FR-037 by skipping manual gates in non-TTY runs. | Resolved by making non-TTY manual gates fail explicitly with `harness.policy.blocked` and a clear remediation to use `--dry-run`. |
 | H1 | Valid | Doctor planning was stricter than the current repo's supported source-checkout layout. | Resolved by defining a compatible-layout check that accepts either installed `.devspark/` projects or source checkouts with `.documentation/`, `pyproject.toml`, and `src/devspark_cli/`. |
 | H2 | Valid | The app-scope task referenced the wrong scope API and bypassed existing validation. | Resolved by updating plan/tasks to reuse `load_registry()` + `scope.resolve_scope()` + `scope.resolve_doc_root()` and to test unknown-app and ambiguity paths. |

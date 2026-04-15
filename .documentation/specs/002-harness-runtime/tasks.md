@@ -1,5 +1,7 @@
 # Tasks: DevSpark Harness Runtime
 
+<!-- markdownlint-disable MD040 MD050 -->
+
 **Input**: Design documents from `.documentation/specs/002-harness-runtime/`
 **Branch**: `002-harness-runtime`
 **Prerequisites**: plan.md ✓, spec.md ✓, data-model.md ✓, contracts/ ✓, research.md ✓

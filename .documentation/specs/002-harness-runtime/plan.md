@@ -1,5 +1,7 @@
 # Implementation Plan: DevSpark Harness Runtime
 
+<!-- markdownlint-disable MD032 MD040 -->
+
 **Branch**: `002-harness-runtime` | **Date**: 2026-04-14 | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification from `.documentation/specs/002-harness-runtime/spec.md`
 

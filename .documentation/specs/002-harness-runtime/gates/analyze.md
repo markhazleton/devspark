@@ -6,6 +6,8 @@ severity: info
 summary: "All 13 findings resolved in-place (2026-04-14): spec.md FR-027 field name and semantics corrected (H1, H2); FR-042 harness.policy.blocked added (M3); tasks.md T017 hardened with .gitignore, regression, --help, and partial-log assertions (M1, M2, L4, L5); T018 timing assertion added (L2); T020 file location fixed to config.py (M4, L3); Phase 3 checkpoint corrected for partial US1 delivery (M5); T032 adapter contract test added (M6). No CRITICAL or constitution violations found."
 ---
 
+<!-- markdownlint-disable MD040 -->
+
 # Specification Analysis Report: DevSpark Harness Runtime
 
 **Feature**: `002-harness-runtime` | **Analyzed**: 2026-04-14
