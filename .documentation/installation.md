@@ -74,6 +74,18 @@ devspark init --here --ai claude
 
 For CLI upgrades and project file updates, see the [Upgrade Guide](upgrade.md).
 
+Once the CLI is installed, you also get the optional harness runtime:
+
+```bash
+devspark doctor
+devspark harness validate sample.harness.yaml
+devspark harness run sample.harness.yaml --dry-run
+devspark harness trace latest
+devspark adapter list
+```
+
+See [Harness Engineering](harness-engineering.md) for the runtime model and command details.
+
 ---
 
 ## Troubleshooting

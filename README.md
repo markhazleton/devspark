@@ -60,7 +60,32 @@ devspark init my-project          # new project
 devspark init --here --ai claude  # existing project
 ```
 
+The CLI also exposes the optional harness runtime and environment checks:
+
+```bash
+devspark doctor
+devspark harness validate sample.harness.yaml
+devspark harness run sample.harness.yaml --dry-run
+devspark adapter list
+```
+
 For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/implementation-lifecycle.md).
+
+## Harness Runtime
+
+DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 27 slash commands and is available when you install the optional CLI or work from a compatible source checkout.
+
+The harness runtime adds:
+
+- `devspark harness run` to execute a declarative workflow spec
+- `devspark harness validate` to check spec structure without execution
+- `devspark harness trace` to inspect the event log from a prior run
+- `devspark adapter list` and `devspark adapter default` to inspect and persist adapter preferences
+- `devspark doctor` to verify the local environment is ready for harness workflows
+
+Harness runs write structured artifacts to `.documentation/devspark/runs/` by default, preserve partial state on abort, and support repository or app-scoped execution when a multi-app registry is present.
+
+See [Harness Engineering](.documentation/harness-engineering.md) for the runtime model, command reference, artifact layout, adapters, and spec design guidance.
 
 ---
 
@@ -210,6 +235,7 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 | Topic | Link |
 |-------|------|
 | Implementation lifecycle | [implementation-lifecycle.md](.documentation/implementation-lifecycle.md) |
+| Harness engineering | [harness-engineering.md](.documentation/harness-engineering.md) |
 | Quickstart | [quickstart.md](.documentation/quickstart.md) |
 | Constitution guide | [constitution-guide.md](.documentation/constitution-guide.md) |
 | CLI reference | [installation.md](.documentation/installation.md) |
