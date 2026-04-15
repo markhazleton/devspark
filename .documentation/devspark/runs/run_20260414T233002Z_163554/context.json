@@ -1,8 +1,0 @@
-{
-  "run_id": "run_20260414T233002Z_163554",
-  "repo_root": "C:\\GitHub\\MarkHazleton\\DevSpark",
-  "spec_path": "C:\\GitHub\\MarkHazleton\\DevSpark\\sample.harness.yaml",
-  "doc_root": "C:\\GitHub\\MarkHazleton\\DevSpark\\.documentation",
-  "adapter": "noop",
-  "dry_run": false
-}
