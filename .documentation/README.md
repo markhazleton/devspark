@@ -29,6 +29,7 @@ To build the documentation locally:
 - `quickstart.md` - Bootstrap and first-feature walkthrough
 - `implementation-lifecycle.md` - Full workflow with anti-patterns guide
 - `installation.md` - Advanced CLI alternatives
+- `harness-engineering.md` - Harness runtime commands, adapters, artifacts, and engineering model
 - `upgrade.md` - Prompt-first and CLI upgrade steps
 - `constitution-guide.md` - Constitution creation, structure, and best practices
 - `monorepo-guide.md` - Optional multi-app monorepo support
