@@ -128,6 +128,36 @@ def main() -> None:
 
             after_gitignore = (repo / ".gitignore").read_text(encoding="utf-8")
             assert before_gitignore == after_gitignore
+
+            # Phase 2: --mode plan stores execution_mode in context.json
+            plan_result = RUNNER.invoke(
+                app,
+                ["harness", "run", "sample.harness.yaml", "--adapter", "noop", "--mode", "plan"],
+                catch_exceptions=False,
+            )
+            assert plan_result.exit_code == 0, plan_result.output
+            plan_run_dir = _latest_run_dir(runs_root)
+            plan_context = json.loads((plan_run_dir / "context.json").read_text(encoding="utf-8"))
+            assert plan_context["execution_mode"] == "plan"
+
+            # Phase 4: replay command re-scores and writes replay_result.json
+            first_run_dir = _latest_run_dir(runs_root)
+            replay_result = RUNNER.invoke(
+                app,
+                ["harness", "replay", "latest", "--run-dir", str(runs_root)],
+                catch_exceptions=False,
+            )
+            assert replay_result.exit_code == 0, replay_result.output
+            replay_json_path = first_run_dir / "replay_result.json"
+            assert replay_json_path.is_file(), f"replay_result.json not found in {first_run_dir}"
+            replay_data = json.loads(replay_json_path.read_text(encoding="utf-8"))
+            assert "replayed_at" in replay_data
+            assert "steps" in replay_data
+            assert len(replay_data["steps"]) > 0
+            # replay_events.jsonl must exist and contain harness.run.replayed
+            replay_events = (first_run_dir / "replay_events.jsonl").read_text(encoding="utf-8")
+            assert "harness.run.replayed" in replay_events
+
         finally:
             os.chdir(previous_cwd)
 

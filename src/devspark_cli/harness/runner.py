@@ -19,6 +19,7 @@ from .config import load_adapter_default, load_run_retention_limit
 from .spec_loader import HarnessSpecError, default_retry_policy, discover_repo_root, load_harness_spec
 from .spec_models import (
     ArtifactDelta,
+    ExecutionMode,
     HarnessSpec,
     Run,
     RunContext,
@@ -40,6 +41,39 @@ def generate_run_id() -> str:
     return f"run_{stamp}_{secrets.token_hex(3)}"
 
 
+def _snapshot_outputs(paths: list[str]) -> dict[str, tuple[float, int] | None]:
+    """Capture mtime+size for each declared output path, or None if missing."""
+    result: dict[str, tuple[float, int] | None] = {}
+    for p in paths:
+        path = Path(p)
+        if path.exists():
+            stat = path.stat()
+            result[p] = (stat.st_mtime, stat.st_size)
+        else:
+            result[p] = None
+    return result
+
+
+def _diff_snapshots(
+    before: dict[str, tuple[float, int] | None],
+    after: dict[str, tuple[float, int] | None],
+) -> ArtifactDelta:
+    """Compare before/after snapshots and return populated ArtifactDelta."""
+    created: list[str] = []
+    modified: list[str] = []
+    deleted: list[str] = []
+    all_paths = sorted(set(before) | set(after))
+    for p in all_paths:
+        b, a = before.get(p), after.get(p)
+        if b is None and a is not None:
+            created.append(p)
+        elif b is not None and a is None:
+            deleted.append(p)
+        elif b is not None and a is not None and b != a:
+            modified.append(p)
+    return ArtifactDelta(created=created, modified=modified, deleted=deleted)
+
+
 class HarnessRunner:
     """Load and execute a harness spec."""
 
@@ -51,12 +85,14 @@ class HarnessRunner:
         use_adapter_default: bool = False,
         dry_run: bool = False,
         repo_root: str | Path | None = None,
+        execution_mode: ExecutionMode = "act",
     ) -> None:
         self.spec_path = Path(spec_file).resolve()
         self.repo_root = Path(repo_root).resolve() if repo_root is not None else discover_repo_root(self.spec_path)
         self.adapter_override = adapter_override
         self.use_adapter_default = use_adapter_default
         self.dry_run = dry_run
+        self.execution_mode = execution_mode
         self.spec: HarnessSpec | None = None
         self.context: RunContext | None = None
         self.run: Run | None = None
@@ -99,6 +135,7 @@ class HarnessRunner:
             doc_root=str(doc_root.resolve()),
             adapter=adapter_name,
             dry_run=self.dry_run,
+            execution_mode=self.execution_mode,
         )
         return self.context
 
@@ -243,6 +280,7 @@ class HarnessRunner:
             result = StepResult(step_id=step.id, status="skipped_dry_run", attempts=0, adapter=adapter_name)
             return result, self.next_step_index(step, success=True)
 
+        before_snapshot = _snapshot_outputs(step.outputs)
         last_findings: list[ValidationFinding] = []
         total_duration = 0
         attempts = 0
@@ -285,7 +323,7 @@ class HarnessRunner:
                         adapter=adapter_name,
                         duration_ms=total_duration,
                         validation_findings=last_findings,
-                        artifacts=ArtifactDelta(),
+                        artifacts=self._compute_artifacts(step, before_snapshot),
                     )
                     return result, self.next_step_index(step, success=True)
                 if attempt < retry.maxAttempts and "validation_fail" in retry.retryOn:
@@ -300,7 +338,7 @@ class HarnessRunner:
                     adapter=adapter_name,
                     duration_ms=total_duration,
                     validation_findings=last_findings,
-                    artifacts=ArtifactDelta(),
+                    artifacts=self._compute_artifacts(step, before_snapshot),
                 )
                 return result, self.next_step_index(step, success=False)
             except KeyboardInterrupt:
@@ -321,7 +359,7 @@ class HarnessRunner:
                     adapter=adapter_name,
                     duration_ms=total_duration,
                     validation_findings=last_findings,
-                    artifacts=ArtifactDelta(),
+                    artifacts=self._compute_artifacts(step, before_snapshot),
                 )
                 return result, None
             except Exception as exc:
@@ -352,7 +390,7 @@ class HarnessRunner:
                     adapter=adapter_name,
                     duration_ms=total_duration,
                     validation_findings=last_findings,
-                    artifacts=ArtifactDelta(),
+                    artifacts=self._compute_artifacts(step, before_snapshot),
                 )
                 return result, self.next_step_index(step, success=False)
 
@@ -363,7 +401,7 @@ class HarnessRunner:
             adapter=adapter_name,
             duration_ms=total_duration,
             validation_findings=last_findings,
-            artifacts=ArtifactDelta(),
+            artifacts=self._compute_artifacts(step, before_snapshot),
         )
         return result, self.next_step_index(step, success=False)
 
@@ -376,12 +414,17 @@ class HarnessRunner:
         return None
 
     def evaluate_step_validations(self, step: StepSpec, step_dir: Path) -> list[ValidationFinding]:
+        assert self.context is not None
+        assert self.telemetry is not None
         findings: list[ValidationFinding] = []
-        for rule in step.validation:
+
+        # Phase 3: deterministic-first ordering — evaluate non-rubric rules before llm.rubric
+        deterministic_rules = [r for r in step.validation if r.type != "llm.rubric"]
+        rubric_rules = [r for r in step.validation if r.type == "llm.rubric"]
+
+        for rule in deterministic_rules:
             finding = self.validation_engine.evaluate(rule, self.context, step_dir)
             findings.append(finding)
-            assert self.telemetry is not None
-            assert self.context is not None
             self.telemetry.emit(
                 "harness.step.validation",
                 self.context.run_id,
@@ -392,7 +435,50 @@ class HarnessRunner:
                 severity=finding.severity,
                 message=finding.message,
             )
+
+        # Skip rubric rules if any deterministic error-severity rule failed
+        has_deterministic_errors = any(
+            f.status == "failed" and f.severity == "error" for f in findings
+        )
+
+        for rule in rubric_rules:
+            if has_deterministic_errors:
+                finding = ValidationFinding(
+                    rule_id=rule.id,
+                    type=rule.type,
+                    status="skipped",
+                    severity=rule.severity,
+                    message="Skipped: deterministic error-severity rule failed",
+                )
+            else:
+                finding = self.validation_engine.evaluate(rule, self.context, step_dir)
+            findings.append(finding)
+            self.telemetry.emit(
+                "harness.step.validation",
+                self.context.run_id,
+                step_id=step.id,
+                rule_id=rule.id,
+                rule_type=rule.type,
+                status=finding.status,
+                severity=finding.severity,
+                message=finding.message,
+            )
+
         return findings
+
+    def _compute_artifacts(self, step: StepSpec, before_snapshot: dict) -> ArtifactDelta:
+        """Compute artifact delta from declared outputs and emit telemetry."""
+        delta = _diff_snapshots(before_snapshot, _snapshot_outputs(step.outputs))
+        if self.telemetry is not None and self.context is not None:
+            self.telemetry.emit(
+                "harness.step.artifacts",
+                self.context.run_id,
+                step_id=step.id,
+                created=delta.created,
+                modified=delta.modified,
+                deleted=delta.deleted,
+            )
+        return delta
 
     def build_retry_prompt(self, step: StepSpec, failed_errors: list[ValidationFinding], retry) -> str | None:
         parts: list[str] = []
@@ -432,6 +518,98 @@ class HarnessRunner:
                 elif child.is_dir():
                     child.rmdir()
             stale.rmdir()
+
+    @classmethod
+    def replay(cls, run_dir: Path) -> dict:
+        """Re-evaluate validation rules for a completed run against the current filesystem state.
+
+        Reads spec.resolved.yaml and context.json from run_dir, re-evaluates all validation
+        rules, and writes replay_result.json alongside the original result.json.
+        Returns the replay result dict.
+        """
+        spec_path = run_dir / "spec.resolved.yaml"
+        context_path = run_dir / "context.json"
+
+        if not spec_path.is_file():
+            raise HarnessSpecError(f"spec.resolved.yaml not found in run dir: {run_dir}")
+        if not context_path.is_file():
+            raise HarnessSpecError(f"context.json not found in run dir: {run_dir}")
+
+        context_data = json.loads(context_path.read_text(encoding="utf-8"))
+        repo_root = Path(context_data["repo_root"])
+
+        spec = load_harness_spec(spec_path, repo_root)
+        context = RunContext.model_validate(context_data)
+
+        result_path = run_dir / "result.json"
+        original_result = json.loads(result_path.read_text(encoding="utf-8")) if result_path.is_file() else {}
+        original_step_statuses = {s["step_id"]: s["status"] for s in original_result.get("steps", [])}
+
+        engine = ValidationEngine()
+        replay_steps = []
+        replayed_at = utc_now_iso()
+        replay_run_id = f"replay_{run_dir.name}"
+
+        replay_events_path = run_dir / "replay_events.jsonl"
+        telemetry = TelemetrySink(replay_events_path, enabled=True)
+        telemetry.emit(
+            "harness.run.replayed",
+            replay_run_id,
+            original_run_id=context_data.get("run_id", ""),
+            replayed_at=replayed_at,
+        )
+
+        for step in spec.steps:
+            step_dir = run_dir / "steps" / step.id
+            step_dir.mkdir(parents=True, exist_ok=True)
+
+            # Deterministic-first, same ordering as live runs
+            deterministic_rules = [r for r in step.validation if r.type != "llm.rubric"]
+            rubric_rules = [r for r in step.validation if r.type == "llm.rubric"]
+
+            findings = []
+            for rule in deterministic_rules:
+                finding = engine.evaluate(rule, context, step_dir)
+                findings.append(finding)
+
+            has_det_errors = any(f.status == "failed" and f.severity == "error" for f in findings)
+
+            for rule in rubric_rules:
+                if has_det_errors:
+                    finding = ValidationFinding(
+                        rule_id=rule.id,
+                        type=rule.type,
+                        status="skipped",
+                        severity=rule.severity,
+                        message="Skipped: deterministic error-severity rule failed",
+                    )
+                else:
+                    finding = engine.evaluate(rule, context, step_dir)
+                findings.append(finding)
+
+            failed_errors = [f for f in findings if f.status == "failed" and f.severity == "error"]
+            replayed_status = "passed" if not failed_errors else "failed"
+            original_status = original_step_statuses.get(step.id, "unknown")
+
+            replay_steps.append(
+                {
+                    "step_id": step.id,
+                    "original_status": original_status,
+                    "replayed_status": replayed_status,
+                    "validation_findings": [f.model_dump() for f in findings],
+                }
+            )
+
+        replay_result = {
+            "replayed_at": replayed_at,
+            "original_run_id": context_data.get("run_id", ""),
+            "run_dir": str(run_dir),
+            "steps": replay_steps,
+        }
+        (run_dir / "replay_result.json").write_text(
+            json.dumps(replay_result, indent=2) + "\n", encoding="utf-8"
+        )
+        return replay_result
 
 
 def run_status_to_exit_code(status: str) -> int:

@@ -11,9 +11,11 @@ from typing import Any
 EVENT_TYPES = {
     "harness.run.started",
     "harness.run.finished",
+    "harness.run.replayed",
     "harness.step.started",
     "harness.step.finished",
     "harness.step.validation",
+    "harness.step.artifacts",
     "harness.tool.called",
     "harness.policy.blocked",
 }
