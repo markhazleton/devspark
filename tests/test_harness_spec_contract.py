@@ -84,6 +84,57 @@ def main() -> None:
         duration = time.perf_counter() - started
         assert duration < 2, f"Validation exceeded 2 seconds for {fixture.name}: {duration:.3f}s"
 
+    # Phase 1-5: new field validation
+    with tempfile.TemporaryDirectory() as temp_dir2:
+        extras_dir = Path(temp_dir2)
+
+        # ValidationRule.enabled defaults to True and can be set False
+        rule_enabled = spec_models.ValidationRule(id="r1", type="always.pass", severity="warning")
+        assert rule_enabled.enabled is True
+        rule_disabled = spec_models.ValidationRule(id="r2", type="always.pass", severity="warning", enabled=False)
+        assert rule_disabled.enabled is False
+
+        # StepSpec.context_budget is optional, defaults None
+        step = spec_models.StepSpec.model_validate({"id": "s1", "type": "agent_task", "prompt_file": "prompts/x.md"})
+        assert step.context_budget is None
+        step_with_budget = spec_models.StepSpec.model_validate({"id": "s2", "type": "agent_task", "prompt_file": "prompts/x.md", "context_budget": 500})
+        assert step_with_budget.context_budget == 500
+
+        # StepDefaults.min_model_capability is optional
+        defaults = spec_models.StepDefaults()
+        assert defaults.min_model_capability is None
+        defaults_with_cap = spec_models.StepDefaults(min_model_capability="gpt-4-class")
+        assert defaults_with_cap.min_model_capability == "gpt-4-class"
+
+        # RunContext.execution_mode defaults to 'act'
+        ctx = spec_models.RunContext(
+            run_id="r", repo_root="/repo", spec_path="/repo/h.yaml",
+            doc_root="/repo/.documentation", adapter="noop", dry_run=False,
+        )
+        assert ctx.execution_mode == "act"
+        ctx_plan = spec_models.RunContext(
+            run_id="r", repo_root="/repo", spec_path="/repo/h.yaml",
+            doc_root="/repo/.documentation", adapter="noop", dry_run=False,
+            execution_mode="plan",
+        )
+        assert ctx_plan.execution_mode == "plan"
+
+        # llm.rubric rule type parses OK with required fields
+        rubric_rule = spec_models.ValidationRule(
+            id="grade", type="llm.rubric", severity="warning",
+            rubric="Does the output include a summary?",
+            grader_command="echo 4",
+        )
+        assert rubric_rule.pass_threshold == 3  # default
+
+        # llm.rubric without rubric/grader_command fails
+        try:
+            spec_models.ValidationRule(id="bad", type="llm.rubric", severity="warning")
+        except Exception as exc:
+            assert "llm.rubric" in str(exc) or "rubric" in str(exc)
+        else:
+            raise AssertionError("Expected llm.rubric without required fields to fail")
+
     print("Harness spec contract validated.")
 
 
