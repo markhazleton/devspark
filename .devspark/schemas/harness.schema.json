@@ -105,6 +105,18 @@
           ],
           "title": "Mode",
           "type": "string"
+        },
+        "min_model_capability": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Model Capability"
         }
       },
       "title": "StepDefaults",
@@ -226,6 +238,18 @@
           ],
           "default": null,
           "title": "On Failure"
+        },
+        "context_budget": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Budget"
         }
       },
       "required": [
@@ -267,7 +291,8 @@
             "command.exit_code",
             "json.schema",
             "git.clean",
-            "regex.match"
+            "regex.match",
+            "llm.rubric"
           ],
           "title": "Type",
           "type": "string"
@@ -356,6 +381,40 @@
           ],
           "default": null,
           "title": "Pattern"
+        },
+        "rubric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rubric"
+        },
+        "grader_command": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Grader Command"
+        },
+        "pass_threshold": {
+          "default": 3,
+          "title": "Pass Threshold",
+          "type": "integer"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
         }
       },
       "required": [

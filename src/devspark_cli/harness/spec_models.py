@@ -17,6 +17,7 @@ Severity = Literal["error", "warning"]
 ValidationStatus = Literal["passed", "failed", "skipped"]
 StepStatus = Literal["passed", "failed", "skipped_dry_run", "aborted"]
 RunStatus = Literal["running", "complete", "failed", "aborted"]
+ExecutionMode = Literal["plan", "act"]
 BackoffType = Literal["none", "fixed", "exponential"]
 RetryTrigger = Literal["validation_fail", "tool_error", "timeout"]
 RuleType = Literal[
@@ -27,6 +28,7 @@ RuleType = Literal[
     "json.schema",
     "git.clean",
     "regex.match",
+    "llm.rubric",
 ]
 
 
@@ -76,6 +78,10 @@ class ValidationRule(BaseModel):
     schema_file: str | None = None
     target_file: str | None = None
     pattern: str | None = None
+    rubric: str | None = None
+    grader_command: str | None = None
+    pass_threshold: int = 3
+    enabled: bool = True
 
     @model_validator(mode="after")
     def validate_rule(self) -> "ValidationRule":
@@ -90,6 +96,7 @@ class ValidationRule(BaseModel):
             "git.clean": ["path"],
             "regex.match": ["path", "pattern"],
             "always.pass": [],
+            "llm.rubric": ["rubric", "grader_command"],
         }
         missing = [field for field in required_fields[self.type] if getattr(self, field) in (None, "")]
         if missing:
@@ -104,6 +111,7 @@ class StepDefaults(BaseModel):
     adapter: str = "noop"
     retry: RetryPolicy = Field(default_factory=RetryPolicy)
     mode: StepMode = "agent"
+    min_model_capability: str | None = None
 
 
 class TelemetryConfig(BaseModel):
@@ -128,6 +136,7 @@ class StepSpec(BaseModel):
     retry: RetryPolicy | None = None
     on_success: str | None = None
     on_failure: str | None = None
+    context_budget: int | None = None
 
     @model_validator(mode="after")
     def validate_step(self) -> "StepSpec":
@@ -230,6 +239,7 @@ class RunContext(BaseModel):
     doc_root: str
     adapter: str
     dry_run: bool = False
+    execution_mode: ExecutionMode = "act"
 
 
 class TelemetryEvent(BaseModel):
