@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "releaseDate": "2026-04-16",
+  "release": {
+    "from": "2026-04-12",
+    "to": "2026-04-16"
+  },
+  "previousVersion": "v1.6.0",
+  "features": {
+    "completed": 1,
+    "enhancements": 2,
+    "deferred": 0
+  },
+  "quickfixes": 0,
+  "bugFixes": 3,
+  "pullRequests": {
+    "merged": 4,
+    "numbers": [20, 21, 22, 24],
+    "filesChanged": 105,
+    "testsAdded": 11,
+    "breakingChanges": 0,
+    "resolvedHighFindings": 0
+  },
+  "adrs": 3,
+  "commits": 40,
+  "contributors": 3,
+  "linesAdded": 9743,
+  "linesRemoved": 358,
+  "newSourceFiles": 15,
+  "newTestFiles": 11,
+  "newCliCommands": 6,
+  "validationRuleTypes": 8,
+  "agentAdapters": 5,
+  "specs": ["002-harness-runtime"],
+  "timestamp": "2026-04-16T15:00:00Z"
+}
