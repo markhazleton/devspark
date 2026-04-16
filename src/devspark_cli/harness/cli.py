@@ -14,6 +14,7 @@ from .adapters import get_registered_adapters, get_registered_adapter_names
 from .config import load_adapter_default, save_adapter_default
 from .runner import HarnessRunner, run_status_to_exit_code
 from .spec_loader import HarnessSpecError, load_harness_spec
+from ..harness.spec_models import ExecutionMode
 
 
 console = Console()
@@ -48,14 +49,24 @@ def run_command(
     dry_run: bool = typer.Option(False, "--dry-run", help="Validate and resolve the spec but skip all step execution."),
     adapter: str | None = typer.Option(None, "--adapter", help="Override the adapter for all executable steps."),
     adapter_default: bool = typer.Option(False, "--adapter-default", help="Use the adapter stored in user config."),
+    mode: str = typer.Option("act", "--mode", help="Execution mode: 'act' (default, write-enabled) or 'plan' (read-only)."),
 ) -> None:
     """Execute a harness spec.
 
     Exit codes: 0 complete, 1 failed, 2 aborted, 3 validation error.
     """
+    if mode not in ("plan", "act"):
+        console.print(f"Invalid mode {mode!r}; must be 'plan' or 'act'")
+        raise typer.Exit(3)
 
     try:
-        runner = HarnessRunner(spec_file, adapter_override=adapter, use_adapter_default=adapter_default, dry_run=dry_run)
+        runner = HarnessRunner(
+            spec_file,
+            adapter_override=adapter,
+            use_adapter_default=adapter_default,
+            dry_run=dry_run,
+            execution_mode=mode,  # type: ignore[arg-type]
+        )
         run = runner.execute()
     except HarnessSpecError as exc:
         console.print(str(exc))
@@ -194,4 +205,39 @@ def set_default_adapter(name: str = typer.Argument(..., help="Adapter name.")) -
         raise typer.Exit(1)
     path = save_adapter_default(name)
     console.print(f"Default adapter set to {name} ({path})")
+    raise typer.Exit(0)
+
+
+@harness_app.command("replay")
+def replay_command(
+    run_id: str = typer.Argument(..., help="Run id or 'latest'."),
+    run_dir: Path = typer.Option(Path(".documentation/devspark/runs"), "--run-dir", help="Root run directory."),
+) -> None:
+    """Re-score validation rules against a completed run's preserved artifacts."""
+
+    target_dir = _resolve_latest_run(run_dir) if run_id == "latest" else run_dir / run_id
+    if target_dir is None or not target_dir.is_dir():
+        console.print("No runs found" if run_id == "latest" else f"Run not found: {run_id}")
+        raise typer.Exit(1)
+
+    try:
+        replay_result = HarnessRunner.replay(target_dir)
+    except HarnessSpecError as exc:
+        console.print(str(exc))
+        raise typer.Exit(1)
+
+    if _is_tty():
+        console.print(f"Replayed run: {target_dir.name}")
+        console.print(f"Re-scored at: {replay_result['replayed_at']}")
+        for step in replay_result["steps"]:
+            orig = step["original_status"]
+            repl = step["replayed_status"]
+            changed = " [yellow](changed)[/yellow]" if orig != repl else ""
+            symbol = "✓" if repl == "passed" else "✗"
+            console.print(f"  {symbol}  {step['step_id']:<20} original={orig:<14} replayed={repl}{changed}")
+        console.print(f"Replay written to: {target_dir / 'replay_result.json'}")
+    else:
+        print(f"replayed {target_dir.name} {replay_result['replayed_at']}")
+        for step in replay_result["steps"]:
+            print(f"step {step['step_id']} original={step['original_status']} replayed={step['replayed_status']}")
     raise typer.Exit(0)
