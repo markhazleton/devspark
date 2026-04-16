@@ -7,6 +7,43 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-04-16 — Harness
+
+**Major release: DevSpark Harness Runtime — a declarative, adapter-driven execution engine that turns YAML specs into reproducible, validated AI-agent workflows.**
+
+This release introduces the Harness subsystem, DevSpark's biggest addition since launch. Harness lets you define multi-step agent workflows in a single YAML file, execute them through pluggable adapters (Copilot, Claude Code, Cursor, or manual), and validate every output with a built-in rule engine — all without writing a single line of glue code.
+
+### Added
+
+- **Harness Runtime Engine** — New `devspark harness run` CLI command executes YAML-defined workflow specs end-to-end with automatic retry, validation, and telemetry
+- **Declarative YAML Spec Format** (`HarnessSpec`) — Define scopes, steps, inputs, outputs, validation rules, retry policies, and telemetry in a single `apiVersion: devspark.ai/v1` document
+- **Pluggable Adapter Architecture** — Five built-in adapters: `copilot`, `claude_code`, `cursor`, `manual`, and `noop`; extensible via the `AgentAdapter` protocol
+- **Validation Engine** with eight rule types: `always.pass`, `file.exists`, `file.contains`, `command.exit_code`, `json.schema`, `git.clean`, `regex.match`, and `llm.rubric`
+- **Execution Modes** — `--mode act` (default, write-enabled) and `--mode plan` (read-only; side-effectful commands are skipped, prompts are prefixed with plan-mode instructions)
+- **Artifact Delta Tracking** — Automatic before/after snapshot of declared outputs records created, modified, and deleted files per step
+- **Context Budget Enforcement** — Adapters respect token-budget hints to keep prompts within model context windows
+- **Deterministic-First Step Ordering** — Validation-only steps run before agent tasks when dependencies allow, giving fast feedback before expensive LLM calls
+- **Harness Replay** — `devspark harness replay` re-runs a completed harness run from its saved artifact directory
+- **Telemetry & Run Artifacts** — Each run emits a JSONL event log and a structured `run.json` under `.documentation/devspark/runs/`, with configurable retention limits
+- **Retry with Repair Prompts** — Steps can declare `retry.repairPrompt` for auto-escalation after initial failures, with optional `requireHumanAfter` threshold for human-in-the-loop gating
+- **Adapter CLI** — `devspark harness adapter list`, `adapter set-default`, `adapter get-default` for managing preferred adapters
+- **Application-Scoped Runs** — Harness specs can target a specific app from the multi-app registry (`scope.type: app`) or the full repo (`scope.type: repo`)
+- **Sample Harness Spec** — `sample.harness.yaml` provides a ready-to-run reference workflow
+- **Comprehensive Contract Tests** — 10+ new test modules covering spec loading, validation rules, adapter contracts, runner lifecycle, and harness validation end-to-end
+
+### Changed
+
+- **PR Review Hardened** — `/devspark.pr-review` now enforces mandatory testing checks, behavioral regression detection, and severity classification
+- **2-Tier Script Resolution** — All 20 stock command templates now resolve scripts via personal → stock fallback
+- **Release Context Recovery** — Release-context and release-history scripts recover specs and quickfixes from archive directories and git history
+- **PowerShell Script Parity** — Release-history scripts updated for consistent output between Bash and PowerShell
+
+### Fixed
+
+- Script resolution blockquote formatting in `specify.md` no longer breaks ordered-list numbering
+- Frontmatter parsing in test fixtures hardened with `len(parts)==3` guard
+- Corrupted `pyproject.toml` (overwritten by test fixture commits) restored to canonical form
+
 ## [1.6.0] - 2026-04-12
 
 **Consistency and install-hardening release with explicit repair flows, cleaner quickstarts, and standardized framework template resolution.**
