@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..spec_models import StepSpec
-from .base import AgentResponse, load_prompt_text
+from .base import AgentResponse, apply_context_budget, load_prompt_text
 
 
 class NoopAdapter:
@@ -15,6 +15,7 @@ class NoopAdapter:
 
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         effective_prompt = load_prompt_text(step, prompt_text)
+        effective_prompt = apply_context_budget(effective_prompt, step, context, telemetry)
         preview = effective_prompt[:200] if effective_prompt else f"noop:{step.id}"
         telemetry.emit(
             "harness.tool.called",

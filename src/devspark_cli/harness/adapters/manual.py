@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from ..spec_models import StepSpec
-from .base import AgentResponse, load_prompt_text
+from .base import AgentResponse, apply_context_budget, load_prompt_text
 
 
 class ManualAdapter:
@@ -34,6 +34,7 @@ class ManualAdapter:
             raise RuntimeError(reason)
 
         effective_prompt = load_prompt_text(step, prompt_text)
+        effective_prompt = apply_context_budget(effective_prompt, step, context, telemetry)
         preview = effective_prompt[:200] if effective_prompt else f"manual:{step.id}"
         telemetry.emit(
             "harness.tool.called",
