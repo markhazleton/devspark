@@ -1,0 +1,2079 @@
+{
+  "generated_at": "2026-04-17T21:51:29.3689582+00:00",
+  "audit_parameters": {
+    "months": 12,
+    "scope": "full",
+    "compare_baseline": "2025-04",
+    "since_date": "2025-04-17",
+    "start_month": "2025-04",
+    "end_month": "2026-04"
+  },
+  "repo": {
+    "name": "DevSpark",
+    "root": "C:/GitHub/MarkHazleton/DevSpark",
+    "remote_origin": "https://github.com/markhazleton/devspark.git",
+    "default_branch": "main"
+  },
+  "summary": {
+    "total_commits": 761,
+    "total_commits_in_window": 761,
+    "total_contributors": 86,
+    "total_tags": 1,
+    "history_span_days": 238
+  },
+  "timeline": {
+    "first_commit": {
+      "sha": "fa2736371e077f55c4fe145fea186bab2561386d",
+      "date": "2025-08-21T15:54:32-07:00",
+      "role": "Lead Architect",
+      "subject": "Initial commit"
+    },
+    "latest_commit": {
+      "sha": "a8fe252361f7fcbd832164cf5939707bdad2b714",
+      "date": "2026-04-17T16:08:14-05:00",
+      "role": "Developer D",
+      "subject": "docs: expand dogfooding guide with history, meta challenges, and narrative tone"
+    },
+    "commits_by_year": {
+      "2026": 233,
+      "2025": 528
+    },
+    "commits_by_month": {
+      "2025-08": 22,
+      "2026-03": 36,
+      "2026-04": 158,
+      "2025-12": 16,
+      "2026-02": 29,
+      "2025-10": 184,
+      "2026-01": 10,
+      "2025-09": 255,
+      "2025-11": 51
+    }
+  },
+  "contributors": {
+    "top": [
+      {
+        "role": "Lead Architect",
+        "commits": 361
+      },
+      {
+        "role": "Developer A",
+        "commits": 137
+      },
+      {
+        "role": "Developer B",
+        "commits": 37
+      },
+      {
+        "role": "Developer C",
+        "commits": 32
+      },
+      {
+        "role": "Developer D",
+        "commits": 20
+      },
+      {
+        "role": "Developer E",
+        "commits": 15
+      },
+      {
+        "role": "Developer F",
+        "commits": 9
+      },
+      {
+        "role": "Developer G",
+        "commits": 8
+      },
+      {
+        "role": "Developer H",
+        "commits": 8
+      },
+      {
+        "role": "Developer I",
+        "commits": 8
+      },
+      {
+        "role": "Developer J",
+        "commits": 7
+      },
+      {
+        "role": "Developer K",
+        "commits": 7
+      },
+      {
+        "role": "Developer L",
+        "commits": 6
+      },
+      {
+        "role": "Developer M",
+        "commits": 6
+      },
+      {
+        "role": "Developer N",
+        "commits": 4
+      },
+      {
+        "role": "Developer O",
+        "commits": 4
+      },
+      {
+        "role": "Developer P",
+        "commits": 4
+      },
+      {
+        "role": "Developer Q",
+        "commits": 3
+      },
+      {
+        "role": "Developer R",
+        "commits": 3
+      },
+      {
+        "role": "Developer S",
+        "commits": 3
+      },
+      {
+        "role": "Developer T",
+        "commits": 3
+      },
+      {
+        "role": "Developer U",
+        "commits": 2
+      },
+      {
+        "role": "Developer V",
+        "commits": 2
+      },
+      {
+        "role": "Developer W",
+        "commits": 2
+      },
+      {
+        "role": "Developer X",
+        "commits": 2
+      }
+    ],
+    "all_count": 86,
+    "monthly_by_role": {
+      "2025-08": {
+        "Developer X": 2,
+        "Lead Architect": 20
+      },
+      "2026-03": {
+        "Developer A": 30,
+        "Developer B": 6
+      },
+      "2026-04": {
+        "Developer V": 2,
+        "Developer A": 71,
+        "Developer B": 31,
+        "Developer C": 32,
+        "Developer Z": 2,
+        "Developer D": 20
+      },
+      "2025-12": {
+        "Developer W": 2,
+        "Developer e": 6,
+        "Lead Architect": 8
+      },
+      "2026-02": {
+        "Developer R": 3,
+        "Developer A": 26
+      },
+      "2025-10": {
+        "Developer h": 1,
+        "Developer F": 7,
+        "Developer \u0085": 1,
+        "Developer ": 1,
+        "Developer G": 9,
+        "Developer v": 1,
+        "Lead Architect": 125,
+        "Developer p": 1,
+        "Developer O": 4,
+        "Developer ": 1,
+        "Developer y": 1,
+        "Developer x": 1,
+        "Developer Q": 3,
+        "Developer [": 2,
+        "Developer N": 4,
+        "Developer ]": 2,
+        "Developer }": 1,
+        "Developer k": 8,
+        "Developer ^": 2,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer w": 1,
+        "Developer _": 1,
+        "Developer ": 1,
+        "Developer U": 2
+      },
+      "2026-01": {
+        "Developer A": 10
+      },
+      "2025-09": {
+        "Developer H": 8,
+        "Developer \\": 2,
+        "Developer I": 9,
+        "Developer u": 1,
+        "Developer ~": 1,
+        "Lead Architect": 188,
+        "Developer M": 7,
+        "Developer b": 1,
+        "Developer a": 1,
+        "Developer Y": 2,
+        "Developer j": 1,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer {": 1,
+        "Developer q": 1,
+        "Developer ": 1,
+        "Developer l": 1,
+        "Developer ": 1,
+        "Developer z": 1,
+        "Developer ": 1,
+        "Developer `": 1,
+        "Developer t": 4,
+        "Developer ": 1,
+        "Developer c": 1,
+        "Developer F": 3,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer s": 1,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer _": 1,
+        "Developer ": 1,
+        "Developer ": 1,
+        "Developer r": 1,
+        "Developer ": 1,
+        "Developer P": 4
+      },
+      "2025-11": {
+        "Developer ": 1,
+        "Developer E": 10,
+        "Developer S": 3,
+        "Developer J": 7,
+        "Lead Architect": 20,
+        "Developer |": 1,
+        "Developer o": 1,
+        "Developer n": 1,
+        "Developer L": 6,
+        "Developer d": 1
+      }
+    }
+  },
+  "contributor_census": {
+    "role_assignments": [
+      {
+        "role": "Lead Architect",
+        "commits": 361
+      },
+      {
+        "role": "Developer A",
+        "commits": 137
+      },
+      {
+        "role": "Developer B",
+        "commits": 37
+      },
+      {
+        "role": "Developer C",
+        "commits": 32
+      },
+      {
+        "role": "Developer D",
+        "commits": 20
+      },
+      {
+        "role": "Developer E",
+        "commits": 15
+      },
+      {
+        "role": "Developer F",
+        "commits": 9
+      },
+      {
+        "role": "Developer G",
+        "commits": 8
+      },
+      {
+        "role": "Developer H",
+        "commits": 8
+      },
+      {
+        "role": "Developer I",
+        "commits": 8
+      },
+      {
+        "role": "Developer J",
+        "commits": 7
+      },
+      {
+        "role": "Developer K",
+        "commits": 7
+      },
+      {
+        "role": "Developer L",
+        "commits": 6
+      },
+      {
+        "role": "Developer M",
+        "commits": 6
+      },
+      {
+        "role": "Developer N",
+        "commits": 4
+      },
+      {
+        "role": "Developer O",
+        "commits": 4
+      },
+      {
+        "role": "Developer P",
+        "commits": 4
+      },
+      {
+        "role": "Developer Q",
+        "commits": 3
+      },
+      {
+        "role": "Developer R",
+        "commits": 3
+      },
+      {
+        "role": "Developer S",
+        "commits": 3
+      },
+      {
+        "role": "Developer T",
+        "commits": 3
+      },
+      {
+        "role": "Developer U",
+        "commits": 2
+      },
+      {
+        "role": "Developer V",
+        "commits": 2
+      },
+      {
+        "role": "Developer W",
+        "commits": 2
+      },
+      {
+        "role": "Developer X",
+        "commits": 2
+      },
+      {
+        "role": "Developer Y",
+        "commits": 2
+      },
+      {
+        "role": "Developer Z",
+        "commits": 2
+      },
+      {
+        "role": "Developer [",
+        "commits": 2
+      },
+      {
+        "role": "Developer \\",
+        "commits": 2
+      },
+      {
+        "role": "Developer ]",
+        "commits": 2
+      },
+      {
+        "role": "Developer ^",
+        "commits": 2
+      },
+      {
+        "role": "Developer _",
+        "commits": 2
+      },
+      {
+        "role": "Developer `",
+        "commits": 1
+      },
+      {
+        "role": "Developer a",
+        "commits": 1
+      },
+      {
+        "role": "Developer b",
+        "commits": 1
+      },
+      {
+        "role": "Developer c",
+        "commits": 1
+      },
+      {
+        "role": "Developer d",
+        "commits": 1
+      },
+      {
+        "role": "Developer e",
+        "commits": 1
+      },
+      {
+        "role": "Developer f",
+        "commits": 1
+      },
+      {
+        "role": "Developer g",
+        "commits": 1
+      },
+      {
+        "role": "Developer h",
+        "commits": 1
+      },
+      {
+        "role": "Developer i",
+        "commits": 1
+      },
+      {
+        "role": "Developer j",
+        "commits": 1
+      },
+      {
+        "role": "Developer k",
+        "commits": 1
+      },
+      {
+        "role": "Developer l",
+        "commits": 1
+      },
+      {
+        "role": "Developer m",
+        "commits": 1
+      },
+      {
+        "role": "Developer n",
+        "commits": 1
+      },
+      {
+        "role": "Developer o",
+        "commits": 1
+      },
+      {
+        "role": "Developer p",
+        "commits": 1
+      },
+      {
+        "role": "Developer q",
+        "commits": 1
+      },
+      {
+        "role": "Developer r",
+        "commits": 1
+      },
+      {
+        "role": "Developer s",
+        "commits": 1
+      },
+      {
+        "role": "Developer t",
+        "commits": 1
+      },
+      {
+        "role": "Developer u",
+        "commits": 1
+      },
+      {
+        "role": "Developer v",
+        "commits": 1
+      },
+      {
+        "role": "Developer w",
+        "commits": 1
+      },
+      {
+        "role": "Developer x",
+        "commits": 1
+      },
+      {
+        "role": "Developer y",
+        "commits": 1
+      },
+      {
+        "role": "Developer z",
+        "commits": 1
+      },
+      {
+        "role": "Developer {",
+        "commits": 1
+      },
+      {
+        "role": "Developer |",
+        "commits": 1
+      },
+      {
+        "role": "Developer }",
+        "commits": 1
+      },
+      {
+        "role": "Developer ~",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer \u0085",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      },
+      {
+        "role": "Developer ",
+        "commits": 1
+      }
+    ]
+  },
+  "volume_metrics": {
+    "total_commits": 761,
+    "monthly_commit_distribution": {
+      "2025-08": 22,
+      "2026-03": 36,
+      "2026-04": 158,
+      "2025-12": 16,
+      "2026-02": 29,
+      "2025-10": 184,
+      "2026-01": 10,
+      "2025-09": 255,
+      "2025-11": 51
+    },
+    "merged_pr_count": 142,
+    "file_types_top": [
+      {
+        "extension": "md",
+        "touched_files": 1450
+      },
+      {
+        "extension": "sh",
+        "touched_files": 322
+      },
+      {
+        "extension": "ps1",
+        "touched_files": 222
+      },
+      {
+        "extension": "py",
+        "touched_files": 191
+      },
+      {
+        "extension": "yml",
+        "touched_files": 72
+      },
+      {
+        "extension": "json",
+        "touched_files": 62
+      },
+      {
+        "extension": "toml",
+        "touched_files": 62
+      },
+      {
+        "extension": "gitkeep",
+        "touched_files": 23
+      },
+      {
+        "extension": "yaml",
+        "touched_files": 15
+      },
+      {
+        "extension": "gitignore",
+        "touched_files": 14
+      },
+      {
+        "extension": "jsonl",
+        "touched_files": 10
+      },
+      {
+        "extension": "(no-ext)",
+        "touched_files": 9
+      },
+      {
+        "extension": "webp",
+        "touched_files": 8
+      },
+      {
+        "extension": "gif",
+        "touched_files": 8
+      },
+      {
+        "extension": "jsonc",
+        "touched_files": 5
+      },
+      {
+        "extension": "jpg",
+        "touched_files": 4
+      },
+      {
+        "extension": "html",
+        "touched_files": 2
+      },
+      {
+        "extension": "gitattributes",
+        "touched_files": 2
+      },
+      {
+        "extension": "txt",
+        "touched_files": 2
+      },
+      {
+        "extension": "ts",
+        "touched_files": 2
+      }
+    ],
+    "largest_merges": [
+      {
+        "sha": "478c25b5b81aac930edeb8f4e2c86e80f443a8e3",
+        "subject": "Merge pull request #22 from markhazleton/002-harness-runtime",
+        "files_changed": 51,
+        "additions": 6346,
+        "deletions": 7,
+        "total_lines": 6353
+      },
+      {
+        "sha": "2f358eafed7854765ffd583bc5f6c799da734130",
+        "subject": "Merge pull request #14 from markhazleton/001-monorepo-implement",
+        "files_changed": 96,
+        "additions": 4244,
+        "deletions": 252,
+        "total_lines": 4496
+      },
+      {
+        "sha": "ea1e0a0d544417cb65b94d4f4bca7f7d8b329c3f",
+        "subject": "Merge pull request #15 from markhazleton/feature/workflow-evolution-create-pr-agent-registry",
+        "files_changed": 67,
+        "additions": 3675,
+        "deletions": 592,
+        "total_lines": 4267
+      },
+      {
+        "sha": "30a4c4ad5ba7419bc2d4a43d2fdaa6e60a00dc5c",
+        "subject": "Merge pull request #13 from markhazleton/feature/monorepo-multi-app-support",
+        "files_changed": 25,
+        "additions": 2094,
+        "deletions": 35,
+        "total_lines": 2129
+      },
+      {
+        "sha": "15139c1e0fbb62fea5ba782ef841333e860010aa",
+        "subject": "chore: merge main into feature branch",
+        "files_changed": 30,
+        "additions": 1299,
+        "deletions": 72,
+        "total_lines": 1371
+      },
+      {
+        "sha": "c493950742317ef40cc3670abeb370f1d31cc4e6",
+        "subject": "Merge pull request #24 from markhazleton/harness_validation",
+        "files_changed": 13,
+        "additions": 1171,
+        "deletions": 12,
+        "total_lines": 1183
+      },
+      {
+        "sha": "427b87b60dcbf1d2787808f53000fdfdd616268e",
+        "subject": "Merge pull request #17 from markhazleton/copilot/enhancement-battle-tested-patterns",
+        "files_changed": 7,
+        "additions": 749,
+        "deletions": 98,
+        "total_lines": 847
+      },
+      {
+        "sha": "7e568c1201be9f70df4ef241bc9e7dab4e70d61e",
+        "subject": "Merge pull request #986 from github/localden/vscode",
+        "files_changed": 21,
+        "additions": 802,
+        "deletions": 44,
+        "total_lines": 846
+      },
+      {
+        "sha": "c88d00d452613d65ef5b2fb630c94c7e2491a127",
+        "subject": "Merge pull request #1135 from anchildress1/upgrade-spec-kit-docs",
+        "files_changed": 5,
+        "additions": 442,
+        "deletions": 3,
+        "total_lines": 445
+      },
+      {
+        "sha": "ad3bb1a5fed2f8a8e5a569b9927a784691cee501",
+        "subject": "resolve confilct and add qoder agent",
+        "files_changed": 9,
+        "additions": 147,
+        "deletions": 73,
+        "total_lines": 220
+      }
+    ]
+  },
+  "commit_message_metrics": {
+    "conventional_commit_count": 208,
+    "informal_commit_count": 4,
+    "spec_reference_commit_count": 0
+  },
+  "test_metrics": {
+    "test_file_count": 135,
+    "test_related_commit_count": 105
+  },
+  "governance_maturity": {
+    "constitution_path": "C:\\GitHub\\MarkHazleton\\DevSpark\\.documentation\\memory\\constitution.md",
+    "constitution_exists": true,
+    "constitution_version": "06",
+    "constitution_amendment_count": 0,
+    "active_spec_count": 1,
+    "archived_spec_directory_count": 4,
+    "governance_artifact_count": 7
+  },
+  "milestones": {
+    "tags": [],
+    "readme_evolution": {
+      "total_readme_commits": 131,
+      "commits": [
+        {
+          "sha": "f10d5bfa79ada0c129848cf826223cc771c590b6",
+          "date": "2026-04-15T06:36:42-05:00",
+          "role": "Developer A",
+          "subject": "Remove video link from README.md"
+        },
+        {
+          "sha": "6413574919f2acdef15520cbbd6efb8e1efdaa8f",
+          "date": "2026-04-15T06:35:25-05:00",
+          "role": "Developer A",
+          "subject": "Refresh documentation for harness runtime"
+        },
+        {
+          "sha": "6e7100e887e3626b0d52d69ae51ab796ca68e18b",
+          "date": "2026-04-14T15:40:34-05:00",
+          "role": "Developer A",
+          "subject": "Unify archive workflow under harvest"
+        },
+        {
+          "sha": "699a964f866e50fe2a22db764e32b38d96c36634",
+          "date": "2026-04-14T06:42:02-05:00",
+          "role": "Developer A",
+          "subject": "docs: refresh repository docs and harvest comments"
+        },
+        {
+          "sha": "9a242c43aac5f8d62f5e212f793d8b34766c8105",
+          "date": "2026-04-12T01:18:41-05:00",
+          "role": "Developer A",
+          "subject": "Align prompt consistency and markdown docs"
+        },
+        {
+          "sha": "8bbb6afd12e984ed6babac0931267e4390642d73",
+          "date": "2026-04-11T09:44:51-05:00",
+          "role": "Developer A",
+          "subject": "feat: evolve route-aware workflows and shared agent registry"
+        },
+        {
+          "sha": "7fffbf8403b4a16fc983e1039887711495dc404a",
+          "date": "2026-04-07T14:51:10-05:00",
+          "role": "Developer C",
+          "subject": "docs: update all documentation for multi-app support as optional feature"
+        },
+        {
+          "sha": "1e58dc8d69b304d8721584e2ed4dc453c30ac579",
+          "date": "2026-04-07T11:00:04-05:00",
+          "role": "Developer C",
+          "subject": "feat(001): quickstarts, README, templates README ΓÇö all tasks complete"
+        },
+        {
+          "sha": "9c0e86b961c73707cba4d49938b6ca0446f15d87",
+          "date": "2026-04-06T08:29:12-05:00",
+          "role": "Developer C",
+          "subject": "release: prepare v0.1.2"
+        },
+        {
+          "sha": "6cc0a466ee96f453db536aae3c92a8fab5d16586",
+          "date": "2026-04-03T10:32:02-05:00",
+          "role": "Developer A",
+          "subject": "feat(repo-story): add Developer FAQ section and README link step"
+        },
+        {
+          "sha": "19ad47e6933138a6b069c6ae5e5bdc79d7b0b15a",
+          "date": "2026-04-03T08:36:19-05:00",
+          "role": "Developer A",
+          "subject": "docs: align all content to v0.1.0 and remove spec-kit references"
+        },
+        {
+          "sha": "86d3d0d9275da0557212f175fefb811d0175931e",
+          "date": "2026-04-02T17:10:30-05:00",
+          "role": "Developer A",
+          "subject": "feat: add platform adapter and 2-tier script override system"
+        },
+        {
+          "sha": "7f20d3265a2923e70a8737e12db5f4c6f6400f41",
+          "date": "2026-04-02T16:10:05-05:00",
+          "role": "Developer A",
+          "subject": "fix: resolve all markdownlint errors across 8 files"
+        },
+        {
+          "sha": "895b0abda9854cd63cf1ca4488efcf5ad75091eb",
+          "date": "2026-04-02T15:08:12-05:00",
+          "role": "Developer A",
+          "subject": "Remove 7 stale .documentation files, fix all broken references"
+        },
+        {
+          "sha": "16d0ef4f78c80b5c3501b9fa485cc08efecf8234",
+          "date": "2026-04-02T14:36:24-05:00",
+          "role": "Developer A",
+          "subject": "fix: remove logo image from README for cleaner presentation"
+        },
+        {
+          "sha": "1bf87684cec846a4d377960d6df685b7eee729ea",
+          "date": "2026-04-02T14:34:23-05:00",
+          "role": "Developer A",
+          "subject": "docs: update README with agent quickstart links as primary install option"
+        },
+        {
+          "sha": "f21ce6d9e10bcd7d8b8c123d98937f2d9996894e",
+          "date": "2026-04-02T14:19:39-05:00",
+          "role": "Developer A",
+          "subject": "feat: separate .devspark/ installation from .documentation/ user artifacts"
+        },
+        {
+          "sha": "60bd460f186748dcde5c7ce2672243b492e8ab70",
+          "date": "2026-04-02T14:10:14-05:00",
+          "role": "Developer A",
+          "subject": "identity cleanup: standalone DevSpark, no fork baggage"
+        },
+        {
+          "sha": "9ebd3fed25ae5066b4a97b591a6dd9d5b56ea49d",
+          "date": "2026-04-02T13:48:08-05:00",
+          "role": "Developer A",
+          "subject": "3-tier override system: defaults/ + commands/ + user/"
+        },
+        {
+          "sha": "189f3f4f2d3f2881fce24b2064cbe5f5230f44b8",
+          "date": "2026-04-02T13:43:53-05:00",
+          "role": "Developer A",
+          "subject": "README: emphasize process not program, copy-once-and-go messaging"
+        },
+        {
+          "sha": "e60572c64575914e63cbd1df8392c6f8ebb7cdae",
+          "date": "2026-04-02T13:38:50-05:00",
+          "role": "Developer A",
+          "subject": "Rebrand to DevSpark ΓÇö full rename from Spec Kit Spark"
+        },
+        {
+          "sha": "9a8fecb057dbc59af78cf79cf638f5569a310da2",
+          "date": "2026-04-01T16:32:09-05:00",
+          "role": "Developer A",
+          "subject": "chore: update version references to v1.6.0 in roadmap and release documentation"
+        },
+        {
+          "sha": "09cbc539e20102629f8bb20ca7d25c7ee4d0a01f",
+          "date": "2026-04-01T15:52:32-05:00",
+          "role": "Developer A",
+          "subject": "chore: release v1.6.0 ΓÇö agent-agnostic layout, multi-user personalization"
+        },
+        {
+          "sha": "680225dbef81d05edaf8cdc3974a1e4970951723",
+          "date": "2026-04-01T15:33:30-05:00",
+          "role": "Developer A",
+          "subject": "feat: Introduce agent-agnostic architecture and multi-user personalization"
+        },
+        {
+          "sha": "09bed006a482742d6777f5cb9f4f077f85b4757f",
+          "date": "2026-03-28T15:59:43-05:00",
+          "role": "Developer A",
+          "subject": "feat: add /speckit.repo-story command and bump to v1.5.0"
+        },
+        {
+          "sha": "ed1e30236b9d0e26cb25811602223398c7679103",
+          "date": "2026-03-26T11:07:33-05:00",
+          "role": "Developer A",
+          "subject": "chore(docs): finalize markdownlint cleanups and branding"
+        },
+        {
+          "sha": "0fe7482e040a64eadadae4984afb07d21a56deef",
+          "date": "2026-03-25T18:21:36-05:00",
+          "role": "Developer A",
+          "subject": "feat: add harvest command for cleaning stale documentation and archiving artifacts"
+        },
+        {
+          "sha": "c0499140314a2ebc2041cb0537cafccb5507d53c",
+          "date": "2026-03-17T13:29:56-05:00",
+          "role": "Developer A",
+          "subject": "fix: update paths to specs directory in scripts and documentation"
+        },
+        {
+          "sha": "0d83e822a1b5d52a798aaf298c63e9dd7c1a4881",
+          "date": "2026-03-02T15:38:53-06:00",
+          "role": "Developer A",
+          "subject": "Add user personas and interaction flows documentation; introduce automated upstream integration strategy for Spec Kit Spark"
+        },
+        {
+          "sha": "f26b2f720a7166b873b81b5d9432c62c7ec9766e",
+          "date": "2026-02-20T13:30:16-06:00",
+          "role": "Developer R",
+          "subject": "fix: rename Qoder AGENT_CONFIG key from 'qoder' to 'qodercli' to match actual CLI executable (#1651)"
+        },
+        {
+          "sha": "58337b9f7b678614e6f3b6a9b05b3197b176bd4c",
+          "date": "2026-02-20T17:14:56-06:00",
+          "role": "Developer A",
+          "subject": "feat: add sync-upstream.ps1 script for managing upstream changes"
+        },
+        {
+          "sha": "5293e02e3a9ec5ded0dc7571c78937ad25ae6abc",
+          "date": "2026-02-08T16:29:58-06:00",
+          "role": "Developer A",
+          "subject": "chore: prepare v1.1.0 release with upgrade command and migration tools"
+        },
+        {
+          "sha": "93165d27e19f9ccbb1f9ccac292727d72ee278f1",
+          "date": "2026-02-08T12:29:18-06:00",
+          "role": "Developer A",
+          "subject": "feat: add migration guide and scripts for transitioning to .documentation/ structure"
+        },
+        {
+          "sha": "584eb228fc7dfc9117e6827c6f55f5854bdc59cb",
+          "date": "2026-02-03T07:35:51-06:00",
+          "role": "Developer A",
+          "subject": "feat: use .documentation/ instead of .specify/ as Spark fork identifier"
+        },
+        {
+          "sha": "cc71dedd496ea63e5150ae77163f5144133977ee",
+          "date": "2026-02-02T12:59:15-06:00",
+          "role": "Developer A",
+          "subject": "Enhance documentation and command templates for improved clarity and usability"
+        },
+        {
+          "sha": "14aef4cb6ba9d34c6b35d8e613700cf90f590266",
+          "date": "2026-02-02T07:55:18-06:00",
+          "role": "Developer A",
+          "subject": "feat: add detailed roadmap section outlining current and future releases for Spec Kit Spark"
+        },
+        {
+          "sha": "ab40a9d91c7a89d0b6a93f941af9e9cbb1db83a9",
+          "date": "2026-02-01T23:28:49-06:00",
+          "role": "Developer A",
+          "subject": "Enhance documentation and roadmap for ASLCD Toolkit"
+        },
+        {
+          "sha": "132b91f4e41ed3af06d3c66ced250ca7dcf8ff89",
+          "date": "2026-02-01T23:20:58-06:00",
+          "role": "Developer A",
+          "subject": "feat: add evolve-constitution command for analyzing PR reviews and proposing amendments"
+        },
+        {
+          "sha": "bc058b2368c774ed701c11f2b12ccd5c3fee809c",
+          "date": "2026-01-29T14:15:24-06:00",
+          "role": "Developer A",
+          "subject": "Refactor release notes and versioning for Spec Kit Spark"
+        },
+        {
+          "sha": "cb5df20b4a809084bc465ac53bcec6a215d0ace3",
+          "date": "2026-01-29T13:06:32-06:00",
+          "role": "Developer A",
+          "subject": "Update documentation and references for Mark Hazleton Edition of Spec Kit"
+        },
+        {
+          "sha": "1b7d1ee54a55d39284ce8a2d87b9024326b49104",
+          "date": "2026-01-29T12:04:31-06:00",
+          "role": "Developer A",
+          "subject": "update documentation for spec driven development and site audit tool"
+        },
+        {
+          "sha": "4d8e14d399b088c932c7d74f0b3b8d183500b8bf",
+          "date": "2026-01-27T00:29:18-06:00",
+          "role": "Developer A",
+          "subject": "Add /speckit.critic command for adversarial risk analysis and update changelog"
+        },
+        {
+          "sha": "5354c8c51c78b34b7f269c0b178425f342a5f589",
+          "date": "2026-01-25T23:05:04-06:00",
+          "role": "Developer A",
+          "subject": "Add /speckit.pr-review command for constitution-based PR reviews"
+        },
+        {
+          "sha": "0049b1cdc2f9ba12def39a042872b0b1b6a09704",
+          "date": "2025-12-04T11:55:56-08:00",
+          "role": "Lead Architect",
+          "subject": "Update Markdown formatting"
+        },
+        {
+          "sha": "3e883fa32ca768629abeb5065d51c5926b525cc9",
+          "date": "2025-12-04T11:50:36-08:00",
+          "role": "Lead Architect",
+          "subject": "Update Markdown formatting"
+        },
+        {
+          "sha": "236bcb39877c29cf3dda082a0036bca76f37f0fe",
+          "date": "2025-12-04T18:05:07+05:30",
+          "role": "Developer e",
+          "subject": "docs: Add existing project initialization to getting started"
+        },
+        {
+          "sha": "84e1a69edc57695f3a10abb41b177f1bf9e39970",
+          "date": "2025-12-01T09:00:39-05:00",
+          "role": "Developer W",
+          "subject": "Limit width and height to 200px to match the small logo"
+        },
+        {
+          "sha": "6f223931061660ed97e7b99020f40b1fee744e34",
+          "date": "2025-12-01T08:56:45-05:00",
+          "role": "Developer W",
+          "subject": "docs: Switch readme logo to logo_large.webp"
+        },
+        {
+          "sha": "964b1418a319ffc7d2a10c3d1c6b63d0a3e89f2e",
+          "date": "2025-12-01T21:40:17+08:00",
+          "role": "Developer E",
+          "subject": "fix"
+        },
+        {
+          "sha": "cad12bd2c80c5222d17702fa661a285fcbb30894",
+          "date": "2025-12-01T21:37:02+08:00",
+          "role": "Developer E",
+          "subject": "fix"
+        },
+        {
+          "sha": "71a20eb787545761374b919970dbf0d911b667c4",
+          "date": "2025-11-19T14:20:21-07:00",
+          "role": "Developer n",
+          "subject": "Update supported AI agents in README.md"
+        },
+        {
+          "sha": "d471a6fa423b9b3ce1fef59798979a667c273ca6",
+          "date": "2025-11-06T23:43:16-05:00",
+          "role": "Developer J",
+          "subject": "docs: fix broken link and improve agent reference"
+        },
+        {
+          "sha": "d79d99f0a9a341e3f7bad3ccb80928b6a2c1535b",
+          "date": "2025-11-06T18:01:16-05:00",
+          "role": "Developer J",
+          "subject": "docs: reorganize upgrade documentation structure"
+        },
+        {
+          "sha": "57c54d3f0a0b578b7b44ccb3bc7a967c31c01070",
+          "date": "2025-11-06T17:47:21-05:00",
+          "role": "Developer J",
+          "subject": "docs: remove related documentation section from upgrading guide"
+        },
+        {
+          "sha": "e976080cbfc4d0c007663bd79af5a4e7cde675e6",
+          "date": "2025-11-06T13:55:17-05:00",
+          "role": "Developer |",
+          "subject": "feat: Add OVHcloud SHAI AI Agent"
+        },
+        {
+          "sha": "f438a10c7c74aeaffb6e9329c8cf439823eecc20",
+          "date": "2025-11-06T15:31:11Z",
+          "role": "Developer S",
+          "subject": "feat: add support for IBM Bob IDE"
+        },
+        {
+          "sha": "3c4081d30fd901da50cc0d3f068a8b61e198ec26",
+          "date": "2025-11-05T20:54:39-05:00",
+          "role": "Developer J",
+          "subject": "fix: remove broken link to existing project guide"
+        },
+        {
+          "sha": "392dbf20c4a6589cf2df6b8627e6beac2773e878",
+          "date": "2025-11-05T18:46:48-05:00",
+          "role": "Developer J",
+          "subject": "docs: Add comprehensive upgrading guide for Spec Kit"
+        },
+        {
+          "sha": "de2cdc633de199b098b4cd75f7a9331737067b72",
+          "date": "2025-11-03T16:46:30+08:00",
+          "role": "Developer E",
+          "subject": "fix:qoder url"
+        },
+        {
+          "sha": "891736ffc8681bf61ef595f04a3229bc47a55481",
+          "date": "2025-11-03T16:43:35+08:00",
+          "role": "Developer E",
+          "subject": "fix:download owner"
+        },
+        {
+          "sha": "3110452c3f79c3cfe97dbae27a36fc170fe2e267",
+          "date": "2025-11-03T14:56:49+08:00",
+          "role": "Developer E",
+          "subject": "feat:support Qoder CLI"
+        },
+        {
+          "sha": "9786e588b7900c8eae9a76e0a9e5d0400d204cf1",
+          "date": "2025-10-21T15:12:33-07:00",
+          "role": "Lead Architect",
+          "subject": "Lint fixes"
+        },
+        {
+          "sha": "33a07969c3f1bf881147313b85d5d8d89bc287cf",
+          "date": "2025-10-20T00:49:15+02:00",
+          "role": "Developer y",
+          "subject": "feat(ci): add markdownlint-cli2 for consistent markdown formatting"
+        },
+        {
+          "sha": "ed0fa8fffe93ec871510987bc4e4badd350ced7a",
+          "date": "2025-10-17T10:25:36-07:00",
+          "role": "Developer v",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "b291a6efb0c9a1fc442903b7593b52f8569c8447",
+          "date": "2025-10-15T22:17:48+01:00",
+          "role": "Developer Q",
+          "subject": "Added support for Amp code agent."
+        },
+        {
+          "sha": "2baae57b264b0a3e5484d1467290f5db5ab6be5a",
+          "date": "2025-10-15T21:38:16+08:00",
+          "role": "Developer K",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "514b0548fe420a1dac2b69c79b62df0fa9377a05",
+          "date": "2025-10-15T21:36:01+08:00",
+          "role": "Developer K",
+          "subject": "Update CodeBuddy link in README.md"
+        },
+        {
+          "sha": "7ca792509bd50ecf3e81a7c926cd9f84cdae23e9",
+          "date": "2025-10-14T18:46:34-07:00",
+          "role": "Developer g",
+          "subject": "docs: fix heading capitalization for consistency"
+        },
+        {
+          "sha": "36ff7e6505ae49eee73a01c2d3dd31752f73ad5d",
+          "date": "2025-10-14T11:52:26-07:00",
+          "role": "Lead Architect",
+          "subject": "Update files"
+        },
+        {
+          "sha": "defb1870da8cfda7fc26ad02170c32079bdce3c3",
+          "date": "2025-10-14T11:47:00-07:00",
+          "role": "Lead Architect",
+          "subject": "Update files"
+        },
+        {
+          "sha": "64745162df143310b0683966bbd95d9fb5753249",
+          "date": "2025-10-14T11:28:47-07:00",
+          "role": "Lead Architect",
+          "subject": "Update wording"
+        },
+        {
+          "sha": "3e476c2ba6e88150478ba75af7c7163a48dd1ced",
+          "date": "2025-10-14T10:38:40-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "09f57a87fa48621bf14ce6bd1639494df7483115",
+          "date": "2025-10-14T09:59:27+08:00",
+          "role": "Developer ",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "2c1de4202edcf0723e10ac098f4f681f296aaaf7",
+          "date": "2025-10-13T10:18:08-06:00",
+          "role": "Developer x",
+          "subject": "docs(readme): add /speckit.tasks step and renumber walkthrough"
+        },
+        {
+          "sha": "d09552fc6389bbec2136113440369996202324f1",
+          "date": "2025-10-10T20:43:20-04:00",
+          "role": "Developer ]",
+          "subject": "fix: align Cursor agent naming to use 'cursor-agent' consistently"
+        },
+        {
+          "sha": "ed9044345b305882a1dda6427afbd97bf32e19a7",
+          "date": "2025-10-10T11:45:51-07:00",
+          "role": "Lead Architect",
+          "subject": "Consolidate Cursor naming"
+        },
+        {
+          "sha": "5846a38c6896a7767e1447aa9bfc40b50d1397a5",
+          "date": "2025-10-09T16:19:36+02:00",
+          "role": "Developer ",
+          "subject": "add how to upgrade specify installation"
+        },
+        {
+          "sha": "719ba762bc42a5a755230f999618074aadbe1ced",
+          "date": "2025-10-07T17:07:25-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "d4cce17f66922823e4dda275d50d0704f6c48b29",
+          "date": "2025-10-07T17:05:15-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "15e5572a1d45730bd767c48dbb5b87bfadef2ee0",
+          "date": "2025-10-06T22:16:48-07:00",
+          "role": "Lead Architect",
+          "subject": "Update command reference"
+        },
+        {
+          "sha": "0037a3f48468bb7979c284a905121a258e9d3026",
+          "date": "2025-10-06T21:11:52-07:00",
+          "role": "Lead Architect",
+          "subject": "Update template and docs"
+        },
+        {
+          "sha": "b06f2b9f8937537932a259e09af0fdd980ccfaf6",
+          "date": "2025-10-06T07:14:58+07:00",
+          "role": "Developer ",
+          "subject": "Codex CLI is now fully supported"
+        },
+        {
+          "sha": "3ee225f624188751f5aed9b2a29c137d18a259ab",
+          "date": "2025-10-01T12:09:41+03:00",
+          "role": "Developer ^",
+          "subject": "Remove Codex named args limitation from README.md"
+        },
+        {
+          "sha": "12b823e4c22840c4fd545cfb5829dd35b83762ad",
+          "date": "2025-10-01T02:54:59-06:00",
+          "role": "Developer [",
+          "subject": "docs(readme): link Amazon Q slash command limitation issue"
+        },
+        {
+          "sha": "f430138895bc62211cee75d5bfe3c1f0caad5d64",
+          "date": "2025-10-01T02:47:58-06:00",
+          "role": "Developer [",
+          "subject": "docs: clarify Amazon Q limitation and update init docstring"
+        },
+        {
+          "sha": "de1db34b084aab95aa494d04dd4bc8466cdd3bb7",
+          "date": "2025-09-25T21:01:43-06:00",
+          "role": "Developer u",
+          "subject": "feat(agent): Added Amazon Q Developer CLI Integration"
+        },
+        {
+          "sha": "6a3e81f813198514dcdfcc11c933f4a996e918f0",
+          "date": "2025-09-25T10:05:08+02:00",
+          "role": "Developer F",
+          "subject": "docs: fix the paths of generated files (moved under a `.specify/` folder)"
+        },
+        {
+          "sha": "68eba52a40a0e424f152d583e41d6227a3e4909b",
+          "date": "2025-09-24T22:41:50-07:00",
+          "role": "Developer ",
+          "subject": "feat: support 'specify init .' for current directory initialization"
+        },
+        {
+          "sha": "62f20c601cab9e22bb40330d0cc7c204a86cb0a8",
+          "date": "2025-09-23T12:09:19Z",
+          "role": "Developer l",
+          "subject": "docs: remove constitution_update_checklist from README"
+        },
+        {
+          "sha": "c7b61f4bfdb16bc9cef470bf19436a8b74dac5f7",
+          "date": "2025-09-22T19:35:45-07:00",
+          "role": "Lead Architect",
+          "subject": "Update with extra commands"
+        },
+        {
+          "sha": "9319f0425e04ef8a528115a011c5d9466a4d5cea",
+          "date": "2025-09-22T14:45:35-07:00",
+          "role": "Lead Architect",
+          "subject": "Update with --force flag"
+        },
+        {
+          "sha": "8b09559690166fae71e5da28f22d73ab736160ae",
+          "date": "2025-09-23T05:22:35+08:00",
+          "role": "Developer M",
+          "subject": "update CodeBuddy to international site"
+        },
+        {
+          "sha": "1db65aa6aa70f043e5b4989172f404b04e1dbada",
+          "date": "2025-09-22T11:08:25-04:00",
+          "role": "Developer t",
+          "subject": "feat: add uv tool install instructions to README"
+        },
+        {
+          "sha": "318b76de50a8bffe02973a3e4a6e8772ecc6a576",
+          "date": "2025-09-22T14:34:43+08:00",
+          "role": "Developer M",
+          "subject": "feat: support codebuddy ai"
+        },
+        {
+          "sha": "92621bca7d61565c301b1e0285855b2a36bde5b2",
+          "date": "2025-09-22T14:20:31+08:00",
+          "role": "Developer M",
+          "subject": "feat: support codebuddy ai"
+        },
+        {
+          "sha": "9348c45f9e47ed6ed7469ef033efab086583cde9",
+          "date": "2025-09-21T19:56:17-07:00",
+          "role": "Lead Architect",
+          "subject": "Update with Roo Code support"
+        },
+        {
+          "sha": "ceba130e52e0bfb08952b18572dcdfcb9df8ad74",
+          "date": "2025-09-21T12:48:58-07:00",
+          "role": "Lead Architect",
+          "subject": "Add support for Auggie"
+        },
+        {
+          "sha": "dceb903804a725d2546fe9680c0fa095e55db1b6",
+          "date": "2025-09-21T12:32:16-07:00",
+          "role": "Lead Architect",
+          "subject": "Updates with Kilo Code support"
+        },
+        {
+          "sha": "39b33ebd22403d0cc7bf0d61a2707b0a81139158",
+          "date": "2025-09-21T11:52:10-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "cef4e8f49549593a28951db8a137d4600bf4dc91",
+          "date": "2025-09-21T11:45:33-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "8c4f348ac11c49b01b96cff3d58ca62c48477347",
+          "date": "2025-09-21T16:03:33+08:00",
+          "role": "Developer j",
+          "subject": "docs: Update README with codex in check command"
+        },
+        {
+          "sha": "7c0f0a4627e0ea6a3caaf72c2ea93389f4957a1e",
+          "date": "2025-09-20T11:19:47-07:00",
+          "role": "Lead Architect",
+          "subject": "Consolidate scripts"
+        },
+        {
+          "sha": "d7d2c145c7c6ce18912e8ddee4538540e0c4f931",
+          "date": "2025-09-20T10:10:23-07:00",
+          "role": "Lead Architect",
+          "subject": "Update config"
+        },
+        {
+          "sha": "65ccbb62ca1749744f8843c7d52e0cd89439d8cf",
+          "date": "2025-09-20T22:44:44+09:00",
+          "role": "Developer I",
+          "subject": "Enhance Codex support by auto-syncing prompt files, allowing spec generation without git, and documenting clearer /specify usage."
+        },
+        {
+          "sha": "d1d5c82a8e7e6eb5f9725c2ba16173a80da2d679",
+          "date": "2025-09-19T18:07:18-07:00",
+          "role": "Lead Architect",
+          "subject": "Update package release"
+        },
+        {
+          "sha": "3a0ae75bfbf97eca7c318c8de3ce7fde59371eba",
+          "date": "2025-09-19T17:53:16+09:00",
+          "role": "Developer I",
+          "subject": "Limit workspace command seeding to Codex init and update Codex documentation accordingly."
+        },
+        {
+          "sha": "312703260c46d4d800825383d5c6f7429ec77cd3",
+          "date": "2025-09-19T16:40:41+09:00",
+          "role": "Developer I",
+          "subject": "Clarify Codex-specific README note with rationale for its different workflow."
+        },
+        {
+          "sha": "32c933c960cc372607f885ade04855665f7d8433",
+          "date": "2025-09-18T23:03:01-07:00",
+          "role": "Lead Architect",
+          "subject": "Update with support for /implement"
+        },
+        {
+          "sha": "95fba17d204aad170d2a496e5f310998e670d347",
+          "date": "2025-09-04T14:47:24+09:00",
+          "role": "Developer I",
+          "subject": "Add Codex CLI support with AGENTS.md and commands bootstrap"
+        },
+        {
+          "sha": "c5f758247099c2c1c5a7cd5c6dc5492eba927732",
+          "date": "2025-09-17T13:12:50-07:00",
+          "role": "Developer ",
+          "subject": "feat: Add opencode ai agent"
+        },
+        {
+          "sha": "ad9c93c13be94cd1d361b5633c0ee4aa0624709f",
+          "date": "2025-09-14T09:09:58-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "b1591282f62a0e6c92fd662c419b714b851af3ff",
+          "date": "2025-09-14T09:08:37-07:00",
+          "role": "Lead Architect",
+          "subject": "Update with video header"
+        },
+        {
+          "sha": "736e28256227a9bd6cff609f02490d09325a120d",
+          "date": "2025-09-12T15:20:20-07:00",
+          "role": "Lead Architect",
+          "subject": "Update with check changes"
+        },
+        {
+          "sha": "6c83e9ff663a18e815e05a2172e874edf648fa31",
+          "date": "2025-09-12T14:39:45-07:00",
+          "role": "Lead Architect",
+          "subject": "Update wording"
+        },
+        {
+          "sha": "0ad2f169d2563e0a7124cc6e688d09ed73c82598",
+          "date": "2025-09-12T14:34:13-07:00",
+          "role": "Lead Architect",
+          "subject": "Support Cursor"
+        },
+        {
+          "sha": "57024454bf29c06f61b274615c08e6bc9a14291f",
+          "date": "2025-09-12T00:17:31-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "1ae6b55c870635bac044fd72b1ae0d45749dd501",
+          "date": "2025-09-12T00:15:25-07:00",
+          "role": "Lead Architect",
+          "subject": "Update CLI reference"
+        },
+        {
+          "sha": "73a9af70a4049c8480ba5a05eb1435274b41336a",
+          "date": "2025-09-11T15:35:46+03:00",
+          "role": "Developer H",
+          "subject": "feat: add Qwen Code support to Spec Kit"
+        },
+        {
+          "sha": "9140e9b009f993d46a5a29e4390c43ad7e09c2d8",
+          "date": "2025-09-09T10:32:58-04:00",
+          "role": "Developer ",
+          "subject": "docs: Fix formatting issues in README.md for consistency"
+        },
+        {
+          "sha": "a3b6e4455a2e5e23ebc6388e0bcd4e8ec42c682b",
+          "date": "2025-09-09T05:39:54+05:30",
+          "role": "Developer s",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "9d01e9d7b66995833269fe7288f852470dce1cbd",
+          "date": "2025-09-08T13:16:38-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "29eb082e2a19f99701397f33f1bc9859959b1ae4",
+          "date": "2025-09-07T15:18:08+09:00",
+          "role": "Developer a",
+          "subject": "Use `/usr/bin/env bash` instead of `/bin/bash` for shebang"
+        },
+        {
+          "sha": "f88f6c8c0586bb69d1f0fbb6b4f594f5309b38b9",
+          "date": "2025-09-04T13:42:39+01:00",
+          "role": "Developer z",
+          "subject": "fix: incorrect tree structure in examples"
+        },
+        {
+          "sha": "c3ff114c5f582f8943ab8b40ef8428a27b8136df",
+          "date": "2025-08-25T14:09:38-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "084d111d687201a5558464e975b0a2437149a612",
+          "date": "2025-08-25T11:26:20-07:00",
+          "role": "Lead Architect",
+          "subject": "Add John Lam as contributor and release badge"
+        },
+        {
+          "sha": "56120b2ff0b885d1ddce80d9cb140d8195cb3cf5",
+          "date": "2025-08-22T12:19:42-07:00",
+          "role": "Lead Architect",
+          "subject": "Update requirements"
+        },
+        {
+          "sha": "26da1c13b88259700a410650ee007725789b54c5",
+          "date": "2025-08-22T10:26:30-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "f6bbb3e1aaaa08b910aa54037194b8301cb49023",
+          "date": "2025-08-22T10:08:59-07:00",
+          "role": "Lead Architect",
+          "subject": "Update README.md"
+        },
+        {
+          "sha": "39f30babe6e60b8674a65a1e78483786453e3c37",
+          "date": "2025-08-22T10:07:28-07:00",
+          "role": "Lead Architect",
+          "subject": "Update project name"
+        },
+        {
+          "sha": "28fdfaa86973d4402eecd89ba6c87d31e1edae03",
+          "date": "2025-08-22T10:06:25-07:00",
+          "role": "Lead Architect",
+          "subject": "Initial checkin"
+        },
+        {
+          "sha": "fa2736371e077f55c4fe145fea186bab2561386d",
+          "date": "2025-08-21T15:54:32-07:00",
+          "role": "Lead Architect",
+          "subject": "Initial commit"
+        }
+      ]
+    }
+  },
+  "change_patterns": {
+    "subject_type_estimates": {
+      "other": 288,
+      "fixes": 168,
+      "docs": 97,
+      "ci_build": 5,
+      "features": 117,
+      "chore": 23,
+      "tests": 44,
+      "refactor": 19
+    },
+    "hotspots": [
+      {
+        "path": "README.md",
+        "changes": 131
+      },
+      {
+        "path": "src/specify_cli/__init__.py",
+        "changes": 106
+      },
+      {
+        "path": "CHANGELOG.md",
+        "changes": 68
+      },
+      {
+        "path": "pyproject.toml",
+        "changes": 62
+      },
+      {
+        "path": ".github/workflows/scripts/create-release-packages.sh",
+        "changes": 58
+      },
+      {
+        "path": "templates/commands/specify.md",
+        "changes": 53
+      },
+      {
+        "path": "scripts/powershell/update-agent-context.ps1",
+        "changes": 48
+      },
+      {
+        "path": "scripts/bash/update-agent-context.sh",
+        "changes": 47
+      },
+      {
+        "path": "CONTRIBUTING.md",
+        "changes": 40
+      },
+      {
+        "path": "templates/commands/tasks.md",
+        "changes": 40
+      },
+      {
+        "path": "templates/commands/plan.md",
+        "changes": 37
+      },
+      {
+        "path": "AGENTS.md",
+        "changes": 37
+      },
+      {
+        "path": "templates/commands/implement.md",
+        "changes": 34
+      },
+      {
+        "path": "scripts/bash/create-new-feature.sh",
+        "changes": 30
+      },
+      {
+        "path": ".github/workflows/release.yml",
+        "changes": 28
+      },
+      {
+        "path": ".documentation/index.md",
+        "changes": 26
+      },
+      {
+        "path": "scripts/powershell/create-new-feature.ps1",
+        "changes": 24
+      },
+      {
+        "path": "templates/plan-template.md",
+        "changes": 24
+      },
+      {
+        "path": "templates/commands/constitution.md",
+        "changes": 23
+      },
+      {
+        "path": "templates/commands/checklist.md",
+        "changes": 23
+      },
+      {
+        "path": "templates/commands/clarify.md",
+        "changes": 20
+      },
+      {
+        "path": "scripts/bash/common.sh",
+        "changes": 20
+      },
+      {
+        "path": "templates/commands/analyze.md",
+        "changes": 19
+      },
+      {
+        "path": "templates/commands/pr-review.md",
+        "changes": 19
+      },
+      {
+        "path": "spec-driven.md",
+        "changes": 18
+      },
+      {
+        "path": "templates/commands/site-audit.md",
+        "changes": 16
+      },
+      {
+        "path": ".github/workflows/scripts/create-release-packages.ps1",
+        "changes": 16
+      },
+      {
+        "path": ".github/workflows/scripts/create-github-release.sh",
+        "changes": 16
+      },
+      {
+        "path": "templates/commands/release.md",
+        "changes": 15
+      },
+      {
+        "path": ".documentation/quickstart.md",
+        "changes": 15
+      },
+      {
+        "path": "templates/commands/upgrade.md",
+        "changes": 15
+      },
+      {
+        "path": "templates/tasks-template.md",
+        "changes": 15
+      },
+      {
+        "path": ".documentation/toc.yml",
+        "changes": 15
+      },
+      {
+        "path": "docs/index.md",
+        "changes": 14
+      },
+      {
+        "path": "templates/commands/repo-story.md",
+        "changes": 14
+      },
+      {
+        "path": "scripts/powershell/common.ps1",
+        "changes": 13
+      },
+      {
+        "path": ".documentation/installation.md",
+        "changes": 13
+      },
+      {
+        "path": "templates/commands/discover-constitution.md",
+        "changes": 13
+      },
+      {
+        "path": "docs/quickstart.md",
+        "changes": 13
+      },
+      {
+        "path": "quickstart/devspark_quickstart_generic.md",
+        "changes": 12
+      },
+      {
+        "path": "quickstart/devspark_quickstart_claudecode.md",
+        "changes": 12
+      },
+      {
+        "path": "quickstart/devspark_quickstart_copilot.md",
+        "changes": 12
+      },
+      {
+        "path": "docs/installation.md",
+        "changes": 12
+      },
+      {
+        "path": ".documentation/specs/001-multi-app-monorepo-support/tasks.md",
+        "changes": 12
+      },
+      {
+        "path": "templates/commands/harvest.md",
+        "changes": 12
+      },
+      {
+        "path": "quickstart/devspark_quickstart_cursor.md",
+        "changes": 12
+      },
+      {
+        "path": "scripts/bash/check-prerequisites.sh",
+        "changes": 11
+      },
+      {
+        "path": ".documentation/upgrade.md",
+        "changes": 11
+      },
+      {
+        "path": ".github/workflows/scripts/README.md",
+        "changes": 11
+      },
+      {
+        "path": ".gitignore",
+        "changes": 11
+      }
+    ]
+  },
+  "technical_signals": {
+    "language_presence": {
+      "python": true,
+      "javascript": false,
+      "typescript": true,
+      "powershell": true,
+      "shell": true,
+      "markdown": true
+    },
+    "has_pyproject_toml": true,
+    "has_package_json": false,
+    "has_dockerfile": false,
+    "has_github_actions": true
+  },
+  "recent": {
+    "commits": [
+      {
+        "sha": "a8fe252361f7fcbd832164cf5939707bdad2b714",
+        "date": "2026-04-17T16:08:14-05:00",
+        "role": "Developer D",
+        "subject": "docs: expand dogfooding guide with history, meta challenges, and narrative tone"
+      },
+      {
+        "sha": "5bc53280a6fb62c92a11e2d772f090da728f028a",
+        "date": "2026-04-17T16:01:59-05:00",
+        "role": "Developer D",
+        "subject": "docs: add Dogfooding DevSpark guide detailing source-direct shim setup"
+      },
+      {
+        "sha": "f7df6ca6a0f35ffffeae5d2a074c236ca6fc4bc3",
+        "date": "2026-04-17T15:56:43-05:00",
+        "role": "Developer D",
+        "subject": "feat: replace Claude commands with source-pointing shims and guards"
+      },
+      {
+        "sha": "caa2d2e1ea89f26ea20216b25eb34b76613cb0a0",
+        "date": "2026-04-17T15:56:35-05:00",
+        "role": "Developer D",
+        "subject": "feat: add Copilot prompt shims for all 27 commands"
+      },
+      {
+        "sha": "e5ecbb2b97b76950fab7b0fd679b9a0228be734d",
+        "date": "2026-04-17T15:56:29-05:00",
+        "role": "Developer D",
+        "subject": "feat: add Copilot agent shims pointing to source templates"
+      },
+      {
+        "sha": "00601acdc2bbb4414a108beb41c411363fc89a49",
+        "date": "2026-04-17T15:56:21-05:00",
+        "role": "Developer D",
+        "subject": "chore: add .devspark/VERSION stamp for source-dogfood install"
+      },
+      {
+        "sha": "f6d43376519c907143d9f75ab6ad257249ce98b3",
+        "date": "2026-04-17T15:56:13-05:00",
+        "role": "Developer D",
+        "subject": "chore: add dogfooding note to CLAUDE.md and unignore .vscode/settings.json"
+      },
+      {
+        "sha": "b647a1b39a41a4f7005931fe0d6221ddcad4fe22",
+        "date": "2026-04-16T10:01:10-05:00",
+        "role": "Developer D",
+        "subject": "fix lint issues"
+      },
+      {
+        "sha": "534d07d203f792a453bd8a4dc5da94da7eefee61",
+        "date": "2026-04-16T09:47:44-05:00",
+        "role": "Developer D",
+        "subject": "docs: add v2.0.0 release archive with notes and metrics"
+      },
+      {
+        "sha": "8b4e834b1ef21ff43d398390c245e82838952322",
+        "date": "2026-04-16T09:42:54-05:00",
+        "role": "Developer D",
+        "subject": "docs: update version references to 2.0.0"
+      },
+      {
+        "sha": "73ccc35181c9a5bf9960bb7e1e64685fd23b2723",
+        "date": "2026-04-16T09:06:56-05:00",
+        "role": "Developer D",
+        "subject": "chore: release v2.0.0 ΓÇö Harness Runtime"
+      },
+      {
+        "sha": "1b2e2f55d2d6e13d57280183bc911defbc51ff4e",
+        "date": "2026-04-16T08:27:06-05:00",
+        "role": "Developer D",
+        "subject": "fix: restore pyproject.toml corrupted by test fixture commits"
+      },
+      {
+        "sha": "c493950742317ef40cc3670abeb370f1d31cc4e6",
+        "date": "2026-04-15T21:01:10-05:00",
+        "role": "Developer A",
+        "subject": "Merge pull request #24 from markhazleton/harness_validation"
+      },
+      {
+        "sha": "959a0f2552a2cb2ffa065a65b3b2d5d4d97c876f",
+        "date": "2026-04-15T20:48:42-05:00",
+        "role": "Developer D",
+        "subject": "test(harness): add contract tests and implementation plan for v2 features"
+      },
+      {
+        "sha": "0e46f8c9ac6eca2f41a6bb91d2c1331b7075919f",
+        "date": "2026-04-15T20:48:33-05:00",
+        "role": "Developer D",
+        "subject": "feat(harness): add --mode flag to harness run and harness replay command"
+      },
+      {
+        "sha": "9d7a883438afbdd711decf0c73df1fc2befef3a5",
+        "date": "2026-04-15T20:48:26-05:00",
+        "role": "Developer D",
+        "subject": "feat(harness): wire ArtifactDelta tracking, execution_mode, deterministic-first ordering, and replay"
+      },
+      {
+        "sha": "2cf885c8e24bce2d9147770c652d006f715b2392",
+        "date": "2026-04-15T20:48:06-05:00",
+        "role": "Developer D",
+        "subject": "feat(harness): add context_budget enforcement and plan-mode prefix to adapters"
+      },
+      {
+        "sha": "9f09c7291e5530a3c217364b69d590fe8cddc3e0",
+        "date": "2026-04-15T20:47:58-05:00",
+        "role": "Developer D",
+        "subject": "feat(harness): add llm.rubric rule, plan-mode skip, and enabled flag to validation engine"
+      },
+      {
+        "sha": "ae4682c0794459595ccb1a10fc7f5799896c37aa",
+        "date": "2026-04-15T20:47:49-05:00",
+        "role": "Developer D",
+        "subject": "feat(harness): extend spec models for v2 features"
+      },
+      {
+        "sha": "b28fcbd05df62213924f88096ea0fa34e0018483",
+        "date": "2026-04-15T08:22:33-05:00",
+        "role": "Developer D",
+        "subject": "update powershell scripts for relasse history"
+      },
+      {
+        "sha": "0c28ae4022c253afe64a71d102923cf870fadf02",
+        "date": "2026-04-15T08:17:00-05:00",
+        "role": "Developer D",
+        "subject": "Initial"
+      },
+      {
+        "sha": "662f9e036c97b39e7e4b4bf6cdc1fde3b868b553",
+        "date": "2026-04-15T08:06:15-05:00",
+        "role": "Developer V",
+        "subject": "Initial release inputs (#22)"
+      },
+      {
+        "sha": "1a40ed7e6012fc27a515c9327bfd17b123b2c1f5",
+        "date": "2026-04-15T08:06:15-05:00",
+        "role": "Developer V",
+        "subject": "Archive completed release inputs ( #22 )"
+      },
+      {
+        "sha": "478c25b5b81aac930edeb8f4e2c86e80f443a8e3",
+        "date": "2026-04-15T07:01:49-05:00",
+        "role": "Developer A",
+        "subject": "Merge pull request #22 from markhazleton/002-harness-runtime"
+      },
+      {
+        "sha": "129b2aa277d789039f0b42625752007b7e5618c4",
+        "date": "2026-04-15T06:54:15-05:00",
+        "role": "Developer A",
+        "subject": "Fix markdownlint failures on harness branch"
+      },
+      {
+        "sha": "f10d5bfa79ada0c129848cf826223cc771c590b6",
+        "date": "2026-04-15T06:36:42-05:00",
+        "role": "Developer A",
+        "subject": "Remove video link from README.md"
+      },
+      {
+        "sha": "6413574919f2acdef15520cbbd6efb8e1efdaa8f",
+        "date": "2026-04-15T06:35:25-05:00",
+        "role": "Developer A",
+        "subject": "Refresh documentation for harness runtime"
+      },
+      {
+        "sha": "5cdff514ba975706a4a548c3fcd3b76ad58c845a",
+        "date": "2026-04-14T20:39:10-05:00",
+        "role": "Developer A",
+        "subject": "Fix harness runtime review findings"
+      },
+      {
+        "sha": "24ab87d52581296d34aa0dc09e60a12207bde4a4",
+        "date": "2026-04-14T20:35:12-05:00",
+        "role": "Developer A",
+        "subject": "PR review"
+      },
+      {
+        "sha": "99da2cacd3f9f4fda14b452df2473b0ed8007990",
+        "date": "2026-04-14T20:07:24-05:00",
+        "role": "Developer A",
+        "subject": "Mark harness runtime feature complete"
+      },
+      {
+        "sha": "a7ce657bb12edf0a7e0c259b0482d144d8c1193f",
+        "date": "2026-04-14T20:07:21-05:00",
+        "role": "Developer A",
+        "subject": "Add real harness adapters and registry wiring"
+      },
+      {
+        "sha": "b4bb347393a535edd82502b7dc8b23a7194383b1",
+        "date": "2026-04-14T20:07:17-05:00",
+        "role": "Developer A",
+        "subject": "Remove tracked harness run artifacts"
+      },
+      {
+        "sha": "c26a7e65a60f71c074c40d489d739be0ec9fbce5",
+        "date": "2026-04-14T18:45:52-05:00",
+        "role": "Developer A",
+        "subject": "feat: Implement harness specification loader and validation engine"
+      },
+      {
+        "sha": "cdd8dd6224d1494e443922c5ced49cb8493485af",
+        "date": "2026-04-14T18:09:02-05:00",
+        "role": "Developer A",
+        "subject": "Refactor harness runtime specifications and improve validation mechanisms"
+      },
+      {
+        "sha": "617aa0b472a978e2daa00b2dabba4f7923ab7b06",
+        "date": "2026-04-14T18:01:47-05:00",
+        "role": "Developer A",
+        "subject": "Add technical risk assessment for DevSpark Harness Runtime"
+      },
+      {
+        "sha": "e2c0f2e1d60afa871e20ca24e9e284ced30edf68",
+        "date": "2026-04-14T17:52:34-05:00",
+        "role": "Developer A",
+        "subject": "Add DevSpark Harness Runtime Tasks Documentation"
+      },
+      {
+        "sha": "3bcda9740910109a73b11c802d9ccf076e23f9b1",
+        "date": "2026-04-14T15:40:39-05:00",
+        "role": "Developer A",
+        "subject": "Share spec validation contract across workflows"
+      },
+      {
+        "sha": "23f9d5510e637796ba8e90835e75af2d702ee2cf",
+        "date": "2026-04-14T15:40:36-05:00",
+        "role": "Developer A",
+        "subject": "Require clean pushed branches for create-pr"
+      },
+      {
+        "sha": "6e7100e887e3626b0d52d69ae51ab796ca68e18b",
+        "date": "2026-04-14T15:40:34-05:00",
+        "role": "Developer A",
+        "subject": "Unify archive workflow under harvest"
+      },
+      {
+        "sha": "699a964f866e50fe2a22db764e32b38d96c36634",
+        "date": "2026-04-14T06:42:02-05:00",
+        "role": "Developer A",
+        "subject": "docs: refresh repository docs and harvest comments"
+      }
+    ]
+  }
+}

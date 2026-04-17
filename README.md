@@ -245,6 +245,7 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 | Critic guide | [critic-usage.md](.documentation/critic-usage.md) |
 | Harvest guide | [harvest-usage.md](.documentation/harvest-usage.md) |
 | Repo story | [repo-story-usage.md](.documentation/repo-story-usage.md) |
+| Repo story (latest) | [repo-story-2026-04-17.md](.documentation/repo-story/repo-story-2026-04-17.md) |
 
 ---
 
