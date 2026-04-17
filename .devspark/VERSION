@@ -1,0 +1,4 @@
+version: 2.0.0
+installed: 2026-04-17
+method: source-dogfood
+note: Shims point directly at templates/commands/ source files — no .devspark/defaults/ copy needed
