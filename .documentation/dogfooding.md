@@ -1,38 +1,71 @@
 # Dogfooding DevSpark
 
-How we set up the DevSpark source repository to use its own spec-driven workflow — always running against the latest source version of every prompt and script.
+How we set up the DevSpark source repository to use its own spec-driven workflow — and what happens when your development process tool becomes both the product and the workbench.
 
-## The Problem
+## Eating Your Own Dog Food
 
-DevSpark's normal install process copies stock prompts from `templates/commands/` into `.devspark/defaults/commands/` with a `devspark.` prefix. Agent shims then resolve through a 3-tier override chain:
+The term "dogfooding" has been floating around the software industry since at least 1988, when Microsoft manager Paul Maritz sent an email titled "Eating our own Dogfood" urging the company to increase internal use of its own products. The origin story people love to tell is that it came from a Kal Kan pet food executive who supposedly ate his own company's dog food at shareholder meetings to prove its quality. Whether that's true or apocryphal, the metaphor stuck.
 
-1. `.documentation/{user}/commands/devspark.{name}.md` (personal override)
-2. `.documentation/commands/devspark.{name}.md` (team override)
-3. `.devspark/defaults/commands/devspark.{name}.md` (stock default)
+Over the decades, the practice has gone by many names:
 
-This works great for consumer repos, but in the DevSpark source repo it creates two problems:
+- **Eating your own dog food** — The original, still the most common. Blunt. Effective.
+- **Drinking your own champagne** — The optimistic European rebrand. Same idea, better taste.
+- **Icecreaming** — Google's preferred term for a while, because who wants to think about dog food?
+- **Eating your own cooking** — The polite version you use in executive presentations.
+- **Self-hosting** — The compiler community's term, where building a compiler with itself is a rite of passage.
+- **Bootstrapping** — Related but distinct. When a system can build itself from scratch, like a compiler that compiles its own source code.
 
-- **Stale copies** — Every prompt edit in `templates/commands/` would need to be mirrored to `.devspark/defaults/commands/`. Forget once and you're testing yesterday's prompt.
-- **Override shadowing** — Personal or team overrides would shadow the source files you're actively developing, hiding bugs in the actual product.
+The core idea is always the same: if you won't use your own product, why should anyone else?
 
-## The Solution: Source-Direct Shims
+## Building the Plane While Flying It
 
-Instead of copying files, every agent shim points directly at the source:
+Remember those old EDS commercials? A team of engineers rebuilding a fighter jet's engine mid-flight, swapping out parts while the plane screams through the sky. The tagline was something like "We solve complex problems." It was absurd. It was memorable. And it's a surprisingly good metaphor for what happens when you try to use a development tool to develop that same tool.
 
-### GitHub Copilot (`.github/agents/`)
+Here's the fundamental tension: DevSpark is a spec-driven development workflow. It has 27 commands that guide you from feature specification through implementation, review, and release. When we decided to use DevSpark to build DevSpark, we immediately hit a question that doesn't come up in normal projects:
+
+**Which version of the tool are you using — the one you shipped, or the one you're changing right now?**
+
+In most dogfooding scenarios, this isn't complicated. Microsoft uses Windows to build Windows, but the Windows build system is a separate thing from the product. Slack uses Slack for internal communication, but the act of sending messages doesn't modify Slack's source code. The tool and the product occupy different layers.
+
+DevSpark doesn't have that luxury. The prompts ARE the product. When you type `@devspark.specify` to write a spec for a new DevSpark feature, the prompt that runs is the exact same file you might be editing. Change a word in the prompt template, and the next time you invoke the command, you get the new behavior. There's no build step, no compilation, no deployment pipeline between "edit" and "experience."
+
+It's like being the pilot AND the mechanic AND the engine designer, all at 30,000 feet.
+
+## The Meta Challenges
+
+### The Stale Copy Trap
+
+DevSpark's normal install process copies stock prompts into `.devspark/defaults/commands/`. For consumer repos, this is perfect — you get a stable snapshot of the framework. But in the source repo, those copies become a trap. Edit `templates/commands/specify.md` to improve the spec workflow, forget to re-copy it to `.devspark/defaults/commands/devspark.specify.md`, and suddenly you're testing yesterday's prompt while thinking you're testing today's. You fix a bug, it still fails, and you spend twenty minutes debugging code that was already correct because the old prompt was still running.
+
+We've all been there with other tools. "Did you rebuild?" "Did you restart the server?" "Are you sure you're hitting the right endpoint?" Stale copies are a universal developer experience, and in a prompt-driven system they're invisible — there's no compiler error, no 404, just subtly different behavior.
+
+### The Override Paradox
+
+DevSpark has a clever 3-tier override system. Personal overrides shadow team overrides, which shadow stock defaults. Great for customization. Terrible for dogfooding. If someone creates a personal override to test a prompt variation, they're no longer testing the source. Worse, they might not realize it. The override system is doing exactly what it's designed to do — it's just doing it at the worst possible time.
+
+### The "Upgrade Yourself" Impossibility
+
+DevSpark has an `upgrade` command that checks your installed version against the latest release and refreshes framework files. In the source repo, this is philosophically incoherent. You can't upgrade to the latest version when you ARE the latest version. Running it would either do nothing (confusing) or overwrite source files with their own copies (destructive and pointless).
+
+### The Chicken-and-Egg Spec Problem
+
+Want to use `/devspark.specify` to write a spec for improving `/devspark.specify`? That's perfectly valid — and perfectly recursive. The spec you write will be guided by the current version of the specify prompt. If the specify prompt has a flaw you're trying to fix, the spec it generates might inherit that flaw. You're using a broken tool to write the repair manual for the broken tool.
+
+This isn't theoretical. It happens. The solution is awareness: know that the output is shaped by the current prompt, review it with fresh eyes, and don't trust the tool more than your own judgment.
+
+## Our Solution: Cut the Indirection
+
+The answer turned out to be simple: stop pretending this is a consumer repo.
+
+Instead of copying prompts into `.devspark/defaults/commands/` and running them through the override chain, every agent shim in the DevSpark source repo points directly at the source file:
+
+**GitHub Copilot** (`.github/agents/devspark.specify.agent.md`):
 
 ```markdown
----
-name: devspark.specify
-description: Create or update the feature specification...
----
-
 Read and follow the instructions in `templates/commands/specify.md` exactly.
 ```
 
-No 3-tier resolution. No `.devspark/defaults/commands/` directory. The shim reads the source file directly.
-
-### Claude Code (`.claude/commands/`)
+**Claude Code** (`.claude/commands/devspark.specify.md`):
 
 ```markdown
 Read and follow the instructions in `templates/commands/specify.md` exactly.
@@ -40,64 +73,46 @@ Read and follow the instructions in `templates/commands/specify.md` exactly.
 User input: $ARGUMENTS
 ```
 
-Same pattern — delegates to the source template and passes through user arguments.
+No override chain. No copied files. No indirection. Edit `templates/commands/specify.md`, invoke `@devspark.specify`, and you're running the code you just wrote. The feedback loop is as tight as it can possibly be.
 
-### Scripts
+### What We Didn't Create
 
-The `.vscode/settings.json` auto-approves scripts from `scripts/` (the source location), not `.devspark/scripts/`:
-
-```json
-{
-    "chat.tools.terminal.autoApprove": {
-        "scripts/bash/": true,
-        "scripts/powershell/": true
-    }
-}
-```
-
-## What We Skipped
-
-The following directories are **not needed** in the source repo:
-
-| Directory | Why it's absent |
-|-----------|----------------|
+| Directory | Why it doesn't exist here |
+|-----------|--------------------------|
 | `.devspark/defaults/commands/` | Shims point at `templates/commands/` directly |
-| `.devspark/scripts/` | Scripts live at `scripts/` (the source location) |
-| `.devspark/templates/` | Templates live at `templates/` (the source location) |
+| `.devspark/scripts/` | Scripts live at `scripts/` (the source) |
+| `.devspark/templates/` | Templates live at `templates/` (the source) |
 
 Only `.devspark/VERSION` and `.devspark/schemas/` exist — metadata that doesn't duplicate source content.
 
-## Guard Clauses
+### Commands That Got a Bouncer
 
-Six commands are nonsensical in the source repo. Their shims display a **STOP** message with an explanation and redirect:
+Six commands don't make sense in the source repo. Rather than let them run and cause confusion, we gave them guard clauses — a **STOP** message that explains why and points you to the right alternative:
 
-| Command | Why blocked | Redirect |
-|---------|-------------|----------|
-| `upgrade` | You ARE the latest version by definition | Edit `CHANGELOG.md` and `.devspark/VERSION` directly |
-| `personalize` | Overrides would shadow source prompts | Edit `templates/commands/{name}.md` directly |
-| `add-application` | DevSpark is not a multi-app monorepo | Use `tests/fixtures/` or `examples/todo-app/` to test |
-| `list-applications` | Same as above | Same as above |
-| `discover-constitution` | The constitution already exists as the authoritative source | Use `evolve-constitution` or edit directly |
-| `archive` | Deprecated alias | Use `harvest` instead |
+| Command | Why it's blocked | What to do instead |
+|---------|-----------------|-------------------|
+| `upgrade` | You ARE the latest version | Edit `CHANGELOG.md` and `.devspark/VERSION` |
+| `personalize` | Overrides would shadow source | Edit `templates/commands/{name}.md` directly |
+| `add-application` | Not a multi-app monorepo | Test with `tests/fixtures/` or `examples/todo-app/` |
+| `list-applications` | Same | Same |
+| `discover-constitution` | Constitution already exists as the source | Use `evolve-constitution` or edit directly |
+| `archive` | Deprecated | Use `harvest` |
 
-The remaining 21 commands work normally and resolve to source.
+The remaining 21 commands work normally, resolving straight to source.
 
-## Steps We Took
+## Living With the Recursion
 
-1. **Removed duplicate framework files** — Deleted `.devspark/defaults/commands/`, `.devspark/scripts/`, and `.devspark/templates/` which were copies of the source
-2. **Created Copilot agent shims** — 27 files in `.github/agents/devspark.*.agent.md`, each pointing at `templates/commands/{name}.md`
-3. **Created Copilot prompt shims** — 27 companion files in `.github/prompts/devspark.*.prompt.md`
-4. **Created Claude Code commands** — 27 files in `.claude/commands/devspark.*.md` with `$ARGUMENTS` passthrough
-5. **Added guard clauses** — 6 commands blocked with STOP messages in both Copilot and Claude shims
-6. **Updated `CLAUDE.md`** — Added dogfooding note explaining source-direct resolution
-7. **Updated `.gitignore`** — Added `!.vscode/settings.json` exception so Copilot settings are tracked
-8. **Wrote `.devspark/VERSION`** — Stamped with `method: source-dogfood`
+Dogfooding DevSpark hasn't been a one-time setup. It's an ongoing practice that surfaces issues you'd never find from the outside:
 
-## The Result
+- **Prompt wording matters more than you think.** When you're the one following your own instructions, you notice every ambiguous phrase, every missing context hint, every assumption that made sense when you wrote it but confuses the agent in practice.
+- **The constitution is real.** DevSpark's constitution defines non-negotiable principles. When you're using the tool to build the tool, constitutional violations are immediately obvious — you feel them in your workflow, not just in a review checklist.
+- **Guard clauses teach by blocking.** Every time someone hits a STOP message, they learn something about the difference between the source repo and a consumer repo. That distinction matters for contributors.
 
-When you type `@devspark.specify` (Copilot) or `/devspark.specify` (Claude Code), the agent reads `templates/commands/specify.md` — the exact file you're editing. Change a prompt, use it immediately, see the result. True dogfooding.
+The EDS tagline was right, if a bit dramatic. We are building the plane while flying it. The trick is making sure every bolt you replace is the one that's actually installed, not a copy you made last week.
 
 ## Consumer Repos vs. Source Repo
+
+For reference, here's how resolution differs:
 
 | Aspect | Consumer repo | DevSpark source repo |
 |--------|--------------|---------------------|
