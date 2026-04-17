@@ -1,1 +1,5 @@
-../../templates/commands/discover-constitution.md
+**STOP — This is the DevSpark source repository.**
+
+The constitution already exists at `.documentation/memory/constitution.md` and IS the authoritative source. The `discover-constitution` command is designed for repos that don't have one yet.
+
+To update the constitution, edit `.documentation/memory/constitution.md` directly or use `/devspark.evolve-constitution`.
