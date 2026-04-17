@@ -6,6 +6,10 @@ Spec-driven development process for AI coding assistants. Just markdown files �
 
 Read `.documentation/memory/constitution.md` before making changes — it defines non-negotiable principles.
 
+## Dogfooding Note
+
+This IS the DevSpark source repo. All `/devspark.*` commands resolve directly to `templates/commands/` — the source prompts you are iterating on. There is no `.devspark/defaults/commands/` copy. Edits to prompts take effect immediately.
+
 ## Repository Structure
 
 - `templates/commands/` — 27 slash-command prompt files (the product)
