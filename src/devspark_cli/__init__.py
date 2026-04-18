@@ -2072,7 +2072,22 @@ def uninstall(
     console.print()
 
 
+def build_app():
+    """Construct (and return) the Typer app with all subcommands registered.
+
+    Tests use this to invoke the CLI without triggering ``app()``.
+    Idempotent: repeated calls do not re-register commands.
+    """
+    if getattr(app, "_devspark_run_commands_registered", False):
+        return app
+    from .run_commands import register as _register_run_commands
+    _register_run_commands(app)
+    app._devspark_run_commands_registered = True  # type: ignore[attr-defined]
+    return app
+
+
 def main():
+    build_app()
     app()
 
 if __name__ == "__main__":

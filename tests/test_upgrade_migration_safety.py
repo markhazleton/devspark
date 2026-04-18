@@ -101,7 +101,40 @@ def main() -> None:
         assert len(analysis["script_overrides"]) == 2
         assert len(analysis["structural_overrides"]) == 1
 
+    # T065: install/upgrade flows MUST never write under .documentation/telemetry/
+    # or any other .documentation/ subpath that the user owns.
+    #
+    # Note: This guards INSTALL and UPGRADE only. Runtime workflow execution
+    # IS allowed to write under .documentation/telemetry/{workflow-events.jsonl,runs/}
+    # per spec Assumptions and constitution §III commentary. The runner's
+    # writes are a normal product artifact, not a migration step.
+    _assert_install_upgrade_never_writes_under_documentation()
+
     print("Upgrade migration safety validated.")
+
+
+def _assert_install_upgrade_never_writes_under_documentation() -> None:
+    """Static-grep the install/upgrade code paths to confirm they don't
+    target ``.documentation/`` for writes.
+
+    Uses a deliberately narrow inspection: the inference / commands modules
+    must not emit ``.documentation/telemetry`` or ``.documentation/runs``
+    paths during install or upgrade. They MAY mention ``.documentation/``
+    for migration *reads* and for the constitution path; we look only for
+    write-target patterns.
+    """
+    cli_dir = ROOT / "src" / "devspark_cli"
+    forbidden = (".documentation/telemetry", ".documentation\\telemetry", ".documentation/runs")
+    offenders: list[str] = []
+    for py in cli_dir.glob("*.py"):
+        text = py.read_text(encoding="utf-8")
+        for token in forbidden:
+            if token in text:
+                offenders.append(f"{py.name} contains {token!r}")
+    assert not offenders, (
+        "install/upgrade code must not target .documentation/telemetry or "
+        f".documentation/runs: {offenders}"
+    )
 
 
 if __name__ == "__main__":
