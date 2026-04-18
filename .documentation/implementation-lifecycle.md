@@ -8,7 +8,7 @@ Advanced option: CLI automation when you explicitly want terminal-driven operati
 ## Lifecycle at a Glance
 
 1. Bootstrap with quickstart prompt (no CLI)
-2. Run the implementation workflow (`/devspark.constitution` -> `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement` -> `/devspark.create-pr` -> `/devspark.pr-review`)
+2. Run the implementation workflow (`/devspark.constitution` -> `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement` -> `/devspark.create-pr` -> `/devspark.pr-review` -> `/devspark.address-pr-review` -> `/devspark.pr-review UPDATE`)
 3. Maintain with the remote upgrade prompt (no CLI)
 4. Use CLI only for advanced automation
 
@@ -38,7 +38,9 @@ After bootstrap, run the standard implementation lifecycle in chat:
 7. `/devspark.implement`
 8. `/devspark.create-pr`
 9. `/devspark.pr-review`
-10. Merge PR after approval
+10. `/devspark.address-pr-review` (author-side fix loop when findings are open)
+11. `/devspark.pr-review UPDATE`
+12. Merge PR after approval
 
 ### Route-Aware Intake
 
@@ -62,7 +64,9 @@ Every spec has a `**Status**:` field that tracks where it is in the lifecycle. S
 /devspark.implement   -->  Status: In Progress (at start)
                       -->  Status: Complete   (when all tasks marked [X])
 /devspark.create-pr   -->  Draft or update the PR using spec, task, and gate context
-/devspark.pr-review   -->  Blocks APPROVE unless Complete + all tasks done
+/devspark.pr-review   -->  Reviewer findings and disposition
+/devspark.address-pr-review -->  Author applies fixes with commit-isolation gates
+/devspark.pr-review UPDATE -->  Focused re-review against latest fix iteration
 /devspark.release     -->  Archives only Complete specs
 ```
 
@@ -90,7 +94,7 @@ A typical sprint follows this pattern:
 ```text
 +--- Repeat per feature (N times during sprint) ------+
 |  /specify -> /clarify -> /plan -> /tasks -> /implement |
-|  -> git push -> /devspark.create-pr -> /devspark.pr-review -> merge |
+|  -> git push -> /devspark.create-pr -> /devspark.pr-review -> /devspark.address-pr-review -> /devspark.pr-review UPDATE -> merge |
 +--------------------------------------------------------+
                          |
                     (end of sprint)

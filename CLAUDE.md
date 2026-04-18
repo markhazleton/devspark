@@ -12,7 +12,7 @@ This IS the DevSpark source repo. All `/devspark.*` commands resolve directly to
 
 ## Repository Structure
 
-- `templates/commands/` — 27 slash-command prompt files (the product)
+- `templates/commands/` — 28 slash-command prompt files (the product)
 - `scripts/` — Context-gathering scripts (PowerShell + Bash)
 - `src/devspark_cli/` — Optional CLI for automated setup
 - `quickstart/` — Agent-specific bootstrap guides
@@ -28,6 +28,7 @@ Use `/devspark.{command}` to invoke workflows:
 - `/devspark.implement` — Execute tasks
 - `/devspark.create-pr` — Draft or update a pull request
 - `/devspark.pr-review` — Constitution-based PR review
+- `/devspark.address-pr-review` — Author-side PR review remediation with commit-isolation gates
 - `/devspark.quickfix` — Lightweight bug fix workflow
 - `/devspark.add-application` — Register app in multi-app registry (optional)
 - `/devspark.list-applications` — Display registered applications (optional)

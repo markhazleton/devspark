@@ -10,7 +10,7 @@
     <a href="https://markhazleton.github.io/devspark/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
-> **Not a program. Not a subscription.** Copy 27 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 28 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
 
 ---
 
@@ -19,7 +19,7 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 27 slash-command prompt files (THE PRODUCT)
+├── templates/commands/   ← 28 slash-command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── src/devspark_cli/     ← Optional CLI for automated setup
 └── .documentation/       ← Guides, media, and GitHub Pages site
@@ -71,9 +71,11 @@ devspark adapter list
 
 For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/implementation-lifecycle.md).
 
+Recommended review loop: `specify → implement → pr-review → address-pr-review → pr-review UPDATE → merge`.
+
 ## Harness Runtime
 
-DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 27 slash commands and is available when you install the optional CLI or work from a compatible source checkout.
+DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 28 slash commands and is available when you install the optional CLI or work from a compatible source checkout.
 
 The harness runtime adds:
 
@@ -108,6 +110,7 @@ See [Harness Engineering](.documentation/harness-engineering.md) for the runtime
 | Command | Purpose |
 |---------|---------|
 | `/devspark.pr-review` | [Constitution-based PR review](.documentation/pr-review-usage.md) |
+| `/devspark.address-pr-review` | Apply PR review fixes with mandatory commit isolation gates |
 | `/devspark.site-audit` | [Comprehensive codebase audit](.documentation/site-audit-usage.md) |
 | `/devspark.quickfix` | Lightweight workflow for bug fixes |
 | `/devspark.critic` | [Adversarial risk analysis](.documentation/critic-usage.md) |
