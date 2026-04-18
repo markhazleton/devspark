@@ -27,7 +27,17 @@ devspark/
 
 ## Get Started
 
-DevSpark has one entry command for new work: `/devspark.specify`. It classifies the request as a one-off fix, a quick spec, or a full spec, explains the recommendation, and lets the human confirm the route before proceeding.
+DevSpark v2 ships three flagship aliases that are the recommended entrypoints for every new feature. Run them via `devspark run <alias>` (or your agent's `/devspark.run` slash command):
+
+| Alias | What it runs |
+|-------|--------------|
+| `create-spec` | `specify → plan → tasks → analyze` (pauses after analyze for review) |
+| `execute-plan` | `implement → create-pr → pr-review` (pauses after create-pr) |
+| `suggest-improvement` | `capture-context → classify-improvement → create-issue` (files an issue against `markhazleton/devspark`) |
+
+See [.documentation/workflows/getting-started.md](.documentation/workflows/getting-started.md) for the full walkthrough.
+
+For one-off work outside a workflow, the legacy entry command remains: `/devspark.specify`. It classifies the request as a one-off fix, a quick spec, or a full spec, explains the recommendation, and lets the human confirm the route before proceeding.
 
 **Option A — Agent Quickstart** (recommended — no install)
 
