@@ -5,6 +5,7 @@
 **Input**: Design documents from `.documentation/specs/002-harness-runtime/`
 **Branch**: `002-harness-runtime`
 **Prerequisites**: plan.md ✓, spec.md ✓, data-model.md ✓, contracts/ ✓, research.md ✓
+**Status**: Complete — Merged. All 32 tasks delivered across PR [#22](https://github.com/markhazleton/devspark/pull/22) (v1, 2026-04-15) and PR [#24](https://github.com/markhazleton/devspark/pull/24) (v2 validation enhancements, 2026-04-16).
 
 **Contract tests**: Included — existing repo pattern; each phase ships its own standalone contract test script.
 

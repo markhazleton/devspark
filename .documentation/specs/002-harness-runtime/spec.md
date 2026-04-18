@@ -13,7 +13,8 @@ required_gates: checklist, analyze, critic
 
 **Feature Branch**: `002-harness-runtime`
 **Created**: 2026-04-14
-**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
+**Status**: Complete — Merged
+**Merged**: PR [#22](https://github.com/markhazleton/devspark/pull/22) (v1 runtime, 2026-04-15) · PR [#24](https://github.com/markhazleton/devspark/pull/24) (v2 validation enhancements, 2026-04-16)
 **Input**: User description: "DevSpark Harness Runtime — an additive, spec-driven orchestration engine that extends the existing DevSpark CLI without changing any existing behavior."
 
 ## Rationale Summary
