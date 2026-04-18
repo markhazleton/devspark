@@ -35,6 +35,13 @@ Complexity must be justified and tracked. Reject abstractions that serve only on
 Bash and PowerShell script behavior must remain functionally equivalent.
 Packaged templates, quickstarts, and CLI behavior must stay aligned with source templates.
 
+### VII. PR Review Artifact Commit Discipline (MUST)
+
+The PR review file (`.documentation/specs/pr-review/pr-NNN.md`) MUST be committed in isolation.
+A commit that touches the review file must not include production code, tests, or other docs.
+Code fixes and review-file updates must land in separate commits so revision diffs remain auditable.
+Violations are MEDIUM severity process findings in PR review.
+
 ## Additional Constraints
 
 - Python 3.11+ for CLI code, typed with typer/rich/click
@@ -55,4 +62,4 @@ This constitution supersedes all other development practices in the DevSpark rep
 Amendments require: documentation of the change, leadership approval, and a migration plan for any
 affected workflows or repositories.
 
-**Version**: 1.0.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-06
+**Version**: 1.1.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-18
