@@ -100,6 +100,7 @@ $openFindings = New-Object System.Collections.Generic.List[object]
 
 for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
+    # Severity prefixes mirror /devspark.pr-review finding IDs: C, H, M, L, CON.
     if ($line -match '^\s*-\s*\[\s\]\s+\*\*((C|H|M|L|CON)-\d{2})\*\*') {
         $findingId = $matches[1]
         $severity = $matches[2]
