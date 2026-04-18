@@ -7,9 +7,9 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.1.0] - 2026-04-18 — Workflow Engine Foundation
 
-**Interactive analyze flow + workflow runner foundation (spec 001-interactive-analyze-flow).**
+**Interactive analyze flow + tiered workflow runner foundation (spec 001-interactive-analyze-flow).**
 
 ### Added
 
@@ -27,10 +27,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lint hardening on PR-touched files (MD047 / MD036 / MD001 markdown rules + pyflakes)
 - Bash shim generator aligned to single backticks for consistent code-fence output
 
+### Architectural Decisions
+
+- **ADR-001**: Tiered Prompt and Workflow Architecture — see [.documentation/decisions/ADR-001.md](.documentation/decisions/ADR-001.md)
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test (CI identity)
+- copilot-swe-agent[bot]
+
 ### Notes
 
-- Spec 002 (Harness Runtime) shipped in [2.0.0] above; this `[Unreleased]` block harvests spec 001.
-- Both source specs archived under `.archive/2026-04-18/.documentation/specs/`.
+- Spec 002 (Harness Runtime) shipped in [2.0.0] above; this entry harvests spec 001.
+- Both source specs archived under `.documentation/releases/v2.1.0/specs/` (and originally to `.archive/2026-04-18/`).
 
 ## [2.0.0] - 2026-04-16 — Harness
 
