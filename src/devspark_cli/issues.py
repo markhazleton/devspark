@@ -61,25 +61,25 @@ def build_payload(proposal: IssueProposal) -> dict:
     body_lines = [
         f"> Filed by `/devspark.suggest-improvement` (workflow run `{proposal.run_id or 'n/a'}`)",
         "",
-        "### Classification",
+        "## Classification",
         "",
         f"`{proposal.classification}`",
         "",
-        "### Context",
+        "## Context",
         "",
         proposal.context.strip(),
         "",
-        "### Current behavior",
+        "## Current behavior",
         "",
         proposal.current_behavior.strip(),
         "",
-        "### Expected behavior",
+        "## Expected behavior",
         "",
         proposal.expected_behavior.strip(),
         "",
     ]
     if proposal.suggested_fix:
-        body_lines += ["### Suggested fix", "", proposal.suggested_fix.strip(), ""]
+        body_lines += ["## Suggested fix", "", proposal.suggested_fix.strip(), ""]
     return {
         "title": title,
         "body": "\n".join(body_lines),

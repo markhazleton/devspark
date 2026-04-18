@@ -28,6 +28,7 @@ Python 3.11+: Follow standard conventions
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
 
+<!-- markdownlint-disable MD012 MD025 -->
 <!-- DEVSPARK SHARED CONTEXT:START -->
 # AGENTS.md
 
@@ -652,4 +653,4 @@ When adding new agents:
 
 *This documentation should be updated whenever new agents are added to maintain accuracy and completeness.*
 <!-- DEVSPARK SHARED CONTEXT:END -->
-
+<!-- markdownlint-enable MD012 MD025 -->

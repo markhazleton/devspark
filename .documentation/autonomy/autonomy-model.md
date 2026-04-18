@@ -56,3 +56,13 @@ Paused. Resume with: devspark resume <workflow_run_id>
 `schema_version` (currently `1`) and the SHA-256 `context_checksum`, and
 continues from `next_step_id` reusing the original `workflow_run_id`. Any
 mismatch exits `EXIT_RESUME_FAILED` (25).
+
+## Performance trade-off
+
+The guardrail enforcer captures a per-step baseline by SHA-1-hashing every
+tracked file (`git ls-files`) before the step runs. On large repositories
+with many short steps this can add measurable latency. As of PR #28 (M-04)
+the enforcer **short-circuits** when no `guardrails` are declared on the
+workflow, so guardrail-free runs incur zero baseline cost. When guardrails
+are declared, accept the per-step hashing cost or scope `restricted_paths`
+narrowly to keep the active set small.

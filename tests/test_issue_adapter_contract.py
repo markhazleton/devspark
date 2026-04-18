@@ -54,12 +54,12 @@ def test_payload_uses_label_from_classification():
     p = build_payload(_proposal(classification="prompt-quality"))
     assert p["labels"] == ["area:prompts"]
     assert "Filed by `/devspark.suggest-improvement`" in p["body"]
-    assert "### Suggested fix" in p["body"]
+    assert "## Suggested fix" in p["body"]
 
 
 def test_payload_omits_suggested_fix_when_absent():
     p = build_payload(_proposal(suggested_fix=None))
-    assert "### Suggested fix" not in p["body"]
+    assert "## Suggested fix" not in p["body"]
 
 
 def test_payload_truncates_title_to_200_chars():
