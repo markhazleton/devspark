@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Interactive Review Remediation Consistency
+# Specification Quality Checklist: Tiered Prompt and Workflow Engine
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-04-18
@@ -34,9 +34,9 @@
 ### Full Spec Required Content
 
 - [x] At least one user story with acceptance scenarios (5 user stories present)
-- [x] At least one edge case bullet (7 edge cases present)
-- [x] At least one functional requirement (35 functional requirements present)
-- [x] At least one measurable success criterion (11 success criteria present)
+- [x] At least one edge case bullet (6 edge cases present)
+- [x] At least one functional requirement (36 functional requirements present)
+- [x] At least one measurable success criterion (10 success criteria present)
 
 ---
 
@@ -67,9 +67,9 @@
 
 ## Feature Readiness
 
-- [x] Functional requirements cover report-only and guided remediation paths
-- [x] User scenarios cover primary author and harness-guided flows
-- [x] Feature supports explicit policy controls before edits
+- [x] Functional requirements cover tiered architecture, workflow orchestration, governance, and migration
+- [x] User scenarios cover primary onboarding, execution, improvement-loop, discoverability, and governance flows
+- [x] Feature supports explicit autonomy policy and observability controls
 - [x] No implementation detail is required to understand the user-facing behavior
 
 ## Validation Result
@@ -78,5 +78,5 @@
 
 ## Notes
 
-- The spec preserves advisory-safe behavior while defining a shared review-remediation contract across clarify, analyze, critic, and pr-review
-- Harness-guided automation is in scope across all three review stages via explicit policy-controlled execution paths
+- The spec defines a tiered architecture shift from prompt-library behavior toward orchestrated workflow execution
+- Backward-compatible slash command access is preserved while aliases/workflows introduce the new adoption layer
