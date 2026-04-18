@@ -7,6 +7,31 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**Interactive analyze flow + workflow runner foundation (spec 001-interactive-analyze-flow).**
+
+### Added
+
+- **Tiered workflow engine** — `loader / executor / telemetry / autonomy` modules with full contract test coverage
+- **`devspark run / resume / workflows / runs / help` CLI subcommands** for running, resuming, and inspecting workflow executions
+- **GitHub issue adapter** for issue-as-task workflows (`devspark.taskstoissues` integration)
+- **Workflow YAML aliases**: `create-spec`, `execute-plan`, `suggest-improvement` with backing `templates/workflows/*.yaml`
+- **28 legacy atomic shims** auto-generated from canonical command prompts, plus 4 new improvement-loop atomic prompts
+- **`/devspark.address-pr-review` command** — author-side PR review remediation with commit-isolation gates (Constitution Principle VII)
+- **Shared Review Resolution Contract** — consistent resolution output across 5 review commands (`pr-review`, `address-pr-review`, `analyze`, `critic`, `clarify`)
+- **Comprehensive v2 documentation** — `getting-started.md`, `architecture.md`, `autonomy.md`, `improvement-loop.md`, `threat-model.md`, plus updated entrypoints
+
+### Changed
+
+- Lint hardening on PR-touched files (MD047 / MD036 / MD001 markdown rules + pyflakes)
+- Bash shim generator aligned to single backticks for consistent code-fence output
+
+### Notes
+
+- Spec 002 (Harness Runtime) shipped in [2.0.0] above; this `[Unreleased]` block harvests spec 001.
+- Both source specs archived under `.archive/2026-04-18/.documentation/specs/`.
+
 ## [2.0.0] - 2026-04-16 — Harness
 
 **Major release: DevSpark Harness Runtime — a declarative, adapter-driven execution engine that turns YAML specs into reproducible, validated AI-agent workflows.**
