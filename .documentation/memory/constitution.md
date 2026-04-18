@@ -19,6 +19,16 @@ Ambiguous context must produce a clear error, not a guess.
 removes. `.documentation/` directories at repo and app level are repository-owned work product.
 Install and upgrade flows must never add, remove, or modify files under any `.documentation/` directory.
 
+Runtime tooling MAY write under a gitignored subtree of `.documentation/` (for example,
+`.documentation/telemetry/`) provided **all** of the following hold:
+
+- the destination subtree is covered by `.gitignore`;
+- the path is overridable via an environment variable (e.g., `DEVSPARK_TELEMETRY_PATH`,
+  `DEVSPARK_RUNS_PATH`);
+- the writer is fail-soft on I/O errors and never blocks the developer's workflow.
+
+Install and upgrade flows are still strictly forbidden from touching any path under `.documentation/`.
+
 ### IV. Governance Authority
 
 Repository-wide governance is authoritative over all applications.
@@ -62,4 +72,4 @@ This constitution supersedes all other development practices in the DevSpark rep
 Amendments require: documentation of the change, leadership approval, and a migration plan for any
 affected workflows or repositories.
 
-**Version**: 1.1.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-18
+**Version**: 1.2.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-18

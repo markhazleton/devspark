@@ -337,6 +337,14 @@ Confirm the installation:
 
 Tell the user: type `@devspark.specify` (or any command) in Copilot Chat to start using DevSpark.
 
+Recommended next step (DevSpark v2): use one of the three flagship aliases as the entrypoint for new work:
+
+- `@devspark.run create-spec` — `specify → plan → tasks → analyze` with a pause for review.
+- `@devspark.run execute-plan` — `implement → create-pr → pr-review` with a pause after the PR opens.
+- `@devspark.run suggest-improvement` — file a workflow/prompt improvement against `markhazleton/devspark`.
+
+See `.documentation/workflows/getting-started.md` for the full walkthrough.
+
 Add maintenance guidance (prompt-first):
 
 - Basic (recommended): run the remote upgrade prompt in chat

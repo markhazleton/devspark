@@ -22,6 +22,14 @@ This IS the DevSpark source repo. All `/devspark.*` commands resolve directly to
 
 Use `/devspark.{command}` to invoke workflows:
 
+### Flagship aliases (recommended entrypoints, v2)
+
+- `/devspark.run create-spec` — `specify → plan → tasks → analyze` (pauses after analyze)
+- `/devspark.run execute-plan` — `implement → create-pr → pr-review` (pauses after create-pr)
+- `/devspark.run suggest-improvement` — file an improvement issue in `markhazleton/devspark`
+
+### Atomic prompts
+
 - `/devspark.specify` — Define requirements and user stories
 - `/devspark.plan` — Create implementation plan
 - `/devspark.tasks` — Break plan into actionable tasks

@@ -350,3 +350,95 @@ def validate_profiles_across_apps(
                 )
 
     return warnings
+
+
+# ---------------------------------------------------------------------------
+# Tiered prompt/workflow/alias resolution (FR-002, FR-005, FR-006)
+# ---------------------------------------------------------------------------
+
+
+def build_atomic_prompt_chain(
+    repo_root: Path,
+    app: AppDefinition | None = None,
+    git_user: str | None = None,
+) -> list[Path]:
+    """Build the atomic-prompt 3-tier resolution chain (personal -> team -> stock).
+
+    1. App team override:  {app.path}/.documentation/templates/prompts/atomic/
+    2. Repo personal:      .documentation/{git-user}/templates/prompts/atomic/
+    3. Repo team override: .documentation/templates/prompts/atomic/
+    4. Stock default:      templates/prompts/atomic/  (workspace) AND .devspark/templates/prompts/atomic/
+    """
+    chain: list[Path] = []
+    if app is not None:
+        chain.append(repo_root / app.path / ".documentation" / "templates" / "prompts" / "atomic")
+    if git_user:
+        chain.append(repo_root / ".documentation" / git_user / "templates" / "prompts" / "atomic")
+    chain.append(repo_root / ".documentation" / "templates" / "prompts" / "atomic")
+    chain.append(repo_root / "templates" / "prompts" / "atomic")
+    chain.append(repo_root / ".devspark" / "templates" / "prompts" / "atomic")
+    return chain
+
+
+def build_workflow_chain(
+    repo_root: Path,
+    app: AppDefinition | None = None,
+    git_user: str | None = None,
+) -> list[Path]:
+    """Build the workflow 3-tier resolution chain."""
+    chain: list[Path] = []
+    if app is not None:
+        chain.append(repo_root / app.path / ".documentation" / "templates" / "workflows")
+    if git_user:
+        chain.append(repo_root / ".documentation" / git_user / "templates" / "workflows")
+    chain.append(repo_root / ".documentation" / "templates" / "workflows")
+    chain.append(repo_root / "templates" / "workflows")
+    chain.append(repo_root / ".devspark" / "templates" / "workflows")
+    return chain
+
+
+def build_alias_chain(
+    repo_root: Path,
+    app: AppDefinition | None = None,
+    git_user: str | None = None,
+) -> list[Path]:
+    """Build the alias 3-tier resolution chain."""
+    chain: list[Path] = []
+    if app is not None:
+        chain.append(repo_root / app.path / ".documentation" / "templates" / "aliases")
+    if git_user:
+        chain.append(repo_root / ".documentation" / git_user / "templates" / "aliases")
+    chain.append(repo_root / ".documentation" / "templates" / "aliases")
+    chain.append(repo_root / "templates" / "aliases")
+    chain.append(repo_root / ".devspark" / "templates" / "aliases")
+    return chain
+
+
+def resolve_atomic_prompt(
+    prompt_id: str,
+    repo_root: Path,
+    app: AppDefinition | None = None,
+    git_user: str | None = None,
+) -> Path | None:
+    """Resolve an atomic prompt id to its first matching path in the 3-tier chain."""
+    return resolve_file(f"{prompt_id}.md", build_atomic_prompt_chain(repo_root, app, git_user))
+
+
+def resolve_workflow(
+    workflow_id: str,
+    repo_root: Path,
+    app: AppDefinition | None = None,
+    git_user: str | None = None,
+) -> Path | None:
+    """Resolve a workflow id to its first matching YAML in the 3-tier chain."""
+    return resolve_file(f"{workflow_id}.yaml", build_workflow_chain(repo_root, app, git_user))
+
+
+def resolve_alias(
+    alias_id: str,
+    repo_root: Path,
+    app: AppDefinition | None = None,
+    git_user: str | None = None,
+) -> Path | None:
+    """Resolve an alias id to its first matching YAML in the 3-tier chain."""
+    return resolve_file(f"{alias_id}.yaml", build_alias_chain(repo_root, app, git_user))

@@ -215,3 +215,20 @@ After producing the report:
 ## Context
 
 {ARGS}
+
+## Shared Review Resolution Contract Output
+
+When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark.address-pr-review, telemetry, harvest) can act on them deterministically:
+
+```yaml
+findings:
+  - finding_id: <stable-id-unique-within-this-command-output>   # e.g., analyze-001, clarify-002
+    severity: critical | high | medium | low
+    description: <1-3 sentence problem statement>
+    recommended_action: <machine-actionable next step>
+    execution_mode: auto | selective | manual
+    status: open                                                  # set to `resolved` after remediation
+    outcome: ""                                                  # populated post-resolution by address-pr-review
+```
+
+inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).

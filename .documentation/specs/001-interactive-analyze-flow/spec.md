@@ -9,63 +9,65 @@ required_gates: checklist, analyze, critic
 
 <!-- markdownlint-disable MD036 -->
 
-# Feature Specification: Interactive Review Remediation Consistency
+# Feature Specification: Tiered Prompt and Workflow Engine
 
 **Feature Branch**: `001-interactive-analyze-flow`
 **Created**: 2026-04-18
-**Status**: Draft <!-- Valid: Draft | In Progress | Complete -->
-**Input**: User description: "update the devspark.analyze process to be more interactive and to actually implmeent the proposed changes after confrimation, this needs to be mroe interactive with an option to just find and fix rather than only advise, this is needed to better automate (using harness engineering) the creation and validation of spec/plan/tasks in a single guided flow."
+**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
+**Input**: User description: "Expand DevSpark from a prompt library into an orchestrated, self-improving workflow system with tiered prompt architecture, workflow definitions, aliases, autonomy controls, observability, CLI UX simplification, prompt metadata, and contribution loops."
 
 ## Rationale Summary
 
 ### Core Problem
 
-DevSpark review prompts are inconsistent across lifecycle stages. `clarify` asks targeted questions and applies changes, while `analyze` and `critic` remain report-only, and `pr-review` creates an advisory document without a built-in resolution loop. This creates different operator expectations at each stage and breaks end-to-end automation.
+DevSpark currently behaves mostly as a prompt library with partial orchestration patterns layered on top. Users can run individual commands effectively, but the repository does not yet provide a first-class, standardized workflow model that separates atomic capability, orchestrated flow, human-friendly entrypoints, and governance controls.
 
-For harness-driven workflows, this inconsistency is more acute. A harness can sequence `/devspark.specify`, `/devspark.plan`, and `/devspark.tasks`, but review stages do not expose a consistent pattern for findings, action planning, confirmation, execution, and re-validation.
+This gap creates operational friction at scale: contributors must manually stitch prompt sequences, consistency varies across lifecycle stages, autonomy boundaries are implicit, and observability signals are not standardized for workflow-level analysis.
 
 ### Decision Summary
 
-Establish a consistent review-remediation contract across the three stages: `spec -> clarify`, `spec/plan/tasks -> analyze and critic`, and `pr -> pr-review`. Analyze, critic, and pr-review must retain advisory-safe behavior but also provide actionable resolution plans and optional automation paths with explicit policy controls, matching the interactive quality already present in clarify.
+Re-architect DevSpark into a tiered system with explicit atomic prompts, workflow definitions, alias entrypoints, autonomy policy, and step-level observability. Keep existing prompt behavior backward-compatible while introducing composable workflow artifacts (`create-spec`, `execute-plan`, `suggest-improvement`) and a shared execution contract that supports both assisted and autonomous modes.
 
 ### Key Drivers
 
-- Users need a single guided flow that can create, validate, and tighten `spec.md`, `plan.md`, and `tasks.md` without manual re-entry between commands
-- Harness engineering needs a predictable analysis step that can either stop at findings or continue through remediation
-- The existing report-only behavior is safe, but it slows execution because users must manually translate recommendations into artifact edits
-- Constitution-aware quality gates are more valuable when they can help users resolve fixable issues instead of only describing them
-- Review and remediation behavior should be consistent across pre-implementation and PR review stages so teams can automate with one mental model
+- Separate concerns between atomic prompt capability and orchestrated workflow composition
+- Make common workflows easier to discover and execute than advanced low-level prompt entrypoints
+- Enable improvement-loop workflows that convert repo feedback into structured issues and optional implementation triggers
+- Introduce explicit autonomy levels and guardrails so governance is configurable and auditable
+- Emit structured step telemetry to support reliability analysis, Kusto-style querying, and staged autonomy expansion
+- Preserve existing slash-command compatibility while introducing a cleaner future architecture
 
 ### Source Inputs
 
-- User request to correct inconsistent review prompt behavior across clarify, analyze/critic, and pr-review
-- Existing `templates/commands/analyze.md` behavior, which is explicitly non-destructive
-- `.documentation/harness-engineering.md`, which defines the need for repeatable, guided, validation-driven workflows
-- DevSpark Constitution v1.0.0, especially Backward Compatibility, Explicit Over Implied, and Ownership Boundary
+- User proposal for tiered prompt architecture (`prompts/atomic`, `workflows`, `aliases`)
+- User proposal for first-class orchestrated workflows (`create-spec`, `execute-plan`, `suggest-improvement`)
+- User proposal for autonomy policy, observability events, and adoption-focused CLI/UX improvements
+- Existing DevSpark command templates and harness direction in `.documentation/harness-engineering.md`
+- DevSpark Constitution v1.1.0, especially Backward Compatibility, Explicit Over Implied, Ownership Boundary, and Platform Parity
 
 ### Tradeoffs Considered
 
-- Option A: Keep `/devspark.analyze` strictly advisory and rely on users to edit artifacts manually after review
-	Rejected because it preserves the current bottleneck and prevents a true guided validation loop
+- Option A: Keep DevSpark as a prompt-first command collection and document suggested command sequences
+  Rejected because sequence reliability, observability, and autonomy policy remain implicit and inconsistent
 
-- Option B: Make all review commands fully automatic with no stage-specific safety controls
-	Rejected because it weakens user control, risks over-editing user-authored artifacts, and conflicts with explicit governance
+- Option B: Move immediately to fully autonomous workflows with hard default execution
+  Rejected because governance maturity and operator trust require staged autonomy with explicit review gates
 
-- Selected: Define a shared review-remediation contract for clarify, analyze, critic, and pr-review with stage-appropriate automation and explicit policy controls
-	Chosen because it improves automation while keeping control, auditability, and constitutional guardrails intact across all review stages
+- Selected: Introduce tiered architecture with assisted defaults, explicit workflow pauses, and optional autonomy expansion
+  Chosen because it provides structural clarity and governance while preserving existing command compatibility
 
 ### Architectural Impact
 
-- Analyze, critic, and pr-review adopt a shared interaction contract: findings, actionable resolution plan, policy-controlled execution, and post-resolution validation output
-- The analysis gate artifact remains authoritative, but it must now reflect both detected findings and the outcome of any remediation pass
-- `spec.md`, `plan.md`, and `tasks.md` become eligible edit targets after a remediation proposal is presented and the user has a clear chance to opt out
-- Harness workflows gain a viable path to perform artifact creation, validation, remediation, and final gate generation within one guided execution sequence
-- Existing users who only want advisory analysis must still be able to run `/devspark.analyze` without triggering edits
-- PR review workflows gain a first-class resolution plan output and an optional automation handoff instead of ending at advisory findings only
+- Add first-class repo structure for atomic prompts, workflow definitions, and alias entrypoints
+- Introduce workflow schema fields for autonomy, pause gates, conditional branching, and output typing
+- Define step-level telemetry contract for all workflow executions
+- Add prompt metadata for audience exposure, categorization, and discoverability
+- Add contribution artifacts for prompt improvement feedback loops
+- Preserve existing command compatibility through alias and migration mapping rather than destructive replacement
 
 ### Reviewer Guidance
 
-Reviewers should focus on four points: (1) stage behavior is consistent across clarify, analyze/critic, and pr-review; (2) advisory-safe behavior remains available; (3) actionable resolution plans and automation paths are explicit; and (4) constitution conflicts remain blocking rather than being silently rewritten away.
+Reviewers should focus on five points: (1) tier boundaries are clear and enforced; (2) workflow definitions are reusable and non-duplicative; (3) autonomy behavior is explicit and auditable; (4) observability payloads are consistent and useful; and (5) backward-compatible prompt paths remain intact.
 
 ## Clarifications
 
@@ -76,189 +78,212 @@ Reviewers should focus on four points: (1) stage behavior is consistent across c
 - Q: What should opt-out behavior do next? → A: Enter selective approval mode for per-finding decisions.
 - Q: How much remediation decision detail should be persisted in the gate artifact? → A: Persist per-finding decisions and outcomes with stable finding IDs.
 - Q: How should non-interactive runs handle remediation policy? → A: Require explicit remediation policy input; fail clearly if missing.
+- Q: Should DevSpark adopt a tiered prompt/workflow/alias architecture as the primary model? → A: Yes, with backward-compatible atomic access retained.
+- Q: Should orchestrated workflows become first-class repository artifacts? → A: Yes, define workflows as versioned YAML assets.
+- Q: Should improvement suggestions support optional auto-assignment and implementation trigger paths? → A: Yes, behind explicit conditional workflow logic.
+- Q: Should autonomy be explicit per workflow with assisted default? → A: Yes, assisted by default with configurable guardrails.
+- Q: Should workflow telemetry be emitted at each step for analysis and governance? → A: Yes, emit structured events for every step outcome.
+- Q: Where should the new tiered artifacts physically live? → A: Under `templates/` (`templates/prompts/atomic/`, `templates/workflows/`, `templates/aliases/`); resolver extends the existing 3-tier override chain (personal → team → stock).
+- Q: What on-disk format should atomic prompts use? → A: `.md` files with YAML frontmatter, matching the existing `templates/commands/*.md` shape; metadata fields added to frontmatter.
+- Q: Where should workflow telemetry events be written? → A: JSON Lines, append-only, to `.documentation/telemetry/workflow-events.jsonl` (path overridable via env var); local-first, no external service required.
+- Q: Which layer enforces autonomy guardrails? → A: The workflow runner enforces, performing pre-step policy checks and post-step diff inspection; atomic prompts remain enforcement-free.
+- Q: Where should `suggest-improvement` create issues? → A: Always create GitHub issues in `github.com/markhazleton/devspark` (the canonical DevSpark home) via `gh` CLI, regardless of the calling repo; no per-repo or platform-adapter configuration in this feature.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Review Findings Without Editing (Priority: P1)
+### User Story 1 - Create Spec via Tiered Workflow (Priority: P1)
 
-A feature author runs `/devspark.analyze` after `/devspark.tasks` and wants a quality review before implementation, but does not want the command to modify any artifacts. They choose the report-only path, receive a severity-ranked report, and keep the current artifacts unchanged.
+A developer runs a single high-level entrypoint (`create-spec`) and receives a complete, reviewable artifact chain (`spec`, `plan`, `tasks`, `analyze`) without manually invoking each atomic prompt.
 
-**Why this priority**: Safe advisory analysis is already part of the current workflow and must remain available for users who want review without automation.
+**Why this priority**: This is the primary onboarding and adoption path for most users.
 
-**Independent Test**: Can be fully tested by running `/devspark.analyze` against a feature with known issues, choosing report-only mode, and confirming that `spec.md`, `plan.md`, and `tasks.md` remain unchanged while `gates/analyze.md` is refreshed.
+**Independent Test**: Can be fully tested by executing `create-spec` and verifying all expected step outputs are produced and pause behavior occurs after `analyze`.
 
 **Acceptance Scenarios**:
 
-1. **Given** `spec.md`, `plan.md`, and `tasks.md` exist for a feature, **When** the user runs `/devspark.analyze` and selects report-only mode, **Then** the command produces findings and updates only the analyze gate artifact
-2. **Given** report-only mode is selected, **When** the command finishes, **Then** no edits are made to `spec.md`, `plan.md`, or `tasks.md`
+1. **Given** the workflow definition `create-spec.yaml` exists, **When** the user executes `create-spec`, **Then** steps run in the declared order: `specify`, `plan`, `generate-tasks`, `analyze`
+2. **Given** `create-spec` reaches the configured pause point, **When** execution stops after `analyze`, **Then** the output is a reviewable artifact package rather than immediate implementation execution
 
 ---
 
-### User Story 2 - Approve and Apply Repairs in the Same Session (Priority: P1)
+### User Story 2 - Execute Plan Workflow with Governance Pauses (Priority: P1)
 
-A feature author runs `/devspark.analyze`, reviews the proposed fixes for missing coverage, terminology drift, underspecified tasks, and similar fixable issues, and allows the default remediation flow to proceed. The command updates the affected artifacts and re-runs analysis so the user ends the session with repaired documents and a current gate, while still being able to opt out before edits.
+A developer runs `execute-plan` to orchestrate `implement`, `create-pr`, and `review-pr` while preserving mandatory review pauses and governance checks.
 
-**Why this priority**: This is the new core value of the feature. Without in-session remediation, `/devspark.analyze` still cannot complete the validation loop.
+**Why this priority**: This provides the production path from approved plan to PR while keeping control gates explicit.
 
-**Independent Test**: Can be fully tested by preparing a feature whose artifacts contain fixable inconsistencies, running `/devspark.analyze`, allowing default remediation to proceed, and confirming that the resulting edits appear in `spec.md`, `plan.md`, and/or `tasks.md` and that a second analysis pass updates `gates/analyze.md`.
+**Independent Test**: Can be fully tested by executing `execute-plan` and verifying pause occurs after `create-pr` with correct pull-request-oriented output.
 
 **Acceptance Scenarios**:
 
-1. **Given** `/devspark.analyze` finds fixable issues, **When** the user chooses guided remediation, **Then** the command presents a concrete remediation proposal before any artifact is changed
-2. **Given** a remediation proposal is shown, **When** the user does not opt out, **Then** the command applies the fixable remediation actions to the affected artifacts
-3. **Given** remediation edits were applied, **When** remediation completes, **Then** the command re-runs analysis and records the post-remediation gate result
-4. **Given** the user declines the remediation proposal, **When** the command completes, **Then** the original artifacts remain unchanged and the gate reflects the unresolved findings
-5. **Given** the user opts out of default auto-remediation, **When** selective approval mode is entered, **Then** the command applies only the findings explicitly approved in that mode and preserves unapproved findings in the final report
+1. **Given** `execute-plan.yaml` defines workflow steps and pause policy, **When** execution reaches `create-pr`, **Then** the workflow pauses for human review if configured
+2. **Given** autonomy mode is `assisted`, **When** review gates are unmet, **Then** the workflow does not continue to unrestricted autonomous progression
 
 ---
 
-### User Story 3 - Use Analyze Inside a Harness-Guided Flow (Priority: P2)
+### User Story 3 - Submit Improvement Suggestions as Workflow (Priority: P1)
 
-A workflow designer wants a harness sequence that can generate `spec.md`, `plan.md`, and `tasks.md`, validate their consistency, and either stop at findings or continue through a repair pass. `/devspark.analyze` provides a predictable decision point that can be incorporated into a guided harness execution instead of breaking the flow with manual out-of-band edits.
+A contributor uses `suggest-improvement` to capture context, classify improvement type, create an issue, and optionally trigger assignment and implementation steps.
 
-**Why this priority**: Harness engineering is the motivating operational use case. The feature is meant to help users automate creation and validation of the core artifacts in one guided sequence.
+**Why this priority**: This establishes the self-improving feedback loop that turns ideas into actionable work.
 
-**Independent Test**: Can be fully tested by running a harness sequence that reaches `/devspark.analyze`, selecting a remediation path, and confirming that the sequence either exits with a report-only gate or continues with repairs and a refreshed gate.
+**Independent Test**: Can be fully tested by running `suggest-improvement` with and without `assign_agent` enabled and verifying conditional behavior.
 
 **Acceptance Scenarios**:
 
-1. **Given** a harness-guided workflow reaches the analysis step, **When** the workflow requests advisory analysis only, **Then** `/devspark.analyze` produces a gate artifact without changing the feature artifacts
-2. **Given** a harness-guided workflow reaches the analysis step with remediation enabled, **When** remediation is not opted out, **Then** `/devspark.analyze` applies the fixable repairs and returns a final gate result for downstream steps
+1. **Given** `suggest-improvement.yaml` declares core steps, **When** the workflow runs, **Then** it emits an issue-link output after context capture, classification, and issue creation
+2. **Given** `assign_agent` is true, **When** conditional branching is evaluated, **Then** `assign-agent` and `trigger-implementation` steps run in order
 
 ---
 
-### User Story 4 - Preserve Safety on Non-Fixable or Sensitive Findings (Priority: P2)
+### User Story 4 - Discover Workflows Through Aliases and Metadata (Priority: P2)
 
-A reviewer runs `/devspark.analyze` on a feature where some issues are not safe to repair automatically, such as constitution conflicts, missing business decisions, or ambiguous scope. The command distinguishes those from straightforward repair candidates and does not pretend it can safely auto-resolve them.
+A new user runs `devspark help` and sees `create-spec`, `execute-plan`, and `suggest-improvement` as primary entrypoints, while advanced users can still access atomic prompts directly.
 
-**Why this priority**: The new remediation capability must not blur the line between fixable editorial issues and decisions that still need human direction.
+**Why this priority**: Adoption depends on clear, ergonomic entrypoints and discoverability metadata.
 
-**Independent Test**: Can be fully tested by analyzing a feature with at least one constitution conflict or unresolved scope choice and confirming that the command leaves that item as a blocking finding instead of auto-applying a speculative repair.
+**Independent Test**: Can be fully tested by checking help output and metadata filtering behavior for exposed prompts.
 
 **Acceptance Scenarios**:
 
-1. **Given** `/devspark.analyze` detects a constitution conflict, **When** remediation is requested, **Then** the command reports the issue as blocking and does not silently rewrite the artifacts to bypass the conflict
-2. **Given** `/devspark.analyze` detects an issue that requires a new product decision, **When** remediation is requested, **Then** the command leaves the issue in advisory or blocking status rather than inventing a requirement on the user's behalf
+1. **Given** alias definitions exist, **When** users invoke aliases, **Then** alias resolution maps to canonical workflow definitions without duplicating atomic logic
+2. **Given** prompt metadata contains audience and exposure flags, **When** help output is rendered, **Then** prompts are filtered and grouped by intended audience and category
 
 ---
 
-### User Story 5 - Keep Review Prompts Consistent Across Stages (Priority: P1)
+### User Story 5 - Govern Automation with Autonomy and Observability (Priority: P1)
 
-A team uses all three review stages in one delivery cycle: clarify during spec refinement, analyze/critic after task generation, and pr-review before merge. They need each stage to produce findings and a concrete resolution path with consistent policy controls so operators and harness workflows do not switch behavior models between stages.
+A team configures workflow autonomy to `assisted`, requires reviews after sensitive steps, and consumes step telemetry to evaluate reliability before expanding autonomy.
 
-**Why this priority**: Inconsistent stage behavior is the root problem. Fixing only one stage leaves the broader automation and operator consistency gap unresolved.
+**Why this priority**: Governance and observability are required to scale automation safely in production environments.
 
-**Independent Test**: Can be fully tested by executing clarify, analyze, critic, and pr-review on the same feature and verifying each stage emits a findings section, an actionable resolution plan, and a clearly declared execution mode/policy outcome.
+**Implementation Sequencing Note**: Although US5 is listed last in this section, `tasks.md` schedules it before US2 because the `execute-plan` workflow (US2) depends on the autonomy enforcement and telemetry infrastructure introduced by US5.
+
+**Independent Test**: Can be fully tested by running workflows with autonomy settings and verifying pause behavior plus structured step events.
 
 **Acceptance Scenarios**:
 
-1. **Given** clarify, analyze, critic, and pr-review are run for the same feature lifecycle, **When** each command finishes, **Then** each output includes findings, an actionable resolution plan, and explicit next actions
-2. **Given** a stage is running in advisory-safe mode, **When** findings are produced, **Then** the command still emits a machine-usable action plan rather than only narrative advice
-3. **Given** a stage supports automation, **When** the required policy input is present, **Then** execution proceeds under the same policy semantics used by the other automated review stages
+1. **Given** autonomy level is `assisted`, **When** a configured review checkpoint is reached, **Then** workflow execution pauses and records the pause reason
+2. **Given** a workflow step completes, **When** telemetry is emitted, **Then** it includes workflow id, step id, status, duration, and success flag in structured format
+3. **Given** future autonomous mode is enabled, **When** guardrail limits are exceeded, **Then** execution is blocked or downgraded according to policy
 
 ---
 
 ### Edge Cases
 
-- What happens when `/devspark.analyze` finds issues but none are safe to repair automatically?
-- What happens when the user approves only a subset of the proposed remediation actions?
-- What happens when artifacts change between analysis and remediation proposal application, including repeated drift after a single automatic re-baseline?
-- What happens when `/devspark.analyze` runs in a non-interactive harness session without an explicit remediation policy input?
-- What happens when a proposed repair would contradict frontmatter metadata or required section order in the shared validation contract?
-- What happens when remediation resolves some issues but surfaces a new blocking issue during the re-analysis pass?
-- What happens when one review stage emits findings but does not emit an actionable resolution plan in the shared format?
+- What happens when an alias points to a missing or invalid workflow definition?
+- What happens when a workflow references an atomic prompt that does not exist or is not exposed?
+- What happens when conditional steps depend on missing context keys?
+- What happens when autonomy policy is not defined for a non-interactive run?
+- What happens when telemetry emission fails mid-workflow?
+- What happens when backward-compatible legacy commands and new aliases are both invoked in the same session?
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-**Analysis Modes**
+**Tiered Architecture and Repository Structure**
 
-- **FR-001**: `/devspark.analyze` MUST support an explicit report-only path that performs analysis, refreshes the analyze gate artifact, and does not edit `spec.md`, `plan.md`, or `tasks.md`
-- **FR-002**: `/devspark.analyze` MUST support a guided remediation path that can continue from findings into an in-session repair flow with explicit opt-out control
-- **FR-003**: The command MUST explain which path is being used before any remediation actions are proposed or applied
+- **FR-001**: The repository MUST define a tiered prompt structure with first-class artifact locations under `templates/prompts/atomic/`, `templates/workflows/`, and `templates/aliases/`, resolved through the existing 3-tier override chain (personal → team → stock defaults) so they remain DevSpark-owned and Ownership-Boundary compliant
+- **FR-002**: Atomic prompt definitions MUST be authored as Markdown files with YAML frontmatter (`.md`) matching the existing `templates/commands/*.md` shape, MUST be reusable, and MUST be independent from specific workflow sequencing logic
+- **FR-003**: Workflow definitions MUST reference atomic prompt capabilities rather than duplicating prompt logic inline
+- **FR-004**: Alias entrypoints MUST map to canonical workflows and MUST NOT create divergent behavior from direct workflow invocation
 
-**Remediation Proposal**
+**Core Workflow Definitions**
 
-- **FR-004**: When fixable issues are detected, the command MUST translate them into a concrete remediation proposal that identifies the affected artifact, the finding being addressed, and the intended outcome of the edit
-- **FR-005**: The command MUST distinguish between fixable issues and issues that still require human judgment, such as constitution conflicts, scope decisions, or missing business intent
-- **FR-006**: The remediation proposal MUST preserve severity so users can understand which proposed edits address blocking issues versus lower-priority cleanup
-- **FR-007**: The command MUST allow the user to decline remediation and keep the session in advisory mode without losing the analysis report
+- **FR-005**: DevSpark MUST define `create-spec` as a workflow that orchestrates `specify`, `plan`, `generate-tasks`, and `analyze`
+- **FR-006**: DevSpark MUST define `execute-plan` as a workflow that orchestrates `implement`, `create-pr`, and `review-pr`
+- **FR-007**: Workflow definitions MUST support explicit pause points (for example after `analyze` or `create-pr`) that can require review before continuation
+- **FR-007a**: Paused workflow runs MUST persist resumable state to disk (default `.documentation/telemetry/runs/<workflow_run_id>.json`, env-overridable via `DEVSPARK_RUNS_PATH`) capturing `schema_version` (=1), `workflow_id`, `workflow_run_id`, `last_completed_step_id`, `next_step_id`, full `context` snapshot, `autonomy_level`, ISO 8601 `paused_at` timestamp, and a SHA-256 `context_checksum` over the serialized context. Writes MUST be atomic: write to `<file>.tmp`, fsync, then `os.replace` to the final path. A partially written `.tmp` MUST never be loaded by resume.
+- **FR-007b**: DevSpark MUST provide a `devspark resume <workflow_run_id>` entrypoint that loads the persisted state, validates `schema_version`, recomputes and verifies `context_checksum`, validates the source workflow definition still resolves AND that the persisted `workflow_id` matches the resolved workflow id, then continues execution from `next_step_id`. Resumed runs MUST reuse the original `workflow_run_id` for telemetry continuity. On any validation failure the runner MUST exit with `EXIT_RESUME_FAILED` and a message naming the failing check.
+- **FR-007c**: When the runner pauses (whether via `pause_after`, `review_after`, or guardrail downgrade) it MUST print `Paused. Resume with: devspark resume <workflow_run_id>` to stderr and emit a `paused` telemetry event with the `workflow_run_id` populated.
+- **FR-008**: Workflow definitions MUST declare output type semantics (for example `reviewable-artifact`, `pull-request`, `issue-link`)
 
-**Confirmation and Edit Safety**
+**Suggest-Improvement Workflow**
 
-- **FR-008**: `/devspark.analyze` MUST default to applying fixable remediation actions after presenting the remediation proposal, unless the user explicitly opts out
-- **FR-009**: The command MUST provide an explicit opt-out path before edits are applied, allowing users to keep report-only behavior or move to selective approval
-- **FR-010**: If the user opts out and chooses selective approval mode, the command MUST allow per-finding approve or deny decisions before edits are applied
-- **FR-011**: If the user opts out and chooses report-only behavior, the command MUST leave all feature artifacts unchanged
-- **FR-012**: The command MUST detect when analyzed artifacts have materially changed before remediation is applied and MUST prevent stale edits from being applied
-- **FR-013**: On first detected drift, the command MUST automatically re-run analysis once, regenerate the remediation proposal, and continue with the same opt-out controls
-- **FR-014**: If drift is detected again after the single automatic re-baseline, the command MUST stop automated remediation, report the drift as blocking for this session, and require a fresh analysis invocation
+- **FR-009**: DevSpark MUST define `suggest-improvement` as a first-class workflow artifact
+- **FR-010**: `suggest-improvement` MUST include core steps for context capture, improvement classification, and issue creation; the issue creation step MUST always target the canonical DevSpark repository at `github.com/markhazleton/devspark` via the `gh` CLI, regardless of the repository the workflow is invoked from. The adapter MUST guarantee canonical-repo targeting against prompt-injection of competing flags by using `gh api repos/markhazleton/devspark/issues` with a JSON payload (no flag-parsing surface for user/model-generated text). Before invoking `gh`, the adapter MUST display the resolved repo, title, and labels and require interactive confirmation; `--yes` skips confirmation in non-interactive runs.
+- **FR-011**: `suggest-improvement` MUST support conditional execution for agent assignment and implementation triggering when explicitly enabled
+- **FR-012**: DevSpark MUST provide atomic prompt definitions for `capture-context`, `classify-improvement`, `create-issue`, and `assign-agent`
 
-**Artifact Repair**
+**Autonomy Governance**
 
-- **FR-015**: Approved remediation actions MUST be able to update `spec.md`, `plan.md`, and `tasks.md` when those edits are necessary to resolve the targeted findings
-- **FR-016**: Remediation edits MUST preserve required frontmatter, required section order, and valid lifecycle state in `spec.md`
-- **FR-017**: Remediation edits MUST not remove user-authored requirements or tasks solely to make the artifacts appear cleaner unless the user explicitly approves that removal
-- **FR-018**: When a finding maps to multiple artifacts, the command MUST coordinate the related edits so terminology, coverage, and sequencing remain consistent across the repaired set
+- **FR-013**: Workflow schema MUST support an explicit `autonomy` block with at least `assisted` and `autonomous` levels
+- **FR-014**: Assisted mode MUST support configured review checkpoints after specified steps
+- **FR-015**: Autonomous mode MUST support explicit guardrails including file-change thresholds and restricted path policies. Because atomic prompts in this repository edit the working tree directly, the workflow runner MUST establish a per-step boundary using a git stash/restore pattern: before each step the runner records the working-tree HEAD + index state; after the step it diffs against the recorded baseline; if the diff violates `max_files_changed`, `restricted_paths`, or `max_total_lines_changed` the runner MUST `git stash` (or hard-reset for untracked-only changes) the offending changes, emit a `guardrail_triggered` telemetry event with the violated `guardrail_rule`, and either downgrade to assisted-mode pause (default) or abort with `EXIT_GUARDRAIL_BLOCKED` if downgrade is disabled. Atomic prompts MUST NOT be responsible for enforcement.
+- **FR-015a**: Workflow runs MUST refuse to start when the working tree has uncommitted changes that the runner cannot safely distinguish from step output, unless `--allow-dirty` is supplied. The intent is to keep the per-step diff baseline well-defined.
+- **FR-016**: Non-interactive executions that require autonomy policy MUST fail with a clear action-required message when policy input is missing. Autonomy policy input MUST be accepted from any of the following channels (highest precedence first): (1) CLI flag `--autonomy assisted|autonomous`; (2) environment variable `DEVSPARK_AUTONOMY`; (3) optional repo-local file `.devspark/autonomy.yaml` with key `default_level`. If none provide a value AND the run is non-interactive AND the workflow lacks an explicit `autonomy.level`, the runner MUST exit non-zero with a message naming all three channels.
 
-**Re-Analysis and Gate Output**
+**Observability and Telemetry**
 
-- **FR-019**: After approved remediation edits are applied, `/devspark.analyze` MUST run a follow-up analysis pass before finalizing the session
-- **FR-020**: The final `gates/analyze.md` artifact MUST reflect the latest state of the artifacts after remediation, not only the pre-edit findings
-- **FR-021**: The final analysis report MUST clearly separate unresolved findings from issues that were repaired in the same session
-- **FR-022**: The final `gates/analyze.md` artifact MUST persist per-finding remediation decisions and outcomes using stable finding IDs so sessions can be audited and compared across reruns
+- **FR-017**: Each workflow step execution MUST emit a structured telemetry event (workflow id, step id, status, duration, success indicator) appended as a single JSON Lines record to `.documentation/telemetry/workflow-events.jsonl` by default; the destination path MUST be overridable via environment variable
+- **FR-018**: Workflow telemetry format MUST be consistent JSON Lines across all workflows so logs can be aggregated and queried reliably with standard tooling (`jq`, Kusto-style ingestion). The writer MUST acquire an OS-level exclusive file lock (`fcntl.flock` on POSIX, `msvcrt.locking` on Windows) around each single-event append so that concurrent `devspark run` invocations sharing the same destination produce a fully parseable JSONL file. Each serialized event MUST be ≤ 4 KB; the optional `context` blob MUST be ≤ 1 KB.
+- **FR-019**: Failed step events MUST include sufficient context to identify failing step and workflow path without parsing raw prompt text. Concretely, the telemetry `error` field MUST be ≤ 500 characters and a populated `error_class` field (string, e.g., `WF_PROMPT_UNKNOWN`, `EXIT_GH_UNAVAILABLE`) MUST accompany every `phase=failed` event for machine grouping.
 
-**Harness-Guided Flow Support**
+**CLI and UX Layer**
 
-- **FR-023**: `/devspark.analyze` MUST expose a predictable interaction pattern that can be used as a decision point inside a harness-guided spec-to-plan-to-tasks workflow
-- **FR-024**: The command MUST support a path where harness-driven workflows can choose advisory analysis only and still receive a final gate artifact suitable for downstream review steps
-- **FR-025**: The command MUST support a path where harness-driven workflows can continue through remediation and finish with a refreshed gate artifact suitable for downstream execution or review steps
-- **FR-026**: In non-interactive execution contexts, the command MUST require an explicit remediation policy input; if absent, it MUST fail with a clear action-required message rather than assuming a default remediation behavior
+- **FR-020**: CLI help output MUST prioritize high-level workflow aliases (`create-spec`, `execute-plan`, `suggest-improvement`) for onboarding
+- **FR-021**: CLI help output MUST still expose advanced atomic operations for expert users
+- **FR-022**: DevSpark SHOULD recommend workflow aliases when repeated atomic command sequences are detected. The recognition heuristic MUST trigger when a user invokes 3 or more consecutive atomic prompts within a 30-minute window that match the first 3 ordered steps of a known workflow definition. The recommendation is advisory only and MUST NOT alter execution.
 
-**Governance and Compatibility**
+**Prompt Metadata and Discoverability**
 
-- **FR-027**: Constitution conflicts detected during analysis MUST remain blocking findings and MUST NOT be auto-resolved by weakening or bypassing the governing principle
-- **FR-028**: The command MUST continue to work for users who want the current analysis-only behavior, preserving backward-compatible access to a non-destructive review flow
-- **FR-029**: The command MUST write all remediation-related reporting to repository-owned feature artifacts and MUST NOT add or modify framework-managed content under `.devspark/`
+- **FR-023**: Atomic prompt definitions MUST support metadata fields for `name`, `audience`, `exposed`, and `category` declared in YAML frontmatter of the prompt `.md` file
+- **FR-024**: Metadata MUST support filtering and grouping of prompts in CLI or UI discovery surfaces
+- **FR-025**: Prompts not marked exposed MUST remain available for internal orchestration but hidden from default beginner-oriented listings
 
-**Cross-Stage Consistency**
+**Review and Remediation Consistency**
 
-- **FR-030**: DevSpark review stages (`clarify`, `analyze`, `critic`, and `pr-review`) MUST follow a shared output contract containing findings, actionable resolution plan entries, and explicit next actions
-- **FR-031**: `analyze` and `critic` MUST provide optional remediation execution paths in addition to advisory mode, with policy controls consistent with clarify-style interactive behavior
-- **FR-032**: `pr-review` MUST include an actionable resolution plan artifact mapped to finding IDs and MUST provide an explicit automation handoff path for applying approved fixes
-- **FR-033**: All review stages that support automation MUST enforce explicit policy input for non-interactive execution and fail clearly when policy is missing
-- **FR-034**: Resolution plan entries across stages MUST be machine-usable and include stable finding ID, recommended action, target artifact, and execution eligibility (`manual`, `automated`, `blocked`)
-- **FR-035**: Stage-specific differences are allowed only when documented as explicit constraints; undocumented divergence in review/remediation behavior across stages MUST be treated as a defect
+- **FR-026**: Review stages (`clarify`, `analyze`, `critic`, `pr-review`, and `address-pr-review`) MUST follow a shared resolution contract containing findings, actionable next actions, and explicit execution status
+- **FR-027**: Stage outputs MUST include stable finding identifiers and machine-usable action entries where applicable
+- **FR-028**: Existing PR-stage commit-isolation behavior introduced by `address-pr-review` MUST remain intact under the new workflow model
+
+**Contribution and Improvement Loop**
+
+- **FR-029**: Repository MUST include a standardized issue template for prompt/workflow improvement submissions
+- **FR-030**: Improvement submissions MUST capture context, current behavior, expected behavior, and optional suggested fix fields
+- **FR-031**: Improvement loop artifacts MUST integrate with the `suggest-improvement` workflow outputs
+
+**Documentation and Adoption**
+
+- **FR-032**: Documentation MUST include sections for Getting Started workflows, Advanced atomic usage, Workflow Architecture, Autonomy Model, and Improvement Loop
+- **FR-033**: Documentation MUST explain relationship between aliases, workflows, and atomic prompts with migration-safe examples
+
+**Backward Compatibility and Migration**
+
+- **FR-034**: Existing slash-command entrypoints MUST continue to work during migration to tiered architecture
+- **FR-035**: Migration MUST preserve constitutional constraints, including Ownership Boundary and Platform Parity
+- **FR-036**: Stage-specific behavior differences MUST be documented explicitly; undocumented divergence from shared workflow semantics MUST be treated as a defect
 
 ### Key Entities *(feature involves data)*
 
-- **Analysis Finding**: A normalized issue identified across `spec.md`, `plan.md`, and `tasks.md`, including category, severity, location, summary, and whether the issue is fixable or requires human judgment
-- **Remediation Proposal**: A set of one or more candidate edits derived from analysis findings, each tied to a specific artifact and expected repair outcome, presented with explicit opt-out controls before application
-- **Confirmation Decision**: The user's recorded choice for the current remediation session, including whether they selected report-only review, approved remediation, declined remediation, or approved only a subset of proposed actions
-- **Remediation Session**: The full guided interaction that starts with findings, moves through proposal and opt-out decision, optionally applies repairs, then ends with a refreshed analysis result and gate artifact
-- **Analyze Gate Report**: The persisted `gates/analyze.md` artifact containing final gate metadata, findings summary, per-finding remediation decisions and outcomes (keyed by stable finding IDs), repaired-items summary, unresolved issues, and next actions for the latest analysis session
-- **Review Resolution Contract**: A shared stage output model that requires each review command to emit stable finding IDs, actionable resolution entries, execution mode metadata, and post-resolution status
+- **Atomic Prompt**: A single-purpose prompt definition that performs one bounded capability and can be reused across multiple workflows
+- **Workflow Definition**: A declarative orchestration artifact that defines ordered steps, pauses, conditions, autonomy behavior, and output semantics
+- **Alias Entrypoint**: A user-facing command mapping that resolves to a canonical workflow without changing underlying workflow semantics
+- **Autonomy Policy**: A workflow configuration describing execution level, review requirements, and guardrails for automated progression
+- **Workflow Event**: A structured telemetry record emitted for each step execution with workflow, step, status, duration, and success data
+- **Improvement Proposal**: A captured suggestion artifact containing context, classification, and linked issue output, optionally extended with assignment/execution triggers
+- **Review Resolution Contract**: A shared stage output model that requires review commands to emit stable finding IDs, actionable resolution entries, execution mode metadata, and post-resolution status
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: A user can run `/devspark.analyze`, choose either report-only or guided remediation, and reach a final gate result in a single session without manually restating the findings in another command
-- **SC-002**: For a feature with fixable cross-artifact inconsistencies, a remediation pass reduces unresolved fixable findings to zero in at least 90% of test scenarios after one follow-up analysis pass
-- **SC-003**: In report-only mode, `spec.md`, `plan.md`, and `tasks.md` remain unchanged in 100% of validation runs while `gates/analyze.md` is still refreshed
-- **SC-004**: In guided remediation mode, users are shown a clear opt-out control before edits, and both report-only and selective-approval opt-out choices are honored in 100% of validation runs
-- **SC-005**: When artifact drift is detected before remediation, the command auto re-baselines once and proceeds with a refreshed proposal in 100% of compliant runs; repeated drift is surfaced as blocking rather than applying stale edits
-- **SC-006**: A harness-guided flow can create `spec.md`, `plan.md`, `tasks.md`, run `/devspark.analyze`, and finish with a usable final gate artifact without requiring manual out-of-band edits between the workflow steps
-- **SC-007**: Constitution conflicts and unresolved scope decisions are preserved as blocking or advisory findings rather than being silently rewritten away in 100% of governance validation runs
-- **SC-008**: In remediation-enabled sessions, 100% of findings recorded in `gates/analyze.md` include a stable finding ID and a terminal decision state (`applied`, `denied`, `deferred`, or `blocked`)
-- **SC-009**: In non-interactive runs, sessions without explicit remediation policy input fail fast with a clear action-required message in 100% of validation runs
-- **SC-010**: In lifecycle validation runs, 100% of clarify, analyze, critic, and pr-review outputs include the shared resolution contract fields (stable finding IDs, actionable resolution entries, and explicit next actions)
-- **SC-011**: In automation-enabled stage runs, policy handling and terminal decision states are consistent across analyze, critic, and pr-review in 100% of conformance tests
+- **SC-001**: Users can complete spec generation through a single `create-spec` workflow entrypoint with correct ordered outputs in at least 95% of validation runs
+- **SC-002**: Users can execute implementation-to-review flow through a single `execute-plan` workflow with configured pause after `create-pr` in 100% of policy-compliant runs
+- **SC-003**: `suggest-improvement` generates a linked issue artifact and optional conditional assignment path in at least 95% of test runs
+- **SC-004**: CLI help surfaces high-level aliases for onboarding while preserving access to advanced atomic prompts in 100% of UX conformance checks
+- **SC-005**: All workflow steps emit structured telemetry events conforming to the shared event schema in 100% of execution tests
+- **SC-006**: Non-interactive workflow runs without required autonomy policy input fail fast with explicit action-required messaging in 100% of governance tests
+- **SC-007**: Shared review resolution contract fields are present across clarify, analyze, critic, pr-review, and address-pr-review outputs in 100% of lifecycle conformance runs
+- **SC-008**: Backward-compatible command entrypoints continue to function during migration in 100% of regression tests for supported legacy flows
+- **SC-009**: Prompt/workflow improvement submissions use the standardized issue template structure in 100% of sampled improvement tickets
+- **SC-010**: Documentation includes required architecture, autonomy, workflow, and improvement-loop sections before feature status can advance from Draft
 
 ## Assumptions
 
-- The initial scope focuses on repairing artifact-quality issues that can be derived from the existing documents, not inventing new product intent
-- Some findings will remain advisory because they require user judgment rather than deterministic repair
-- Harness-driven flows can provide the required opt-out or policy signal at the guided decision point so automatic remediation behavior remains explicit
+- Workflow artifacts are represented as version-controlled YAML definitions and validated by repository tooling
+- Existing command templates remain available during transition to prevent disruptive migration for current contributors
+- Telemetry emission can be implemented in a way that supports current logging pipelines without requiring immediate external service integration
 - The feature continues to operate on repository-owned work products under `.documentation/` and does not expand DevSpark ownership into `.devspark/`
+- **Runtime vs install/upgrade ownership of `.documentation/`**: Constitution §III prohibits install and upgrade flows from writing under any `.documentation/` directory. Runtime workflow execution is a separate concern and MAY create or append repo-owned work product (telemetry events, run state, gate artifacts) under `.documentation/`. The boundary is enforced by `tests/test_upgrade_migration_safety.py` (install/upgrade) and is left unconstrained for runtime.

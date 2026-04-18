@@ -1,0 +1,24 @@
+name: shim-drift
+
+on:
+  pull_request:
+    paths:
+      - "templates/commands/**"
+      - "templates/prompts/atomic/**"
+      - "scripts/powershell/generate-atomic-shims.ps1"
+      - "scripts/bash/generate-atomic-shims.sh"
+      - ".github/workflows/shim-drift.yml"
+  push:
+    branches:
+      - main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify atomic-prompt shims are not stale
+        shell: bash
+        run: |
+          chmod +x scripts/bash/generate-atomic-shims.sh
+          scripts/bash/generate-atomic-shims.sh --check
