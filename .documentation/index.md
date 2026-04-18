@@ -33,7 +33,7 @@ For teams that want terminal-driven execution, DevSpark also ships an additive C
 
 ## About DevSpark
 
-> **DevSpark** is a structured development process for AI coding assistants — 27 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
+> **DevSpark** is a structured development process for AI coding assistants — 28 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
 
 ### The ASLCD Vision
 
@@ -56,6 +56,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | `/devspark.constitution` | ✅ Included |
 | `/devspark.discover-constitution` | ✅ Brownfield discovery |
 | `/devspark.pr-review` | ✅ Constitution-based PR review |
+| `/devspark.address-pr-review` | ✅ Author-side PR review remediation with commit isolation |
 | `/devspark.site-audit` | ✅ Full codebase auditing |
 | `/devspark.critic` | ✅ Adversarial risk analysis |
 | `/devspark.quickfix` | ✅ Lightweight workflow |
@@ -143,6 +144,7 @@ For major features and architectural changes.
 | `/devspark.implement` | Execute tasks | `/devspark.create-pr` |
 | `/devspark.create-pr` | Draft or update the PR with workflow context | `/devspark.pr-review` |
 | `/devspark.update-pr` | Refresh an existing PR description after new commits or review fixes | `/devspark.pr-review` |
+| `/devspark.address-pr-review` | Address open review findings and commit review updates in isolation | `/devspark.pr-review UPDATE` |
 
 ### Lightweight Workflow
 
@@ -170,6 +172,7 @@ Constitution-powered quality commands that work independently.
 | `/devspark.harvest` | Canonical knowledge-preserving cleanup and archival workflow | [Harvest Guide](harvest-usage.md) |
 | `/devspark.repo-story` | Evidence-based repository narrative generation | [Repo Story Guide](repo-story-usage.md) |
 | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals | |
+| `/devspark.address-pr-review` | Address open PR review findings with enforced commit isolation | |
 | `/devspark.taskstoissues` | Convert tasks.md into GitHub issues | |
 | `/devspark.clarify` | Clarify specification requirements | |
 | `/devspark.checklist` | Generate quality checklists | [Checklist Guide](checklist-usage.md) |
