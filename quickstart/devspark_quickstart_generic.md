@@ -172,6 +172,7 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `create-pr.md` | `.devspark/defaults/commands/devspark.create-pr.md` |
 | `constitution.md` | `.devspark/defaults/commands/devspark.constitution.md` |
 | `pr-review.md` | `.devspark/defaults/commands/devspark.pr-review.md` |
+| `address-pr-review.md` | `.devspark/defaults/commands/devspark.address-pr-review.md` |
 | `quickfix.md` | `.devspark/defaults/commands/devspark.quickfix.md` |
 | `harvest.md` | `.devspark/defaults/commands/devspark.harvest.md` |
 | `release.md` | `.devspark/defaults/commands/devspark.release.md` |
@@ -221,6 +222,7 @@ For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
 - `powershell/create-new-feature.ps1`
 - `powershell/setup-plan.ps1`
 - `powershell/get-pr-context.ps1`
+- `powershell/address-pr-review.ps1`
 - `powershell/create-pr.ps1`
 - `powershell/update-agent-context.ps1`
 - `powershell/archive-context.ps1` (deprecated compatibility wrapper around harvest)
