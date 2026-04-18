@@ -104,7 +104,7 @@ Adopt **squash-merge by default** plus a `commit-msg` hook enforcing Conventiona
 
 ## AI Adoption Level
 
-**Level 3 — Collaborative**
+### Level 3 — Collaborative
 
 Evidence:
 

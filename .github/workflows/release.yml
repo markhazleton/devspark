@@ -22,7 +22,13 @@ on:
         type: string
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+    permissions:
+      contents: read
+
   release:
+    needs: lint
     runs-on: ubuntu-latest
     permissions:
       contents: write

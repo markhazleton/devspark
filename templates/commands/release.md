@@ -446,7 +446,42 @@ Ensure future roadmap section version ranges (`Near-Term`, `Medium-Term`, `Long-
 
 Run a quick search for the **old** version string (`{CURRENT_VERSION}`) across `README.md`, `release_notes.md`, `.documentation/*.md`, and confirm every remaining reference is intentional (e.g., CHANGELOG history). Flag any stale occurrences for manual review.
 
-### 11. Clean Slate Preparation
+### 11. Markdownlint Preflight (Required)
+
+Before finalizing release output, run a full markdown lint pass and fail closed on any violations.
+
+#### A. Run markdownlint-cli2
+
+Execute from repository root:
+
+```bash
+npx markdownlint-cli2 "**/*.md" "#node_modules"
+```
+
+If local policy requires a different invocation, use the repository-standard equivalent but keep full-repo coverage.
+
+#### B. Produce a detailed findings report
+
+If lint fails, parse and print a structured report with:
+
+- Rule ID (e.g., `MD036`, `MD050`)
+- File path
+- Line number
+- Short message
+
+Include grouped counts by rule and by file so the author can fix quickly.
+
+#### C. Block release completion on lint errors
+
+If any markdownlint violations remain:
+
+- Mark release as **BLOCKED**
+- Do **not** proceed to completion messaging
+- Return explicit remediation guidance with the failing file/line/rule list
+
+Continue only when markdownlint exits cleanly.
+
+### 12. Clean Slate Preparation
 
 After archival (skip if DRY_RUN):
 
@@ -469,7 +504,7 @@ For each quickfix in QUICKFIXES:
 1. Create `/.documentation/specs/.gitkeep` if directory is empty
 2. Create `/.documentation/quickfixes/.gitkeep` if directory is empty
 
-### 12. Output Summary
+### 13. Output Summary
 
 #### Dry Run Output
 

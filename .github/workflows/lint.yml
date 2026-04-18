@@ -2,7 +2,12 @@ name: Lint
 permissions:
   contents: read
 
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
+  workflow_call:
   push:
     branches: ["main"]
   pull_request:
