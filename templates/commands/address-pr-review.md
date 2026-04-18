@@ -85,7 +85,7 @@ For each selected finding:
 fix(pr-{PR_ID}): address {M-02,M-04,M-05}
 ```
 
-4. Capture the resulting short hash as `{FIX_SHA}`.
+1. Capture the resulting short hash as `{FIX_SHA}`.
 
 ### Phase 5 — Update the review file
 
@@ -112,7 +112,7 @@ Then update metadata:
 review(pr-{PR_ID}): rev {N} — {X} fixed, {Y} remaining
 ```
 
-4. Verify commit disjointness:
+1. Verify commit disjointness:
 
 ```bash
 git log HEAD~2..HEAD --name-only
