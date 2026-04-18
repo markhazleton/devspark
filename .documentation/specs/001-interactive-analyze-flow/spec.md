@@ -48,13 +48,13 @@ Re-architect DevSpark into a tiered system with explicit atomic prompts, workflo
 ### Tradeoffs Considered
 
 - Option A: Keep DevSpark as a prompt-first command collection and document suggested command sequences
-	Rejected because sequence reliability, observability, and autonomy policy remain implicit and inconsistent
+  Rejected because sequence reliability, observability, and autonomy policy remain implicit and inconsistent
 
 - Option B: Move immediately to fully autonomous workflows with hard default execution
-	Rejected because governance maturity and operator trust require staged autonomy with explicit review gates
+  Rejected because governance maturity and operator trust require staged autonomy with explicit review gates
 
 - Selected: Introduce tiered architecture with assisted defaults, explicit workflow pauses, and optional autonomy expansion
-	Chosen because it provides structural clarity and governance while preserving existing command compatibility
+  Chosen because it provides structural clarity and governance while preserving existing command compatibility
 
 ### Architectural Impact
 
