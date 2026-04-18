@@ -13,10 +13,7 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
-import os
-from pathlib import Path
 
 import pytest
 
@@ -25,8 +22,6 @@ from devspark_cli.runner.executor import (
     PAUSE_STATE_SCHEMA_VERSION,
     WorkflowRunner,
     load_pause_state,
-    runs_dir,
-    write_pause_state,
 )
 from devspark_cli.runner.loader import Workflow, WorkflowStep
 
@@ -50,7 +45,7 @@ def test_pause_writes_required_shape(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("DEVSPARK_RUNS_PATH", str(tmp_path / "runs"))
     wf = _make_wf()
     runner = WorkflowRunner(wf, mode="stub", repo_root=tmp_path)
-    run = runner.run({"k": "v"})
+    runner.run({"k": "v"})
     files = list((tmp_path / "runs").glob("*.json"))
     assert len(files) == 1
     data = json.loads(files[0].read_text(encoding="utf-8"))

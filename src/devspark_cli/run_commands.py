@@ -24,7 +24,6 @@ from .resolution import (
     resolve_atomic_prompt,
     resolve_workflow,
 )
-from .runner import executor as exec_mod
 from .runner.executor import (
     EXIT_AUTONOMY_REQUIRED,
     EXIT_RESUME_FAILED,

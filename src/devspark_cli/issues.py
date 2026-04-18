@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
-from typing import Iterable
 
 CANONICAL_REPO = "markhazleton/devspark"
 ENDPOINT = f"repos/{CANONICAL_REPO}/issues"

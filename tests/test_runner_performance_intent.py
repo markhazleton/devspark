@@ -10,7 +10,6 @@ from __future__ import annotations
 import time
 import uuid
 import warnings
-from pathlib import Path
 
 from devspark_cli.runner.executor import WorkflowRunner
 from devspark_cli.runner.loader import Workflow, WorkflowStep

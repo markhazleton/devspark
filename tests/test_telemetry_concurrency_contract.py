@@ -21,7 +21,6 @@ import pytest
 def _worker(args):
     target_path, worker_id, count = args
     # Re-import inside child for spawn semantics
-    import os
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
     from devspark_cli.runner.telemetry import TelemetryWriter
 
