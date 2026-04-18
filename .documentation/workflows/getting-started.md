@@ -61,3 +61,27 @@ Pause-state lives at `.documentation/telemetry/runs/<run_id>.json` (override
 with `DEVSPARK_RUNS_PATH`). On resume, DevSpark verifies the persisted
 `schema_version`, `workflow_id`, and `context_checksum`; any mismatch exits
 with code 25 (`EXIT_RESUME_FAILED`).
+
+## Template discovery (install / packaging note)
+
+The runner resolves aliases, workflows, and atomic prompts via the
+following repo-relative chain (first match wins):
+
+1. `<app>/.documentation/templates/<kind>/` — multi-app override
+2. `.documentation/<git-user>/templates/<kind>/` — personal override
+3. `.documentation/templates/<kind>/` — team override
+4. `templates/<kind>/` — source repo (DevSpark itself)
+5. `.devspark/templates/<kind>/` — installed framework payload
+
+For consumers installed via `pip install devspark-cli`, only paths 1–3
+and 5 are searched at runtime; the wheel does **not** ship
+`templates/aliases/*.yaml`, `templates/workflows/*.yaml`, or
+`templates/prompts/atomic/*.md` as importable package data. The standard
+install path provisions `.devspark/templates/` (see `quickstart/`), so
+this is only a concern if you skipped the framework-extraction step.
+
+For repository-scoped fixes (process suggestion **M-03** from
+`.documentation/specs/pr-review/pr-28.md`): when a feature spec PR grows
+beyond ~50 files / ~1k LOC, prefer splitting along the
+`spec → runner → prompts/workflows → cli → docs` boundary so revert and
+bisect remain low-cost.

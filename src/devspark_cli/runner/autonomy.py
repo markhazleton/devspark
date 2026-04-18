@@ -41,6 +41,11 @@ class AutonomyEnforcer:
 
     # -------------------------------------------------- pre-step hook
     def before_step(self, run, step) -> None:
+        # Skip the (potentially expensive) baseline capture entirely when
+        # there are no guardrails to enforce. Mirrors the early-return in
+        # ``after_step`` and keeps step latency low on guardrail-free runs.
+        if not self.guardrails:
+            return
         baseline = _Baseline()
         baseline.head = self._git("rev-parse", "HEAD") or ""
         files = (self._git("ls-files") or "").splitlines()

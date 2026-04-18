@@ -107,12 +107,14 @@ def validate_event(event: dict[str, Any]) -> None:
         raise TelemetryError(EVT_FIELD_MISSING, f"missing required fields: {sorted(missing)}")
 
     ts = event["timestamp"]
-    if not isinstance(ts, str) or not (ts.endswith("Z") or "+" in ts or "-" in ts[10:]):
-        raise TelemetryError(EVT_TIMESTAMP_INVALID, f"timestamp must be ISO 8601 UTC, got {ts!r}")
+    if not isinstance(ts, str):
+        raise TelemetryError(EVT_TIMESTAMP_INVALID, f"timestamp must be ISO 8601 string, got {ts!r}")
     try:
-        datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(ts.replace("Z", "+00:00"))
     except (TypeError, ValueError):
         raise TelemetryError(EVT_TIMESTAMP_INVALID, f"timestamp not parseable: {ts!r}")
+    if parsed.tzinfo is None:
+        raise TelemetryError(EVT_TIMESTAMP_INVALID, f"timestamp must include timezone offset, got {ts!r}")
 
     if event["phase"] not in _PHASES:
         raise TelemetryError(EVT_PHASE_INVALID, f"phase={event['phase']!r} not in {_PHASES}")
