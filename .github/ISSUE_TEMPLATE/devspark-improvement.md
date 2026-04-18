@@ -8,11 +8,11 @@ assignees: []
 
 > Filed by `/devspark.suggest-improvement` (workflow run `<run_id>`)
 
-### Classification
+## Classification
 
 `<bug | enhancement | prompt-quality | workflow-design | documentation>`
 
-### Context
+## Context
 
 <!-- What is the surrounding situation? Which prompt, workflow, or document is involved? -->
 

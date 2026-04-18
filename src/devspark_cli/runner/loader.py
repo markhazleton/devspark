@@ -196,7 +196,7 @@ def validate_atomic_prompt(
     # legacy_command
     if prompt.legacy_command is not None:
         if not isinstance(prompt.legacy_command, str) or not prompt.legacy_command:
-            raise ValidationError(AP_LEGACY_UNKNOWN, f"legacy_command must be a non-empty string or null")
+            raise ValidationError(AP_LEGACY_UNKNOWN, "legacy_command must be a non-empty string or null")
         if commands_dir is not None:
             target = commands_dir / f"{prompt.legacy_command}.md"
             if not target.is_file():

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from devspark_cli.runner.executor import WorkflowRunner
 from devspark_cli.runner.loader import (
     parse_alias,
