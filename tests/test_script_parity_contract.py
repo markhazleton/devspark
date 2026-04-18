@@ -69,6 +69,20 @@ def main() -> None:
     assert 'MERGED_PR_NUMBERS' in ps_release_history
     assert 'PR_REVIEW_SUMMARY' in ps_release_history
 
+    # T064: run-workflow.* and generate-atomic-shims.* parity
+    bash_run = _read('scripts/bash/run-workflow.sh')
+    ps_run = _read('scripts/powershell/run-workflow.ps1')
+    assert 'python -m devspark_cli run' in bash_run
+    assert 'python -m devspark_cli run' in ps_run
+
+    bash_shims = _read('scripts/bash/generate-atomic-shims.sh')
+    ps_shims = _read('scripts/powershell/generate-atomic-shims.ps1')
+    assert '--check' in bash_shims
+    assert '$Check' in ps_shims or '-Check' in ps_shims
+    for token in ('audience: expert', 'exposed: false', 'category: legacy-command'):
+        assert token in bash_shims, f'bash generate-atomic-shims missing {token!r}'
+        assert token in ps_shims, f'ps generate-atomic-shims missing {token!r}'
+
     print('Script parity contract validated.')
 
 
