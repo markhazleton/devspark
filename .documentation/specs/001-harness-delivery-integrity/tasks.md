@@ -62,9 +62,9 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 - [ ] T007 [P] Add lifecycle artifact writer scaffolding in src/devspark_cli/harness/runner.py
 - [ ] T008 Implement finding status transitions (open, resolved, deferred) in src/devspark_cli/harness/runner.py
 - [ ] T009 Add stage-level failure reason-code mapping in src/devspark_cli/harness/runner.py
-- [ ] T010 Add governance approval checkpoint requirements to execution notes in .documentation/specs/001-harness-delivery-integrity/plan.md
-- [ ] T011 Implement non-UTF decode fallback handling for subprocess streams in src/devspark_cli/harness/runner.py
-- [ ] T012 [P] Emit non-fatal decode incident events in src/devspark_cli/harness/telemetry.py
+- [ ] T010 Implement pre-implement governance approval guard that validates leadership checkpoint evidence before execution starts in src/devspark_cli/commands.py
+- [ ] T011 Implement stall-detection evaluator, timeout boundary checks, and non-UTF decode fallback handling in src/devspark_cli/harness/runner.py
+- [ ] T012 [P] Emit timeout and decode incident non-fatal events with reason codes in src/devspark_cli/harness/telemetry.py
 - [ ] T013 Record governance checkpoint evidence template in .documentation/specs/001-harness-delivery-integrity/gates/governance-approval.md
 
 **Checkpoint**: Foundation complete and governance gate defined.

@@ -64,7 +64,6 @@ Implement a delivery-integrity architecture for harness execution: dual status o
 - **I. Backward Compatibility (PASS)**: Hands-off is opt-in; interactive behavior remains available.
 - **II. Explicit Over Implied (PASS)**: Mode semantics, adapter capabilities, failure reason codes, and gate states are explicitly modeled.
 - **III. Ownership Boundary (PASS)**: Runtime artifacts remain in repository-owned docs trees already used by runtime; install/upgrade behavior unchanged.
-- **IV. Governance Authority (PASS)**: Repo-level governance remains authoritative; no weakening.
 - **IV. Governance Authority (PASS WITH REQUIRED CHECKPOINT)**: Leadership approval checkpoint is required before implementation because this feature is explicitly cross-cutting.
 - **V. Simplicity (PASS WITH WATCHPOINT)**: Adds concepts (delivery status, convergence loop) but each addresses a demonstrated failure mode; complexity tracking remains justified.
 - **VI. Platform Parity (PASS WITH REQUIRED TESTING)**: Any script/behavior change requires Bash and PowerShell parity tests.
