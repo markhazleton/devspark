@@ -16,7 +16,7 @@ Stop here. Do not proceed further.
 
 **If it does not exist** (you are in a consumer repo), read and follow the instructions from the **first file that exists**:
 
-1. `.documentation/$GITUSER/commands/devspark.upgrade.md` (personalized override — determine `$GITUSER` by running `git config user.name`, then normalise: lowercase, spaces → hyphens, strip non-alphanumeric/hyphen characters)
+1. `.documentation/$GITUSER/commands/devspark.upgrade.md` (personalized override — determine `$GITUSER` by running `git config user.name`, then normalize: lowercase, spaces → hyphens, strip non-alphanumeric/hyphen characters)
 2. `.documentation/commands/devspark.upgrade.md` (team customisation)
 3. `.devspark/defaults/commands/devspark.upgrade.md` (stock default)
 
