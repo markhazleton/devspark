@@ -57,17 +57,34 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 **CRITICAL**: No user story implementation starts before this phase completes.
 
 - [ ] T004 Extend run outcome schema for workflow_status, delivery_status, and create_pr_ready in src/devspark_cli/harness/spec_models.py
-- [ ] T005 Add structured delivery check result model in src/devspark_cli/harness/spec_models.py
+- [ ] T005 Add structured delivery check result model with git diff reference strategy in src/devspark_cli/harness/spec_models.py
 - [ ] T006 [P] Add mutation-aware validation rule support in src/devspark_cli/harness/validation.py
 - [ ] T007 [P] Add lifecycle artifact writer scaffolding in src/devspark_cli/harness/runner.py
 - [ ] T008 Implement finding status transitions (open, resolved, deferred) in src/devspark_cli/harness/runner.py
 - [ ] T009 Add stage-level failure reason-code mapping in src/devspark_cli/harness/runner.py
 - [ ] T010 Implement pre-implement governance approval guard that validates leadership checkpoint evidence before execution starts in src/devspark_cli/commands.py
-- [ ] T011 Implement stall-detection evaluator, timeout boundary checks, and non-UTF decode fallback handling in src/devspark_cli/harness/runner.py
+- [ ] T011 [MVP SCOPE] Implement total-step-timeout and non-UTF decode fallback handling in src/devspark_cli/harness/runner.py (full 5-min stall detection deferred post-MVP pending async subprocess refactor)
 - [ ] T012 [P] Emit timeout and decode incident non-fatal events with reason codes in src/devspark_cli/harness/telemetry.py
 - [ ] T013 Record governance checkpoint evidence template in .documentation/specs/001-harness-delivery-integrity/gates/governance-approval.md
+- [ ] T013a [P] Create test_delivery_status_contract.py with gating and create-pr-ready blocking validation in tests/
+- [ ] T013b [P] Create test_convergence_loop_contract.py with iteration records and finding state transitions in tests/
+- [ ] T013c Create CI/CD configuration to run new contract tests in .github/workflows/ (or update existing)
+- [ ] T013d Perform security audit of subprocess calls with shell=True in validation.py for injection risk in src/devspark_cli/harness/validation.py
 
-**Checkpoint**: Foundation complete and governance gate defined.
+**Checkpoint**: Foundation complete, governance gate defined, and new contract tests passing.
+
+---
+
+## Phase 2b: Foundational Runner Orchestration (Blocking for Phase 5)
+
+**Purpose**: Clarify and document runner ownership model for hands-off lifecycle orchestration.
+
+**CRITICAL**: Must complete before Phase 5 hands-off implementation begins.
+
+- [ ] T013e Add runner orchestration model documentation to plan.md (workflow runner as top-level, harness runner as subordinate for per-step validation)
+- [ ] T013f Add AgentAdapter.probe() method signature and ProbeResult model to src/devspark_cli/harness/adapters/__init__.py
+
+**Checkpoint**: Runner model clarified and adapter probe interface defined.
 
 ---
 
@@ -79,13 +96,14 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Enforce default src/test mutation evidence rule in src/devspark_cli/harness/validation.py
+- [ ] T014 [US1] Enforce default src/test mutation evidence rule with git diff reference in src/devspark_cli/harness/validation.py
 - [ ] T015 [US1] Compute create_pr_ready from delivery checks in src/devspark_cli/harness/runner.py
 - [ ] T016 [P] [US1] Generate no-change explainer section in run artifacts in src/devspark_cli/harness/runner.py
 - [ ] T017 [P] [US1] Align run outcome contract details in .documentation/specs/001-harness-delivery-integrity/contracts/run-outcome-contract.md
 - [ ] T018 [US1] Add explicit delivery-status gate before create-pr transition in src/devspark_cli/run_commands.py
+- [ ] T018a [P] Add parity smoke test for delivery-status enforcement in Bash and PowerShell scripts (bash/powershell)
 
-**Checkpoint**: US1 independently validated.
+**Checkpoint**: US1 independently validated. PR1 ready for review.
 
 ---
 
@@ -113,19 +131,23 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 **Independent Test**: Hands-off mode runs full chain without manual prompts and fails fast on blocking gates.
 
+**MVP SCOPE NOTE**: Convergence loop is **re-validation-only** in this release. After each pass, findings are re-evaluated against updated artifacts. Automatic fix generation is deferred to post-MVP. This is achievable without additional LLM infrastructure and still demonstrates iterative convergence behavior. True auto-remediation will be added in a follow-up feature.
+
 ### Implementation for User Story 5
 
 - [ ] T024 [US5] Add hands-off option parsing and routing in src/devspark_cli/commands.py
-- [ ] T025 [US5] Implement full lifecycle orchestrator in src/devspark_cli/runner/executor.py
-- [ ] T026 [US5] Implement analyze and critic remediation loop controller with max 3 passes in src/devspark_cli/harness/runner.py
+- [ ] T025 [US5] Implement full lifecycle orchestrator in runner/executor.py (workflow runner as top-level, sequences plan → tasks → analyze → critic → implement → create-pr → pr-review)
+- [ ] T026 [US5] [MVP: RE-VALIDATION ONLY] Implement analyze and critic re-validation loop controller with max 3 passes in src/devspark_cli/harness/runner.py (evaluates findings against updated outputs without auto-fix generation)
 - [ ] T027 [US5] Emit convergence status (converged or max-pass-failed) per stage in src/devspark_cli/harness/runner.py
 - [ ] T028 [US5] Add max-pass failure convergence report output in src/devspark_cli/harness/runner.py
 - [ ] T029 [US5] Persist per-pass iteration records in src/devspark_cli/harness/telemetry.py
 - [ ] T030 [US5] Enforce fail-fast rejection for write-incompatible adapters on write-required stages in src/devspark_cli/harness/runner.py
 - [ ] T031 [US5] Enforce create-pr and pr-review dual gating (delivery-status plus branch sync) in src/devspark_cli/run_commands.py
 - [ ] T032 [P] [US5] Generate final decision packet output in src/devspark_cli/harness/runner.py
+- [ ] T025a Create test_adapter_doctor_contract.py with probe results and capability classification in tests/
+- [ ] T025b Create test_hands_off_lifecycle_contract.py with full-chain execution and gating validation in tests/
 
-**Checkpoint**: US5 independently validated.
+**Checkpoint**: US5 independently validated. PR2 ready for review.
 
 ---
 
@@ -168,77 +190,113 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 **Purpose**: Parity, docs consistency, and concrete validation execution.
 
-- [ ] T042 [P] Add Bash parity updates for hands-off and adapter doctor preflight in scripts/bash/check-prerequisites.sh
-- [ ] T043 [P] Add PowerShell parity updates for hands-off and adapter doctor preflight in scripts/powershell/check-prerequisites.ps1
+- [ ] T042 [P] Add Bash parity updates for delivery-status enforcement and timeout handling in scripts/bash/check-prerequisites.sh
+- [ ] T043 [P] Add PowerShell parity updates for delivery-status enforcement and timeout handling in scripts/powershell/check-prerequisites.ps1
 - [ ] T044 Update implement command guidance for governance and convergence gates in templates/commands/implement.md
+- [ ] T044a [P] Add adapter doctor troubleshooting to .documentation/harness-engineering.md with probe state explanations
 - [ ] T045 Run focused validation command set and record results in .documentation/specs/001-harness-delivery-integrity/gates/validation-smoke.md
 - [ ] T046 Run full pytest suite and record pass or fail summary in .documentation/specs/001-harness-delivery-integrity/gates/validation-full.md
 - [ ] T047 Refresh lifecycle documentation with canonical adapter doctor terminology in .documentation/implementation-lifecycle.md
+- [ ] T048 [P] Update CHANGELOG.md with delivery-integrity feature summary and scope notes
+- [ ] T049 [P] Run full parity test suite (Bash + PowerShell) for all modified scripts across Windows/macOS/Linux test matrix
 
----
+**Checkpoint**: Polish complete. Full feature validated. Ready for final review.
 
 ## Dependencies and Execution Order
 
 ### Phase Dependencies
 
 - Phase 1 starts immediately.
-- Phase 2 depends on Phase 1 and blocks all user stories.
-- Phase 3 through Phase 7 depend on Phase 2 completion.
-- Phase 8 depends on completion of target user stories.
+- Phase 2 depends on Phase 1 and Phase 2b (runner model clarification) and blocks all user stories.
+- Phase 2b depends on Phase 2 initial completion and must be done before Phase 5 starts.
+- Phase 3 (US1 / PR1) depends on Phase 1-2 completion only; can be released independently.
+- Phases 4-8 (PR2) depend on Phase 3 (PR1) being merged first.
 
 ### User Story Dependencies
 
-- US1 depends only on foundational delivery contracts.
-- US2 depends on foundational models and adapter interfaces.
-- US5 depends on US1 and US2 baseline behavior.
-- US3 depends on foundational gate framework and can start after US1 baseline.
-- US4 depends on stable behavior from US1, US2, and US5.
+- US1 (Phases 1-3) is PR1 and has no dependencies on other user stories; independently deployable and valuable.
+- US2 (Phase 4) depends on Phase 2b runner model clarification.
+- US5 (Phase 5) depends on Phase 2b runner model + US1 (Phase 3) + US2 baseline (Phase 4).
+- US3 (Phase 6) depends on Phase 2 foundational gates + US1 (Phase 3).
+- US4 (Phase 7) depends on US1 baseline + US2 + US5.
 
-### Parallel Opportunities
+### Parallel Opportunities (within same PR phase)
 
-- T003 in parallel with T001 and T002
-- T006 and T007 in parallel after T004 and T005
-- T011 and T012 in parallel after core runner wiring is in place
-- T016 and T017 in parallel after T014 and T015
-- T022 and T023 in parallel after T019 through T021
-- T036 and T037 in parallel after T033 through T035
-- T040 and T041 in parallel after T038 and T039
-- T042 and T043 in parallel
+**Within PR1 (Phases 1-3)**:
+- T003 in parallel with T001, T002
+- T013a, T013b in parallel with T013, T013c, T013d
+- T016, T017 in parallel after T014, T015
 
----
-
-## Parallel Example: User Story 5
-
-```bash
-Task: "T027 [US5] Emit convergence status in src/devspark_cli/harness/runner.py"
-Task: "T029 [US5] Persist per-pass iteration records in src/devspark_cli/harness/telemetry.py"
-Task: "T032 [P] [US5] Generate final decision packet output in src/devspark_cli/harness/runner.py"
-```
+**Within PR2 (Phases 4-8)**:
+- T022, T023 in parallel after T019-T021
+- T036, T037 in parallel after T033-T035
+- T040, T041 in parallel after T038, T039
+- T042, T043 in parallel
+- T048 in parallel with Phase 8 work
+- T025a, T025b in parallel with T024-T032
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (US1)
+### PR1: MVP Delivery Integrity (Phases 1-3, Tasks T001-T018 + T013a-d + T018a)
+
+**Scope**: Core delivery-status gating and validation evidence model.
+**User Stories Delivered**: US1 (Detect Non-Delivery Runs) only.
+**Standalone Value**: Independently fixes the primary false-positive failure mode.
+**Effort**: ~2-3 weeks for single developer or small team.
+**Testing**: Includes new contract tests from Phase 2.
+**Can be released** as v1.5.1 or similar patch to establish MVP value before PR2.
+
+### PR2: Advanced Features (Phases 4-8, Tasks T019-T049)
+
+**Scope**: Adapter doctor, hands-off orchestration, manual gates, templates, parity, polish.
+**Depends On**: PR1 merged and passing.
+**User Stories Delivered**: US2, US3, US4, US5 (Adapter Doctor, Manual Gates, Strict Defaults, Hands-Off Lifecycle).
+**Effort**: ~4-5 weeks for small team (2-3 developers).
+**Testing**: Full contract + integration tests.
+
+### MVP First (PR1 Only)
 
 1. Complete Phase 1 and Phase 2.
-2. Complete US1 (Phase 3).
-3. Validate delivery-status and create_pr_ready behavior before advancing.
+2. Complete Phase 2b (runner model clarification for future reference).
+3. Complete US1 (Phase 3).
+4. Validate delivery-status and create_pr_ready behavior.
+5. Release PR1.
+6. Start PR2 work after PR1 merges.
 
-### Incremental Delivery
+### Incremental Delivery Strategy (After PR1 Merge)
 
-1. Deliver US1 then US2.
-2. Deliver US5 hands-off orchestration and convergence behavior.
-3. Deliver US3 interactive policy refinements.
-4. Deliver US4 strict-template and docs refinements.
-5. Complete phase 8 parity and validation.
+1. PR1 delivers US1 (delivery integrity MVP).
+2. PR2 begins with Phase 2b clarification already documented.
+3. Phase 4 (US2 adapter doctor) in parallel with Phase 5 (US5 hands-off) since Phase 5 depends on Phase 2b + US1 already done.
+4. Phases 6-7 (US3, US4) can run in parallel after Phase 4 baseline.
+5. Phase 8 polish and parity validation across all user stories.
 
-### Parallel Team Strategy
+### Parallel Team Strategy (for PR2)
 
-1. Team completes foundational phase together.
-2. Developer A: US1 plus US5 orchestration and convergence.
-3. Developer B: US2 adapter doctor plus US3 policies.
-4. Developer C: US4 docs/templates and phase 8 parity and validation tasks.
+- **Developer A**: Phase 5 (US5 hands-off orchestrator + convergence loop) + Phase 4 adapter doctor probe protocol implementation
+- **Developer B**: Phase 6 (US3 manual gates) + Phase 7 (US4 templates) + documentation
+- **Developer C**: Phase 8 (parity, validation, polish, CHANGELOG)
+
+---
+
+## Implementation Notes
+
+### MVP Scope Clarifications
+
+- **Convergence Loop (T026-T028)**: Re-validation-only in MVP. After each pass, findings are re-evaluated. Auto-remediation (LLM-driven fix generation) is deferred to post-MVP feature work.
+- **Stall Detection (T011)**: Total-step-timeout only in MVP. 5-minute output-inactivity detection requires async subprocess refactor; deferred post-MVP.
+- **Git Diff Strategy (T005, T014)**: Use `git diff origin/main...HEAD -- src/ test/` for branch-aware detection.
+- **Non-UTF Decode (T011-T012)**: Add `errors="replace"` to all subprocess text decoding; emit telemetry events on replacement.
+- **Adapter Probe Protocol (T013f)**: Each adapter implements `probe()` method returning `ProbeResult` with capability flags. Non-destructive, no LLM integration required.
+
+### Risk Mitigation Summary
+
+- **CR-1 (Auto-Remediation)**: Scoped as re-validation-only MVP; eliminates unplanned LLM infrastructure work.
+- **CR-2 (Stall Detection)**: Scoped as total-step-timeout only; achievable with current subprocess architecture.
+- **CR-3 (Scope Creep)**: Split into 2 PRs; PR1 is independently valuable and can be released.
+- **HP-1 through HP-6**: All addressed with explicit task additions, clarifications, or scope adjustments.
 
 ---
 
@@ -246,5 +304,6 @@ Task: "T032 [P] [US5] Generate final decision packet output in src/devspark_cli/
 
 - All tasks follow strict checklist format with explicit paths.
 - Canonical term is adapter doctor across artifacts.
-- Governance approval is a required pre-implementation checkpoint for this cross-cutting feature.
-- No unresolved gate acknowledgements are carried forward.
+- Governance approval is a required pre-implementation checkpoint for PR1 (cross-cutting at phase 1-3 scope).
+- PR1 release is independent; PR2 can follow after PR1 merges and is approved.
+- No unresolved gate acknowledgements are carried forward; all critic findings have been addressed in this plan update.

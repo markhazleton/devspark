@@ -41,6 +41,71 @@ Introduce delivery-aware run semantics, adapter doctor capability diagnostics, a
 
 Prioritize verification of hard gate semantics, convergence loop correctness, adapter capability enforcement, and parity across PowerShell/Bash plus template/docs updates.
 
+## Delivery Strategy & Scope Separation
+
+**Two-PR Approach for Risk Mitigation (CR-3 Resolution)**:
+
+### PR1: Delivery Integrity MVP (Phases 1-3, Tasks T001-T018)
+**Scope**: Core delivery-status gating and validation evidence model.
+**User Stories Delivered**: US1 (Detect Non-Delivery Runs) only.
+**Key Features**:
+- Dual outcome model (workflow_status, delivery_status)
+- Default delivery evidence rule (src/test mutation)
+- create-pr-ready readiness blocking
+- No-change explainer artifacts
+- Governance approval checkpoint enforcement
+**Testing**: Includes new contract tests (test_delivery_status_contract.py)
+**Value**: Independently deployable, addresses primary false-positive failure mode
+
+### PR2: Advanced Features & Parity (Phases 4-8, Tasks T019-T047)
+**Scope**: Adapter doctor, hands-off orchestration, manual gates, templates, parity
+**User Stories Delivered**: US2, US3, US4, US5 (Adapter Doctor, Manual Gates, Strict Defaults, Hands-Off Lifecycle)
+**Key Features**:
+- Adapter doctor probes and capability profiles
+- Hands-off lifecycle orchestration (plan → pr-review)
+- Manual gate policies with evidence
+- Strict harness template
+- Bash/PowerShell parity verification
+- Full convergence loop (re-validation only in MVP, auto-remediation deferred)
+**Testing**: Includes full contract and integration tests
+**Value**: Completes vision of unattended end-to-end execution
+
+**Sequencing**: PR1 must merge before PR2 begins. PR1 can be released independently.
+
+## Risk Mitigations Applied (2026-04-29)
+
+### CR-1: Auto-Remediation MVP Scope
+**Resolution**: Convergence loop in Phase 1 is **re-validation-only**. After each pass, findings are re-evaluated. Automatic fix generation is deferred to post-MVP (outside this feature). This eliminates the need for an unplanned LLM integration while still proving iterative convergence behavior.
+
+### CR-2: Stall Detection MVP Scope
+**Resolution**: Stall detection deferred. MVP implements only total-step-timeout via subprocess.run timeout parameter. 5-minute output-inactivity detection requires async subprocess refactor, deferred to post-MVP infrastructure improvement.
+
+### CR-3: Scope Creep Mitigation
+**Resolution**: Split into 2 PRs. PR1 (Phases 1-3) is MVP-complete and independently valuable. PR2 (Phases 4-8) builds on PR1. Reduces per-PR complexity and risk.
+
+### HP-2: Git Diff Reference Strategy
+**Resolution**: Use `git diff origin/main...HEAD -- src/ test/` for branch-aware diff. Document in DeliveryCheckResult model and validation contracts.
+
+### HP-3: Adapter Probe Protocol
+**Resolution**: Add explicit `probe()` method to AgentAdapter protocol. Each adapter implements own probe logic returning ProbeResult with capability flags. No destructive testing needed.
+
+### HP-4: Non-UTF Decode Handling
+**Resolution**: Add `errors="replace"` to all subprocess text decoding in validation.py and adapter base. Emit telemetry event on replacement. Update artifacts to show decode incidents as non-fatal step events.
+
+### HP-5: Runner Orchestration Model
+**Resolution**: Clarify ownership in plan: workflow runner (executor.py) orchestrates full lifecycle; harness runner (harness/runner.py) handles per-step validation and convergence. Add this to Phase 2 foundational task dependencies.
+
+### HP-6: Platform Parity Timing
+**Resolution**: Move parity verification into each phase checkpoint (not Phase-8-only). Phases modifying scripts must include parity smoke check. Full suite runs at Phase 8.
+
+### HP-1: Missing Integration Tests
+**Resolution**: Add new Phase 2 foundational contract tests:
+- test_delivery_status_contract.py
+- test_adapter_doctor_contract.py
+- test_convergence_loop_contract.py
+- test_hands_off_lifecycle_contract.py
+These are Phase 2 gates before user story implementation begins.
+
 ## Summary
 
 Implement a delivery-integrity architecture for harness execution: dual status outcomes (`workflow_status`, `delivery_status`), mandatory implementation evidence checks, iterative analyze/critic remediation loops, and an adapter-gated true hands-off lifecycle from plan through pr-review.
