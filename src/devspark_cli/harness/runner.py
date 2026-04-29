@@ -216,6 +216,182 @@ class HarnessRunner:
             encoding="utf-8",
         )
 
+    def write_lifecycle_artifacts(self) -> None:
+        """Write lifecycle-related artifacts (findings, stage iterations, convergence state).
+        
+        Scaffolding for Phase 2 convergence loop support. Called at end of run execution
+        to persist finding state transitions and iteration records for hands-off re-validation.
+        """
+        if self.run_dir is None or self.run is None:
+            return
+        
+        # Write stage iteration records if present
+        if self.run.stage_iterations:
+            iterations_path = self.run_dir / "lifecycle" / "stage-iterations.json"
+            iterations_path.parent.mkdir(parents=True, exist_ok=True)
+            iterations_path.write_text(
+                json.dumps(
+                    [iter_record.model_dump(mode="json") for iter_record in self.run.stage_iterations],
+                    indent=2
+                ) + "\n",
+                encoding="utf-8",
+            )
+        
+        # Write findings records if present
+        if self.run.findings:
+            findings_path = self.run_dir / "lifecycle" / "findings.json"
+            findings_path.parent.mkdir(parents=True, exist_ok=True)
+            findings_path.write_text(
+                json.dumps(
+                    [finding.model_dump(mode="json") for finding in self.run.findings],
+                    indent=2
+                ) + "\n",
+                encoding="utf-8",
+            )
+    
+    def write_convergence_state(self, pass_number: int, max_passes: int, converged: bool, reason: str | None = None) -> None:
+        """Record convergence loop state for hands-off lifecycle re-validation.
+        
+        Scaffolding for Phase 5 convergence loop implementation. Records whether analyze/critic
+        passes are converging toward resolution or hitting max-pass limit.
+        
+        Args:
+            pass_number: Current pass number (1-indexed)
+            max_passes: Maximum allowed passes
+            converged: Whether convergence criteria met
+            reason: Optional explanation if not converged
+        """
+        if self.run_dir is None:
+            return
+        
+        convergence_path = self.run_dir / "lifecycle" / "convergence-state.json"
+        convergence_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        state = {
+            "pass_number": pass_number,
+            "max_passes": max_passes,
+            "converged": converged,
+            "timestamp": utc_now_iso(),
+        }
+        if reason:
+            state["reason"] = reason
+        
+        convergence_path.write_text(
+            json.dumps(state, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+    def add_finding(
+        self,
+        finding_id: str,
+        severity: str,
+        description: str,
+        recommended_action: str,
+        execution_mode: str = "manual",
+    ) -> None:
+        """Add a new finding to the current run.
+        
+        Part of Phase 2 convergence loop scaffolding. Findings track analyze/critic
+        issues that need resolution in subsequent passes.
+        
+        Args:
+            finding_id: Unique identifier for the finding
+            severity: "error", "warning", or "info"
+            description: Human-readable description
+            recommended_action: Suggested remediation action
+            execution_mode: "auto" (attempted), "selective" (conditional), "manual" (user-triggered)
+        """
+        if self.run is None:
+            return
+        
+        if self.run.findings is None:
+            self.run.findings = []
+        
+        from .spec_models import Finding
+        finding = Finding(
+            finding_id=finding_id,
+            severity=severity,
+            description=description,
+            recommended_action=recommended_action,
+            execution_mode=execution_mode,
+            status="open",
+        )
+        self.run.findings.append(finding)
+
+    def resolve_finding(self, finding_id: str) -> bool:
+        """Mark a finding as resolved.
+        
+        Called when re-validation confirms that a previously-identified issue
+        has been fixed in the latest stage output.
+        
+        Returns:
+            True if finding was found and transitioned; False otherwise.
+        """
+        if self.run is None or self.run.findings is None:
+            return False
+        
+        for finding in self.run.findings:
+            if finding.finding_id == finding_id and finding.status == "open":
+                finding.status = "resolved"
+                return True
+        return False
+
+    def defer_finding(self, finding_id: str, reason: str | None = None) -> bool:
+        """Mark a finding as deferred (post-MVP work).
+        
+        Called when an issue is identified but cannot be resolved in the current
+        run context and should be addressed in a future iteration.
+        
+        Returns:
+            True if finding was found and transitioned; False otherwise.
+        """
+        if self.run is None or self.run.findings is None:
+            return False
+        
+        for finding in self.run.findings:
+            if finding.finding_id == finding_id and finding.status == "open":
+                finding.status = "deferred"
+                if reason:
+                    finding.description = f"{finding.description} (deferred: {reason})"
+                return True
+        return False
+
+    def get_open_findings(self) -> list:
+        """Return all currently-open findings for re-evaluation."""
+        if self.run is None or self.run.findings is None:
+            return []
+        return [f for f in self.run.findings if f.status == "open"]
+
+    def record_stage_failure(self, stage_name: str, reason_code: str, details: str | None = None) -> None:
+        """Record a stage-level failure with reason code for audit trail.
+        
+        Part of Phase 2 explicit failure tracking. Maps stage failures to structured
+        reason codes for reporting, gating decisions, and hands-off orchestration.
+        
+        Args:
+            stage_name: Name of the stage (e.g., "analyze", "critic", "implement")
+            reason_code: Canonical reason code (e.g., REASON_CODE_CREATE_PR_BLOCKED)
+            details: Optional additional context
+        """
+        if self.telemetry is None or self.context is None:
+            return
+        
+        # Emit telemetry event for stage failure with reason code
+        event_data = {
+            "stage": stage_name,
+            "reason_code": reason_code,
+        }
+        if details:
+            event_data["details"] = details
+        
+        self.telemetry.emit("harness.stage.failure", self.context.run_id, **event_data)
+
+    def get_stage_reason_code(self) -> str | None:
+        """Return the failure reason code if this run failed at a stage boundary."""
+        if self.run is None:
+            return None
+        return self.run.failure_reason_code
+
     def _collect_delivery_checks(self) -> list[DeliveryCheckResult]:
         if self.context is None:
             return []
@@ -369,6 +545,7 @@ class HarnessRunner:
             validation_failures=run.metrics.validation_failures,
         )
         self.write_result()
+        self.write_lifecycle_artifacts()
         self.prune_old_runs(Path(spec.telemetry.run_dir), keep=load_run_retention_limit())
         return run
 

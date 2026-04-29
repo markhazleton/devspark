@@ -24,11 +24,58 @@ class AgentResponse:
     command_preview: str = ""
 
 
+@dataclass(slots=True)
+class ProbeResult:
+    """Adapter capability and readiness status.
+    
+    Part of Phase 4 adapter doctor feature. Each adapter reports its capabilities
+    so the harness runner can make routing decisions without trial execution.
+    
+    Attributes:
+        can_read: True if adapter can execute read-only steps (no file modifications)
+        can_write: True if adapter can execute write steps (commits, PRs, file edits)
+        is_interactive: True if adapter requires user prompts/feedback
+        ready: True if all prerequisites are met for execution
+        diagnostics: List of diagnostic messages if not ready (empty if ready=True)
+    """
+    can_read: bool = True
+    can_write: bool = False
+    is_interactive: bool = False
+    ready: bool = False
+    diagnostics: list[str] | None = None
+    
+    def with_diagnostic(self, message: str) -> ProbeResult:
+        """Add a diagnostic message and return self."""
+        if self.diagnostics is None:
+            self.diagnostics = []
+        self.diagnostics.append(message)
+        return self
+
+
 class AgentAdapter(Protocol):
     name: str
 
     def is_available(self) -> tuple[bool, str | None]:
         ...
+
+    def probe(self) -> ProbeResult:
+        """Return adapter capability and readiness status.
+        
+        Non-destructive probe that determines whether this adapter can execute
+        read-only steps, write steps, or both. Called before harness execution
+        to make routing decisions.
+        
+        Part of Phase 4 adapter doctor feature. Implementation is optional in MVP.
+        Default behavior: return ProbeResult with can_read=True, ready depends on is_available().
+        """
+        available, error = self.is_available()
+        return ProbeResult(
+            can_read=True,
+            can_write=False,
+            is_interactive=False,
+            ready=available,
+            diagnostics=[error] if error else None,
+        )
 
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         ...

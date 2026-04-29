@@ -245,6 +245,18 @@ def register(app: typer.Typer) -> None:
                     )
                     raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
+        # Governance approval guard for cross-cutting features
+        if _requires_governance_approval(workflow_id):
+            approval = _get_governance_approval_status(repo_root)
+            if approval is None:
+                typer.echo(
+                    "Governance approval required but not found. "
+                    "Leadership checkpoint must be completed before this workflow can run.\n"
+                    "See .documentation/specs/*/gates/governance-approval.md for approval template.",
+                    err=True,
+                )
+                raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+
         invoker = _live_prompt_invoker(repo_root)
         telemetry = _make_telemetry(repo_root)
         enforcer = _make_enforcer(repo_root, wf, effective_autonomy)
@@ -485,6 +497,53 @@ def _latest_harness_result(repo_root: Path) -> dict[str, Any] | None:
 def _is_delivery_gate_target(workflow_id: str) -> bool:
     lowered = workflow_id.lower()
     return "create-pr" in lowered or "pr-review" in lowered
+
+
+def _get_governance_approval_status(repo_root: Path) -> dict[str, Any] | None:
+    """Check for governance approval evidence in spec artifacts.
+    
+    Returns approval record if found, None otherwise.
+    """
+    # Check common feature spec locations
+    spec_paths = [
+        repo_root / ".documentation" / "specs" / "*/gates" / "governance-approval.md",
+        repo_root / ".documentation" / "specs" / "*/governance-approval.md",
+    ]
+    
+    for pattern_path in spec_paths:
+        if "*" in str(pattern_path):
+            import glob
+            matches = glob.glob(str(pattern_path))
+            for match in matches:
+                try:
+                    content = Path(match).read_text(encoding="utf-8")
+                    # Check if approval record is populated
+                    if "Approver Name:" in content and "Decision:" in content:
+                        # Extract decision line
+                        for line in content.split("\n"):
+                            if "Decision:" in line:
+                                decision = line.split("Decision:")[-1].strip()
+                                if "approved" in decision.lower():
+                                    return {"approved": True, "path": match, "decision": decision}
+                except Exception:
+                    continue
+    
+    return None
+
+
+def _requires_governance_approval(workflow_id: str) -> bool:
+    """Check if a workflow requires governance approval checkpoint.
+    
+    Workflows that modify cross-cutting runtime behavior require governance
+    approval before execution begins.
+    """
+    lowered = workflow_id.lower()
+    # Require approval for workflows marked in spec as governance-required
+    # This includes harness delivery integrity and other cross-cutting features
+    return "implement" in lowered and any(
+        marker in lowered
+        for marker in ["delivery-integrity", "harness", "governance"]
+    )
 
 
 def _make_telemetry(repo_root: Path):

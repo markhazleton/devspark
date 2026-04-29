@@ -318,6 +318,7 @@ class Run(BaseModel):
     create_pr_ready: bool = False
     failure_reason_code: str | None = None
     delivery_checks: list[DeliveryCheckResult] = Field(default_factory=list)
+    findings: list[Finding] = Field(default_factory=list)
     stage_iterations: list[StageIterationRecord] = Field(default_factory=list)
     steps: list[StepResult] = Field(default_factory=list)
     metrics: RunMetrics = Field(default_factory=RunMetrics)

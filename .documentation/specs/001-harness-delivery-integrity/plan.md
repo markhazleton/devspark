@@ -189,6 +189,93 @@ tests/
 
 **Structure Decision**: Keep existing single-project repository layout. Implement runtime logic under `src/devspark_cli/` and enforce parity/contract behavior via updates to `scripts/*`, `templates/*`, and `tests/*`.
 
+## Runner Orchestration Model
+
+**Phase 2b Clarification: Ownership and Responsibility**
+
+The DevSpark harness runtime has two distinct runner components with clear ownership boundaries:
+
+### Workflow Runner (executor.py) — Top-Level Orchestrator
+
+**Responsibility**: Sequences the end-to-end workflow from plan through pr-review.
+
+**Location**: `src/devspark_cli/runner/executor.py`
+
+**Capabilities**:
+- Parses workflow YAML definitions
+- Schedules stages in order (e.g., plan → tasks → analyze → critic → implement → create-pr → pr-review)
+- Handles pause/resume and autonomy-level enforcement
+- Coordinates telemetry across all stages
+- Not responsible for stage-internal validation or finding management
+
+**Ownership Model**: DevSpark framework layer; handles orchestration semantics, not validation logic.
+
+### Harness Runner (harness/runner.py) — Per-Step Validator
+
+**Responsibility**: Executes individual harness steps within the implement stage and validates each step's outcomes.
+
+**Location**: `src/devspark_cli/harness/runner.py`
+
+**Capabilities**:
+- Loads and parses harness spec YAML
+- Executes each step via selected adapter
+- Validates step output against declared rules
+- Computes delivery checks and finding status
+- Manages lifecycle artifacts (findings, convergence state, stage iterations)
+- Emits per-step and per-run telemetry
+- Not responsible for cross-stage orchestration or workflow routing
+
+**Ownership Model**: Harness subsystem; handles per-step validation and delivery integrity semantics.
+
+### Collaboration Pattern
+
+```
+WorkflowRunner (Top-Level)
+  └─ Calls: implement stage
+       └─ Invokes: HarnessRunner
+            ├─ Loads: harness spec
+            ├─ For each step:
+            │  ├─ Executes: adapter.run()
+            │  ├─ Validates: rules + delivery checks
+            │  └─ Emits: step telemetry
+            ├─ Computes: delivery_status + create_pr_ready
+            └─ Returns: Run outcome to WorkflowRunner
+  └─ Checks: create_pr_ready gate
+  └─ Continues: if gate passes
+```
+
+### Design Rationale
+
+**Separation of Concerns**:
+- Workflow runner handles sequencing and cross-stage decisions
+- Harness runner handles validation and per-step evidence
+- Each is independently testable and deployable
+
+**Hand-Off Semantic** (for Phase 5 hands-off implementation):
+- WorkflowRunner reads run outcome and delivery_status from HarnessRunner
+- If delivery_status is unmet, WorkflowRunner blocks create-pr and pr-review transitions
+- Re-validation loop (Phase 5 convergence) runs within HarnessRunner, not WorkflowRunner
+
+**Adapter Capability Model** (Phase 4+):
+- Adapters report probe() results to HarnessRunner
+- HarnessRunner may signal WorkflowRunner to skip write-required stages if adapter is read-only
+- This allows graceful degradation in non-write environments (e.g., review-only runs)
+
+### Future Extension: Probe Protocol
+
+**Phase 4 Addition**: Each adapter will implement a `probe()` method returning:
+```python
+@dataclass
+class ProbeResult:
+    can_read: bool  # Can execute read steps
+    can_write: bool  # Can execute write steps (commits, PRs)
+    is_interactive: bool  # Requires user prompts
+    ready: bool  # All prerequisites met
+    diagnostics: list[str]  # Readiness issues if not ready
+```
+
+This allows WorkflowRunner to make routing decisions based on adapter capability without executing trial steps.
+
 ## Complexity Tracking
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |

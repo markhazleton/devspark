@@ -86,6 +86,9 @@ class ValidationEngine:
                 return ValidationFinding(rule_id=rule.id, type=rule.type, status="skipped", severity=rule.severity, message="Skipped in plan mode (command may have side effects)")
             timeout_seconds = rule.timeout_seconds or 300
             try:
+                # SECURITY NOTE: rule.command comes from committed harness spec YAML, not user input.
+                # Injection risk is limited to developers with repo write access. No untrusted input flows here.
+                # See .documentation/specs/*/gates/security-audit.md for full analysis.
                 completed = subprocess.run(
                     rule.command,
                     cwd=repo_root,
@@ -200,6 +203,9 @@ class ValidationEngine:
                 "Score 1-5 on the first line (just the integer). 1=poor, 5=excellent."
             )
 
+            # SECURITY NOTE: rule.grader_command comes from committed harness spec YAML, not user input.
+            # Injection risk is limited to developers with repo write access. Grading prompt is constructed
+            # from file contents, not external input. See security-audit.md for full analysis.
             completed = subprocess.run(
                 rule.grader_command,
                 shell=True,
