@@ -233,6 +233,18 @@ def register(app: typer.Typer) -> None:
             )
             raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
+        if _is_delivery_gate_target(workflow_id):
+            latest_result = _latest_harness_result(repo_root)
+            if latest_result is not None:
+                delivery_status = latest_result.get("delivery_status")
+                create_pr_ready = latest_result.get("create_pr_ready")
+                if delivery_status == "unmet" or create_pr_ready is False:
+                    typer.echo(
+                        "delivery-status gate blocked this workflow; latest harness run is not create-pr ready.",
+                        err=True,
+                    )
+                    raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+
         invoker = _live_prompt_invoker(repo_root)
         telemetry = _make_telemetry(repo_root)
         enforcer = _make_enforcer(repo_root, wf, effective_autonomy)
@@ -454,6 +466,25 @@ def _git_dirty(repo_root: Path) -> bool:
     except FileNotFoundError:
         return False
     return bool(result.stdout.strip())
+
+
+def _latest_harness_result(repo_root: Path) -> dict[str, Any] | None:
+    runs_root = repo_root / ".documentation" / "devspark" / "runs"
+    if not runs_root.is_dir():
+        return None
+    candidates = [path for path in runs_root.iterdir() if path.is_dir() and (path / "result.json").is_file()]
+    if not candidates:
+        return None
+    latest = max(candidates, key=lambda item: item.stat().st_mtime)
+    try:
+        return json.loads((latest / "result.json").read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _is_delivery_gate_target(workflow_id: str) -> bool:
+    lowered = workflow_id.lower()
+    return "create-pr" in lowered or "pr-review" in lowered
 
 
 def _make_telemetry(repo_root: Path):

@@ -1,0 +1,9 @@
+{
+  "run_id": "run_20260429T133323Z_a59914",
+  "repo_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j",
+  "spec_path": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\rubric.harness.yaml",
+  "doc_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\.documentation",
+  "adapter": "noop",
+  "dry_run": false,
+  "execution_mode": "act"
+}

@@ -44,8 +44,8 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 **Purpose**: Prepare shared constants, reason codes, and analysis artifact locations.
 
-- [ ] T001 Add feature constants and defaults in src/devspark_cli/harness/config.py
-- [ ] T002 Add shared reason-code definitions in src/devspark_cli/harness/spec_models.py
+- [X] T001 Add feature constants and defaults in src/devspark_cli/harness/config.py
+- [X] T002 Add shared reason-code definitions in src/devspark_cli/harness/spec_models.py
 - [ ] T003 [P] Add feature quickstart section in .documentation/specs/001-harness-delivery-integrity/quickstart.md
 
 ---
@@ -56,18 +56,18 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 **CRITICAL**: No user story implementation starts before this phase completes.
 
-- [ ] T004 Extend run outcome schema for workflow_status, delivery_status, and create_pr_ready in src/devspark_cli/harness/spec_models.py
-- [ ] T005 Add structured delivery check result model with git diff reference strategy in src/devspark_cli/harness/spec_models.py
-- [ ] T006 [P] Add mutation-aware validation rule support in src/devspark_cli/harness/validation.py
+- [X] T004 Extend run outcome schema for workflow_status, delivery_status, and create_pr_ready in src/devspark_cli/harness/spec_models.py
+- [X] T005 Add structured delivery check result model with git diff reference strategy in src/devspark_cli/harness/spec_models.py
+- [X] T006 [P] Add mutation-aware validation rule support in src/devspark_cli/harness/validation.py
 - [ ] T007 [P] Add lifecycle artifact writer scaffolding in src/devspark_cli/harness/runner.py
 - [ ] T008 Implement finding status transitions (open, resolved, deferred) in src/devspark_cli/harness/runner.py
 - [ ] T009 Add stage-level failure reason-code mapping in src/devspark_cli/harness/runner.py
 - [ ] T010 Implement pre-implement governance approval guard that validates leadership checkpoint evidence before execution starts in src/devspark_cli/commands.py
-- [ ] T011 [MVP SCOPE] Implement total-step-timeout and non-UTF decode fallback handling in src/devspark_cli/harness/runner.py (full 5-min stall detection deferred post-MVP pending async subprocess refactor)
-- [ ] T012 [P] Emit timeout and decode incident non-fatal events with reason codes in src/devspark_cli/harness/telemetry.py
-- [ ] T013 Record governance checkpoint evidence template in .documentation/specs/001-harness-delivery-integrity/gates/governance-approval.md
-- [ ] T013a [P] Create test_delivery_status_contract.py with gating and create-pr-ready blocking validation in tests/
-- [ ] T013b [P] Create test_convergence_loop_contract.py with iteration records and finding state transitions in tests/
+- [X] T011 [MVP SCOPE] Implement total-step-timeout and non-UTF decode fallback handling in src/devspark_cli/harness/runner.py (full 5-min stall detection deferred post-MVP pending async subprocess refactor)
+- [X] T012 [P] Emit timeout and decode incident non-fatal events with reason codes in src/devspark_cli/harness/telemetry.py
+- [X] T013 Record governance checkpoint evidence template in .documentation/specs/001-harness-delivery-integrity/gates/governance-approval.md
+- [X] T013a [P] Create test_delivery_status_contract.py with gating and create-pr-ready blocking validation in tests/
+- [X] T013b [P] Create test_convergence_loop_contract.py with iteration records and finding state transitions in tests/
 - [ ] T013c Create CI/CD configuration to run new contract tests in .github/workflows/ (or update existing)
 - [ ] T013d Perform security audit of subprocess calls with shell=True in validation.py for injection risk in src/devspark_cli/harness/validation.py
 
@@ -96,11 +96,11 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Enforce default src/test mutation evidence rule with git diff reference in src/devspark_cli/harness/validation.py
-- [ ] T015 [US1] Compute create_pr_ready from delivery checks in src/devspark_cli/harness/runner.py
-- [ ] T016 [P] [US1] Generate no-change explainer section in run artifacts in src/devspark_cli/harness/runner.py
-- [ ] T017 [P] [US1] Align run outcome contract details in .documentation/specs/001-harness-delivery-integrity/contracts/run-outcome-contract.md
-- [ ] T018 [US1] Add explicit delivery-status gate before create-pr transition in src/devspark_cli/run_commands.py
+- [X] T014 [US1] Enforce default src/test mutation evidence rule with git diff reference in src/devspark_cli/harness/validation.py
+- [X] T015 [US1] Compute create_pr_ready from delivery checks in src/devspark_cli/harness/runner.py
+- [X] T016 [P] [US1] Generate no-change explainer section in run artifacts in src/devspark_cli/harness/runner.py
+- [X] T017 [P] [US1] Align run outcome contract details in .documentation/specs/001-harness-delivery-integrity/contracts/run-outcome-contract.md
+- [X] T018 [US1] Add explicit delivery-status gate before create-pr transition in src/devspark_cli/run_commands.py
 - [ ] T018a [P] Add parity smoke test for delivery-status enforcement in Bash and PowerShell scripts (bash/powershell)
 
 **Checkpoint**: US1 independently validated. PR1 ready for review.

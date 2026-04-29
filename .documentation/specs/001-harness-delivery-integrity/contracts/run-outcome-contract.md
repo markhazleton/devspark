@@ -11,7 +11,7 @@ Defines required output contract for hands-off lifecycle runs and iterative anal
 - `delivery_status`: `met` | `unmet`
 - `create_pr_ready`: boolean
 - `failure_reason_code`: string|null
-- `checks`: array of DeliveryCheckResult
+- `delivery_checks`: array of DeliveryCheckResult
 - `iterations`: array of StageIterationRecord
 - `decision_packet`: DecisionPacket
 
@@ -19,7 +19,8 @@ Defines required output contract for hands-off lifecycle runs and iterative anal
 
 1. `create_pr_ready` MUST be `false` when `delivery_status` is `unmet`.
 2. Implement-stage default evidence requires at least one changed path matching `src/**` or `test/**`.
-3. Branch sync checks MUST pass before create-pr/pr-review in hands-off mode.
+3. Delivery evidence MUST evaluate branch-aware diffs using `git diff origin/main...HEAD -- src/ test/`, with fallback checks for staged (`git diff --cached`) and working tree (`git diff`) changes.
+4. Branch sync checks MUST pass before create-pr/pr-review in hands-off mode.
 
 ## Iteration Rules
 

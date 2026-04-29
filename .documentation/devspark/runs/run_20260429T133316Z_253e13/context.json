@@ -1,0 +1,9 @@
+{
+  "run_id": "run_20260429T133316Z_253e13",
+  "repo_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\pytest-of-markh\\pytest-21\\test_delivery_status_met_with_0",
+  "spec_path": "C:\\Users\\markh\\AppData\\Local\\Temp\\pytest-of-markh\\pytest-21\\test_delivery_status_met_with_0\\delivery.harness.yaml",
+  "doc_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\pytest-of-markh\\pytest-21\\test_delivery_status_met_with_0\\.documentation",
+  "adapter": "noop",
+  "dry_run": false,
+  "execution_mode": "act"
+}

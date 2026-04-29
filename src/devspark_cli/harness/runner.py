@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import secrets
+import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,8 +20,14 @@ from .config import load_adapter_default, load_run_retention_limit
 from .spec_loader import HarnessSpecError, default_retry_policy, discover_repo_root, load_harness_spec
 from .spec_models import (
     ArtifactDelta,
+    DeliveryCheckResult,
+    DeliveryStatus,
     ExecutionMode,
     HarnessSpec,
+    REASON_CODE_CREATE_PR_BLOCKED,
+    REASON_CODE_DECODE_REPLACEMENT,
+    REASON_CODE_DELIVERY_UNMET,
+    REASON_CODE_STEP_TIMEOUT,
     Run,
     RunContext,
     RunMetrics,
@@ -209,6 +216,92 @@ class HarnessRunner:
             encoding="utf-8",
         )
 
+    def _collect_delivery_checks(self) -> list[DeliveryCheckResult]:
+        if self.context is None:
+            return []
+        repo_root = Path(self.context.repo_root)
+        changed: set[str] = set()
+        try:
+            commands = [
+                ["git", "diff", "origin/main...HEAD", "--name-only", "--", "src/", "test/"],
+                ["git", "diff", "--cached", "--name-only", "--", "src/", "test/"],
+                ["git", "diff", "--name-only", "--", "src/", "test/"],
+            ]
+            for command in commands:
+                completed = subprocess.run(
+                    command,
+                    cwd=repo_root,
+                    text=True,
+                    errors="replace",
+                    capture_output=True,
+                    check=False,
+                    timeout=30,
+                )
+                if completed.returncode == 0:
+                    for line in (completed.stdout or "").splitlines():
+                        value = line.strip()
+                        if value:
+                            changed.add(value.replace("\\", "/"))
+
+            status_completed = subprocess.run(
+                ["git", "status", "--porcelain", "--", "src/", "test/"],
+                cwd=repo_root,
+                text=True,
+                errors="replace",
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+            if status_completed.returncode == 0:
+                for line in (status_completed.stdout or "").splitlines():
+                    candidate = line[3:].strip() if len(line) > 3 else ""
+                    if candidate:
+                        changed.add(candidate.replace("\\", "/"))
+        except Exception:
+            changed = set()
+
+        checks: list[DeliveryCheckResult] = []
+        checks.append(
+            DeliveryCheckResult(
+                check_id="default-src-test-changed-count",
+                check_type="git.changed_count",
+                required=True,
+                status="pass" if len(changed) >= 1 else "fail",
+                details={"base_ref": "origin/main", "count": len(changed)},
+            )
+        )
+        checks.append(
+            DeliveryCheckResult(
+                check_id="default-src-test-path-match",
+                check_type="git.changed_path_match",
+                required=True,
+                status="pass" if any(path.startswith("src/") or path.startswith("test/") for path in changed) else "fail",
+                details={"base_ref": "origin/main", "matched_paths": sorted(changed)[:20]},
+            )
+        )
+        return checks
+
+    def _write_no_change_explainer(self, checks: list[DeliveryCheckResult]) -> None:
+        if self.run_dir is None:
+            return
+        failed = [check for check in checks if check.required and check.status == "fail"]
+        if not failed:
+            return
+        lines = [
+            "# Delivery Status Unmet",
+            "",
+            "Workflow execution completed but delivery evidence requirements were not met.",
+            "",
+            "## Failed Checks",
+        ]
+        for check in failed:
+            lines.append(f"- {check.check_id}: {check.details}")
+        lines.append("")
+        lines.append("## Next Actions")
+        lines.append("- Ensure at least one file changes under src/ or test/.")
+        lines.append("- Re-run harness after implementation changes are present.")
+        (self.run_dir / "no-change-explainer.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
     def execute(self) -> Run:
         spec = self.spec or self.load_spec()
         run, _ = self.prepare_run()
@@ -240,13 +333,37 @@ class HarnessRunner:
         except KeyboardInterrupt:
             run.status = "aborted"
 
+        run.workflow_status = "complete" if run.status == "complete" else "failed"
+        run.delivery_checks = self._collect_delivery_checks()
+        required_failed = [check for check in run.delivery_checks if check.required and check.status == "fail"]
+        run.delivery_status = "met" if not required_failed else "unmet"
+        run.create_pr_ready = run.workflow_status == "complete" and run.delivery_status == "met"
+        if run.delivery_status == "unmet":
+            run.failure_reason_code = REASON_CODE_DELIVERY_UNMET
+            self._write_no_change_explainer(run.delivery_checks)
+        elif not run.create_pr_ready:
+            run.failure_reason_code = REASON_CODE_CREATE_PR_BLOCKED
+
         run.finished_at = utc_now_iso()
         run.metrics.duration_ms = int((time.perf_counter() - started) * 1000)
         assert self.telemetry is not None
+        for check in run.delivery_checks:
+            self.telemetry.emit(
+                "harness.delivery.check",
+                run.run_id,
+                check_id=check.check_id,
+                check_type=check.check_type,
+                required=check.required,
+                status=check.status,
+                details=check.details,
+            )
         self.telemetry.emit(
             "harness.run.finished",
             run.run_id,
             status=run.status,
+            workflow_status=run.workflow_status,
+            delivery_status=run.delivery_status,
+            create_pr_ready=run.create_pr_ready,
             duration_ms=run.metrics.duration_ms,
             steps_total=run.metrics.steps_total,
             validation_failures=run.metrics.validation_failures,
@@ -435,6 +552,24 @@ class HarnessRunner:
                 severity=finding.severity,
                 message=finding.message,
             )
+            if "timed out" in finding.message.lower():
+                self.telemetry.emit(
+                    "harness.step.incident",
+                    self.context.run_id,
+                    step_id=step.id,
+                    reason_code=REASON_CODE_STEP_TIMEOUT,
+                    rule_id=rule.id,
+                    non_fatal=True,
+                )
+            if "decode replacements applied" in finding.message.lower():
+                self.telemetry.emit(
+                    "harness.step.incident",
+                    self.context.run_id,
+                    step_id=step.id,
+                    reason_code=REASON_CODE_DECODE_REPLACEMENT,
+                    rule_id=rule.id,
+                    non_fatal=True,
+                )
 
         # Skip rubric rules if any deterministic error-severity rule failed
         has_deterministic_errors = any(
@@ -463,6 +598,24 @@ class HarnessRunner:
                 severity=finding.severity,
                 message=finding.message,
             )
+            if "timed out" in finding.message.lower():
+                self.telemetry.emit(
+                    "harness.step.incident",
+                    self.context.run_id,
+                    step_id=step.id,
+                    reason_code=REASON_CODE_STEP_TIMEOUT,
+                    rule_id=rule.id,
+                    non_fatal=True,
+                )
+            if "decode replacements applied" in finding.message.lower():
+                self.telemetry.emit(
+                    "harness.step.incident",
+                    self.context.run_id,
+                    step_id=step.id,
+                    reason_code=REASON_CODE_DECODE_REPLACEMENT,
+                    rule_id=rule.id,
+                    non_fatal=True,
+                )
 
         return findings
 

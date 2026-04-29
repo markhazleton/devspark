@@ -1,0 +1,25 @@
+apiVersion: devspark.ai/v1
+kind: HarnessSpec
+name: delta-test
+scope:
+  type: repo
+defaults:
+  adapter: noop
+  retry:
+    maxAttempts: 1
+    backoff: none
+    retryOn:
+    - validation_fail
+  mode: agent
+steps:
+- id: delta-step
+  name: ''
+  type: agent_task
+  prompt_file: C:\Users\markh\AppData\Local\Temp\tmp0tuoj79j\prompts\base.md
+  inputs: []
+  outputs:
+  - C:\Users\markh\AppData\Local\Temp\tmp0tuoj79j\tracked_output.txt
+  validation: []
+telemetry:
+  emit_jsonl: true
+  run_dir: .documentation/devspark/runs

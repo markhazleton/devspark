@@ -1,0 +1,44 @@
+apiVersion: devspark.ai/v1
+kind: HarnessSpec
+name: rubric-skip-test
+scope:
+  type: repo
+defaults:
+  adapter: noop
+  retry:
+    maxAttempts: 1
+    backoff: none
+    retryOn:
+    - validation_fail
+  mode: agent
+steps:
+- id: rubric-step
+  name: ''
+  type: validation
+  inputs: []
+  outputs: []
+  validation:
+  - id: det-fail
+    type: file.exists
+    severity: error
+    path: C:\Users\markh\AppData\Local\Temp\tmp0tuoj79j\absolutely_missing_rubric_input.txt
+    expected_exit: 0
+    git_base_ref: origin/main
+    path_patterns: []
+    min_changed_count: 1
+    pass_threshold: 3
+    enabled: true
+  - id: rubric-check
+    type: llm.rubric
+    severity: warning
+    expected_exit: 0
+    git_base_ref: origin/main
+    path_patterns: []
+    min_changed_count: 1
+    rubric: Does the output contain a summary?
+    grader_command: echo 4
+    pass_threshold: 3
+    enabled: true
+telemetry:
+  emit_jsonl: true
+  run_dir: .documentation/devspark/runs

@@ -1,0 +1,77 @@
+{
+  "run_id": "run_20260429T133322Z_123caf",
+  "status": "failed",
+  "harness_name": "retry-test",
+  "api_version": "devspark.ai/v1",
+  "scope": {
+    "type": "repo"
+  },
+  "started_at": "2026-04-29T13:33:22.807Z",
+  "finished_at": "2026-04-29T13:33:22.989Z",
+  "workflow_status": "failed",
+  "delivery_status": "unmet",
+  "create_pr_ready": false,
+  "failure_reason_code": "delivery_status_unmet",
+  "delivery_checks": [
+    {
+      "check_id": "default-src-test-changed-count",
+      "check_type": "git.changed_count",
+      "required": true,
+      "status": "fail",
+      "details": {
+        "base_ref": "origin/main",
+        "count": 0
+      }
+    },
+    {
+      "check_id": "default-src-test-path-match",
+      "check_type": "git.changed_path_match",
+      "required": true,
+      "status": "fail",
+      "details": {
+        "base_ref": "origin/main",
+        "matched_paths": []
+      }
+    }
+  ],
+  "stage_iterations": [],
+  "steps": [
+    {
+      "step_id": "retry-step",
+      "status": "failed",
+      "attempts": 2,
+      "adapter": "noop",
+      "duration_ms": 6,
+      "validation_findings": [
+        {
+          "rule_id": "missing-output",
+          "type": "file.exists",
+          "status": "failed",
+          "severity": "error",
+          "message": "File C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\missing.txt is missing"
+        }
+      ],
+      "artifacts": {
+        "created": [],
+        "modified": [],
+        "deleted": []
+      }
+    }
+  ],
+  "metrics": {
+    "duration_ms": 180,
+    "steps_total": 1,
+    "steps_passed": 0,
+    "steps_failed": 1,
+    "validation_failures": 1
+  },
+  "context": {
+    "run_id": "run_20260429T133322Z_123caf",
+    "repo_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j",
+    "spec_path": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\retry.harness.yaml",
+    "doc_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\.documentation",
+    "adapter": "noop",
+    "dry_run": false,
+    "execution_mode": "act"
+  }
+}

@@ -11,7 +11,7 @@ required_gates: checklist, analyze, critic
 
 **Feature Branch**: `001-harness-delivery-integrity`
 **Created**: 2026-04-19
-**Status**: Draft
+**Status**: In Progress
 **Input**: User description: "review this retrospective on trying to use the cli to complete a spec to pr-review. see what lessons can be learned and if we need to update the code or documentation to make this an easier process."
 
 ## Rationale Summary

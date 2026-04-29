@@ -1,0 +1,84 @@
+{
+  "run_id": "run_20260429T133323Z_e11087",
+  "status": "complete",
+  "harness_name": "disabled-test",
+  "api_version": "devspark.ai/v1",
+  "scope": {
+    "type": "repo"
+  },
+  "started_at": "2026-04-29T13:33:23.731Z",
+  "finished_at": "2026-04-29T13:33:23.900Z",
+  "workflow_status": "complete",
+  "delivery_status": "unmet",
+  "create_pr_ready": false,
+  "failure_reason_code": "delivery_status_unmet",
+  "delivery_checks": [
+    {
+      "check_id": "default-src-test-changed-count",
+      "check_type": "git.changed_count",
+      "required": true,
+      "status": "fail",
+      "details": {
+        "base_ref": "origin/main",
+        "count": 0
+      }
+    },
+    {
+      "check_id": "default-src-test-path-match",
+      "check_type": "git.changed_path_match",
+      "required": true,
+      "status": "fail",
+      "details": {
+        "base_ref": "origin/main",
+        "matched_paths": []
+      }
+    }
+  ],
+  "stage_iterations": [],
+  "steps": [
+    {
+      "step_id": "disabled-step",
+      "status": "passed",
+      "attempts": 1,
+      "adapter": "validation",
+      "duration_ms": 0,
+      "validation_findings": [
+        {
+          "rule_id": "this-fails",
+          "type": "file.exists",
+          "status": "skipped",
+          "severity": "error",
+          "message": "Rule disabled (enabled=false)"
+        },
+        {
+          "rule_id": "this-passes",
+          "type": "always.pass",
+          "status": "passed",
+          "severity": "warning",
+          "message": "Rule passed"
+        }
+      ],
+      "artifacts": {
+        "created": [],
+        "modified": [],
+        "deleted": []
+      }
+    }
+  ],
+  "metrics": {
+    "duration_ms": 166,
+    "steps_total": 1,
+    "steps_passed": 1,
+    "steps_failed": 0,
+    "validation_failures": 0
+  },
+  "context": {
+    "run_id": "run_20260429T133323Z_e11087",
+    "repo_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j",
+    "spec_path": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\disabled.harness.yaml",
+    "doc_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\.documentation",
+    "adapter": "noop",
+    "dry_run": false,
+    "execution_mode": "act"
+  }
+}
