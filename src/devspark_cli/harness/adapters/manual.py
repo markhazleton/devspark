@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from ..spec_models import StepSpec
-from .base import AgentResponse, apply_context_budget, load_prompt_text
+from .base import AgentResponse, ProbeResult, apply_context_budget, load_prompt_text
 
 
 class ManualAdapter:
@@ -21,6 +21,15 @@ class ManualAdapter:
 
     def is_available(self) -> tuple[bool, str | None]:
         return True, None
+
+    def probe(self) -> ProbeResult:
+        return ProbeResult(
+            can_read=True,
+            can_write=False,
+            is_interactive=True,
+            ready=True,
+            diagnostics=["Manual adapter requires interactive user confirmation for write operations."],
+        )
 
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         if not sys.stdout.isatty():

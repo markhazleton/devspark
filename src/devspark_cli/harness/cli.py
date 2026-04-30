@@ -10,7 +10,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from .adapters import get_registered_adapters, get_registered_adapter_names
+from .adapters import get_registered_adapters, get_registered_adapter_names, probe_adapter
 from .config import load_adapter_default, save_adapter_default
 from .runner import HarnessRunner, run_status_to_exit_code
 from .spec_loader import HarnessSpecError, load_harness_spec
@@ -50,6 +50,7 @@ def run_command(
     adapter: str | None = typer.Option(None, "--adapter", help="Override the adapter for all executable steps."),
     adapter_default: bool = typer.Option(False, "--adapter-default", help="Use the adapter stored in user config."),
     mode: str = typer.Option("act", "--mode", help="Execution mode: 'act' (default, write-enabled) or 'plan' (read-only)."),
+    hands_off: bool = typer.Option(False, "--hands-off", help="Enable non-interactive lifecycle mode (no manual confirmation prompts)."),
 ) -> None:
     """Execute a harness spec.
 
@@ -66,6 +67,7 @@ def run_command(
             use_adapter_default=adapter_default,
             dry_run=dry_run,
             execution_mode=mode,  # type: ignore[arg-type]
+            hands_off=hands_off,
         )
         run = runner.execute()
     except HarnessSpecError as exc:
@@ -205,6 +207,45 @@ def set_default_adapter(name: str = typer.Argument(..., help="Adapter name.")) -
         raise typer.Exit(1)
     path = save_adapter_default(name)
     console.print(f"Default adapter set to {name} ({path})")
+    raise typer.Exit(0)
+
+
+@adapter_app.command("doctor")
+def adapter_doctor(name: str | None = typer.Option(None, "--adapter", help="Inspect one adapter only.")) -> None:
+    """Diagnose adapter readiness and write capability."""
+
+    adapter_names = [name] if name else get_registered_adapter_names()
+    profiles = [probe_adapter(adapter_name) for adapter_name in adapter_names]
+
+    if _is_tty():
+        table = Table(title="Adapter Doctor")
+        table.add_column("Adapter")
+        table.add_column("State")
+        table.add_column("Read")
+        table.add_column("Write")
+        table.add_column("Interactive")
+        table.add_column("Guidance")
+        for profile in profiles:
+            table.add_row(
+                profile.adapter,
+                profile.state,
+                "yes" if profile.can_execute_read_only else "no",
+                "yes" if profile.can_execute_write else "no",
+                "yes" if profile.requires_write_approval else "no",
+                profile.remediation_guidance or "",
+            )
+        console.print(table)
+    else:
+        for profile in profiles:
+            print(
+                json.dumps(
+                    profile.model_dump(mode="json"),
+                    ensure_ascii=True,
+                )
+            )
+
+    if any(profile.state == "unavailable" for profile in profiles):
+        raise typer.Exit(1)
     raise typer.Exit(0)
 
 

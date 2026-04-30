@@ -181,6 +181,7 @@ def register(app: typer.Typer) -> None:
         allow_dirty: bool = typer.Option(
             False, "--allow-dirty", help="Allow start with a dirty git working tree (FR-015a)."
         ),
+        hands_off: bool = typer.Option(False, "--hands-off", help="Run full lifecycle non-interactively."),
         yes: bool = typer.Option(False, "--yes", help="Skip interactive confirmations."),
     ) -> None:
         """Run a workflow by alias or workflow id."""
@@ -233,6 +234,36 @@ def register(app: typer.Typer) -> None:
             )
             raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
+        if _is_delivery_gate_target(workflow_id):
+            latest_result = _latest_harness_result(repo_root)
+            if latest_result is not None:
+                delivery_status = latest_result.get("delivery_status")
+                create_pr_ready = latest_result.get("create_pr_ready")
+                if delivery_status == "unmet" or create_pr_ready is False:
+                    typer.echo(
+                        "delivery-status gate blocked this workflow; latest harness run is not create-pr ready.",
+                        err=True,
+                    )
+                    raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+            if not _is_branch_synced_with_main(repo_root):
+                typer.echo(
+                    "branch-sync gate blocked this workflow; branch is behind origin/main.",
+                    err=True,
+                )
+                raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+
+        # Governance approval guard for cross-cutting features
+        if _requires_governance_approval(wf):
+            approval = _get_governance_approval_status(repo_root)
+            if approval is None:
+                typer.echo(
+                    "Governance approval required but not found. "
+                    "Leadership checkpoint must be completed before this workflow can run.\n"
+                    "See .documentation/specs/*/gates/governance-approval.md for approval template.",
+                    err=True,
+                )
+                raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+
         invoker = _live_prompt_invoker(repo_root)
         telemetry = _make_telemetry(repo_root)
         enforcer = _make_enforcer(repo_root, wf, effective_autonomy)
@@ -244,7 +275,10 @@ def register(app: typer.Typer) -> None:
             telemetry=telemetry,
             autonomy_enforcer=enforcer,
         )
-        result = runner.run({}, autonomy_level=effective_autonomy)
+        if hands_off:
+            result = runner.run_full_lifecycle({}, autonomy_level=effective_autonomy)
+        else:
+            result = runner.run({}, autonomy_level=effective_autonomy)
 
         typer.echo(
             f"[devspark] workflow {wf.id!r} output_type={wf.output_type} "
@@ -454,6 +488,90 @@ def _git_dirty(repo_root: Path) -> bool:
     except FileNotFoundError:
         return False
     return bool(result.stdout.strip())
+
+
+def _latest_harness_result(repo_root: Path) -> dict[str, Any] | None:
+    runs_root = repo_root / ".documentation" / "devspark" / "runs"
+    if not runs_root.is_dir():
+        return None
+    candidates = [path for path in runs_root.iterdir() if path.is_dir() and (path / "result.json").is_file()]
+    if not candidates:
+        return None
+    latest = max(candidates, key=lambda item: item.stat().st_mtime)
+    try:
+        return json.loads((latest / "result.json").read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _is_delivery_gate_target(workflow_id: str) -> bool:
+    lowered = workflow_id.lower()
+    return "create-pr" in lowered or "pr-review" in lowered
+
+
+def _is_branch_synced_with_main(repo_root: Path) -> bool:
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["git", "rev-list", "--left-right", "--count", "origin/main...HEAD"],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return True
+    if result.returncode != 0:
+        return True
+    parts = (result.stdout or "").strip().split()
+    if len(parts) != 2:
+        return True
+    try:
+        behind = int(parts[0])
+    except ValueError:
+        return True
+    return behind == 0
+
+
+def _get_governance_approval_status(repo_root: Path) -> dict[str, Any] | None:
+    """Check for governance approval evidence in spec artifacts.
+    
+    Returns approval record if found, None otherwise.
+    """
+    # Check common feature spec locations
+    spec_paths = [
+        repo_root / ".documentation" / "specs" / "*/gates" / "governance-approval.md",
+        repo_root / ".documentation" / "specs" / "*/governance-approval.md",
+    ]
+    
+    for pattern_path in spec_paths:
+        if "*" in str(pattern_path):
+            import glob
+            matches = glob.glob(str(pattern_path))
+            for match in matches:
+                try:
+                    content = Path(match).read_text(encoding="utf-8")
+                    # Check if approval record is populated
+                    if "Approver Name:" in content and "Decision:" in content:
+                        # Extract decision line
+                        for line in content.split("\n"):
+                            if "Decision:" in line:
+                                decision = line.split("Decision:")[-1].strip()
+                                if "approved" in decision.lower():
+                                    return {"approved": True, "path": match, "decision": decision}
+                except (OSError, UnicodeDecodeError):
+                    continue
+    
+    return None
+
+
+def _requires_governance_approval(wf: Workflow) -> bool:
+    """Check if a workflow requires governance approval checkpoint.
+    
+    Returns True only when the workflow YAML explicitly sets governance_required: true.
+    """
+    return bool(wf.governance_required)
 
 
 def _make_telemetry(repo_root: Path):

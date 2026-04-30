@@ -16,6 +16,9 @@ EVENT_TYPES = {
     "harness.step.finished",
     "harness.step.validation",
     "harness.step.artifacts",
+    "harness.step.incident",
+    "harness.delivery.check",
+    "harness.stage.iteration",
     "harness.tool.called",
     "harness.policy.blocked",
 }

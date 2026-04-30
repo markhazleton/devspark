@@ -24,11 +24,60 @@ class AgentResponse:
     command_preview: str = ""
 
 
+@dataclass(slots=True)
+class ProbeResult:
+    """Adapter capability and readiness status.
+    
+    Part of Phase 4 adapter doctor feature. Each adapter reports its capabilities
+    so the harness runner can make routing decisions without trial execution.
+    
+    Attributes:
+        can_read: True if adapter can execute read-only steps (no file modifications)
+        can_write: True if adapter can execute write steps (commits, PRs, file edits)
+        is_interactive: True if adapter requires user prompts/feedback
+        ready: True if all prerequisites are met for execution
+    diagnostics: List of diagnostic messages if not ready. Both ``None`` and ``[]``
+        are treated as "no diagnostics"; use :meth:`with_diagnostic` to append safely.
+        ``AdapterCapabilityProfile.diagnostics`` normalizes this to ``list[str]``.
+    """
+    can_read: bool = True
+    can_write: bool = False
+    is_interactive: bool = False
+    ready: bool = False
+    diagnostics: list[str] | None = None
+    
+    def with_diagnostic(self, message: str) -> ProbeResult:
+        """Add a diagnostic message and return self."""
+        if self.diagnostics is None:
+            self.diagnostics = []
+        self.diagnostics.append(message)
+        return self
+
+
 class AgentAdapter(Protocol):
     name: str
 
     def is_available(self) -> tuple[bool, str | None]:
         ...
+
+    def probe(self) -> ProbeResult:
+        """Return adapter capability and readiness status.
+        
+        Non-destructive probe that determines whether this adapter can execute
+        read-only steps, write steps, or both. Called before harness execution
+        to make routing decisions.
+        
+        Part of Phase 4 adapter doctor feature. Implementation is optional in MVP.
+        Default behavior: return ProbeResult with can_read=True, ready depends on is_available().
+        """
+        available, error = self.is_available()
+        return ProbeResult(
+            can_read=True,
+            can_write=False,
+            is_interactive=False,
+            ready=available,
+            diagnostics=[error] if error else None,
+        )
 
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         ...
@@ -72,6 +121,16 @@ class CommandLineAdapter:
     def build_command(self) -> list[str]:
         return [self.executable, "--print"]
 
+    def probe(self) -> ProbeResult:
+        available, reason = self.is_available()
+        return ProbeResult(
+            can_read=available,
+            can_write=available,
+            is_interactive=False,
+            ready=available,
+            diagnostics=[reason] if reason else None,
+        )
+
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         effective_prompt = load_prompt_text(step, prompt_text)
         # Phase 2: prepend plan-mode instruction so the model does not write files
@@ -94,50 +153,7 @@ class CommandLineAdapter:
             input=effective_prompt,
             capture_output=True,
             text=True,
-            check=False,
-        )
-        if completed.returncode != 0:
-            error_text = (completed.stderr or completed.stdout or "CLI execution failed").strip()
-            raise RuntimeError(f"{self.name} exited with code {completed.returncode}: {error_text}")
-        return AgentResponse(
-            output_text=completed.stdout,
-            prompt_text=effective_prompt,
-            command_preview=preview,
-        )
-
-
-class CommandLineAdapter:
-    """Base adapter for agent CLIs that accept a prompt as a terminal argument."""
-
-    name = ""
-    description = ""
-    executable = ""
-
-    def is_available(self) -> tuple[bool, str | None]:
-        if shutil.which(self.executable) is not None:
-            return True, None
-        return False, f"Missing required CLI '{self.executable}' for adapter '{self.name}'"
-
-    def build_command(self) -> list[str]:
-        return [self.executable, "--print"]
-
-    def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
-        effective_prompt = load_prompt_text(step, prompt_text)
-        command = self.build_command()
-        preview = shlex.join(command)
-        telemetry.emit(
-            "harness.tool.called",
-            context.run_id,
-            step_id=step.id,
-            tool=self.name,
-            command_preview=preview,
-        )
-        completed = subprocess.run(
-            command,
-            cwd=context.repo_root,
-            input=effective_prompt,
-            capture_output=True,
-            text=True,
+            errors="replace",
             check=False,
         )
         if completed.returncode != 0:

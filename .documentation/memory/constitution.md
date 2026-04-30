@@ -25,7 +25,10 @@ Runtime tooling MAY write under a gitignored subtree of `.documentation/` (for e
 - the destination subtree is covered by `.gitignore`;
 - the path is overridable via an environment variable (e.g., `DEVSPARK_TELEMETRY_PATH`,
   `DEVSPARK_RUNS_PATH`);
-- the writer is fail-soft on I/O errors and never blocks the developer's workflow.
+- the writer is fail-soft on I/O errors and never blocks the developer's workflow;
+- the `.gitignore` rule covering the subtree MUST exist in the default branch (`main`) **before**
+  any run artifacts are first generated in that subtree (commit ordering constraint — prevents
+  accidental tracking of runtime output when the ignore rule and artifacts land in the same PR).
 
 Install and upgrade flows are still strictly forbidden from touching any path under `.documentation/`.
 
