@@ -1,9 +1,0 @@
-{
-  "run_id": "run_20260429T133323Z_3e8824",
-  "repo_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j",
-  "spec_path": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\plan.harness.yaml",
-  "doc_root": "C:\\Users\\markh\\AppData\\Local\\Temp\\tmp0tuoj79j\\.documentation",
-  "adapter": "noop",
-  "dry_run": false,
-  "execution_mode": "plan"
-}
