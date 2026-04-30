@@ -9,12 +9,12 @@
 
 ## Approval Record
 
-- Approver Name:
-- Approver Role:
-- Date (UTC):
-- Decision: approved | rejected | conditional
-- Conditions (if any):
-- Evidence Links:
+- Approver Name: Mark Hazleton
+- Approver Role: Sole Developer / Project Owner
+- Date (UTC): 2026-04-30
+- Decision: approved
+- Conditions (if any): none
+- Evidence Links: tests/test_delivery_status_contract.py, tests/test_hands_off_lifecycle_contract.py, .documentation/specs/001-harness-delivery-integrity/gates/validation-full.md
 
 ## Notes
 
