@@ -73,6 +73,17 @@ Reads `events.jsonl` from a prior run and renders the recorded event stream. Use
 
 Lists the built-in adapters, whether each is available on the current machine, and the currently saved default.
 
+### `devspark adapter doctor`
+
+Produces normalized readiness states for each adapter:
+
+- `ready`
+- `write_approval_required`
+- `write_incompatible`
+- `unavailable`
+
+Use this before hands-off lifecycle runs to confirm the selected adapter can execute write-required stages without interactive approval.
+
 ### `devspark adapter default`
 
 Persists a local default adapter in the user's config directory. This does not modify `.devspark/` or `.documentation/`, so upgrades do not overwrite the preference.
@@ -152,9 +163,16 @@ Current artifact layout includes:
 - `context.json`
 - `events.jsonl`
 - `result.json`
+- `adapter-doctor.json`
+- `decision-packet.json`
 - `steps/<step-id>/prompt.md` when a prompt was materialized
 - `steps/<step-id>/output.txt` when an adapter produced output
 - `steps/<step-id>/stdout.txt` for `command.exit_code` validation output
+
+Conditional artifacts:
+
+- `no-change-explainer.md` when workflow completed but delivery evidence was unmet
+- `max-pass-failure-report.md` when hands-off convergence reaches max passes without resolution
 
 Runs are retained with a user-configurable limit. The default retention limit is `20`.
 
@@ -181,6 +199,12 @@ Recommended flow for a new spec:
 5. Execute a real run only after the adapter and validation behavior are what you expect.
 
 For adapter-driven runs, prefer explicit adapters in the spec when reproducibility matters across machines. Use a saved adapter default when you want a machine-local convenience setting.
+
+## Hands-Off Troubleshooting
+
+- If run fails with `write_incompatible_adapter`, switch to a write-capable non-interactive adapter and rerun `devspark adapter doctor`.
+- If `delivery_status` is unmet, review `no-change-explainer.md` and ensure changes exist under `src/` or `test/`.
+- If convergence fails after max passes, inspect `max-pass-failure-report.md` and resolve remaining findings manually before retrying.
 
 ## Relationship to the Prompt Workflow
 

@@ -195,6 +195,12 @@ Use CLI if you need terminal-driven automation, scripting, or CI-like control.
 - Run declarative execution specs: `devspark harness validate`, `devspark harness run`, `devspark harness trace`
 - Inspect or persist adapter preferences: `devspark adapter list`, `devspark adapter default`
 
+For delivery-integrity runs, use:
+
+- `devspark adapter doctor` to classify adapter readiness (`ready`, `write_approval_required`, `write_incompatible`, `unavailable`)
+- `devspark harness run <spec> --hands-off` for non-interactive lifecycle execution
+- `decision-packet.json` and `max-pass-failure-report.md` artifacts for final go/no-go decisions
+
 If your team does not need CLI automation, stay with prompt-first quickstart and prompt-first upgrade.
 
 For the runtime model, artifact layout, and spec authoring guidance, see [Harness Engineering](harness-engineering.md).

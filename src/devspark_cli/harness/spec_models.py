@@ -23,6 +23,7 @@ DeliveryCheckStatus = Literal["pass", "fail", "skipped"]
 FindingSeverity = Literal["critical", "high", "medium", "low"]
 FindingStatus = Literal["open", "resolved", "deferred"]
 RevalidationStatus = Literal["converged", "continue", "max-pass-failed"]
+AdapterDoctorState = Literal["ready", "write_approval_required", "write_incompatible", "unavailable"]
 ExecutionMode = Literal["plan", "act"]
 BackoffType = Literal["none", "fixed", "exponential"]
 RetryTrigger = Literal["validation_fail", "tool_error", "timeout"]
@@ -279,6 +280,19 @@ class DeliveryCheckResult(BaseModel):
     details: dict = Field(default_factory=dict)
 
 
+class AdapterCapabilityProfile(BaseModel):
+    """Normalized adapter-doctor profile for routing and diagnostics."""
+
+    adapter: str
+    state: AdapterDoctorState
+    is_available: bool
+    can_execute_read_only: bool
+    can_execute_write: bool
+    requires_write_approval: bool = False
+    remediation_guidance: str | None = None
+    diagnostics: list[str] = Field(default_factory=list)
+
+
 class StepResult(BaseModel):
     step_id: str
     status: StepStatus
@@ -297,6 +311,7 @@ class RunContext(BaseModel):
     adapter: str
     dry_run: bool = False
     execution_mode: ExecutionMode = "act"
+    hands_off: bool = False
 
 
 class TelemetryEvent(BaseModel):

@@ -14,6 +14,7 @@ DEFAULT_RUN_RETENTION_LIMIT = 20
 DEFAULT_WRITE_STEP_TIMEOUT_SECONDS = 300
 DEFAULT_DELIVERY_GIT_BASE_REF = "origin/main"
 DEFAULT_DELIVERY_PATH_PATTERNS = ("src/**", "test/**")
+DEFAULT_MANUAL_GATE_POLICY = "confirm-only"
 
 
 def config_path() -> Path:
@@ -23,14 +24,28 @@ def config_path() -> Path:
 def read_user_config() -> dict[str, Any]:
     path = config_path()
     if not path.is_file():
-        return {"default_adapter": DEFAULT_ADAPTER, "run_retention_limit": DEFAULT_RUN_RETENTION_LIMIT}
+        return {
+            "default_adapter": DEFAULT_ADAPTER,
+            "run_retention_limit": DEFAULT_RUN_RETENTION_LIMIT,
+            "manual_gate_policy": DEFAULT_MANUAL_GATE_POLICY,
+        }
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return {"default_adapter": DEFAULT_ADAPTER, "run_retention_limit": DEFAULT_RUN_RETENTION_LIMIT}
+        return {
+            "default_adapter": DEFAULT_ADAPTER,
+            "run_retention_limit": DEFAULT_RUN_RETENTION_LIMIT,
+            "manual_gate_policy": DEFAULT_MANUAL_GATE_POLICY,
+        }
+
+    manual_gate_policy = raw.get("manual_gate_policy")
+    if manual_gate_policy not in {"confirm-only", "confirm-with-file-check", "confirm-with-git-diff-check"}:
+        manual_gate_policy = DEFAULT_MANUAL_GATE_POLICY
+
     return {
         "default_adapter": raw.get("default_adapter") if isinstance(raw.get("default_adapter"), str) else None,
         "run_retention_limit": raw.get("run_retention_limit") if isinstance(raw.get("run_retention_limit"), int) and raw.get("run_retention_limit") > 0 else DEFAULT_RUN_RETENTION_LIMIT,
+        "manual_gate_policy": manual_gate_policy,
     }
 
 
@@ -54,4 +69,17 @@ def load_run_retention_limit() -> int:
 def save_adapter_default(name: str) -> Path:
     data = read_user_config()
     data["default_adapter"] = name
+    return write_user_config(data)
+
+
+def load_manual_gate_policy() -> str:
+    value = read_user_config().get("manual_gate_policy")
+    if isinstance(value, str) and value.strip():
+        return value
+    return DEFAULT_MANUAL_GATE_POLICY
+
+
+def save_manual_gate_policy(policy: str) -> Path:
+    data = read_user_config()
+    data["manual_gate_policy"] = policy
     return write_user_config(data)

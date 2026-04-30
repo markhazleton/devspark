@@ -298,6 +298,25 @@ class WorkflowRunner:
         run.exit_code = EXIT_OK
         return run
 
+    def run_full_lifecycle(
+        self,
+        context: dict[str, Any] | None = None,
+        *,
+        autonomy_level: str | None = None,
+        workflow_run_id: str | None = None,
+    ) -> WorkflowRun:
+        """Execute a full lifecycle workflow in one pass.
+
+        The concrete stage order is defined by the workflow file and is expected to
+        include plan -> tasks -> analyze -> critic -> implement -> create-pr -> pr-review.
+        """
+        return self.run(
+            context=context,
+            autonomy_level=autonomy_level,
+            workflow_run_id=workflow_run_id,
+            start_at_step_id=None,
+        )
+
     # ------------------------------------------------------------------ pause
     def _pause(
         self,

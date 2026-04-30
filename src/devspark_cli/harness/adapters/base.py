@@ -119,6 +119,16 @@ class CommandLineAdapter:
     def build_command(self) -> list[str]:
         return [self.executable, "--print"]
 
+    def probe(self) -> ProbeResult:
+        available, reason = self.is_available()
+        return ProbeResult(
+            can_read=available,
+            can_write=available,
+            is_interactive=False,
+            ready=available,
+            diagnostics=[reason] if reason else None,
+        )
+
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         effective_prompt = load_prompt_text(step, prompt_text)
         # Phase 2: prepend plan-mode instruction so the model does not write files
@@ -141,50 +151,7 @@ class CommandLineAdapter:
             input=effective_prompt,
             capture_output=True,
             text=True,
-            check=False,
-        )
-        if completed.returncode != 0:
-            error_text = (completed.stderr or completed.stdout or "CLI execution failed").strip()
-            raise RuntimeError(f"{self.name} exited with code {completed.returncode}: {error_text}")
-        return AgentResponse(
-            output_text=completed.stdout,
-            prompt_text=effective_prompt,
-            command_preview=preview,
-        )
-
-
-class CommandLineAdapter:
-    """Base adapter for agent CLIs that accept a prompt as a terminal argument."""
-
-    name = ""
-    description = ""
-    executable = ""
-
-    def is_available(self) -> tuple[bool, str | None]:
-        if shutil.which(self.executable) is not None:
-            return True, None
-        return False, f"Missing required CLI '{self.executable}' for adapter '{self.name}'"
-
-    def build_command(self) -> list[str]:
-        return [self.executable, "--print"]
-
-    def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
-        effective_prompt = load_prompt_text(step, prompt_text)
-        command = self.build_command()
-        preview = shlex.join(command)
-        telemetry.emit(
-            "harness.tool.called",
-            context.run_id,
-            step_id=step.id,
-            tool=self.name,
-            command_preview=preview,
-        )
-        completed = subprocess.run(
-            command,
-            cwd=context.repo_root,
-            input=effective_prompt,
-            capture_output=True,
-            text=True,
+            errors="replace",
             check=False,
         )
         if completed.returncode != 0:

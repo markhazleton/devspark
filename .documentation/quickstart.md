@@ -116,6 +116,17 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 - [Upgrade Guide](upgrade.md) -- keep DevSpark current
 - [Implementation Lifecycle](implementation-lifecycle.md) -- full workflow overview
 - [Harness Engineering](harness-engineering.md) -- optional CLI runtime for declarative workflows
+- [Harness Strict Template](../templates/workflows/harness-strict-template.md) -- delivery-integrity defaults for hands-off runs
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
 - [Command Reference](index.md#command-categories) -- all 27 commands
+
+## Strict Harness Path
+
+For delivery-integrity focused execution, use the strict harness template and run with an explicit write-capable adapter:
+
+```text
+devspark harness run sample.harness.yaml --hands-off --adapter claude_code
+```
+
+If the latest run is not create-pr ready, inspect `decision-packet.json` and `no-change-explainer.md` before continuing.

@@ -13,13 +13,14 @@ import yaml
 
 from ..registry import get_app, load_registry
 from ..scope import resolve_doc_root, resolve_scope
-from .adapters import get_registered_adapters
+from .adapters import get_registered_adapters, probe_adapter
 from .adapters.base import AgentAdapter
 from .adapters.manual import ManualAdapter
-from .config import load_adapter_default, load_run_retention_limit
+from .config import load_adapter_default, load_manual_gate_policy, load_run_retention_limit
 from .spec_loader import HarnessSpecError, default_retry_policy, discover_repo_root, load_harness_spec
 from .spec_models import (
     ArtifactDelta,
+    AdapterCapabilityProfile,
     DeliveryCheckResult,
     DeliveryStatus,
     ExecutionMode,
@@ -93,6 +94,7 @@ class HarnessRunner:
         dry_run: bool = False,
         repo_root: str | Path | None = None,
         execution_mode: ExecutionMode = "act",
+        hands_off: bool = False,
     ) -> None:
         self.spec_path = Path(spec_file).resolve()
         self.repo_root = Path(repo_root).resolve() if repo_root is not None else discover_repo_root(self.spec_path)
@@ -100,6 +102,7 @@ class HarnessRunner:
         self.use_adapter_default = use_adapter_default
         self.dry_run = dry_run
         self.execution_mode = execution_mode
+        self.hands_off = hands_off
         self.spec: HarnessSpec | None = None
         self.context: RunContext | None = None
         self.run: Run | None = None
@@ -143,6 +146,7 @@ class HarnessRunner:
             adapter=adapter_name,
             dry_run=self.dry_run,
             execution_mode=self.execution_mode,
+            hands_off=self.hands_off,
         )
         return self.context
 
@@ -150,6 +154,114 @@ class HarnessRunner:
         spec = spec or self.spec or self.load_spec()
         stored_default = load_adapter_default() if self.use_adapter_default or self.adapter_override is None else None
         return self.adapter_override or stored_default or spec.defaults.adapter or "noop"
+
+    def get_adapter_capability_profile(self, adapter_name: str) -> AdapterCapabilityProfile:
+        return probe_adapter(adapter_name)
+
+    def _is_write_required_step(self, step: StepSpec) -> bool:
+        lowered = step.id.lower()
+        return any(marker in lowered for marker in ("implement", "create-pr", "pr-review"))
+
+    def _enforce_write_capability(self, step: StepSpec, adapter_name: str) -> None:
+        if not self.hands_off or not self._is_write_required_step(step):
+            return
+        profile = self.get_adapter_capability_profile(adapter_name)
+        if profile.state in ("write_incompatible", "unavailable", "write_approval_required"):
+            details = profile.remediation_guidance or "Select a write-capable non-interactive adapter."
+            raise RuntimeError(
+                f"write_incompatible_adapter: step={step.id} adapter={adapter_name} state={profile.state}. {details}"
+            )
+
+    def _write_adapter_doctor_artifact(self) -> None:
+        if self.run_dir is None or self.context is None:
+            return
+        profiles = [
+            self.get_adapter_capability_profile(adapter_name).model_dump(mode="json")
+            for adapter_name in get_registered_adapters().keys()
+        ]
+        payload = {
+            "selected_adapter": self.context.adapter,
+            "profiles": profiles,
+            "generated_at": utc_now_iso(),
+        }
+        (self.run_dir / "adapter-doctor.json").write_text(
+            json.dumps(payload, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+    def run_stage_revalidation_loop(self, max_passes: int = 3) -> tuple[bool, int]:
+        """Run a re-validation-only loop for analyze/critic findings."""
+        open_findings = self.get_open_findings()
+        if not open_findings:
+            self.write_convergence_state(pass_number=1, max_passes=max_passes, converged=True)
+            return True, 1
+
+        from .spec_models import StageIterationRecord
+
+        for pass_index in range(1, max_passes + 1):
+            current_open = self.get_open_findings()
+            if not current_open:
+                self.write_convergence_state(pass_number=pass_index, max_passes=max_passes, converged=True)
+                return True, pass_index
+
+            for stage_name in ("analyze", "critic"):
+                if self.run is not None:
+                    self.run.stage_iterations.append(
+                        StageIterationRecord(
+                            stage=stage_name,
+                            pass_index=pass_index,
+                            finding_deltas={"open": len(current_open)},
+                            actions_attempted=["revalidate"],
+                            revalidation_status="continue",
+                        )
+                    )
+                if self.telemetry is not None and self.context is not None:
+                    self.telemetry.emit(
+                        "harness.stage.iteration",
+                        self.context.run_id,
+                        stage=stage_name,
+                        pass_index=pass_index,
+                        open_findings=len(current_open),
+                    )
+
+            if pass_index == max_passes:
+                self.write_convergence_state(
+                    pass_number=pass_index,
+                    max_passes=max_passes,
+                    converged=False,
+                    reason="max-pass-failed",
+                )
+                return False, pass_index
+
+        return False, max_passes
+
+    def _write_max_pass_failure_report(self, pass_count: int) -> None:
+        if self.run_dir is None:
+            return
+        lines = [
+            "# Convergence Max-Pass Failure",
+            "",
+            f"- Passes attempted: {pass_count}",
+            f"- Remaining open findings: {len(self.get_open_findings())}",
+            "",
+            "## Next Actions",
+            "- Resolve unresolved findings and rerun analyze/critic.",
+            "- Use interactive mode if write approvals are needed.",
+        ]
+        (self.run_dir / "max-pass-failure-report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    def _write_final_decision_packet(self) -> None:
+        if self.run_dir is None or self.run is None:
+            return
+        payload = {
+            "run_id": self.run.run_id,
+            "workflow_status": self.run.workflow_status,
+            "delivery_status": self.run.delivery_status,
+            "create_pr_ready": self.run.create_pr_ready,
+            "failure_reason_code": self.run.failure_reason_code,
+            "generated_at": utc_now_iso(),
+        }
+        (self.run_dir / "decision-packet.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
     def resolve_step_adapter(self, step: StepSpec, spec: HarnessSpec) -> str:
         if step.type == "validation":
@@ -193,7 +305,9 @@ class HarnessRunner:
             scope=run.scope.model_dump(exclude_none=True),
             adapter=context.adapter,
             dry_run=context.dry_run,
+            hands_off=context.hands_off,
         )
+        self._write_adapter_doctor_artifact()
         return run, run_dir
 
     def write_supporting_artifacts(self) -> None:
@@ -520,6 +634,12 @@ class HarnessRunner:
         elif not run.create_pr_ready:
             run.failure_reason_code = REASON_CODE_CREATE_PR_BLOCKED
 
+        if self.hands_off:
+            converged, pass_count = self.run_stage_revalidation_loop(max_passes=3)
+            if not converged:
+                run.failure_reason_code = "convergence_max_pass_failed"
+                self._write_max_pass_failure_report(pass_count)
+
         run.finished_at = utc_now_iso()
         run.metrics.duration_ms = int((time.perf_counter() - started) * 1000)
         assert self.telemetry is not None
@@ -546,6 +666,7 @@ class HarnessRunner:
         )
         self.write_result()
         self.write_lifecycle_artifacts()
+        self._write_final_decision_packet()
         self.prune_old_runs(Path(spec.telemetry.run_dir), keep=load_run_retention_limit())
         return run
 
@@ -586,6 +707,34 @@ class HarnessRunner:
             try:
                 if step.type != "validation":
                     adapter = self.get_adapter(adapter_name)
+                    if self.hands_off and adapter_name == "manual":
+                        self.telemetry.emit(
+                            "harness.policy.blocked",
+                            self.context.run_id,
+                            step_id=step.id,
+                            reason="hands_off_manual_gate_bypassed",
+                        )
+                        duration_ms = int((time.perf_counter() - attempt_started) * 1000)
+                        total_duration += duration_ms
+                        self.telemetry.emit(
+                            "harness.step.finished",
+                            self.context.run_id,
+                            step_id=step.id,
+                            attempt=attempt,
+                            status="passed",
+                            duration_ms=duration_ms,
+                        )
+                        result = StepResult(
+                            step_id=step.id,
+                            status="passed",
+                            attempts=attempt,
+                            adapter=adapter_name,
+                            duration_ms=total_duration,
+                            validation_findings=[],
+                            artifacts=self._compute_artifacts(step, before_snapshot),
+                        )
+                        return result, self.next_step_index(step, success=True)
+                    self._enforce_write_capability(step, adapter_name)
                     available, reason = adapter.is_available()
                     if not available:
                         message = reason or f"adapter {adapter_name} not available"
@@ -824,6 +973,30 @@ class HarnessRunner:
     def pause_for_human_review(self, step: StepSpec, prompt_text: str, step_dir: Path) -> None:
         assert self.context is not None
         assert self.telemetry is not None
+        if self.context.hands_off:
+            self.telemetry.emit(
+                "harness.policy.blocked",
+                self.context.run_id,
+                step_id=step.id,
+                reason="hands_off_manual_prompt_bypassed",
+            )
+            return
+
+        policy = load_manual_gate_policy()
+        if policy == "confirm-with-file-check" and not (step_dir / "output.txt").exists():
+            raise RuntimeError(f"manual_gate_policy_blocked: {policy} requires output.txt for step {step.id}")
+        if policy == "confirm-with-git-diff-check":
+            status = subprocess.run(
+                ["git", "diff", "--name-only", "--", "src/", "test/"],
+                cwd=self.context.repo_root,
+                text=True,
+                errors="replace",
+                capture_output=True,
+                check=False,
+            )
+            if status.returncode != 0 or not (status.stdout or "").strip():
+                raise RuntimeError(f"manual_gate_policy_blocked: {policy} requires changes under src/ or test/")
+
         manual_step = StepSpec.model_validate(
             {
                 "id": f"{step.id}-human-review",

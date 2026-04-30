@@ -103,6 +103,14 @@ else
     log_fail "Governance approval template not found"
 fi
 
+# Test 6: Verify git diff command executes without errors
+log_test "Git diff command works"
+if git diff --stat HEAD 2>/dev/null >/dev/null; then
+    log_pass "Git diff command executes without errors"
+else
+    log_fail "Git diff command failed"
+fi
+
 # Summary
 echo ""
 echo "=========================================="

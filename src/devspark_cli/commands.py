@@ -305,3 +305,27 @@ def validate_registry(repo_root: Path) -> dict[str, Any]:
             "profiles": len(registry.profiles),
         },
     }
+
+
+def parse_hands_off_option(raw_args: list[str] | None = None) -> bool:
+    """Parse `--hands-off` option from arbitrary argument lists.
+
+    This helper keeps hands-off flag detection centralized for callers that need
+    to route execution through non-interactive lifecycle mode.
+    """
+
+    if not raw_args:
+        return False
+    normalized = {item.strip().lower() for item in raw_args}
+    return "--hands-off" in normalized or "--hands_off" in normalized
+
+
+def resolve_harness_template(repo_root: Path, strict: bool = False) -> Path:
+    """Return the preferred harness template path.
+
+    Strict mode is opt-in and maps to the delivery-integrity template.
+    """
+
+    if strict:
+        return repo_root / "templates" / "workflows" / "harness-strict-template.md"
+    return repo_root / "sample.harness.yaml"

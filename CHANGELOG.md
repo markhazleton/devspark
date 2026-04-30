@@ -7,6 +7,22 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Adapter doctor CLI (`devspark adapter doctor`) with normalized readiness states for hands-off routing
+- Hands-off execution flag for harness runs (`devspark harness run --hands-off`)
+- Decision packet and convergence failure report artifacts for lifecycle go/no-go decisions
+- Strict harness template at `templates/workflows/harness-strict-template.md`
+- New contract tests for adapter doctor and hands-off lifecycle behavior
+
+### Changed
+
+- Delivery gate enforcement now pairs with branch-sync checks for create-pr/pr-review transitions
+- Manual gate policy handling supports `confirm-only`, `confirm-with-file-check`, and `confirm-with-git-diff-check`
+- Bash and PowerShell prerequisite scripts include optional delivery-status gate enforcement switches
+
 ## [2.1.0] - 2026-04-18 — Workflow Engine Foundation
 
 **Interactive analyze flow + tiered workflow runner foundation (spec 001-interactive-analyze-flow).**

@@ -15,6 +15,12 @@ Defines required output contract for hands-off lifecycle runs and iterative anal
 - `iterations`: array of StageIterationRecord
 - `decision_packet`: DecisionPacket
 
+## Artifact Mapping
+
+- `decision_packet` is persisted to `decision-packet.json`
+- max-pass failures are persisted to `max-pass-failure-report.md`
+- delivery evidence failures are persisted to `no-change-explainer.md`
+
 ## Delivery Gate Rules
 
 1. `create_pr_ready` MUST be `false` when `delivery_status` is `unmet`.
@@ -31,6 +37,7 @@ Defines required output contract for hands-off lifecycle runs and iterative anal
 
 ## Decision Packet Rules
 
-- `decision_packet.merge_recommendation` MUST be present.
-- `decision_packet` MUST summarize implementation evidence and unresolved findings.
+- `decision_packet.workflow_status` MUST be present.
+- `decision_packet.delivery_status` MUST be present.
+- `decision_packet.create_pr_ready` MUST be present.
 - Packet MUST support final human PR accept/reject decision.

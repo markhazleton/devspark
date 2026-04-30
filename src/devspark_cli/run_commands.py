@@ -181,6 +181,7 @@ def register(app: typer.Typer) -> None:
         allow_dirty: bool = typer.Option(
             False, "--allow-dirty", help="Allow start with a dirty git working tree (FR-015a)."
         ),
+        hands_off: bool = typer.Option(False, "--hands-off", help="Run full lifecycle non-interactively."),
         yes: bool = typer.Option(False, "--yes", help="Skip interactive confirmations."),
     ) -> None:
         """Run a workflow by alias or workflow id."""
@@ -244,6 +245,12 @@ def register(app: typer.Typer) -> None:
                         err=True,
                     )
                     raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+            if not _is_branch_synced_with_main(repo_root):
+                typer.echo(
+                    "branch-sync gate blocked this workflow; branch is behind origin/main.",
+                    err=True,
+                )
+                raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
         # Governance approval guard for cross-cutting features
         if _requires_governance_approval(workflow_id):
@@ -268,7 +275,10 @@ def register(app: typer.Typer) -> None:
             telemetry=telemetry,
             autonomy_enforcer=enforcer,
         )
-        result = runner.run({}, autonomy_level=effective_autonomy)
+        if hands_off:
+            result = runner.run_full_lifecycle({}, autonomy_level=effective_autonomy)
+        else:
+            result = runner.run({}, autonomy_level=effective_autonomy)
 
         typer.echo(
             f"[devspark] workflow {wf.id!r} output_type={wf.output_type} "
@@ -497,6 +507,31 @@ def _latest_harness_result(repo_root: Path) -> dict[str, Any] | None:
 def _is_delivery_gate_target(workflow_id: str) -> bool:
     lowered = workflow_id.lower()
     return "create-pr" in lowered or "pr-review" in lowered
+
+
+def _is_branch_synced_with_main(repo_root: Path) -> bool:
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["git", "rev-list", "--left-right", "--count", "origin/main...HEAD"],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return True
+    if result.returncode != 0:
+        return True
+    parts = (result.stdout or "").strip().split()
+    if len(parts) != 2:
+        return True
+    try:
+        behind = int(parts[0])
+    except ValueError:
+        return True
+    return behind == 0
 
 
 def _get_governance_approval_status(repo_root: Path) -> dict[str, Any] | None:

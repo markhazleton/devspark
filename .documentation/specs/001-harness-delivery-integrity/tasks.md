@@ -115,11 +115,11 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 ### Implementation for User Story 2
 
-- [ ] T019 [US2] Add adapter capability profile model in src/devspark_cli/harness/spec_models.py
-- [ ] T020 [US2] Implement adapter doctor command flow in src/devspark_cli/harness/cli.py
-- [ ] T021 [US2] Implement behavior-based adapter doctor probes in src/devspark_cli/harness/adapters/__init__.py
-- [ ] T022 [P] [US2] Emit normalized adapter doctor output in src/devspark_cli/harness/runner.py
-- [ ] T023 [P] [US2] Normalize adapter doctor terminology in .documentation/specs/001-harness-delivery-integrity/contracts/adapter-doctor-contract.md
+- [X] T019 [US2] Add adapter capability profile model in src/devspark_cli/harness/spec_models.py
+- [X] T020 [US2] Implement adapter doctor command flow in src/devspark_cli/harness/cli.py
+- [X] T021 [US2] Implement behavior-based adapter doctor probes in src/devspark_cli/harness/adapters/__init__.py
+- [X] T022 [P] [US2] Emit normalized adapter doctor output in src/devspark_cli/harness/runner.py
+- [X] T023 [P] [US2] Normalize adapter doctor terminology in .documentation/specs/001-harness-delivery-integrity/contracts/adapter-doctor-contract.md
 
 **Checkpoint**: US2 independently validated.
 
@@ -135,17 +135,17 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 ### Implementation for User Story 5
 
-- [ ] T024 [US5] Add hands-off option parsing and routing in src/devspark_cli/commands.py
-- [ ] T025 [US5] Implement full lifecycle orchestrator in runner/executor.py (workflow runner as top-level, sequences plan → tasks → analyze → critic → implement → create-pr → pr-review)
-- [ ] T026 [US5] [MVP: RE-VALIDATION ONLY] Implement analyze and critic re-validation loop controller with max 3 passes in src/devspark_cli/harness/runner.py (evaluates findings against updated outputs without auto-fix generation)
-- [ ] T027 [US5] Emit convergence status (converged or max-pass-failed) per stage in src/devspark_cli/harness/runner.py
-- [ ] T028 [US5] Add max-pass failure convergence report output in src/devspark_cli/harness/runner.py
-- [ ] T029 [US5] Persist per-pass iteration records in src/devspark_cli/harness/telemetry.py
-- [ ] T030 [US5] Enforce fail-fast rejection for write-incompatible adapters on write-required stages in src/devspark_cli/harness/runner.py
-- [ ] T031 [US5] Enforce create-pr and pr-review dual gating (delivery-status plus branch sync) in src/devspark_cli/run_commands.py
-- [ ] T032 [P] [US5] Generate final decision packet output in src/devspark_cli/harness/runner.py
-- [ ] T025a Create test_adapter_doctor_contract.py with probe results and capability classification in tests/
-- [ ] T025b Create test_hands_off_lifecycle_contract.py with full-chain execution and gating validation in tests/
+- [X] T024 [US5] Add hands-off option parsing and routing in src/devspark_cli/commands.py
+- [X] T025 [US5] Implement full lifecycle orchestrator in runner/executor.py (workflow runner as top-level, sequences plan → tasks → analyze → critic → implement → create-pr → pr-review)
+- [X] T026 [US5] [MVP: RE-VALIDATION ONLY] Implement analyze and critic re-validation loop controller with max 3 passes in src/devspark_cli/harness/runner.py (evaluates findings against updated outputs without auto-fix generation)
+- [X] T027 [US5] Emit convergence status (converged or max-pass-failed) per stage in src/devspark_cli/harness/runner.py
+- [X] T028 [US5] Add max-pass failure convergence report output in src/devspark_cli/harness/runner.py
+- [X] T029 [US5] Persist per-pass iteration records in src/devspark_cli/harness/telemetry.py
+- [X] T030 [US5] Enforce fail-fast rejection for write-incompatible adapters on write-required stages in src/devspark_cli/harness/runner.py
+- [X] T031 [US5] Enforce create-pr and pr-review dual gating (delivery-status plus branch sync) in src/devspark_cli/run_commands.py
+- [X] T032 [P] [US5] Generate final decision packet output in src/devspark_cli/harness/runner.py
+- [X] T025a Create test_adapter_doctor_contract.py with probe results and capability classification in tests/
+- [X] T025b Create test_hands_off_lifecycle_contract.py with full-chain execution and gating validation in tests/
 
 **Checkpoint**: US5 independently validated. PR2 ready for review.
 
@@ -159,11 +159,11 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Implement manual gate policy parsing in src/devspark_cli/harness/config.py
-- [ ] T034 [US3] Enforce confirm-with-file-check policy in src/devspark_cli/harness/runner.py
-- [ ] T035 [US3] Enforce confirm-with-git-diff-check policy in src/devspark_cli/harness/runner.py
-- [ ] T036 [P] [US3] Ensure hands-off mode bypasses manual confirmation prompts in src/devspark_cli/harness/cli.py
-- [ ] T037 [P] [US3] Update interactive manual-gate guidance in .documentation/harness-engineering.md
+- [X] T033 [US3] Implement manual gate policy parsing in src/devspark_cli/harness/config.py
+- [X] T034 [US3] Enforce confirm-with-file-check policy in src/devspark_cli/harness/runner.py
+- [X] T035 [US3] Enforce confirm-with-git-diff-check policy in src/devspark_cli/harness/runner.py
+- [X] T036 [P] [US3] Ensure hands-off mode bypasses manual confirmation prompts in src/devspark_cli/harness/cli.py
+- [X] T037 [P] [US3] Update interactive manual-gate guidance in .documentation/harness-engineering.md
 
 **Checkpoint**: US3 independently validated.
 
@@ -177,10 +177,10 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 ### Implementation for User Story 4
 
-- [ ] T038 [US4] Add strict harness template in templates/workflows/harness-strict-template.md
-- [ ] T039 [US4] Add strict template wiring in src/devspark_cli/commands.py
-- [ ] T040 [P] [US4] Document strict template usage in .documentation/quickstart.md
-- [ ] T041 [P] [US4] Add no-change explainer troubleshooting docs in .documentation/harness-engineering.md
+- [X] T038 [US4] Add strict harness template in templates/workflows/harness-strict-template.md
+- [X] T039 [US4] Add strict template wiring in src/devspark_cli/commands.py
+- [X] T040 [P] [US4] Document strict template usage in .documentation/quickstart.md
+- [X] T041 [P] [US4] Add no-change explainer troubleshooting docs in .documentation/harness-engineering.md
 
 **Checkpoint**: US4 independently validated.
 
@@ -190,15 +190,15 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 **Purpose**: Parity, docs consistency, and concrete validation execution.
 
-- [ ] T042 [P] Add Bash parity updates for delivery-status enforcement and timeout handling in scripts/bash/check-prerequisites.sh
-- [ ] T043 [P] Add PowerShell parity updates for delivery-status enforcement and timeout handling in scripts/powershell/check-prerequisites.ps1
-- [ ] T044 Update implement command guidance for governance and convergence gates in templates/commands/implement.md
-- [ ] T044a [P] Add adapter doctor troubleshooting to .documentation/harness-engineering.md with probe state explanations
-- [ ] T045 Run focused validation command set and record results in .documentation/specs/001-harness-delivery-integrity/gates/validation-smoke.md
-- [ ] T046 Run full pytest suite and record pass or fail summary in .documentation/specs/001-harness-delivery-integrity/gates/validation-full.md
-- [ ] T047 Refresh lifecycle documentation with canonical adapter doctor terminology in .documentation/implementation-lifecycle.md
-- [ ] T048 [P] Update CHANGELOG.md with delivery-integrity feature summary and scope notes
-- [ ] T049 [P] Run full parity test suite (Bash + PowerShell) for all modified scripts across Windows/macOS/Linux test matrix
+- [X] T042 [P] Add Bash parity updates for delivery-status enforcement and timeout handling in scripts/bash/check-prerequisites.sh
+- [X] T043 [P] Add PowerShell parity updates for delivery-status enforcement and timeout handling in scripts/powershell/check-prerequisites.ps1
+- [X] T044 Update implement command guidance for governance and convergence gates in templates/commands/implement.md
+- [X] T044a [P] Add adapter doctor troubleshooting to .documentation/harness-engineering.md with probe state explanations
+- [X] T045 Run focused validation command set and record results in .documentation/specs/001-harness-delivery-integrity/gates/validation-smoke.md
+- [X] T046 Run full pytest suite and record pass or fail summary in .documentation/specs/001-harness-delivery-integrity/gates/validation-full.md
+- [X] T047 Refresh lifecycle documentation with canonical adapter doctor terminology in .documentation/implementation-lifecycle.md
+- [X] T048 [P] Update CHANGELOG.md with delivery-integrity feature summary and scope notes
+- [X] T049 [P] Run full parity test suite (Bash + PowerShell) for all modified scripts across Windows/macOS/Linux test matrix
 
 **Checkpoint**: Polish complete. Full feature validated. Ready for final review.
 
