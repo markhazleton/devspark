@@ -37,4 +37,3 @@ Date: 2026-04-29
 ### macOS/Linux
 
 Bash scripts tested via WSL on Windows. Full macOS/Linux CI matrix requires GitHub Actions runner — tracked in CI roadmap.
-

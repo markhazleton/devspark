@@ -230,6 +230,7 @@ class Workflow:
     guardrails: dict[str, Any] = field(default_factory=dict)
     steps: list[WorkflowStep] = field(default_factory=list)
     schema_version: int = 1
+    governance_required: bool = False
     source_path: Path | None = None
 
 
@@ -280,6 +281,7 @@ def parse_workflow(path: Path) -> Workflow:
         guardrails=dict(autonomy.get("guardrails") or {}),
         steps=steps,
         schema_version=int(data.get("schema_version", 1)),
+        governance_required=bool(data.get("governance_required", False)),
         source_path=path,
     )
 

@@ -56,7 +56,7 @@ Reviewers should focus on whether new runner behavior prevents "complete with no
 
 ### Session 2026-04-19
 
-- Q: What should count as implementation evidence? → A: Require at least one changed file in src/** or test/** for delivery status to pass implement-stage evidence.
+- Q: What should count as implementation evidence? → A: Require at least one changed file in `src/**` or `test/**` for delivery status to pass implement-stage evidence.
 - Q: How should create-pr readiness behave when delivery status is unmet? → A: Block create-pr readiness whenever delivery status is unmet.
 - Q: What is the default stall timeout strategy for write-producing steps? → A: Trigger stall after 5 minutes with no output.
 - Q: What should be the default manual gate policy for implement? → A: Use confirm-only as the default policy.
@@ -66,33 +66,42 @@ Reviewers should focus on whether new runner behavior prevents "complete with no
 ### Session 2026-04-29 - Risk Mitigation Decisions
 
 #### Auto-Remediation Scope (CR-1 Resolution)
+
 - Q: What does "auto-remediation" mean in the convergence loop (FR-015, FR-018)? → A: **MVP Scope Decision**: In Phase 1-3 MVP, the convergence loop is **re-validation-only**. After each pass, findings are re-evaluated against updated artifacts and step outputs, but automatic fix generation is deferred to Phase 5+ as a separate feature. This enables deterministic behavior (no unplanned LLM integrations) and keeps the MVP achievable. Hands-off mode still demonstrates iterative convergence; it just does not auto-generate fixes. Manual gates remain available for operator-driven remediation in interactive mode.
 
 #### Stall Detection Strategy (CR-2 Resolution)
+
 - Q: How can stall detection work when current adapters are synchronous and use subprocess.run? → A: **MVP Scope Decision**: Stall detection (FR-008) is deferred to Phase 5+ pending streaming subprocess refactor. For Phase 1-3 MVP, we implement only total-step-timeout (explicit timeout on entire step duration via subprocess.run timeout parameter). This is achievable immediately and provides useful safety guardrails. Long-operation distinction and 5-minute output-inactivity detection require async subprocess monitoring, deferred as post-MVP infrastructure improvement.
 
 #### Delivery Evidence Git Diff Strategy (HP-2 Resolution)
+
 - Q: What git diff reference should delivery checks use if adapters auto-commit? → A: Use `git diff origin/main...HEAD -- src/ test/` (branch diff against upstream default branch) for committed changes. This captures adapter-committed work and staged changes. Supplement with `git diff --cached -- src/ test/` for staged-only changes if needed. Specify this explicitly in the data model and validation contracts. Implementation: Add git diff reference specification to `DeliveryCheckResult` model.
 
 #### Adapter Probe Protocol (HP-3 Resolution)
+
 - Q: How should adapter doctor distinguish write-capable from write-approval-required without destructive testing? → A: Define an explicit `probe()` method on the `AgentAdapter` protocol that each adapter implements. Return a `ProbeResult` with flags: `is_available`, `can_execute_read_only`, `requires_write_approval`, `error_details`, and `remediation_guidance`. Each adapter controls its own probe logic; no destructive testing required. Document the probe contract in the adapter-doctor-contract.md.
 
 #### Non-UTF Decode Handling (HP-4 Resolution)
+
 - Q: How should non-UTF output be handled fail-softly to prevent Windows crashes? → A: Add `errors="replace"` to all subprocess text decoding paths in validation.py and adapter base classes. Emit a telemetry event (reason code: `decode_replacement_applied`) when replacement occurs. Update run artifacts to show decode incidents as non-fatal step events that do not block completion. This prevents hard crashes and provides auditability.
 
 #### Runner Orchestration Model (HP-5 Resolution)
+
 - Q: How do runner/executor.py and harness/runner.py interact for hands-off mode? → A: Clarify ownership: `runner/executor.py` (workflow runner) is the top-level orchestrator for full lifecycle hands-off mode. It sequences `plan -> tasks -> analyze -> critic -> implement -> create-pr -> pr-review` stages. `harness/runner.py` (harness runner) is a subordinate that handles per-step validation, delivery checks, convergence loops, and iteration records. Workflow runner calls harness runner for each stage. Document this hierarchy in plan.md and add it to Phase 2 foundational task dependencies.
 
 #### Platform Parity Timing (HP-6 Resolution)
+
 - Q: Should parity tests be deferred to Phase 8 or integrated earlier? → A: Move parity verification into each phase checkpoint rather than Phase 8-only. At minimum: Each phase that modifies scripts (bash/powershell) MUST include a parity smoke check in the checkpoint criteria. Full parity test suite runs at Phase 8, but intermediate phases validate they do not diverge. This enforces Constitution Principle VI throughout, not just at the end.
 
 #### Scope Separation (CR-3 Resolution)
+
 - Q: Should all 47 tasks ship in one PR? → A: **Delivery Strategy**: Split into 2 independently valuable PRs:
   - **PR1 (Phases 1-3)**: Core delivery integrity MVP. Tasks T001-T018. Adds delivery-status gating, core validation rules, delivery-evidence defaults. User Story 1 (US1). Creates PR-mergeable, independently testable value.
   - **PR2 (Phases 4-8)**: Advanced features. Tasks T019-T047. Adds adapter doctor, hands-off lifecycle, manual gates, templates, parity, polish. User Stories 2-5 (US2, US3, US4, US5).
   - Benefits: Reduced risk per PR, clearer review scope, iterative value delivery, easier rollback if needed.
 
 #### Integration Testing (HP-1 Resolution)
+
 - Q: What new tests should be added? → A: Add to tasks.md as new items after Phase 2:
   - `test_delivery_status_contract.py`: Validates delivery-status gating, create-pr-ready blocking
   - `test_adapter_doctor_contract.py`: Validates adapter probe results and write-capability classification
@@ -101,6 +110,7 @@ Reviewers should focus on whether new runner behavior prevents "complete with no
   - These are Phase 2 foundational gate requirements before user story implementation.
 
 #### Missing Operational Tasks (HP-5 Additional)
+
 - Q: Are there missing CI/CD or changelog tasks? → A: Add to tasks:
   - Update CHANGELOG.md with delivery-integrity feature summary (Phase 8)
   - Add CI/CD configuration to run new contract tests (Phase 2 gate)

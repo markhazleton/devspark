@@ -36,7 +36,9 @@ class ProbeResult:
         can_write: True if adapter can execute write steps (commits, PRs, file edits)
         is_interactive: True if adapter requires user prompts/feedback
         ready: True if all prerequisites are met for execution
-        diagnostics: List of diagnostic messages if not ready (empty if ready=True)
+    diagnostics: List of diagnostic messages if not ready. Both ``None`` and ``[]``
+        are treated as "no diagnostics"; use :meth:`with_diagnostic` to append safely.
+        ``AdapterCapabilityProfile.diagnostics`` normalizes this to ``list[str]``.
     """
     can_read: bool = True
     can_write: bool = False

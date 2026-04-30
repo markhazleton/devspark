@@ -127,6 +127,7 @@ The delivery check looks for mutations in `src/` and `test/` directories. If you
 ### "No-change explainer" appears but I expected changes
 
 Review the harness spec and adapter configuration:
+
 1. Does the adapter support write operations in your environment?
 2. Did the harness spec include implementation stages that create source mutations?
 3. Check adapter doctor output: `devspark adapter-doctor --adapter <name>`

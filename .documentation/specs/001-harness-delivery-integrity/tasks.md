@@ -82,7 +82,7 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 **CRITICAL**: Must complete before Phase 5 hands-off implementation begins.
 
 - [X] T013e Add runner orchestration model documentation to plan.md (workflow runner as top-level, harness runner as subordinate for per-step validation)
-- [X] T013f Add AgentAdapter.probe() method signature and ProbeResult model to src/devspark_cli/harness/adapters/__init__.py
+- [X] T013f Add AgentAdapter.probe() method signature and ProbeResult model to `src/devspark_cli/harness/adapters/__init__.py`
 
 **Checkpoint**: Runner model clarified and adapter probe interface defined.
 
@@ -117,7 +117,7 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 
 - [X] T019 [US2] Add adapter capability profile model in src/devspark_cli/harness/spec_models.py
 - [X] T020 [US2] Implement adapter doctor command flow in src/devspark_cli/harness/cli.py
-- [X] T021 [US2] Implement behavior-based adapter doctor probes in src/devspark_cli/harness/adapters/__init__.py
+- [X] T021 [US2] Implement behavior-based adapter doctor probes in `src/devspark_cli/harness/adapters/__init__.py`
 - [X] T022 [P] [US2] Emit normalized adapter doctor output in src/devspark_cli/harness/runner.py
 - [X] T023 [P] [US2] Normalize adapter doctor terminology in .documentation/specs/001-harness-delivery-integrity/contracts/adapter-doctor-contract.md
 
@@ -223,11 +223,13 @@ Focus review on governance gate enforcement, delivery-status gating, iterative c
 ### Parallel Opportunities (within same PR phase)
 
 **Within PR1 (Phases 1-3)**:
+
 - T003 in parallel with T001, T002
 - T013a, T013b in parallel with T013, T013c, T013d
 - T016, T017 in parallel after T014, T015
 
 **Within PR2 (Phases 4-8)**:
+
 - T022, T023 in parallel after T019-T021
 - T036, T037 in parallel after T033-T035
 - T040, T041 in parallel after T038, T039

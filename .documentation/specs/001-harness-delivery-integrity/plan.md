@@ -46,9 +46,11 @@ Prioritize verification of hard gate semantics, convergence loop correctness, ad
 **Two-PR Approach for Risk Mitigation (CR-3 Resolution)**:
 
 ### PR1: Delivery Integrity MVP (Phases 1-3, Tasks T001-T018)
+
 **Scope**: Core delivery-status gating and validation evidence model.
 **User Stories Delivered**: US1 (Detect Non-Delivery Runs) only.
 **Key Features**:
+
 - Dual outcome model (workflow_status, delivery_status)
 - Default delivery evidence rule (src/test mutation)
 - create-pr-ready readiness blocking
@@ -58,9 +60,11 @@ Prioritize verification of hard gate semantics, convergence loop correctness, ad
 **Value**: Independently deployable, addresses primary false-positive failure mode
 
 ### PR2: Advanced Features & Parity (Phases 4-8, Tasks T019-T047)
+
 **Scope**: Adapter doctor, hands-off orchestration, manual gates, templates, parity
 **User Stories Delivered**: US2, US3, US4, US5 (Adapter Doctor, Manual Gates, Strict Defaults, Hands-Off Lifecycle)
 **Key Features**:
+
 - Adapter doctor probes and capability profiles
 - Hands-off lifecycle orchestration (plan → pr-review)
 - Manual gate policies with evidence
@@ -75,31 +79,41 @@ Prioritize verification of hard gate semantics, convergence loop correctness, ad
 ## Risk Mitigations Applied (2026-04-29)
 
 ### CR-1: Auto-Remediation MVP Scope
+
 **Resolution**: Convergence loop in Phase 1 is **re-validation-only**. After each pass, findings are re-evaluated. Automatic fix generation is deferred to post-MVP (outside this feature). This eliminates the need for an unplanned LLM integration while still proving iterative convergence behavior.
 
 ### CR-2: Stall Detection MVP Scope
+
 **Resolution**: Stall detection deferred. MVP implements only total-step-timeout via subprocess.run timeout parameter. 5-minute output-inactivity detection requires async subprocess refactor, deferred to post-MVP infrastructure improvement.
 
 ### CR-3: Scope Creep Mitigation
+
 **Resolution**: Split into 2 PRs. PR1 (Phases 1-3) is MVP-complete and independently valuable. PR2 (Phases 4-8) builds on PR1. Reduces per-PR complexity and risk.
 
 ### HP-2: Git Diff Reference Strategy
+
 **Resolution**: Use `git diff origin/main...HEAD -- src/ test/` for branch-aware diff. Document in DeliveryCheckResult model and validation contracts.
 
 ### HP-3: Adapter Probe Protocol
+
 **Resolution**: Add explicit `probe()` method to AgentAdapter protocol. Each adapter implements own probe logic returning ProbeResult with capability flags. No destructive testing needed.
 
 ### HP-4: Non-UTF Decode Handling
+
 **Resolution**: Add `errors="replace"` to all subprocess text decoding in validation.py and adapter base. Emit telemetry event on replacement. Update artifacts to show decode incidents as non-fatal step events.
 
 ### HP-5: Runner Orchestration Model
+
 **Resolution**: Clarify ownership in plan: workflow runner (executor.py) orchestrates full lifecycle; harness runner (harness/runner.py) handles per-step validation and convergence. Add this to Phase 2 foundational task dependencies.
 
 ### HP-6: Platform Parity Timing
+
 **Resolution**: Move parity verification into each phase checkpoint (not Phase-8-only). Phases modifying scripts must include parity smoke check. Full suite runs at Phase 8.
 
 ### HP-1: Missing Integration Tests
+
 **Resolution**: Add new Phase 2 foundational contract tests:
+
 - test_delivery_status_contract.py
 - test_adapter_doctor_contract.py
 - test_convergence_loop_contract.py
@@ -191,7 +205,7 @@ tests/
 
 ## Runner Orchestration Model
 
-**Phase 2b Clarification: Ownership and Responsibility**
+### Phase 2b Clarification: Ownership and Responsibility
 
 The DevSpark harness runtime has two distinct runner components with clear ownership boundaries:
 
@@ -202,6 +216,7 @@ The DevSpark harness runtime has two distinct runner components with clear owner
 **Location**: `src/devspark_cli/runner/executor.py`
 
 **Capabilities**:
+
 - Parses workflow YAML definitions
 - Schedules stages in order (e.g., plan → tasks → analyze → critic → implement → create-pr → pr-review)
 - Handles pause/resume and autonomy-level enforcement
@@ -217,6 +232,7 @@ The DevSpark harness runtime has two distinct runner components with clear owner
 **Location**: `src/devspark_cli/harness/runner.py`
 
 **Capabilities**:
+
 - Loads and parses harness spec YAML
 - Executes each step via selected adapter
 - Validates step output against declared rules
@@ -229,7 +245,7 @@ The DevSpark harness runtime has two distinct runner components with clear owner
 
 ### Collaboration Pattern
 
-```
+```text
 WorkflowRunner (Top-Level)
   └─ Calls: implement stage
        └─ Invokes: HarnessRunner
@@ -247,16 +263,19 @@ WorkflowRunner (Top-Level)
 ### Design Rationale
 
 **Separation of Concerns**:
+
 - Workflow runner handles sequencing and cross-stage decisions
 - Harness runner handles validation and per-step evidence
 - Each is independently testable and deployable
 
 **Hand-Off Semantic** (for Phase 5 hands-off implementation):
+
 - WorkflowRunner reads run outcome and delivery_status from HarnessRunner
 - If delivery_status is unmet, WorkflowRunner blocks create-pr and pr-review transitions
 - Re-validation loop (Phase 5 convergence) runs within HarnessRunner, not WorkflowRunner
 
 **Adapter Capability Model** (Phase 4+):
+
 - Adapters report probe() results to HarnessRunner
 - HarnessRunner may signal WorkflowRunner to skip write-required stages if adapter is read-only
 - This allows graceful degradation in non-write environments (e.g., review-only runs)
@@ -264,6 +283,7 @@ WorkflowRunner (Top-Level)
 ### Future Extension: Probe Protocol
 
 **Phase 4 Addition**: Each adapter will implement a `probe()` method returning:
+
 ```python
 @dataclass
 class ProbeResult:

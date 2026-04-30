@@ -253,7 +253,7 @@ def register(app: typer.Typer) -> None:
                 raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
         # Governance approval guard for cross-cutting features
-        if _requires_governance_approval(workflow_id):
+        if _requires_governance_approval(wf):
             approval = _get_governance_approval_status(repo_root)
             if approval is None:
                 typer.echo(
@@ -560,25 +560,18 @@ def _get_governance_approval_status(repo_root: Path) -> dict[str, Any] | None:
                                 decision = line.split("Decision:")[-1].strip()
                                 if "approved" in decision.lower():
                                     return {"approved": True, "path": match, "decision": decision}
-                except Exception:
+                except (OSError, UnicodeDecodeError):
                     continue
     
     return None
 
 
-def _requires_governance_approval(workflow_id: str) -> bool:
+def _requires_governance_approval(wf: Workflow) -> bool:
     """Check if a workflow requires governance approval checkpoint.
     
-    Workflows that modify cross-cutting runtime behavior require governance
-    approval before execution begins.
+    Returns True only when the workflow YAML explicitly sets governance_required: true.
     """
-    lowered = workflow_id.lower()
-    # Require approval for workflows marked in spec as governance-required
-    # This includes harness delivery integrity and other cross-cutting features
-    return "implement" in lowered and any(
-        marker in lowered
-        for marker in ["delivery-integrity", "harness", "governance"]
-    )
+    return bool(wf.governance_required)
 
 
 def _make_telemetry(repo_root: Path):

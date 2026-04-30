@@ -25,13 +25,15 @@ completed = subprocess.run(
 )
 ```
 
-**Injection Vector**: If rule.command contains shell metacharacters (e.g., `; rm -rf /`), they execute.  
-**Mitigation**: 
+**Injection Vector**: If rule.command contains shell metacharacters (e.g., `; rm -rf /`), they execute.
+**Mitigation**:
+
 - Rules are defined in committed YAML specs, not user-provided at runtime
 - Injection vector is limited to developers with repository write access
 - Harness runs are typically executed in isolated environments or by trusted automation
 
 **Recommendation**:
+
 - Document that rule commands are trusted (from spec definitions)
 - Add lint check in spec-validation-contract.md to warn on suspicious commands
 - Consider using shlex.quote() for any dynamic path interpolation in future
@@ -60,6 +62,7 @@ completed = subprocess.run(
 **Mitigation**: Same as F-1.
 
 **Recommendation**:
+
 - Document that grader commands are trusted
 - Ensure grader_command validation is in spec-validation-contract.md
 
@@ -75,6 +78,7 @@ completed = subprocess.run(
 **Overall Risk Level**: LOW
 
 **Reasoning**:
+
 - Attack surface limited to developers with repo write access (who can already inject code)
 - Harness execution environment is typically controlled (CI/CD, local dev)
 - No end-user input flows into shell commands
