@@ -10,13 +10,13 @@
 
 | CAP ID | Created | Type | Principle | Status | Review Due |
 |--------|---------|------|-----------|--------|------------|
-| CAP-2026-001 | 2026-04-30 | MODIFY | §VIII Markdown Quality | DRAFT | 2026-05-14 |
+| CAP-2026-001 | 2026-04-30 | MODIFY | §VIII Markdown Quality | APPROVED | 2026-05-14 |
 
 ## Amendment Log
 
 | Version | Date | Type | Principle | CAP ID | Status |
 |---------|------|------|-----------|--------|--------|
-| (entries added as amendments are approved) | | | | | |
+| 1.3.0 | 2026-04-30 | MODIFY | §VIII Markdown Quality | CAP-2026-001 | APPROVED — pending apply |
 
 ## Rejected Proposals
 
