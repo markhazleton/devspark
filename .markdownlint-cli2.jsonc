@@ -23,10 +23,10 @@
     "MD060": false
   },
   "ignores": [
-    ".genreleases/",
-    "incoming/**",
-    ".documentation/drafts/**",
-    ".documentation/devspark/runs/**",
-    ".pytest_cache/**"
+    ".genreleases/",           // generated release notes — machine-authored, not hand-edited
+    "incoming/**",             // staging area for external content before review
+    ".documentation/drafts/**", // in-progress drafts not yet ready for lint enforcement
+    ".documentation/devspark/runs/**", // runtime artifacts — gitignored, not committed to repo
+    ".pytest_cache/**"         // pytest runtime cache — not markdown content
   ]
 }
