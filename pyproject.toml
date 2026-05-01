@@ -32,3 +32,8 @@ packages = ["src/devspark_cli"]
 [tool.hatch.build.targets.wheel.force-include]
 "agents-registry.json" = "src/devspark_cli/agents-registry.json"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+

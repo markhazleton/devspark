@@ -16,12 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Decision packet and convergence failure report artifacts for lifecycle go/no-go decisions
 - Strict harness template at `templates/workflows/harness-strict-template.md`
 - New contract tests for adapter doctor and hands-off lifecycle behavior
+- CI `tests.yml` workflow with matrix (ubuntu/windows/macos × Python 3.11/3.12) for pytest suite and all harness contract scripts
+- `dev` extras group in `pyproject.toml` so `pytest` installs cleanly in CI via `pip install -e ".[dev]"`
 
 ### Changed
 
 - Delivery gate enforcement now pairs with branch-sync checks for create-pr/pr-review transitions
 - Manual gate policy handling supports `confirm-only`, `confirm-with-file-check`, and `confirm-with-git-diff-check`
 - Bash and PowerShell prerequisite scripts include optional delivery-status gate enforcement switches
+- `_requires_governance_approval` now reads explicit `governance_required: bool` field from workflow YAML instead of substring-matching the workflow id
+- Exception handling in governance approval status narrowed to `(OSError, UnicodeDecodeError)` to prevent silent swallow of unexpected errors
+- Constitution §III extended with a 4th condition: the `.gitignore` rule covering a runtime-writable subtree must exist in the default branch before any run artifacts are first generated
 
 ## [2.1.0] - 2026-04-18 — Workflow Engine Foundation
 

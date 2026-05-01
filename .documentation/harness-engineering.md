@@ -214,3 +214,35 @@ The harness runtime does not replace DevSpark's prompt-first lifecycle.
 - use the harness runtime when you need repeatable terminal-driven execution and traceable run artifacts
 
 That separation is intentional: prompt workflows manage human and agent collaboration, while the harness runtime executes declarative engineering flows.
+
+## Test Coverage
+
+The harness runtime is covered by two kinds of tests, both under `tests/`:
+
+### pytest test modules (run via `pytest tests/`)
+
+These use standard `def test_*` functions and are picked up automatically by the test runner.
+
+| File | Tests | What it covers |
+|------|-------|----------------|
+| `test_delivery_status_contract.py` | 2 | Delivery gate logic: `unmet` when no `src/` or `test/` changes; `met` when `src/` changes present |
+| `test_convergence_loop_contract.py` | 2 | Finding state transitions (`open`, `resolved`, `deferred`); stage iteration record structure |
+
+Run: `pytest tests/ -v`
+
+### Runnable contract scripts (run directly via `python`)
+
+These use a `main()` entry point and validate end-to-end CLI behavior through `typer.testing.CliRunner` or subprocess. CI runs them in the `contract-validation` job.
+
+| File | What it covers |
+|------|----------------|
+| `test_harness_validation_contract.py` | `devspark harness validate` — loads and validates a spec YAML against the schema |
+| `test_harness_spec_contract.py` | Spec model parsing, field validation, and constraint checking |
+| `test_harness_runner_contract.py` | Full harness run lifecycle — artifacts written, exit codes, retry and abort paths |
+| `test_harness_adapters_contract.py` | Adapter routing via `agents-registry.json`, step-level adapter resolution |
+| `test_adapter_doctor_contract.py` | `devspark adapter doctor` — normalized readiness states (`ready`, `write_approval_required`, `write_incompatible`, `unavailable`) |
+| `test_hands_off_lifecycle_contract.py` | `--hands-off` flag — write-incompatible adapter triggers abort; `decision-packet.json` and `result.json` artifacts created |
+
+Run individually: `python tests/test_harness_runner_contract.py`
+
+Run all: `python tests/test_harness_validation_contract.py && python tests/test_harness_spec_contract.py && python tests/test_harness_runner_contract.py && python tests/test_harness_adapters_contract.py && python tests/test_adapter_doctor_contract.py && python tests/test_hands_off_lifecycle_contract.py`

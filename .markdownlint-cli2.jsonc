@@ -26,6 +26,7 @@
     ".genreleases/",
     "incoming/**",
     ".documentation/drafts/**",
+    ".documentation/devspark/runs/**",
     ".pytest_cache/**"
   ]
 }
