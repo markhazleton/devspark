@@ -1,5 +1,22 @@
 # DevSpark Constitution
 
+<!--
+  Sync Impact Report — v1.2.0 → v1.3.0 (2026-04-30)
+  Amendment: CAP-2026-001 (APPROVED 2026-04-30)
+  Bump type: MINOR — new named principle §VIII added
+  Modified principles: none renamed
+  Added sections: §VIII Markdown Quality (MUST)
+  Removed sections: none (Additional Constraints bullet "Markdown linted via
+    markdownlint-cli2" promoted into §VIII and removed from bullet list)
+  Templates checked:
+    ✅ templates/plan-template.md     — no lint references; no update needed
+    ✅ templates/spec-template.md     — no lint references; no update needed
+    ✅ templates/tasks-template.md    — no lint references; no update needed
+    ✅ CONTRIBUTING.md                — added §VIII compliance note
+    ✅ .markdownlint-cli2.jsonc       — ignores entries already carry rationale comments
+  Follow-up TODOs: none
+-->
+
 ## Core Principles
 
 ### I. Backward Compatibility (NON-NEGOTIABLE)
@@ -55,10 +72,36 @@ A commit that touches the review file must not include production code, tests, o
 Code fixes and review-file updates must land in separate commits so revision diffs remain auditable.
 Violations are MEDIUM severity process findings in PR review.
 
+### VIII. Markdown Quality (MUST)
+
+All markdown files committed to the repository MUST pass `npx markdownlint-cli2 "**/*.md"`
+with zero errors against the project `.markdownlint-cli2.jsonc` configuration.
+
+**MUST requirements:**
+
+- Every markdown file merged to the default branch MUST produce zero markdownlint errors.
+- The CI lint job (`.github/workflows/lint.yml`) MUST run on every push and pull request and
+  MUST be required-to-pass before merge.
+- Every path excluded via the `ignores` block in `.markdownlint-cli2.jsonc` MUST carry an inline
+  rationale comment (e.g., `// runtime artifacts — gitignored, not committed`).
+- New `ignores` entries MUST be introduced in the same PR that introduces the excluded path pattern,
+  not as a retroactive fix after CI failures.
+- Runtime-generated markdown (e.g., `.documentation/devspark/runs/**`) MUST be excluded via the
+  `ignores` block; runtime tooling is not responsible for linting its own output.
+
+**SHOULD recommendations:**
+
+- Run `npx markdownlint-cli2 "**/*.md"` locally before pushing.
+- Use editor integrations (e.g., VS Code markdownlint extension) for real-time feedback.
+- Keep the `ignores` list minimal; prefer fixing files over excluding them.
+- Place in-progress drafts under a path already in `ignores` (e.g., `.documentation/drafts/`)
+  rather than adding a new exclusion.
+
+Violations are HIGH severity in PR review when they block CI; MEDIUM when caught locally before push.
+
 ## Additional Constraints
 
 - Python 3.11+ for CLI code, typed with typer/rich/click
-- Markdown linted via markdownlint-cli2
 - Scripts in both PowerShell and Bash; context scripts support GitHub, AzDO, and GitLab
 - Never overwrite `.documentation/` user artifacts during CLI operations
 
@@ -75,4 +118,4 @@ This constitution supersedes all other development practices in the DevSpark rep
 Amendments require: documentation of the change, leadership approval, and a migration plan for any
 affected workflows or repositories.
 
-**Version**: 1.2.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-18
+**Version**: 1.3.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-30

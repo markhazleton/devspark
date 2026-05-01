@@ -65,6 +65,8 @@ When working on devspark:
 2. Verify templates are working correctly in `templates/` directory
 3. Test script functionality in the `.documentation/scripts/` directory
 4. Ensure memory files (`memory/constitution.md`) are updated if major process changes are made
+5. **Lint all markdown before pushing** (Constitution §VIII): run `npx markdownlint-cli2 "**/*.md"`
+   and resolve all errors. CI will block the PR if any errors remain.
 
 ### Testing template and command changes locally
 
