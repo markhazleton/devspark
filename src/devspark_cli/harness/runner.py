@@ -332,9 +332,9 @@ class HarnessRunner:
 
     def write_lifecycle_artifacts(self) -> None:
         """Write lifecycle-related artifacts (findings, stage iterations, convergence state).
-        
-        Scaffolding for Phase 2 convergence loop support. Called at end of run execution
-        to persist finding state transitions and iteration records for hands-off re-validation.
+
+        Called at end of run execution to persist finding state transitions and
+        iteration records for hands-off re-validation passes.
         """
         if self.run_dir is None or self.run is None:
             return
@@ -365,10 +365,10 @@ class HarnessRunner:
     
     def write_convergence_state(self, pass_number: int, max_passes: int, converged: bool, reason: str | None = None) -> None:
         """Record convergence loop state for hands-off lifecycle re-validation.
-        
-        Scaffolding for Phase 5 convergence loop implementation. Records whether analyze/critic
-        passes are converging toward resolution or hitting max-pass limit.
-        
+
+        Persists the current pass number, convergence result, and optional reason
+        so downstream tooling and audit trails can reconstruct the loop history.
+
         Args:
             pass_number: Current pass number (1-indexed)
             max_passes: Maximum allowed passes
@@ -404,10 +404,12 @@ class HarnessRunner:
         execution_mode: str = "manual",
     ) -> None:
         """Add a new finding to the current run.
-        
-        Part of Phase 2 convergence loop scaffolding. Findings track analyze/critic
-        issues that need resolution in subsequent passes.
-        
+
+        Findings track analyze/critic issues that need resolution in subsequent
+        convergence loop passes. Each finding carries a severity, description,
+        recommended action, and an execution mode indicating how remediation
+        should be attempted.
+
         Args:
             finding_id: Unique identifier for the finding
             severity: "error", "warning", or "info"
@@ -478,10 +480,10 @@ class HarnessRunner:
 
     def record_stage_failure(self, stage_name: str, reason_code: str, details: str | None = None) -> None:
         """Record a stage-level failure with reason code for audit trail.
-        
-        Part of Phase 2 explicit failure tracking. Maps stage failures to structured
-        reason codes for reporting, gating decisions, and hands-off orchestration.
-        
+
+        Maps stage failures to structured reason codes used in reporting,
+        delivery gating decisions, and hands-off orchestration.
+
         Args:
             stage_name: Name of the stage (e.g., "analyze", "critic", "implement")
             reason_code: Canonical reason code (e.g., REASON_CODE_CREATE_PR_BLOCKED)
@@ -861,7 +863,8 @@ class HarnessRunner:
         assert self.telemetry is not None
         findings: list[ValidationFinding] = []
 
-        # Phase 3: deterministic-first ordering — evaluate non-rubric rules before llm.rubric
+        # Deterministic rules run first so cheaper, fast-path checks can short-circuit
+        # before more expensive LLM rubric evaluation is attempted.
         deterministic_rules = [r for r in step.validation if r.type != "llm.rubric"]
         rubric_rules = [r for r in step.validation if r.type == "llm.rubric"]
 

@@ -58,7 +58,7 @@ class ValidationEngine:
         return sorted(paths)
 
     def evaluate(self, rule: ValidationRule, context: RunContext, step_dir: Path) -> ValidationFinding:
-        # Phase 5: respect enabled flag — disabled rules are skipped without error
+        # Disabled rules are skipped without error so specs can temporarily turn off checks.
         if not rule.enabled:
             return ValidationFinding(rule_id=rule.id, type=rule.type, status="skipped", severity=rule.severity, message="Rule disabled (enabled=false)")
 
@@ -81,7 +81,7 @@ class ValidationEngine:
             return ValidationFinding(rule_id=rule.id, type=rule.type, status=status, severity=rule.severity, message=f"Substring {'found' if status == 'passed' else 'missing'} in {path}")
 
         if rule.type == "command.exit_code":
-            # Phase 2: skip side-effectful commands in plan mode
+            # Skip side-effectful commands in plan mode to avoid unintended state mutations.
             if context.execution_mode == "plan":
                 return ValidationFinding(rule_id=rule.id, type=rule.type, status="skipped", severity=rule.severity, message="Skipped in plan mode (command may have side effects)")
             timeout_seconds = rule.timeout_seconds or 300
@@ -184,7 +184,7 @@ class ValidationEngine:
             return ValidationFinding(rule_id=rule.id, type=rule.type, status=status, severity=rule.severity, message=f"Pattern {'matched' if status == 'passed' else 'did not match'} in {path}")
 
         if rule.type == "llm.rubric":
-            # Phase 3: LLM rubric scoring — delegate to grader CLI, no credentials in harness
+            # LLM rubric scoring — delegates to a grader CLI so the harness holds no credentials.
             output_path = step_dir / "output.txt"
             if not output_path.exists():
                 return ValidationFinding(rule_id=rule.id, type=rule.type, status="failed", severity=rule.severity, message="No output.txt found for rubric evaluation")

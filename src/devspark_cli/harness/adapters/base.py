@@ -27,10 +27,11 @@ class AgentResponse:
 @dataclass(slots=True)
 class ProbeResult:
     """Adapter capability and readiness status.
-    
-    Part of Phase 4 adapter doctor feature. Each adapter reports its capabilities
-    so the harness runner can make routing decisions without trial execution.
-    
+
+    Each adapter reports its capabilities so the harness runner can make routing
+    decisions — including fail-fast for write-incompatible adapters — without
+    trial execution.
+
     Attributes:
         can_read: True if adapter can execute read-only steps (no file modifications)
         can_write: True if adapter can execute write steps (commits, PRs, file edits)
@@ -62,13 +63,14 @@ class AgentAdapter(Protocol):
 
     def probe(self) -> ProbeResult:
         """Return adapter capability and readiness status.
-        
+
         Non-destructive probe that determines whether this adapter can execute
         read-only steps, write steps, or both. Called before harness execution
         to make routing decisions.
-        
-        Part of Phase 4 adapter doctor feature. Implementation is optional in MVP.
-        Default behavior: return ProbeResult with can_read=True, ready depends on is_available().
+
+        Default implementation derives readiness from ``is_available()`` with
+        ``can_write=False``. Adapters that support write steps should override
+        this method and return ``can_write=True`` when appropriate.
         """
         available, error = self.is_available()
         return ProbeResult(
@@ -133,7 +135,7 @@ class CommandLineAdapter:
 
     def execute(self, step: StepSpec, context, telemetry, prompt_text: str | None = None) -> AgentResponse:
         effective_prompt = load_prompt_text(step, prompt_text)
-        # Phase 2: prepend plan-mode instruction so the model does not write files
+        # In plan mode, prepend an instruction so the model analyses without writing files.
         execution_mode = getattr(context, "execution_mode", "act")
         if execution_mode == "plan":
             effective_prompt = _PLAN_MODE_PREFIX + effective_prompt

@@ -329,7 +329,7 @@ def validate_profiles_across_apps(
 
     Checks:
     - All inherited profiles exist (already caught by registry validation)
-    - Profile-layer overrides don't weaken repo-wide mandatory rules (T051)
+    - Profile-layer overrides don't weaken repo-wide mandatory rules
 
     Returns a list of warnings/errors.
     """
@@ -353,7 +353,7 @@ def validate_profiles_across_apps(
 
 
 # ---------------------------------------------------------------------------
-# Tiered prompt/workflow/alias resolution (FR-002, FR-005, FR-006)
+# Tiered prompt/workflow/alias resolution
 # ---------------------------------------------------------------------------
 
 

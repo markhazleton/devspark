@@ -174,7 +174,8 @@ class WorkflowRunner:
 
     Two modes:
       - mode="stub":  do not invoke the prompt; record the step as success.
-                      Used by deterministic CI tests (T019, T020, T034).
+                      Used by deterministic CI tests that verify step sequencing
+                      and state transitions without live agent execution.
       - mode="live":  call the supplied invoker for every step.
     """
 
@@ -342,7 +343,7 @@ class WorkflowRunner:
             print(f"[devspark] WARNING: failed to persist pause state: {exc}", file=sys.stderr)
             target = None
 
-        # Resume hint to stderr (FR-007c)
+        # Emit the resume hint so the user or an automation layer can restart from the paused step.
         print(
             f"Paused. Resume with: devspark resume {run.workflow_run_id}",
             file=sys.stderr,

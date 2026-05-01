@@ -98,7 +98,7 @@ def _scan_aliases(repo_root: Path) -> dict[str, Alias]:
 
 
 # ---------------------------------------------------------------------------
-# Repeated-sequence detection ring buffer (FR-022 / T049)
+# Repeated-sequence detection ring buffer
 # ---------------------------------------------------------------------------
 
 _INVOCATION_RING: list[tuple[str, float]] = []
@@ -129,7 +129,7 @@ def _record_atomic_invocation(prompt_id: str, repo_root: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Live invoker (T025): forward to the canonical command file via legacy_command
+# Live invoker: forward to the canonical command file via legacy_command
 # ---------------------------------------------------------------------------
 
 def _live_prompt_invoker(repo_root: Path):
@@ -226,7 +226,7 @@ def register(app: typer.Typer) -> None:
             )
             raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
-        # Working tree guard (FR-015a)
+        # Working tree guard: refuse to start if uncommitted changes would pollute delivery evidence.
         if not allow_dirty and _git_dirty(repo_root):
             typer.echo(
                 "git working tree is dirty. Commit/stash changes or pass --allow-dirty.",
@@ -423,7 +423,7 @@ def register(app: typer.Typer) -> None:
         category: str | None = typer.Option(None, "--category", help="Filter atomic prompts by category"),
         audience: str | None = typer.Option(None, "--audience", help="Filter atomic prompts by audience"),
     ) -> None:
-        """List aliases, workflows, and atomic prompts (FR-021)."""
+        """List aliases, workflows, and atomic prompts."""
         _print_help_view(_repo_root(), include_all=all_, category=category, audience=audience)
 
     @app.command("workflows-help", hidden=True)
