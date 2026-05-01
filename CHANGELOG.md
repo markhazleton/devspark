@@ -9,24 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-04-30 — Harness Delivery Integrity
+
+**Delivery-aware harness execution, adapter doctor diagnostics, and hands-off lifecycle mode (spec 001-harness-delivery-integrity).**
+
 ### Added
 
-- Adapter doctor CLI (`devspark adapter doctor`) with normalized readiness states for hands-off routing
-- Hands-off execution flag for harness runs (`devspark harness run --hands-off`)
-- Decision packet and convergence failure report artifacts for lifecycle go/no-go decisions
-- Strict harness template at `templates/workflows/harness-strict-template.md`
-- New contract tests for adapter doctor and hands-off lifecycle behavior
-- CI `tests.yml` workflow with matrix (ubuntu/windows/macos × Python 3.11/3.12) for pytest suite and all harness contract scripts
-- `dev` extras group in `pyproject.toml` so `pytest` installs cleanly in CI via `pip install -e ".[dev]"`
+- **Dual outcome model** — `workflow_status` + `delivery_status` + `create_pr_ready` flag; implementation stages require src/test file changes to pass the delivery gate
+- **Adapter doctor** (`devspark adapter doctor`) with normalized readiness states (`available`, `read-only-works`, `write-approval-required`, `unusable`) and fail-fast routing for hands-off runs
+- **Hands-off lifecycle mode** (`devspark harness run --hands-off`) — chains `plan → tasks → analyze → critic → implement → create-pr → pr-review` with hard gate enforcement and no mid-run human prompts
+- **Convergence loop** — up to 3 analyze/critic re-validation passes per stage; persists per-pass iteration records and a final decision packet on convergence failure
+- **Decision packet and convergence failure report artifacts** for lifecycle go/no-go decisions
+- **Strict harness template** at `templates/workflows/harness-strict-template.md`
+- **Contract tests** for adapter doctor, hands-off lifecycle, delivery status, and convergence loop behavior
+- **CI test matrix** in `tests.yml` (ubuntu/windows/macos × Python 3.11/3.12) running full pytest suite + all 6 harness contract scripts
+- `dev` extras group in `pyproject.toml` — `pip install -e ".[dev]"` in CI
+- **pip-audit CI job** (`security-scan` in `tests.yml`) — uploads JSON vulnerability report as artifact on every push/PR
+- **Constitution §VIII Markdown Quality** — zero markdownlint errors required on all committed markdown; `lint.yml` is a required-to-pass check
+- **`scripts/bash/address-pr-review.sh`** — bash parity for PowerShell address-pr-review script (closes §VI platform parity gap)
 
 ### Changed
 
-- Delivery gate enforcement now pairs with branch-sync checks for create-pr/pr-review transitions
+- Delivery gate enforcement pairs with branch-sync checks for create-pr/pr-review transitions
 - Manual gate policy handling supports `confirm-only`, `confirm-with-file-check`, and `confirm-with-git-diff-check`
-- Bash and PowerShell prerequisite scripts include optional delivery-status gate enforcement switches
-- `_requires_governance_approval` now reads explicit `governance_required: bool` field from workflow YAML instead of substring-matching the workflow id
-- Exception handling in governance approval status narrowed to `(OSError, UnicodeDecodeError)` to prevent silent swallow of unexpected errors
-- Constitution §III extended with a 4th condition: the `.gitignore` rule covering a runtime-writable subtree must exist in the default branch before any run artifacts are first generated
+- `_requires_governance_approval` now reads explicit `governance_required: bool` field from workflow YAML (no more substring matching)
+- Exception handling in governance approval status narrowed to `(OSError, UnicodeDecodeError)`
+- Constitution §III extended with 4th condition: `.gitignore` rule covering runtime-writable subtree must exist in default branch before run artifacts are first generated
+- `.markdownlint-cli2.jsonc` ignore entries now include inline rationale comments (§VIII compliance)
+- `.devspark/VERSION` stamp updated to 2.2.0
+
+### Fixed
+
+- CI `pytest -k "harness"` collected 0 tests and exited with code 1 — replaced with `pytest tests/ -v --tb=short`
+- `.documentation/devspark/runs/**` was missing from `.markdownlint-cli2.jsonc` ignores, causing 73 spurious CI lint errors
+- Upgrade shim now detects source-repo context; guard is conditional to avoid false-positive upgrade prompts in the DevSpark source repo itself
+
+### Architectural Decisions
+
+- **ADR-002**: Delivery-Aware Harness Execution Model — see [.documentation/decisions/ADR-002.md](.documentation/decisions/ADR-002.md)
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test (CI identity)
+- copilot-swe-agent[bot]
 
 ## [2.1.0] - 2026-04-18 — Workflow Engine Foundation
 
