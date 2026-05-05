@@ -87,6 +87,53 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 
 ---
 
+## Full Development → Release Cycle
+
+The recommended command order from first requirements through a tagged release:
+
+### Phase 1 — Feature Development
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/devspark.specify` | Define requirements (route-aware: quickfix, quick-spec, or full-spec) |
+| 2 | `/devspark.plan` | Technical architecture and stack choices |
+| 3 | `/devspark.tasks` | Break the plan into actionable implementation tasks |
+| 4 | `/devspark.analyze` | Cross-artifact consistency check |
+| 5 | `/devspark.implement` | Execute tasks — spec status moves to *In Progress*, then *Complete* |
+
+> **Shortcut**: `/devspark.run create-spec` chains steps 1–4 automatically and pauses after `/devspark.analyze`.
+
+### Phase 2 — Pull Request
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 6 | `/devspark.create-pr` | Draft the pull request with spec and gate context |
+| 7 | `/devspark.pr-review` | Constitution-based review |
+| 8 | `/devspark.address-pr-review` | Remediate review findings with enforced commit isolation |
+| 9 | `/devspark.pr-review UPDATE` | Focused re-review against the fix iteration, then merge |
+
+> **Shortcut**: `/devspark.run execute-plan` chains steps 5–7 automatically and pauses after `/devspark.create-pr`.
+
+### Phase 3 — Release
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 10 | `/devspark.site-audit` | Optional final compliance and quality audit |
+| 11 | `/devspark.release --dry-run` | Preview artifacts to archive and documentation to generate |
+| 12 | `/devspark.release {version}` | Archive complete specs, generate CHANGELOG, release notes, and bump version |
+| 13 | `/devspark.harvest` | Post-release cleanup of stale artifacts |
+
+**Prerequisites before `/devspark.release`:**
+
+- All `tasks.md` items checked `[x]`
+- All `spec.md` statuses set to `Complete`
+- All PRs merged and branch synced with `main` (`git fetch origin && git status`)
+- Markdownlint passes — the release command blocks on lint errors
+
+See [Implementation Lifecycle Guide](implementation-lifecycle.md) for sprint cadence, spec status rules, and right-sizing guidance.
+
+---
+
 ## Core Concepts
 
 ### The Constitution
