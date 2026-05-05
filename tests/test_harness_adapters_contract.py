@@ -94,7 +94,7 @@ def main() -> None:
             telemetry = DummyTelemetry()
             captured: dict[str, object] = {}
 
-            def fake_run(command, cwd, input, capture_output, text, check):
+            def fake_run(command, cwd, input, capture_output, text, check, errors):
                 captured["command"] = command
                 captured["cwd"] = cwd
                 captured["input"] = input
