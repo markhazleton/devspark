@@ -117,6 +117,32 @@ class HarnessRunner:
     def next_step_index(self, step: StepSpec, success: bool) -> int | None:
         return _pd.next_step_index(step, self._step_lookup, success)
 
+    # Backward-compatibility delegates (methods present in main-branch runner.py)
+    def resolve_step_adapter(self, step: StepSpec, spec: HarnessSpec | None = None) -> str:
+        return _pd.resolve_step_adapter(step, spec or self.spec or self.load_spec(), self.adapter_override, self.use_adapter_default)
+
+    def get_adapter(self, name: str):  # noqa: ANN201
+        return _pd.get_adapter(name)
+
+    def build_retry_prompt(self, step: StepSpec, failed_errors: list[ValidationFinding], retry) -> str | None:
+        return _pd.build_retry_prompt(step, failed_errors, retry)
+
+    def pause_for_human_review(self, step: StepSpec, prompt_text: str, step_dir: Path) -> None:
+        assert self.context and self.telemetry
+        _pd.pause_for_human_review(step, prompt_text, step_dir, self.context, self.telemetry)
+
+    def write_supporting_artifacts(self) -> None:
+        if self.run_dir and self.spec and self.context:
+            _rf.write_supporting_artifacts(self.run_dir, self.spec, self.context)
+
+    def write_result(self) -> None:
+        if self.run:
+            _rf.write_result(self.run_dir, self.run)
+
+    def write_lifecycle_artifacts(self) -> None:
+        if self.run:
+            _rf.write_lifecycle_artifacts(self.run_dir, self.run)
+
     def execute(self) -> Run:
         spec = self.spec or self.load_spec()
         run, _ = self.prepare_run()
