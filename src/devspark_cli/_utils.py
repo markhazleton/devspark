@@ -230,11 +230,10 @@ def check_tool(tool: str, tracker: StepTracker = None) -> bool:
     Returns:
         True if tool is found, False otherwise
     """
-    # Special handling for Claude CLI after `claude migrate-installer`
-    # See: https://github.com/(claude migrate-installer removes original exe)
-    # The migrate-installer command REMOVES the original executable from PATH
-    # and creates an alias at ~/.claude/local/claude instead
-    # This path should be prioritized over other claude executables in PATH
+    # Special handling for Claude CLI after `claude migrate-installer`.
+    # After running that command, the original executable is removed from PATH
+    # and replaced by an alias at ~/.claude/local/claude instead.
+    # This path must be checked explicitly before the standard shutil.which() lookup.
     if tool == "claude":
         if CLAUDE_LOCAL_PATH.exists() and CLAUDE_LOCAL_PATH.is_file():
             if tracker:

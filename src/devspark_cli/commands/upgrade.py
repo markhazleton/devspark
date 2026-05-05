@@ -73,7 +73,13 @@ def detect_ai_agent() -> Optional[str]:
         if Path(folder).exists():
             # For some agents, check if commands subdirectory exists
             if agent_key in ["claude", "copilot", "cursor-agent"]:
-                commands_path = Path(folder) / "commands" if agent_key == "claude" else Path(folder) / ("agents" if agent_key == "copilot" else "commands")
+                if agent_key == "claude":
+                    sub = "commands"
+                elif agent_key == "copilot":
+                    sub = "agents"
+                else:
+                    sub = "commands"
+                commands_path = Path(folder) / sub
                 if commands_path.exists():
                     return agent_key
             else:
@@ -474,7 +480,9 @@ def upgrade(
     # Step 7: Run the actual upgrade (using init logic)
     console.print("[cyan]→[/cyan] Downloading and applying latest templates...\n")
 
-    # Import here to avoid circular imports at module level
+    # Import here to avoid a circular import at module level:
+    # upgrade.py is loaded by __init__.py before commands/init.py, so importing
+    # init at the top of upgrade.py would create an import cycle through __init__.py.
     from .init import init
 
     try:
