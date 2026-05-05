@@ -710,32 +710,19 @@ class HarnessRunner:
                 if step.type != "validation":
                     adapter = self.get_adapter(adapter_name)
                     if self.hands_off and adapter_name == "manual":
+                        profile = self.get_adapter_capability_profile(adapter_name)
                         self.telemetry.emit(
                             "harness.policy.blocked",
                             self.context.run_id,
                             step_id=step.id,
-                            reason="hands_off_manual_gate_bypassed",
+                            reason="write_incompatible_adapter",
+                            state=profile.state,
                         )
-                        duration_ms = int((time.perf_counter() - attempt_started) * 1000)
-                        total_duration += duration_ms
-                        self.telemetry.emit(
-                            "harness.step.finished",
-                            self.context.run_id,
-                            step_id=step.id,
-                            attempt=attempt,
-                            status="passed",
-                            duration_ms=duration_ms,
+                        raise RuntimeError(
+                            f"write_incompatible_adapter: step={step.id} adapter={adapter_name}"
+                            f" state={profile.state}."
+                            f" {profile.remediation_guidance or 'Select a write-capable non-interactive adapter.'}"
                         )
-                        result = StepResult(
-                            step_id=step.id,
-                            status="passed",
-                            attempts=attempt,
-                            adapter=adapter_name,
-                            duration_ms=total_duration,
-                            validation_findings=[],
-                            artifacts=self._compute_artifacts(step, before_snapshot),
-                        )
-                        return result, self.next_step_index(step, success=True)
                     self._enforce_write_capability(step, adapter_name)
                     available, reason = adapter.is_available()
                     if not available:
