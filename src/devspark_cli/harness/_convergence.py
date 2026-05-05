@@ -33,14 +33,14 @@ def write_convergence_state(
     convergence_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
 
-def write_max_pass_failure_report(run_dir: Path | None, open_findings_count: int) -> None:
+def write_max_pass_failure_report(run_dir: Path | None, pass_count: int, open_findings_count: int) -> None:
     """Write a markdown report when the convergence loop exceeds max passes."""
     if run_dir is None:
         return
     lines = [
         "# Convergence Max-Pass Failure",
         "",
-        f"- Passes attempted: {open_findings_count}",
+        f"- Passes attempted: {pass_count}",
         f"- Remaining open findings: {open_findings_count}",
         "",
         "## Next Actions",

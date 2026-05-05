@@ -125,10 +125,10 @@ class HarnessRunner:
         run.workflow_status = "complete" if run.status == "complete" else "failed"
         _dg.evaluate_delivery_gate(run, self.run_dir, Path(self.context.repo_root))
         if self.hands_off:
-            converged, _ = self.run_stage_revalidation_loop(max_passes=3)
+            converged, pass_count = self.run_stage_revalidation_loop(max_passes=3)
             if not converged:
                 run.failure_reason_code = "convergence_max_pass_failed"
-                _conv.write_max_pass_failure_report(self.run_dir, len(self.get_open_findings()))
+                _conv.write_max_pass_failure_report(self.run_dir, pass_count, len(self.get_open_findings()))
         assert self.telemetry is not None
         _rf.finalize_run_artifacts(run, spec, self.run_dir, self.telemetry, started, load_run_retention_limit())
         return run

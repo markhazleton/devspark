@@ -16,6 +16,7 @@ from .spec_models import (
     HarnessSpec,
     REASON_CODE_DECODE_REPLACEMENT,
     REASON_CODE_STEP_TIMEOUT,
+    RetryPolicy,
     RunContext,
     StepResult,
     StepSpec,
@@ -125,13 +126,13 @@ def next_step_index(step: StepSpec, step_lookup: dict[str, int], success: bool) 
     return None
 
 
-def build_retry_prompt(step: StepSpec, failed_errors: list[ValidationFinding], retry: object) -> str | None:
+def build_retry_prompt(step: StepSpec, failed_errors: list[ValidationFinding], retry: RetryPolicy) -> str | None:
     """Build a retry prompt by combining the step prompt, repair prompt, and validation errors."""
     parts: list[str] = []
     if step.prompt_file:
         parts.append(Path(step.prompt_file).read_text(encoding="utf-8"))
-    if getattr(retry, "repairPrompt", None):
-        parts.append(Path(retry.repairPrompt).read_text(encoding="utf-8"))  # type: ignore[union-attr]
+    if retry.repairPrompt:
+        parts.append(Path(retry.repairPrompt).read_text(encoding="utf-8"))
     lines = ["## Validation Errors"]
     lines.extend(f"- {finding.rule_id}: {finding.message}" for finding in failed_errors)
     parts.append("\n".join(lines))
