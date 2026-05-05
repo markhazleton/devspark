@@ -1,5 +1,7 @@
 # Feature Specification: Sample Harness Workflow
 
+**Status**: Complete
+
 This file is a fixture used by `sample.harness.yaml` to demonstrate the
 DevSpark harness runtime. It satisfies the harness validation rules
 (`spec-heading` and `spec-has-rationale`) so the sample can run end-to-end.
