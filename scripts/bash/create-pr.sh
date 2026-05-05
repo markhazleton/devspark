@@ -122,36 +122,22 @@ trim_text() {
 extract_section_text() {
     local file_path="$1"
     local section_name="$2"
-    python - "$file_path" "$section_name" <<'PY'
-from pathlib import Path
-import re
-import sys
-
-path = Path(sys.argv[1])
-heading = sys.argv[2].strip().lower()
-if not path.exists():
-    sys.exit(0)
-text = path.read_text(encoding="utf-8")
-lines = text.splitlines()
-capture = False
-collected = []
-target = heading
-for line in lines:
-    stripped = line.strip()
-    if re.match(r'^##\s+', stripped):
-        current = re.sub(r'^##\s+', '', stripped).strip().lower()
-        if capture and current != target:
-            break
-        capture = current == target
-        continue
-    if capture:
-        collected.append(line)
-print("\n".join(collected).strip())
-PY
-}
-
-json_escape_multiline() {
-    jq -Rs '.'
+    [[ -f "$file_path" ]] || return 0
+    awk -v section="$section_name" '
+        /^## / {
+            h = substr($0, 4)
+            sub(/^[[:space:]]+/, "", h); sub(/[[:space:]]+$/, "", h)
+            if (capture) exit
+            capture = (tolower(h) == tolower(section))
+            next
+        }
+        capture { lines[n++] = $0 }
+        END {
+            s = 0; while (s < n && lines[s] ~ /^[[:space:]]*$/) s++
+            e = n - 1; while (e >= s && lines[e] ~ /^[[:space:]]*$/) e--
+            for (i = s; i <= e; i++) print lines[i]
+        }
+    ' "$file_path"
 }
 
 find_quickfix_record_for_branch() {
@@ -159,28 +145,23 @@ find_quickfix_record_for_branch() {
     local branch_name="$2"
     local quickfix_dir="$repo_root/.documentation/quickfixes"
     [[ -d "$quickfix_dir" ]] || return 0
-    python - "$quickfix_dir" "$branch_name" <<'PY'
-from pathlib import Path
-import re
-import sys
-
-quickfix_dir = Path(sys.argv[1])
-branch_name = sys.argv[2].strip()
-matches = []
-for path in sorted(quickfix_dir.glob('*.md')):
-    try:
-        text = path.read_text(encoding='utf-8')
-    except Exception:
-        continue
-    match = re.search(r'^- \*\*Branch\*\*:\s*(.+)$', text, re.MULTILINE)
-    if match and match.group(1).strip() == branch_name:
-        id_match = re.search(r'^- \*\*ID\*\*:\s*(.+)$', text, re.MULTILINE)
-        quickfix_id = id_match.group(1).strip() if id_match else path.stem
-        matches.append((quickfix_id, str(path)))
-if matches:
-    matches.sort(key=lambda item: item[0])
-    print(matches[-1][1])
-PY
+    local best_id="" best_path="" file branch_line quickfix_id
+    shopt -s nullglob
+    for file in "$quickfix_dir"/*.md; do
+        branch_line=$(grep -m1 '^- \*\*Branch\*\*:' "$file" 2>/dev/null \
+            | sed 's/^- \*\*Branch\*\*:[[:space:]]*//' | sed 's/[[:space:]]*$//' || true)
+        if [[ "$branch_line" == "$branch_name" ]]; then
+            quickfix_id=$(grep -m1 '^- \*\*ID\*\*:' "$file" 2>/dev/null \
+                | sed 's/^- \*\*ID\*\*:[[:space:]]*//' | sed 's/[[:space:]]*$//' || true)
+            [[ -z "$quickfix_id" ]] && quickfix_id=$(basename "$file" .md)
+            if [[ -z "$best_id" || "$quickfix_id" > "$best_id" ]]; then
+                best_id="$quickfix_id"
+                best_path="$file"
+            fi
+        fi
+    done
+    shopt -u nullglob
+    [[ -n "$best_path" ]] && printf '%s\n' "$best_path"
 }
 
 build_quickfix_json() {
@@ -283,39 +264,39 @@ scan_gate_artifacts_json() {
 
 collect_gate_acknowledgements_json() {
     local tasks_path="$1"
-    if [[ ! -f "$tasks_path" ]]; then
-        printf '[]\n'
-        return
-    fi
+    [[ -f "$tasks_path" ]] || { printf '[]\n'; return; }
     local section_text
-    section_text=$(extract_section_text "$tasks_path" "Gate Acknowledgements" | trim_text)
-    if [[ -z "$section_text" ]]; then
-        printf '[]\n'
-        return
-    fi
-    SECTION_TEXT="$section_text" python <<'PY'
-import json
-import os
+    section_text=$(extract_section_text "$tasks_path" "Gate Acknowledgements")
+    [[ -n "$section_text" ]] || { printf '[]\n'; return; }
 
-text = os.environ["SECTION_TEXT"].strip()
-entries = []
-current = []
-for line in text.splitlines():
-    stripped = line.strip()
-    if not stripped:
-        if current:
-            entries.append("\n".join(current).strip())
-            current = []
-        continue
-    if stripped.startswith('- Gate:') and current:
-        entries.append("\n".join(current).strip())
-        current = [stripped]
-    else:
-        current.append(stripped)
-if current:
-    entries.append("\n".join(current).strip())
-print(json.dumps(entries))
-PY
+    local -a blocks=()
+    local current_block=""
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        local trimmed
+        trimmed=$(printf '%s' "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        if [[ -z "$trimmed" ]]; then
+            if [[ -n "$current_block" ]]; then
+                blocks+=("$current_block")
+                current_block=""
+            fi
+        elif [[ "$trimmed" == "- Gate:"* && -n "$current_block" ]]; then
+            blocks+=("$current_block")
+            current_block="$trimmed"
+        else
+            current_block="${current_block:+$current_block$'\n'}$trimmed"
+        fi
+    done <<< "$section_text"
+    [[ -n "$current_block" ]] && blocks+=("$current_block")
+
+    if [[ ${#blocks[@]} -eq 0 ]]; then
+        printf '[]\n'
+    else
+        local json='[]'
+        for block in "${blocks[@]}"; do
+            json=$(jq --arg e "$block" '. + [$e]' <<< "$json")
+        done
+        printf '%s\n' "$json"
+    fi
 }
 
 collect_preflight() {
@@ -325,7 +306,7 @@ collect_preflight() {
     local spec_exists=false plan_exists=false tasks_exists=false
     local spec_title="" classification="" risk_level="" required_gates="" recommended_next_step=""
     local tasks_total=0 tasks_completed=0 tasks_incomplete=0
-    local diff_ref lines_summary changed_files_count recent_commits_json existing_pr_json checklists_json gate_artifacts_json gate_acknowledgements_json quickfix_json
+    local diff_ref lines_summary changed_files_count file_changes_json commit_log_json existing_pr_json checklists_json gate_artifacts_json gate_acknowledgements_json quickfix_json
     local existing_pr=false existing_pr_number="" existing_pr_url="" existing_pr_title="" existing_pr_state="" existing_pr_draft=false
 
     repo_root=$(get_repo_root)
@@ -429,8 +410,16 @@ collect_preflight() {
         diff_ref="HEAD~1...HEAD"
     fi
     lines_summary=$(git diff --shortstat "$diff_ref" 2>/dev/null || echo "")
-    changed_files_count=$(git diff --name-only "$diff_ref" 2>/dev/null | grep -c . || echo '0')
-    recent_commits_json=$(git log --format='%s' -n 10 "$diff_ref" 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))' 2>/dev/null || echo '[]')
+    file_changes_json=$(git diff --name-status "$diff_ref" 2>/dev/null | \
+        jq -R 'split("\t") |
+            if length == 3 then {status: (.[0] | .[0:1]), path: .[2], from: .[1]}
+            elif length >= 2 then {status: .[0], path: .[1]}
+            else empty end' | \
+        jq -s '.' 2>/dev/null || printf '[]\n')
+    changed_files_count=$(printf '%s' "$file_changes_json" | jq 'length')
+    commit_log_json=$(git log --format='%H%x1f%s%x1f%an%x1f%ai' -n 20 "$diff_ref" 2>/dev/null | \
+        jq -R 'split("") | if length >= 4 then {hash: .[0], subject: .[1], author: .[2], date: .[3]} else empty end' | \
+        jq -s '.' 2>/dev/null || printf '[]\n')
 
     if [[ "$cli_available" == true && "$auth_ok" == true ]]; then
         existing_pr_json=$(gh pr list --head "$current_branch" --json number,url,title,state,isDraft --limit 1 2>/dev/null | jq '.[0] // {}' 2>/dev/null || echo '{}')
@@ -483,7 +472,8 @@ collect_preflight() {
         --argjson existing_pr "$existing_pr" \
         --argjson existing_pr_number "${existing_pr_number:-0}" \
         --argjson existing_pr_draft "$([[ "$existing_pr_draft" == "true" ]] && echo true || echo false)" \
-        --argjson recent_commits "$recent_commits_json" \
+        --argjson commit_log "$commit_log_json" \
+        --argjson file_changes "$file_changes_json" \
         --argjson checklists "$checklists_json" \
         --argjson gate_artifacts "$gate_artifacts_json" \
         --argjson gate_acknowledgements "$gate_acknowledgements_json" \
@@ -533,7 +523,8 @@ collect_preflight() {
             diff: {
                 changed_files_count: $changed_files_count,
                 lines_summary: $lines_summary,
-                recent_commit_subjects: $recent_commits
+                commit_log: $commit_log,
+                file_changes: $file_changes
             },
             quickfix_record: $quickfix_record,
             existing_pr: {
