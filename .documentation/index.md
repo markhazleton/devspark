@@ -101,7 +101,7 @@ The recommended command order from first requirements through a tagged release:
 | 4 | `/devspark.analyze` | Cross-artifact consistency check |
 | 5 | `/devspark.implement` | Execute tasks — spec status moves to *In Progress*, then *Complete* |
 
-> **Shortcut**: `/devspark.run create-spec` chains steps 1–4 automatically and pauses after `/devspark.analyze`.
+> **CLI shortcut**: `devspark run create-spec` chains steps 1–4 automatically and pauses after analyze. Requires the [DevSpark CLI](harness-engineering.md#devspark-run--development-workflow-aliases).
 
 ### Phase 2 — Pull Request
 
@@ -112,7 +112,7 @@ The recommended command order from first requirements through a tagged release:
 | 8 | `/devspark.address-pr-review` | Remediate review findings with enforced commit isolation |
 | 9 | `/devspark.pr-review UPDATE` | Focused re-review against the fix iteration, then merge |
 
-> **Shortcut**: `/devspark.run execute-plan` chains steps 5–7 automatically and pauses after `/devspark.create-pr`.
+> **CLI shortcut**: `devspark run execute-plan` chains steps 5–7 automatically and pauses after create-pr. Requires the [DevSpark CLI](harness-engineering.md#devspark-run--development-workflow-aliases).
 
 ### Phase 3 — Release
 

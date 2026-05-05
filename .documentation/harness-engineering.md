@@ -4,6 +4,86 @@ DevSpark's harness runtime is an optional CLI execution layer for repeatable eng
 
 This page documents what is currently implemented in the repository.
 
+> **CLI required** — Everything on this page requires the DevSpark CLI. Install it once with:
+>
+> ```bash
+> uv tool install devspark-cli --force --from git+https://github.com/markhazleton/devspark.git
+> ```
+>
+> Prompt-first slash commands (`/devspark.*`) work without the CLI and are documented in the [Implementation Lifecycle Guide](implementation-lifecycle.md).
+
+---
+
+## devspark.run — Development Workflow Aliases
+
+`devspark run <alias>` is the fastest path through the spec-driven development cycle when the CLI is installed. It chains atomic prompts into a single terminal command with built-in pause points and structured artifact output.
+
+**These are CLI-only commands.** There is no `/devspark.run` slash command and no backing file exists in `.claude/commands/`. Without the CLI, run the atomic commands manually in sequence (see [Without the CLI](#without-the-cli) below).
+
+### Available Aliases
+
+| Alias | Chains | Pause point | Output |
+|-------|--------|-------------|--------|
+| `create-spec` | `specify → plan → tasks → analyze` | After `analyze` — review before implementing | Reviewable spec artifact |
+| `execute-plan` | `implement → create-pr → pr-review` | After `create-pr` — confirm PR before review runs | Pull request |
+| `suggest-improvement` | `capture-context → classify-improvement → create-issue → (assign-agent) → (implement)` | None by default; pass `--yes` to skip confirmation | GitHub issue link |
+
+### Usage
+
+```bash
+# Start a new feature from scratch
+devspark run create-spec
+
+# Execute an existing plan through to a reviewed PR
+devspark run execute-plan
+
+# File a workflow improvement against markhazleton/devspark
+devspark run suggest-improvement
+devspark run suggest-improvement --yes    # skip confirmation prompt
+```
+
+### Pause and Resume
+
+`create-spec` and `execute-plan` pause at defined checkpoints so a human can review before the workflow continues. When a pause fires, the CLI prints the exact resume command:
+
+```bash
+devspark resume <run_id>
+```
+
+Pause state is saved at `.documentation/telemetry/runs/<run_id>.json`. On resume, DevSpark verifies the persisted `schema_version`, `workflow_id`, and `context_checksum` — any mismatch exits with code 25 (`EXIT_RESUME_FAILED`).
+
+Active paused runs can be listed with:
+
+```bash
+devspark runs list
+```
+
+### Full Development Cycle with devspark.run
+
+The two aliases cover the entire feature lifecycle when used in sequence:
+
+```text
+devspark run create-spec
+# → review analyze output, then resume or continue:
+devspark run execute-plan
+# → review and merge PR, then release:
+devspark release <version>
+```
+
+For the full command order including release, see the [Full Development → Release Cycle](index.md#full-development--release-cycle) on the home page.
+
+### Without the CLI
+
+Use the atomic slash commands directly in your agent:
+
+| `devspark.run` alias | Manual equivalent (no CLI required) |
+|----------------------|-------------------------------------|
+| `create-spec` | `/devspark.specify` → `/devspark.plan` → `/devspark.tasks` → `/devspark.analyze` |
+| `execute-plan` | `/devspark.implement` → `/devspark.create-pr` → `/devspark.pr-review` |
+| `suggest-improvement` | `/devspark.specify` with improvement framing, then file the issue manually |
+
+---
+
 ## When to Use It
 
 Use the harness runtime when you need terminal-driven execution, repeatable local validation, or a structured audit trail for a workflow that should run the same way more than once.
