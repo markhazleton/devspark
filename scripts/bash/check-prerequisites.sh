@@ -156,7 +156,7 @@ if $REQUIRE_DELIVERY_STATUS; then
     if [[ -n "$latest_result" ]] && [[ -f "$latest_result" ]] && command -v jq >/dev/null 2>&1; then
         create_pr_ready=$(jq -r '.create_pr_ready // false' "$latest_result")
         if [[ "$create_pr_ready" != "true" ]]; then
-            echo "ERROR: delivery-status gate failed; latest harness run is not create-pr ready" >&2
+            echo "ERROR: delivery-status gate failed; latest harness run is not create-pr ready (timeout-seconds=$TIMEOUT_SECONDS)" >&2
             exit 1
         fi
     fi
