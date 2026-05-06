@@ -34,7 +34,8 @@ param(
     [ValidateSet('full', 'specs', 'docs', 'comments', 'changelog', 'scan')]
     [string]$Scope = 'full',
     [switch]$Json,
-    [int]$SampleLimit = 100
+    [int]$SampleLimit = 100,
+    [string]$OutFile = ''
 )
 
 # Import common functions
@@ -611,4 +612,26 @@ if (-not $Json) {
     Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
 }
 
-$result | ConvertTo-Json -Depth 10
+$jsonOutput = $result | ConvertTo-Json -Depth 10
+
+if ($OutFile) {
+    $outPath = if ([IO.Path]::IsPathRooted($OutFile)) {
+        $OutFile
+    } else {
+        Join-Path $repoRoot $OutFile
+    }
+
+    $outDir = Split-Path -Parent $outPath
+    if ($outDir -and -not (Test-Path $outDir)) {
+        New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+    }
+
+    # Persist a copy for resilient tooling when stdout capture is truncated.
+    Set-Content -Path $outPath -Value $jsonOutput -Encoding UTF8
+
+    if (-not $Json) {
+        Write-Host "[OUTPUT] Harvest context saved to $($outPath.Substring($repoRoot.Length + 1).Replace('\\', '/'))" -ForegroundColor Gray
+    }
+}
+
+$jsonOutput
