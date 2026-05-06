@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-05-06 - Patch Release
+
+### Added
+
+- Additional release process documentation covering the full development-to-release cycle
+- Expanded PR review guidance and documentation references
+
+### Changed
+
+- Refactored harness internals by splitting large modules into focused components for maintainability
+- Refactored CLI command package initialization into dedicated command modules
+- Archived stale release/pr-review artifacts and refreshed spec-linked comments
+- Improved create-pr preflight data richness for downstream automation
+
+### Fixed
+
+- Restored backward-compatibility delegates for removed HarnessRunner methods
+- Corrected harness max-pass failure report `pass_count` handling
+- Restored missing harness fixture files required by contract flows
+- Resolved markdown lint trigger and spec lifecycle audit findings
+- Fixed delivery-status shell timeout variable handling (`TIMEOUT_SECONDS`)
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test (CI identity)
+- copilot-swe-agent[bot]
+
 ## [2.2.0] - 2026-04-30 — Harness Delivery Integrity
 
 **Delivery-aware harness execution, adapter doctor diagnostics, and hands-off lifecycle mode (spec 001-harness-delivery-integrity).**
