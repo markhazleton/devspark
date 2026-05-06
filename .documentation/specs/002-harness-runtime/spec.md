@@ -18,3 +18,5 @@ demo without requiring a live feature spec to be in progress.
 See `.documentation/harness-engineering.md` for full harness documentation.
 See `.documentation/releases/v2.1.0/specs/002-harness-runtime/spec.md` for
 the completed Harness Runtime feature specification.
+See `CHANGELOG.md` (v2.1.0, "Tiered Workflow Engine Foundation") for the
+released changelog entry covering the completed harness runtime work.
