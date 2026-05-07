@@ -108,26 +108,35 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
 
     if verbose:
         console.print("[cyan]Fetching latest release information...[/cyan]")
-    api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+    latest_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
 
-    try:
+    def _find_matching_asset(assets: list[dict], expected_pattern: str) -> Optional[dict]:
+        for candidate in assets:
+            name = candidate.get("name", "")
+            if expected_pattern in name and name.endswith(".zip"):
+                return candidate
+        return None
+
+    def _fetch_release(url: str) -> dict:
         response = client.get(
-            api_url,
+            url,
             timeout=30,
             follow_redirects=True,
             headers=_github_auth_headers(github_token),
         )
         status = response.status_code
         if status != 200:
-            # Format detailed error message with rate-limit info
-            error_msg = _format_rate_limit_error(status, response.headers, api_url)
+            error_msg = _format_rate_limit_error(status, response.headers, url)
             if debug:
                 error_msg += f"\n\n[dim]Response body (truncated 500):[/dim]\n{response.text[:500]}"
             raise RuntimeError(error_msg)
         try:
-            release_data = response.json()
+            return response.json()
         except ValueError as je:
             raise RuntimeError(f"Failed to parse release JSON: {je}\nRaw (truncated 400): {response.text[:400]}")
+
+    try:
+        release_data = _fetch_release(latest_api_url)
     except Exception as e:
         console.print(f"[red]Error fetching release information[/red]")
         console.print(Panel(str(e), title="Fetch Error", border_style="red"))
@@ -135,12 +144,28 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
 
     assets = release_data.get("assets", [])
     pattern = f"devspark-template-{ai_assistant}-{script_type}"
-    matching_assets = [
-        asset for asset in assets
-        if pattern in asset["name"] and asset["name"].endswith(".zip")
-    ]
+    asset = _find_matching_asset(assets, pattern)
 
-    asset = matching_assets[0] if matching_assets else None
+    # Fallback: latest release can exist without packaged assets.
+    # Search recent releases to find the newest published asset bundle.
+    if asset is None:
+        releases_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=10"
+        try:
+            releases = _fetch_release(releases_api_url)
+            if isinstance(releases, list):
+                latest_id = release_data.get("id")
+                for candidate_release in releases:
+                    if latest_id is not None and candidate_release.get("id") == latest_id:
+                        continue
+                    candidate_assets = candidate_release.get("assets", [])
+                    asset = _find_matching_asset(candidate_assets, pattern)
+                    if asset is not None:
+                        release_data = candidate_release
+                        assets = candidate_assets
+                        break
+        except Exception:
+            # Keep existing error behavior below if no matching asset is found.
+            pass
 
     if asset is None:
         console.print(f"[red]No matching release asset found[/red] for [bold]{ai_assistant}[/bold] (expected pattern: [bold]{pattern}[/bold])")
