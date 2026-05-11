@@ -37,6 +37,7 @@ def init(
     project_name: str = typer.Argument(None, help="Name for your new project directory (optional if using --here, or use '.' for current directory)"),
     ai_assistant: str = typer.Option(None, "--ai", help="AI assistant to use: claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, roo, codebuddy, amp, shai, q, bob, or qodercli"),
     script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
+    release_tag: str = typer.Option(None, "--release-tag", help="Install from a specific GitHub release tag (e.g. v2.1.0)"),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
@@ -185,6 +186,8 @@ def init(
 
     console.print(f"[cyan]Selected AI assistant:[/cyan] {selected_ai}")
     console.print(f"[cyan]Selected script type:[/cyan] {selected_script}")
+    if release_tag:
+        console.print(f"[cyan]Selected release tag:[/cyan] {release_tag}")
 
     tracker = StepTracker("Initialize DevSpark Project")
 
@@ -220,7 +223,18 @@ def init(
             local_ssl_context = _ssl_context if verify else False
             local_client = httpx.Client(verify=local_ssl_context)
 
-            _, release_tag = download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, github_token=github_token)
+            _, resolved_release_tag = download_and_extract_template(
+                project_path,
+                selected_ai,
+                selected_script,
+                here,
+                release_tag=release_tag,
+                verbose=False,
+                tracker=tracker,
+                client=local_client,
+                debug=debug,
+                github_token=github_token,
+            )
 
             ensure_executable_scripts(project_path, tracker=tracker)
 
@@ -245,10 +259,26 @@ def init(
                 tracker.skip("git", "--no-git flag")
 
             tracker.start("version-stamp")
-            write_version_stamp(project_path, selected_ai, release_version=release_tag)
+            write_version_stamp(project_path, selected_ai, release_version=resolved_release_tag)
             tracker.complete("version-stamp", "stamped")
 
             tracker.complete("final", "project ready")
+        except typer.Exit as e:
+            tracker.error("final", f"exit code {e.exit_code}")
+            # Keep prior detailed error output from lower layers and avoid
+            # displaying an unhelpful "Initialization failed: 1" message.
+            if e.exit_code == 1:
+                retry_lines = [
+                    "Initialization could not complete with the current release asset state.",
+                    "",
+                    "Recommended next steps:",
+                    f"- Retry with a known-good release tag:\n  [cyan]devspark init --here --force --ai {selected_ai} --script {selected_script} --release-tag v2.1.0 --ignore-agent-tools[/cyan]",
+                    "- If using uvx, force refresh cache:\n  [cyan]uvx --refresh --from git+https://github.com/markhazleton/devspark.git devspark init --here --force --ai " + selected_ai + " --script " + selected_script + " --ignore-agent-tools[/cyan]",
+                ]
+                console.print(Panel("\n".join(retry_lines), title="Initialization Help", border_style="cyan"))
+            if not here and project_path.exists():
+                shutil.rmtree(project_path)
+            raise
         except Exception as e:
             tracker.error("final", str(e))
             console.print(Panel(f"Initialization failed: {e}", title="Failure", border_style="red"))

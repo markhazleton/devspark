@@ -100,14 +100,17 @@ def merge_json_files(existing_path: Path, new_content: dict, verbose: bool = Fal
     return merged
 
 
-def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Tuple[Path, dict]:
+def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", release_tag: Optional[str] = None, verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Tuple[Path, dict]:
     repo_owner = "MarkHazleton"
     repo_name = "devspark"
     if client is None:
         client = httpx.Client(verify=ssl_context)
 
     if verbose:
-        console.print("[cyan]Fetching latest release information...[/cyan]")
+        if release_tag:
+            console.print(f"[cyan]Fetching release information for tag:[/cyan] {release_tag}")
+        else:
+            console.print("[cyan]Fetching latest release information...[/cyan]")
     latest_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
 
     def _find_matching_asset(assets: list[dict], expected_pattern: str) -> Optional[dict]:
@@ -135,21 +138,36 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
         except ValueError as je:
             raise RuntimeError(f"Failed to parse release JSON: {je}\nRaw (truncated 400): {response.text[:400]}")
 
+    def _fetch_release_by_tag(tag: str) -> dict:
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/tags/{tag}"
+        return _fetch_release(url)
+
     try:
-        release_data = _fetch_release(latest_api_url)
+        if release_tag:
+            release_data = _fetch_release_by_tag(release_tag)
+        else:
+            release_data = _fetch_release(latest_api_url)
     except Exception as e:
         console.print(f"[red]Error fetching release information[/red]")
         console.print(Panel(str(e), title="Fetch Error", border_style="red"))
         raise typer.Exit(1)
 
     assets = release_data.get("assets", [])
+    latest_tag = release_data.get("tag_name", "unknown")
     pattern = f"devspark-template-{ai_assistant}-{script_type}"
     asset = _find_matching_asset(assets, pattern)
+    resolved_via_fallback = False
+    resolved_release_tag = latest_tag
+    scanned_release_count = 1
 
     # Fallback: latest release can exist without packaged assets.
     # Search recent releases to find the newest published asset bundle.
-    if asset is None:
-        releases_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=10"
+    if asset is None and not release_tag:
+        if verbose:
+            console.print(
+                "[yellow]Latest release has no matching template asset; checking recent releases...[/yellow]"
+            )
+        releases_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=20"
         try:
             releases = _fetch_release(releases_api_url)
             if isinstance(releases, list):
@@ -157,20 +175,74 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
                 for candidate_release in releases:
                     if latest_id is not None and candidate_release.get("id") == latest_id:
                         continue
+                    scanned_release_count += 1
                     candidate_assets = candidate_release.get("assets", [])
                     asset = _find_matching_asset(candidate_assets, pattern)
                     if asset is not None:
+                        resolved_via_fallback = True
                         release_data = candidate_release
                         assets = candidate_assets
+                        resolved_release_tag = candidate_release.get("tag_name", "unknown")
                         break
         except Exception:
             # Keep existing error behavior below if no matching asset is found.
             pass
 
+        # If still unresolved, scan older releases page-by-page.
+        if asset is None:
+            try:
+                for page in range(2, 6):
+                    paged_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=20&page={page}"
+                    page_releases = _fetch_release(paged_url)
+                    if not isinstance(page_releases, list) or not page_releases:
+                        break
+                    for candidate_release in page_releases:
+                        scanned_release_count += 1
+                        candidate_assets = candidate_release.get("assets", [])
+                        asset = _find_matching_asset(candidate_assets, pattern)
+                        if asset is not None:
+                            resolved_via_fallback = True
+                            release_data = candidate_release
+                            assets = candidate_assets
+                            resolved_release_tag = candidate_release.get("tag_name", "unknown")
+                            break
+                    if asset is not None:
+                        break
+            except Exception:
+                pass
+
     if asset is None:
         console.print(f"[red]No matching release asset found[/red] for [bold]{ai_assistant}[/bold] (expected pattern: [bold]{pattern}[/bold])")
         asset_names = [a.get('name', '?') for a in assets]
         console.print(Panel("\n".join(asset_names) or "(no assets)", title="Available Assets", border_style="yellow"))
+        guidance_lines = [
+            f"Latest release [cyan]{latest_tag}[/cyan] does not currently contain template assets.",
+            f"Scanned [cyan]{scanned_release_count}[/cyan] release(s) for a matching template.",
+            "",
+            "Try one of these options:",
+            "- retry in a few minutes (release assets may still be publishing)",
+            "- run with a GitHub token: [cyan]--github-token <token>[/cyan]",
+            "- pin a release directly with [cyan]--release-tag[/cyan]",
+            "- use a known release tag with assets:",
+            f"  [cyan]uvx --refresh --from git+https://github.com/{repo_owner.lower()}/{repo_name}.git@v2.1.0 devspark init --here --force --ai {ai_assistant} --script {script_type} --ignore-agent-tools[/cyan]",
+        ]
+        if ai_assistant == "claude":
+            guidance_lines.extend(
+                [
+                    "",
+                    "Claude Code quickstart (prompt-first):",
+                    "[cyan]https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_claudecode.md[/cyan]",
+                ]
+            )
+        elif ai_assistant == "copilot":
+            guidance_lines.extend(
+                [
+                    "",
+                    "GitHub Copilot quickstart (prompt-first):",
+                    "[cyan]https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_copilot.md[/cyan]",
+                ]
+            )
+        console.print(Panel("\n".join(guidance_lines), title="Recovery Guidance", border_style="cyan"))
         raise typer.Exit(1)
 
     download_url = asset["browser_download_url"]
@@ -178,6 +250,10 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
     file_size = asset["size"]
 
     if verbose:
+        if resolved_via_fallback:
+            console.print(
+                f"[yellow]Using template from earlier release:[/yellow] [cyan]{resolved_release_tag}[/cyan] (latest is [cyan]{latest_tag}[/cyan])"
+            )
         console.print(f"[cyan]Found template:[/cyan] {filename}")
         console.print(f"[cyan]Size:[/cyan] {file_size:,} bytes")
         console.print(f"[cyan]Release:[/cyan] {release_data['tag_name']}")
@@ -235,12 +311,15 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
         "filename": filename,
         "size": file_size,
         "release": release_data["tag_name"],
-        "asset_url": download_url
+        "asset_url": download_url,
+        "resolved_via_fallback": resolved_via_fallback,
+        "latest_release": latest_tag,
+        "scanned_release_count": scanned_release_count,
     }
     return zip_path, metadata
 
 
-def download_and_extract_template(project_path: Path, ai_assistant: str, script_type: str, is_current_dir: bool = False, *, verbose: bool = True, tracker: Optional[StepTracker] = None, client: httpx.Client = None, debug: bool = False, github_token: str = None):
+def download_and_extract_template(project_path: Path, ai_assistant: str, script_type: str, is_current_dir: bool = False, *, release_tag: Optional[str] = None, verbose: bool = True, tracker: Optional[StepTracker] = None, client: httpx.Client = None, debug: bool = False, github_token: str = None):
     """Download the latest release and extract it to create a new project.
     Returns (project_path, release_tag). Uses tracker if provided (with keys: fetch, download, extract, cleanup)
     """
@@ -254,6 +333,7 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
             ai_assistant,
             current_dir,
             script_type=script_type,
+            release_tag=release_tag,
             verbose=verbose and tracker is None,
             show_progress=(tracker is None),
             client=client,

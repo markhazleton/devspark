@@ -33,7 +33,8 @@ from devspark_cli._template import download_template_from_github
 
 
 LATEST_URL = "https://api.github.com/repos/MarkHazleton/devspark/releases/latest"
-RELEASES_URL = "https://api.github.com/repos/MarkHazleton/devspark/releases?per_page=10"
+RELEASES_URL = "https://api.github.com/repos/MarkHazleton/devspark/releases?per_page=20"
+RELEASES_PAGE_2_URL = "https://api.github.com/repos/MarkHazleton/devspark/releases?per_page=20&page=2"
 
 
 class _FakeResponse:
@@ -126,6 +127,8 @@ def test_download_template_falls_back_to_previous_release(tmp_path):
 
     assert requested_pattern in metadata["filename"]
     assert metadata["release"] == "v2.2.0"
+    assert metadata["resolved_via_fallback"] is True
+    assert metadata["latest_release"] == "v2.2.1"
     assert zip_path.exists()
     assert zip_path.read_bytes() == b"hello world!"
     assert client.get_calls == [LATEST_URL, RELEASES_URL]
@@ -153,6 +156,7 @@ def test_download_template_errors_when_no_release_has_requested_asset(tmp_path):
         get_map={
             LATEST_URL: _FakeResponse(payload=latest_release),
             RELEASES_URL: _FakeResponse(payload=[latest_release, non_matching_release]),
+            RELEASES_PAGE_2_URL: _FakeResponse(payload=[]),
         },
         stream_map={},
     )
@@ -171,3 +175,81 @@ def test_download_template_errors_when_no_release_has_requested_asset(tmp_path):
         assert False, "Expected typer.Exit when no matching release asset exists"
     except typer.Exit as exc:
         assert exc.exit_code == 1
+
+
+def test_download_template_succeeds_from_latest_without_fallback(tmp_path):
+    download_url = "https://example.invalid/devspark-template-copilot-ps-v2.2.1.zip"
+    latest_release = {
+        "id": 100,
+        "tag_name": "v2.2.1",
+        "assets": [
+            {
+                "name": "devspark-template-copilot-ps-v2.2.1.zip",
+                "browser_download_url": download_url,
+                "size": 4,
+            }
+        ],
+    }
+
+    client = _FakeClient(
+        get_map={
+            LATEST_URL: _FakeResponse(payload=latest_release),
+        },
+        stream_map={
+            download_url: _FakeResponse(headers={"content-length": "4"}, chunks=[b"test"]),
+        },
+    )
+
+    _, metadata = download_template_from_github(
+        "copilot",
+        tmp_path,
+        script_type="ps",
+        verbose=False,
+        show_progress=False,
+        client=client,
+    )
+
+    assert metadata["release"] == "v2.2.1"
+    assert metadata["resolved_via_fallback"] is False
+    assert metadata["latest_release"] == "v2.2.1"
+    assert client.get_calls == [LATEST_URL]
+
+
+def test_download_template_uses_explicit_release_tag(tmp_path):
+    tagged_url = "https://example.invalid/devspark-template-claude-ps-v2.0.0.zip"
+    tag_url = "https://api.github.com/repos/MarkHazleton/devspark/releases/tags/v2.0.0"
+    tagged_release = {
+        "id": 42,
+        "tag_name": "v2.0.0",
+        "assets": [
+            {
+                "name": "devspark-template-claude-ps-v2.0.0.zip",
+                "browser_download_url": tagged_url,
+                "size": 6,
+            }
+        ],
+    }
+
+    client = _FakeClient(
+        get_map={
+            tag_url: _FakeResponse(payload=tagged_release),
+        },
+        stream_map={
+            tagged_url: _FakeResponse(headers={"content-length": "6"}, chunks=[b"v2", b".0.0"]),
+        },
+    )
+
+    _, metadata = download_template_from_github(
+        "claude",
+        tmp_path,
+        script_type="ps",
+        release_tag="v2.0.0",
+        verbose=False,
+        show_progress=False,
+        client=client,
+    )
+
+    assert metadata["release"] == "v2.0.0"
+    assert metadata["resolved_via_fallback"] is False
+    assert metadata["latest_release"] == "v2.0.0"
+    assert client.get_calls == [tag_url]
