@@ -15,6 +15,7 @@ from .._template import (
     _seed_user_artifacts,
     download_and_extract_template,
     ensure_executable_scripts,
+    repair_agent_shim_frontmatter,
 )
 from .._utils import (
     StepTracker,
@@ -206,6 +207,7 @@ def init(
         ("zip-list", "Archive contents"),
         ("extracted-summary", "Extraction summary"),
         ("chmod", "Ensure scripts executable"),
+        ("shim-validate", "Validate agent shims"),
         ("cleanup", "Cleanup"),
         ("git", "Initialize git repository"),
         ("version-stamp", "Write version stamp"),
@@ -241,6 +243,13 @@ def init(
             # Seed user artifacts (.documentation/) from templates in .devspark/
             # Only copies files that don't already exist — never overwrites user work
             _seed_user_artifacts(project_path)
+
+            tracker.start("shim-validate")
+            repaired_count = repair_agent_shim_frontmatter(project_path)
+            if repaired_count:
+                tracker.complete("shim-validate", f"repaired {repaired_count}")
+            else:
+                tracker.complete("shim-validate", "ok")
 
             if not no_git:
                 tracker.start("git")

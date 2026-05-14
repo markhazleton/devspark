@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -551,3 +552,67 @@ def _seed_user_artifacts(project_path: Path) -> None:
     doc_dir = project_path / ".documentation"
     memory_dir = doc_dir / "memory"
     memory_dir.mkdir(parents=True, exist_ok=True)
+
+
+def repair_agent_shim_frontmatter(project_path: Path) -> int:
+    """Repair malformed YAML scalar quoting in Copilot agent shim frontmatter.
+
+    Some bootstrap flows have produced lines like:
+      name: ""devspark.specify""
+      description: ""DevSpark specify command shim""
+
+    This normalizes those lines to valid YAML quoting:
+      name: "devspark.specify"
+      description: "DevSpark specify command shim"
+
+    Returns the number of files rewritten.
+    """
+    agents_dir = project_path / ".github" / "agents"
+    if not agents_dir.is_dir():
+        return 0
+
+    repaired = 0
+    bad_quote_re = re.compile(r'^(name|description):\s*""(.*)""\s*$')
+
+    for shim_path in agents_dir.glob("devspark.*.agent.md"):
+        try:
+            original = shim_path.read_text(encoding="utf-8")
+        except Exception:
+            continue
+
+        if not original.startswith("---"):
+            continue
+
+        newline = "\r\n" if "\r\n" in original else "\n"
+        fence = f"---{newline}"
+        if fence not in original:
+            continue
+
+        parts = original.split(fence, 2)
+        if len(parts) < 3:
+            continue
+
+        # parts[1] is frontmatter content between the first two --- fences.
+        frontmatter = parts[1]
+        body = parts[2]
+        updated_lines = []
+        changed = False
+        for line in frontmatter.splitlines():
+            match = bad_quote_re.match(line)
+            if match:
+                key = match.group(1)
+                value = match.group(2)
+                updated_lines.append(f'{key}: "{value}"')
+                changed = True
+            else:
+                updated_lines.append(line)
+
+        if not changed:
+            continue
+
+        repaired_frontmatter = newline.join(updated_lines)
+        rewritten = f"---{newline}{repaired_frontmatter}{newline}---{newline}{body}"
+        shim_path.write_text(rewritten, encoding="utf-8")
+        repaired += 1
+
+    return repaired

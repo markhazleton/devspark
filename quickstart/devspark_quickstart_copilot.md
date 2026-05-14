@@ -244,8 +244,8 @@ For each command in `.devspark/defaults/commands/devspark.{name}.md`, create two
 
 ```markdown
 ---
-name: "devspark.{name}"
-description: "{one-line description of the command}"
+name: devspark.{name}
+description: DevSpark {name} command shim
 ---
 
 ## Prompt Resolution
@@ -265,9 +265,35 @@ Read and execute the instructions from the **first file that exists**:
 Pass the user input above to the resolved prompt.
 ```
 
+Important frontmatter rule:
+
+- Use valid YAML scalars for `name` and `description`.
+- Never emit doubled quotes such as `""devspark.specify""`.
+- If you choose to quote values, use one pair only: `"devspark.specify"`.
+
 ### `.github/prompts/devspark.{name}.prompt.md`
 
 Create a companion prompt file with the same 3-tier resolution content (without YAML frontmatter).
+
+### Step 7 Validation (required)
+
+After generating shims, verify no malformed doubled-quote frontmatter exists.
+
+PowerShell:
+
+```powershell
+Get-ChildItem .github/agents/devspark.*.agent.md -ErrorAction SilentlyContinue |
+  Select-String -Pattern '^name:\s*""|^description:\s*""' |
+  ForEach-Object { $_.Path + ":" + $_.LineNumber + " -> " + $_.Line }
+```
+
+Bash:
+
+```bash
+grep -nE '^name:[[:space:]]*""|^description:[[:space:]]*""' .github/agents/devspark.*.agent.md || true
+```
+
+If any matches are found, fix those lines to valid YAML and re-run the check until it reports no matches.
 
 ---
 
