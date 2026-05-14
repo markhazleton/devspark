@@ -1,12 +1,15 @@
 """upgrade command and its supporting helpers."""
 
+import os
 import subprocess
 from pathlib import Path
 from typing import Optional
 
+import httpx
 import typer
 
 from .._app import app, console, show_banner
+from .._github import _format_rate_limit_error, _github_auth_headers, ssl_context
 from .._upgrade_helpers import read_version_stamp, write_version_stamp  # noqa: F401 (re-exported)
 from .._utils import select_with_arrows
 from ..agent_registry import AGENT_CONFIG
@@ -26,6 +29,9 @@ STRUCTURAL_OVERRIDE_COMMANDS = (
     "implement",
     "create-pr",
 )
+
+
+SCRIPT_TYPE_CHOICES = {"sh", "ps"}
 
 
 # ============================================================================
@@ -345,6 +351,165 @@ def print_upgrade_analysis(analysis: dict, project_path: Path, ai_assistant: str
         console.print("[dim]DevSpark will not delete these automatically. Remove them manually after verification.[/dim]\n")
 
 
+def discover_upgrade_release_assets(
+    ai_assistant: str,
+    script_type: str,
+    *,
+    release_tag: str | None = None,
+    github_token: str | None = None,
+    client: httpx.Client | None = None,
+) -> dict:
+    """Discover release assets for upgrade preflight without downloading templates."""
+    repo_owner = "MarkHazleton"
+    repo_name = "devspark"
+    close_client = client is None
+    if client is None:
+        client = httpx.Client(verify=ssl_context)
+
+    pattern = f"devspark-template-{ai_assistant}-{script_type}"
+    inspected_releases: list[dict] = []
+
+    def _find_matching_asset(assets: list[dict], expected_pattern: str) -> Optional[dict]:
+        for candidate in assets:
+            name = candidate.get("name", "")
+            if expected_pattern in name and name.endswith(".zip"):
+                return candidate
+        return None
+
+    def _fetch_release(url: str) -> dict:
+        response = client.get(
+            url,
+            timeout=30,
+            follow_redirects=True,
+            headers=_github_auth_headers(github_token),
+        )
+        status = response.status_code
+        if status != 200:
+            raise RuntimeError(_format_rate_limit_error(status, response.headers, url))
+        try:
+            return response.json()
+        except ValueError as je:
+            raise RuntimeError(f"Failed to parse release JSON: {je}")
+
+    def _record_release(candidate_release: dict) -> Optional[dict]:
+        assets = candidate_release.get("assets", [])
+        matched = _find_matching_asset(assets, pattern)
+        inspected_releases.append(
+            {
+                "tag_name": candidate_release.get("tag_name", "unknown"),
+                "asset_count": len(assets),
+                "matched_asset": matched.get("name") if matched else None,
+                "asset_names": [a.get("name", "?") for a in assets],
+            }
+        )
+        return matched
+
+    latest_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+    tag_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/tags/{release_tag}" if release_tag else ""
+    releases_api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=20"
+
+    try:
+        if release_tag:
+            initial_release = _fetch_release(tag_api_url)
+            latest_tag = release_tag
+        else:
+            initial_release = _fetch_release(latest_api_url)
+            latest_tag = initial_release.get("tag_name", "unknown")
+    finally:
+        pass
+
+    seen_ids: set[int] = set()
+    initial_id = initial_release.get("id")
+    if isinstance(initial_id, int):
+        seen_ids.add(initial_id)
+
+    matching_asset = _record_release(initial_release)
+    resolved_release = initial_release
+    resolved_via_fallback = False
+
+    if matching_asset is None and not release_tag:
+        releases = _fetch_release(releases_api_url)
+        if isinstance(releases, list):
+            for candidate_release in releases:
+                release_id = candidate_release.get("id")
+                if isinstance(release_id, int) and release_id in seen_ids:
+                    continue
+                if isinstance(release_id, int):
+                    seen_ids.add(release_id)
+                matching_asset = _record_release(candidate_release)
+                if matching_asset is not None:
+                    resolved_release = candidate_release
+                    resolved_via_fallback = True
+                    break
+
+        if matching_asset is None:
+            for page in range(2, 6):
+                paged_url = f"{releases_api_url}&page={page}"
+                page_releases = _fetch_release(paged_url)
+                if not isinstance(page_releases, list) or not page_releases:
+                    break
+                for candidate_release in page_releases:
+                    release_id = candidate_release.get("id")
+                    if isinstance(release_id, int) and release_id in seen_ids:
+                        continue
+                    if isinstance(release_id, int):
+                        seen_ids.add(release_id)
+                    matching_asset = _record_release(candidate_release)
+                    if matching_asset is not None:
+                        resolved_release = candidate_release
+                        resolved_via_fallback = True
+                        break
+                if matching_asset is not None:
+                    break
+
+    if close_client:
+        client.close()
+
+    return {
+        "pattern": pattern,
+        "ai_assistant": ai_assistant,
+        "script_type": script_type,
+        "requested_release_tag": release_tag,
+        "latest_release_tag": latest_tag,
+        "resolved_release_tag": resolved_release.get("tag_name", "unknown"),
+        "resolved_via_fallback": resolved_via_fallback,
+        "matching_asset_name": matching_asset.get("name") if matching_asset else None,
+        "scanned_release_count": len(inspected_releases),
+        "inspected_releases": inspected_releases,
+    }
+
+
+def print_upgrade_preflight(report: dict) -> None:
+    """Print release asset preflight diagnostics for upgrade."""
+    console.print("[bold]Release Asset Preflight[/bold]")
+    console.print(
+        f"  Assistant: [cyan]{report['ai_assistant']}[/cyan]  "
+        f"Script: [cyan]{report['script_type']}[/cyan]  "
+        f"Pattern: [cyan]{report['pattern']}[/cyan]"
+    )
+    console.print(
+        f"  Latest release: [cyan]{report['latest_release_tag']}[/cyan]  "
+        f"Resolved release: [cyan]{report['resolved_release_tag']}[/cyan]"
+    )
+    if report["matching_asset_name"]:
+        via = " (fallback)" if report["resolved_via_fallback"] else ""
+        console.print(f"  Match: [green]{report['matching_asset_name']}[/green]{via}")
+    else:
+        console.print("  Match: [red]none[/red]")
+
+    console.print("  Releases scanned:")
+    for rel in report["inspected_releases"]:
+        marker = "[green]✓[/green]" if rel["matched_asset"] else "[yellow]-[/yellow]"
+        console.print(
+            f"    {marker} {rel['tag_name']} (assets: {rel['asset_count']})"
+            + (f" -> {rel['matched_asset']}" if rel["matched_asset"] else "")
+        )
+
+    if not report["matching_asset_name"]:
+        console.print("[yellow]No matching asset discovered in scanned releases.[/yellow]")
+    console.print()
+
+
 # ============================================================================
 # Upgrade Command
 # ============================================================================
@@ -357,6 +522,7 @@ def upgrade(
     force: bool = typer.Option(False, "--force", help="Skip all confirmations"),
     github_token: str = typer.Option(None, "--github-token", help="GitHub token for API requests"),
     script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
+    preflight: bool = typer.Option(False, "--preflight", help="Print release-asset diagnostics and exit"),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository operations"),
 ):
@@ -432,6 +598,35 @@ def upgrade(
         agent_name = AGENT_CONFIG[ai_assistant]["name"]
         console.print(f"[green]✓[/green] Using AI assistant: [cyan]{agent_name}[/cyan] ({ai_assistant})\n")
 
+    resolved_script_type = script_type or ("ps" if os.name == "nt" else "sh")
+    if resolved_script_type not in SCRIPT_TYPE_CHOICES:
+        console.print(f"[red]✗ Error:[/red] Invalid script type '{resolved_script_type}'")
+        console.print(f"[dim]Choose from: {', '.join(sorted(SCRIPT_TYPE_CHOICES))}[/dim]")
+        raise typer.Exit(1)
+
+    console.print("[cyan]→[/cyan] Running release asset preflight...")
+    try:
+        preflight_report = discover_upgrade_release_assets(
+            ai_assistant,
+            resolved_script_type,
+            github_token=github_token,
+        )
+    except Exception as e:
+        console.print(f"[red]✗ Release asset preflight failed:[/red] {e}")
+        raise typer.Exit(1)
+    print_upgrade_preflight(preflight_report)
+
+    if preflight:
+        console.print("[green]✓[/green] Preflight complete (no upgrade executed).")
+        return
+
+    if not preflight_report["matching_asset_name"]:
+        console.print("[red]✗ Cannot continue upgrade: no matching template asset discovered.[/red]")
+        console.print(
+            f"[dim]Run preflight again after release assets publish: devspark upgrade --preflight --ai {ai_assistant} --script {resolved_script_type}[/dim]"
+        )
+        raise typer.Exit(1)
+
     # Step 4: Check for old structure migration (deferred — runs after templates are installed)
     migration_needed = False
     migration_confirmed = False
@@ -490,7 +685,7 @@ def upgrade(
         init(
             project_name=None,
             ai_assistant=ai_assistant,
-            script_type=script_type,
+            script_type=resolved_script_type,
             ignore_agent_tools=ignore_agent_tools,
             no_git=no_git,
             here=True,
