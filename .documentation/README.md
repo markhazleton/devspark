@@ -1,5 +1,7 @@
 # Documentation
 
+Current Release: v2.3.0
+
 This folder contains the documentation source files for DevSpark, built using [DocFX](https://dotnet.github.io/docfx/).
 
 ## Building Locally

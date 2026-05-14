@@ -1,6 +1,6 @@
 [project]
 name = "devspark-cli"
-version = "2.2.1"
+version = "2.3.0"
 description = "DevSpark CLI — AI development lifecycle prompts and scaffolding for any coding assistant."
 requires-python = ">=3.11"
 dependencies = [

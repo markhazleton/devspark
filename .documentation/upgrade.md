@@ -1,5 +1,7 @@
 # Upgrade Guide
 
+## Current Release: v2.3.0
+
 ---
 
 ## Prompt-First Upgrade (Recommended)
@@ -57,7 +59,7 @@ devspark upgrade
 | Agent shim files (`.claude/commands/`, `.github/agents/`, etc.) | `.documentation/scripts/` |
 | `.devspark/VERSION` | Source code, git history |
 
-If you keep overrides in `.documentation/commands/`, review any upgraded stock prompt that changed its contract. In v1.6.0 that especially includes installed-template path normalization, quickstart repair expectations, and route-aware or frontmatter-driven commands such as `/devspark.specify`, `/devspark.plan`, `/devspark.tasks`, `/devspark.implement`, and `/devspark.create-pr`.
+If you keep overrides in `.documentation/commands/`, review any upgraded stock prompt that changed its contract, especially route-aware or frontmatter-driven commands such as `/devspark.specify`, `/devspark.plan`, `/devspark.tasks`, `/devspark.implement`, and `/devspark.create-pr`.
 
 If upgrade needs to migrate legacy `.specify/` or root-level support directories, existing files already under `.documentation/` win. DevSpark preserves the legacy copies in `.old/` backups and reports the skipped files instead of overwriting current repo-owned work.
 

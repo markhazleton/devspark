@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-05-14 - Minor Release
+
+### Added
+
+- Upgrade release-asset preflight diagnostics (`devspark upgrade --preflight`) to print discovered template assets before upgrade execution
+- Regression tests for upgrade preflight fallback and no-match behavior
+
+### Changed
+
+- Updated repository and GitHub Pages documentation to mark v2.3.0 as the current release
+
+### Fixed
+
+- Repaired malformed doubled-quote YAML frontmatter in generated Copilot agent shims during init/upgrade
+- Hardened Copilot quickstart shim instructions and validation guidance to prevent invalid YAML quoting regressions
+
+### Contributors
+
+- Mark Hazleton
+- copilot-swe-agent[bot]
+
 ## [2.2.1] - 2026-05-06 - Patch Release
 
 ### Added

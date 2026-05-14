@@ -2,6 +2,8 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
+## Current Release: v2.3.0
+
 **An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
 <video controls width="100%">
@@ -82,7 +84,7 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
 - [Harness Engineering](harness-engineering.md) — Declarative runtime, adapters, artifacts, and operator guidance
-- [Validation Matrix](validation-matrix.md) — Current evidence for v1.6.0 workflow scenarios
+- [Validation Matrix](validation-matrix.md) — Current workflow validation evidence
 - [Monorepo Guide](monorepo-guide.md) — Optional multi-application monorepo support
 
 ---

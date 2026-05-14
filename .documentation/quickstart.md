@@ -1,5 +1,7 @@
 # Quick Start Guide
 
+## Current Release: v2.3.0
+
 ## Step 1: Bootstrap DevSpark
 
 Open a chat with your AI agent inside the target repository and paste the command for your agent:
