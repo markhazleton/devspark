@@ -10,6 +10,8 @@
     <a href="https://markhazleton.github.io/devspark/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
+**Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
+
 > **Not a program. Not a subscription.** Copy 28 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
 
 ## Current Release: v2.3.0
@@ -278,6 +280,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.
 ## Acknowledgements
 
 DevSpark is maintained by [Mark Hazleton](https://github.com/markhazleton) and the open-source community.
+
+> Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
+> DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
 
 ## License
 
