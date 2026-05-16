@@ -5,11 +5,17 @@ No CLI installation is required. You will pull prompt files from the DevSpark re
 
 ## Step 1: Gather Project Context
 
-Ask only the install-critical questions before proceeding:
+Infer the script preference from the OS — do not ask unless you cannot determine it.
 
-1. **Script preference** — Does this project use **PowerShell** (`ps`) or **Bash** (`sh`) for scripts? (Default: PowerShell on Windows, Bash on macOS/Linux)
+**Script preference detection** (in priority order):
 
-Wait for answers before continuing.
+1. If the workspace path contains a drive letter (e.g., `C:\`) or backslash separators → **PowerShell** (`ps`)
+2. If `$env:OS` is `Windows_NT` or `$IsWindows` is true → **PowerShell** (`ps`)
+3. If the shell environment is bash/zsh/sh → **Bash** (`sh`)
+4. If none of the above can be determined → ask: _"PowerShell or Bash?"_
+
+After detecting (or receiving the answer), state your choice before proceeding:
+> _"Script preference: PowerShell (detected Windows)"_ or _"Script preference: Bash (detected macOS/Linux)"_
 
 ---
 
@@ -64,7 +70,45 @@ Tell the user what you found and ask for confirmation before proceeding.
 
 After migration, continue with Step 3.
 
-### Constitution bootstrap questions (only if needed)
+---
+
+## Step 2b: Announce Mode and Preview Plan
+
+**Before writing any files**, output a mode banner so the user knows exactly what is about to happen.
+
+### Mode Banner
+
+Choose the banner that matches the detected state from Step 2:
+
+| Detected state | Banner to output |
+|---|---|
+| No `.devspark/` found, no legacy | `▶ Mode: FRESH INSTALL` |
+| `.devspark/` found, version older than latest | `▶ Mode: UPDATE (vX.Y.Z → vY.Y.Y)` |
+| `.devspark/` found, version matches latest, all files present | `▶ Mode: ALREADY CURRENT (vX.Y.Z) — nothing to do. Skipping to Step 12.` |
+| `.devspark/` found, version matches latest, files missing | `▶ Mode: REPAIR (vX.Y.Z — re-fetching missing framework files)` |
+| Legacy layout detected | `▶ Mode: MIGRATION → FRESH INSTALL` |
+
+Output the banner, then immediately output a brief **plan preview** — one line per action group:
+
+```
+Plan:
+  • Create directories: .devspark/, .documentation/, .github/, .vscode/
+  • Fetch N stock prompts → .devspark/defaults/commands/
+  • Fetch N templates → .devspark/templates/
+  • Fetch N scripts → .devspark/scripts/powershell/ (or bash/)
+  • Generate N agent shims → .github/agents/ and .github/prompts/
+  • Seed constitution → .documentation/memory/constitution.md  [if needed]
+  • Write VERSION stamp → .devspark/VERSION
+  • Update .gitignore
+```
+
+For Update and Repair modes, show only the steps that will actually run.
+
+Proceed immediately after outputting the banner and plan — no additional confirmation needed unless you are about to perform a migration that renames or deletes directories.
+
+---
+
+### Constitution bootstrap questions (only if needed — Fresh Install only)
 
 After detection and any migration work above, check whether `.documentation/memory/constitution.md` already exists.
 
@@ -141,6 +185,10 @@ Create these directories (skip any that already exist):
 
 ## Step 4: Pull Stock Prompts
 
+> **Live manifest (preferred):** Before fetching individual files, query the GitHub API to get the authoritative command list:
+> `https://api.github.com/repos/markhazleton/devspark/contents/templates/commands`
+> Use the `name` field of each returned entry (strip `.md` suffix) as the command list. This keeps the install in sync with the latest release automatically. Fall back to the static table below only if the API is unreachable.
+
 Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/` and save to `.devspark/defaults/commands/` with the `devspark.` prefix:
 
 | Source file | Destination |
@@ -173,6 +221,23 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `list-applications.md` | `.devspark/defaults/commands/devspark.list-applications.md` |
 | `validate-registry.md` | `.devspark/defaults/commands/devspark.validate-registry.md` |
 
+### Step 4 Validation (required)
+
+After fetching, verify every expected command file landed successfully:
+
+```powershell
+$expected = Get-ChildItem .devspark/defaults/commands/devspark.*.md -ErrorAction SilentlyContinue
+Write-Host "Commands installed: $($expected.Count)"
+$expected | ForEach-Object { if (-not (Test-Path $_.FullName)) { Write-Host "MISSING: $_" } }
+```
+
+```bash
+count=$(ls .devspark/defaults/commands/devspark.*.md 2>/dev/null | wc -l)
+echo "Commands installed: $count"
+```
+
+If any command file is missing, re-fetch it before continuing.
+
 ---
 
 ## Step 5: Pull Helper Templates
@@ -188,6 +253,26 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 - `vscode-settings.json`
 
 Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-registry.json` and save it to `agents-registry.json` at the repository root.
+
+### Step 5 Validation (required)
+
+After fetching, verify each template file is present:
+
+```powershell
+@('spec-template.md','plan-template.md','tasks-template.md','quick-spec-template.md',
+  'checklist-template.md','agent-file-template.md','vscode-settings.json') | ForEach-Object {
+    if (-not (Test-Path ".devspark/templates/$_")) { Write-Host "MISSING: $_" }
+}
+```
+
+```bash
+for f in spec-template.md plan-template.md tasks-template.md quick-spec-template.md \
+         checklist-template.md agent-file-template.md vscode-settings.json; do
+  [ -f ".devspark/templates/$f" ] || echo "MISSING: $f"
+done
+```
+
+If any file is missing, re-fetch it before continuing.
 
 ---
 
@@ -233,6 +318,22 @@ For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
 - `bash/site-audit.sh`
 
 **Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.documentation/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.documentation/scripts/`.
+
+### Step 6 Validation (required)
+
+After fetching, verify the script directory is populated:
+
+```powershell
+$scripts = Get-ChildItem .devspark/scripts/powershell/*.ps1 -ErrorAction SilentlyContinue
+Write-Host "Scripts installed: $($scripts.Count)"
+```
+
+```bash
+count=$(ls .devspark/scripts/bash/*.sh 2>/dev/null | wc -l)
+echo "Scripts installed: $count"
+```
+
+If the count is 0 or any expected script is missing, re-fetch the missing files before continuing.
 
 ---
 
@@ -345,39 +446,72 @@ Append to `.gitignore` if not already present:
 
 ## Step 12: Verify & Report
 
-Confirm the installation:
+Run a final presence check across all installed framework files and output a structured summary.
 
-- Check that every stock prompt from Step 4 exists in `.devspark/defaults/commands/`
-- Check that every helper template from Step 5 exists in `.devspark/templates/`
-- Check that the selected script set from Step 6 exists under `.devspark/scripts/`
-- Check that the expected agent shim files from Step 7 exist in `.github/agents/` and `.github/prompts/`
-- If any expected framework file is missing, stop and run **Repair Mode** before reporting success
+### 12a — Presence checks (stop and repair if any fail)
 
-- **Migration summary**: What was migrated and where backups live (`.specify.old/`, etc.)
-- Number of stock commands in `.devspark/defaults/commands/`
-- Number of agent shims in `.github/agents/`
-- Constitution status: seeded fresh, migrated, or already existed
-- Repair status: not needed, or repaired missing framework files
-- Explain the 3-tier override system and that `@devspark.personalize {command}` creates personal overrides
-- If backup directories exist (`.specify.old/`, `memory.old/`), remind the user they can delete them once satisfied
+- Every stock prompt from Step 4 exists in `.devspark/defaults/commands/`
+- Every helper template from Step 5 exists in `.devspark/templates/`
+- The selected script set from Step 6 exists under `.devspark/scripts/`
+- Agent shim files from Step 7 exist in both `.github/agents/` and `.github/prompts/`
+- Shim frontmatter is valid YAML (no doubled-quote defects)
+- `.devspark/VERSION` exists and contains a semver version
+- `.gitignore` contains the personal-overrides exclusion
 
-Tell the user: type `@devspark.specify` (or any command) in Copilot Chat to start using DevSpark.
+If **any** check fails, run Repair Mode before reporting success. Do not tell the user the setup is done if framework files are broken or missing.
 
-Recommended next step (DevSpark v2): use one of the three flagship aliases as the entrypoint for new work:
+### 12b — Output a structured completion banner
 
-- `@devspark.run create-spec` — `specify → plan → tasks → analyze` with a pause for review.
-- `@devspark.run execute-plan` — `implement → create-pr → pr-review` with a pause after the PR opens.
-- `@devspark.run suggest-improvement` — file a workflow/prompt improvement against `markhazleton/devspark`.
+Output the following summary (adapt counts and status to what actually ran):
 
-See `.documentation/workflows/getting-started.md` for the full walkthrough.
+```
+✔ DevSpark {LATEST_VERSION} — {MODE} complete
 
-Add maintenance guidance (prompt-first):
+Mode:          {FRESH INSTALL | UPDATE vX.Y.Z → vY.Y.Y | REPAIR | MIGRATION → FRESH INSTALL}
+Script type:   {PowerShell (Windows) | Bash (macOS/Linux)}
 
-- Basic (recommended): run the remote upgrade prompt in chat
-- `@workspace Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md`
-- Advanced (optional): if CLI is installed, run `devspark upgrade`
+Files written:
+  • {N} stock prompts   → .devspark/defaults/commands/
+  • {N} templates       → .devspark/templates/
+  • {N} scripts         → .devspark/scripts/{powershell|bash}/
+  • {N} agent shims     → .github/agents/
+  • {N} prompt files    → .github/prompts/
+  • VERSION stamp       → .devspark/VERSION
+  • .gitignore updated
 
-For either path, upgrades refresh `.devspark/` stock files and preserve `.documentation/` customizations.
+Files preserved (never touched by DevSpark):
+  • .documentation/    — all user artifacts untouched
+  {IF migration: • Backup at .specify.old/ (safe to delete once satisfied)}
+
+Validation:
+  • Shim frontmatter — {ok | repaired N file(s)}
+  • Framework files  — all present
+  • VERSION stamp    — {LATEST_VERSION}
+
+Constitution: {seeded fresh | migrated from .specify/ | already existed — not touched}
+```
+
+### 12c — Next steps
+
+Tell the user:
+
+```
+Start DevSpark: type @devspark.specify in Copilot Chat.
+
+Recommended entrypoints (DevSpark v2):
+  @devspark.run create-spec     — specify → plan → tasks → analyze
+  @devspark.run execute-plan    — implement → create-pr → pr-review
+  @devspark.run suggest-improvement  — file an improvement against markhazleton/devspark
+
+To upgrade later (no CLI required):
+  @workspace Follow the instructions at
+  https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md
+
+See .documentation/workflows/getting-started.md for the full walkthrough.
+```
+
+Also explain the 3-tier override system in one sentence:
+> Personal overrides in `.documentation/{git-user}/commands/` take priority over team overrides in `.documentation/commands/`, which take priority over stock prompts in `.devspark/defaults/commands/`. Run `@devspark.personalize {command}` to create a personal override.
 
 ---
 
