@@ -16,6 +16,7 @@ from .._template import (
     download_and_extract_template,
     ensure_executable_scripts,
     repair_agent_shim_frontmatter,
+    validate_installation_manifest,
 )
 from .._utils import (
     StepTracker,
@@ -246,10 +247,16 @@ def init(
 
             tracker.start("shim-validate")
             repaired_count = repair_agent_shim_frontmatter(project_path)
-            if repaired_count:
-                tracker.complete("shim-validate", f"repaired {repaired_count}")
+            manifest = validate_installation_manifest(project_path)
+            repair_detail = f"repaired {repaired_count}, " if repaired_count else ""
+            manifest_detail = f"{manifest['command_count']} commands / {manifest['shim_count']} shims"
+            if manifest["missing_shims"]:
+                missing = ", ".join(manifest["missing_shims"][:3])
+                if len(manifest["missing_shims"]) > 3:
+                    missing += f" +{len(manifest['missing_shims']) - 3} more"
+                tracker.error("shim-validate", f"{repair_detail}missing shims: {missing}")
             else:
-                tracker.complete("shim-validate", "ok")
+                tracker.complete("shim-validate", f"{repair_detail}{manifest_detail}")
 
             if not no_git:
                 tracker.start("git")

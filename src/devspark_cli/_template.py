@@ -554,6 +554,51 @@ def _seed_user_artifacts(project_path: Path) -> None:
     memory_dir.mkdir(parents=True, exist_ok=True)
 
 
+def validate_installation_manifest(project_path: Path) -> dict:
+    """Cross-check installed commands against generated agent shims.
+
+    Scans ``.devspark/defaults/commands/devspark.*.md`` as the source of truth
+    for which commands are installed, then verifies a matching
+    ``.github/agents/devspark.*.agent.md`` exists for each.
+
+    Returns a dict with:
+        command_count   – number of installed stock command files
+        shim_count      – number of present agent shim files
+        missing_shims   – commands that have no corresponding shim
+        extra_shims     – shims with no corresponding command file
+        valid           – True when missing_shims is empty
+    """
+    commands_dir = project_path / ".devspark" / "defaults" / "commands"
+    agents_dir = project_path / ".github" / "agents"
+
+    installed_commands: list[str] = []
+    if commands_dir.is_dir():
+        for p in sorted(commands_dir.glob("devspark.*.md")):
+            name = p.stem  # e.g. "devspark.specify"
+            if name.startswith("devspark."):
+                installed_commands.append(name[len("devspark."):])
+
+    present_shims: list[str] = []
+    if agents_dir.is_dir():
+        for p in sorted(agents_dir.glob("devspark.*.agent.md")):
+            stem = p.name  # e.g. "devspark.specify.agent.md"
+            if stem.startswith("devspark.") and stem.endswith(".agent.md"):
+                present_shims.append(stem[len("devspark."):-len(".agent.md")])
+
+    missing_shims = [cmd for cmd in installed_commands if cmd not in present_shims]
+    extra_shims = [shim for shim in present_shims if shim not in installed_commands]
+
+    return {
+        "installed_commands": installed_commands,
+        "command_count": len(installed_commands),
+        "present_shims": present_shims,
+        "shim_count": len(present_shims),
+        "missing_shims": missing_shims,
+        "extra_shims": extra_shims,
+        "valid": len(missing_shims) == 0,
+    }
+
+
 def repair_agent_shim_frontmatter(project_path: Path) -> int:
     """Repair malformed YAML scalar quoting in Copilot agent shim frontmatter.
 
