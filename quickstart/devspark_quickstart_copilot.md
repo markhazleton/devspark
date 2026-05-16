@@ -12,10 +12,10 @@ Infer the script preference from the OS — do not ask unless you cannot determi
 1. If the workspace path contains a drive letter (e.g., `C:\`) or backslash separators → **PowerShell** (`ps`)
 2. If `$env:OS` is `Windows_NT` or `$IsWindows` is true → **PowerShell** (`ps`)
 3. If the shell environment is bash/zsh/sh → **Bash** (`sh`)
-4. If none of the above can be determined → ask: _"PowerShell or Bash?"_
+4. If none of the above can be determined → ask: *"PowerShell or Bash?"*
 
 After detecting (or receiving the answer), state your choice before proceeding:
-> _"Script preference: PowerShell (detected Windows)"_ or _"Script preference: Bash (detected macOS/Linux)"_
+> *"Script preference: PowerShell (detected Windows)"* or *"Script preference: Bash (detected macOS/Linux)"*
 
 ---
 
