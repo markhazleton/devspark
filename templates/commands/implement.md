@@ -95,15 +95,15 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
 
    Before writing any code, verify each gate below. Present results as a single table, then act on the worst finding.
 
-   | Gate | Source of truth | Pass condition | On fail |
-   |------|-----------------|----------------|---------|
-   | Clarifications resolved | `spec.md` | No `[NEEDS CLARIFICATION]` markers remain | Route to `/devspark.clarify` |
-   | Required gates from frontmatter | `spec.md` YAML `required_gates` | Each listed gate has a matching artifact in FEATURE_DIR | Route to the listed gate command |
-   | Analyze findings | FEATURE_DIR/analysis.md (or analyze output) | No `severity: critical` findings with `status: open` | Route to `/devspark.analyze` (or `/devspark.address-pr-review`-style triage) |
-   | Critic findings | FEATURE_DIR/critique.md (or critic output) | No `severity: critical` findings with `status: open` | Route to `/devspark.critic` |
-   | Checklists | step 2 result | All checklists at 0 incomplete (or explicit override recorded) | Already handled in step 2 |
-   | Constitution coverage | constitution.md vs tasks.md | Every runtime-bearing mandated principle has a task OR a waiver | Route to `/devspark.tasks` (regenerate) or `/devspark.plan` (record waiver) |
-   | Plan waivers acknowledged | `plan.md` `## Constitution Waivers` | All waivers have rationale + expiry | Route to `/devspark.plan` |
+   | Gate                            | Source of truth                             | Pass condition                                                  | On fail                                                                      |
+   | ------------------------------- | ------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+   | Clarifications resolved         | `spec.md`                                   | No `[NEEDS CLARIFICATION]` markers remain                       | Route to `/devspark.clarify`                                                 |
+   | Required gates from frontmatter | `spec.md` YAML `required_gates`             | Each listed gate has a matching artifact in FEATURE_DIR         | Route to the listed gate command                                             |
+   | Analyze findings                | FEATURE_DIR/analysis.md (or analyze output) | No `severity: critical` findings with `status: open`            | Route to `/devspark.analyze` (or `/devspark.address-pr-review`-style triage) |
+   | Critic findings                 | FEATURE_DIR/critique.md (or critic output)  | No `severity: critical` findings with `status: open`            | Route to `/devspark.critic`                                                  |
+   | Checklists                      | step 2 result                               | All checklists at 0 incomplete (or explicit override recorded)  | Already handled in step 2                                                    |
+   | Constitution coverage           | constitution.md vs tasks.md                 | Every runtime-bearing mandated principle has a task OR a waiver | Route to `/devspark.tasks` (regenerate) or `/devspark.plan` (record waiver)  |
+   | Plan waivers acknowledged       | `plan.md` `## Constitution Waivers`         | All waivers have rationale + expiry                             | Route to `/devspark.plan`                                                    |
 
    If any required gate fails, surface the failure with context and ask the user whether to (a) fix first (recommended), (b) review findings, or (c) proceed anyway. If the user proceeds anyway, append or update a `## Gate Acknowledgements` section in `tasks.md` with: the failing gate(s), the unresolved findings (by ID), the user's explicit decision, and a UTC timestamp. This section will be surfaced in the PR body by `/devspark.create-pr`.
 
@@ -119,12 +119,12 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
      git rev-parse --git-dir 2>/dev/null
      ```
 
-   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
-   - Check if .eslintrc* exists → create/verify .eslintignore
-   - Check if eslint.config.* exists → ensure the config's `ignores` entries cover required patterns
-   - Check if .prettierrc* exists → create/verify .prettierignore
+   - Check if Dockerfile\* exists or Docker in plan.md → create/verify .dockerignore
+   - Check if .eslintrc\* exists → create/verify .eslintignore
+   - Check if eslint.config.\* exists → ensure the config's `ignores` entries cover required patterns
+   - Check if .prettierrc\* exists → create/verify .prettierignore
    - Check if .npmrc or package.json exists → create/verify .npmignore (if publishing)
-   - Check if terraform files (*.tf) exist → create/verify .terraformignore
+   - Check if terraform files (\*.tf) exist → create/verify .terraformignore
    - Check if .helmignore needed (helm charts present) → create/verify .helmignore
 
    **If ignore file already exists**: Verify it contains essential patterns, append missing critical patterns only
@@ -176,7 +176,6 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
 9. Progress tracking, artifact sync, and error handling:
 
    **Continuous artifact sync** (required — do this as work happens, not at the end):
-
    - **tasks.md** — mark each task `[X]` immediately on completion. Never batch updates at the end of a phase. If a task is partially done, leave it `[ ]` and add a brief `<!-- WIP: ... -->` note rather than half-checking it.
    - **tasks.md phase checkpoints** — when every task in a phase (Setup, Foundational, User Story N, Polish) is `[X]`, append a checkpoint line under that phase heading: `**Checkpoint**: Phase complete — YYYY-MM-DD`. For user-story phases, this is the signal that the story is independently shippable.
    - **spec.md user stories** — when all tasks tagged `[USn]` are `[X]`, update the corresponding `### User Story n` heading by appending ` ✅ Complete` (preserve the priority marker). This keeps the spec a live picture of delivered scope.
@@ -185,7 +184,6 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
    - **Constitution waivers** — if a new waiver becomes necessary mid-implementation, **halt**, route the user to `/devspark.plan` to record it, then resume. Never invent waivers from within implement.
 
    **Progress reporting and error handling**:
-
    - Report progress after each completed task (task ID + one-line summary)
    - Halt execution if any non-parallel task fails
    - For parallel tasks `[P]`, continue with successful tasks, report failed ones with context
@@ -193,7 +191,6 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
    - Suggest next steps if implementation cannot proceed
 
    **Governance expectations for the create-pr/pr-review handoff**:
-
    - Delivery status must be met (`create_pr_ready=true` in latest harness result)
    - Branch sync must pass (`HEAD` not behind `origin/main`)
    - Every `## Gate Acknowledgements` entry and every `## Constitution Waivers` entry will be surfaced by `/devspark.create-pr` in the PR body — make sure they are accurate.
