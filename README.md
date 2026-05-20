@@ -29,6 +29,32 @@ devspark/
 └── .documentation/       ← Guides, media, and GitHub Pages site
 ```
 
+## Agent Skills
+
+DevSpark treats skills as portable capability packages within a governed lifecycle
+orchestration system. Commands invoke skills; DevSpark governs the lifecycle around
+them.
+
+The dual-surface model:
+
+```text
+command -> adapter -> skill -> context scripts -> agent reasoning -> artifact
+```
+
+- **Slash-commands** (`templates/commands/`) own DevSpark-specific lifecycle behavior:
+  route classification, branch creation, multi-app scoping, artifact placement, and
+  gate enforcement.
+- **Agent Skills** (`templates/skills/`) own portable capability instructions that
+  run in any skills-compatible client without DevSpark installed.
+
+The adapter contract (`templates/skills/ADAPTER-contract.md`) defines how a command
+invokes a skill. The skill validation contract
+(`templates/skills/SKILL-validation-contract.md`) defines the rules every `SKILL.md`
+must satisfy. See `templates/skills/references/devspark-skills-guide.md` for the
+contributor walkthrough for adding new skills.
+
+---
+
 ## Get Started
 
 DevSpark v2 ships three flagship aliases that are the recommended entrypoints for every new feature. Run them via `devspark run <alias>` (or your agent's `/devspark.run` slash command):

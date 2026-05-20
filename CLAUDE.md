@@ -10,9 +10,25 @@ Read `.documentation/memory/constitution.md` before making changes — it define
 
 This IS the DevSpark source repo. All `/devspark.*` commands resolve directly to `templates/commands/` — the source prompts you are iterating on. There is no `.devspark/defaults/commands/` copy. Edits to prompts take effect immediately.
 
+## Agent Skills Architecture
+
+DevSpark treats skills as portable capability packages within a governed lifecycle
+orchestration system. Commands invoke skills; DevSpark governs the lifecycle around
+them.
+
+Internal architecture: `command → invokes → skill → context scripts → artifact`
+
+- `templates/skills/` — Agent Skills surface: portable capability packages
+- `templates/skills/ADAPTER-contract.md` — How commands invoke skills
+- `templates/skills/SKILL-validation-contract.md` — Validation rules for SKILL.md files
+- `templates/skills/references/devspark-skills-guide.md` — Contributor walkthrough
+
+Skill validation: `devspark skills list` / `devspark skills validate [path]`
+
 ## Repository Structure
 
 - `templates/commands/` — 28 slash-command prompt files (the product)
+- `templates/skills/` — Agent Skills (portable capability packages)
 - `scripts/` — Context-gathering scripts (PowerShell + Bash)
 - `src/devspark_cli/` — Optional CLI for automated setup
 - `quickstart/` — Agent-specific bootstrap guides
