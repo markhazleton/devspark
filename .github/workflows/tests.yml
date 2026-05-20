@@ -10,7 +10,7 @@ concurrency:
 on:
   workflow_call:
   push:
-    branches: ["main", "001-harness-delivery-integrity"]
+    branches: ["main"]
   pull_request:
 
 jobs:

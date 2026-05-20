@@ -2,7 +2,7 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
-## Current Release: v2.3.0
+## Current Release: v2.4.0
 
 **An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 

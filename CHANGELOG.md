@@ -9,6 +9,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-05-20 - Minor Release
+
+### Added
+
+- **Agent Skills surface**: New `templates/skills/` directory parallel to `templates/commands/`
+  — portable capability packages that run in any skills-compatible client without DevSpark installed.
+- **`write-spec` skill**: First portable Agent Skill (`templates/skills/write-spec/SKILL.md`)
+  complying with the open Agent Skills specification (agentskills.io). Bundles dual-parity
+  context-gathering scripts for constitution loading and prior-spec summary.
+- **Adapter contract**: `templates/skills/ADAPTER-contract.md` — defines how a DevSpark command
+  invokes a skill (discovery, input/output mapping, responsibility split, backward-compatibility rules).
+- **Skill validation contract**: `templates/skills/SKILL-validation-contract.md` — rules every
+  `SKILL.md` must satisfy (open-spec compliance + DevSpark addendum).
+- **DevSpark Skills Guide**: `templates/skills/references/devspark-skills-guide.md` — contributor
+  walkthrough for adding new skills to the repository.
+- **`devspark skills` CLI**: New `devspark skills list` and `devspark skills validate [path]`
+  subcommands for enumerating and validating skills.
+- **Skill and adapter contract tests**: `tests/test_skill_contract.py` and
+  `tests/test_adapter_contract.py` gate skill compliance on every PR.
+- **First-class Codex quickstart**: Codex CLI quickstart guide added to `quickstart/`.
+- **GitHub Actions hardening**: `tests.yml` now gates releases; stale branch filter removed.
+
+### Changed
+
+- **`/devspark.specify` refactored**: Thin-wrapper command delegates spec-drafting reasoning
+  to the `write-spec` skill via the adapter contract. User-observable behavior is unchanged.
+- **Source module split**: `src/devspark_cli/_template.py` (679 → 575 lines) and
+  `run_commands.py` (589 → 496 lines) extracted into `_release.py` and `_run_guards.py`
+  to bring both files under the 500-line threshold.
+
+### Architectural Decisions
+
+- **ADR-003**: Agent Skills as Portable Capability Packages within Lifecycle Orchestration
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test
+
 ## [2.3.0] - 2026-05-14 - Minor Release
 
 ### Added

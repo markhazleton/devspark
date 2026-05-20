@@ -14,7 +14,7 @@
 
 > **Not a program. Not a subscription.** Copy 28 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
 
-## Current Release: v2.3.0
+## Current Release: v2.4.0
 
 ---
 
