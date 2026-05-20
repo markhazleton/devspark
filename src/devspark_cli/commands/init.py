@@ -247,7 +247,7 @@ def init(
 
             tracker.start("shim-validate")
             repaired_count = repair_agent_shim_frontmatter(project_path)
-            manifest = validate_installation_manifest(project_path)
+            manifest = validate_installation_manifest(project_path, selected_ai)
             repair_detail = f"repaired {repaired_count}, " if repaired_count else ""
             manifest_detail = f"{manifest['command_count']} commands / {manifest['shim_count']} shims"
             if manifest["missing_shims"]:
@@ -360,11 +360,12 @@ def init(
         codex_path = project_path / ".codex"
         quoted_path = shlex.quote(str(codex_path))
         if os.name == "nt":  # Windows
-            cmd = f"setx CODEX_HOME {quoted_path}"
+            ps_path = str(codex_path).replace("'", "''")
+            cmd = f"$env:CODEX_HOME = '{ps_path}'"
         else:  # Unix-like systems
             cmd = f"export CODEX_HOME={quoted_path}"
 
-        steps_lines.append(f"{step_num}. Set [cyan]CODEX_HOME[/cyan] environment variable before running Codex: [cyan]{cmd}[/cyan]")
+        steps_lines.append(f"{step_num}. Optional for Codex custom prompt discovery in older CLI builds: [cyan]{cmd}[/cyan]")
         step_num += 1
 
     steps_lines.append(f"{step_num}. Start using slash commands with your AI agent:")

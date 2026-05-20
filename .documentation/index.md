@@ -86,6 +86,7 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 
 - [Implementation Lifecycle Guide](implementation-lifecycle.md) — Prompt-first quickstart, feature workflow, and updates
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
+- [DevSpark and Codex](devspark-and-codex.md) — Best practices for pairing Codex with DevSpark
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
 - [Harness Engineering](harness-engineering.md) — Declarative runtime, adapters, artifacts, and operator guidance

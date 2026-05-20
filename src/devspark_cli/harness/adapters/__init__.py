@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .base import AgentAdapter, ProbeResult
 from .claude_code import ClaudeCodeAdapter
+from .codex import CodexAdapter
 from .copilot import CopilotAdapter
 from .cursor import CursorAdapter
 from .manual import ManualAdapter
@@ -18,6 +19,7 @@ def get_registered_adapters() -> dict[str, AgentAdapter]:
 		"noop": NoopAdapter(),
 		"manual": ManualAdapter(),
 		"claude_code": ClaudeCodeAdapter(),
+		"codex": CodexAdapter(),
 		"copilot": CopilotAdapter(),
 		"cursor": CursorAdapter(),
 	}
