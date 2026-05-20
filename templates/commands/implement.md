@@ -178,7 +178,7 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
    **Continuous artifact sync** (required — do this as work happens, not at the end):
    - **tasks.md** — mark each task `[X]` immediately on completion. Never batch updates at the end of a phase. If a task is partially done, leave it `[ ]` and add a brief `<!-- WIP: ... -->` note rather than half-checking it.
    - **tasks.md phase checkpoints** — when every task in a phase (Setup, Foundational, User Story N, Polish) is `[X]`, append a checkpoint line under that phase heading: `**Checkpoint**: Phase complete — YYYY-MM-DD`. For user-story phases, this is the signal that the story is independently shippable.
-   - **spec.md user stories** — when all tasks tagged `[USn]` are `[X]`, update the corresponding `### User Story n` heading by appending ` ✅ Complete` (preserve the priority marker). This keeps the spec a live picture of delivered scope.
+   - **spec.md user stories** — when all tasks tagged `[USn]` are `[X]`, update the corresponding `### User Story n` heading by appending `✅ Complete` (preserve the priority marker). This keeps the spec a live picture of delivered scope.
    - **spec.md lifecycle status** — flip `**Status**: Draft` to `**Status**: In Progress` on the first completed task (already done in step 3); the final flip to `Complete` happens in step 11.
    - **plan.md** — if implementation discovers a deviation from the plan (different library chosen, contract adjusted, etc.), update plan.md inline and add a short `## Implementation Notes` entry dated and linked to the task ID. Do NOT silently diverge.
    - **Constitution waivers** — if a new waiver becomes necessary mid-implementation, **halt**, route the user to `/devspark.plan` to record it, then resume. Never invent waivers from within implement.
@@ -198,7 +198,7 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
 10. Completion validation:
     - Verify all required tasks in `tasks.md` are `[X]`
     - Verify every phase has a `**Checkpoint**: Phase complete` line (per step 9 sync rules)
-    - Verify every completed user story in `spec.md` carries the ` ✅ Complete` marker
+    - Verify every completed user story in `spec.md` carries the `✅ Complete` marker
     - Check that implemented features match the original specification
     - Validate that tests pass and coverage meets requirements
     - Confirm the implementation follows the technical plan (and that any deviations are recorded under `## Implementation Notes` in `plan.md`)

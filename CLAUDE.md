@@ -74,7 +74,7 @@ Full list in `templates/commands/`.
 - Never overwrite `.documentation/` user artifacts during CLI operations
 
 <!-- DEVSPARK SHARED CONTEXT:START -->
-# AGENTS.md
+## AGENTS.md
 
 ## About DevSpark
 
@@ -697,4 +697,3 @@ When adding new agents:
 
 *This documentation should be updated whenever new agents are added to maintain accuracy and completeness.*
 <!-- DEVSPARK SHARED CONTEXT:END -->
-

@@ -116,7 +116,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 
 - Flag vague adjectives (fast, scalable, secure, intuitive, robust) lacking measurable criteria
 - Flag unresolved placeholders (TODO, TKTK, ???, `<placeholder>`, etc.)
-- **Scope**: this pass evaluates whether the requirement is _worded precisely enough to act on_. Whether the stated target is _achievable in production_ is `/devspark.critic`'s responsibility — do not duplicate.
+- **Scope**: this pass evaluates whether the requirement is *worded precisely enough to act on*. Whether the stated target is *achievable in production* is `/devspark.critic`'s responsibility — do not duplicate.
 
 #### C. Underspecification
 
@@ -134,7 +134,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 - Requirements with zero associated tasks
 - Tasks with no mapped requirement/story
 - Non-functional requirements not reflected in tasks (e.g., performance, security)
-- **Scope**: this pass only checks whether _stated_ requirements have _stated_ tasks. Whether the spec is _missing_ operational tasks (observability, rollback, backups, runbooks) that no requirement called for is `/devspark.critic`'s responsibility.
+- **Scope**: this pass only checks whether *stated* requirements have *stated* tasks. Whether the spec is *missing* operational tasks (observability, rollback, backups, runbooks) that no requirement called for is `/devspark.critic`'s responsibility.
 
 #### F. Inconsistency
 

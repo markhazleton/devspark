@@ -90,7 +90,7 @@ Choose the banner that matches the detected state from Step 2:
 
 Output the banner, then immediately output a brief **plan preview** — one line per action group:
 
-```
+```text
 Plan:
   • Create directories: .devspark/, .documentation/, .github/, .vscode/
   • Fetch N stock prompts → .devspark/defaults/commands/
@@ -464,7 +464,7 @@ If **any** check fails, run Repair Mode before reporting success. Do not tell th
 
 Output the following summary (adapt counts and status to what actually ran):
 
-```
+```text
 ✔ DevSpark {LATEST_VERSION} — {MODE} complete
 
 Mode:          {FRESH INSTALL | UPDATE vX.Y.Z → vY.Y.Y | REPAIR | MIGRATION → FRESH INSTALL}
@@ -495,7 +495,7 @@ Constitution: {seeded fresh | migrated from .specify/ | already existed — not 
 
 Tell the user:
 
-```
+```text
 Start DevSpark: type @devspark.specify in Copilot Chat.
 
 Recommended entrypoints (DevSpark v2):
