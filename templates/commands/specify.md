@@ -123,32 +123,34 @@ Given that feature description, do this:
    - `quick-spec` -> `/.devspark/templates/quick-spec-template.md` in installed repos, or `templates/quick-spec-template.md` in source repos
    - Shared validation contract -> `/.devspark/templates/spec-validation-contract.md` in installed repos, or `templates/spec-validation-contract.md` in source repos
 
-4. Follow this execution flow:
-   1. Parse user description from Input
-      If empty: ERROR "No feature description provided"
-   2. Extract key concepts from description
-      Identify: actors, actions, data, constraints
-   3. For unclear aspects:
-      - Make informed guesses based on context and industry standards
-      - Only mark with [NEEDS CLARIFICATION: specific question] if:
-        - The choice significantly impacts feature scope or user experience
-        - Multiple reasonable interpretations exist with different implications
-        - No reasonable default exists
-      - **LIMIT: Maximum 3 [NEEDS CLARIFICATION] markers total**
-      - Prioritize clarifications by impact: scope > security/privacy > user experience > technical details
-   4. Fill User Scenarios & Testing section
-      If no clear user flow: ERROR "Cannot determine user scenarios"
-   5. Generate Functional Requirements
-      Each requirement must be testable
-      Use reasonable defaults for unspecified details (document assumptions in Assumptions section)
-   6. Define Success Criteria
-      Create measurable, technology-agnostic outcomes
-      Include both quantitative metrics (time, performance, volume) and qualitative measures (user satisfaction, task completion)
-      Each criterion must be verifiable without implementation details
-   7. Identify Key Entities (if data involved)
-   8. Return: SUCCESS (spec ready for planning)
+4. **Delegate spec-drafting to the `write-spec` skill** via the adapter contract:
 
-5. Write the specification to SPEC_FILE using the selected template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings. **Ensure the `**Status**:`field is explicitly set to`Draft`** — this is the starting state of the spec lifecycle (`Draft → In Progress → Complete`). The status will transition to `In Progress` when `/devspark.implement` starts and `Complete` when all tasks are done.
+   Resolve the skill at `templates/skills/write-spec/SKILL.md` (source repos) or
+   `.devspark/templates/skills/write-spec/SKILL.md` (installed repos).
+
+   Pass the following named adapter inputs to the skill:
+
+   - `$FEATURE_DESCRIPTION` — the user's feature description text
+   - `$CONSTITUTION_PATH` — the resolved path to `.documentation/memory/constitution.md`
+     (null when not found)
+   - `$PRIOR_SPEC_SUMMARY` — the JSON output from the skill's context-gathering script
+     (null when unavailable)
+
+   The skill produces a draft `spec.md` body following the drafting procedure defined
+   in `SKILL.md`. The skill limits `[NEEDS CLARIFICATION]` markers to a maximum of
+   three and sets `status: Draft`.
+
+   Multi-app scope resolution (`$APP_SCOPE`) is a command responsibility resolved
+   in step 2 above and is NOT passed into the skill body.
+
+5. Write the skill-produced draft to SPEC_FILE, ensuring:
+   - The `**Status**:` field is explicitly set to `Draft` — this is the starting
+     state of the spec lifecycle (`Draft → In Progress → Complete`). The status
+     will transition to `In Progress` when `/devspark.implement` starts and
+     `Complete` when all tasks are done.
+   - The route-metadata frontmatter (classification, risk_level, target_workflow,
+     required_artifacts, recommended_next_step, required_gates) is applied to the
+     file from step 0 route classification.
 
 6. **Specification Quality Validation**: After writing the initial spec, validate it against the shared specification validation contract plus the quality criteria below:
 
