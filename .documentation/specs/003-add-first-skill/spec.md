@@ -1,6 +1,8 @@
 ---
 classification: full-spec
 risk_level: medium
+risk_profile: internal
+change_type: brownfield
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
 recommended_next_step: clarify
