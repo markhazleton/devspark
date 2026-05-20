@@ -22,7 +22,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 **Step 2 of 4** in the authoring chain (`specify → clarify → plan → tasks`).
 
 - **Owns**: targeted ambiguity reduction in an existing spec via up to 5 interactive questions, each integrated into the appropriate spec section.
-- **Does NOT own**: drafting/replacing the spec (→ `/devspark.specify`); deciding stack/architecture/data-store choices (→ `/devspark.plan` — only ask here if the _absence_ of the choice blocks functional clarity); generating tasks (→ `/devspark.tasks`); adversarial review (→ `/devspark.critic`, `/devspark.analyze`).
+- **Does NOT own**: drafting/replacing the spec (→ `/devspark.specify`); deciding stack/architecture/data-store choices (→ `/devspark.plan` — only ask here if the *absence* of the choice blocks functional clarity); generating tasks (→ `/devspark.tasks`); adversarial review (→ `/devspark.critic`, `/devspark.analyze`).
 - **Seed queue**: any `[NEEDS CLARIFICATION: …]` markers left by `/devspark.specify` are the first candidates; resolving them removes the marker in addition to the standard integration.
 
 ## Constitution Authority
@@ -138,6 +138,7 @@ Execution steps:
      | B      | <Option B description>                                                                              |
      | C      | <Option C description> (add D/E as needed up to 5)                                                  |
      | Short  | Provide a different short answer (<=5 words) (Include only if free-form alternative is appropriate) |
+
      - After the table, add: `You can reply with the option letter (e.g., "A"), accept the recommendation by saying "yes" or "recommended", or provide your own short answer.`
 
    - For short‑answer style (no meaningful discrete options):

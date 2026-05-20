@@ -9,6 +9,7 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 | **GitHub Copilot** | [`devspark_quickstart_copilot.md`](devspark_quickstart_copilot.md) |
 | **Claude Code** | [`devspark_quickstart_claudecode.md`](devspark_quickstart_claudecode.md) |
 | **Cursor** | [`devspark_quickstart_cursor.md`](devspark_quickstart_cursor.md) |
+| **Codex** | [`devspark_quickstart_codex.md`](devspark_quickstart_codex.md) |
 | **Any other agent** | [`devspark_quickstart_generic.md`](devspark_quickstart_generic.md) |
 
 ## How It Works
@@ -43,6 +44,12 @@ Example (Claude Code):
 
 ```text
 /devspark Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_claudecode.md
+```
+
+Example (Codex):
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_codex.md
 ```
 
 ## What Gets Installed

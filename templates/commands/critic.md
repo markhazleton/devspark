@@ -37,7 +37,7 @@ These are deliberately **non-overlapping gates**. Critic does NOT re-check:
 
 - Internal artifact consistency, duplication, terminology drift → owned by `/devspark.analyze`
 - Whether stated requirements have matching tasks (req↔task coverage) → owned by `/devspark.analyze`
-- Whether requirement _wording_ is precise (vague adjectives, placeholders) → owned by `/devspark.analyze`
+- Whether requirement *wording* is precise (vague adjectives, placeholders) → owned by `/devspark.analyze`
 - **Rationale Summary completeness or spec↔plan Core-Problem drift** → owned by `/devspark.analyze`
 
 Critic DOES own: whether stated NFR targets are achievable, what operational/security/scale tasks are missing **regardless** of whether any requirement called for them, and archetype-specific production failure modes.
@@ -133,7 +133,7 @@ Read `change_type` from spec.md frontmatter. If missing, infer from file deltas 
 
 Read `risk_profile` from spec.md frontmatter; fall back to constitution; default to `internal`.
 
-**Severity scaling rule** (deterministic). Each finding has a _base severity_ from the category registry. Apply this shift to derive _effective severity_:
+**Severity scaling rule** (deterministic). Each finding has a *base severity* from the category registry. Apply this shift to derive *effective severity*:
 
 | Profile          | Shift                                                                  |
 | ---------------- | ---------------------------------------------------------------------- |
@@ -160,7 +160,7 @@ Extract failure-prone elements (skip sections whose artifact is absent):
 
 ### 6. Risk Category Registry (archetype-gated)
 
-Apply only categories whose `archetypes` set includes the detected archetype (or `*`). Each category has a _base severity ceiling_; the §4 profile shift adjusts findings up or down.
+Apply only categories whose `archetypes` set includes the detected archetype (or `*`). Each category has a *base severity ceiling*; the §4 profile shift adjusts findings up or down.
 
 | Category                    | Archetypes                                                               | Base ceiling |
 | --------------------------- | ------------------------------------------------------------------------ | ------------ |
@@ -226,7 +226,7 @@ Load all matching checklists from disk:
 - `.devspark/risk-checklists/{stack}.md` (e.g., `python-fastapi.md`, `node-express.md`, `go-gin.md`, `java-spring.md`, `dotnet-aspnet.md`)
 - `.devspark/risk-checklists/{archetype}.md` (e.g., `library.md`, `cli.md`, `data-pipeline.md`)
 
-If none exist, derive risks from first principles using the universal failure-mode lens above. Note in the report output: _"No stack/archetype checklists found at `.devspark/risk-checklists/` — consider seeding from prior critic runs."_ Stock seeds ship with DevSpark; teams override by placing files of the same name in `.documentation/risk-checklists/`.
+If none exist, derive risks from first principles using the universal failure-mode lens above. Note in the report output: *"No stack/archetype checklists found at `.devspark/risk-checklists/` — consider seeding from prior critic runs."* Stock seeds ship with DevSpark; teams override by placing files of the same name in `.documentation/risk-checklists/`.
 
 Every named tool in a checklist must be paired with the underlying capability so the model can translate across ecosystems. Pattern:
 
@@ -378,7 +378,7 @@ After producing the report:
 
 - Code style preferences (if linter configured)
 - Minor documentation-format inconsistencies
-- **Low-probability AND low-impact** issues _(low-probability/high-impact events must still be surfaced)_
+- **Low-probability AND low-impact** issues *(low-probability/high-impact events must still be surfaced)*
 - Micro-optimizations without proven bottlenecks
 
 ### Output Quality

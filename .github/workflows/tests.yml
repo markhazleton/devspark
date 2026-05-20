@@ -64,6 +64,10 @@ jobs:
           python tests/test_adapter_doctor_contract.py
           python tests/test_hands_off_lifecycle_contract.py
 
+      - name: Validate skill and adapter contracts
+        run: |
+          pytest tests/test_skill_contract.py tests/test_adapter_contract.py -v --tb=short
+
   security-scan:
     runs-on: ubuntu-latest
     steps:

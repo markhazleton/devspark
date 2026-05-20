@@ -38,7 +38,6 @@ For teams that want terminal-driven execution, DevSpark also ships an additive C
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 
 > **DevSpark** is a structured development process for AI coding assistants — 28 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
-
 > Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
 > DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
 
@@ -86,6 +85,7 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 
 - [Implementation Lifecycle Guide](implementation-lifecycle.md) — Prompt-first quickstart, feature workflow, and updates
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
+- [DevSpark and Codex](devspark-and-codex.md) — Best practices for pairing Codex with DevSpark
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
 - [Harness Engineering](harness-engineering.md) — Declarative runtime, adapters, artifacts, and operator guidance

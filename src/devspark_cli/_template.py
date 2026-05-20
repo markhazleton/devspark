@@ -17,6 +17,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from ._app import console
 from ._github import _format_rate_limit_error, _github_auth_headers, ssl_context
 from ._utils import StepTracker
+from .agent_registry import AGENT_CONFIG
 
 # Paths that are never overwritten when the destination file already exists.
 # Everything under .documentation/ is user-owned work product.
@@ -241,6 +242,14 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
                     "",
                     "GitHub Copilot quickstart (prompt-first):",
                     "[cyan]https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_copilot.md[/cyan]",
+                ]
+            )
+        elif ai_assistant == "codex":
+            guidance_lines.extend(
+                [
+                    "",
+                    "Codex quickstart (prompt-first):",
+                    "[cyan]https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_codex.md[/cyan]",
                 ]
             )
         console.print(Panel("\n".join(guidance_lines), title="Recovery Guidance", border_style="cyan"))
@@ -554,12 +563,12 @@ def _seed_user_artifacts(project_path: Path) -> None:
     memory_dir.mkdir(parents=True, exist_ok=True)
 
 
-def validate_installation_manifest(project_path: Path) -> dict:
+def validate_installation_manifest(project_path: Path, ai_assistant: str | None = None) -> dict:
     """Cross-check installed commands against generated agent shims.
 
     Scans ``.devspark/defaults/commands/devspark.*.md`` as the source of truth
-    for which commands are installed, then verifies a matching
-    ``.github/agents/devspark.*.agent.md`` exists for each.
+    for which commands are installed, then verifies a matching agent shim exists
+    in the selected agent's registered command directory.
 
     Returns a dict with:
         command_count   – number of installed stock command files
@@ -569,7 +578,10 @@ def validate_installation_manifest(project_path: Path) -> dict:
         valid           – True when missing_shims is empty
     """
     commands_dir = project_path / ".devspark" / "defaults" / "commands"
-    agents_dir = project_path / ".github" / "agents"
+    agent_key = ai_assistant or "copilot"
+    release = AGENT_CONFIG.get(agent_key, {}).get("release", {})
+    shim_dir = project_path / release.get("commands_dir", ".github/agents")
+    extension = release.get("extension", "agent.md")
 
     installed_commands: list[str] = []
     if commands_dir.is_dir():
@@ -579,11 +591,12 @@ def validate_installation_manifest(project_path: Path) -> dict:
                 installed_commands.append(name[len("devspark."):])
 
     present_shims: list[str] = []
-    if agents_dir.is_dir():
-        for p in sorted(agents_dir.glob("devspark.*.agent.md")):
-            stem = p.name  # e.g. "devspark.specify.agent.md"
-            if stem.startswith("devspark.") and stem.endswith(".agent.md"):
-                present_shims.append(stem[len("devspark."):-len(".agent.md")])
+    if shim_dir.is_dir():
+        suffix = f".{extension}"
+        for p in sorted(shim_dir.glob(f"devspark.*{suffix}")):
+            stem = p.name
+            if stem.startswith("devspark.") and stem.endswith(suffix):
+                present_shims.append(stem[len("devspark."):-len(suffix)])
 
     missing_shims = [cmd for cmd in installed_commands if cmd not in present_shims]
     extra_shims = [shim for shim in present_shims if shim not in installed_commands]
@@ -591,6 +604,9 @@ def validate_installation_manifest(project_path: Path) -> dict:
     return {
         "installed_commands": installed_commands,
         "command_count": len(installed_commands),
+        "agent": agent_key,
+        "shim_dir": str(shim_dir),
+        "shim_extension": extension,
         "present_shims": present_shims,
         "shim_count": len(present_shims),
         "missing_shims": missing_shims,

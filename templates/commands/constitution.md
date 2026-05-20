@@ -25,7 +25,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 All three paths converge here → this command writes `constitution.md` and bumps the version.
 
 - **Owns**: collecting placeholder values, semver decisions, writing the constitution file, propagating impact to dependent templates, emitting the Sync Impact Report.
-- **Does NOT own**: reverse-engineering principles (→ `/devspark.discover-constitution`); generating amendment proposals (→ `/devspark.evolve-constitution`); reviewing/voting on proposals (out-of-band; this command only _applies_ approved ones).
+- **Does NOT own**: reverse-engineering principles (→ `/devspark.discover-constitution`); generating amendment proposals (→ `/devspark.evolve-constitution`); reviewing/voting on proposals (out-of-band; this command only *applies* approved ones).
 
 ## Upstream Inputs to Check
 

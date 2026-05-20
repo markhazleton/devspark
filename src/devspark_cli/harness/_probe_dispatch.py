@@ -322,32 +322,19 @@ def execute_step(
             if step.type != "validation":
                 adapter = get_adapter(adapter_name)
                 if hands_off and adapter_name == "manual":
+                    profile = probe_adapter(adapter_name)
+                    details = profile.remediation_guidance or "Select a non-interactive adapter for hands-off mode."
+                    message = (
+                        f"write_incompatible_adapter: step={step.id} adapter={adapter_name} "
+                        f"state={profile.state}. {details}"
+                    )
                     telemetry.emit(
                         "harness.policy.blocked",
                         context.run_id,
                         step_id=step.id,
-                        reason="hands_off_manual_gate_bypassed",
+                        reason=message,
                     )
-                    duration_ms = int((time.perf_counter() - attempt_started) * 1000)
-                    total_duration += duration_ms
-                    telemetry.emit(
-                        "harness.step.finished",
-                        context.run_id,
-                        step_id=step.id,
-                        attempt=attempt,
-                        status="passed",
-                        duration_ms=duration_ms,
-                    )
-                    result = StepResult(
-                        step_id=step.id,
-                        status="passed",
-                        attempts=attempt,
-                        adapter=adapter_name,
-                        duration_ms=total_duration,
-                        validation_findings=[],
-                        artifacts=compute_artifacts(step, before_snapshot, telemetry, context),
-                    )
-                    return result, next_step_index(step, step_lookup, success=True)
+                    raise RuntimeError(message)
                 enforce_write_capability(step, adapter_name, hands_off)
                 available, reason = adapter.is_available()
                 if not available:

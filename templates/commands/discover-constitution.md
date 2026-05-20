@@ -21,7 +21,7 @@ You **MUST** consider the user input before proceeding (if not empty). User may 
 
 **Brownfield bootstrap** step: `discover → constitution`, then later `evolve → constitution`.
 
-- **Owns**: scanning the codebase for implicit patterns, interactive validation, and producing a _draft_ at `/.documentation/memory/constitution-draft.md`.
+- **Owns**: scanning the codebase for implicit patterns, interactive validation, and producing a *draft* at `/.documentation/memory/constitution-draft.md`.
 - **Does NOT own**: writing or amending the real `constitution.md` (→ always `/devspark.constitution`); evidence-based amendment proposals once a constitution exists (→ `/devspark.evolve-constitution`).
 - **When NOT to use**: constitution already exists and is broadly accurate (→ `/devspark.evolve-constitution`); greenfield codebase (→ `/devspark.constitution` directly with aspirational principles).
 
@@ -82,7 +82,7 @@ Scan the codebase for patterns across these categories. For each, note:
 | ---------------------- | ------------------------------------------ |
 | Test framework         | Detect jest, vitest, mocha, pytest, etc.   |
 | Test file location     | Co-located vs. separate test directory     |
-| Test file naming       | _.test.ts, _.spec.ts, test\_\*.py patterns |
+| Test file naming       | `*.test.ts`, `*.spec.ts`, `test_*.py` patterns |
 | Coverage configuration | Presence of coverage config, thresholds    |
 | Test types present     | Unit, integration, e2e directories         |
 

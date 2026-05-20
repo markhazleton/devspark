@@ -598,31 +598,31 @@ To execute this release:
    git commit -m "docs: release v{NEXT_VERSION}"
    ```
 
-5. Tag release:
+1. Tag release:
 
    ```bash
    git tag -a v{NEXT_VERSION} -m "Release v{NEXT_VERSION}"
    ```
 
-6. Push to remote:
+2. Push to remote:
 
    ```bash
    git push origin main --tags
    ```
 
-7. Create GitHub Release (optional):
+3. Create GitHub Release (optional):
 
    ```bash
    gh release create v{NEXT_VERSION} --notes-file .documentation/releases/v{NEXT_VERSION}/release-notes.md
    ```
 
-8. Consumer projects will receive the new version stamp the next time they run:
+4. Consumer projects will receive the new version stamp the next time they run:
 
    ```bash
    devspark upgrade
    ```
 
-9. Run `/devspark.harvest` to complete the cleanup cycle: rewrite spec-linked code comments, consolidate or archive stale docs, and move obsolete artifacts to `/.archive/`.
+5. Run `/devspark.harvest` to complete the cleanup cycle: rewrite spec-linked code comments, consolidate or archive stale docs, and move obsolete artifacts to `/.archive/`.
 
 ## Guidelines
 

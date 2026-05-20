@@ -24,6 +24,14 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_cursor.md
 ```
 
+### Codex
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_codex.md
+```
+
+For Codex-specific workflow guidance, see [DevSpark and Codex](devspark-and-codex.md).
+
 ### Any Other Agent
 
 ```text
@@ -116,6 +124,7 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 ## What's Next
 
 - [Upgrade Guide](upgrade.md) -- keep DevSpark current
+- [DevSpark and Codex](devspark-and-codex.md) -- best practices for using Codex with DevSpark
 - [Implementation Lifecycle](implementation-lifecycle.md) -- full workflow overview
 - [Harness Engineering](harness-engineering.md) -- optional CLI runtime for declarative workflows
 - [Harness Strict Template](../templates/workflows/harness-strict-template.md) -- delivery-integrity defaults for hands-off runs

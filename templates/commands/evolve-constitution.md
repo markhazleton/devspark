@@ -22,10 +22,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Lifecycle Position
 
-Continuous-improvement step: `PR reviews + audits → evolve-constitution → CAP-YYYY-NNN.md (DRAFT) → approve/reject → /devspark.constitution applies APPROVED CAPs`. Runs _after_ a constitution exists, _between_ version bumps.
+Continuous-improvement step: `PR reviews + audits → evolve-constitution → CAP-YYYY-NNN.md (DRAFT) → approve/reject → /devspark.constitution applies APPROVED CAPs`. Runs *after* a constitution exists, *between* version bumps.
 
 - **Owns**: pattern analysis across PR reviews and audits, gap detection, drafting Constitution Amendment Proposals (CAPs), and recording approve/reject decisions in `proposals/` and history.
-- **Does NOT own**: editing `constitution.md` (only `/devspark.constitution` writes it — this command always emits a _proposal_ file); bootstrapping (→ `/devspark.discover-constitution` brownfield, `/devspark.constitution` greenfield); performing the reviews themselves (→ `/devspark.pr-review`, `/devspark.site-audit`).
+- **Does NOT own**: editing `constitution.md` (only `/devspark.constitution` writes it — this command always emits a *proposal* file); bootstrapping (→ `/devspark.discover-constitution` brownfield, `/devspark.constitution` greenfield); performing the reviews themselves (→ `/devspark.pr-review`, `/devspark.site-audit`).
 - **Prerequisite**: if `/.documentation/memory/constitution.md` does not exist, halt and route to `/devspark.discover-constitution` (brownfield) or `/devspark.constitution` (greenfield). Never propose against a non-existent constitution.
 
 ## Overview
