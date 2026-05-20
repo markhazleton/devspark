@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.text import Text
 from typer.core import TyperGroup
 
+from .commands.skills import skills_app
 from .harness.cli import adapter_app, harness_app
 
 BANNER = """
@@ -43,6 +44,7 @@ app = typer.Typer(
 
 app.add_typer(harness_app, name="harness")
 app.add_typer(adapter_app, name="adapter")
+app.add_typer(skills_app, name="skills")
 
 
 def show_banner():
