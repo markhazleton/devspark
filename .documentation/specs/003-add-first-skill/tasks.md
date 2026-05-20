@@ -60,15 +60,17 @@ Single project layout. Skills surface under `templates/skills/`. CLI under
 **Purpose**: Confirm directory skeleton exists and markdownlint baseline is green
 before authoring any new files.
 
-- [ ] T001 Verify `templates/skills/` directory exists with `write-spec/` and
+- [x] T001 Verify `templates/skills/` directory exists with `write-spec/` and
   `references/` subdirectories; create any missing directories; confirm
   `PyYAML>=6.0` is present as a direct dependency in `pyproject.toml`
   (critic-006 — already declared; verification step ensures it stays explicit
   if lockfile is regenerated)
-- [ ] T002 [P] Run `npx markdownlint-cli2 "**/*.md"` from repo root and confirm
+- [x] T002 [P] Run `npx markdownlint-cli2 "**/*.md"` from repo root and confirm
   zero errors as the baseline before new files are added
-- [ ] T003 [P] Confirm existing test suite passes: `pytest tests/` (establishes
+- [x] T003 [P] Confirm existing test suite passes: `pytest tests/` (establishes
   regression baseline before any code changes)
+
+**Checkpoint**: Phase complete — 2026-05-19
 
 ---
 
@@ -87,7 +89,7 @@ skill body (2B), the tests (2C), or the command refactor (2D) can proceed.
 
 **⚠️ CRITICAL**: No 2B, 2C, or 2D work can begin until this phase is complete.
 
-- [ ] T004 Author `templates/skills/SKILL-validation-contract.md` — upstream
+- [x] T004 Author `templates/skills/SKILL-validation-contract.md` — upstream
   Agent Skills frontmatter rules (name/description/length limits) + DevSpark
   addendum (required `metadata.version`, required body sections, body-length
   budget, prohibited keys, repair rules consistent with
@@ -96,34 +98,36 @@ skill body (2B), the tests (2C), or the command refactor (2D) can proceed.
   warning count on stderr and advisory details (body budget pressure does not
   block CI); `fail` exits 1 with diagnostic `[RULE] [OFFENDING-VALUE] message`
   on stderr (critic-002 — prevents CI silently accepting oversized skills)
-- [ ] T005 Author `templates/skills/ADAPTER-contract.md` — skill discovery rules,
+- [x] T005 Author `templates/skills/ADAPTER-contract.md` — skill discovery rules,
   input mapping (`$FEATURE_DESCRIPTION`, `$CONSTITUTION_PATH`,
   `$PRIOR_SPEC_SUMMARY`), output mapping (draft → SPEC_FILE), responsibility
   split (command vs. skill vs. adapter), backward-compatibility rules
-- [ ] T006 Complete `templates/skills/references/devspark-skills-guide.md` —
+- [x] T006 Complete `templates/skills/references/devspark-skills-guide.md` —
   **SC-005 owner**: this file carries the step-by-step new-skill walkthrough;
   ensure it includes: (a) validation surface section, (b) adding-a-skill workflow
   with numbered steps referencing T004 contracts + write-spec as the worked
   example, (c) review checklist section; content must be sufficient for a new
   contributor to author and pass a second skill on their first PR attempt
   (SC-005); consistent with T004/T005 contracts
-- [ ] T007 Author `templates/skills/README.md` — pointer-only landing page for
+- [x] T007 Author `templates/skills/README.md` — pointer-only landing page for
   the `skills/` surface; dual-surface model summary (`command → adapter → skill`);
   links to `ADAPTER-contract.md`, `SKILL-validation-contract.md`, and
   `references/devspark-skills-guide.md` (where the SC-005 walkthrough lives);
   does not duplicate walkthrough content
-- [ ] T008 Update `README.md` (repo root) — add positioning statement ("DevSpark
+- [x] T008 Update `README.md` (repo root) — add positioning statement ("DevSpark
   treats skills as portable capability packages within a governed lifecycle
   orchestration system"), dual-surface model description, pointers to
   `templates/skills/README.md` and the two contract files (FR-019)
-- [ ] T009 Update `CLAUDE.md` — add positioning statement and `command → invokes →
+- [x] T009 Update `CLAUDE.md` — add positioning statement and `command → invokes →
   skill` internal architecture note; pointer to `templates/skills/` (FR-019)
-- [ ] T010 Run `npx markdownlint-cli2 "**/*.md"` — confirm zero errors after all
+- [x] T010 Run `npx markdownlint-cli2 "**/*.md"` — confirm zero errors after all
   2A files are authored (§VIII gate)
 
 **Checkpoint 2A**: `ADAPTER-contract.md` and `SKILL-validation-contract.md` both
 exist and are lint-clean; `devspark-skills-guide.md` is complete; `README.md`
 and `CLAUDE.md` carry the FR-019 updates. Proceed to 2B.
+
+**Checkpoint**: Phase complete — 2026-05-19
 
 ---
 
@@ -145,7 +149,7 @@ without error; markdownlint passes; FR-004 through FR-010 satisfied.
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Author `templates/skills/write-spec/SKILL.md` — frontmatter:
+- [x] T011 [US1] Author `templates/skills/write-spec/SKILL.md` — frontmatter:
   `name: write-spec`, discovery-rich `description` (≤ 1024 chars, includes
   keywords: draft specification, feature spec, requirements document, user
   stories, acceptance criteria), `metadata.version: "0.1.0"`; no DevSpark-only
@@ -159,11 +163,11 @@ without error; markdownlint passes; FR-004 through FR-010 satisfied.
   (d) draft spec per shared validation contract; (e) limit
   `[NEEDS CLARIFICATION]` to max 3; (f) record any skipped context in the
   spec's Assumptions section; (g) set status `Draft` (FR-004–FR-007, FR-010)
-- [ ] T012 [P] [US1] Author at least one `templates/skills/write-spec/references/`
+- [x] T012 [P] [US1] Author at least one `templates/skills/write-spec/references/`
   file — factor out spec template structure, clarification question format, and
   success criteria guidelines from the skill body; reference with relative paths
   from skill root (FR-007)
-- [ ] T013 [P] [US1] Author `templates/skills/write-spec/scripts/gather-context.ps1`
+- [x] T013 [P] [US1] Author `templates/skills/write-spec/scripts/gather-context.ps1`
   — PowerShell: detect git repo, load constitution (emit summary), list prior
   specs under `.documentation/specs/`; always exit 0 and always emit valid JSON
   (critic-005 — the skill cannot guard against a non-zero exit if the script
@@ -173,18 +177,18 @@ without error; markdownlint passes; FR-004 through FR-010 satisfied.
   (e.g., `"no-git-repo"`, `"constitution-not-found"`) and remaining fields are
   null/empty; degrade gracefully when git or constitution is unavailable;
   never block skill execution (FR-008, FR-009, FR-010)
-- [ ] T014 [P] [US1] Author `templates/skills/write-spec/scripts/gather-context.sh`
+- [x] T014 [P] [US1] Author `templates/skills/write-spec/scripts/gather-context.sh`
   — Bash equivalent of T013; functionally identical JSON output schema and
   exit-0 contract (critic-005); handles missing git, missing constitution,
   non-repo context; records skipped context in `skipped_context` array;
   always exits 0 and always emits valid JSON (FR-009, FR-010)
-- [ ] T015 [US1] Manually validate `SKILL.md` against `SKILL-validation-contract.md`
+- [x] T015 [US1] Manually validate `SKILL.md` against `SKILL-validation-contract.md`
   (from T004): name matches directory, description within limits, `metadata.version`
   quoted, no prohibited keys, body within budget, degradation documented in
   Assumptions (SC-001, SC-007)
-- [ ] T016 [P] [US1] Run `npx markdownlint-cli2 "**/*.md"` — confirm zero errors
+- [x] T016 [P] [US1] Run `npx markdownlint-cli2 "**/*.md"` — confirm zero errors
   after all 2B Markdown files are authored (§VIII, FR-018)
-- [ ] T017 [P] [US1] Run both context-gathering scripts against the current
+- [x] T017 [P] [US1] Run both context-gathering scripts against the current
   repository: `.\templates\skills\write-spec\scripts\gather-context.ps1` and
   `bash templates/skills/write-spec/scripts/gather-context.sh`; verify JSON
   output contains `constitution_summary` and `prior_specs` keys; verify
@@ -192,6 +196,8 @@ without error; markdownlint passes; FR-004 through FR-010 satisfied.
 
 **Checkpoint 2B / US1**: `write-spec/SKILL.md` is valid; both scripts produce
 correct JSON on this repo; markdownlint clean. Proceed to 2C tests.
+
+**Checkpoint**: Phase complete — 2026-05-19
 
 ---
 
@@ -213,7 +219,7 @@ before the command refactor (US2/2D). This ordering is required by the spec
 
 ### Tests for User Story 3
 
-- [ ] T018 [P] [US3] Author `tests/test_skill_contract.py` — discovers all
+- [x] T018 [P] [US3] Author `tests/test_skill_contract.py` — discovers all
   directories under `templates/skills/` that contain `SKILL.md`; for each:
   parse YAML frontmatter using `yaml.safe_load()` (SafeLoader — avoids YAML 1.1
   boolean surprises where bare `yes`/`no`/`on`/`off` become Python booleans,
@@ -233,7 +239,7 @@ before the command refactor (US2/2D). This ordering is required by the spec
   description > 1024 chars, unquoted float version, partial semver, prohibited
   key, body with DevSpark-specific string — each fixture must fail with an
   assertion message naming the violated rule (FR-011, SC-002)
-- [ ] T019 [P] [US3] Author `tests/test_adapter_contract.py` — asserts
+- [x] T019 [P] [US3] Author `tests/test_adapter_contract.py` — asserts
   `templates/commands/specify.md` contains a reference to `write-spec` skill;
   asserts `specify.md` does not contain the inline spec-drafting procedure
   post-2D refactor (add as an xfail/skip marker for now, to be enabled in T026
@@ -247,7 +253,7 @@ before the command refactor (US2/2D). This ordering is required by the spec
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Author `src/devspark_cli/commands/skills.py` — implements
+- [x] T020 [US3] Author `src/devspark_cli/commands/skills.py` — implements
   `skills_app = typer.Typer(name="skills")`; subcommand `list`: enumerate all
   directories under `templates/skills/` that contain `SKILL.md`, print Rich
   table (name, version, path, status); **no `--json` flag in this release**
@@ -259,19 +265,21 @@ before the command refactor (US2/2D). This ordering is required by the spec
   on stdout; warn → exit 0 + warning count on stderr; fail → exit 1 + diagnostic
   `[RULE] [OFFENDING-VALUE] message` on stderr; parse frontmatter and run all
   rules from `SKILL-validation-contract.md` (FR-013)
-- [ ] T021 [US3] Wire `skills_app` into `src/devspark_cli/_app.py` — add
+- [x] T021 [US3] Wire `skills_app` into `src/devspark_cli/_app.py` — add
   `app.add_typer(skills_app, name="skills")` alongside existing `harness_app`
   and `adapter_app` (FR-013)
-- [ ] T022 [US3] Run `pytest tests/test_skill_contract.py tests/test_adapter_contract.py`
+- [x] T022 [US3] Run `pytest tests/test_skill_contract.py tests/test_adapter_contract.py`
   — confirm T018/T019 pass; confirm `devspark skills validate` exits 0 against
   current `write-spec` skill; confirm deliberate-violation fixture exits 1 with
   named rule (SC-002)
-- [ ] T023 [P] [US3] Run full test suite `pytest tests/` — confirm no regressions
+- [x] T023 [P] [US3] Run full test suite `pytest tests/` — confirm no regressions
   from CLI wiring (SC-006)
 
 **Checkpoint 2C / US3**: Both new test modules pass; `devspark skills list` and
 `devspark skills validate` are wired and functional; regression baseline held.
 Proceed to 2D.
+
+**Checkpoint**: Phase complete — 2026-05-19
 
 ---
 
@@ -290,10 +298,10 @@ refactored command. All tests must pass unchanged. Additionally,
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Read `templates/commands/specify.md` in full before editing —
+- [x] T024 [US2] Read `templates/commands/specify.md` in full before editing —
   identify the inline spec-drafting procedure section (the block starting at step
   4 "Follow this execution flow" through step 5 "Write the specification")
-- [ ] T025 [US2] Refactor `templates/commands/specify.md` — retain all DevSpark
+- [x] T025 [US2] Refactor `templates/commands/specify.md` — retain all DevSpark
   lifecycle steps (route classification at step 0, branch creation at step 2,
   multi-app scoping, artifact placement at step 5, checklist generation at
   step 6, gate enforcement); replace the inline spec-drafting procedure with a
@@ -302,19 +310,23 @@ refactored command. All tests must pass unchanged. Additionally,
   and `$PRIOR_SPEC_SUMMARY` as named inputs, (c) places the skill-produced draft
   into `SPEC_FILE`; multi-app scope resolution remains a command responsibility
   and is NOT passed into the skill body (FR-014, FR-015, SC-003)
-- [ ] T026 [US2] Enable the previously-skipped adapter contract assertion in
+- [x] T026 [US2] Enable the previously-skipped adapter contract assertion in
   `tests/test_adapter_contract.py` (T019) that verifies `specify.md` references
   `write-spec` and does not duplicate the drafting procedure inline (FR-012)
-- [ ] T027 [US2] Run `pytest tests/test_create_spec_workflow_integration.py` and
+- [x] T027 [US2] Run `pytest tests/test_create_spec_workflow_integration.py` and
   all related specify integration tests — confirm all pass unchanged after the
   refactor (FR-015, SC-003)
-- [ ] T028 [US2] Run `pytest tests/test_adapter_contract.py` — confirm delegation
+- [x] T028 [US2] Run `pytest tests/test_adapter_contract.py` — confirm delegation
   assertion now passes with the refactored command (FR-012)
-- [ ] T029 [P] [US2] Run `npx markdownlint-cli2 "**/*.md"` — confirm zero errors
+- [x] T029 [P] [US2] Run `npx markdownlint-cli2 "**/*.md"` — confirm zero errors
   on modified `specify.md` (§VIII, FR-018)
 
 **Checkpoint 2D / US2**: All existing integration tests pass unchanged; adapter
 contract test confirms delegation; markdownlint clean.
+
+**Checkpoint**: Phase complete — 2026-05-19
+
+### User Story 2 ✅ Complete
 
 ---
 
@@ -322,26 +334,28 @@ contract test confirms delegation; markdownlint clean.
 
 **Purpose**: Final validation sweep across all surfaces introduced by this feature.
 
-- [ ] T030 [P] Run full markdownlint sweep: `npx markdownlint-cli2 "**/*.md"` —
+- [x] T030 [P] Run full markdownlint sweep: `npx markdownlint-cli2 "**/*.md"` —
   confirm zero errors across all new and modified Markdown files (§VIII, FR-018,
   SC-004)
-- [ ] T031 [P] Run full test suite: `pytest tests/` — confirm all tests pass;
+- [x] T031 [P] Run full test suite: `pytest tests/` — confirm all tests pass;
   zero regressions in any existing test (SC-006)
-- [ ] T032 Perform manual portability check: copy only
+- [x] T032 Perform manual portability check: copy only
   `templates/skills/write-spec/` to a temporary directory; open with a
   skills-compatible client; request a draft spec for a sample feature description;
   verify the resulting `spec.md` has valid frontmatter, four mandatory full-spec
   sections, `Draft` status, and ≤ 3 `[NEEDS CLARIFICATION]` markers (SC-001,
   US1 acceptance scenario 1)
-- [ ] T033 [P] Verify `devspark skills list` output — confirm it enumerates
+- [x] T033 [P] Verify `devspark skills list` output — confirm it enumerates
   `write-spec` with correct name, version `0.1.0`, path, and `pass` status
   (SC-002, FR-013)
-- [ ] T034 [P] Verify `devspark skills validate` exit code — zero for `write-spec`;
+- [x] T034 [P] Verify `devspark skills validate` exit code — zero for `write-spec`;
   non-zero with named rule for deliberate-violation fixture (SC-002, US3
   acceptance scenario 2)
-- [ ] T035 Review `CLAUDE.md` and `README.md` FR-019 updates — confirm positioning
+- [x] T035 Review `CLAUDE.md` and `README.md` FR-019 updates — confirm positioning
   statement, dual-surface model description, and all four pointers are present
   and links resolve (FR-019)
+
+**Checkpoint**: Phase complete — 2026-05-19
 
 ---
 

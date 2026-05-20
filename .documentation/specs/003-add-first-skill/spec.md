@@ -13,7 +13,7 @@ required_gates: checklist, analyze, critic
 
 **Feature Branch**: `003-add-first-skill`
 **Created**: 2026-05-19
-**Status**: Draft <!-- Valid: Draft | In Progress | Complete -->
+**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Add Agent Skills support to DevSpark, starting with a write-spec skill that wraps /devspark.specify per the agentskills.io open spec"
 
 ## Rationale Summary
@@ -86,7 +86,7 @@ Reviewers should focus on:
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Portable skill executes in a non-DevSpark client (Priority: P1)
+### User Story 1 - Portable skill executes in a non-DevSpark client (Priority: P1) ✅ Complete
 
 A developer using a skills-compatible agent client (Claude Code, Cursor, or any other client listed on the agentskills.io Client Showcase) that has **no DevSpark installation** loads the `templates/skills/write-spec/` folder. The client surfaces the skill in its discovery list. The developer asks the agent to "draft a feature spec for X." The agent activates the skill, runs any bundled context-gathering scripts, and produces a draft `spec.md` artifact that conforms to the shared spec validation contract.
 
@@ -100,7 +100,7 @@ A developer using a skills-compatible agent client (Claude Code, Cursor, or any 
 2. **Given** the skill is loaded at startup, **When** the agent enumerates available skills, **Then** only the skill's `name` and `description` are loaded into context (progressive disclosure); the full body is loaded only on activation.
 3. **Given** the skill's `SKILL.md` frontmatter, **When** it is parsed by an open-spec validator, **Then** it contains no DevSpark-specific keys (e.g., `handoffs`, `scripts:` in the command-prompt sense) and complies with the open Agent Skills spec.
 
-### User Story 2 - DevSpark command invokes the skill internally (Priority: P1)
+### User Story 2 - DevSpark command invokes the skill internally (Priority: P1) ✅ Complete
 
 A user runs `/devspark.specify "..."` inside a DevSpark-enabled repository. The command performs DevSpark-specific lifecycle work (route classification, branch creation, multi-app scoping, artifact placement, checklist generation, gate enforcement) and delegates the actual spec-drafting reasoning to the `write-spec` skill via the documented adapter contract. The user observes **no behavior change** compared to the pre-refactor `/devspark.specify`.
 
@@ -114,7 +114,7 @@ A user runs `/devspark.specify "..."` inside a DevSpark-enabled repository. The 
 2. **Given** the adapter contract, **When** the adapter test runs, **Then** it confirms the command file references the skill and does not duplicate the drafting procedure inline.
 3. **Given** a DevSpark multi-app repository, **When** a user issues `/devspark.specify --app <id> "..."`, **Then** the command resolves the app scope and the skill receives the correctly scoped paths via the adapter — multi-app scoping remains a command responsibility, not a skill responsibility.
 
-### User Story 3 - Maintainer validates a skill before merging (Priority: P2)
+### User Story 3 - Maintainer validates a skill before merging (Priority: P2) ✅ Complete
 
 A DevSpark contributor adds or edits a skill in `templates/skills/`. They run a single CLI command to validate the skill against both the open Agent Skills spec, the DevSpark skill-validation addendum, and the adapter contract. CI runs the same validation on every PR.
 
