@@ -1,6 +1,6 @@
 """Skills subcommand group: list and validate DevSpark Agent Skills."""
+import os
 import re
-import sys
 from pathlib import Path
 
 import typer
@@ -41,12 +41,27 @@ _BODY_FAIL_LINES = 500
 
 
 def _find_skills_root() -> Path:
-    """Locate the templates/skills/ directory relative to the package."""
+    """Locate the templates/skills/ directory.
+
+    Resolution order:
+    1. DEVSPARK_SKILLS_ROOT env var — explicit override for installed/CI environments.
+    2. __file__-relative path — works in source-tree and editable installs only.
+       When installed as a wheel, templates/ is not part of the package and this
+       path will not exist; a warning is emitted so the user knows to set the env var.
+    """
+    env_override = os.environ.get("DEVSPARK_SKILLS_ROOT")
+    if env_override:
+        return Path(env_override)
+
     # Path(__file__) = src/devspark_cli/commands/skills.py
     # .parent = commands/, .parent = devspark_cli/, .parent = src/, .parent = repo root
-    package_dir = Path(__file__).parent.parent.parent
-    repo_root = package_dir.parent
-    return repo_root / "templates" / "skills"
+    computed = Path(__file__).parent.parent.parent.parent / "templates" / "skills"
+    if not computed.exists():
+        stderr_console.print(
+            f"[yellow]Warning[/yellow]: skills directory not found at {computed}. "
+            "Set DEVSPARK_SKILLS_ROOT to the templates/skills/ path for installed environments."
+        )
+    return computed
 
 
 def _parse_skill_md(skill_dir: Path):
