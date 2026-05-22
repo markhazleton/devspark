@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Cross-platform script install** (#45): all five quickstart guides (copilot,
+  claudecode, cursor, codex, generic) now unconditionally install both
+  `.devspark/scripts/bash/` and `.devspark/scripts/powershell/` regardless of
+  the current OS. Previously only the OS-detected set was installed, breaking
+  repos used on both macOS and Windows. Step 6 validation now checks both
+  script-set counts.
+- **`upgrade.md`**: Step 7a now explicitly requires syncing both script sets;
+  post-upgrade verification table shows both counts separately.
+- **`address-pr-review.md`**: `sh` variant was incorrectly using
+  `pwsh -File` (invoking PowerShell on macOS/Linux); fixed to use the native
+  `scripts/bash/address-pr-review.sh` counterpart.
+
+### Changed
+
+- **Constitution v1.4.0** (CAP-2026-002): §VI Platform Parity promoted from a
+  soft convention to a formal `(MUST)`. New rules: changes to any script in one
+  language must land with a matching change in the other in the same commit;
+  installs must always deliver both script sets; HIGH severity violation in PR
+  review.
+- **`test_script_parity_contract.py`**: added structural §VI enforcement —
+  asserts every `.sh` in `scripts/bash/` has a matching `.ps1` in
+  `scripts/powershell/` and vice versa.
+
 ## [2.4.0] - 2026-05-20 - Minor Release
 
 ### Added

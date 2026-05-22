@@ -16,7 +16,7 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 
 1. Open a chat with your AI agent in the target repository
 2. Paste the URL to the raw quickstart file, or copy its contents into the chat
-3. The agent will ask the install-critical questions first, then pull and install the full DevSpark framework payload
+3. The agent detects the current OS (for plan preview only), then pulls and installs the full DevSpark framework payload — **both** PowerShell and Bash script sets are always installed regardless of OS
 4. For upgrades, run the [remote upgrade prompt](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) (no CLI required)
 5. Use CLI only if you want advanced automation (`devspark upgrade`)
 
@@ -54,7 +54,7 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 
 ## What Gets Installed
 
-- **`.devspark/`** — Framework files (stock prompts, templates, scripts). Safe to delete or upgrade.
+- **`.devspark/`** — Framework files (stock prompts, templates, both PowerShell and Bash scripts). Safe to delete or upgrade.
 - **`.documentation/`** — Your project artifacts (constitution, specs, decisions). Seeded during initial setup and preserved afterward.
 - **`agents-registry.json`** — Shared agent metadata used by context-generation and packaging workflows.
 - **Agent shims** — Platform-specific files that wire `/devspark.*` commands to personal, team, and stock prompt resolution.
