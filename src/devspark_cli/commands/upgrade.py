@@ -32,6 +32,8 @@ STRUCTURAL_OVERRIDE_COMMANDS = (
 
 
 SCRIPT_TYPE_CHOICES = {"sh", "ps"}
+# ADR-001: Both script sets are always installed. SCRIPT_TYPE_CHOICES only
+# controls which path variant gets baked into .devspark/defaults/commands/ files.
 
 
 # ============================================================================
@@ -521,7 +523,7 @@ def upgrade(
     skip_migration: bool = typer.Option(False, "--skip-migration", help="Skip automatic migration check"),
     force: bool = typer.Option(False, "--force", help="Skip all confirmations"),
     github_token: str = typer.Option(None, "--github-token", help="GitHub token for API requests"),
-    script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
+    script_type: str = typer.Option(None, "--script", help="Command variant to bake into agent prompts: sh or ps (default: auto-detected from OS). Both script sets are always installed."),
     preflight: bool = typer.Option(False, "--preflight", help="Print release-asset diagnostics and exit"),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository operations"),
@@ -598,6 +600,7 @@ def upgrade(
         agent_name = AGENT_CONFIG[ai_assistant]["name"]
         console.print(f"[green]✓[/green] Using AI assistant: [cyan]{agent_name}[/cyan] ({ai_assistant})\n")
 
+    # ADR-001: both script sets are always installed; auto-detect command variant only
     resolved_script_type = script_type or ("ps" if os.name == "nt" else "sh")
     if resolved_script_type not in SCRIPT_TYPE_CHOICES:
         console.print(f"[red]✗ Error:[/red] Invalid script type '{resolved_script_type}'")
@@ -623,7 +626,7 @@ def upgrade(
     if not preflight_report["matching_asset_name"]:
         console.print("[red]✗ Cannot continue upgrade: no matching template asset discovered.[/red]")
         console.print(
-            f"[dim]Run preflight again after release assets publish: devspark upgrade --preflight --ai {ai_assistant} --script {resolved_script_type}[/dim]"
+            f"[dim]Run preflight again after release assets publish: devspark upgrade --preflight --ai {ai_assistant}[/dim]"
         )
         raise typer.Exit(1)
 

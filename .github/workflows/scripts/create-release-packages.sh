@@ -317,19 +317,13 @@ build_variant() {
   # Constitution is user-owned and never included in release packages.
   # Users create it via /devspark.constitution or /devspark.discover-constitution.
   
-  # Only copy the relevant script variant directory
+  # ADR-001: Always copy both script sets regardless of build variant.
+  # The sh|ps variant only controls which {SCRIPT} path gets baked into command files.
   if [[ -d scripts ]]; then
     mkdir -p "$DEVSPARK_DIR/scripts"
-    case $script in
-      sh)
-        [[ -d scripts/bash ]] && { cp -r scripts/bash "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/bash -> .devspark/scripts"; }
-        find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
-        ;;
-      ps)
-        [[ -d scripts/powershell ]] && { cp -r scripts/powershell "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/powershell -> .devspark/scripts"; }
-        find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
-        ;;
-    esac
+    [[ -d scripts/bash ]] && { cp -r scripts/bash "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/bash -> .devspark/scripts"; }
+    [[ -d scripts/powershell ]] && { cp -r scripts/powershell "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/powershell -> .devspark/scripts"; }
+    find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
   fi
   
   [[ -d templates ]] && {

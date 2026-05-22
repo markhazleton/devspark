@@ -33,6 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`test_script_parity_contract.py`**: added structural §VI enforcement —
   asserts every `.sh` in `scripts/bash/` has a matching `.ps1` in
   `scripts/powershell/` and vice versa.
+- **CLI `devspark init` / `devspark upgrade`**: `--script` option now reflects
+  its actual purpose — selecting the command-path variant baked into agent
+  prompts, not gating which script set is installed. Interactive script-type
+  selector removed from `init`; auto-detection retained. Both sets are always
+  installed regardless of the selected variant (ADR-001).
+- **Release packaging** (`create-release-packages.sh`): script-set copy block
+  now always copies both `scripts/bash/` and `scripts/powershell/` into every
+  release ZIP, regardless of the `sh|ps` build variant (ADR-001).
 
 ## [2.4.0] - 2026-05-20 - Minor Release
 

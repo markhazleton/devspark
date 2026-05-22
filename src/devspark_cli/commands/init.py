@@ -32,13 +32,15 @@ from .._github import ssl_context as _ssl_context
 import httpx
 
 SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
+# ADR-001: Both script sets are always installed. --script only selects
+# which path variant gets baked into .devspark/defaults/commands/ files.
 
 
 @app.command()
 def init(
     project_name: str = typer.Argument(None, help="Name for your new project directory (optional if using --here, or use '.' for current directory)"),
     ai_assistant: str = typer.Option(None, "--ai", help="AI assistant to use: claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, roo, codebuddy, amp, shai, q, bob, or qodercli"),
-    script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
+    script_type: str = typer.Option(None, "--script", help="Command variant to bake into agent prompts: sh or ps (default: auto-detected from OS). Both script sets are always installed."),
     release_tag: str = typer.Option(None, "--release-tag", help="Install from a specific GitHub release tag (e.g. v2.1.0)"),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
@@ -179,15 +181,11 @@ def init(
             raise typer.Exit(1)
         selected_script = script_type
     else:
-        default_script = "ps" if os.name == "nt" else "sh"
-
-        if sys.stdin.isatty():
-            selected_script = select_with_arrows(SCRIPT_TYPE_CHOICES, "Choose script type (or press Enter)", default_script)
-        else:
-            selected_script = default_script
+        # ADR-001: both script sets are always installed; auto-detect command variant only
+        selected_script = "ps" if os.name == "nt" else "sh"
 
     console.print(f"[cyan]Selected AI assistant:[/cyan] {selected_ai}")
-    console.print(f"[cyan]Selected script type:[/cyan] {selected_script}")
+    console.print(f"[cyan]Command variant:[/cyan] {selected_script} (both script sets will be installed)")
     if release_tag:
         console.print(f"[cyan]Selected release tag:[/cyan] {release_tag}")
 
@@ -199,8 +197,8 @@ def init(
     tracker.complete("precheck", "ok")
     tracker.add("ai-select", "Select AI assistant")
     tracker.complete("ai-select", f"{selected_ai}")
-    tracker.add("script-select", "Select script type")
-    tracker.complete("script-select", selected_script)
+    tracker.add("script-select", "Select command variant")
+    tracker.complete("script-select", f"{selected_script} (both script sets)")
     for key, label in [
         ("fetch", "Fetch latest release"),
         ("download", "Download template"),
@@ -288,8 +286,8 @@ def init(
                     "Initialization could not complete with the current release asset state.",
                     "",
                     "Recommended next steps:",
-                    f"- Retry with a known-good release tag:\n  [cyan]devspark init --here --force --ai {selected_ai} --script {selected_script} --release-tag v2.1.0 --ignore-agent-tools[/cyan]",
-                    "- If using uvx, force refresh cache:\n  [cyan]uvx --refresh --from git+https://github.com/markhazleton/devspark.git devspark init --here --force --ai " + selected_ai + " --script " + selected_script + " --ignore-agent-tools[/cyan]",
+                    f"- Retry with a known-good release tag:\n  [cyan]devspark init --here --force --ai {selected_ai} --release-tag v2.1.0 --ignore-agent-tools[/cyan]",
+                    "- If using uvx, force refresh cache:\n  [cyan]uvx --refresh --from git+https://github.com/markhazleton/devspark.git devspark init --here --force --ai " + selected_ai + " --ignore-agent-tools[/cyan]",
                 ]
                 console.print(Panel("\n".join(retry_lines), title="Initialization Help", border_style="cyan"))
             if not here and project_path.exists():
