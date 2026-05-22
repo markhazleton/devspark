@@ -17,6 +17,29 @@
   Follow-up TODOs: none
 -->
 
+<!--
+  Sync Impact Report — v1.3.0 → v1.4.0 (2026-05-22)
+  Amendment: CAP-2026-002 (APPROVED 2026-05-22)
+  Bump type: MINOR — §VI promoted from convention to enforced MUST
+  Modified principles: §VI Platform Parity — added MUST marker, explicit
+    same-commit parity rule, install-both-sets requirement, and HIGH severity
+    violation classification
+  Added sections: none
+  Removed sections: none (Additional Constraints bullet "Scripts in both
+    PowerShell and Bash" now covered by §VI MUST and left as-is for brevity)
+  Templates checked:
+    ✅ quickstart/devspark_quickstart_copilot.md    — already updated (this PR)
+    ✅ quickstart/devspark_quickstart_claudecode.md — already updated (this PR)
+    ✅ quickstart/devspark_quickstart_cursor.md     — already updated (this PR)
+    ✅ quickstart/devspark_quickstart_codex.md      — already updated (this PR)
+    ✅ quickstart/devspark_quickstart_generic.md    — already updated (this PR)
+    ✅ templates/commands/upgrade.md                — already updated (this PR)
+    ✅ templates/commands/address-pr-review.md      — sh variant fixed (this PR)
+  Follow-up TODOs:
+    - Add §VI parity check to test_script_parity_contract.py (verify every .sh
+      has a matching .ps1 and vice versa)
+-->
+
 ## Core Principles
 
 ### I. Backward Compatibility (NON-NEGOTIABLE)
@@ -60,10 +83,18 @@ repo-wide rules. Constitution violations are showstopper severity in reviews.
 Prefer conventions over configuration. Prefer simple resolution models over flexible ones.
 Complexity must be justified and tracked. Reject abstractions that serve only one use case.
 
-### VI. Platform Parity
+### VI. Platform Parity (MUST)
 
-Bash and PowerShell script behavior must remain functionally equivalent.
+Bash and PowerShell scripts must remain functionally equivalent.
+A change to any script in `scripts/bash/` MUST have a corresponding change in
+`scripts/powershell/` in the same commit, and vice versa — no script may be
+updated in one language without a matching update in the other.
+Install and upgrade flows MUST always deliver **both** script sets
+(`scripts/bash/` and `scripts/powershell/`) regardless of the developer's
+current OS. A repo that has only one set installed is considered broken.
 Packaged templates, quickstarts, and CLI behavior must stay aligned with source templates.
+
+Violations are HIGH severity in PR review.
 
 ### VII. PR Review Artifact Commit Discipline (MUST)
 
@@ -118,4 +149,4 @@ This constitution supersedes all other development practices in the DevSpark rep
 Amendments require: documentation of the change, leadership approval, and a migration plan for any
 affected workflows or repositories.
 
-**Version**: 1.3.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-04-30
+**Version**: 1.4.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-05-22

@@ -5,11 +5,16 @@ No CLI installation is required. You will pull prompt files from the DevSpark re
 
 ## Step 1: Gather Project Context
 
-Ask only the install-critical questions before proceeding:
+No install-critical questions are needed before proceeding — **both** script sets (PowerShell and Bash) are always installed regardless of OS. Detect the current OS to display in the plan preview.
 
-1. **Script preference** — Does this project use **PowerShell** (`ps`) or **Bash** (`sh`) for scripts? (Default: Bash)
+**OS detection** (in priority order):
 
-Wait for answers before continuing.
+1. If the workspace path contains a drive letter (e.g., `C:\`) or backslash separators → **Windows** (active runtime: PowerShell)
+2. If the shell environment is bash/zsh/sh → **macOS/Linux** (active runtime: Bash)
+
+State the detected OS before proceeding:
+> *"Detected: Windows — active runtime PowerShell. Installing both PowerShell and Bash scripts."*
+> *"Detected: macOS/Linux — active runtime Bash. Installing both PowerShell and Bash scripts."*
 
 ---
 
@@ -188,9 +193,9 @@ Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-
 
 ## Step 6: Pull Scripts
 
-Fetch scripts from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` based on the user's script preference from Step 1.
+Fetch **both** script sets from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` — always install both PowerShell and Bash, regardless of the current OS. This ensures the repository works for developers on macOS, Linux, and Windows without requiring a reinstall when switching machines.
 
-For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
+Save to `.devspark/scripts/powershell/`:
 
 - `powershell/common.ps1`
 - `powershell/platform.ps1`
@@ -209,7 +214,7 @@ For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
 - `powershell/repo-story-context.ps1`
 - `powershell/site-audit.ps1`
 
-For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
+Save to `.devspark/scripts/bash/`:
 
 - `bash/common.sh`
 - `bash/platform.sh`
@@ -226,6 +231,8 @@ For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
 - `bash/release-context.sh`
 - `bash/repo-story-context.sh`
 - `bash/site-audit.sh`
+
+**Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Because both sets are always installed, switching between machines never requires a reinstall.
 
 **Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.documentation/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.documentation/scripts/`.
 

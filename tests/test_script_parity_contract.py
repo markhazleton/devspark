@@ -83,6 +83,20 @@ def main() -> None:
         assert token in bash_shims, f'bash generate-atomic-shims missing {token!r}'
         assert token in ps_shims, f'ps generate-atomic-shims missing {token!r}'
 
+    # §VI Platform Parity (MUST): every .sh must have a matching .ps1 and vice versa
+    bash_dir = ROOT / 'scripts' / 'bash'
+    ps_dir = ROOT / 'scripts' / 'powershell'
+    bash_stems = {p.stem for p in bash_dir.glob('*.sh')}
+    ps_stems = {p.stem for p in ps_dir.glob('*.ps1')}
+    bash_only = bash_stems - ps_stems
+    ps_only = ps_stems - bash_stems
+    assert not bash_only, (
+        f'Constitution §VI violation — Bash scripts have no PowerShell counterpart: {sorted(bash_only)}'
+    )
+    assert not ps_only, (
+        f'Constitution §VI violation — PowerShell scripts have no Bash counterpart: {sorted(ps_only)}'
+    )
+
     print('Script parity contract validated.')
 
 

@@ -5,17 +5,18 @@ No CLI installation is required. You will pull prompt files from the DevSpark re
 
 ## Step 1: Gather Project Context
 
-Infer the script preference from the OS — do not ask unless you cannot determine it.
+Detect the current OS to determine the active runtime for the plan preview — **both** script sets (PowerShell and Bash) are always installed regardless of OS.
 
-**Script preference detection** (in priority order):
+**OS detection** (in priority order):
 
-1. If the workspace path contains a drive letter (e.g., `C:\`) or backslash separators → **PowerShell** (`ps`)
-2. If `$env:OS` is `Windows_NT` or `$IsWindows` is true → **PowerShell** (`ps`)
-3. If the shell environment is bash/zsh/sh → **Bash** (`sh`)
-4. If none of the above can be determined → ask: *"PowerShell or Bash?"*
+1. If the workspace path contains a drive letter (e.g., `C:\`) or backslash separators → **Windows** (active runtime: PowerShell)
+2. If `$env:OS` is `Windows_NT` or `$IsWindows` is true → **Windows** (active runtime: PowerShell)
+3. If the shell environment is bash/zsh/sh → **macOS/Linux** (active runtime: Bash)
+4. If none of the above can be determined → assume macOS/Linux
 
-After detecting (or receiving the answer), state your choice before proceeding:
-> *"Script preference: PowerShell (detected Windows)"* or *"Script preference: Bash (detected macOS/Linux)"*
+State the detected OS before proceeding:
+> *"Detected: Windows — active runtime PowerShell. Installing both PowerShell and Bash scripts."*
+> *"Detected: macOS/Linux — active runtime Bash. Installing both PowerShell and Bash scripts."*
 
 ---
 
@@ -95,7 +96,7 @@ Plan:
   • Create directories: .devspark/, .documentation/, .github/, .vscode/
   • Fetch N stock prompts → .devspark/defaults/commands/
   • Fetch N templates → .devspark/templates/
-  • Fetch N scripts → .devspark/scripts/powershell/ (or bash/)
+  • Fetch N scripts → .devspark/scripts/bash/ + .devspark/scripts/powershell/ (both always)
   • Generate N agent shims → .github/agents/ and .github/prompts/
   • Seed constitution → .documentation/memory/constitution.md  [if needed]
   • Write VERSION stamp → .devspark/VERSION
@@ -278,9 +279,9 @@ If any file is missing, re-fetch it before continuing.
 
 ## Step 6: Pull Scripts
 
-Fetch scripts from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` based on the user's script preference from Step 1.
+Fetch **both** script sets from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` — always install both PowerShell and Bash, regardless of the current OS. This ensures the repository works for developers on macOS, Linux, and Windows without requiring a reinstall when switching machines.
 
-For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
+Save to `.devspark/scripts/powershell/`:
 
 - `powershell/common.ps1`
 - `powershell/platform.ps1`
@@ -299,7 +300,7 @@ For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
 - `powershell/repo-story-context.ps1`
 - `powershell/site-audit.ps1`
 
-For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
+Save to `.devspark/scripts/bash/`:
 
 - `bash/common.sh`
 - `bash/platform.sh`
@@ -317,23 +318,29 @@ For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
 - `bash/repo-story-context.sh`
 - `bash/site-audit.sh`
 
+**Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Because both sets are always installed, switching between machines never requires a reinstall.
+
 **Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.documentation/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.documentation/scripts/`.
 
 ### Step 6 Validation (required)
 
-After fetching, verify the script directory is populated:
+After fetching, verify **both** script directories are populated:
 
 ```powershell
-$scripts = Get-ChildItem .devspark/scripts/powershell/*.ps1 -ErrorAction SilentlyContinue
-Write-Host "Scripts installed: $($scripts.Count)"
+$ps = (Get-ChildItem .devspark/scripts/powershell/*.ps1 -ErrorAction SilentlyContinue).Count
+$sh = (Get-ChildItem .devspark/scripts/bash/*.sh -ErrorAction SilentlyContinue).Count
+Write-Host "PowerShell scripts: $ps  Bash scripts: $sh"
+if ($ps -eq 0 -or $sh -eq 0) { Write-Host "WARNING: one or both script sets are missing — re-fetch before continuing" }
 ```
 
 ```bash
-count=$(ls .devspark/scripts/bash/*.sh 2>/dev/null | wc -l)
-echo "Scripts installed: $count"
+ps=$(ls .devspark/scripts/powershell/*.ps1 2>/dev/null | wc -l | tr -d ' ')
+sh=$(ls .devspark/scripts/bash/*.sh 2>/dev/null | wc -l | tr -d ' ')
+echo "PowerShell scripts: $ps  Bash scripts: $sh"
+[ "$ps" -eq 0 ] || [ "$sh" -eq 0 ] && echo "WARNING: one or both script sets are missing — re-fetch before continuing"
 ```
 
-If the count is 0 or any expected script is missing, re-fetch the missing files before continuing.
+If either count is 0, re-fetch the missing set before continuing.
 
 ---
 

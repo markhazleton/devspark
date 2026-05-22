@@ -143,8 +143,7 @@ These are written to `.devspark/` and should match the latest version:
 
 - `.devspark/defaults/commands/devspark.*.md` — stock prompt templates
 - `.devspark/templates/` — stock helper templates
-- `.devspark/scripts/bash/*.sh`
-- `.devspark/scripts/powershell/*.ps1`
+- `.devspark/scripts/bash/*.sh` and `.devspark/scripts/powershell/*.ps1` — both sets always present
 - `.devspark/VERSION`
 - Agent shim files:
   - `.github/agents/*.agent.md`
@@ -226,7 +225,9 @@ MISSING: .github/agents/devspark.specify.agent.md
 #### 7a. Update stock defaults
 
 Write the latest DevSpark prompt templates to `.devspark/defaults/commands/`
-and stock scripts to `.devspark/scripts/`.
+and **both** script sets to `.devspark/scripts/bash/` and `.devspark/scripts/powershell/`.
+Always sync both sets regardless of the current OS — a repo is shared across macOS,
+Linux, and Windows, so both sets must be present at all times.
 These directories are framework-owned and safe to overwrite completely.
 
 **Important**: Do NOT write to `.documentation/commands/` or `.documentation/scripts/`.
@@ -295,7 +296,8 @@ Post-Upgrade Verification
   VERSION stamp      : 1.2.4  (was 1.1.0)
   defaults/commands/ : updated (27 prompts)
   commands/          : unchanged (team customizations preserved)
-  stock scripts/     : updated (15 scripts)
+  stock scripts/bash : updated (15 scripts)
+  stock scripts/ps   : updated (16 scripts)
   team scripts/      : unchanged (overrides preserved)
   constitution.md    : untouched (never modified by upgrades)
 ```
@@ -312,7 +314,7 @@ DevSpark Upgrade Summary
   Date             : <TODAY>
 
 Stock prompts updated in .devspark/defaults/commands/.
-Stock scripts updated in .devspark/scripts/.
+Stock scripts updated in .devspark/scripts/bash/ and .devspark/scripts/powershell/ (both sets).
 Team customizations in .documentation/commands/ and .documentation/scripts/ are untouched.
 
 To merge specific improvements into your team prompts:
