@@ -28,6 +28,8 @@ def main() -> None:
     ps_release_context = _read('scripts/powershell/release-context.ps1')
     bash_release_history = _read('scripts/bash/release-history-context.sh')
     ps_release_history = _read('scripts/powershell/release-history-context.ps1')
+    bash_address_pr_review = _read('scripts/bash/address-pr-review.sh')
+    ps_address_pr_review = _read('scripts/powershell/address-pr-review.ps1')
 
     assert 'get_markdown_frontmatter()' in bash_common
     assert 'get_markdown_frontmatter_value()' in bash_common
@@ -68,6 +70,10 @@ def main() -> None:
     assert 'RECOVERED_QUICKFIXES' in ps_release_history
     assert 'MERGED_PR_NUMBERS' in ps_release_history
     assert 'PR_REVIEW_SUMMARY' in ps_release_history
+
+    for token in ('Code commit gate failed', 'Review commit gate failed'):
+        assert token in bash_address_pr_review
+        assert token in ps_address_pr_review
 
     # T064: run-workflow.* and generate-atomic-shims.* parity
     bash_run = _read('scripts/bash/run-workflow.sh')
