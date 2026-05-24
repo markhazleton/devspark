@@ -139,6 +139,7 @@ Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
 
 - **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite)
 - **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite)
+- **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite)
 - **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite)
 - **Step 7** — Re-create all agent shim files (overwrite — shims are framework files)
 - **Step 10** — Update `.devspark/VERSION` with new version and today's date
@@ -153,6 +154,7 @@ Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
 
 - **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite missing or stale copies)
 - **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite missing or stale copies)
+- **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite missing or stale copies)
 - **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite missing or stale copies)
 - **Step 7** — Re-create all agent shim files (overwrite missing or stale copies)
 - **Step 10** — Re-write `.devspark/VERSION` using the current `LATEST_VERSION` and today's date
@@ -274,6 +276,52 @@ done
 ```
 
 If any file is missing, re-fetch it before continuing.
+
+---
+
+## Step 5.5: Pull Agent Skills
+
+DevSpark 2.4.0+ delegates some command reasoning to portable **Agent Skill** packages under `.devspark/templates/skills/`. `/devspark.specify` requires the `write-spec` skill — without it, the command silently degrades to legacy inline behaviour.
+
+Fetch each file below from `https://raw.githubusercontent.com/markhazleton/devspark/main/` and save it to the matching path under `.devspark/templates/skills/` (preserve the subdirectory structure):
+
+- `templates/skills/README.md`
+- `templates/skills/ADAPTER-contract.md`
+- `templates/skills/SKILL-validation-contract.md`
+- `templates/skills/references/devspark-skills-guide.md`
+- `templates/skills/write-spec/SKILL.md`
+- `templates/skills/write-spec/references/spec-template.md`
+- `templates/skills/write-spec/scripts/gather-context.ps1`
+- `templates/skills/write-spec/scripts/gather-context.sh`
+
+> Skills are framework-owned and safe to overwrite on every install or upgrade. They never touch `.documentation/`.
+
+### Step 5.5 Validation (required)
+
+After fetching, verify the critical skill files landed:
+
+```powershell
+@(
+  'ADAPTER-contract.md',
+  'SKILL-validation-contract.md',
+  'write-spec/SKILL.md',
+  'write-spec/scripts/gather-context.ps1',
+  'write-spec/scripts/gather-context.sh',
+  'write-spec/references/spec-template.md'
+) | ForEach-Object {
+  if (-not (Test-Path ".devspark/templates/skills/$_")) { Write-Host "MISSING: skills/$_" }
+}
+```
+
+```bash
+for f in ADAPTER-contract.md SKILL-validation-contract.md \
+         write-spec/SKILL.md write-spec/scripts/gather-context.ps1 \
+         write-spec/scripts/gather-context.sh write-spec/references/spec-template.md; do
+  [ -f ".devspark/templates/skills/$f" ] || echo "MISSING: skills/$f"
+done
+```
+
+If any skill file is missing, re-fetch it before continuing. A missing `write-spec/SKILL.md` will cause `/devspark.specify` to silently fall back to pre-2.4 behaviour.
 
 ---
 

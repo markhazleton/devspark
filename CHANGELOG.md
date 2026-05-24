@@ -11,6 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Agent Skills install gap** (#42, #43, #44): the `templates/skills/` surface
+  introduced in v2.4.0 was not installed or refreshed by any quickstart guide
+  or `/devspark.upgrade`. As a result, `/devspark.specify` silently degraded
+  to legacy behaviour after upgrade because `.devspark/templates/skills/write-spec/SKILL.md`
+  was absent. Fixed by adding:
+  - **New `Step 5.5: Pull Agent Skills`** to all five quickstart guides
+    (copilot, claudecode, cursor, codex, generic) that fetches the full
+    `templates/skills/` tree into `.devspark/templates/skills/` with required
+    file-presence validation.
+  - **`upgrade.md`**: `.devspark/templates/skills/` now listed under
+    "Framework-owned (safe to overwrite on upgrade)"; Step 7a explicitly
+    re-syncs skill packages; Step 6 verify reports missing skill files at the
+    same severity as missing scripts; post-upgrade summary surfaces a
+    `stock skills/` row.
+  - **`copilot.md` upgrade + repair modes**: Step 5.5 added to both the
+    upgrade and repair execution order so re-runs restore missing skills.
+  - **`tests/test_skills_install_contract.py`**: new contract test asserts
+    every quickstart references `.devspark/templates/skills/` and the
+    `write-spec` skill, upgrade.md lists skills as framework-owned, and the
+    release packager still ships them.
 - **Cross-platform script install** (#45): all five quickstart guides (copilot,
   claudecode, cursor, codex, generic) now unconditionally install both
   `.devspark/scripts/bash/` and `.devspark/scripts/powershell/` regardless of

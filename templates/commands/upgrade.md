@@ -143,6 +143,7 @@ These are written to `.devspark/` and should match the latest version:
 
 - `.devspark/defaults/commands/devspark.*.md` — stock prompt templates
 - `.devspark/templates/` — stock helper templates
+- `.devspark/templates/skills/` — portable Agent Skill packages (SKILL.md + scripts + references) consumed by commands such as `/devspark.specify`
 - `.devspark/scripts/bash/*.sh` and `.devspark/scripts/powershell/*.ps1` — both sets always present
 - `.devspark/VERSION`
 - Agent shim files:
@@ -214,7 +215,10 @@ Missing framework files should be reported as:
 ```
 MISSING: .devspark/scripts/powershell/setup-plan.ps1
 MISSING: .github/agents/devspark.specify.agent.md
+MISSING: .devspark/templates/skills/write-spec/SKILL.md
 ```
+
+For every command prompt that delegates to a skill (currently `/devspark.specify` → `write-spec`), verify the skill's `SKILL.md`, `scripts/`, and `references/` are present under `.devspark/templates/skills/`. A missing skill must be reported at the same severity as a missing script — commands that delegate to a missing skill silently degrade to fallback behaviour.
 
 ### 7. Perform the Upgrade
 
@@ -228,6 +232,20 @@ Write the latest DevSpark prompt templates to `.devspark/defaults/commands/`
 and **both** script sets to `.devspark/scripts/bash/` and `.devspark/scripts/powershell/`.
 Always sync both sets regardless of the current OS — a repo is shared across macOS,
 Linux, and Windows, so both sets must be present at all times.
+
+Also write the latest **Agent Skill packages** from upstream `templates/skills/` to
+`.devspark/templates/skills/`. This directory is framework-owned and safe to overwrite
+completely. At minimum the following must land:
+
+- `.devspark/templates/skills/README.md`
+- `.devspark/templates/skills/ADAPTER-contract.md`
+- `.devspark/templates/skills/SKILL-validation-contract.md`
+- `.devspark/templates/skills/references/devspark-skills-guide.md`
+- `.devspark/templates/skills/write-spec/SKILL.md`
+- `.devspark/templates/skills/write-spec/references/spec-template.md`
+- `.devspark/templates/skills/write-spec/scripts/gather-context.ps1`
+- `.devspark/templates/skills/write-spec/scripts/gather-context.sh`
+
 These directories are framework-owned and safe to overwrite completely.
 
 **Important**: Do NOT write to `.documentation/commands/` or `.documentation/scripts/`.
@@ -298,6 +316,7 @@ Post-Upgrade Verification
   commands/          : unchanged (team customizations preserved)
   stock scripts/bash : updated (15 scripts)
   stock scripts/ps   : updated (16 scripts)
+  stock skills/      : updated (write-spec + contracts)
   team scripts/      : unchanged (overrides preserved)
   constitution.md    : untouched (never modified by upgrades)
 ```
