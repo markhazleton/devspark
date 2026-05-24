@@ -12,7 +12,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import typer
 
@@ -428,8 +428,8 @@ def register(app: typer.Typer) -> None:
     @app.command("help")
     def help_cmd(
         all_: bool = typer.Option(False, "--all", help="Include hidden (exposed: false) atomic prompts"),
-        category: str | None = typer.Option(None, "--category", help="Filter atomic prompts by category"),
-        audience: str | None = typer.Option(None, "--audience", help="Filter atomic prompts by audience"),
+        category: Optional[str] = typer.Option(None, "--category", help="Filter atomic prompts by category"),
+        audience: Optional[str] = typer.Option(None, "--audience", help="Filter atomic prompts by audience"),
     ) -> None:
         """List aliases, workflows, and atomic prompts."""
         _print_help_view(_repo_root(), include_all=all_, category=category, audience=audience)

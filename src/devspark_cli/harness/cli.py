@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
+from typing import Optional
 
 import typer
 from rich.console import Console
@@ -47,7 +48,7 @@ def _print_run_summary(run, run_dir: Path) -> None:
 def run_command(
     spec_file: Path = typer.Argument(..., exists=True, readable=True, help="Path to a harness YAML or JSON file."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Validate and resolve the spec but skip all step execution."),
-    adapter: str | None = typer.Option(None, "--adapter", help="Override the adapter for all executable steps."),
+    adapter: Optional[str] = typer.Option(None, "--adapter", help="Override the adapter for all executable steps."),
     adapter_default: bool = typer.Option(False, "--adapter-default", help="Use the adapter stored in user config."),
     mode: str = typer.Option("act", "--mode", help="Execution mode: 'act' (default, write-enabled) or 'plan' (read-only)."),
     hands_off: bool = typer.Option(False, "--hands-off", help="Enable non-interactive lifecycle mode (no manual confirmation prompts)."),
@@ -211,7 +212,7 @@ def set_default_adapter(name: str = typer.Argument(..., help="Adapter name.")) -
 
 
 @adapter_app.command("doctor")
-def adapter_doctor(name: str | None = typer.Option(None, "--adapter", help="Inspect one adapter only.")) -> None:
+def adapter_doctor(name: Optional[str] = typer.Option(None, "--adapter", help="Inspect one adapter only.")) -> None:
     """Diagnose adapter readiness and write capability."""
 
     adapter_names = [name] if name else get_registered_adapter_names()
