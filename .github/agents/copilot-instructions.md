@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2026-04-18
 
 ## Active Technologies
+
 - Markdown documentation and YAML frontmatter examples + markdownlint-cli2, pytest (001-participant-roles)
 
 - Python 3.11+ + typer, click, rich, pydantic, jsonschema, PyYAML (001-harness-delivery-integrity)
@@ -26,6 +27,7 @@ cd src; pytest; ruff check .
 Python 3.11+: Follow standard conventions
 
 ## Recent Changes
+
 - 001-participant-roles: Added Markdown documentation and YAML frontmatter examples + markdownlint-cli2, pytest
 
 - 001-harness-delivery-integrity: Added Python 3.11+ + typer, click, rich, pydantic, jsonschema, PyYAML
