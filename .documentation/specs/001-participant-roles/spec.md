@@ -1,6 +1,9 @@
 ---
 classification: full-spec
 risk_level: medium
+risk_profile: internal
+change_type: brownfield
+archetype: documentation-site
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
 recommended_next_step: plan
@@ -168,8 +171,9 @@ optional participant examples while validation guidance treats absence as valid.
    validation or review guidance evaluates it, **Then** the missing metadata is
    at most a warning or recommendation and not a failure.
 3. **Given** participant metadata is present in plan or task artifacts, **When**
-   commands summarize artifact context, **Then** they may report it as advisory
-   responsibility context without changing execution.
+   commands run or summarize artifact context, **Then** the metadata remains
+   preserved in artifacts and is not surfaced through a dedicated participant
+   printout step.
 
 ### Edge Cases
 
@@ -250,9 +254,9 @@ optional participant examples while validation guidance treats absence as valid.
   concepts do not change DevSpark's existing customization layers.
 - **SC-003**: The stock spec, plan, and task templates each include optional
   `participants` YAML frontmatter metadata.
-- **SC-004**: The existing `pytest` suite passes green (`pytest` exits 0) on a
-  checkout where no artifact contains participant metadata, confirming that
-  prompt resolution, skill validation, workflow validation, and documentation
-  audit are unaffected by this feature.
+- **SC-004**: The existing `pytest` suite passes green (`pytest` exits 0)
+  without requiring participant metadata in fixtures or pre-existing artifacts,
+  confirming that prompt resolution, skill validation, workflow validation, and
+  documentation audit are unaffected by this feature.
 - **SC-005**: A text search for new team-member guidance shows `participant`
   usage instead of redefining `agent` outside existing AI-runtime contexts.

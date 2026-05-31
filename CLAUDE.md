@@ -74,7 +74,7 @@ Full list in `templates/commands/`.
 - Never overwrite `.documentation/` user artifacts during CLI operations
 
 <!-- DEVSPARK SHARED CONTEXT:START -->
-## AGENTS.md
+# AGENTS.md
 
 ## About DevSpark
 
