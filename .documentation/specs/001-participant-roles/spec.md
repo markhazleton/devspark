@@ -14,7 +14,7 @@ required_gates: checklist, analyze, critic
 
 **Feature Branch**: `001-participant-roles`
 **Created**: 2026-05-31
-**Status**: Draft
+**Status**: Complete
 **Input**: User description: "Document participant terminology and optional participant metadata for DevSpark phase 1 and phase 2, preserving existing customization layers and keeping agent reserved for AI runtimes."
 
 ## Rationale Summary
@@ -98,7 +98,7 @@ new inheritance or orchestration behavior.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Understand Core Vocabulary (Priority: P1)
+### User Story 1 - Understand Core Vocabulary (Priority: P1) ✅ Complete
 
 As a DevSpark user, I want documentation to distinguish prompts, agents, skills,
 participants, and roles so that I can discuss team workflows without confusing
@@ -124,7 +124,7 @@ single DevSpark-specific definition with examples.
 
 ---
 
-### User Story 2 - Preserve Existing Customization Layers (Priority: P2)
+### User Story 2 - Preserve Existing Customization Layers (Priority: P2) ✅ Complete
 
 As a DevSpark maintainer, I want participant guidance to explicitly preserve
 the current default, team, and individual customization process so that new
@@ -150,7 +150,7 @@ not rename, relocate, reorder, or replace the existing customization layers.
 
 ---
 
-### User Story 3 - Add Optional Participant Metadata (Priority: P3)
+### User Story 3 - Add Optional Participant Metadata (Priority: P3) ✅ Complete
 
 As a DevSpark author, I want spec, plan, and task artifacts to have an optional
 place to record participant context so responsibility is visible without making

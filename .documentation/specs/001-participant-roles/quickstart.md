@@ -44,3 +44,14 @@ Run the full suite before completion:
 - Tests pass with no fixture requiring participant metadata.
 - Markdown lint reports zero errors for changed markdown.
 - Existing prompt and script resolution documentation remains unchanged.
+
+## Final Validation Notes
+
+Validated on 2026-05-31 with the planned commands:
+
+- `npx markdownlint-cli2 "README.md" ".documentation/**/*.md" "templates/**/*.md"`
+- `.\.venv\Scripts\python -m pytest -q tests/test_participant_metadata_contract.py`
+- `.\.venv\Scripts\python -m pytest -q`
+- `git diff --check`
+
+All commands completed successfully.

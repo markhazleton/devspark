@@ -62,9 +62,11 @@ customization layer precedence.
 **Purpose**: Establish test and documentation targets before changing product
 content.
 
-- [ ] T001 Review participant metadata contract in `.documentation/specs/001-participant-roles/contracts/participant-metadata.md`
-- [ ] T002 Review current terminology references in `README.md`, `.documentation/implementation-lifecycle.md`, `.documentation/constitution-guide.md`, and `templates/README.md`
-- [ ] T003 [P] Inspect current stock template frontmatter in `templates/spec-template.md`, `templates/quick-spec-template.md`, `templates/plan-template.md`, and `templates/tasks-template.md`
+- [X] T001 Review participant metadata contract in `.documentation/specs/001-participant-roles/contracts/participant-metadata.md`
+- [X] T002 Review current terminology references in `README.md`, `.documentation/implementation-lifecycle.md`, `.documentation/constitution-guide.md`, and `templates/README.md`
+- [X] T003 [P] Inspect current stock template frontmatter in `templates/spec-template.md`, `templates/quick-spec-template.md`, `templates/plan-template.md`, and `templates/tasks-template.md`
+
+**Checkpoint**: Phase complete - 2026-05-31
 
 ---
 
@@ -73,10 +75,12 @@ content.
 **Purpose**: Add regression tests and shared wording before updating individual
 user-story surfaces.
 
-- [ ] T004 Create participant terminology and metadata contract tests in `tests/test_participant_metadata_contract.py`
-- [ ] T005 Add assertions in `tests/test_participant_metadata_contract.py` that existing artifacts without `participants` metadata remain valid by checking representative fixture/spec/template parsing does not require the field
-- [ ] T006 Add assertions in `tests/test_participant_metadata_contract.py` that stock docs reserve `agent` for AI runtime/client integrations and use `participant` for team-member concepts
-- [ ] T007 Add assertions in `tests/test_participant_metadata_contract.py` that participant metadata examples do not require personal names, do not recommend storing personally identifying information, and do not mention participant routing, inheritance, or command output behavior
+- [X] T004 Create participant terminology and metadata contract tests in `tests/test_participant_metadata_contract.py`
+- [X] T005 Add assertions in `tests/test_participant_metadata_contract.py` that existing artifacts without `participants` metadata remain valid by checking representative fixture/spec/template parsing does not require the field
+- [X] T006 Add assertions in `tests/test_participant_metadata_contract.py` that stock docs reserve `agent` for AI runtime/client integrations and use `participant` for team-member concepts
+- [X] T007 Add assertions in `tests/test_participant_metadata_contract.py` that participant metadata examples do not require personal names, do not recommend storing personally identifying information, and do not mention participant routing, inheritance, or command output behavior
+
+**Checkpoint**: Phase complete - 2026-05-31
 
 **Checkpoint**: Contract tests define the expected vocabulary and optional
 metadata behavior before product files are edited.
@@ -93,14 +97,16 @@ in `tests/test_participant_metadata_contract.py`.
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] Add test coverage for required glossary terms in `tests/test_participant_metadata_contract.py`
+- [X] T008 [P] [US1] Add test coverage for required glossary terms in `tests/test_participant_metadata_contract.py`
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Add a glossary section defining `prompt`, `agent`, `skill`, `participant`, and `role` in `README.md`
-- [ ] T010 [US1] Add lifecycle terminology guidance explaining participant responsibilities in `.documentation/implementation-lifecycle.md`
-- [ ] T011 [US1] Update template documentation to distinguish prompts, agents, skills, and participants in `templates/README.md`
-- [ ] T012 [US1] Ensure new team-member guidance uses `participant` instead of redefining `agent` in `README.md`, `.documentation/implementation-lifecycle.md`, and `templates/README.md`
+- [X] T009 [US1] Add a glossary section defining `prompt`, `agent`, `skill`, `participant`, and `role` in `README.md`
+- [X] T010 [US1] Add lifecycle terminology guidance explaining participant responsibilities in `.documentation/implementation-lifecycle.md`
+- [X] T011 [US1] Update template documentation to distinguish prompts, agents, skills, and participants in `templates/README.md`
+- [X] T012 [US1] Ensure new team-member guidance uses `participant` instead of redefining `agent` in `README.md`, `.documentation/implementation-lifecycle.md`, and `templates/README.md`
+
+**Checkpoint**: Phase complete - 2026-05-31
 
 **Checkpoint**: Core vocabulary is documented and independently reviewable.
 
@@ -117,14 +123,16 @@ layer model.
 
 ### Tests for User Story 2
 
-- [ ] T013 [P] [US2] Add test assertions that `README.md` still documents the existing 3-tier prompt resolution and 2-tier script resolution in `tests/test_participant_metadata_contract.py`
-- [ ] T014 [P] [US2] Add test assertions that participant documentation does not introduce upstream inheritance or a participant override model in `tests/test_participant_metadata_contract.py`
+- [X] T013 [P] [US2] Add test assertions that `README.md` still documents the existing 3-tier prompt resolution and 2-tier script resolution in `tests/test_participant_metadata_contract.py`
+- [X] T014 [P] [US2] Add test assertions that participant documentation does not introduce upstream inheritance or a participant override model in `tests/test_participant_metadata_contract.py`
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Update `README.md` participant guidance to state that existing customization layers and precedence are unchanged
-- [ ] T016 [US2] Update `.documentation/implementation-lifecycle.md` to state that participant metadata is advisory and does not affect command, prompt, or script resolution
-- [ ] T017 [US2] Update `.documentation/constitution-guide.md` only if needed to clarify that participants do not weaken constitution authority or app-level governance
+- [X] T015 [US2] Update `README.md` participant guidance to state that existing customization layers and precedence are unchanged
+- [X] T016 [US2] Update `.documentation/implementation-lifecycle.md` to state that participant metadata is advisory and does not affect command, prompt, or script resolution
+- [X] T017 [US2] Update `.documentation/constitution-guide.md` only if needed to clarify that participants do not weaken constitution authority or app-level governance
+
+**Checkpoint**: Phase complete - 2026-05-31
 
 **Checkpoint**: Participant docs preserve DevSpark's current customization
 process.
@@ -141,17 +149,19 @@ verify metadata is optional and artifact-only.
 
 ### Tests for User Story 3
 
-- [ ] T018 [P] [US3] Add test assertions that `templates/spec-template.md`, `templates/quick-spec-template.md`, `templates/plan-template.md`, and `templates/tasks-template.md` include optional `participants` YAML frontmatter, and that `templates/plan-template.md` still exposes its `# Implementation Plan` heading after frontmatter is skipped, in `tests/test_participant_metadata_contract.py`
-- [ ] T019 [P] [US3] Add test assertions that `templates/spec-validation-contract.md` documents optional participant metadata as advisory and non-blocking in `tests/test_participant_metadata_contract.py`
+- [X] T018 [P] [US3] Add test assertions that `templates/spec-template.md`, `templates/quick-spec-template.md`, `templates/plan-template.md`, and `templates/tasks-template.md` include optional `participants` YAML frontmatter, and that `templates/plan-template.md` still exposes its `# Implementation Plan` heading after frontmatter is skipped, in `tests/test_participant_metadata_contract.py`
+- [X] T019 [P] [US3] Add test assertions that `templates/spec-validation-contract.md` documents optional participant metadata as advisory and non-blocking in `tests/test_participant_metadata_contract.py`
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Add optional `participants` YAML frontmatter examples to `templates/spec-template.md`
-- [ ] T021 [US3] Add optional `participants` YAML frontmatter examples to `templates/quick-spec-template.md`
-- [ ] T022 [US3] Add optional `participants` YAML frontmatter examples to `templates/plan-template.md` while preserving `# Implementation Plan` as the first body heading
-- [ ] T023 [US3] Add optional `participants` YAML frontmatter examples to `templates/tasks-template.md`
-- [ ] T024 [US3] Update `templates/spec-validation-contract.md` to state that `participants` is optional advisory metadata and absence must not fail validation
-- [ ] T025 [US3] Update `templates/README.md` helper template documentation to mention optional participant metadata in stock lifecycle templates
+- [X] T020 [US3] Add optional `participants` YAML frontmatter examples to `templates/spec-template.md`
+- [X] T021 [US3] Add optional `participants` YAML frontmatter examples to `templates/quick-spec-template.md`
+- [X] T022 [US3] Add optional `participants` YAML frontmatter examples to `templates/plan-template.md` while preserving `# Implementation Plan` as the first body heading
+- [X] T023 [US3] Add optional `participants` YAML frontmatter examples to `templates/tasks-template.md`
+- [X] T024 [US3] Update `templates/spec-validation-contract.md` to state that `participants` is optional advisory metadata and absence must not fail validation
+- [X] T025 [US3] Update `templates/README.md` helper template documentation to mention optional participant metadata in stock lifecycle templates
+
+**Checkpoint**: Phase complete - 2026-05-31
 
 **Checkpoint**: Stock templates carry optional participant metadata examples and
 existing artifacts without the metadata remain valid.
@@ -163,11 +173,13 @@ existing artifacts without the metadata remain valid.
 **Purpose**: Validate the full documentation/template change and prepare it for
 review.
 
-- [ ] T026 [P] Run `npx markdownlint-cli2 "README.md" ".documentation/**/*.md" "templates/**/*.md"` and fix markdown issues in changed files
-- [ ] T027 Run `.\.venv\Scripts\python -m pytest -q tests/test_participant_metadata_contract.py` and fix failures
-- [ ] T028 Run `.\.venv\Scripts\python -m pytest -q` and confirm existing test suite passes without participant metadata in fixtures
-- [ ] T029 Run `git diff --check` and fix whitespace or line-ending issues in changed files
-- [ ] T030 Update `.documentation/specs/001-participant-roles/quickstart.md` with final validation notes if commands differ from the planned verification steps
+- [X] T026 [P] Run `npx markdownlint-cli2 "README.md" ".documentation/**/*.md" "templates/**/*.md"` and fix markdown issues in changed files
+- [X] T027 Run `.\.venv\Scripts\python -m pytest -q tests/test_participant_metadata_contract.py` and fix failures
+- [X] T028 Run `.\.venv\Scripts\python -m pytest -q` and confirm existing test suite passes without participant metadata in fixtures
+- [X] T029 Run `git diff --check` and fix whitespace or line-ending issues in changed files
+- [X] T030 Update `.documentation/specs/001-participant-roles/quickstart.md` with final validation notes if commands differ from the planned verification steps
+
+**Checkpoint**: Phase complete - 2026-05-31
 
 ---
 
