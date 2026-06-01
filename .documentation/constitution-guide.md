@@ -6,6 +6,10 @@ The **project constitution** is the foundational document that defines your proj
 
 The constitution lives at `/.documentation/memory/constitution.md` in your project root.
 
+Participant metadata, when present in specs, plans, or tasks, is advisory
+responsibility context. It never weakens constitution authority, app-level
+governance, quality gates, or the existing prompt and script resolution rules.
+
 ## Why a Constitution?
 
 Without clear guiding principles, AI agents and developers can make inconsistent decisions. The constitution provides:

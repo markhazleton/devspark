@@ -42,6 +42,23 @@ After bootstrap, run the standard implementation lifecycle in chat:
 11. `/devspark.pr-review UPDATE`
 12. Merge PR after approval
 
+### Lifecycle Terminology
+
+DevSpark uses distinct terms for workflow concepts:
+
+- **Prompt**: the workflow command surface that owns lifecycle orchestration.
+- **Agent**: an AI runtime or client integration that executes prompts.
+- **Skill**: a portable capability package a prompt may delegate to.
+- **Participant**: a human or AI-filled team member with responsibility in a
+  workflow.
+- **Role**: a responsibility label for a participant, such as owner, planner,
+  implementer, reviewer, critic, or scribe.
+
+Participant metadata is advisory and artifact-only. It can record responsibility
+context in specs, plans, or tasks, but it does not affect command execution,
+prompt resolution, script resolution, gate enforcement, or command output.
+Customization layers and precedence are unchanged.
+
 ### Route-Aware Intake
 
 `/devspark.specify` is the canonical starting point for new work. It classifies the request, explains the recommendation, and asks the user to confirm or override it.

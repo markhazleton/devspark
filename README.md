@@ -29,6 +29,25 @@ devspark/
 └── .documentation/       ← Guides, media, and GitHub Pages site
 ```
 
+## DevSpark Vocabulary
+
+- **Prompt**: A workflow command surface, usually a slash-command file, that
+  orchestrates DevSpark lifecycle behavior such as specification, planning,
+  implementation, review, or release.
+- **Agent**: An AI runtime or client integration such as Codex, Claude,
+  Copilot, Cursor, or Gemini. Agent metadata lives in `agents-registry.json`
+  and describes supported integrations, not team responsibilities.
+- **Skill**: A reusable portable capability package that a prompt can delegate
+  to when specialized task knowledge is useful.
+- **Participant**: A human or AI-filled team member carrying responsibility for
+  work, review, approval, critique, or decision capture in a workflow.
+- **Role**: A responsibility label assigned to a participant, such as owner,
+  planner, implementer, reviewer, critic, or scribe.
+
+Participant metadata is optional advisory context in artifacts. It does not
+change prompt resolution, script resolution, command behavior, or the existing
+customization process.
+
 ## Agent Skills
 
 DevSpark treats skills as portable capability packages within a governed lifecycle
@@ -254,6 +273,10 @@ DevSpark cleanly separates **your work** from **its installation**:
 2. `.devspark/scripts/` — Stock scripts
 
 There is no third ownership tier. If an organization wants a shared baseline in `.documentation/`, it manages that through its own repo practices; DevSpark still only writes to `.devspark/`.
+
+Participant metadata uses these existing repository-owned artifacts when present.
+It does not change how prompts or scripts are found; customization layers and
+precedence are unchanged.
 
 **Clean removal**: `devspark uninstall` removes `.devspark/` and agent shims, leaves `.documentation/` untouched.
 
