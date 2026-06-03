@@ -95,6 +95,38 @@ If the script fails:
 
 For single quotes in args like "I'm reviewing", use escape syntax: e.g 'I'\''m reviewing' (or double-quote if possible: "I'm reviewing").
 
+### 1b. Trust-Tier Classification
+
+Detect workflow compliance for the PR's source branch before loading the constitution:
+
+1. Extract `head_branch` from PR context.
+2. Derive spec dir: `.documentation/specs/{head_branch}/`
+3. Check file existence:
+   - `spec.md` present?
+   - `plan.md` present?
+   - `tasks.md` present?
+4. Classify trust tier:
+   - All 3 present → **full-compliance** (standard review depth)
+   - `spec.md` only, or `spec.md` + `plan.md` → **partial-compliance** (note gap; moderate scrutiny)
+   - None present → **no-compliance** (elevated scrutiny; emit MEDIUM finding below)
+   - Branch name does not match `NNN-*` pattern → **no-compliance** (note naming convention gap)
+5. For **no-compliance** branches, emit the following finding using the Shared Review Resolution Contract schema and include an explicit reviewer note:
+
+```yaml
+findings:
+  - finding_id: trust-tier-01
+    severity: medium
+    description: "Branch has no spec artifacts under .documentation/specs/{head_branch}/. Constitution §Development Workflow requires features to be spec-driven: specify first, plan second, implement third."
+    recommended_action: "Run /devspark.specify to create the spec, then /devspark.plan and /devspark.tasks before merging."
+    execution_mode: manual
+    status: open
+    outcome: ""
+```
+
+> ⚠️ **No spec artifacts detected** — apply heightened attention to all findings in this
+> report. The absence of a spec means requirements and acceptance criteria have not been
+> formally defined; findings may undercount issues.
+
 ### 2. Load Constitution
 
 Read and parse `/.documentation/memory/constitution.md`:
@@ -103,6 +135,7 @@ Read and parse `/.documentation/memory/constitution.md`:
 - Identify MUST requirements (non-negotiable/mandatory)
 - Identify SHOULD requirements (recommended)
 - Note constitution version and amendment date
+- If `.documentation/memory/severity-registry.md` exists, load it and use its `§{section}.{LEVEL}` entries to validate finding codes when emitting findings
 - Build a checklist of principles to evaluate
 
 If constitution doesn't exist:
@@ -737,6 +770,18 @@ Use this scenario-to-severity mapping table to anchor classification. When two t
 | Stale TODO referencing merged work | LOW | Clutter |
 | Style / naming / docs | LOW | Optional improvement |
 | Constitution needs updating (not code) | CON | Governance improvement |
+
+#### Severity Code Format
+
+Every finding that references a constitution principle MUST include a severity code in the
+format `§{section}.{LEVEL}` matching an entry in `.documentation/memory/severity-registry.md`.
+
+**Examples**: `§VI.HIGH` (platform parity), `§VII.MEDIUM` (review file commit discipline),
+`§VIII.HIGH` (markdownlint CI block), `§I.SHOWSTOPPER` (backward compatibility violation)
+
+For findings not mapped to any constitution section (e.g., security observations, code-quality
+issues not covered by the constitution): emit the finding without a `§` code and flag it as
+a `CON` candidate for `/devspark.evolve-constitution`.
 
 Summary tiers:
 
