@@ -149,4 +149,10 @@ This constitution supersedes all other development practices in the DevSpark rep
 Amendments require: documentation of the change, leadership approval, and a migration plan for any
 affected workflows or repositories.
 
+## Companion Documents
+
+- [Known Governance Limitations](known-limitations.md)
+- [Severity Registry](severity-registry.md)
+- [Prompt Conformance Manifest](prompt-conformance-manifest.md)
+
 **Version**: 1.4.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-05-22
