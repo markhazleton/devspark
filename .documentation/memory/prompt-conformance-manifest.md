@@ -161,13 +161,11 @@ When invoked via `/devspark.checklist`:
 *To be populated after T013 baseline run. Document pass/fail results per template here.*
 
 <!-- BASELINE: Run 2026-06-03 against specify.md, plan.md, pr-review.md (sanity check).
-
 Sanity results:
 - plan.md: PASS (all 3 elements present; constitution.md + non-negotiable on same line)
 - pr-review.md: PASS (all 3 elements present; non-negotiable in Guidelines/Constitution Authority section)
 - specify.md: VARIANT — Element 1 uses "MUST align" with constitution.md rather than "non-negotiable";
   has ## Constitution Authority heading. Adding to Known Variant Headings below.
-
 Full baseline across all templates/commands/ files: pending /devspark.checklist run.
 Re-run before any PR that modifies files in templates/commands/.
 -->

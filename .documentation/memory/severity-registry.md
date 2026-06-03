@@ -59,4 +59,4 @@ code and flag it as a `CON` candidate for `/devspark.evolve-constitution`.
 ## Companion Documents
 
 - [Known Governance Limitations](known-limitations.md)
-- [Constitution](.documentation/memory/constitution.md)
+- [Constitution](constitution.md)

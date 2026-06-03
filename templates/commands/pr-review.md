@@ -110,7 +110,7 @@ Detect workflow compliance for the PR's source branch before loading the constit
    - `spec.md` only, or `spec.md` + `plan.md` → **partial-compliance** (note gap; moderate scrutiny)
    - None present → **no-compliance** (elevated scrutiny; emit MEDIUM finding below)
    - Branch name does not match `NNN-*` pattern → **no-compliance** (note naming convention gap)
-5. For **no-compliance** branches, emit the following finding using the Shared Review Resolution Contract schema and include an explicit reviewer note:
+5. For **no-compliance** branches only, emit the following finding and include the reviewer alert below. Do NOT emit this finding or alert for full-compliance or partial-compliance branches.
 
 ```yaml
 findings:
@@ -123,9 +123,11 @@ findings:
     outcome: ""
 ```
 
-> ⚠️ **No spec artifacts detected** — apply heightened attention to all findings in this
-> report. The absence of a spec means requirements and acceptance criteria have not been
-> formally defined; findings may undercount issues.
+   > ⚠️ **No spec artifacts detected** — apply heightened attention to all findings in this
+   > report. The absence of a spec means requirements and acceptance criteria have not been
+   > formally defined; findings may undercount issues.
+
+   For **partial-compliance** branches (spec.md present but plan.md or tasks.md missing), note the gap inline in the review output without emitting a separate finding: "Partial spec compliance detected — plan.md or tasks.md missing. Standard depth review applied."
 
 ### 2. Load Constitution
 
