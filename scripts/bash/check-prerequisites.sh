@@ -12,6 +12,8 @@
 #   --require-tasks     Require tasks.md to exist (for implementation phase)
 #   --include-tasks     Include tasks.md in AVAILABLE_DOCS list
 #   --paths-only        Only output path variables (no validation)
+#   --require-delivery-status  Require latest harness run to be create-pr ready
+#   --timeout-seconds=N  Timeout value reported in diagnostics
 #   --help, -h          Show help message
 #
 # OUTPUTS:
@@ -33,6 +35,8 @@ JSON_MODE=false
 REQUIRE_TASKS=false
 INCLUDE_TASKS=false
 PATHS_ONLY=false
+REQUIRE_DELIVERY_STATUS=false
+TIMEOUT_SECONDS=300
 
 for arg in "$@"; do
     case "$arg" in
@@ -48,6 +52,12 @@ for arg in "$@"; do
         --paths-only)
             PATHS_ONLY=true
             ;;
+        --require-delivery-status)
+            REQUIRE_DELIVERY_STATUS=true
+            ;;
+        --timeout-seconds=*)
+            TIMEOUT_SECONDS="${arg#*=}"
+            ;;
         --help|-h)
             cat << 'EOF'
 Usage: check-prerequisites.sh [OPTIONS]
@@ -59,6 +69,8 @@ OPTIONS:
   --require-tasks     Require tasks.md to exist (for implementation phase)
   --include-tasks     Include tasks.md in AVAILABLE_DOCS list
   --paths-only        Only output path variables (no prerequisite validation)
+    --require-delivery-status  Require latest harness run to be create-pr ready
+    --timeout-seconds=N  Timeout value reported in diagnostics (default: 300)
   --help, -h          Show this help message
 
 EXAMPLES:
@@ -70,6 +82,9 @@ EXAMPLES:
   
   # Get feature paths only (no validation)
   ./check-prerequisites.sh --paths-only
+
+    # Enforce delivery gate for create-pr/pr-review transitions
+    ./check-prerequisites.sh --json --require-delivery-status --timeout-seconds=300
   
 EOF
             exit 0
@@ -131,6 +146,20 @@ if $REQUIRE_TASKS && [[ ! -f "$TASKS" ]]; then
     echo "ERROR: tasks.md not found in $FEATURE_DIR" >&2
     echo "Run /devspark.tasks first to create the task list." >&2
     exit 1
+fi
+
+if $REQUIRE_DELIVERY_STATUS; then
+    latest_result=""
+    if [[ -d ".documentation/devspark/runs" ]]; then
+        latest_result=$(ls -1dt .documentation/devspark/runs/*/result.json 2>/dev/null | head -n 1)
+    fi
+    if [[ -n "$latest_result" ]] && [[ -f "$latest_result" ]] && command -v jq >/dev/null 2>&1; then
+        create_pr_ready=$(jq -r '.create_pr_ready // false' "$latest_result")
+        if [[ "$create_pr_ready" != "true" ]]; then
+            echo "ERROR: delivery-status gate failed; latest harness run is not create-pr ready (timeout-seconds=$TIMEOUT_SECONDS)" >&2
+            exit 1
+        fi
+    fi
 fi
 
 # Build list of available documents

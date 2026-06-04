@@ -17,6 +17,7 @@ fi
 scope="full"
 json_only=false
 sample_limit=100
+out_file=""
 
 for arg in "$@"; do
   case "$arg" in
@@ -31,6 +32,9 @@ for arg in "$@"; do
       ;;
     --sample-limit=*)
       sample_limit="${arg#--sample-limit=}"
+      ;;
+    --out-file=*)
+      out_file="${arg#--out-file=}"
       ;;
   esac
 done
@@ -324,42 +328,61 @@ join_json_array() {
   printf ']'
 }
 
-printf '{'
-printf '"harvest_date":%s,' "$(json_escape "$harvest_date")"
-printf '"harvest_timestamp":%s,' "$(json_escape "$harvest_timestamp")"
-printf '"repo_root":%s,' "$(json_escape "$repo_root")"
-printf '"scope":%s,' "$(json_escape "$scope")"
-printf '"report_path":%s,' "$(json_escape "$report_path")"
-printf '"specs":%s,' "$(join_json_array "${spec_entries[@]}")"
-printf '"docs":{' 
-printf '"all":%s,' "$(join_json_array "${docs_all[@]}")"
-printf '"living_reference":%s,' "$(join_json_array "${living_reference[@]}")"
-printf '"completed_reviews":%s,' "$(join_json_array "${completed_reviews[@]}")"
-printf '"completed_audits":%s,' "$(join_json_array "${completed_audits[@]}")"
-printf '"stale_drafts":%s,' "$(join_json_array "${stale_drafts[@]}")"
-printf '"session_notes":%s,' "$(join_json_array "${session_notes[@]}")"
-printf '"backup_files":%s,' "$(join_json_array "${backup_files[@]}")"
-printf '"orphaned_files":%s,' "$(join_json_array "${orphaned_files[@]}")"
-printf '"impl_plans":%s,' "$(join_json_array "${impl_plans[@]}")"
-printf '"release_docs":%s,' "$(join_json_array "${release_docs[@]}")"
-printf '"quickfix_records":%s,' "$(join_json_array "${quickfix_records[@]}")"
-printf '"legacy_root_docs":%s,' "$(join_json_array "${legacy_root_docs[@]}")"
-printf '"taxonomy_counts":{},"disposition_counts":{}},'
-printf '"code_comments":%s,' "$(join_json_array "${code_comments[@]}")"
-printf '"changelog_gaps":%s,' "$(join_json_array "${changelog_gap_entries[@]}")"
-printf '"changelog_entries":%s,' "$(join_json_array "${changelog_entries[@]}")"
-printf '"bak_files":%s,' "$(join_json_array "${bak_files[@]}")"
-printf '"archive_existing":%s,' "$(join_json_array "${archive_existing[@]}")"
-printf '"path_roots":{"canonical_documentation":".documentation/","legacy_roots":%s},' "$(join_json_array "${legacy_roots[@]}")"
-printf '"summary":{' 
-printf '"specs_completed":%d,' "$specs_completed"
-printf '"specs_in_progress":%d,' "$specs_in_progress"
-printf '"specs_draft":%d,' "$specs_draft"
-printf '"docs_to_archive":%d,' "$docs_to_archive"
-printf '"code_comments_found":%d,' "$code_comment_count"
-printf '"changelog_gaps":%d,' "$summary_changelog_gaps"
-printf '"bak_files_found":%d' "$bak_files_found"
-printf '}}'
+json_output=$(
+  printf '{'
+  printf '"harvest_date":%s,' "$(json_escape "$harvest_date")"
+  printf '"harvest_timestamp":%s,' "$(json_escape "$harvest_timestamp")"
+  printf '"repo_root":%s,' "$(json_escape "$repo_root")"
+  printf '"scope":%s,' "$(json_escape "$scope")"
+  printf '"report_path":%s,' "$(json_escape "$report_path")"
+  printf '"specs":%s,' "$(join_json_array "${spec_entries[@]}")"
+  printf '"docs":{'
+  printf '"all":%s,' "$(join_json_array "${docs_all[@]}")"
+  printf '"living_reference":%s,' "$(join_json_array "${living_reference[@]}")"
+  printf '"completed_reviews":%s,' "$(join_json_array "${completed_reviews[@]}")"
+  printf '"completed_audits":%s,' "$(join_json_array "${completed_audits[@]}")"
+  printf '"stale_drafts":%s,' "$(join_json_array "${stale_drafts[@]}")"
+  printf '"session_notes":%s,' "$(join_json_array "${session_notes[@]}")"
+  printf '"backup_files":%s,' "$(join_json_array "${backup_files[@]}")"
+  printf '"orphaned_files":%s,' "$(join_json_array "${orphaned_files[@]}")"
+  printf '"impl_plans":%s,' "$(join_json_array "${impl_plans[@]}")"
+  printf '"release_docs":%s,' "$(join_json_array "${release_docs[@]}")"
+  printf '"quickfix_records":%s,' "$(join_json_array "${quickfix_records[@]}")"
+  printf '"legacy_root_docs":%s,' "$(join_json_array "${legacy_root_docs[@]}")"
+  printf '"taxonomy_counts":{},"disposition_counts":{}},'
+  printf '"code_comments":%s,' "$(join_json_array "${code_comments[@]}")"
+  printf '"changelog_gaps":%s,' "$(join_json_array "${changelog_gap_entries[@]}")"
+  printf '"changelog_entries":%s,' "$(join_json_array "${changelog_entries[@]}")"
+  printf '"bak_files":%s,' "$(join_json_array "${bak_files[@]}")"
+  printf '"archive_existing":%s,' "$(join_json_array "${archive_existing[@]}")"
+  printf '"path_roots":{"canonical_documentation":".documentation/","legacy_roots":%s},' "$(join_json_array "${legacy_roots[@]}")"
+  printf '"summary":{'
+  printf '"specs_completed":%d,' "$specs_completed"
+  printf '"specs_in_progress":%d,' "$specs_in_progress"
+  printf '"specs_draft":%d,' "$specs_draft"
+  printf '"docs_to_archive":%d,' "$docs_to_archive"
+  printf '"code_comments_found":%d,' "$code_comment_count"
+  printf '"changelog_gaps":%d,' "$summary_changelog_gaps"
+  printf '"bak_files_found":%d' "$bak_files_found"
+  printf '}}'
+)
+
+if [[ -n "$out_file" ]]; then
+  if [[ "$out_file" = /* ]]; then
+    out_path="$out_file"
+  else
+    out_path="$repo_root/$out_file"
+  fi
+  mkdir -p "$(dirname "$out_path")"
+  # Persist a copy for resilient tooling when stdout capture is truncated.
+  printf '%s' "$json_output" > "$out_path"
+  if [[ "$json_only" == false ]]; then
+    rel_out="${out_path#"$repo_root/"}"
+    printf '[OUTPUT] Harvest context saved to %s\n' "$rel_out" >&2
+  fi
+fi
+
+printf '%s' "$json_output"
 
 if [[ "$json_only" == false ]]; then
   printf '\n'

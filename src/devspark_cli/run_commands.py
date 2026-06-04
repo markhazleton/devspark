@@ -12,7 +12,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import typer
 
@@ -30,6 +30,14 @@ from .runner.executor import (
     WorkflowRunner,
     load_pause_state,
     runs_dir,
+)
+from ._run_guards import (
+    branch_synced_with_main as _is_branch_synced_with_main,
+    get_governance_approval_status as _get_governance_approval_status,
+    git_dirty as _git_dirty,
+    is_delivery_gate_target as _is_delivery_gate_target,
+    latest_harness_result as _latest_harness_result,
+    requires_governance_approval as _requires_governance_approval,
 )
 from .runner.loader import (
     Alias,
@@ -98,7 +106,7 @@ def _scan_aliases(repo_root: Path) -> dict[str, Alias]:
 
 
 # ---------------------------------------------------------------------------
-# Repeated-sequence detection ring buffer (FR-022 / T049)
+# Repeated-sequence detection ring buffer
 # ---------------------------------------------------------------------------
 
 _INVOCATION_RING: list[tuple[str, float]] = []
@@ -129,7 +137,7 @@ def _record_atomic_invocation(prompt_id: str, repo_root: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Live invoker (T025): forward to the canonical command file via legacy_command
+# Live invoker: forward to the canonical command file via legacy_command
 # ---------------------------------------------------------------------------
 
 def _live_prompt_invoker(repo_root: Path):
@@ -181,6 +189,7 @@ def register(app: typer.Typer) -> None:
         allow_dirty: bool = typer.Option(
             False, "--allow-dirty", help="Allow start with a dirty git working tree (FR-015a)."
         ),
+        hands_off: bool = typer.Option(False, "--hands-off", help="Run full lifecycle non-interactively."),
         yes: bool = typer.Option(False, "--yes", help="Skip interactive confirmations."),
     ) -> None:
         """Run a workflow by alias or workflow id."""
@@ -225,13 +234,43 @@ def register(app: typer.Typer) -> None:
             )
             raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
-        # Working tree guard (FR-015a)
+        # Working tree guard: refuse to start if uncommitted changes would pollute delivery evidence.
         if not allow_dirty and _git_dirty(repo_root):
             typer.echo(
                 "git working tree is dirty. Commit/stash changes or pass --allow-dirty.",
                 err=True,
             )
             raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+
+        if _is_delivery_gate_target(workflow_id):
+            latest_result = _latest_harness_result(repo_root)
+            if latest_result is not None:
+                delivery_status = latest_result.get("delivery_status")
+                create_pr_ready = latest_result.get("create_pr_ready")
+                if delivery_status == "unmet" or create_pr_ready is False:
+                    typer.echo(
+                        "delivery-status gate blocked this workflow; latest harness run is not create-pr ready.",
+                        err=True,
+                    )
+                    raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+            if not _is_branch_synced_with_main(repo_root):
+                typer.echo(
+                    "branch-sync gate blocked this workflow; branch is behind origin/main.",
+                    err=True,
+                )
+                raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
+
+        # Governance approval guard for cross-cutting features
+        if _requires_governance_approval(wf):
+            approval = _get_governance_approval_status(repo_root)
+            if approval is None:
+                typer.echo(
+                    "Governance approval required but not found. "
+                    "Leadership checkpoint must be completed before this workflow can run.\n"
+                    "See .documentation/specs/*/gates/governance-approval.md for approval template.",
+                    err=True,
+                )
+                raise typer.Exit(code=EXIT_AUTONOMY_REQUIRED)
 
         invoker = _live_prompt_invoker(repo_root)
         telemetry = _make_telemetry(repo_root)
@@ -244,7 +283,10 @@ def register(app: typer.Typer) -> None:
             telemetry=telemetry,
             autonomy_enforcer=enforcer,
         )
-        result = runner.run({}, autonomy_level=effective_autonomy)
+        if hands_off:
+            result = runner.run_full_lifecycle({}, autonomy_level=effective_autonomy)
+        else:
+            result = runner.run({}, autonomy_level=effective_autonomy)
 
         typer.echo(
             f"[devspark] workflow {wf.id!r} output_type={wf.output_type} "
@@ -386,10 +428,10 @@ def register(app: typer.Typer) -> None:
     @app.command("help")
     def help_cmd(
         all_: bool = typer.Option(False, "--all", help="Include hidden (exposed: false) atomic prompts"),
-        category: str | None = typer.Option(None, "--category", help="Filter atomic prompts by category"),
-        audience: str | None = typer.Option(None, "--audience", help="Filter atomic prompts by audience"),
+        category: Optional[str] = typer.Option(None, "--category", help="Filter atomic prompts by category"),
+        audience: Optional[str] = typer.Option(None, "--audience", help="Filter atomic prompts by audience"),
     ) -> None:
-        """List aliases, workflows, and atomic prompts (FR-021)."""
+        """List aliases, workflows, and atomic prompts."""
         _print_help_view(_repo_root(), include_all=all_, category=category, audience=audience)
 
     @app.command("workflows-help", hidden=True)
@@ -437,23 +479,6 @@ def _print_help_view(
             typer.echo(f"  [{cat}]")
             for p in sorted(groups[cat], key=lambda x: (order.get(x.audience, 99), x.id)):
                 typer.echo(f"    {p.id:<22} ({p.audience}) {p.description.strip()[:80]}")
-
-
-def _git_dirty(repo_root: Path) -> bool:
-    """Return True when `git status --porcelain` reports any change."""
-    import subprocess
-
-    try:
-        result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            cwd=str(repo_root),
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except FileNotFoundError:
-        return False
-    return bool(result.stdout.strip())
 
 
 def _make_telemetry(repo_root: Path):

@@ -1,5 +1,7 @@
 # Quick Start Guide
 
+## Current Release: v2.3.0
+
 ## Step 1: Bootstrap DevSpark
 
 Open a chat with your AI agent inside the target repository and paste the command for your agent:
@@ -21,6 +23,14 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 ```text
 Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_cursor.md
 ```
+
+### Codex
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_codex.md
+```
+
+For Codex-specific workflow guidance, see [DevSpark and Codex](devspark-and-codex.md).
 
 ### Any Other Agent
 
@@ -114,8 +124,20 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 ## What's Next
 
 - [Upgrade Guide](upgrade.md) -- keep DevSpark current
+- [DevSpark and Codex](devspark-and-codex.md) -- best practices for using Codex with DevSpark
 - [Implementation Lifecycle](implementation-lifecycle.md) -- full workflow overview
 - [Harness Engineering](harness-engineering.md) -- optional CLI runtime for declarative workflows
+- [Harness Strict Template](../templates/workflows/harness-strict-template.md) -- delivery-integrity defaults for hands-off runs
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
 - [Command Reference](index.md#command-categories) -- all 27 commands
+
+## Strict Harness Path
+
+For delivery-integrity focused execution, use the strict harness template and run with an explicit write-capable adapter:
+
+```text
+devspark harness run sample.harness.yaml --hands-off --adapter claude_code
+```
+
+If the latest run is not create-pr ready, inspect `decision-packet.json` and `no-change-explainer.md` before continuing.

@@ -1,5 +1,7 @@
 # Other Ways to Get Started
 
+## Current Release: v2.3.0
+
 > For most users the [Prompt Bootstrap](quickstart.md) is all you need. This page covers advanced CLI alternatives only.
 
 ---

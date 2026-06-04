@@ -80,6 +80,7 @@ def main() -> None:
 
         expected_commands = {
             "claude_code": "claude",
+            "codex": "codex",
             "copilot": "copilot",
             "cursor": "cursor-agent",
         }
@@ -94,7 +95,7 @@ def main() -> None:
             telemetry = DummyTelemetry()
             captured: dict[str, object] = {}
 
-            def fake_run(command, cwd, input, capture_output, text, check):
+            def fake_run(command, cwd, input, capture_output, text, check, errors):
                 captured["command"] = command
                 captured["cwd"] = cwd
                 captured["input"] = input
@@ -103,7 +104,12 @@ def main() -> None:
             with patch("shutil.which", return_value=f"/tmp/{executable}"), patch("subprocess.run", side_effect=fake_run):
                 response = adapter.execute(_make_step(prompt_path), context, telemetry)
 
-            assert captured["command"] == [executable, "--print"]
+            expected_command = (
+                [executable, "exec", "--sandbox", "workspace-write", "-"]
+                if adapter_name == "codex"
+                else [executable, "--print"]
+            )
+            assert captured["command"] == expected_command
             assert captured["cwd"] == context.repo_root
             assert captured["input"] == prompt_text
             assert response.output_text == f"{adapter_name} output"

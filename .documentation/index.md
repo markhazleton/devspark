@@ -2,6 +2,8 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
+## Current Release: v2.4.0
+
 **An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
 <video controls width="100%">
@@ -33,7 +35,11 @@ For teams that want terminal-driven execution, DevSpark also ships an additive C
 
 ## About DevSpark
 
+**Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
+
 > **DevSpark** is a structured development process for AI coding assistants — 28 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
+> Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
+> DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
 
 ### The ASLCD Vision
 
@@ -79,11 +85,59 @@ Follow the [Quick Start Guide](quickstart.md) to bootstrap DevSpark with a singl
 
 - [Implementation Lifecycle Guide](implementation-lifecycle.md) — Prompt-first quickstart, feature workflow, and updates
 - [Quick Start Guide](quickstart.md) — Prompt bootstrap + 5-step workflow
+- [DevSpark and Codex](devspark-and-codex.md) — Best practices for pairing Codex with DevSpark
 - [Other Ways to Get Started](installation.md) — Advanced manual and CLI options
 - [Upgrade Guide](upgrade.md) — Prompt-first updates, CLI optional
 - [Harness Engineering](harness-engineering.md) — Declarative runtime, adapters, artifacts, and operator guidance
-- [Validation Matrix](validation-matrix.md) — Current evidence for v1.6.0 workflow scenarios
+- [Validation Matrix](validation-matrix.md) — Current workflow validation evidence
 - [Monorepo Guide](monorepo-guide.md) — Optional multi-application monorepo support
+
+---
+
+## Full Development → Release Cycle
+
+The recommended command order from first requirements through a tagged release:
+
+### Phase 1 — Feature Development
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/devspark.specify` | Define requirements (route-aware: quickfix, quick-spec, or full-spec) |
+| 2 | `/devspark.plan` | Technical architecture and stack choices |
+| 3 | `/devspark.tasks` | Break the plan into actionable implementation tasks |
+| 4 | `/devspark.analyze` | Cross-artifact consistency check |
+| 5 | `/devspark.implement` | Execute tasks — spec status moves to *In Progress*, then *Complete* |
+
+> **CLI shortcut**: `devspark run create-spec` chains steps 1–4 automatically and pauses after analyze. Requires the [DevSpark CLI](harness-engineering.md#devspark-run--development-workflow-aliases).
+
+### Phase 2 — Pull Request
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 6 | `/devspark.create-pr` | Draft the pull request with spec and gate context |
+| 7 | `/devspark.pr-review` | Constitution-based review |
+| 8 | `/devspark.address-pr-review` | Remediate review findings with enforced commit isolation |
+| 9 | `/devspark.pr-review UPDATE` | Focused re-review against the fix iteration, then merge |
+
+> **CLI shortcut**: `devspark run execute-plan` chains steps 5–7 automatically and pauses after create-pr. Requires the [DevSpark CLI](harness-engineering.md#devspark-run--development-workflow-aliases).
+
+### Phase 3 — Release
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 10 | `/devspark.site-audit` | Optional final compliance and quality audit |
+| 11 | `/devspark.release --dry-run` | Preview artifacts to archive and documentation to generate |
+| 12 | `/devspark.release {version}` | Archive complete specs, generate CHANGELOG, release notes, and bump version |
+| 13 | `/devspark.harvest` | Post-release cleanup of stale artifacts |
+
+**Prerequisites before `/devspark.release`:**
+
+- All `tasks.md` items checked `[x]`
+- All `spec.md` statuses set to `Complete`
+- All PRs merged and branch synced with `main` (`git fetch origin && git status`)
+- Markdownlint passes — the release command blocks on lint errors
+
+See [Implementation Lifecycle Guide](implementation-lifecycle.md) for sprint cadence, spec status rules, and right-sizing guidance.
 
 ---
 

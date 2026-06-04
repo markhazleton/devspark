@@ -10,7 +10,11 @@
     <a href="https://markhazleton.github.io/devspark/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
 </p>
 
+**Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
+
 > **Not a program. Not a subscription.** Copy 28 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [13 more](#supported-ai-agents).
+
+## Current Release: v2.4.0
 
 ---
 
@@ -24,6 +28,51 @@ devspark/
 ├── src/devspark_cli/     ← Optional CLI for automated setup
 └── .documentation/       ← Guides, media, and GitHub Pages site
 ```
+
+## DevSpark Vocabulary
+
+- **Prompt**: A workflow command surface, usually a slash-command file, that
+  orchestrates DevSpark lifecycle behavior such as specification, planning,
+  implementation, review, or release.
+- **Agent**: An AI runtime or client integration such as Codex, Claude,
+  Copilot, Cursor, or Gemini. Agent metadata lives in `agents-registry.json`
+  and describes supported integrations, not team responsibilities.
+- **Skill**: A reusable portable capability package that a prompt can delegate
+  to when specialized task knowledge is useful.
+- **Participant**: A human or AI-filled team member carrying responsibility for
+  work, review, approval, critique, or decision capture in a workflow.
+- **Role**: A responsibility label assigned to a participant, such as owner,
+  planner, implementer, reviewer, critic, or scribe.
+
+Participant metadata is optional advisory context in artifacts. It does not
+change prompt resolution, script resolution, command behavior, or the existing
+customization process.
+
+## Agent Skills
+
+DevSpark treats skills as portable capability packages within a governed lifecycle
+orchestration system. Commands invoke skills; DevSpark governs the lifecycle around
+them.
+
+The dual-surface model:
+
+```text
+command -> adapter -> skill -> context scripts -> agent reasoning -> artifact
+```
+
+- **Slash-commands** (`templates/commands/`) own DevSpark-specific lifecycle behavior:
+  route classification, branch creation, multi-app scoping, artifact placement, and
+  gate enforcement.
+- **Agent Skills** (`templates/skills/`) own portable capability instructions that
+  run in any skills-compatible client without DevSpark installed.
+
+The adapter contract (`templates/skills/ADAPTER-contract.md`) defines how a command
+invokes a skill. The skill validation contract
+(`templates/skills/SKILL-validation-contract.md`) defines the rules every `SKILL.md`
+must satisfy. See `templates/skills/references/devspark-skills-guide.md` for the
+contributor walkthrough for adding new skills.
+
+---
 
 ## Get Started
 
@@ -46,6 +95,7 @@ Point your AI agent at the quickstart prompt for your platform:
 - [GitHub Copilot](quickstart/devspark_quickstart_copilot.md)
 - [Claude Code](quickstart/devspark_quickstart_claudecode.md)
 - [Cursor](quickstart/devspark_quickstart_cursor.md)
+- [Codex](quickstart/devspark_quickstart_codex.md)
 - [Any other agent](quickstart/devspark_quickstart_generic.md)
 
 The agent asks a few questions, then pulls and installs all DevSpark prompts.
@@ -224,6 +274,10 @@ DevSpark cleanly separates **your work** from **its installation**:
 
 There is no third ownership tier. If an organization wants a shared baseline in `.documentation/`, it manages that through its own repo practices; DevSpark still only writes to `.devspark/`.
 
+Participant metadata uses these existing repository-owned artifacts when present.
+It does not change how prompts or scripts are found; customization layers and
+precedence are unchanged.
+
 **Clean removal**: `devspark uninstall` removes `.devspark/` and agent shims, leaves `.documentation/` untouched.
 
 ---
@@ -276,6 +330,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.
 ## Acknowledgements
 
 DevSpark is maintained by [Mark Hazleton](https://github.com/markhazleton) and the open-source community.
+
+> Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
+> DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
 
 ## License
 

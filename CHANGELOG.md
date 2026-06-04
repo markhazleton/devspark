@@ -7,6 +7,229 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Agent Skills install gap** (#42, #43, #44): the `templates/skills/` surface
+  introduced in v2.4.0 was not installed or refreshed by any quickstart guide
+  or `/devspark.upgrade`. As a result, `/devspark.specify` silently degraded
+  to legacy behaviour after upgrade because `.devspark/templates/skills/write-spec/SKILL.md`
+  was absent. Fixed by adding:
+  - **New `Step 5.5: Pull Agent Skills`** to all five quickstart guides
+    (copilot, claudecode, cursor, codex, generic) that fetches the full
+    `templates/skills/` tree into `.devspark/templates/skills/` with required
+    file-presence validation.
+  - **`upgrade.md`**: `.devspark/templates/skills/` now listed under
+    "Framework-owned (safe to overwrite on upgrade)"; Step 7a explicitly
+    re-syncs skill packages; Step 6 verify reports missing skill files at the
+    same severity as missing scripts; post-upgrade summary surfaces a
+    `stock skills/` row.
+  - **`copilot.md` upgrade + repair modes**: Step 5.5 added to both the
+    upgrade and repair execution order so re-runs restore missing skills.
+  - **`tests/test_skills_install_contract.py`**: new contract test asserts
+    every quickstart references `.devspark/templates/skills/` and the
+    `write-spec` skill, upgrade.md lists skills as framework-owned, and the
+    release packager still ships them.
+- **Cross-platform script install** (#45): all five quickstart guides (copilot,
+  claudecode, cursor, codex, generic) now unconditionally install both
+  `.devspark/scripts/bash/` and `.devspark/scripts/powershell/` regardless of
+  the current OS. Previously only the OS-detected set was installed, breaking
+  repos used on both macOS and Windows. Step 6 validation now checks both
+  script-set counts.
+- **`upgrade.md`**: Step 7a now explicitly requires syncing both script sets;
+  post-upgrade verification table shows both counts separately.
+- **`address-pr-review.md`**: `sh` variant was incorrectly using
+  `pwsh -File` (invoking PowerShell on macOS/Linux); fixed to use the native
+  `scripts/bash/address-pr-review.sh` counterpart.
+
+### Changed
+
+- **Constitution v1.4.0** (CAP-2026-002): §VI Platform Parity promoted from a
+  soft convention to a formal `(MUST)`. New rules: changes to any script in one
+  language must land with a matching change in the other in the same commit;
+  installs must always deliver both script sets; HIGH severity violation in PR
+  review.
+- **`test_script_parity_contract.py`**: added structural §VI enforcement —
+  asserts every `.sh` in `scripts/bash/` has a matching `.ps1` in
+  `scripts/powershell/` and vice versa.
+- **CLI `devspark init` / `devspark upgrade`**: `--script` option now reflects
+  its actual purpose — selecting the command-path variant baked into agent
+  prompts, not gating which script set is installed. Interactive script-type
+  selector removed from `init`; auto-detection retained. Both sets are always
+  installed regardless of the selected variant (ADR-001).
+- **Release packaging** (`create-release-packages.sh`): script-set copy block
+  now always copies both `scripts/bash/` and `scripts/powershell/` into every
+  release ZIP, regardless of the `sh|ps` build variant (ADR-001).
+
+## [2.4.0] - 2026-05-20 - Minor Release
+
+### Added
+
+- **Agent Skills surface**: New `templates/skills/` directory parallel to `templates/commands/`
+  — portable capability packages that run in any skills-compatible client without DevSpark installed.
+- **`write-spec` skill**: First portable Agent Skill (`templates/skills/write-spec/SKILL.md`)
+  complying with the open Agent Skills specification (agentskills.io). Bundles dual-parity
+  context-gathering scripts for constitution loading and prior-spec summary.
+- **Adapter contract**: `templates/skills/ADAPTER-contract.md` — defines how a DevSpark command
+  invokes a skill (discovery, input/output mapping, responsibility split, backward-compatibility rules).
+- **Skill validation contract**: `templates/skills/SKILL-validation-contract.md` — rules every
+  `SKILL.md` must satisfy (open-spec compliance + DevSpark addendum).
+- **DevSpark Skills Guide**: `templates/skills/references/devspark-skills-guide.md` — contributor
+  walkthrough for adding new skills to the repository.
+- **`devspark skills` CLI**: New `devspark skills list` and `devspark skills validate [path]`
+  subcommands for enumerating and validating skills.
+- **Skill and adapter contract tests**: `tests/test_skill_contract.py` and
+  `tests/test_adapter_contract.py` gate skill compliance on every PR.
+- **First-class Codex quickstart**: Codex CLI quickstart guide added to `quickstart/`.
+- **GitHub Actions hardening**: `tests.yml` now gates releases; stale branch filter removed.
+
+### Changed
+
+- **`/devspark.specify` refactored**: Thin-wrapper command delegates spec-drafting reasoning
+  to the `write-spec` skill via the adapter contract. User-observable behavior is unchanged.
+- **Source module split**: `src/devspark_cli/_template.py` (679 → 575 lines) and
+  `run_commands.py` (589 → 496 lines) extracted into `_release.py` and `_run_guards.py`
+  to bring both files under the 500-line threshold.
+
+### Architectural Decisions
+
+- **ADR-003**: Agent Skills as Portable Capability Packages within Lifecycle Orchestration
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test
+
+## [2.3.0] - 2026-05-14 - Minor Release
+
+### Added
+
+- Upgrade release-asset preflight diagnostics (`devspark upgrade --preflight`) to print discovered template assets before upgrade execution
+- Regression tests for upgrade preflight fallback and no-match behavior
+
+### Changed
+
+- Updated repository and GitHub Pages documentation to mark v2.3.0 as the current release
+
+### Fixed
+
+- Repaired malformed doubled-quote YAML frontmatter in generated Copilot agent shims during init/upgrade
+- Hardened Copilot quickstart shim instructions and validation guidance to prevent invalid YAML quoting regressions
+
+### Contributors
+
+- Mark Hazleton
+- copilot-swe-agent[bot]
+
+## [2.2.1] - 2026-05-06 - Patch Release
+
+### Added
+
+- Additional release process documentation covering the full development-to-release cycle
+- Expanded PR review guidance and documentation references
+
+### Changed
+
+- Refactored harness internals by splitting large modules into focused components for maintainability
+- Refactored CLI command package initialization into dedicated command modules
+- Archived stale release/pr-review artifacts and refreshed spec-linked comments
+- Improved create-pr preflight data richness for downstream automation
+
+### Fixed
+
+- Restored backward-compatibility delegates for removed HarnessRunner methods
+- Corrected harness max-pass failure report `pass_count` handling
+- Restored missing harness fixture files required by contract flows
+- Resolved markdown lint trigger and spec lifecycle audit findings
+- Fixed delivery-status shell timeout variable handling (`TIMEOUT_SECONDS`)
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test (CI identity)
+- copilot-swe-agent[bot]
+
+## [2.2.0] - 2026-04-30 — Harness Delivery Integrity
+
+**Delivery-aware harness execution, adapter doctor diagnostics, and hands-off lifecycle mode (spec 001-harness-delivery-integrity).**
+
+### Added
+
+- **Dual outcome model** — `workflow_status` + `delivery_status` + `create_pr_ready` flag; implementation stages require src/test file changes to pass the delivery gate
+- **Adapter doctor** (`devspark adapter doctor`) with normalized readiness states (`available`, `read-only-works`, `write-approval-required`, `unusable`) and fail-fast routing for hands-off runs
+- **Hands-off lifecycle mode** (`devspark harness run --hands-off`) — chains `plan → tasks → analyze → critic → implement → create-pr → pr-review` with hard gate enforcement and no mid-run human prompts
+- **Convergence loop** — up to 3 analyze/critic re-validation passes per stage; persists per-pass iteration records and a final decision packet on convergence failure
+- **Decision packet and convergence failure report artifacts** for lifecycle go/no-go decisions
+- **Strict harness template** at `templates/workflows/harness-strict-template.md`
+- **Contract tests** for adapter doctor, hands-off lifecycle, delivery status, and convergence loop behavior
+- **CI test matrix** in `tests.yml` (ubuntu/windows/macos × Python 3.11/3.12) running full pytest suite + all 6 harness contract scripts
+- `dev` extras group in `pyproject.toml` — `pip install -e ".[dev]"` in CI
+- **pip-audit CI job** (`security-scan` in `tests.yml`) — uploads JSON vulnerability report as artifact on every push/PR
+- **Constitution §VIII Markdown Quality** — zero markdownlint errors required on all committed markdown; `lint.yml` is a required-to-pass check
+- **`scripts/bash/address-pr-review.sh`** — bash parity for PowerShell address-pr-review script (closes §VI platform parity gap)
+
+### Changed
+
+- Delivery gate enforcement pairs with branch-sync checks for create-pr/pr-review transitions
+- Manual gate policy handling supports `confirm-only`, `confirm-with-file-check`, and `confirm-with-git-diff-check`
+- `_requires_governance_approval` now reads explicit `governance_required: bool` field from workflow YAML (no more substring matching)
+- Exception handling in governance approval status narrowed to `(OSError, UnicodeDecodeError)`
+- Constitution §III extended with 4th condition: `.gitignore` rule covering runtime-writable subtree must exist in default branch before run artifacts are first generated
+- `.markdownlint-cli2.jsonc` ignore entries now include inline rationale comments (§VIII compliance)
+- `.devspark/VERSION` stamp updated to 2.2.0
+
+### Fixed
+
+- CI `pytest -k "harness"` collected 0 tests and exited with code 1 — replaced with `pytest tests/ -v --tb=short`
+- `.documentation/devspark/runs/**` was missing from `.markdownlint-cli2.jsonc` ignores, causing 73 spurious CI lint errors
+- Upgrade shim now detects source-repo context; guard is conditional to avoid false-positive upgrade prompts in the DevSpark source repo itself
+
+### Architectural Decisions
+
+- **ADR-002**: Delivery-Aware Harness Execution Model — see [.documentation/decisions/ADR-002.md](.documentation/decisions/ADR-002.md)
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test (CI identity)
+- copilot-swe-agent[bot]
+
+## [2.1.0] - 2026-04-18 — Workflow Engine Foundation
+
+**Interactive analyze flow + tiered workflow runner foundation (spec 001-interactive-analyze-flow).**
+
+### Added
+
+- **Tiered workflow engine** — `loader / executor / telemetry / autonomy` modules with full contract test coverage
+- **`devspark run / resume / workflows / runs / help` CLI subcommands** for running, resuming, and inspecting workflow executions
+- **GitHub issue adapter** for issue-as-task workflows (`devspark.taskstoissues` integration)
+- **Workflow YAML aliases**: `create-spec`, `execute-plan`, `suggest-improvement` with backing `templates/workflows/*.yaml`
+- **28 legacy atomic shims** auto-generated from canonical command prompts, plus 4 new improvement-loop atomic prompts
+- **`/devspark.address-pr-review` command** — author-side PR review remediation with commit-isolation gates (Constitution Principle VII)
+- **Shared Review Resolution Contract** — consistent resolution output across 5 review commands (`pr-review`, `address-pr-review`, `analyze`, `critic`, `clarify`)
+- **Comprehensive v2 documentation** — `getting-started.md`, `architecture.md`, `autonomy.md`, `improvement-loop.md`, `threat-model.md`, plus updated entrypoints
+
+### Changed
+
+- Lint hardening on PR-touched files (MD047 / MD036 / MD001 markdown rules + pyflakes)
+- Bash shim generator aligned to single backticks for consistent code-fence output
+
+### Architectural Decisions
+
+- **ADR-001**: Tiered Prompt and Workflow Architecture — see [.documentation/decisions/ADR-001.md](.documentation/decisions/ADR-001.md)
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test (CI identity)
+- copilot-swe-agent[bot]
+
+### Notes
+
+- Spec 002 (Harness Runtime) shipped in [2.0.0] above; this entry harvests spec 001.
+- Both source specs archived under `.documentation/releases/v2.1.0/specs/` (and originally to `.archive/2026-04-18/`).
+
 ## [2.0.0] - 2026-04-16 — Harness
 
 **Major release: DevSpark Harness Runtime — a declarative, adapter-driven execution engine that turns YAML specs into reproducible, validated AI-agent workflows.**

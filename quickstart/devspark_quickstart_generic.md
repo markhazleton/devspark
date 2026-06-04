@@ -7,12 +7,11 @@ This guide works with any AI coding agent that supports slash commands or custom
 
 ## Step 1: Gather Project Context
 
-Ask only the install-critical questions before proceeding:
+Ask only the install-critical question before proceeding:
 
 1. **AI agent** — Which AI agent are you using? (Copilot, Claude Code, Cursor, Windsurf, Gemini CLI, Codex, Roo Code, Amazon Q, or other)
-2. **Script preference** — Does this project use **PowerShell** (`ps`) or **Bash** (`sh`) for scripts?
 
-Wait for answers before continuing.
+Wait for the answer before continuing. **Both** script sets (PowerShell and Bash) are always installed regardless of OS — no need to ask for a script preference.
 
 ### Agent Directory Mapping
 
@@ -210,11 +209,57 @@ Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-
 
 ---
 
+## Step 5.5: Pull Agent Skills
+
+DevSpark 2.4.0+ delegates some command reasoning to portable **Agent Skill** packages under `.devspark/templates/skills/`. `/devspark.specify` requires the `write-spec` skill — without it, the command silently degrades to legacy inline behaviour.
+
+Fetch each file below from `https://raw.githubusercontent.com/markhazleton/devspark/main/` and save it to the matching path under `.devspark/templates/skills/` (preserve the subdirectory structure):
+
+- `templates/skills/README.md`
+- `templates/skills/ADAPTER-contract.md`
+- `templates/skills/SKILL-validation-contract.md`
+- `templates/skills/references/devspark-skills-guide.md`
+- `templates/skills/write-spec/SKILL.md`
+- `templates/skills/write-spec/references/spec-template.md`
+- `templates/skills/write-spec/scripts/gather-context.ps1`
+- `templates/skills/write-spec/scripts/gather-context.sh`
+
+> Skills are framework-owned and safe to overwrite on every install or upgrade. They never touch `.documentation/`.
+
+### Step 5.5 Validation (required)
+
+After fetching, verify the critical skill files landed:
+
+```powershell
+@(
+  'ADAPTER-contract.md',
+  'SKILL-validation-contract.md',
+  'write-spec/SKILL.md',
+  'write-spec/scripts/gather-context.ps1',
+  'write-spec/scripts/gather-context.sh',
+  'write-spec/references/spec-template.md'
+) | ForEach-Object {
+  if (-not (Test-Path ".devspark/templates/skills/$_")) { Write-Host "MISSING: skills/$_" }
+}
+```
+
+```bash
+for f in ADAPTER-contract.md SKILL-validation-contract.md \
+         write-spec/SKILL.md write-spec/scripts/gather-context.ps1 \
+         write-spec/scripts/gather-context.sh write-spec/references/spec-template.md; do
+  [ -f ".devspark/templates/skills/$f" ] || echo "MISSING: skills/$f"
+done
+```
+
+If any skill file is missing, re-fetch it before continuing. A missing `write-spec/SKILL.md` will cause `/devspark.specify` to silently fall back to pre-2.4 behaviour.
+
+---
+
 ## Step 6: Pull Scripts
 
-Fetch scripts from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` based on the user's script preference from Step 1.
+Fetch **both** script sets from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` — always install both PowerShell and Bash, regardless of the current OS. This ensures the repository works for developers on macOS, Linux, and Windows without requiring a reinstall when switching machines.
 
-For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
+Save to `.devspark/scripts/powershell/`:
 
 - `powershell/common.ps1`
 - `powershell/platform.ps1`
@@ -233,7 +278,7 @@ For **PowerShell** (`ps`), save to `.devspark/scripts/powershell/`:
 - `powershell/repo-story-context.ps1`
 - `powershell/site-audit.ps1`
 
-For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
+Save to `.devspark/scripts/bash/`:
 
 - `bash/common.sh`
 - `bash/platform.sh`
@@ -250,6 +295,8 @@ For **Bash** (`sh`), save to `.devspark/scripts/bash/`:
 - `bash/release-context.sh`
 - `bash/repo-story-context.sh`
 - `bash/site-audit.sh`
+
+**Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Because both sets are always installed, switching between machines never requires a reinstall.
 
 **Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.documentation/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.documentation/scripts/`.
 

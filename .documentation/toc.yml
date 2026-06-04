@@ -9,6 +9,8 @@
       href: implementation-lifecycle.md
     - name: Quick Start
       href: quickstart.md
+    - name: DevSpark and Codex
+      href: devspark-and-codex.md
     - name: Other Ways to Get Started
       href: installation.md
     - name: Upgrade

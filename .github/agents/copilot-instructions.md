@@ -4,6 +4,11 @@ Auto-generated from all feature plans. Last updated: 2026-04-18
 
 ## Active Technologies
 
+- Markdown documentation and YAML frontmatter examples + markdownlint-cli2, pytest (001-participant-roles)
+
+- Python 3.11+ + typer, click, rich, pydantic, jsonschema, PyYAML (001-harness-delivery-integrity)
+- File-based artifacts under `.documentation/specs/*` and `.documentation/devspark/runs/*` (001-harness-delivery-integrity)
+
 - Python 3.11+ + typer, rich, click, PyYAML (already vendored requirement), `gh` CLI (external), pytest (001-interactive-analyze-flow)
 
 ## Project Structure
@@ -23,12 +28,17 @@ Python 3.11+: Follow standard conventions
 
 ## Recent Changes
 
+- 001-participant-roles: Added Markdown documentation and YAML frontmatter examples + markdownlint-cli2, pytest
+
+- 001-harness-delivery-integrity: Added Python 3.11+ + typer, click, rich, pydantic, jsonschema, PyYAML
+
 - 001-interactive-analyze-flow: Added Python 3.11+ + typer, rich, click, PyYAML (already vendored requirement), `gh` CLI (external), pytest
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
 
 <!-- markdownlint-disable MD012 MD025 -->
+
 <!-- DEVSPARK SHARED CONTEXT:START -->
 # AGENTS.md
 
@@ -653,4 +663,4 @@ When adding new agents:
 
 *This documentation should be updated whenever new agents are added to maintain accuracy and completeness.*
 <!-- DEVSPARK SHARED CONTEXT:END -->
-<!-- markdownlint-enable MD012 MD025 -->
+

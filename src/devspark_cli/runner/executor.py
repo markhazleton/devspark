@@ -174,7 +174,8 @@ class WorkflowRunner:
 
     Two modes:
       - mode="stub":  do not invoke the prompt; record the step as success.
-                      Used by deterministic CI tests (T019, T020, T034).
+                      Used by deterministic CI tests that verify step sequencing
+                      and state transitions without live agent execution.
       - mode="live":  call the supplied invoker for every step.
     """
 
@@ -298,6 +299,25 @@ class WorkflowRunner:
         run.exit_code = EXIT_OK
         return run
 
+    def run_full_lifecycle(
+        self,
+        context: dict[str, Any] | None = None,
+        *,
+        autonomy_level: str | None = None,
+        workflow_run_id: str | None = None,
+    ) -> WorkflowRun:
+        """Execute a full lifecycle workflow in one pass.
+
+        The concrete stage order is defined by the workflow file and is expected to
+        include plan -> tasks -> analyze -> critic -> implement -> create-pr -> pr-review.
+        """
+        return self.run(
+            context=context,
+            autonomy_level=autonomy_level,
+            workflow_run_id=workflow_run_id,
+            start_at_step_id=None,
+        )
+
     # ------------------------------------------------------------------ pause
     def _pause(
         self,
@@ -323,7 +343,7 @@ class WorkflowRunner:
             print(f"[devspark] WARNING: failed to persist pause state: {exc}", file=sys.stderr)
             target = None
 
-        # Resume hint to stderr (FR-007c)
+        # Emit the resume hint so the user or an automation layer can restart from the paused step.
         print(
             f"Paused. Resume with: devspark resume {run.workflow_run_id}",
             file=sys.stderr,

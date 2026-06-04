@@ -17,6 +17,13 @@ Severity = Literal["error", "warning"]
 ValidationStatus = Literal["passed", "failed", "skipped"]
 StepStatus = Literal["passed", "failed", "skipped_dry_run", "aborted"]
 RunStatus = Literal["running", "complete", "failed", "aborted"]
+WorkflowStatus = Literal["complete", "failed", "stalled"]
+DeliveryStatus = Literal["met", "unmet"]
+DeliveryCheckStatus = Literal["pass", "fail", "skipped"]
+FindingSeverity = Literal["critical", "high", "medium", "low"]
+FindingStatus = Literal["open", "resolved", "deferred"]
+RevalidationStatus = Literal["converged", "continue", "max-pass-failed"]
+AdapterDoctorState = Literal["ready", "write_approval_required", "write_incompatible", "unavailable"]
 ExecutionMode = Literal["plan", "act"]
 BackoffType = Literal["none", "fixed", "exponential"]
 RetryTrigger = Literal["validation_fail", "tool_error", "timeout"]
@@ -27,9 +34,17 @@ RuleType = Literal[
     "command.exit_code",
     "json.schema",
     "git.clean",
+    "git.changed_count",
+    "git.changed_path_match",
     "regex.match",
     "llm.rubric",
 ]
+
+
+REASON_CODE_DELIVERY_UNMET = "delivery_status_unmet"
+REASON_CODE_CREATE_PR_BLOCKED = "create_pr_blocked_delivery_unmet"
+REASON_CODE_STEP_TIMEOUT = "step_timeout"
+REASON_CODE_DECODE_REPLACEMENT = "decode_replacement_applied"
 
 
 class ScopeDeclaration(BaseModel):
@@ -75,8 +90,12 @@ class ValidationRule(BaseModel):
     contains: str | None = None
     command: str | None = None
     expected_exit: int = 0
+    timeout_seconds: int | None = None
     schema_file: str | None = None
     target_file: str | None = None
+    git_base_ref: str = "origin/main"
+    path_patterns: list[str] = Field(default_factory=list)
+    min_changed_count: int = 1
     pattern: str | None = None
     rubric: str | None = None
     grader_command: str | None = None
@@ -94,6 +113,8 @@ class ValidationRule(BaseModel):
             "command.exit_code": ["command"],
             "json.schema": ["schema_file", "target_file"],
             "git.clean": ["path"],
+            "git.changed_count": [],
+            "git.changed_path_match": [],
             "regex.match": ["path", "pattern"],
             "always.pass": [],
             "llm.rubric": ["rubric", "grader_command"],
@@ -102,6 +123,10 @@ class ValidationRule(BaseModel):
         if missing:
             missing_text = ", ".join(missing)
             raise ValueError(f"validation rule '{self.id}' missing required field(s) for {self.type}: {missing_text}")
+        if self.timeout_seconds is not None and self.timeout_seconds < 1:
+            raise ValueError("validation.timeout_seconds must be >= 1 when provided")
+        if self.min_changed_count < 0:
+            raise ValueError("validation.min_changed_count must be >= 0")
         return self
 
 
@@ -222,6 +247,52 @@ class RunMetrics(BaseModel):
     validation_failures: int = 0
 
 
+class Finding(BaseModel):
+    finding_id: str
+    severity: FindingSeverity
+    description: str
+    recommended_action: str
+    execution_mode: Literal["auto", "selective", "manual"] = "manual"
+    status: FindingStatus = "open"
+
+
+class StageIterationRecord(BaseModel):
+    stage: Literal["analyze", "critic"]
+    pass_index: int
+    finding_deltas: dict = Field(default_factory=dict)
+    actions_attempted: list[str] = Field(default_factory=list)
+    revalidation_status: RevalidationStatus
+
+
+class DeliveryCheckResult(BaseModel):
+    """Structured delivery-evidence check result."""
+
+    check_id: str
+    check_type: Literal[
+        "git.changed_count",
+        "git.changed_path_match",
+        "command.pass",
+        "artifact.exists",
+        "branch.sync",
+    ]
+    required: bool = True
+    status: DeliveryCheckStatus
+    details: dict = Field(default_factory=dict)
+
+
+class AdapterCapabilityProfile(BaseModel):
+    """Normalized adapter-doctor profile for routing and diagnostics."""
+
+    adapter: str
+    state: AdapterDoctorState
+    is_available: bool
+    can_execute_read_only: bool
+    can_execute_write: bool
+    requires_write_approval: bool = False
+    remediation_guidance: str | None = None
+    diagnostics: list[str] = Field(default_factory=list)
+
+
 class StepResult(BaseModel):
     step_id: str
     status: StepStatus
@@ -240,6 +311,7 @@ class RunContext(BaseModel):
     adapter: str
     dry_run: bool = False
     execution_mode: ExecutionMode = "act"
+    hands_off: bool = False
 
 
 class TelemetryEvent(BaseModel):
@@ -256,6 +328,13 @@ class Run(BaseModel):
     scope: ScopeDeclaration
     started_at: str
     finished_at: str | None = None
+    workflow_status: WorkflowStatus = "failed"
+    delivery_status: DeliveryStatus = "unmet"
+    create_pr_ready: bool = False
+    failure_reason_code: str | None = None
+    delivery_checks: list[DeliveryCheckResult] = Field(default_factory=list)
+    findings: list[Finding] = Field(default_factory=list)
+    stage_iterations: list[StageIterationRecord] = Field(default_factory=list)
     steps: list[StepResult] = Field(default_factory=list)
     metrics: RunMetrics = Field(default_factory=RunMetrics)
     context: RunContext | None = None

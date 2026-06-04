@@ -2,32 +2,22 @@
   "build": {
     "content": [
       {
-        "files": [
-          "*.md",
-          "toc.yml"
-        ]
+        "files": ["*.md", "toc.yml"]
       }
     ],
     "resource": [
       {
-        "files": [
-          "images/**"
-        ]
+        "files": ["images/**"]
       },
       {
-        "files": [
-          "media/**"
-        ]
+        "files": ["media/**"]
       }
     ],
     "overwrite": [],
     "dest": "_site",
     "globalMetadataFiles": [],
     "fileMetadataFiles": [],
-    "template": [
-      "default",
-      "modern"
-    ],
+    "template": ["default", "modern"],
     "postProcessors": [],
     "markdownEngineName": "markdig",
     "noLangKeyword": false,
@@ -35,9 +25,10 @@
     "cleanupCacheHistory": false,
     "disableGitFeatures": false,
     "globalMetadata": {
+      "_googleAnalyticsTagId": "G-RY77Z11S9E",
       "_appTitle": "DevSpark",
       "_appName": "DevSpark",
-      "_appFooter": "DevSpark - Constitution-powered specification-driven development toolkit",
+      "_appFooter": "<a href=\"https://dev.makeboldspark.com\">DevSpark</a> &mdash; built by <a href=\"https://markhazleton.com\">Mark Hazleton</a> &middot; <a href=\"https://makeboldsolutions.com\">Make Bold Solutions</a>",
       "_enableSearch": true,
       "_disableContribution": false,
       "_gitContribute": {
@@ -47,4 +38,3 @@
     }
   }
 }
-

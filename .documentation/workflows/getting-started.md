@@ -1,8 +1,15 @@
 # Getting Started with DevSpark Workflows
 
+> **CLI required** — `devspark run` is a CLI command, not a slash command. No `/devspark.run` slash command exists. Install the CLI first:
+>
+> ```bash
+> uv tool install devspark-cli --force --from git+https://github.com/markhazleton/devspark.git
+> ```
+>
+> To work without the CLI, run the atomic slash commands manually instead — see [Harness Engineering](../harness-engineering.md) for the manual equivalents.
+
 DevSpark v2 ships three flagship aliases that wrap the core spec-driven flow.
-Run them via `devspark run <alias>` (or your agent's `/devspark.run` slash
-command).
+Run them via `devspark run <alias>` in your terminal.
 
 ## 1. `create-spec` — From idea to ready-to-implement spec
 

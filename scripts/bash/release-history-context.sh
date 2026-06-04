@@ -150,6 +150,11 @@ if not to_date:
 
 range_spec = f"{base_ref}..{head_ref}" if base_ref else head_ref
 
+base_sha_lines = git_lines("rev-parse", "--verify", base_ref) if base_ref else []
+base_sha = base_sha_lines[0].strip() if base_sha_lines else ""
+head_sha_lines = git_lines("rev-parse", "--verify", head_ref)
+head_sha = head_sha_lines[0].strip() if head_sha_lines else ""
+
 commit_args = ["log", "--date=iso-strict", "--pretty=format:%H%x09%h%x09%ad%x09%an%x09%s"]
 if from_date:
     commit_args.append(f"--since={from_date}T00:00:00")
@@ -291,7 +296,9 @@ pr_review_summary = {
 result = {
     "REPO_ROOT": repo_root.as_posix(),
     "BASE_REF": base_ref,
+    "BASE_SHA": base_sha,
     "HEAD_REF": head_ref,
+    "HEAD_SHA": head_sha,
     "RANGE_SPEC": range_spec,
     "RELEASE_FROM": from_date,
     "RELEASE_TO": to_date,
@@ -319,6 +326,9 @@ else
   printf '=======================\n'
   printf 'Repository: %s\n' "$REPO_ROOT"
   printf 'Range: %s\n' "$(printf '%s' "$JSON_OUTPUT" | "$PYTHON_CMD" -c 'import json,sys; print(json.load(sys.stdin)["RANGE_SPEC"])')"
+  BASE_SHA_OUT="$(printf '%s' "$JSON_OUTPUT" | "$PYTHON_CMD" -c 'import json,sys; print(json.load(sys.stdin)["BASE_SHA"])')"
+  if [[ -n "$BASE_SHA_OUT" ]]; then printf 'Base SHA: %s\n' "$BASE_SHA_OUT"; fi
+  printf 'Head SHA: %s\n' "$(printf '%s' "$JSON_OUTPUT" | "$PYTHON_CMD" -c 'import json,sys; print(json.load(sys.stdin)["HEAD_SHA"])')"
   printf 'Release Window: %s -> %s\n' \
     "$(printf '%s' "$JSON_OUTPUT" | "$PYTHON_CMD" -c 'import json,sys; print(json.load(sys.stdin)["RELEASE_FROM"])')" \
     "$(printf '%s' "$JSON_OUTPUT" | "$PYTHON_CMD" -c 'import json,sys; print(json.load(sys.stdin)["RELEASE_TO"])')"
