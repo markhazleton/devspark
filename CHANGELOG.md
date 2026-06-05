@@ -7,6 +7,42 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.5.0] - 2026-06-05
+
+### Added
+
+- **Tiered Prompt and Workflow Engine** (#49): Re-platforms DevSpark from a prompt library into a three-tier orchestration system — atomic prompts (`templates/prompts/atomic/`), workflow YAML (`templates/workflows/`), alias entrypoints (`templates/aliases/`) — wired by a Python workflow runner with autonomy guardrails and JSON Lines telemetry. Three flagship aliases ship: `create-spec`, `execute-plan`, `suggest-improvement`. All 28 existing slash commands remain fully functional via atomic shim mappings.
+- **Participant Roles** (#47): Introduces `participant` as the canonical vocabulary for human or AI-filled team members (owner, planner, implementer, reviewer, critic, scribe). Adds optional `participants` YAML frontmatter to stock spec, plan, and task templates. `agent` remains reserved for AI runtime integrations. Zero runtime impact — metadata is advisory only.
+- **AGT-Inspired Governance Improvements** (#48): Adds structured severity registry (`.documentation/memory/severity-registry.md`), known-limitations document, and prompt conformance manifest. Updates `pr-review.md` with trust-tier logic: spec-backed PRs receive standard depth; spec-less PRs receive elevated scrutiny with a MEDIUM trust-tier finding.
+- **`devspark run` CLI subcommand**: Resolves aliases to workflows, instantiates the workflow runner, and prints output-type summaries. Includes `devspark workflows`, `devspark runs`, `devspark resume`, and `devspark help` subcommands.
+- **Shim-drift CI check** (`.github/workflows/shim-drift.yml`): Fails when any `templates/commands/` entry lacks a corresponding atomic shim or any shim is stale.
+- **Workflow-level telemetry**: JSON Lines events written to `.documentation/telemetry/workflow-events.jsonl`; path overridable via `DEVSPARK_TELEMETRY_PATH`.
+
+### Fixed
+
+- **Agent Skills install gap** (#42, #43, #44): `templates/skills/` was not installed by any quickstart guide or `/devspark.upgrade`. All five quickstart guides (copilot, claudecode, cursor, codex, generic) now include a Step 5.5 that fetches the full `templates/skills/` tree with file-presence validation.
+- **Cross-platform script install** (#46): All quickstart guides now unconditionally install both `.devspark/scripts/bash/` and `.devspark/scripts/powershell/` regardless of OS. Step 6 validation checks both script-set counts.
+- **`address-pr-review.md`**: `sh` variant was using `pwsh -File` on macOS/Linux; fixed to use the native `scripts/bash/address-pr-review.sh`.
+
+### Changed
+
+- **Constitution v1.4.0** (CAP-2026-002): §VI Platform Parity promoted from soft convention to formal `(MUST)`. Changes to any script in one language must land with a matching change in the other in the same commit; installs must always deliver both script sets; HIGH severity violation in PR review.
+- **CLI `devspark init` / `devspark upgrade`**: `--script` option now reflects its actual purpose — selecting the command-path variant baked into agent prompts, not gating which script set is installed. Both sets always install regardless of the selected variant (ADR-001).
+
+### Architectural Decisions
+
+- **ADR-004**: Tiered Prompt and Workflow Architecture
+- **ADR-005**: Participant Vocabulary — Reserving `agent` for AI Runtimes
+- **ADR-006**: AGT-Inspired Governance — Severity Registry, Trust Tiers, and Conformance Manifest
+- **ADR-007**: Harness Workflow Fixture as Spec Lifecycle Compliance Artifact
+
+### Contributors
+
+- Mark Hazleton
+- BSW Health contributor
+- tungdd2710
+- DevSpark Test
+
 ## [Unreleased]
 
 ### Fixed
