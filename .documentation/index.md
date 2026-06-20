@@ -2,7 +2,7 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
-## Current Release: v2.5.0
+## Current Release: v2.6.0
 
 **An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
@@ -71,7 +71,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | `/devspark.harvest` | ✅ Knowledge harvest and cleanup |
 | Agent-agnostic architecture | ✅ Stock prompts + repo overrides + thin shims |
 | Multi-user personalization | ✅ `/devspark.personalize` per-user overrides |
-| Multi-agent support | ✅ 17+ AI agents |
+| Multi-agent support | ✅ 18+ AI agents |
 | Multi-app monorepo support | ✅ Optional — profile-based inheritance, scoped commands |
 | Harness runtime | ✅ `devspark harness`, `devspark adapter`, `devspark doctor` |
 

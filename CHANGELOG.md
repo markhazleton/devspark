@@ -7,6 +7,28 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.6.0] - 2026-06-20
+
+### Added
+
+- **Antigravity agent support**: Registers `antigravity` in `agents-registry.json` (`.gemini/` folder, `ANTIGRAVITY.md` context file, markdown command shims, no CLI install required) as a first-class DeepMind Antigravity integration. Adds a dedicated quickstart guide (`quickstart/devspark_quickstart_antigravity.md`) and an integration guide (`devspark-and-antigravity.md`), and lists Antigravity in the README agent table, docs TOC, `CLAUDE.md`, and the `devspark init --ai` help text. DevSpark now supports 18 AI agents.
+- **Make Bold Solutions and Make Bold Spark brand assets**: Added brand guides, logo/asset packages, and contact card metadata for Make Bold Solutions (LLC brand kit, LinkedIn company page guide, contact cards) and Make Bold Spark (project brand guide, design tokens, CSS, favicons, fonts) under `.documentation/branding/`.
+
+### Changed
+
+- **`devspark upgrade` agent auto-detection**: Now distinguishes Antigravity (`ANTIGRAVITY.md` or `.gemini/commands/*.md`) from Gemini CLI (`GEMINI.md` or `.gemini/commands/*.toml`) instead of falling through to generic folder detection — both agents share the `.gemini/` folder.
+- **`devspark run --allow-dirty` help text**: Reworded to describe behavior in plain language instead of referencing an internal requirement ID.
+- **Documentation harvest** (2026-06-05): Archived 10 stale audit/harvest/repo-story/PR-review artifacts beyond retention into `.archive/2026-06-05/`; 1 spec-linked code comment rewritten.
+
+### Fixed
+
+- **Antigravity doc formatting**: Corrected a duplicate top-level heading, trailing whitespace, and missing list spacing in `devspark-and-antigravity.md` so it passes markdownlint.
+
+### Contributors
+
+- Mark Hazleton
+- DevSpark Test
+
 ## [v2.5.0] - 2026-06-05
 
 ### Added
@@ -42,61 +64,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BSW Health contributor
 - tungdd2710
 - DevSpark Test
-
-## [Unreleased]
-
-### Fixed
-
-- **Agent Skills install gap** (#42, #43, #44): the `templates/skills/` surface
-  introduced in v2.4.0 was not installed or refreshed by any quickstart guide
-  or `/devspark.upgrade`. As a result, `/devspark.specify` silently degraded
-  to legacy behaviour after upgrade because `.devspark/templates/skills/write-spec/SKILL.md`
-  was absent. Fixed by adding:
-  - **New `Step 5.5: Pull Agent Skills`** to all five quickstart guides
-    (copilot, claudecode, cursor, codex, generic) that fetches the full
-    `templates/skills/` tree into `.devspark/templates/skills/` with required
-    file-presence validation.
-  - **`upgrade.md`**: `.devspark/templates/skills/` now listed under
-    "Framework-owned (safe to overwrite on upgrade)"; Step 7a explicitly
-    re-syncs skill packages; Step 6 verify reports missing skill files at the
-    same severity as missing scripts; post-upgrade summary surfaces a
-    `stock skills/` row.
-  - **`copilot.md` upgrade + repair modes**: Step 5.5 added to both the
-    upgrade and repair execution order so re-runs restore missing skills.
-  - **`tests/test_skills_install_contract.py`**: new contract test asserts
-    every quickstart references `.devspark/templates/skills/` and the
-    `write-spec` skill, upgrade.md lists skills as framework-owned, and the
-    release packager still ships them.
-- **Cross-platform script install** (#45): all five quickstart guides (copilot,
-  claudecode, cursor, codex, generic) now unconditionally install both
-  `.devspark/scripts/bash/` and `.devspark/scripts/powershell/` regardless of
-  the current OS. Previously only the OS-detected set was installed, breaking
-  repos used on both macOS and Windows. Step 6 validation now checks both
-  script-set counts.
-- **`upgrade.md`**: Step 7a now explicitly requires syncing both script sets;
-  post-upgrade verification table shows both counts separately.
-- **`address-pr-review.md`**: `sh` variant was incorrectly using
-  `pwsh -File` (invoking PowerShell on macOS/Linux); fixed to use the native
-  `scripts/bash/address-pr-review.sh` counterpart.
-
-### Changed
-
-- **Constitution v1.4.0** (CAP-2026-002): §VI Platform Parity promoted from a
-  soft convention to a formal `(MUST)`. New rules: changes to any script in one
-  language must land with a matching change in the other in the same commit;
-  installs must always deliver both script sets; HIGH severity violation in PR
-  review.
-- **`test_script_parity_contract.py`**: added structural §VI enforcement —
-  asserts every `.sh` in `scripts/bash/` has a matching `.ps1` in
-  `scripts/powershell/` and vice versa.
-- **CLI `devspark init` / `devspark upgrade`**: `--script` option now reflects
-  its actual purpose — selecting the command-path variant baked into agent
-  prompts, not gating which script set is installed. Interactive script-type
-  selector removed from `init`; auto-detection retained. Both sets are always
-  installed regardless of the selected variant (ADR-001).
-- **Release packaging** (`create-release-packages.sh`): script-set copy block
-  now always copies both `scripts/bash/` and `scripts/powershell/` into every
-  release ZIP, regardless of the `sh|ps` build variant (ADR-001).
 
 ## [2.4.0] - 2026-05-20 - Minor Release
 
