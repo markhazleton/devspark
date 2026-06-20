@@ -295,6 +295,7 @@ Specify supports multiple AI agents by generating agent-specific command files a
 | **Amp**                    | `.agents/commands/`    | Markdown | `amp`           | Amp CLI                     |
 | **SHAI**                   | `.shai/commands/`      | Markdown | `shai`          | SHAI CLI                    |
 | **IBM Bob**                | `.bob/commands/`       | Markdown | N/A (IDE-based) | IBM Bob IDE                 |
+| **Antigravity**            | `.gemini/commands/`    | Markdown | N/A (built-in)  | DeepMind Antigravity        |
 
 ### Step-by-Step Integration Guide
 

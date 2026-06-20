@@ -32,6 +32,14 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 
 For Codex-specific workflow guidance, see [DevSpark and Codex](devspark-and-codex.md).
 
+### Antigravity
+
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_antigravity.md
+```
+
+For Antigravity-specific workflow guidance, see [DevSpark and Antigravity](devspark-and-antigravity.md).
+
 ### Any Other Agent
 
 ```text

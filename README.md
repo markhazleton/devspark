@@ -293,7 +293,7 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 | [Amp](https://ampcode.com/) | ✅ | [Roo Code](https://roocode.com/) | ✅ | [Kilo Code](https://github.com/Kilo-Org/kilocode) | ✅ |
 | [Auggie CLI](https://docs.augmentcode.com/cli/overview) | ✅ | [opencode](https://opencode.ai/) | ✅ | [Qwen Code](https://github.com/QwenLM/qwen-code) | ✅ |
 | [SHAI](https://github.com/ovh/shai) | ✅ | [Amazon Q](https://aws.amazon.com/developer/learning/q-developer-cli/) | ⚠️ | [IBM Bob](https://www.ibm.com/products/bob) | ✅ |
-| [CodeBuddy](https://www.codebuddy.ai/cli) | ✅ | [Qoder CLI](https://qoder.com/cli) | ✅ | | |
+| [CodeBuddy](https://www.codebuddy.ai/cli) | ✅ | [Qoder CLI](https://qoder.com/cli) | ✅ | [Antigravity](https://deepmind.google/technologies/gemini/) | ✅ |
 
 ---
 

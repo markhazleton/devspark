@@ -11,6 +11,8 @@
       href: quickstart.md
     - name: DevSpark and Codex
       href: devspark-and-codex.md
+    - name: DevSpark and Antigravity
+      href: devspark-and-antigravity.md
     - name: Other Ways to Get Started
       href: installation.md
     - name: Upgrade

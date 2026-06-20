@@ -187,7 +187,7 @@ def register(app: typer.Typer) -> None:
             False, "--non-interactive", help="Fail rather than prompt for missing inputs."
         ),
         allow_dirty: bool = typer.Option(
-            False, "--allow-dirty", help="Allow start with a dirty git working tree (FR-015a)."
+            False, "--allow-dirty", help="Allow starting a run with uncommitted working-tree changes."
         ),
         hands_off: bool = typer.Option(False, "--hands-off", help="Run full lifecycle non-interactively."),
         yes: bool = typer.Option(False, "--yes", help="Skip interactive confirmations."),

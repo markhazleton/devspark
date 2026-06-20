@@ -10,6 +10,7 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 | **Claude Code** | [`devspark_quickstart_claudecode.md`](devspark_quickstart_claudecode.md) |
 | **Cursor** | [`devspark_quickstart_cursor.md`](devspark_quickstart_cursor.md) |
 | **Codex** | [`devspark_quickstart_codex.md`](devspark_quickstart_codex.md) |
+| **Antigravity** | [`devspark_quickstart_antigravity.md`](devspark_quickstart_antigravity.md) |
 | **Any other agent** | [`devspark_quickstart_generic.md`](devspark_quickstart_generic.md) |
 
 ## How It Works

@@ -80,7 +80,13 @@ def detect_ai_agent() -> Optional[str]:
         # Check both the folder itself and common subdirectories
         if Path(folder).exists():
             # For some agents, check if commands subdirectory exists
-            if agent_key in ["claude", "copilot", "cursor-agent"]:
+            if agent_key == "antigravity":
+                if Path("ANTIGRAVITY.md").exists() or any(Path(folder).glob("commands/*.md")):
+                    return agent_key
+            elif agent_key == "gemini":
+                if Path("GEMINI.md").exists() or any(Path(folder).glob("commands/*.toml")):
+                    return agent_key
+            elif agent_key in ["claude", "copilot", "cursor-agent"]:
                 if agent_key == "claude":
                     sub = "commands"
                 elif agent_key == "copilot":
