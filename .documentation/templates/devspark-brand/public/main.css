@@ -45,6 +45,18 @@ h1, h2, h3, h4, h5, h6,
   letter-spacing: 0;
 }
 
+.navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-brand img#logo {
+  height: 28px;
+  width: auto;
+  max-width: none;
+}
+
 .btn-primary {
   --bs-btn-bg: #3fbfa8;
   --bs-btn-border-color: #3fbfa8;
