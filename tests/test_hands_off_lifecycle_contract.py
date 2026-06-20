@@ -36,17 +36,28 @@ def _latest_run_dir(runs_root: Path) -> Path:
 def _prepare_repo(temp_root: Path) -> Path:
     repo = temp_root / "repo"
     repo.mkdir()
-    for rel_path in (
-        Path("sample.harness.yaml"),
-        Path(".devspark/schemas/harness.schema.json"),
-        Path(".documentation/specs/002-harness-runtime/spec.md"),
-        Path(".documentation/specs/002-harness-runtime/contracts/cli-commands.md"),
-        Path(".documentation/specs/002-harness-runtime/contracts/harness-spec-yaml.md"),
-        Path(".documentation/memory/constitution.md"),
+    for dest_rel_path, source_rel_path in (
+        (Path("sample.harness.yaml"), Path("sample.harness.yaml")),
+        (Path(".devspark/schemas/harness.schema.json"), Path(".devspark/schemas/harness.schema.json")),
+        # sample.harness.yaml hardcodes these as .documentation/specs/002-harness-runtime/ paths,
+        # but the source spec was archived to releases/v2.5.0/ when that release shipped.
+        (
+            Path(".documentation/specs/002-harness-runtime/spec.md"),
+            Path(".documentation/releases/v2.5.0/specs/002-harness-runtime/spec.md"),
+        ),
+        (
+            Path(".documentation/specs/002-harness-runtime/contracts/cli-commands.md"),
+            Path(".documentation/releases/v2.5.0/specs/002-harness-runtime/contracts/cli-commands.md"),
+        ),
+        (
+            Path(".documentation/specs/002-harness-runtime/contracts/harness-spec-yaml.md"),
+            Path(".documentation/releases/v2.5.0/specs/002-harness-runtime/contracts/harness-spec-yaml.md"),
+        ),
+        (Path(".documentation/memory/constitution.md"), Path(".documentation/memory/constitution.md")),
     ):
-        target = repo / rel_path
+        target = repo / dest_rel_path
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(ROOT / rel_path, target)
+        shutil.copy2(ROOT / source_rel_path, target)
 
     subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True, text=True)
     subprocess.run(["git", "config", "user.name", "DevSpark Test"], cwd=repo, check=True, capture_output=True, text=True)
