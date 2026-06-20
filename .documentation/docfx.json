@@ -24,11 +24,14 @@
     "keepFileLink": false,
     "cleanupCacheHistory": false,
     "disableGitFeatures": false,
+    "template": ["default", "modern", "templates/devspark-brand"],
     "globalMetadata": {
       "_googleAnalyticsTagId": "G-RY77Z11S9E",
-      "_appTitle": "DevSpark",
+      "_appTitle": "Make Bold Spark",
       "_appName": "DevSpark",
-      "_appFooter": "<a href=\"https://dev.makeboldspark.com\">DevSpark</a> &mdash; built by <a href=\"https://markhazleton.com\">Mark Hazleton</a> &middot; <a href=\"https://makeboldsolutions.com\">Make Bold Solutions</a>",
+      "_appLogoPath": "media/brand/logo/makeboldspark-mark.svg",
+      "_appFaviconPath": "media/brand/favicon/favicon.ico",
+      "_appFooter": "<a href=\"https://dev.makeboldspark.com\">DevSpark</a> &mdash; built by <a href=\"https://markhazleton.com\">Mark Hazleton</a> &middot; <a href=\"https://makeboldsolutions.com\">Make Bold Solutions</a> &middot; part of the <a href=\"https://makeboldspark.com\">Make Bold Spark</a> family",
       "_enableSearch": true,
       "_disableContribution": false,
       "_gitContribute": {

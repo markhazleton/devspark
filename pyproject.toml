@@ -2,6 +2,8 @@
 name = "devspark-cli"
 version = "2.6.0"
 description = "DevSpark CLI — AI development lifecycle prompts and scaffolding for any coding assistant."
+authors = [{ name = "Make Bold Spark" }]
+keywords = ["makeboldspark", "spark", "devspark", "ai-agents", "sdd"]
 requires-python = ">=3.11"
 dependencies = [
     "typer",
@@ -21,6 +23,10 @@ dev = ["pytest>=7.0"]
 
 [project.scripts]
 devspark = "devspark_cli:main"
+
+[project.urls]
+Homepage = "https://dev.makeboldspark.com"
+Repository = "https://github.com/markhazleton/devspark"
 
 [build-system]
 requires = ["hatchling"]
