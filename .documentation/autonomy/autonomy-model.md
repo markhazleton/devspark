@@ -8,7 +8,9 @@ DevSpark workflows declare their `autonomy.level` and (optionally) a set of
 | Level | Behavior |
 |-------|----------|
 | `assisted` (default) | Pauses at every `pause_after: true` step and at every `review_after` step. Guardrail breaches downgrade to a pause. |
-| `autonomous` | Runs through `pause_after` and `review_after` markers. Guardrail breaches HARD-FAIL with `EXIT_GUARDRAIL_BLOCKED` (21). Requires `guardrails` to be declared. |
+| `autonomous` | Guardrail breaches HARD-FAIL with `EXIT_GUARDRAIL_BLOCKED` (21) instead of pausing. Requires `guardrails` to be declared. |
+
+> **Correction (current behavior)**: `pause_after`/`review_after` checks in [`runner/executor.py`](../../src/devspark_cli/runner/executor.py) are unconditional — they pause regardless of `autonomy_level`. Setting `autonomy.level: autonomous` does **not** bypass a step-declared `pause_after`/`review_after` marker today; only the guardrail-breach behavior (pause vs. hard-block) differs by level. Workflows that want zero mandatory pauses under autonomous mode — e.g. `templates/workflows/full-cycle.yaml` — must avoid declaring `pause_after`/`review_after` on any step and rely on guardrails alone.
 
 ## Guardrails
 

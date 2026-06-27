@@ -29,6 +29,12 @@ Delivery gateway between authoring (`specify → clarify → plan → tasks → 
 - **Does NOT own**: re-specifying scope (`/devspark.specify` or `/devspark.quickfix`), re-planning (`/devspark.plan`), adding/removing tasks (`/devspark.tasks`), producing gate artifacts (`/devspark.analyze`, `/devspark.critic`, `/devspark.clarify`, `/devspark.checklist`), the PR itself (`/devspark.create-pr`, `/devspark.pr-review`).
 - **If scope grows mid-implementation**: halt, mark partial work in `tasks.md`, route back to the appropriate authoring command. Never silently expand scope.
 
+## Definition of Done
+
+Done when: every task in `tasks.md` is `[X]`, every phase has a `**Checkpoint**: Phase complete` line, every finished user story in `spec.md` carries `✅ Complete`, `spec.md` **Status** is `Complete`, and the step-4 gate pre-flight table re-run shows no regression. If any condition can't be met in one pass, stop and report exactly which one is unmet — don't keep narrating remaining steps.
+
+**Chat output budget**: `tasks.md`/`spec.md`/`plan.md` carry full detail. In chat, report progress at phase checkpoints (one line per phase), not one line per task, plus the step 9 final summary. Don't restate file contents already written to disk.
+
 ## Constitution Authority
 
 Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated principle as **non-negotiable**:
@@ -71,6 +77,7 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
      - Wait for user response before continuing
      - If user says "no" or "wait" or "stop", halt execution
        - If user says "yes" or "proceed" or "continue", proceed to step 3 and record the explicit override in `tasks.md` under `## Gate Acknowledgements`
+     - **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the wait — proceed to step 3 and record `auto-selected: true` in the Gate Acknowledgement instead of waiting for a reply.
 
    - **If all checklists are complete**:
      - Display the table showing all checklists passed
@@ -106,6 +113,8 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
    | Plan waivers acknowledged       | `plan.md` `## Constitution Waivers`         | All waivers have rationale + expiry                             | Route to `/devspark.plan`                                                    |
 
    If any required gate fails, surface the failure with context and ask the user whether to (a) fix first (recommended), (b) review findings, or (c) proceed anyway. If the user proceeds anyway, append or update a `## Gate Acknowledgements` section in `tasks.md` with: the failing gate(s), the unresolved findings (by ID), the user's explicit decision, and a UTC timestamp. This section will be surfaced in the PR body by `/devspark.create-pr`.
+
+   **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, auto-select option (a) — route to `/devspark.tasks` for gate remediation (or the listed gate command) instead of waiting for a reply — and record `auto-selected: true` in the Gate Acknowledgement. **Exception, never auto-overridden**: a failing "Constitution coverage" or "Plan waivers acknowledged" row, or any finding whose severity is SHOWSTOPPER or carries a `§`-coded constitution citation — those always halt and wait for a human, `--auto` or not.
 
    The YAML frontmatter classification and `required_gates` in `spec.md` are authoritative; if the prose disagrees with the metadata, treat the metadata as truth and flag the mismatch.
 
@@ -154,38 +163,31 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
    - **Kubernetes/k8s**: `*.secret.yaml`, `secrets/`, `.kube/`, `kubeconfig*`, `*.key`, `*.crt`
 
 6. Parse tasks.md structure and extract:
-   - **Task phases**: Setup, Tests, Core, Integration, Polish
+   - **Task phases**: Setup, Foundational, User Story phases (priority order), Polish
    - **Task dependencies**: Sequential vs parallel execution rules
    - **Task details**: ID, description, file paths, parallel markers [P]
    - **Execution flow**: Order and dependency requirements
 
-7. Execute implementation following the task plan:
-   - **Phase-by-phase execution**: Complete each phase before moving to the next
-   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together
-   - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
-   - **File-based coordination**: Tasks affecting the same files must run sequentially
-   - **Validation checkpoints**: Verify each phase completion before proceeding
+7. Execute implementation phase-by-phase, in the order parsed in step 6:
+   - Complete each phase fully (including its tests, per TDD) before moving to the next; verify completion before proceeding
+   - Within a phase, respect sequential dependencies; run `[P]`-marked tasks together
+   - Within a phase, write test tasks before the implementation tasks they cover
+   - Tasks touching the same file must run sequentially even if marked `[P]`
 
-8. Implementation execution rules:
-   - **Setup first**: Initialize project structure, dependencies, configuration
-   - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
-   - **Core development**: Implement models, services, CLI commands, endpoints
-   - **Integration work**: Database connections, middleware, logging, external services
-   - **Polish and validation**: Unit tests, performance optimization, documentation
-
-9. Progress tracking, artifact sync, and error handling:
+8. Progress tracking, artifact sync, and error handling:
 
    **Continuous artifact sync** (required — do this as work happens, not at the end):
    - **tasks.md** — mark each task `[X]` immediately on completion. Never batch updates at the end of a phase. If a task is partially done, leave it `[ ]` and add a brief `<!-- WIP: ... -->` note rather than half-checking it.
    - **tasks.md phase checkpoints** — when every task in a phase (Setup, Foundational, User Story N, Polish) is `[X]`, append a checkpoint line under that phase heading: `**Checkpoint**: Phase complete — YYYY-MM-DD`. For user-story phases, this is the signal that the story is independently shippable.
    - **spec.md user stories** — when all tasks tagged `[USn]` are `[X]`, update the corresponding `### User Story n` heading by appending `✅ Complete` (preserve the priority marker). This keeps the spec a live picture of delivered scope.
-   - **spec.md lifecycle status** — flip `**Status**: Draft` to `**Status**: In Progress` on the first completed task (already done in step 3); the final flip to `Complete` happens in step 11.
+   - **spec.md lifecycle status** — flip `**Status**: Draft` to `**Status**: In Progress` on the first completed task (already done in step 3); the final flip to `Complete` happens in step 10.
    - **plan.md** — if implementation discovers a deviation from the plan (different library chosen, contract adjusted, etc.), update plan.md inline and add a short `## Implementation Notes` entry dated and linked to the task ID. Do NOT silently diverge.
    - **Constitution waivers** — if a new waiver becomes necessary mid-implementation, **halt**, route the user to `/devspark.plan` to record it, then resume. Never invent waivers from within implement.
+   - **Gate finding resolution** — when a task whose description includes `(resolves: <finding_id>[, <finding_id>...])` is marked `[X]`, flip each referenced finding's `status` from `open` to `resolved` and fill in `outcome` (one line: what changed, which commit/task) in the gate file that originated it (`gates/critic.md` for `critic-*` ids, `gates/analyze.md` for `analyze-*` ids). This is what lets a re-run of `/devspark.critic`/`/devspark.analyze` converge instead of re-reporting the same finding.
 
    **Progress reporting and error handling**:
-   - Report progress after each completed task (task ID + one-line summary)
-   - Halt execution if any non-parallel task fails
+   - Update tasks.md per task as it completes (already required above); in chat, report progress at phase checkpoints only — one line per phase, not one line per task
+   - Halt execution if any non-parallel task fails; report it immediately regardless of checkpoint batching
    - For parallel tasks `[P]`, continue with successful tasks, report failed ones with context
    - Provide clear error messages with context for debugging
    - Suggest next steps if implementation cannot proceed
@@ -195,9 +197,9 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
    - Branch sync must pass (`HEAD` not behind `origin/main`)
    - Every `## Gate Acknowledgements` entry and every `## Constitution Waivers` entry will be surfaced by `/devspark.create-pr` in the PR body — make sure they are accurate.
 
-10. Completion validation:
+9. Completion validation:
     - Verify all required tasks in `tasks.md` are `[X]`
-    - Verify every phase has a `**Checkpoint**: Phase complete` line (per step 9 sync rules)
+    - Verify every phase has a `**Checkpoint**: Phase complete` line (per step 8 sync rules)
     - Verify every completed user story in `spec.md` carries the `✅ Complete` marker
     - Check that implemented features match the original specification
     - Validate that tests pass and coverage meets requirements
@@ -206,7 +208,7 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
     - Report final status with summary of completed work, any remaining `## Gate Acknowledgements`, and any active `## Constitution Waivers`
     - For quick-spec and full-spec routes, recommend `/devspark.create-pr` as the default next step after implementation
 
-11. **Spec Lifecycle Status Update**:
+10. **Spec Lifecycle Status Update**:
     - After all tasks in tasks.md are marked `[X]` (complete):
       1. Read `FEATURE_DIR/spec.md`
       2. Update the `**Status**:` field from `Draft` or `In Progress` to `Complete`

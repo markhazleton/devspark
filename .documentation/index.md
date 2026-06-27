@@ -2,7 +2,7 @@
 
 *Build high-quality software faster with AI-driven lifecycle management.*
 
-## Current Release: v2.6.0
+## Current Release: v2.7.0
 
 **An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
@@ -274,7 +274,7 @@ devspark harness run sample.harness.yaml --dry-run
 devspark harness trace latest
 ```
 
-Built-in adapters are `noop`, `manual`, `claude_code`, `copilot`, and `cursor`. The saved default adapter is stored in the user config directory, not in `.devspark/` or `.documentation/`, so upgrades do not overwrite it.
+Built-in adapters are `noop`, `manual`, `claude_code`, `codex`, `copilot`, and `cursor`. The saved default adapter is stored in the user config directory, not in `.devspark/` or `.documentation/`, so upgrades do not overwrite it.
 
 ---
 

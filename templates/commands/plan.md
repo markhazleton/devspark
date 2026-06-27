@@ -32,6 +32,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 - **Does NOT own**: re-litigating WHAT/WHY (spec is authoritative); resolving open functional ambiguities (→ `/devspark.clarify`); the executable task list (→ `/devspark.tasks`); adversarial review (→ `/devspark.critic`, `/devspark.analyze`).
 - **Pre-flight**: if the loaded spec still contains `[NEEDS CLARIFICATION: …]` markers, halt and route to `/devspark.clarify`. Do not silently default open questions into planning decisions.
 
+## Definition of Done
+
+Done when: research.md has zero `NEEDS CLARIFICATION` markers, data-model.md/contracts//quickstart.md exist where applicable to the project type, the agent-context script has run, and the Constitution Check is re-evaluated post-design with no unresolved violations. This command stops after Phase 1 (step 4) — it does not generate tasks or write code. Chat output: report only the branch, IMPL_PLAN path, and generated artifact list — full design detail lives in the files.
+
 ## Constitution Authority
 
 `/.documentation/memory/constitution.md` is **non-negotiable** for planning. Violations may not be carried forward as `NEEDS CLARIFICATION`; they must be resolved before exiting the Constitution Check gate. Justified deviations require an explicit `## Constitution Waivers` block in `plan.md` citing the principle, deviation, reason, and compensating control.

@@ -50,6 +50,26 @@ Captures context, classifies the proposal, and files an issue against
 confirmation prompt; non-interactive runs without `--yes` exit with
 code 20 (`EXIT_AUTONOMY_REQUIRED`).
 
+## 4. `full-cycle` — The entire lifecycle, fewer checkpoints
+
+```pwsh
+devspark run full-cycle
+```
+
+Chains all nine steps in one alias: `specify → plan → tasks → critic → analyze → tasks (remediate) → implement → create-pr → pr-review`. Unlike the three aliases above, `full-cycle` declares `autonomy.level: autonomous` with guardrails (`max_files_changed`, `restricted_paths`, `max_total_lines_changed`) instead of `pause_after` checkpoints — it's for users who explicitly want fewer human gates, not a safer default.
+
+Two important caveats:
+
+- **`devspark run full-cycle` still needs a driving agent.** This CLI layer sequences steps and tracks telemetry/guardrails, but its invoker only prints which prompt to invoke next — it does not itself call an LLM. It's meant to be run from inside an agent session (the agent reads the printed instruction and executes the corresponding `templates/commands/*.md` prompt itself), the same as `create-spec`/`execute-plan`.
+- **For genuinely unattended execution** (no agent watching — e.g., a scheduled or CI-triggered run), use the harness-runtime equivalent instead, which does shell out to a real adapter CLI:
+
+  ```pwsh
+  devspark adapter doctor
+  devspark harness run full-cycle.harness.yaml --adapter claude_code --hands-off
+  ```
+
+  See [Harness Engineering](../harness-engineering.md#full-unattended-lifecycle) for the full-cycle harness spec, its validation rules, and the convergence-loop caveat.
+
 ## Discovery
 
 ```pwsh

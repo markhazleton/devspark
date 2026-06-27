@@ -31,6 +31,10 @@ If the spec body and frontmatter disagree, surface the inconsistency to the user
 
 This command is advisory. Dirty trees, missing specs, incomplete tasks, unresolved gates, and explicit gate acknowledgements are warnings that the agent must explain, not hard blocks. The user decides whether to proceed, adjust the draft, or stop.
 
+## Definition of Done
+
+Done when: the user has explicitly confirmed (step 4) and the PR has been created or updated (step 5), with the step-6 result report printed. Do not call the create/update script before that confirmation, and do not keep re-drafting once the user has approved — act on their decision.
+
 ## Outline
 
 **Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
@@ -100,6 +104,8 @@ Ask explicitly whether to:
 - stop without changing anything
 
 Do **not** call the create/update script mode until the user confirms.
+
+**Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the wait — create or update the PR as `--draft` (regardless of whether `--draft` was otherwise requested) and proceed without waiting for a reply. Opening a PR is visible to others but a draft is reversible, so this is the one auto-bypass in this command that defaults to the more conservative flag rather than the literal request. Report the action taken (and that it was auto-selected) in the step-6 result.
 
 ### 5. Create or Update the PR
 

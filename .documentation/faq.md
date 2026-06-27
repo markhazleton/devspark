@@ -81,9 +81,9 @@ See the [Constitution Guide](constitution-guide.md) for full examples.
 
 In your AI agent's chat interface -- the same place you normally talk to your assistant. They are not terminal commands.
 
-### Do I have to use all 27 commands?
+### Do I have to use all 28 commands?
 
-No. Most projects use a small subset of the 27 stock commands:
+No. Most projects use a small subset of the 28 stock commands:
 
 **Everyday:** `/devspark.quickfix`, `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`, `/devspark.pr-review`
 
@@ -157,15 +157,15 @@ See [Harness Engineering](harness-engineering.md) for the full model.
 
 ### Is the harness runtime part of the slash-command workflow?
 
-No. The 27 stock slash commands remain prompt-driven. The harness runtime is additive and lives in the optional CLI.
+No. The 28 stock slash commands remain prompt-driven. The harness runtime is additive and lives in the optional CLI.
 
 ### What adapters are built in?
 
-`noop`, `manual`, `claude_code`, `copilot`, and `cursor`.
+`noop`, `manual`, `claude_code`, `codex`, `copilot`, and `cursor`.
 
 - `noop` is the safe default for dry runs, CI, and contract testing.
 - `manual` pauses for a human and requires a TTY.
-- `claude_code`, `copilot`, and `cursor` call their corresponding local CLIs when available.
+- `claude_code`, `codex`, `copilot`, and `cursor` call their corresponding local CLIs when available.
 
 Use `devspark adapter list` to inspect availability on the current machine and `devspark adapter default <name>` to save a local default.
 

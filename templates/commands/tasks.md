@@ -30,6 +30,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 - **Does NOT own**: revisiting WHAT/WHY (spec is authoritative); redesigning architecture/stack/contracts (→ `/devspark.plan`); resolving `[NEEDS CLARIFICATION]` (→ `/devspark.clarify`); gate artifacts beyond the opt-in `## Gate Acknowledgements` note (→ `/devspark.analyze`, `/devspark.critic`).
 - **Pre-flight**: if `plan.md` is missing or `spec.md` still contains `[NEEDS CLARIFICATION]` markers, halt and route back to the appropriate earlier step.
 
+## Definition of Done
+
+Done when: `tasks.md` exists with every task in the required checklist format (checkbox, ID, optional `[P]`/`[Story]` labels, file path), organized by phase and user story, with a dependency/parallel-execution section. On a re-run with existing gate findings, done means the `## Gate Remediation` phase is appended (step 3) and reported — not full regeneration. This command stops after writing tasks.md — it does not begin implementation. Chat output: report only the step-6 summary (counts, MVP scope); the task list itself lives in the file.
+
 ## Constitution Authority
 
 Load `/.documentation/memory/constitution.md` before generating tasks. **Non-negotiable** in one specific way: every mandated principle that requires runtime behavior (observability, structured logging, accessibility, security baseline, test coverage, telemetry, audit logging, etc.) MUST have a corresponding task in either the Foundational phase or the relevant user-story phase. If the plan accepted a Constitution Waiver, surface it as a task-section note rather than silently skipping the principle's task.
@@ -55,11 +59,24 @@ Load `/.documentation/memory/constitution.md` before generating tasks. **Non-neg
    - `analyze.md`, `critic.md`
    - `gates/*.md`
 
-   If required gates exist and contain unresolved blocking findings, or a checklist has incomplete items, summarize the findings and recommend the next action. Ask the user whether to fix first, review findings, or proceed anyway. Do not hard-block.
+   **Mode detection**: if `tasks.md` does **not** yet exist, skip step 3 and continue at step 4 (initial generation). If `tasks.md` **already exists**, this is a re-run — go to step 3 (Gate Remediation Merge) and stop there; do not regenerate from scratch.
 
-   If the user chooses to proceed anyway, record the decision in `tasks.md` under a `## Gate Acknowledgements` section with the gate name, the unresolved concern, and the user's explicit choice.
+   If required gates exist and contain unresolved blocking findings, or a checklist has incomplete items, summarize the findings and recommend the next action. Ask the user whether to fix first, review findings, or proceed anyway. Do not hard-block. **Autonomy override**: if the invocation includes `--auto` (or the conversation has established a standing autonomy instruction), skip the ask — auto-select "fix first" when `gates/critic.md`/`gates/analyze.md` have open findings (route to step 3) and "proceed" otherwise; either way, record the auto-selected choice under `## Gate Acknowledgements` with `auto-selected: true`. A constitution-violation finding (CRITICAL/SHOWSTOPPER tied to a `§`-coded principle) is never auto-proceeded past, `--auto` or not.
 
-3. **Execute task generation workflow**:
+   If the user (or `--auto`) chooses to proceed anyway, record the decision in `tasks.md` under a `## Gate Acknowledgements` section with the gate name, the unresolved concern, and the user's explicit choice.
+
+3. **Gate Remediation Merge** (re-run only, when `tasks.md` already exists — initial generation skips straight to step 4):
+
+   - Load the `findings:` YAML from `gates/critic.md` and `gates/analyze.md` (when present). Both already use the Shared Review Resolution Contract (`finding_id`, `severity`, `description`, `recommended_action`, `execution_mode`, `status`, `outcome`), so they merge directly — no schema translation needed.
+   - Merge and dedupe: findings citing the same file:line/section with overlapping descriptions are one row with both `finding_id`s noted (`critic-004 / analyze-009`).
+   - Keep only `status: open` findings. Sort by severity: showstopper > critical > high > medium > low (CON findings are out of scope here — those feed `/devspark.evolve-constitution`, not tasks).
+   - Present the merged list as one table with an elaborated recommendation per row (not just the stored `recommended_action` one-liner — reason about the actual fix given the current spec/plan/code).
+   - Selection: ask which findings to address this round (`all` allowed) — **unless** `--auto`/standing autonomy is set, in which case: `execution_mode: auto` findings are selected automatically, `execution_mode: selective` findings are selected with a single batch note (not asked one-by-one), and `execution_mode: manual` findings are always left for the human regardless of autonomy.
+   - For each selected finding, append a task under a new `## Gate Remediation` phase (after Polish) in the existing `tasks.md`: `- [ ] T0NN [P?] Fix <one-line description> in <file path> (resolves: <finding_id>[, <finding_id>...])`. Do not touch already-checked `[X]` tasks or existing phases.
+   - Report the count of tasks appended and recommend `/devspark.implement` to execute them. After remediation tasks are implemented, re-run `/devspark.critic` and `/devspark.analyze` to confirm the findings are gone — loop (re-run this step) until no open blocking findings remain.
+   - This step is terminal for a re-run: do not fall through to step 4 afterward.
+
+4. **Execute task generation workflow** (initial generation only):
    - Load plan.md and extract tech stack, libraries, project structure
    - Load spec.md and extract user stories with their priorities (P1, P2, P3, etc.)
    - If data-model.md exists: Extract entities and map to user stories
@@ -71,7 +88,7 @@ Load `/.documentation/memory/constitution.md` before generating tasks. **Non-neg
    - Create parallel execution examples per user story
    - Validate task completeness (each user story has all needed tasks, independently testable)
 
-4. **Generate tasks.md**: Use `/.devspark/templates/tasks-template.md` in installed repos, or `templates/tasks-template.md` in source repos, as the structure. Fill with:
+5. **Generate tasks.md**: Use `/.devspark/templates/tasks-template.md` in installed repos, or `templates/tasks-template.md` in source repos, as the structure. Fill with:
    - Correct feature name from plan.md
    - Phase 1: Setup tasks (project initialization)
    - Phase 2: Foundational tasks (blocking prerequisites for all user stories)
@@ -85,7 +102,7 @@ Load `/.documentation/memory/constitution.md` before generating tasks. **Non-neg
    - Implementation strategy section (MVP first, incremental delivery)
    - `## Gate Acknowledgements` section when the user proceeds with unresolved findings
 
-5. **Report**: Output path to generated tasks.md and summary:
+6. **Report**: Output path to generated tasks.md and summary:
    - Total task count
    - Task count per user story
    - Parallel opportunities identified

@@ -209,6 +209,8 @@ At end of report, output a concise Next Actions block:
 
 Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
+**Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask. Instead, recommend re-running `/devspark.tasks` — its Gate Remediation Merge step (§2a) reads this report's `findings:` block directly, merges it with `/devspark.critic`'s, and appends concrete fix tasks without an extra round-trip through this command.
+
 ### 9. Persist Gate Artifact
 
 After producing the report:

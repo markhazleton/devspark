@@ -29,6 +29,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 - **Does NOT own**: resolving more than 3 `[NEEDS CLARIFICATION]` markers (→ `/devspark.clarify`); tech stack/architecture (→ `/devspark.plan`); ordered executable tasks (→ `/devspark.tasks`); adversarial review (→ `/devspark.critic`, `/devspark.analyze`).
 - Leave 1–3 prioritized `[NEEDS CLARIFICATION: …]` markers when ambiguity is material — they seed the queue for `/devspark.clarify`.
 
+## Definition of Done
+
+Done when: the route is confirmed by the user, SPEC_FILE is written with `Status: Draft` and the route-metadata frontmatter, the requirements checklist passes (or remaining gaps are documented after 3 repair iterations), and any `[NEEDS CLARIFICATION]` markers are either resolved or capped at 3. Stop once the spec is written and reported — don't keep iterating on wording after the checklist passes.
+
 ## Constitution Authority
 
 If `/.documentation/memory/constitution.md` exists, load it before drafting. The spec MUST align with mandated principles (privacy, accessibility, observability, testing, etc.). If a principle conflicts with what the user asked for, surface it under `## Open Questions` or `## Constitution Conflicts` — do not silently dilute the principle. Changing a principle is an explicit constitution update, not a spec workaround.
@@ -68,8 +72,8 @@ Given that feature description, do this:
    - Evaluate scope, risk, expected effort, and impact area
    - Recommend one route: `one-off-fix`, `quick-spec`, or `full-spec`
    - Present the recommendation and reasoning to the user
-   - Ask the user to confirm or override the route before creating artifacts
-   - If the confirmed route is `one-off-fix`, stop and instruct the user to run `/devspark.quickfix` unless they explicitly want to continue here
+   - Ask the user to confirm or override the route before creating artifacts. **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and proceed with the recommended route, noting that it was auto-confirmed.
+   - If the confirmed (or auto-confirmed) route is `one-off-fix`, stop and instruct the user to run `/devspark.quickfix` unless they explicitly want to continue here — `--auto` does not override this redirect, since quickfix vs. full-spec is a workflow choice, not a gate.
    - If `/.documentation/memory/constitution.md` exists, load it so the generated spec can reference mandatory principles and constraints
 
 1. **Generate a concise short name** (2-4 words) for the branch:
@@ -209,6 +213,9 @@ Given that feature description, do this:
        4. If still failing after 3 iterations, document remaining issues in checklist notes and warn user
 
    - **If [NEEDS CLARIFICATION] markers remain**:
+
+     **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip steps 3-7 below entirely. For each marker, pick the most defensible answer (industry default, or the first suggested option you would have offered), replace the marker with it, and add one line per resolved marker to a `## Assumptions (auto-resolved)` section: the question, the chosen answer, and why. Warn once in the final report that auto-resolved assumptions increase downstream rework risk and should be reviewed before `/devspark.plan` if any are high-stakes (security, data model, or scope boundary). Then go to step 8.
+
      1. Extract all [NEEDS CLARIFICATION: ...] markers from the spec
      2. **LIMIT CHECK**: If more than 3 markers exist, keep only the 3 most critical (by scope/security/UX impact) and make informed guesses for the rest
      3. For each clarification needed (max 3), present options to user in this format:

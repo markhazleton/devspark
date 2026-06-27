@@ -15,7 +15,7 @@
 
 > **Not a program. Not a subscription.** Copy 28 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
-## Current Release: v2.6.0
+## Current Release: v2.7.0
 
 ---
 
@@ -77,13 +77,15 @@ contributor walkthrough for adding new skills.
 
 ## Get Started
 
-DevSpark v2 ships three flagship aliases that are the recommended entrypoints for every new feature. Run them via `devspark run <alias>` (or your agent's `/devspark.run` slash command):
+DevSpark v2 ships three flagship aliases that are the recommended entrypoints for every new feature. Run them via `devspark run <alias>` (note: `devspark run` is a CLI command — there is no `/devspark.run` slash command):
 
 | Alias | What it runs |
 |-------|--------------|
 | `create-spec` | `specify → plan → tasks → analyze` (pauses after analyze for review) |
 | `execute-plan` | `implement → create-pr → pr-review` (pauses after create-pr) |
 | `suggest-improvement` | `capture-context → classify-improvement → create-issue` (files an issue against `markhazleton/devspark`) |
+
+A fourth, more advanced alias, `full-cycle`, chains the entire lifecycle (`specify → plan → tasks → critic → analyze → tasks (remediate) → implement → create-pr → pr-review`) with `autonomy.level: autonomous` and guardrails instead of mandatory pauses — for users who want fewer checkpoints, not more. `devspark run full-cycle` still expects an agent already driving the conversation to act on each step; for genuinely unattended execution (no agent watching), use `devspark harness run full-cycle.harness.yaml --adapter claude_code --hands-off` instead.
 
 See [.documentation/workflows/getting-started.md](.documentation/workflows/getting-started.md) for the full walkthrough.
 
@@ -128,6 +130,14 @@ devspark doctor
 devspark harness validate sample.harness.yaml
 devspark harness run sample.harness.yaml --dry-run
 devspark adapter list
+```
+
+For the full unattended lifecycle (specify through pr-review, no human checkpoints), see `full-cycle.harness.yaml`:
+
+```bash
+devspark adapter doctor                                   # confirm a write-capable adapter is ready
+devspark harness validate full-cycle.harness.yaml
+devspark harness run full-cycle.harness.yaml --adapter claude_code --hands-off
 ```
 
 For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/implementation-lifecycle.md).
@@ -180,6 +190,7 @@ See [Harness Engineering](.documentation/harness-engineering.md) for the runtime
 | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `/devspark.repo-story` | Generate narrative from commit history |
 | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
+| `/devspark.taskstoissues` | Convert tasks.md into dependency-ordered GitHub issues |
 
 ### Quality & Personalization
 
@@ -202,7 +213,7 @@ See [Harness Engineering](.documentation/harness-engineering.md) for the runtime
 | `/devspark.list-applications` | Display all registered applications |
 | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
-See [templates/README.md](templates/README.md) for full command details.
+See [.documentation/index.md](.documentation/index.md#command-categories) for full command details.
 
 ---
 

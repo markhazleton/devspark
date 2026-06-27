@@ -32,6 +32,10 @@ This command is the **author-side companion** to `/devspark.pr-review`. It helps
 - Git repository with the PR source branch checked out
 - PowerShell 7+ (`pwsh`) on Windows, or Bash on macOS/Linux, for the gate helper script
 
+## Definition of Done
+
+Done when: every selected finding is fixed and committed (Phase 4), the review file is updated and committed separately (Phase 6), the two commits are verified disjoint, and the handoff message is printed (Phase 7). If validation (Phase 3) can't be made to pass, stop and report which finding is blocking — don't keep retrying silently.
+
 ## Outline
 
 ### Phase 0 — Load context
@@ -55,7 +59,7 @@ If no open findings remain, print: `Nothing to address.` and stop.
 ### Phase 1 — Plan
 
 1. Render open findings as a checklist with severity badges.
-2. Ask which findings to address this iteration (`all` allowed).
+2. Ask which findings to address this iteration (`all` allowed). **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and select `all` open findings except any `C-NN` (Critical) finding whose fix is ambiguous enough to need a human judgment call — flag those specifically and proceed with the rest.
 3. Build an internal todo list with one item per selected finding.
 
 ### Phase 2 — Fix loop (per finding)

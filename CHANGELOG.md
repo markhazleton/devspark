@@ -7,6 +7,43 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.7.0] - 2026-06-27
+
+### Added
+
+- **`full-cycle` workflow + alias**: `templates/workflows/full-cycle.yaml` chains `specify → plan → tasks → critic → analyze → tasks (remediate) → implement → create-pr → pr-review` with `autonomy.level: autonomous` and guardrails (`max_files_changed`, `restricted_paths`, `max_total_lines_changed`) instead of mandatory pauses. Run via `devspark run full-cycle`. Note: this layer sequences and tracks telemetry only — it expects an already-present driving agent to execute each step, the same as `create-spec`/`execute-plan`.
+- **`full-cycle.harness.yaml`**: a HarnessSpec (checked in at repo root, alongside `sample.harness.yaml`) covering the same nine-step chain as `agent_task` steps, for genuinely unattended execution via `devspark harness run full-cycle.harness.yaml --adapter claude_code --hands-off`. Validation rules resolve the active feature directory dynamically (`$(ls -td .documentation/specs/*/ | head -1)`) rather than hardcoding a path, so the spec is reusable across features.
+- **Gate Remediation Merge** (`/devspark.tasks`): re-running `/devspark.tasks` after `tasks.md` already exists now merges `gates/critic.md` + `gates/analyze.md` findings (deduped, severity-sorted, with elaborated recommendations) into a new `## Gate Remediation` task phase instead of regenerating from scratch.
+- **Gate finding resolution sync** (`/devspark.implement`): completing a task tagged `(resolves: <finding_id>)` now flips that finding's `status` to `resolved` and fills `outcome` in the originating `gates/critic.md` or `gates/analyze.md` file, so re-running `/devspark.critic`/`/devspark.analyze` converges instead of re-reporting the same finding indefinitely.
+- **`--auto` autonomy convention**: `implement.md`, `tasks.md`, `create-pr.md`, `quickfix.md`, `analyze.md`, `address-pr-review.md`, `specify.md`, and `clarify.md` now recognize a standing `--auto`/autonomy instruction and auto-select the recommended option at each "ask the user" gate (logged under `## Gate Acknowledgements` with `auto-selected: true`) instead of waiting. Constitution/SHOWSTOPPER violations, quickfix FAIL findings, and `execution_mode: manual` findings are never auto-bypassed. PR creation under `--auto` defaults to `--draft`.
+- **Definition of Done banners**: `implement.md`, `plan.md`, `tasks.md`, `specify.md`, `clarify.md`, `pr-review.md`, `address-pr-review.md`, `quickfix.md`, and `create-pr.md` now state their concrete completion condition and chat-output budget up front (mirroring the discipline already present in `critic.md`/`analyze.md`), instead of only at the final step of a long prompt.
+
+- **Custom DevSpark branding CSS**: `main.css` brand overrides for the DocFX site (custom "Inter Tight" font-face, primary color variables, light/dark link colors, header styling).
+
+### Changed
+
+- **`implement.md` progress reporting**: chat updates are now batched at phase checkpoints instead of one line per completed task; `tasks.md` updates per-task as before.
+- **`implement.md` steps 6-8 merged**: the three steps that separately restated the Setup → Foundational → User Story → Polish phase order are now two steps; no behavior change, less redundant prose.
+- **Branding assets and styles**: updated Make Bold Solutions branding assets and styles.
+
+### Fixed
+
+- **`.documentation/autonomy/autonomy-model.md`**: corrected the `autonomous` level description — `pause_after`/`review_after` steps pause unconditionally in the current `src/devspark_cli/runner/executor.py` implementation regardless of autonomy level; only guardrail-breach severity (pause vs. hard-block) differs by level. `full-cycle.yaml` works around this by declaring no `pause_after`/`review_after` steps at all, relying solely on guardrails.
+- **`.documentation/harness-engineering.md`**, **`.documentation/faq.md`**, **`.documentation/index.md`**: added the `codex` adapter to the Built-In Adapters lists (it existed in `src/devspark_cli/harness/adapters/codex.py` and `devspark adapter list` output but was undocumented in three places).
+- **Stale "27 commands" count**: corrected to 28 in `.documentation/faq.md` (×2), `.documentation/dogfooding.md`, and `.documentation/quickstart.md` — the actual count in `templates/commands/` has been 28 since `taskstoissues.md` was added.
+- **README.md command table**: added the missing `/devspark.taskstoissues` row (existed as a command file but was never listed).
+- **README.md broken link**: `See templates/README.md for full command details` pointed at a file that does not exist; repointed to `.documentation/index.md#command-categories`, which is complete and accurate.
+- **Unused logo assets**: removed `logo_large.webp` and `logo_small.webp` from `.documentation/media/` (superseded by current brand assets).
+- **Release-notes generator agent count**: updated to 18+ to match the current supported-agent count.
+
+### Architectural Decisions
+
+- **ADR-008**: Prompt-Level Autonomy Override and the full-cycle Lifecycle
+
+### Contributors
+
+- DevSpark Test
+
 ## [v2.6.0] - 2026-06-20
 
 ### Added

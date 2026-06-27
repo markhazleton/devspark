@@ -1,0 +1,34 @@
+{
+  "version": "2.7.0",
+  "releaseDate": "2026-06-27",
+  "release": {
+    "from": "2026-06-20",
+    "to": "2026-06-27"
+  },
+  "commitRange": {
+    "baseRef": "v2.6.0",
+    "baseSha": "fd80ba76fda4c044431f8795eb342d24a71f368c",
+    "headRef": "HEAD",
+    "headSha": "4acdefa0b54e28296681db87fd5479755cfff0ee",
+    "rangeSpec": "v2.6.0..HEAD"
+  },
+  "previousVersion": "2.6.0",
+  "features": {
+    "completed": 0,
+    "deferred": 0
+  },
+  "quickfixes": 0,
+  "pullRequests": {
+    "merged": 0,
+    "numbers": [],
+    "filesChanged": 32,
+    "testsAdded": 0,
+    "breakingChanges": 0,
+    "resolvedHighFindings": 0
+  },
+  "adrs": 1,
+  "commits": 4,
+  "contributors": 1,
+  "specs": [],
+  "timestamp": "2026-06-27T15:59:23Z"
+}

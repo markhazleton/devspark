@@ -25,6 +25,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 - **Does NOT own**: drafting/replacing the spec (→ `/devspark.specify`); deciding stack/architecture/data-store choices (→ `/devspark.plan` — only ask here if the *absence* of the choice blocks functional clarity); generating tasks (→ `/devspark.tasks`); adversarial review (→ `/devspark.critic`, `/devspark.analyze`).
 - **Seed queue**: any `[NEEDS CLARIFICATION: …]` markers left by `/devspark.specify` are the first candidates; resolving them removes the marker in addition to the standard integration.
 
+## Definition of Done
+
+Done when: the questioning loop has ended (5 questions asked, full coverage reached, or the user signaled completion), every accepted answer is written back to the spec file, and the step-8 coverage summary is reported. Already capped at 5 questions / 10 total — that cap is the convergence condition; don't ask "any other questions?" once it's reached.
+
 ## Constitution Authority
 
 If `/.documentation/memory/constitution.md` exists, load it. The constitution is a **non-negotiable ambiguity-detection lens**: any mandated principle (privacy, accessibility, observability, testing, etc.) that the spec omits or leaves vague is a high-priority candidate question. Constitution conflicts cannot be resolved by answer choice — they must trigger a follow-up note in the spec recommending either spec amendment or an explicit constitution update.
@@ -120,7 +124,10 @@ Execution steps:
    - Favor clarifications that reduce downstream rework risk or prevent misaligned acceptance tests.
    - If more than 5 categories remain unresolved, select the top 5 by (Impact \* Uncertainty) heuristic.
 
-4. Sequential questioning loop (interactive):
+4. Sequential questioning loop (interactive, unless `--auto`):
+
+   **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the interactive wait for every queued question — compute the Recommended/Suggested answer as below, accept it immediately, record it the same way an explicit "yes" would, and move to the next queued question. Still respect the 5-question/10-total cap and still produce the same `## Clarifications` integration in step 5; only the waiting is skipped. Note in the final report (step 8) that all answers were auto-accepted.
+
    - Present EXACTLY ONE question at a time.
    - For multiple‑choice questions:
      - **Analyze all options** and determine the **most suitable option** based on:

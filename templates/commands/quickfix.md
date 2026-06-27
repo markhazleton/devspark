@@ -63,6 +63,10 @@ Parse `$ARGUMENTS` for action type:
 | `complete` | `/devspark.quickfix complete QF-YYYY-NNN` | Mark quickfix as completed |
 | `list`     | `/devspark.quickfix list`                 | Show recent quickfixes     |
 
+## Definition of Done
+
+Done when (for `create`): the quickfix record exists at `QUICKFIX_DIR/NEXT_ID.md` with the constitution compliance table filled in, and the step-8 summary (including the Gate Result block and Next Steps) is printed. `list` and `complete` are done as soon as their single action completes — no further narration needed.
+
 ## Outline
 
 **Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
@@ -183,8 +187,8 @@ For each relevant principle:
 
 **Compliance Decision:**
 
-- If any FAIL: Surface the blocking concern, explain why it matters, recommend `/devspark.specify` or escalation, and ask whether to continue anyway, switch workflows, or stop.
-- If CONDITIONAL: Document required actions in the quickfix record.
+- If any FAIL: Surface the blocking concern, explain why it matters, recommend `/devspark.specify` or escalation, and ask whether to continue anyway, switch workflows, or stop. **Never auto-bypassed** — a FAIL here is a constitution violation by definition, so this always waits for a human regardless of `--auto`.
+- If CONDITIONAL: Document required actions in the quickfix record. Under `--auto` (or a standing autonomy instruction), this is auto-documented and the run proceeds without asking — CONDITIONAL is not a blocker, it's a recorded follow-up.
 - If all PASS: Proceed with quickfix creation.
 
 If the user chooses to continue despite FAIL or CONDITIONAL findings, record that explicit override in the quickfix record under `## Gate Acknowledgements`.

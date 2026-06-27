@@ -27,6 +27,9 @@ This page documents what is currently implemented in the repository.
 | `create-spec` | `specify → plan → tasks → analyze` | After `analyze` — review before implementing | Reviewable spec artifact |
 | `execute-plan` | `implement → create-pr → pr-review` | After `create-pr` — confirm PR before review runs | Pull request |
 | `suggest-improvement` | `capture-context → classify-improvement → create-issue → (assign-agent) → (implement)` | None by default; pass `--yes` to skip confirmation | GitHub issue link |
+| `full-cycle` | `specify → plan → tasks → critic → analyze → tasks (remediate) → implement → create-pr → pr-review` | None — `autonomy.level: autonomous` with guardrails instead | Pull request |
+
+`full-cycle` is intentionally different from the other three: it has no `pause_after`/`review_after` steps at all. Safety comes from guardrails (file/line/path limits — see [Autonomy Model](autonomy/autonomy-model.md)), which hard-block rather than pause under `autonomy.level: autonomous`. Like the others, `devspark run full-cycle` only sequences steps and tracks telemetry — it expects an agent already driving the conversation to execute each one. For execution with no agent watching, see [Full Unattended Lifecycle](#full-unattended-lifecycle) below.
 
 ### Usage
 
@@ -81,6 +84,7 @@ Use the atomic slash commands directly in your agent:
 | `create-spec` | `/devspark.specify` → `/devspark.plan` → `/devspark.tasks` → `/devspark.analyze` |
 | `execute-plan` | `/devspark.implement` → `/devspark.create-pr` → `/devspark.pr-review` |
 | `suggest-improvement` | `/devspark.specify` with improvement framing, then file the issue manually |
+| `full-cycle` | `/devspark.specify` → `/devspark.plan` → `/devspark.tasks` → `/devspark.critic` → `/devspark.analyze` → `/devspark.tasks` (re-run, merges gate findings) → `/devspark.implement` → `/devspark.create-pr` → `/devspark.pr-review` |
 
 ---
 
@@ -175,6 +179,7 @@ The current built-in adapters are:
 - `noop`
 - `manual`
 - `claude_code`
+- `codex`
 - `copilot`
 - `cursor`
 
@@ -186,9 +191,9 @@ Safe default for contract tests, dry runs, and environments without an AI tool i
 
 Displays the prompt for a human operator and waits for an acknowledgement keypress. It requires a TTY. In non-interactive contexts it fails clearly instead of silently skipping the gate.
 
-### `claude_code`, `copilot`, `cursor`
+### `claude_code`, `codex`, `copilot`, `cursor`
 
-These adapters call the corresponding local CLI if it is installed. Prompt content is sent through standard input rather than as a command-line argument, which avoids Windows command-length issues for larger prompts.
+These adapters call the corresponding local CLI (`claude`, `codex`, `copilot`, `cursor-agent`) if it is installed. Prompt content is sent through standard input rather than as a command-line argument, which avoids Windows command-length issues for larger prompts. Run `devspark adapter list` to see which of these are actually available on the current machine.
 
 ## Spec Model
 
@@ -202,7 +207,7 @@ Harness specs are YAML or JSON documents with:
 - `steps`
 - `telemetry`
 
-The checked-in example is [sample.harness.yaml](../sample.harness.yaml).
+The checked-in examples are [sample.harness.yaml](../sample.harness.yaml) (minimal, demonstrates each validation rule type) and [full-cycle.harness.yaml](../full-cycle.harness.yaml) (the full specify-through-pr-review lifecycle as `agent_task` steps — see [Full Unattended Lifecycle](#full-unattended-lifecycle) below).
 
 Step types currently implemented:
 
@@ -280,11 +285,30 @@ Recommended flow for a new spec:
 
 For adapter-driven runs, prefer explicit adapters in the spec when reproducibility matters across machines. Use a saved adapter default when you want a machine-local convenience setting.
 
+## Full Unattended Lifecycle
+
+`full-cycle.harness.yaml` chains all nine lifecycle steps (`specify → plan → tasks → critic → analyze → tasks (remediate) → implement → create-pr → pr-review`) as `agent_task` steps, with one `human_gate` before `create-pr` that `--hands-off` bypasses automatically. Unlike `devspark run full-cycle` (see [Available Aliases](#available-aliases) above), this actually executes each step non-interactively via the chosen adapter's CLI.
+
+```bash
+devspark adapter doctor                                              # confirm write-capable adapter
+devspark harness validate full-cycle.harness.yaml
+devspark harness run full-cycle.harness.yaml --dry-run                # resolve without executing
+devspark harness run full-cycle.harness.yaml --adapter claude_code --hands-off
+```
+
+Validation rules deliberately avoid hardcoding a feature directory path — none exists yet when the spec is authored — and instead resolve the most recently modified `.documentation/specs/*/` directory at validation time (`command.exit_code` rules using `$(ls -td .documentation/specs/*/ | head -1)`).
+
+**Convergence-loop caveat**: `--hands-off` automatically runs `run_stage_revalidation_loop` (max 3 passes) after the step loop completes, but as currently implemented this only re-checks `run.findings` bookkeeping — it does not re-invoke the `critic`/`analyze` prompts to regenerate fresh findings. In practice, `full-cycle.harness.yaml` gets one remediation pass per run (the `remediate-gates` step, which is `/devspark.tasks` re-run merging `gates/critic.md` + `gates/analyze.md` into a `## Gate Remediation` task phase — see [Gate Remediation Merge](#gate-remediation-merge) below). If findings remain open after that pass, the delivery-gate check should block `create-pr` readiness rather than silently proceeding; check `no-change-explainer.md` / `max-pass-failure-report.md` if a run reports unmet delivery status.
+
+## Gate Remediation Merge
+
+`/devspark.tasks` detects whether `tasks.md` already exists. On a re-run (already exists), it merges the `findings:` YAML from `gates/critic.md` and `gates/analyze.md` — both already in the Shared Review Resolution Contract shape (`finding_id`, `severity`, `description`, `recommended_action`, `execution_mode`, `status`, `outcome`) — dedupes overlapping findings, sorts by severity, and appends a `## Gate Remediation` task phase with tasks tagged `(resolves: <finding_id>)`. `/devspark.implement` flips each referenced finding's `status` to `resolved` in the originating gate file as its task completes, so a subsequent `/devspark.critic`/`/devspark.analyze` re-run reports fewer open findings instead of repeating the same ones. This is prompt-level behavior (in `templates/commands/tasks.md` and `templates/commands/implement.md`), not harness-runtime code — it works whether `/devspark.tasks` is invoked as a slash command, via `devspark run`, or via `devspark harness run`.
+
 ## Hands-Off Troubleshooting
 
 - If run fails with `write_incompatible_adapter`, switch to a write-capable non-interactive adapter and rerun `devspark adapter doctor`.
 - If `delivery_status` is unmet, review `no-change-explainer.md` and ensure changes exist under `src/` or `test/`.
-- If convergence fails after max passes, inspect `max-pass-failure-report.md` and resolve remaining findings manually before retrying.
+- If convergence fails after max passes, inspect `max-pass-failure-report.md` and resolve remaining findings manually before retrying — see the convergence-loop caveat under [Full Unattended Lifecycle](#full-unattended-lifecycle).
 
 ## Relationship to the Prompt Workflow
 
