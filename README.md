@@ -1,5 +1,5 @@
 <div align="center">
-    <img src=".documentation/media/brand/logo/makeboldspark-mark.svg" alt="Make Bold Spark" width="56" height="56" />
+    <img src=".documentation/media/brand/logo/makeboldsolutions-mark.svg" alt="Make Bold Solutions" width="56" height="56" />
     <h1>DevSpark</h1>
     <h3><em>A structured development process for AI coding assistants.<br/>Just markdown files — no install required.</em></h3>
 </div>
@@ -346,7 +346,7 @@ DevSpark is maintained by [Mark Hazleton](https://github.com/markhazleton) and t
 > Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
 > DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
 
-Part of the [Make Bold Spark](https://makeboldspark.com) family.
+A [Make Bold Solutions](https://makeboldsolutions.com) project, part of the [Make Bold Spark](https://makeboldspark.com) family.
 
 ## License
 
