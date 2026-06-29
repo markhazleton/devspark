@@ -39,7 +39,7 @@ SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 @app.command()
 def init(
     project_name: str = typer.Argument(None, help="Name for your new project directory (optional if using --here, or use '.' for current directory)"),
-    ai_assistant: str = typer.Option(None, "--ai", help="AI assistant to use: claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, roo, codebuddy, amp, shai, q, bob, qodercli, or antigravity"),
+    ai_assistant: str = typer.Option(None, "--ai", help=f"AI assistant to use: {', '.join(AGENT_CONFIG.keys())}"),
     script_type: str = typer.Option(None, "--script", help="Command variant to bake into agent prompts: sh or ps (default: auto-detected from OS). Both script sets are always installed."),
     release_tag: str = typer.Option(None, "--release-tag", help="Install from a specific GitHub release tag (e.g. v2.1.0)"),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),

@@ -1,6 +1,6 @@
 # Documentation
 
-Current Release: v2.3.0
+Current Release: [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
 This folder contains the documentation source files for DevSpark, built using [DocFX](https://dotnet.github.io/docfx/).
 
@@ -22,6 +22,8 @@ To build the documentation locally:
    ```
 
 3. Open your browser to `http://localhost:8080` to view the documentation.
+
+   > "Current Release" on each page is a live badge pulled from the GitHub Releases API — it always reflects the latest published release with no manual edits or build step required.
 
 ## Structure
 

@@ -98,7 +98,7 @@ Six commands don't make sense in the source repo. Rather than let them run and c
 | `discover-constitution` | Constitution already exists as the source | Use `evolve-constitution` or edit directly |
 | `archive` | Deprecated | Use `harvest` |
 
-The remaining 21 commands work normally, resolving straight to source.
+The remaining 22 commands work normally, resolving straight to source.
 
 ## Living With the Recursion
 

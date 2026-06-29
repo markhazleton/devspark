@@ -433,31 +433,25 @@ When running **Create Release** via `workflow_dispatch`, set `release_version` t
 `{NEXT_VERSION}` (or `v{NEXT_VERSION}`) so the workflow publishes the intended tag
 instead of auto-incrementing from the latest existing tag.
 
-### 10. Update Public-Facing Version References
+### 10. Verify Public-Facing Version References
 
-After bumping `pyproject.toml` (Step 9), update **all** public documents that mention the current release version so they stay in sync. **Skip if DRY_RUN** — but list the files that would change.
+`README.md` and every page under `.documentation/` display the current release as a live `img.shields.io/github/v/release/...` badge that reads the GitHub Releases API directly — there is nothing to edit by hand. As soon as the `.github/workflows/release.yml` workflow publishes the `v{NEXT_VERSION}` tag and GitHub Release, every badge updates on its own.
 
-#### A. Roadmap files
+**Skip if DRY_RUN.**
 
-Update **both** roadmap files to reflect the new current release:
+Confirm the no-manual-edit invariant still holds and nothing has regressed into a hardcoded copy:
 
-| File | Field to update |
-|------|-----------------|
-| `README.md` → `## 🗺️ Roadmap` | `### Current Release (v{NEXT_VERSION})` — add any new capabilities to the checked list |
-| `/.documentation/roadmap.md` | `## Current Release: v{NEXT_VERSION}` — move newly shipped items from Near-Term into Current, update version example |
+```bash
+grep -rn "Current Release: v[0-9]" README.md .documentation/*.md
+```
 
-Ensure future roadmap section version ranges (`Near-Term`, `Medium-Term`, `Long-Term`) are **ahead** of `{NEXT_VERSION}`. If any future section uses a version number ≤ `{NEXT_VERSION}`, bump it forward.
+This should return **no matches**. If it does, someone hardcoded a version string instead of using the badge — replace it with:
 
-#### B. Release notes / index page
+```markdown
+[![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
+```
 
-| File | Field to update |
-|------|-----------------|
-| `release_notes.md` | Update highlights and "What's New" to `{NEXT_VERSION}` |
-| `/.documentation/index.md` | Update any version badges or "latest" references |
-
-#### C. Verify — no stale version strings
-
-Run a quick search for the **old** version string (`{CURRENT_VERSION}`) across `README.md`, `release_notes.md`, `.documentation/*.md`, and confirm every remaining reference is intentional (e.g., CHANGELOG history). Flag any stale occurrences for manual review.
+Also run a quick search for the **old** version string (`{CURRENT_VERSION}`) across `README.md` and `.documentation/*.md`, and confirm every remaining reference is intentional (e.g., CHANGELOG history, worked examples). Flag any stale occurrences for manual review.
 
 ### 11. Markdownlint Preflight (Required)
 
@@ -585,7 +579,7 @@ To execute this release:
 
 1. Confirm `pyproject.toml` has been bumped to `{NEXT_VERSION}` (Step 9A above).
 
-2. Confirm roadmap and public docs reference `{NEXT_VERSION}` (Step 10 above).
+2. Confirm public docs have no hardcoded version strings (Step 10 above) — the release badges read `{NEXT_VERSION}` automatically once it's tagged.
 
 3. Review generated documentation:
    - `/.documentation/releases/v{NEXT_VERSION}/release-notes.md`

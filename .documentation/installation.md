@@ -1,6 +1,8 @@
 # Other Ways to Get Started
 
-## Current Release: v2.3.0
+## Current Release
+
+[![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
 > For most users the [Prompt Bootstrap](quickstart.md) is all you need. This page covers advanced CLI alternatives only.
 

@@ -5,6 +5,7 @@
 </div>
 
 <p align="center">
+    <a href="https://github.com/markhazleton/devspark/releases/latest"><img src="https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release" alt="Current Release"/></a>
     <a href="https://github.com/markhazleton/devspark/actions/workflows/release.yml"><img src="https://github.com/markhazleton/devspark/actions/workflows/release.yml/badge.svg" alt="Release"/></a>
     <a href="https://github.com/markhazleton/devspark/stargazers"><img src="https://img.shields.io/github/stars/markhazleton/devspark?style=social" alt="GitHub stars"/></a>
     <a href="https://github.com/markhazleton/devspark/blob/main/LICENSE"><img src="https://img.shields.io/github/license/markhazleton/devspark" alt="License"/></a>
@@ -14,8 +15,6 @@
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 
 > **Not a program. Not a subscription.** Copy 28 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
-
-## Current Release: v2.7.0
 
 ---
 
@@ -324,7 +323,6 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 | Critic guide | [critic-usage.md](.documentation/critic-usage.md) |
 | Harvest guide | [harvest-usage.md](.documentation/harvest-usage.md) |
 | Repo story | [repo-story-usage.md](.documentation/repo-story-usage.md) |
-| Repo story (latest) | [repo-story-2026-04-17.md](.documentation/repo-story/repo-story-2026-04-17.md) |
 
 ---
 

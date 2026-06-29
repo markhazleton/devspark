@@ -125,7 +125,7 @@ Use `/devspark.personalize` to create personal overrides.
 
 ### Which AI assistants work with DevSpark?
 
-17+ agents including GitHub Copilot, Claude Code, Cursor, Gemini CLI, Windsurf, Amazon Q Developer, and more. See the [Quick Start Guide](quickstart.md) for the full list.
+18+ agents including GitHub Copilot, Claude Code, Cursor, Gemini CLI, Windsurf, Amazon Q Developer, and more. See the [Quick Start Guide](quickstart.md) for the full list.
 
 ### Can I use multiple agents on the same project?
 
