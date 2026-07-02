@@ -94,3 +94,4 @@ jobs:
           name: pip-audit-report
           path: pip-audit-report.json
           if-no-files-found: warn
+          retention-days: 1
