@@ -39,7 +39,7 @@ For teams that want terminal-driven execution, DevSpark also ships an additive C
 
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 
-> **DevSpark** is a structured development process for AI coding assistants — 28 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
+> **DevSpark** is a structured development process for AI coding assistants — 29 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
 > Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
 > DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
 
@@ -68,6 +68,7 @@ Traditional spec-driven development works well for greenfield projects with majo
 | `/devspark.site-audit` | ✅ Full codebase auditing |
 | `/devspark.critic` | ✅ Adversarial risk analysis |
 | `/devspark.quickfix` | ✅ Lightweight workflow |
+| `/devspark.fix-score` | ✅ Score remediation workflow |
 | `/devspark.release` | ✅ Release documentation |
 | `/devspark.evolve-constitution` | ✅ Constitution evolution |
 | `/devspark.harvest` | ✅ Knowledge harvest and cleanup |
@@ -208,6 +209,7 @@ For bug fixes, hotfixes, and small features.
 | Command | Purpose |
 |---------|---------|
 | `/devspark.quickfix` | Create, validate, and track quick fixes |
+| `/devspark.fix-score` | Diagnose and remediate repository score blockers with explicit guardrails |
 
 ### Quality Assurance
 

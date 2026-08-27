@@ -21,7 +21,7 @@ DevSpark ownership is strictly two-tier:
 - `.devspark/` is framework-managed stock content
 - `.documentation/` is repository-owned work product and overrides
 
-The collection includes 27 active commands plus 1 deprecated compatibility alias.
+The collection includes 28 active commands plus 1 deprecated compatibility alias.
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -37,6 +37,7 @@ The collection includes 27 active commands plus 1 deprecated compatibility alias
 | `site-audit.md` | `/devspark.site-audit` | Comprehensive codebase audit |
 | `commit-audit.md` | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
 | `quickfix.md` | `/devspark.quickfix` | Lightweight bug fix workflow |
+| `fix-score.md` | `/devspark.fix-score` | Diagnose and remediate repository score blockers with verification guardrails |
 | `harvest.md` | `/devspark.harvest` | Canonical knowledge-preserving cleanup and archival workflow |
 | `release.md` | `/devspark.release` | Archive artifacts and prepare releases |
 | `evolve-constitution.md` | `/devspark.evolve-constitution` | Propose constitution amendments |
