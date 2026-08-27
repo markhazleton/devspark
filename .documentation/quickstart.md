@@ -140,7 +140,7 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 - [Harness Strict Template](../templates/workflows/harness-strict-template.md) -- delivery-integrity defaults for hands-off runs
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
-- [Command Reference](index.md#command-categories) -- all 28 commands
+- [Command Reference](index.md#command-categories) -- all 29 commands
 
 ## Strict Harness Path
 

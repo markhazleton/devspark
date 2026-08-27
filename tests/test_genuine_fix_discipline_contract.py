@@ -11,6 +11,21 @@ def _read(rel_path: str) -> str:
     return (ROOT / rel_path).read_text(encoding="utf-8")
 
 
+def _read_spec_file(feature_id: str, rel_path: str) -> str:
+    active_path = ROOT / ".documentation" / "specs" / feature_id / rel_path
+    candidates = [active_path]
+    releases_dir = ROOT / ".documentation" / "releases"
+    if releases_dir.is_dir():
+        candidates.extend(sorted(releases_dir.glob(f"v*/specs/{feature_id}/{rel_path}"), reverse=True))
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8")
+
+    searched = ", ".join(str(candidate.relative_to(ROOT)) for candidate in candidates)
+    raise FileNotFoundError(f"Unable to find {feature_id}/{rel_path}; searched {searched}")
+
+
 def test_command_preamble_contains_section_9_contract() -> None:
     text = _read("templates/command-preamble-contract.md")
     assert "## 9. Genuine Fix Discipline" in text
@@ -61,7 +76,7 @@ def test_verify_command_and_atomic_shim_define_guard() -> None:
 def test_constitution_surfaces_genuine_fix_principle() -> None:
     command = _read("templates/commands/constitution.md")
     constitution = _read(".documentation/memory/constitution.md")
-    contract = _read(".documentation/specs/001-okf-genuine-fix/contracts/genuine-fix-discipline.md")
+    contract = _read_spec_file("001-okf-genuine-fix", "contracts/genuine-fix-discipline.md")
 
     assert "Genuine Fix Discipline" in command
     assert "behavioral intent before metric movement" in command

@@ -198,6 +198,7 @@ For major features and architectural changes.
 | `/devspark.tasks` | Task breakdown | `/devspark.critic` |
 | `/devspark.critic` | Risk analysis | `/devspark.implement` |
 | `/devspark.implement` | Execute tasks | `/devspark.create-pr` |
+| `/devspark.verify` | Verify behavioral proof and reject metric-only fixes | `/devspark.create-pr` |
 | `/devspark.create-pr` | Draft or update the PR with workflow context | `/devspark.pr-review` |
 | `/devspark.update-pr` | Refresh an existing PR description after new commits or review fixes | `/devspark.pr-review` |
 | `/devspark.address-pr-review` | Address open review findings and commit review updates in isolation | `/devspark.pr-review UPDATE` |
@@ -220,6 +221,7 @@ Constitution-powered quality commands that work independently.
 | `/devspark.pr-review` | Review PRs against constitution | [PR Review Guide](pr-review-usage.md) |
 | `/devspark.site-audit` | Codebase compliance audit | [Site Audit Guide](site-audit-usage.md) |
 | `/devspark.critic` | Adversarial risk analysis | [Critic Guide](critic-usage.md) |
+| `/devspark.verify` | Verify behavioral proof and reject metric-only fixes | |
 
 ### Lifecycle Commands
 

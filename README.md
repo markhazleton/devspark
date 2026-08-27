@@ -145,7 +145,7 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 
 ## Harness Runtime
 
-DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 28 slash commands and is available when you install the optional CLI or work from a compatible source checkout.
+DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 29 slash commands and is available when you install the optional CLI or work from a compatible source checkout.
 
 The harness runtime adds:
 

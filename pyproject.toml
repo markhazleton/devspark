@@ -1,6 +1,6 @@
 [project]
 name = "devspark-cli"
-version = "2.7.0"
+version = "2.8.0"
 description = "DevSpark CLI — AI development lifecycle prompts and scaffolding for any coding assistant."
 authors = [{ name = "Make Bold Spark" }]
 keywords = ["makeboldspark", "spark", "devspark", "ai-agents", "sdd"]
@@ -42,4 +42,3 @@ packages = ["src/devspark_cli"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-

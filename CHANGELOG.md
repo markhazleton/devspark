@@ -7,10 +7,13 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v2.8.0] - 2026-08-27
 
 ### Added
 
+- **`/devspark.fix-score` workflow**: added repository score remediation with
+  context scripts and verification guardrails that preserve score rules instead
+  of weakening checks.
 - **OKF traceability layer**: lifecycle scripts now dual-write per-feature
   `knowledge/` Markdown with YAML frontmatter alongside unchanged JSON contracts,
   with schema validation via `templates/schemas/okf-knowledge-document.schema.json`.
@@ -20,6 +23,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Genuine Fix Discipline**: added shared §9 command guidance, intent cues on
   findings, `/devspark.verify`, and Constitution §IX to reject metric-only fixes
   that leave behavior unchanged.
+
+### Fixed
+
+- **Release package parity**: aligned release packaging so Bash and PowerShell
+  helper script sets, OKF schemas, preamble contracts, and `/devspark.verify`
+  shims ship consistently to installed projects.
+- **Documentation command counts**: updated public static documentation from 28
+  to 29 active slash commands after `/devspark.verify` was added.
+
+### Architectural Decisions
+
+- **ADR-009**: OKF Knowledge Layer and Genuine Fix Discipline
+
+### Contributors
+
+- Copilot
+- DevSpark Test
+- Mark Hazleton
 
 ## [v2.7.0] - 2026-06-27
 
