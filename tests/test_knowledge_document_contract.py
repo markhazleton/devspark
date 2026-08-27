@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import importlib.util
+import shlex
 import shutil
 import subprocess
 import sys
@@ -85,6 +86,11 @@ Fixture traceability.
 
 def _bash_path(path: Path) -> str:
     if sys.platform == "win32":
+        if shutil.which("cygpath") is not None:
+            return subprocess.check_output(
+                ["cygpath", "-u", str(path.resolve())],
+                text=True,
+            ).strip()
         resolved = path.resolve()
         drive = resolved.drive.rstrip(":").lower()
         rest = resolved.as_posix().split(":", 1)[1]
@@ -165,12 +171,22 @@ def test_bash_wrapper_outputs_json_when_available(tmp_path: Path) -> None:
     if shutil.which("bash") is None:
         pytest.skip("bash is not available")
     feature = _write_feature(tmp_path, complete=True)
+    script_path = _bash_path(ROOT / "scripts" / "bash" / "validate-knowledge-coverage.sh")
+    feature_path = _bash_path(feature)
+    probe = subprocess.run(
+        ["bash", "-lc", f"test -f {shlex.quote(script_path)} && test -d {shlex.quote(feature_path)}"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    if probe.returncode != 0:
+        pytest.skip("bash cannot access Windows fixture paths")
     result = subprocess.run(
         [
             "bash",
-            _bash_path(ROOT / "scripts" / "bash" / "validate-knowledge-coverage.sh"),
+            script_path,
             "--feature-dir",
-            _bash_path(feature),
+            feature_path,
             "--json",
         ],
         cwd=ROOT,

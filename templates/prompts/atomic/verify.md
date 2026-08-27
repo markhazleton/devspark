@@ -10,8 +10,11 @@ outputs: []
 legacy_command: verify
 ---
 
-# Legacy Command Shim: /devspark.verify
+## Outline
 
-This atomic prompt exists so `/devspark.verify` is discoverable through the
-atomic prompt catalog. Execution is delegated to the canonical command file at
-`templates/commands/verify.md`.
+This atomic prompt is a backward-compatibility shim. Its execution is
+delegated to the canonical command file at `templates/commands/verify.md`.
+
+The workflow runner resolves this id through the standard 3-tier override
+chain (personal -> team -> stock) and forwards execution to the legacy
+command body.
