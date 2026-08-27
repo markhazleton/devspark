@@ -117,6 +117,7 @@ Execute **only** these steps in order, then skip to Step 11 (Verify & Report):
 
 - **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite)
 - **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite)
+- **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite)
 - **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite)
 - **Step 7** — Re-create all agent shim files (overwrite — shims are framework files)
 - **Step 9** — Update `.devspark/VERSION` with new version and today's date
@@ -131,6 +132,7 @@ Execute **only** these steps in order, then skip to Step 11 (Verify & Report):
 
 - **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite missing or stale copies)
 - **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite missing or stale copies)
+- **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite missing or stale copies)
 - **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite missing or stale copies)
 - **Step 7** — Re-create all agent shim files (overwrite missing or stale copies)
 - **Step 9** — Re-write `.devspark/VERSION` using the current `LATEST_VERSION` and today's date
@@ -191,6 +193,9 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `add-application.md` | `.devspark/defaults/commands/devspark.add-application.md` |
 | `list-applications.md` | `.devspark/defaults/commands/devspark.list-applications.md` |
 | `validate-registry.md` | `.devspark/defaults/commands/devspark.validate-registry.md` |
+| `commit-audit.md` | `.devspark/defaults/commands/devspark.commit-audit.md` |
+| `fix-score.md` | `.devspark/defaults/commands/devspark.fix-score.md` |
+| `verify.md` | `.devspark/defaults/commands/devspark.verify.md` |
 
 ---
 
@@ -204,6 +209,20 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 - `quick-spec-template.md`
 - `checklist-template.md`
 - `agent-file-template.md`
+- `command-preamble-contract.md`
+- `rationale-template.md`
+- `spec-validation-contract.md`
+- `README.md`
+
+Also fetch every file recursively under these template subdirectories, preserving the same relative paths under `.devspark/templates/`:
+
+- `aliases/`
+- `prompts/`
+- `risk-checklists/`
+- `schemas/`
+- `workflows/`
+
+Do not fetch `templates/commands/` in this step — Step 4 installs command prompts into `.devspark/defaults/commands/`. Do not fetch `templates/vscode-settings.json`.
 
 Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-registry.json` and save it to `agents-registry.json` at the repository root.
 
@@ -211,7 +230,7 @@ Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-
 
 ## Step 5.5: Pull Agent Skills
 
-DevSpark 2.4.0+ delegates some command reasoning to portable **Agent Skill** packages under `.devspark/templates/skills/`. `/devspark.specify` requires the `write-spec` skill — without it, the command silently degrades to legacy inline behaviour.
+Current DevSpark releases delegate some command reasoning to portable **Agent Skill** packages under `.devspark/templates/skills/`. `/devspark.specify` requires the `write-spec` skill — without it, the command silently degrades to legacy inline behaviour.
 
 Fetch each file below from `https://raw.githubusercontent.com/markhazleton/devspark/main/` and save it to the matching path under `.devspark/templates/skills/` (preserve the subdirectory structure):
 
@@ -251,7 +270,7 @@ for f in ADAPTER-contract.md SKILL-validation-contract.md \
 done
 ```
 
-If any skill file is missing, re-fetch it before continuing. A missing `write-spec/SKILL.md` will cause `/devspark.specify` to silently fall back to pre-2.4 behaviour.
+If any skill file is missing, re-fetch it before continuing. A missing `write-spec/SKILL.md` will cause `/devspark.specify` to silently fall back to legacy inline behaviour.
 
 ---
 
@@ -269,6 +288,13 @@ Save to `.devspark/scripts/powershell/`:
 - `powershell/get-pr-context.ps1`
 - `powershell/address-pr-review.ps1`
 - `powershell/create-pr.ps1`
+- `powershell/delivery-status-smoke-test.ps1`
+- `powershell/fix-score-context.ps1`
+- `powershell/generate-atomic-shims.ps1`
+- `powershell/migrate-to-documentation.ps1`
+- `powershell/release-history-context.ps1`
+- `powershell/run-workflow.ps1`
+- `powershell/validate-knowledge-coverage.ps1`
 - `powershell/update-agent-context.ps1`
 - `powershell/archive-context.ps1` (deprecated compatibility wrapper around harvest)
 - `powershell/evolution-context.ps1`
@@ -286,7 +312,15 @@ Save to `.devspark/scripts/bash/`:
 - `bash/create-new-feature.sh`
 - `bash/setup-plan.sh`
 - `bash/get-pr-context.sh`
+- `bash/address-pr-review.sh`
 - `bash/create-pr.sh`
+- `bash/delivery-status-smoke-test.sh`
+- `bash/fix-score-context.sh`
+- `bash/generate-atomic-shims.sh`
+- `bash/migrate-to-documentation.sh`
+- `bash/release-history-context.sh`
+- `bash/run-workflow.sh`
+- `bash/validate-knowledge-coverage.sh`
 - `bash/update-agent-context.sh`
 - `bash/archive-context.sh` (deprecated compatibility wrapper around harvest)
 - `bash/evolution-context.sh`
