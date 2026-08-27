@@ -14,7 +14,7 @@
 
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 
-> **Not a program. Not a subscription.** Copy 28 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 29 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
 ---
 
@@ -23,7 +23,7 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 28 slash-command prompt files (THE PRODUCT)
+├── templates/commands/   ← 29 slash-command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── src/devspark_cli/     ← Optional CLI for automated setup
 └── .documentation/       ← Guides, media, and GitHub Pages site
@@ -183,6 +183,7 @@ See [Harness Engineering](.documentation/harness-engineering.md) for the runtime
 | `/devspark.address-pr-review` | Apply PR review fixes with mandatory commit isolation gates |
 | `/devspark.site-audit` | [Comprehensive codebase audit](.documentation/site-audit-usage.md) |
 | `/devspark.quickfix` | Lightweight workflow for bug fixes |
+| `/devspark.fix-score` | Diagnose and remediate repository score blockers without weakening scoring rules |
 | `/devspark.critic` | [Adversarial risk analysis](.documentation/critic-usage.md) |
 | `/devspark.release` | Archive dev artifacts and prepare releases |
 | `/devspark.harvest` | [Canonical knowledge-preserving cleanup and archival workflow](.documentation/harvest-usage.md) |
