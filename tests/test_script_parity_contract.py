@@ -30,6 +30,9 @@ def main() -> None:
     ps_release_history = _read('scripts/powershell/release-history-context.ps1')
     bash_address_pr_review = _read('scripts/bash/address-pr-review.sh')
     ps_address_pr_review = _read('scripts/powershell/address-pr-review.ps1')
+    bash_fix_score = _read('scripts/bash/fix-score-context.sh')
+    ps_fix_score = _read('scripts/powershell/fix-score-context.ps1')
+    fix_score_command = _read('templates/commands/fix-score.md')
 
     assert 'get_markdown_frontmatter()' in bash_common
     assert 'get_markdown_frontmatter_value()' in bash_common
@@ -74,6 +77,13 @@ def main() -> None:
     for token in ('Code commit gate failed', 'Review commit gate failed'):
         assert token in bash_address_pr_review
         assert token in ps_address_pr_review
+
+    assert 'fix-score-context.sh $ARGUMENTS --json' in fix_score_command
+    assert 'fix-score-context.ps1 $ARGUMENTS -Json' in fix_score_command
+    for token in ('score_categories', 'readme-quality', 'repository-attention', 'frontend-maintenance'):
+        assert token in bash_fix_score
+        assert token in ps_fix_score
+        assert token in fix_score_command
 
     # T064: run-workflow.* and generate-atomic-shims.* parity
     bash_run = _read('scripts/bash/run-workflow.sh')
