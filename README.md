@@ -172,6 +172,7 @@ See [Harness Engineering](.documentation/harness-engineering.md) for the runtime
 | `/devspark.plan` | Create a technical implementation plan |
 | `/devspark.tasks` | Break the plan into actionable task lists |
 | `/devspark.implement` | Execute tasks and build the feature |
+| `/devspark.verify` | Verify behavioral proof and reject metric-only fixes |
 | `/devspark.create-pr` | Draft or update a spec-aware pull request |
 | `/devspark.update-pr` | Refresh an existing pull request description from the current branch delta |
 

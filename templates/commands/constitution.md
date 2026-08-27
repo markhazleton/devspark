@@ -66,6 +66,7 @@ Follow this execution flow:
    - Replace every placeholder with concrete text (no bracketed tokens left except intentionally retained template slots that the project has chosen not to define yet—explicitly justify any left).
    - Preserve heading hierarchy and comments can be removed once replaced unless they still add clarifying guidance.
    - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non‑negotiable rules, explicit rationale if not obvious.
+   - When adding or preserving Genuine Fix Discipline, ensure the principle requires behavioral intent before metric movement, a citation hook for constitution-backed findings, and a verification failure mode for metric-only proof with unchanged behavior.
    - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.
 
 4. Consistency propagation checklist (convert prior checklist into active validations):
@@ -73,6 +74,7 @@ Follow this execution flow:
    - Read `/.devspark/templates/spec-template.md` (or `templates/spec-template.md` in source repos) for scope/requirements alignment—update if constitution adds/removes mandatory sections or constraints.
    - Read `/.devspark/templates/tasks-template.md` (or `templates/tasks-template.md` in source repos) and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
    - Read command prompt templates from `templates/commands/*.md` when available; otherwise inspect generated command files under active agent folders (for example `.github/agents/`, `.claude/commands/`, `.cursor/commands/`, `.gemini/commands/`). Verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
+   - If the update touches Genuine Fix Discipline, check `templates/command-preamble-contract.md` §9/§9.1/§9.2, `/devspark.verify`, and review/fix commands that emit or resolve findings.
    - Read runtime guidance docs (for example `README.md`, `/.documentation/Guide.md`, and agent-specific guidance files if present). Update references to principles changed.
 
 5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):

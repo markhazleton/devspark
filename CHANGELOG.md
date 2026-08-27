@@ -7,6 +7,20 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **OKF traceability layer**: lifecycle scripts now dual-write per-feature
+  `knowledge/` Markdown with YAML frontmatter alongside unchanged JSON contracts,
+  with schema validation via `templates/schemas/okf-knowledge-document.schema.json`.
+- **Knowledge coverage validator**: added Bash and PowerShell wrappers backed by a
+  shared Python parser for advisory requirement/task/gate-evidence coverage in
+  `/devspark.analyze` and `/devspark.critic`.
+- **Genuine Fix Discipline**: added shared §9 command guidance, intent cues on
+  findings, `/devspark.verify`, and Constitution §IX to reject metric-only fixes
+  that leave behavior unchanged.
+
 ## [v2.7.0] - 2026-06-27
 
 ### Added

@@ -307,6 +307,7 @@ mkdir -p "$FEATURE_DIR"
 TEMPLATE="$REPO_ROOT/.documentation/templates/spec-template.md"
 SPEC_FILE="$FEATURE_DIR/spec.md"
 if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"; fi
+write_okf_knowledge_document "$FEATURE_DIR" "traceability-index" "traceability-index" "Traceability Index" "draft" "spec.md" 2>/dev/null || true
 
 # Set the DEVSPARK_FEATURE environment variable for the current session
 export DEVSPARK_FEATURE="$BRANCH_NAME"

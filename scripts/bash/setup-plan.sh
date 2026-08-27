@@ -57,6 +57,7 @@ else
     # Create a basic plan file if template doesn't exist
     touch "$IMPL_PLAN"
 fi
+write_okf_knowledge_document "$FEATURE_DIR" "plan-context" "decision" "Plan Context" "active" "plan.md" 2>/dev/null || true
 
 # Output results
 if $JSON_MODE; then
@@ -69,4 +70,3 @@ else
     echo "BRANCH: $CURRENT_BRANCH"
     echo "HAS_GIT: $HAS_GIT"
 fi
-

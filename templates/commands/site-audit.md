@@ -245,6 +245,7 @@ For each violation found:
 - **Principle**: Name of constitution principle violated
 - **File:Line**: Exact location
 - **Issue**: Specific description
+- **Intent**: Behavioral intent that must be repaired or preserved before metric movement is accepted
 - **Recommendation**: Concrete fix
 
 ### 7. Package/Dependency Audit
@@ -473,9 +474,9 @@ Use this format:
 
 ### Detailed Violations
 
-| ID | Principle | File:Line | Issue | Severity | Recommendation |
-|----|-----------|-----------|-------|----------|----------------|
-| SEC1 | Security | src/config.py:45 | Hardcoded API key | CRITICAL | Use environment variable |
+| ID | Principle | File:Line | Issue | Intent | Severity | Recommendation |
+|----|-----------|-----------|-------|--------|----------|----------------|
+| SEC1 | Security | src/config.py:45 | Hardcoded API key | Prevent credential disclosure at runtime | CRITICAL | Use environment variable |
 
 ## DevSpark Version
 
@@ -489,10 +490,10 @@ Use this format:
 
 ### Version Findings
 
-| ID | Issue | Severity | Recommendation |
-|----|-------|----------|----------------|
-| VER1 | VERSION stamp absent | HIGH | Run the remote upgrade prompt to install or refresh the version stamp |
-| VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/devspark.upgrade` to update |
+| ID | Issue | Intent | Severity | Recommendation |
+|----|-------|--------|----------|----------------|
+| VER1 | VERSION stamp absent | Keep installed framework provenance auditable | HIGH | Run the remote upgrade prompt to install or refresh the version stamp |
+| VER2 | Version X.Y.Z installed, X.Y.Z available | Keep framework behavior aligned with current release contracts | MEDIUM | Run `/devspark.upgrade` to update |
 
 ## Security Findings
 
@@ -565,15 +566,15 @@ Use this format:
 
 ### Files Requiring Attention
 
-| File | Issue | Metric | Recommendation |
-|------|-------|--------|----------------|
-| src/large_module.py | Excessive length | 850 lines | Split into smaller modules |
+| File | Issue | Intent | Metric | Recommendation |
+|------|-------|--------|--------|----------------|
+| src/large_module.py | Excessive length | Preserve maintainable review and test boundaries | 850 lines | Split into smaller modules |
 
 ### Quality Issues
 
-| ID | Category | File:Line | Issue | Severity |
-|----|----------|-----------|-------|----------|
-| QUAL1 | Complexity | src/handler.py:120 | Function exceeds 50 lines | MEDIUM |
+| ID | Category | File:Line | Issue | Intent | Severity |
+|----|----------|-----------|-------|--------|----------|
+| QUAL1 | Complexity | src/handler.py:120 | Function exceeds 50 lines | Preserve understandable control flow without changing behavior | MEDIUM |
 
 ## Test Coverage Analysis
 
@@ -586,9 +587,9 @@ Use this format:
 
 ### Untested Files
 
-| File | Importance | Recommendation |
-|------|------------|----------------|
-| src/auth.py | HIGH | Add unit tests for authentication logic |
+| File | Importance | Intent | Recommendation |
+|------|------------|--------|----------------|
+| src/auth.py | HIGH | Prove authentication accepts and rejects the intended cases | Add unit tests for authentication logic |
 
 ## Documentation Status
 
@@ -621,9 +622,9 @@ Use this format:
 
 ### Duplicate Blocks Found
 
-| ID | Locations | Lines | Similarity | Recommendation |
-|----|-----------|-------|------------|----------------|
-| DUP1 | src/a.py:10-25, src/b.py:45-60 | 15 | 100% | Extract to shared function |
+| ID | Locations | Lines | Similarity | Intent | Recommendation |
+|----|-----------|-------|------------|--------|----------------|
+| DUP1 | src/a.py:10-25, src/b.py:45-60 | 15 | 100% | Preserve equivalent behavior while removing duplicate maintenance paths | Extract to shared function |
 
 ## Recommendations
 

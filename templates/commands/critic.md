@@ -71,6 +71,16 @@ Run `{SCRIPT}` once from repo root, parse JSON for FEATURE_DIR and AVAILABLE_DOC
 - TASKS = FEATURE_DIR/tasks.md (optional)
 - CONSTITUTION = /.documentation/memory/constitution.md
 
+Run the advisory knowledge coverage validator after resolving `FEATURE_DIR`:
+
+- PowerShell: `.devspark/scripts/powershell/validate-knowledge-coverage.ps1 -FeatureDir "$FEATURE_DIR" -Json`
+- Bash: `.devspark/scripts/bash/validate-knowledge-coverage.sh --feature-dir "$FEATURE_DIR" --json`
+
+This pass is additive and fail-soft. If `knowledge/` is absent, report the
+validator's clean skip and continue. If coverage is incomplete or invalid,
+surface it as advisory context without failing the critic gate unless an
+independent production-risk finding justifies failure.
+
 **Tiered artifact requirements** — do NOT abort on missing plan/tasks; degrade gracefully:
 
 | Artifacts present   | Critique scope                                                                   | Degradation label |
@@ -279,6 +289,7 @@ findings:
     archetype_applicable: true
     location: <spec.md#section | plan.md#L42 | tasks.md#T07>
     description: <1–3 sentences>
+    intent_cue: <behavioral intent that must be repaired or preserved>
     base_severity: showstopper | critical | high | medium | low
     effective_severity: showstopper | critical | high | medium | low
     recommended_action: <machine-actionable next step>
@@ -426,6 +437,7 @@ If spec.md lacks `archetype`, `risk_profile`, or `change_type` frontmatter, the 
 Findings use the shared resolution contract so downstream tools (`/devspark.address-pr-review`, telemetry, harvest) can act deterministically.
 
 - `finding_id` MUST be stable across re-runs when the underlying issue is unchanged.
+- `intent_cue` MUST name the behavior, contract, safety property, or operational outcome the finding protects before metric-focused remediation.
 - `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation).
 - `status` and `outcome` are written by `/devspark.address-pr-review` (FR-028).
 

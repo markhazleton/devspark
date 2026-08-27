@@ -154,6 +154,7 @@ RESEARCH='$feature_dir/research.md'
 DATA_MODEL='$feature_dir/data-model.md'
 QUICKSTART='$feature_dir/quickstart.md'
 CONTRACTS_DIR='$feature_dir/contracts'
+KNOWLEDGE_DIR='$feature_dir/knowledge'
 EOF
 }
 
@@ -177,6 +178,45 @@ get_markdown_frontmatter_value() {
     local key="$2"
 
     get_markdown_frontmatter "$file_path" | awk -F': ' -v wanted="$key" '$1 == wanted { print $2; exit }'
+}
+
+write_okf_knowledge_document() {
+    local feature_dir="$1"
+    local document_id="$2"
+    local document_type="$3"
+    local title="$4"
+    local status="${5:-active}"
+    local source_artifact="${6:-spec.md}"
+
+    [[ -n "$feature_dir" && -n "$document_id" && -n "$document_type" && -n "$title" ]] || return 0
+
+    local feature_id knowledge_dir output_file updated_at
+    feature_id="$(basename "$feature_dir")"
+    knowledge_dir="$feature_dir/knowledge"
+    output_file="$knowledge_dir/$document_id.md"
+    updated_at="$(date +%Y-%m-%d)"
+
+    mkdir -p "$knowledge_dir" 2>/dev/null || return 0
+    cat > "$output_file" <<EOF
+---
+okf_schema_version: "1.0"
+document_id: "$document_id"
+document_type: "$document_type"
+feature_id: "$feature_id"
+title: "$title"
+status: "$status"
+requirement_ids: []
+task_ids: []
+gate_evidence_ids: []
+source_artifacts:
+  - "$source_artifact"
+updated_at: "$updated_at"
+---
+
+# $title
+
+This OKF knowledge document is emitted alongside existing DevSpark lifecycle artifacts.
+EOF
 }
 
 # ---------------------------------------------------------------------------
@@ -544,6 +584,6 @@ RESEARCH='$feature_dir/research.md'
 DATA_MODEL='$feature_dir/data-model.md'
 QUICKSTART='$feature_dir/quickstart.md'
 CONTRACTS_DIR='$feature_dir/contracts'
+KNOWLEDGE_DIR='$feature_dir/knowledge'
 EOF
 }
-

@@ -27,6 +27,12 @@ Reviews are advisory. The agent must explain constitution or lifecycle issues, r
 
 `/devspark.create-pr` is the preferred predecessor for spec-driven work because it collects task, checklist, and gate context before review. If the PR was created manually, continue with review but call out any missing lifecycle context.
 
+## Genuine Fix Discipline
+
+Apply `templates/command-preamble-contract.md` §9 when generating review
+findings. Each actionable finding must name the behavioral intent being
+protected before recommending metric movement or style cleanup.
+
 ## Prerequisites
 
 - Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
@@ -121,6 +127,7 @@ findings:
   - finding_id: trust-tier-01
     severity: medium
     description: "Branch has no spec artifacts under .documentation/specs/{head_branch}/. Constitution §Development Workflow requires features to be spec-driven: specify first, plan second, implement third."
+    intent_cue: "Keep review behavior grounded in declared spec, plan, and task evidence before merge."
     recommended_action: "Run /devspark.specify to create the spec, then /devspark.plan and /devspark.tasks before merging."
     execution_mode: manual
     status: open
@@ -247,6 +254,7 @@ Create structured findings with **stable IDs** that persist across re-reviews. U
 - **Principle**: Name of constitution principle
 - **File:Line**: Exact location in code
 - **Issue**: Specific description of the problem, including broken code snippet for CRITICAL/HIGH
+- **Intent cue**: Behavioral intent that must be repaired or preserved
 - **Fix**: Concrete code fix for CRITICAL/HIGH findings (required); recommendation for others
 
 ### 5. Additional Review Dimensions
@@ -877,10 +885,11 @@ findings:
   - finding_id: <stable-id-unique-within-this-command-output>   # e.g., analyze-001, clarify-002
     severity: critical | high | medium | low
     description: <1-3 sentence problem statement>
+    intent_cue: <behavioral intent that must be repaired or preserved>
     recommended_action: <machine-actionable next step>
     execution_mode: auto | selective | manual
     status: open                                                  # set to `resolved` after remediation
     outcome: ""                                                  # populated post-resolution by address-pr-review
 ```
 
-inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
+`finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `intent_cue` MUST name the behavior, contract, safety property, or user outcome the finding protects before metric-focused remediation. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).

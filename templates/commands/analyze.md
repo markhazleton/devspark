@@ -60,6 +60,16 @@ Run `{SCRIPT}` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
 
+Run the advisory knowledge coverage validator after resolving `FEATURE_DIR`:
+
+- PowerShell: `.devspark/scripts/powershell/validate-knowledge-coverage.ps1 -FeatureDir "$FEATURE_DIR" -Json`
+- Bash: `.devspark/scripts/bash/validate-knowledge-coverage.sh --feature-dir "$FEATURE_DIR" --json`
+
+This pass is additive and fail-soft. If `knowledge/` is absent, report the
+validator's clean skip and continue. If coverage is incomplete or invalid,
+surface the warning in the analysis report without turning the gate into a
+blocking failure unless another independent finding already blocks the gate.
+
 Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
@@ -250,10 +260,11 @@ findings:
   - finding_id: <stable-id-unique-within-this-command-output> # e.g., analyze-001, clarify-002
     severity: critical | high | medium | low
     description: <1-3 sentence problem statement>
+    intent_cue: <behavioral intent that must be repaired or preserved>
     recommended_action: <machine-actionable next step>
     execution_mode: auto | selective | manual
     status: open # set to `resolved` after remediation
     outcome: "" # populated post-resolution by address-pr-review
 ```
 
-`finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
+`finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `intent_cue` MUST name the behavior, contract, or quality outcome the finding protects before any metric-focused remediation. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
