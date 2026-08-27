@@ -4,6 +4,8 @@
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
+**Latest published release:** [v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)
+
 ## Step 1: Bootstrap DevSpark
 
 Open a chat with your AI agent inside the target repository and paste the command for your agent:
@@ -140,7 +142,7 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 - [Harness Strict Template](../templates/workflows/harness-strict-template.md) -- delivery-integrity defaults for hands-off runs
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
-- [Command Reference](index.md#command-categories) -- all 29 commands
+- [Command Reference](index.md#command-categories) -- all 29 active commands
 
 ## Strict Harness Path
 

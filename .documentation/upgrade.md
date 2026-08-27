@@ -4,6 +4,8 @@
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
+**Latest published release:** [v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)
+
 ---
 
 ## Prompt-First Upgrade (Recommended)

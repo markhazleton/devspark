@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import sys
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -29,7 +31,7 @@ sys.modules["devspark_cli"] = cli_module
 assert cli_spec.loader is not None
 cli_spec.loader.exec_module(cli_module)
 
-from devspark_cli._template import download_template_from_github
+from devspark_cli._template import download_and_extract_template, download_template_from_github
 
 
 LATEST_URL = "https://api.github.com/repos/MarkHazleton/devspark/releases/latest"
@@ -252,4 +254,51 @@ def test_download_template_uses_explicit_release_tag(tmp_path):
     assert metadata["release"] == "v2.0.0"
     assert metadata["resolved_via_fallback"] is False
     assert metadata["latest_release"] == "v2.0.0"
+    assert client.get_calls == [tag_url]
+
+
+def test_download_and_extract_template_preserves_explicit_release_tag(tmp_path, monkeypatch):
+    tagged_url = "https://example.invalid/devspark-template-codex-ps-v2.8.0.zip"
+    tag_url = "https://api.github.com/repos/MarkHazleton/devspark/releases/tags/v2.8.0"
+    tagged_release = {
+        "id": 84,
+        "tag_name": "v2.8.0",
+        "assets": [
+            {
+                "name": "devspark-template-codex-ps-v2.8.0.zip",
+                "browser_download_url": tagged_url,
+                "size": 10,
+            }
+        ],
+    }
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as archive:
+        archive.writestr(".devspark/VERSION", "version: 2.8.0\n")
+        archive.writestr("AGENTS.md", "DevSpark\n")
+
+    client = _FakeClient(
+        get_map={
+            tag_url: _FakeResponse(payload=tagged_release),
+        },
+        stream_map={
+            tagged_url: _FakeResponse(
+                headers={"content-length": str(len(zip_buffer.getvalue()))},
+                chunks=[zip_buffer.getvalue()],
+            )
+        },
+    )
+
+    monkeypatch.chdir(tmp_path)
+    project_path, resolved_release_tag = download_and_extract_template(
+        tmp_path / "installed",
+        "codex",
+        "ps",
+        release_tag="v2.8.0",
+        verbose=False,
+        client=client,
+    )
+
+    assert resolved_release_tag == "v2.8.0"
+    assert (project_path / ".devspark" / "VERSION").read_text(encoding="utf-8") == "version: 2.8.0\n"
     assert client.get_calls == [tag_url]

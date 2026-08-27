@@ -25,7 +25,7 @@ This command checks whether the consumer project's installed DevSpark matches th
 latest available version and guides you through a safe upgrade. It:
 
 1. Reads `.devspark/VERSION` to find the installed version (fallback: legacy `.documentation/DEVSPARK_VERSION`)
-2. Detects the latest version from `CHANGELOG.md` or `pyproject.toml`
+2. Detects the latest version from the GitHub Releases API, with `CHANGELOG.md` as a fallback
 3. Classifies files under `.documentation/` as framework-owned vs. user-owned
 4. Identifies stale or missing framework files
 5. Runs `devspark upgrade` (or `devspark init --here --force`) to apply updates
@@ -89,12 +89,18 @@ agent: <agent-key>
 
 ### 2. Detect Latest Available Version
 
-Read `CHANGELOG.md` at the repo root (or `.documentation/CHANGELOG.md`):
+Fetch `https://api.github.com/repos/markhazleton/devspark/releases/latest`:
 
-- Find the most recent `## [X.Y.Z]` heading
+- Read `tag_name`
+- Strip the leading `v`
 - That is `LATEST_VERSION`
 
-Fallback: read `pyproject.toml` `version = "..."` if CHANGELOG is absent.
+Fallback if the Releases API is unreachable: read `CHANGELOG.md` at the repo root (or `.documentation/CHANGELOG.md`):
+
+- Find the most recent `## [vX.Y.Z]` or `## [X.Y.Z]` heading
+- That is `LATEST_VERSION`
+
+Final fallback: read `pyproject.toml` `version = "..."` if CHANGELOG is absent.
 
 ### 3. Compare Versions
 

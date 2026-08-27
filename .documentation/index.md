@@ -6,6 +6,8 @@
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
+**Latest published release:** [v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)
+
 **An Adaptive System Life Cycle Development (ASLCD) Toolkit** — agent-agnostic, multi-user, and full-lifecycle. DevSpark combines specification-driven development with constitution-powered quality assurance and right-sized workflows for tasks of any complexity.
 
 <video controls width="100%">
@@ -39,7 +41,7 @@ For teams that want terminal-driven execution, DevSpark also ships an additive C
 
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 
-> **DevSpark** is a structured development process for AI coding assistants — 29 slash-command prompts plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
+> **DevSpark** is a structured development process for AI coding assistants — 30 stock command prompts (29 active commands plus one deprecated compatibility alias) plus helper templates and scripts that give any AI agent a repeatable workflow from requirements through release.
 > Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
 > DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
 

@@ -21,7 +21,7 @@ DevSpark ownership is strictly two-tier:
 - `.devspark/` is framework-managed stock content
 - `.documentation/` is repository-owned work product and overrides
 
-The collection includes 29 active commands plus 1 deprecated compatibility alias.
+As of v2.8.0, the collection includes 29 active commands plus 1 deprecated compatibility alias.
 
 | File | Command | Purpose |
 |------|---------|---------|

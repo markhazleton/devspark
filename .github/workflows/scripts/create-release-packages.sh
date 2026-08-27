@@ -313,6 +313,13 @@ build_variant() {
   # Framework files go into .devspark/ (removable installation)
   DEVSPARK_DIR="$base_dir/.devspark"
   mkdir -p "$DEVSPARK_DIR"
+  RELEASE_DATE=$(date +%F)
+  {
+    echo "version: ${NEW_VERSION#v}"
+    echo "installed: $RELEASE_DATE"
+    echo "method: release-package"
+    echo "migrated-from: fresh"
+  } > "$DEVSPARK_DIR/VERSION"
 
   # Constitution is user-owned and never included in release packages.
   # Users create it via /devspark.constitution or /devspark.discover-constitution.
@@ -408,4 +415,3 @@ done
 
 echo "Archives in $GENRELEASES_DIR:"
 ls -1 "$GENRELEASES_DIR"/devspark-template-*-"${NEW_VERSION}".zip
-

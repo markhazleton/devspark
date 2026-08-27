@@ -24,11 +24,23 @@ def main() -> None:
 
     assert '"version": 1' in registry
     assert 'AGENT_REGISTRY_FILE="agents-registry.json"' in bash_release
+    assert 'echo "version: ${NEW_VERSION#v}"' in bash_release
+    assert 'RELEASE_DATE=$(date +%F)' in bash_release
+    assert '> "$DEVSPARK_DIR/VERSION"' in bash_release
     assert '$AgentRegistryFile = "agents-registry.json"' in ps_release
+    assert '$versionNoV = $Version -replace' in ps_release
+    assert "$installedDate = Get-Date -Format 'yyyy-MM-dd'" in ps_release
+    assert 'Join-Path $devsparkDir "VERSION"' in ps_release
     assert 'get_registered_agents()' in bash_release
     assert 'Get-RegisteredAgents' in ps_release
     assert 'AGENT_REGISTRY_FILE="agents-registry.json"' in bash_publish
+    assert 'gh release upload "$VERSION"' in bash_publish
+    assert '--clobber' in bash_publish
+    assert 'gh release edit "$VERSION"' in bash_publish
     assert "$AgentRegistryFile = 'agents-registry.json'" in ps_publish
+    assert 'gh release upload $Version' in ps_publish
+    assert '--clobber' in ps_publish
+    assert 'gh release edit $Version' in ps_publish
     assert '.agents[].key' in bash_publish
     assert 'ConvertFrom-Json' in ps_publish
 

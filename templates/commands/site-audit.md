@@ -127,8 +127,11 @@ Check for `.devspark/VERSION` first (fallback: legacy `.documentation/DEVSPARK_V
 
 #### B. Detect Latest Version
 
-Read the most recent `## [X.Y.Z]` entry in `CHANGELOG.md` (repo root) to get
-`LATEST_VERSION`. Fallback: read `version = "..."` from `pyproject.toml`.
+Fetch `https://api.github.com/repos/markhazleton/devspark/releases/latest`, read
+`tag_name`, and strip the leading `v` to get `LATEST_VERSION`. Fallback if the
+Releases API is unreachable: read the most recent `## [vX.Y.Z]` or
+`## [X.Y.Z]` entry in `CHANGELOG.md` (repo root). Final fallback: read
+`version = "..."` from `pyproject.toml`.
 
 #### C. Compare and Flag
 

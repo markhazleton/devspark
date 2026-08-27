@@ -8,7 +8,7 @@
 >
 > To work without the CLI, run the atomic slash commands manually instead — see [Harness Engineering](../harness-engineering.md) for the manual equivalents.
 
-DevSpark v2 ships three flagship aliases that wrap the core spec-driven flow.
+DevSpark v2.8.0 ships three flagship aliases that wrap the core spec-driven flow.
 Run them via `devspark run <alias>` in your terminal.
 
 ## 1. `create-spec` — From idea to ready-to-implement spec

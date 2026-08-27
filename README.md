@@ -13,8 +13,9 @@
 </p>
 
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
+**Latest published release:** [v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)
 
-> **Not a program. Not a subscription.** Copy 29 slash-command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 30 stock command prompts (29 active commands plus one deprecated compatibility alias) plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
 ---
 
@@ -23,7 +24,7 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 29 slash-command prompt files (THE PRODUCT)
+├── templates/commands/   ← 30 stock command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── src/devspark_cli/     ← Optional CLI for automated setup
 └── .documentation/       ← Guides, media, and GitHub Pages site
@@ -76,7 +77,7 @@ contributor walkthrough for adding new skills.
 
 ## Get Started
 
-DevSpark v2 ships three flagship aliases that are the recommended entrypoints for every new feature. Run them via `devspark run <alias>` (note: `devspark run` is a CLI command — there is no `/devspark.run` slash command):
+DevSpark v2.8.0 ships three flagship aliases that are the recommended entrypoints for every new feature. Run them via `devspark run <alias>` (note: `devspark run` is a CLI command — there is no `/devspark.run` slash command):
 
 | Alias | What it runs |
 |-------|--------------|
@@ -145,7 +146,7 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 
 ## Harness Runtime
 
-DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 29 slash commands and is available when you install the optional CLI or work from a compatible source checkout.
+DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 29 active slash commands and is available when you install the optional CLI or work from a compatible source checkout.
 
 The harness runtime adds:
 

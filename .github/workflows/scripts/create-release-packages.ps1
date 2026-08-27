@@ -456,7 +456,16 @@ function Build-Variant {
     # Framework files go into .devspark/ (removable installation)
     $devsparkDir = Join-Path $baseDir ".devspark"
     New-Item -ItemType Directory -Path $devsparkDir -Force | Out-Null
-    
+    $versionNoV = $Version -replace '^v', ''
+    $installedDate = Get-Date -Format 'yyyy-MM-dd'
+    $versionStamp = @(
+        "version: $versionNoV"
+        "installed: $installedDate"
+        "method: release-package"
+        "migrated-from: fresh"
+    ) -join "`n"
+    Set-Content -Path (Join-Path $devsparkDir "VERSION") -Value ($versionStamp + "`n") -NoNewline
+
     # Constitution is user-owned and never included in release packages.
     # Users create it via /devspark.constitution or /devspark.discover-constitution.
     

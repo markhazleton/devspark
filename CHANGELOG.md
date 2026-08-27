@@ -30,7 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   helper script sets, OKF schemas, preamble contracts, and `/devspark.verify`
   shims ship consistently to installed projects.
 - **Documentation command counts**: updated public static documentation from 28
-  to 29 active slash commands after `/devspark.verify` was added.
+  to 30 stock command prompts: 29 active slash commands plus the deprecated
+  `/devspark.archive` compatibility alias.
 
 ### Architectural Decisions
 

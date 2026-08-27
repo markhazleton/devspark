@@ -81,18 +81,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release package variants
-        if: steps.get_tag.outputs.skip_release != 'true' && steps.check_release.outputs.exists == 'false'
+        if: steps.get_tag.outputs.skip_release != 'true' && (steps.check_release.outputs.exists == 'false' || github.event_name == 'workflow_dispatch')
         run: |
           chmod +x .github/workflows/scripts/create-release-packages.sh
           .github/workflows/scripts/create-release-packages.sh ${{ steps.get_tag.outputs.new_version }}
       - name: Generate release notes
-        if: steps.get_tag.outputs.skip_release != 'true' && steps.check_release.outputs.exists == 'false'
+        if: steps.get_tag.outputs.skip_release != 'true' && (steps.check_release.outputs.exists == 'false' || github.event_name == 'workflow_dispatch')
         id: release_notes
         run: |
           chmod +x .github/workflows/scripts/generate-release-notes.sh
           .github/workflows/scripts/generate-release-notes.sh ${{ steps.get_tag.outputs.new_version }} ${{ steps.get_tag.outputs.latest_tag }}
       - name: Create GitHub Release
-        if: steps.get_tag.outputs.skip_release != 'true' && steps.check_release.outputs.exists == 'false'
+        if: steps.get_tag.outputs.skip_release != 'true' && (steps.check_release.outputs.exists == 'false' || github.event_name == 'workflow_dispatch')
         run: |
           chmod +x .github/workflows/scripts/create-github-release.sh
           .github/workflows/scripts/create-github-release.sh ${{ steps.get_tag.outputs.new_version }}

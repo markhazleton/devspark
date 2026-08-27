@@ -81,7 +81,7 @@ After detection and any migration work above, check whether `.documentation/memo
 ### If `.devspark/` already exists — Version Check
 
 1. Read `.devspark/VERSION`. If the file is missing or `version:` is not semver (`X.Y.Z`), treat the installed version as `unknown`.
-2. Fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/CHANGELOG.md` and extract the most recent `## [X.Y.Z]` heading as `LATEST_VERSION`.
+2. Fetch `https://api.github.com/repos/markhazleton/devspark/releases/latest`, read `tag_name`, and strip the leading `v` to get `LATEST_VERSION`. Only if the Releases API is unreachable, fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/CHANGELOG.md` and extract the most recent `## [vX.Y.Z]` or `## [X.Y.Z]` heading as a fallback.
 3. Compare and act:
 
 | Installed version | Latest version | Action |

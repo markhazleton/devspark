@@ -230,7 +230,7 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
     Returns (project_path, release_tag). Uses tracker if provided (with keys: fetch, download, extract, cleanup)
     """
     current_dir = Path.cwd()
-    release_tag = ""
+    requested_release_tag = release_tag
 
     if tracker:
         tracker.start("fetch", "contacting GitHub API")
@@ -239,7 +239,7 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
             ai_assistant,
             current_dir,
             script_type=script_type,
-            release_tag=release_tag,
+            release_tag=requested_release_tag,
             verbose=verbose and tracker is None,
             show_progress=(tracker is None),
             client=client,

@@ -81,9 +81,9 @@ See the [Constitution Guide](constitution-guide.md) for full examples.
 
 In your AI agent's chat interface -- the same place you normally talk to your assistant. They are not terminal commands.
 
-### Do I have to use all 29 commands?
+### Do I have to use all 29 active commands?
 
-No. Most projects use a small subset of the 29 stock commands:
+No. Most projects use a small subset of the 29 active stock commands. The shipped v2.8.0 template set contains 30 command files because `/devspark.archive` remains as a deprecated compatibility alias for `/devspark.harvest`.
 
 **Everyday:** `/devspark.quickfix`, `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`, `/devspark.pr-review`
 
@@ -157,7 +157,7 @@ See [Harness Engineering](harness-engineering.md) for the full model.
 
 ### Is the harness runtime part of the slash-command workflow?
 
-No. The 29 stock slash commands remain prompt-driven. The harness runtime is additive and lives in the optional CLI.
+No. The 29 active stock slash commands remain prompt-driven. The harness runtime is additive and lives in the optional CLI.
 
 ### What adapters are built in?
 

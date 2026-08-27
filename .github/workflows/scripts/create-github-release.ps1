@@ -50,16 +50,35 @@ if (-not (Test-Path "release_notes.md")) {
 }
 
 # Create the release
-Write-Host "Creating release $Version..."
-gh release create $Version `
-    $files `
-    --repo MarkHazleton/devspark `
-    --title "DevSpark Templates - $versionNoV" `
-    --notes-file release_notes.md
+Write-Host "Publishing release $Version..."
+gh release view $Version --repo MarkHazleton/devspark *> $null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "Release $Version already exists; refreshing assets with --clobber."
+    gh release upload $Version `
+        $files `
+        --repo MarkHazleton/devspark `
+        --clobber
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to upload release assets for $Version"
+        exit 1
+    }
+
+    gh release edit $Version `
+        --repo MarkHazleton/devspark `
+        --title "DevSpark Templates - $versionNoV" `
+        --notes-file release_notes.md
+} else {
+    gh release create $Version `
+        $files `
+        --repo MarkHazleton/devspark `
+        --title "DevSpark Templates - $versionNoV" `
+        --notes-file release_notes.md
+}
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "Successfully created release $Version"
+    Write-Host "Successfully published release $Version"
 } else {
-    Write-Error "Failed to create release $Version"
+    Write-Error "Failed to publish release $Version"
     exit 1
 }

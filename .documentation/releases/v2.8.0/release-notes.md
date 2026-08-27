@@ -57,7 +57,8 @@ surface and release package coverage.
 
 - Release packaging now includes the new OKF schema, shared command preamble,
   validation scripts, and `/devspark.verify` command surfaces consistently.
-- Public static documentation now reflects 29 active slash commands.
+- Public static documentation now reflects 30 shipped command files: 29 active
+  slash commands plus the deprecated `/devspark.archive` compatibility alias.
 
 ## Breaking Changes
 

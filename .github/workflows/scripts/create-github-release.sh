@@ -28,8 +28,20 @@ while IFS= read -r agent; do
   assets+=(".genreleases/devspark-template-${agent}-ps-${VERSION}.zip")
 done < <(jq -r '.agents[].key' "$AGENT_REGISTRY_FILE")
 
-gh release create "$VERSION" \
-  "${assets[@]}" \
-  --repo MarkHazleton/devspark \
-  --title "DevSpark Templates - $VERSION_NO_V" \
-  --notes-file release_notes.md
+if gh release view "$VERSION" --repo MarkHazleton/devspark >/dev/null 2>&1; then
+  echo "Release $VERSION already exists; refreshing assets with --clobber."
+  gh release upload "$VERSION" \
+    "${assets[@]}" \
+    --repo MarkHazleton/devspark \
+    --clobber
+  gh release edit "$VERSION" \
+    --repo MarkHazleton/devspark \
+    --title "DevSpark Templates - $VERSION_NO_V" \
+    --notes-file release_notes.md
+else
+  gh release create "$VERSION" \
+    "${assets[@]}" \
+    --repo MarkHazleton/devspark \
+    --title "DevSpark Templates - $VERSION_NO_V" \
+    --notes-file release_notes.md
+fi
