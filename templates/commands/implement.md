@@ -43,6 +43,13 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
 - An implementation choice that conflicts with a principle MUST be refused even if the task description appears to permit it → amend via `/devspark.plan` or propose via `/devspark.evolve-constitution`.
 - Preserve `## Constitution Waivers` from `plan.md` through to the PR.
 
+## Genuine Fix Discipline
+
+Before resolving task-linked gates or marking findings complete, apply
+`templates/command-preamble-contract.md` §9. A task that only improves a metric
+without proving the behavioral intent in the finding's `intent_cue` remains
+unresolved.
+
 ## Outline
 
 **Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
@@ -183,7 +190,7 @@ Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated pr
    - **spec.md lifecycle status** — flip `**Status**: Draft` to `**Status**: In Progress` on the first completed task (already done in step 3); the final flip to `Complete` happens in step 10.
    - **plan.md** — if implementation discovers a deviation from the plan (different library chosen, contract adjusted, etc.), update plan.md inline and add a short `## Implementation Notes` entry dated and linked to the task ID. Do NOT silently diverge.
    - **Constitution waivers** — if a new waiver becomes necessary mid-implementation, **halt**, route the user to `/devspark.plan` to record it, then resume. Never invent waivers from within implement.
-   - **Gate finding resolution** — when a task whose description includes `(resolves: <finding_id>[, <finding_id>...])` is marked `[X]`, flip each referenced finding's `status` from `open` to `resolved` and fill in `outcome` (one line: what changed, which commit/task) in the gate file that originated it (`gates/critic.md` for `critic-*` ids, `gates/analyze.md` for `analyze-*` ids). This is what lets a re-run of `/devspark.critic`/`/devspark.analyze` converge instead of re-reporting the same finding.
+   - **Gate finding resolution** — when a task whose description includes `(resolves: <finding_id>[, <finding_id>...])` is marked `[X]`, verify the finding's `intent_cue` under Genuine Fix Discipline, then flip each referenced finding's `status` from `open` to `resolved` and fill in `outcome` (one line: what changed, which commit/task, and what behavior was proven) in the gate file that originated it (`gates/critic.md` for `critic-*` ids, `gates/analyze.md` for `analyze-*` ids). This is what lets a re-run of `/devspark.critic`/`/devspark.analyze` converge instead of re-reporting the same finding.
 
    **Progress reporting and error handling**:
    - Update tasks.md per task as it completes (already required above); in chat, report progress at phase checkpoints only — one line per phase, not one line per task

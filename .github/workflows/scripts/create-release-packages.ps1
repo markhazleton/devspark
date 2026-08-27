@@ -460,24 +460,19 @@ function Build-Variant {
     # Constitution is user-owned and never included in release packages.
     # Users create it via /devspark.constitution or /devspark.discover-constitution.
     
-    # Only copy the relevant script variant directory
+    # ADR-001 / Constitution §VI: Always copy both script sets regardless of build variant.
+    # The sh|ps variant only controls which {SCRIPT} path gets baked into command files.
     if (Test-Path "scripts") {
         $scriptsDestDir = Join-Path $devsparkDir "scripts"
         New-Item -ItemType Directory -Path $scriptsDestDir -Force | Out-Null
-        
-        switch ($Script) {
-            'sh' {
-                if (Test-Path "scripts/bash") {
-                    Copy-Item -Path "scripts/bash" -Destination $scriptsDestDir -Recurse -Force
-                    Write-Host "Copied scripts/bash -> .devspark/scripts"
-                }
-            }
-            'ps' {
-                if (Test-Path "scripts/powershell") {
-                    Copy-Item -Path "scripts/powershell" -Destination $scriptsDestDir -Recurse -Force
-                    Write-Host "Copied scripts/powershell -> .devspark/scripts"
-                }
-            }
+
+        if (Test-Path "scripts/bash") {
+            Copy-Item -Path "scripts/bash" -Destination $scriptsDestDir -Recurse -Force
+            Write-Host "Copied scripts/bash -> .devspark/scripts"
+        }
+        if (Test-Path "scripts/powershell") {
+            Copy-Item -Path "scripts/powershell" -Destination $scriptsDestDir -Recurse -Force
+            Write-Host "Copied scripts/powershell -> .devspark/scripts"
         }
         
         # Copy any script files that aren't in variant-specific directories

@@ -32,12 +32,18 @@ def main() -> None:
     ps_address_pr_review = _read('scripts/powershell/address-pr-review.ps1')
     bash_fix_score = _read('scripts/bash/fix-score-context.sh')
     ps_fix_score = _read('scripts/powershell/fix-score-context.ps1')
+    bash_knowledge = _read('scripts/bash/validate-knowledge-coverage.sh')
+    ps_knowledge = _read('scripts/powershell/validate-knowledge-coverage.ps1')
     fix_score_command = _read('templates/commands/fix-score.md')
 
     assert 'get_markdown_frontmatter()' in bash_common
     assert 'get_markdown_frontmatter_value()' in bash_common
     assert 'function Get-MarkdownFrontmatter' in ps_common
     assert 'function Get-MarkdownFrontmatterValue' in ps_common
+    assert 'write_okf_knowledge_document()' in bash_common
+    assert 'function Write-OkfKnowledgeDocument' in ps_common
+    assert 'KNOWLEDGE_DIR' in bash_common
+    assert 'KNOWLEDGE_DIR' in ps_common
 
     assert 'SHARED_CONTEXT_START="<!-- DEVSPARK SHARED CONTEXT:START -->"' in bash_update
     assert "$SHARED_CONTEXT_START = '<!-- DEVSPARK SHARED CONTEXT:START -->'" in ps_update
@@ -84,6 +90,11 @@ def main() -> None:
         assert token in bash_fix_score
         assert token in ps_fix_score
         assert token in fix_score_command
+
+    for token in ('devspark_cli/_knowledge.py', 'feature-dir'):
+        assert token in bash_knowledge
+    for token in ('devspark_cli/_knowledge.py', 'FeatureDir'):
+        assert token in ps_knowledge
 
     # T064: run-workflow.* and generate-atomic-shims.* parity
     bash_run = _read('scripts/bash/run-workflow.sh')

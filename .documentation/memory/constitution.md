@@ -1,6 +1,28 @@
 # DevSpark Constitution
 
 <!--
+  Sync Impact Report — v1.4.0 → v1.5.0 (2026-08-27)
+  Amendment: OKF Genuine Fix Discipline (approved by user request 2026-08-27)
+  Bump type: MINOR — new named principle §IX added
+  Modified principles: none renamed
+  Added sections: §IX Genuine Fix Discipline (MUST)
+  Removed sections: none
+  Templates checked:
+    ✅ templates/command-preamble-contract.md — added §9/§9.1/§9.2 guidance
+    ✅ templates/commands/verify.md — added Genuine Fix Guard
+    ✅ templates/commands/analyze.md — added intent_cue and OKF coverage advisory
+    ✅ templates/commands/critic.md — added intent_cue and OKF coverage advisory
+    ✅ templates/commands/site-audit.md — added Intent field
+    ✅ templates/commands/implement.md — references Genuine Fix Discipline
+    ✅ templates/commands/quickfix.md — references Genuine Fix Discipline
+    ✅ templates/commands/pr-review.md — references Genuine Fix Discipline
+    ✅ templates/commands/address-pr-review.md — references Genuine Fix Discipline
+    ✅ templates/commands/constitution.md — updated principle surface
+    ✅ README.md and templates/README.md — updated command/contract references
+  Follow-up TODOs: none
+-->
+
+<!--
   Sync Impact Report — v1.2.0 → v1.3.0 (2026-04-30)
   Amendment: CAP-2026-001 (APPROVED 2026-04-30)
   Bump type: MINOR — new named principle §VIII added
@@ -130,6 +152,30 @@ with zero errors against the project `.markdownlint-cli2.jsonc` configuration.
 
 Violations are HIGH severity in PR review when they block CI; MEDIUM when caught locally before push.
 
+### IX. Genuine Fix Discipline (MUST)
+
+Fix, review, audit, analysis, and verification workflows MUST state the behavioral
+intent of a finding before accepting metric movement as evidence. Lower lint
+counts, lower complexity, higher coverage, cleaner scores, or similar metric
+changes are supporting evidence only. They do not satisfy a finding unless the
+observable behavior, user outcome, contract obligation, safety property, or
+operational guarantee that motivated the finding is repaired or preserved.
+
+**MUST requirements:**
+
+- Metric-related findings MUST include an intent cue that names the behavior
+  being protected or repaired.
+- Review and audit findings that cite a constitution principle MUST explain why
+  the behavior matters under that principle.
+- Verification MUST fail proof that only shows metric improvement while behavior
+  is unchanged.
+- Resolved finding records MUST include behavioral evidence, such as a targeted
+  test, reproduction before/after, fixture, contract check, runtime signal, or
+  reviewer-checkable invariant.
+
+Violations are HIGH severity in PR review; they become SHOWSTOPPER when the
+metric-only proof masks a constitution violation.
+
 ## Additional Constraints
 
 - Python 3.11+ for CLI code, typed with typer/rich/click
@@ -155,4 +201,4 @@ affected workflows or repositories.
 - [Severity Registry](severity-registry.md)
 - [Prompt Conformance Manifest](prompt-conformance-manifest.md)
 
-**Version**: 1.4.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-05-22
+**Version**: 1.5.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-08-27

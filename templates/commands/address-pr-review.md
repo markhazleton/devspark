@@ -26,6 +26,12 @@ This command is the **author-side companion** to `/devspark.pr-review`. It helps
 
 **IMPORTANT**: The staging gates are mechanical and mandatory. Do not bypass them.
 
+## Genuine Fix Discipline
+
+Apply `templates/command-preamble-contract.md` §9 while resolving each PR review
+finding. A finding is not resolved when the proof only moves a metric and leaves
+the behavior named by `intent_cue` unchanged.
+
 ## Prerequisites
 
 - Existing PR review file at `/.documentation/specs/pr-review/pr-{PR_ID}.md`
@@ -169,10 +175,11 @@ findings:
   - finding_id: <stable-id-unique-within-this-command-output>   # e.g., analyze-001, clarify-002
     severity: critical | high | medium | low
     description: <1-3 sentence problem statement>
+    intent_cue: <behavioral intent that must be repaired or preserved>
     recommended_action: <machine-actionable next step>
     execution_mode: auto | selective | manual
     status: open                                                  # set to `resolved` after remediation
     outcome: ""                                                  # populated post-resolution by address-pr-review
 ```
 
-inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
+`finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `intent_cue` MUST name the behavior, contract, safety property, or user outcome the finding protects before metric-focused remediation. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).

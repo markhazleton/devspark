@@ -39,6 +39,7 @@ def test_all_flag_includes_hidden_prompts():
     assert res.exit_code == 0
     # legacy `implement` shim has audience=expert; must appear with --all.
     assert "implement" in res.output
+    assert "verify" in res.output
 
 
 def test_category_filter():

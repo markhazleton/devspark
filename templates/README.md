@@ -21,7 +21,7 @@ DevSpark ownership is strictly two-tier:
 - `.devspark/` is framework-managed stock content
 - `.documentation/` is repository-owned work product and overrides
 
-The collection includes 28 active commands plus 1 deprecated compatibility alias.
+The collection includes 29 active commands plus 1 deprecated compatibility alias.
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -29,6 +29,7 @@ The collection includes 28 active commands plus 1 deprecated compatibility alias
 | `plan.md` | `/devspark.plan` | Create technical implementation plan |
 | `tasks.md` | `/devspark.tasks` | Generate actionable task list |
 | `implement.md` | `/devspark.implement` | Execute tasks to build the feature |
+| `verify.md` | `/devspark.verify` | Verify behavioral proof and reject metric-only fixes |
 | `create-pr.md` | `/devspark.create-pr` | Draft or update a pull request with workflow context |
 | `update-pr.md` | `/devspark.update-pr` | Refresh an existing pull request description from the current branch delta |
 | `constitution.md` | `/devspark.constitution` | Establish project principles |
@@ -67,6 +68,8 @@ The collection includes 28 active commands plus 1 deprecated compatibility alias
 | `tasks-template.md` | Template structure for task breakdowns |
 | `checklist-template.md` | Template structure for quality checklists |
 | `spec-validation-contract.md` | Shared validation contract for spec structure and required content |
+| `command-preamble-contract.md` | Shared command guidance, including Genuine Fix Discipline |
+| `schemas/okf-knowledge-document.schema.json` | OKF knowledge-document frontmatter schema |
 | `agent-file-template.md` | Template for agent configuration files |
 | `vscode-settings.json` | Recommended VS Code settings |
 
@@ -75,3 +78,16 @@ The stock spec, quick-spec, plan, and tasks templates include optional
 responsibility context only. It is not required for existing artifacts, does
 not affect prompt or script resolution, and does not change command output.
 Customization layers and precedence are unchanged.
+
+## Knowledge and Genuine Fix Contracts
+
+Feature lifecycle scripts may dual-write OKF Markdown under
+`.documentation/specs/<feature>/knowledge/` while preserving existing JSON
+contracts. Validate frontmatter with
+`templates/schemas/okf-knowledge-document.schema.json` and run advisory coverage
+with `scripts/{bash,powershell}/validate-knowledge-coverage.*`.
+
+Commands that fix, review, audit, analyze, or verify findings reference
+`templates/command-preamble-contract.md` §9. Findings must name behavioral
+intent before metric remediation; `/devspark.verify` fails metric-only proof
+when behavior is unchanged.

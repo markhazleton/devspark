@@ -32,6 +32,13 @@ Alternative entry point to authoring: `[user request] → route decision → { s
 
 `/.documentation/memory/constitution.md` is **required** — if missing, halt and direct the user to `/devspark.constitution`. The targeted constitution check (§5) loads only principles relevant to the detected classification, but they remain non-negotiable: a FAIL must be surfaced and acknowledged in writing, never silently ignored.
 
+## Genuine Fix Discipline
+
+Before applying a quick fix for lint, complexity, coverage, score, or audit
+movement, apply `templates/command-preamble-contract.md` §9. State the behavior
+being repaired first; metric improvement is acceptable only as supporting
+evidence.
+
 ## Overview
 
 This command enables rapid fixes for bug fixes, small features, and production issues without the overhead of full specification workflows. It validates changes against relevant constitution sections and generates a lightweight change record.
