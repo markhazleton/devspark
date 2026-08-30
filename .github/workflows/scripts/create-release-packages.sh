@@ -38,11 +38,12 @@ mkdir -p "$GENRELEASES_DIR"
 rm -rf "${GENRELEASES_DIR:?}"/* || true
 
 rewrite_paths() {
-  # DevSpark uses .devspark/ for framework files and .documentation/ for user work
+  # DevSpark uses .devspark/ for framework files, .knowledge/ for current truth,
+  # and .devspark.work/ for in-flight work packages.
   sed -E \
     -e 's@(/?)\.specify/@\1.documentation/@g' \
-    -e 's@(^|[[:space:]]|`)/specs/@\1/.documentation/specs/@g' \
-    -e 's@(^|[[:space:]]|`)/memory/@\1/.documentation/memory/@g' \
+    -e 's@(^|[[:space:]]|`)/specs/@\1/.devspark.work/specs/@g' \
+    -e 's@(^|[[:space:]]|`)/memory/@\1/.knowledge/governance/@g' \
     -e 's@(^|[[:space:]]|`)/scripts/@\1/.devspark/scripts/@g' \
     -e 's@(^|[[:space:]]|`)/templates/@\1/.devspark/templates/@g'
 }
@@ -321,8 +322,8 @@ build_variant() {
     echo "migrated-from: fresh"
   } > "$DEVSPARK_DIR/VERSION"
 
-  # Constitution is user-owned and never included in release packages.
-  # Users create it via /devspark.constitution or /devspark.discover-constitution.
+  # Current truth is user-owned and never included as repository content.
+  mkdir -p "$base_dir/.knowledge/entities" "$base_dir/.knowledge/governance/decisions" "$base_dir/.knowledge/ontology" "$base_dir/.devspark.work/specs"
   
   # ADR-001: Always copy both script sets regardless of build variant.
   # The sh|ps variant only controls which {SCRIPT} path gets baked into command files.

@@ -275,7 +275,9 @@ Never reference archived files from active prompts, scripts, or documentation. T
 
 **Problem**: The pre-scan script is missing.
 
-**Solution**: Run `devspark upgrade` to install the latest scripts, or copy `harvest.ps1` from the source repo's `scripts/powershell/` to `/.documentation/scripts/powershell/`.
+**Solution**: Re-run the matching quickstart prompt to repair the installed
+framework scripts, or copy `harvest.ps1` from the source repo's
+`scripts/powershell/` to `/.devspark/scripts/powershell/`.
 
 ### "No specs found to harvest"
 

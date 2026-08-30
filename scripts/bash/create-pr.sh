@@ -143,16 +143,20 @@ extract_section_text() {
 find_quickfix_record_for_branch() {
     local repo_root="$1"
     local branch_name="$2"
-    local quickfix_dir="$repo_root/.documentation/quickfixes"
+    local quickfix_dir="$repo_root/.devspark.work/quickfixes"
     [[ -d "$quickfix_dir" ]] || return 0
     local best_id="" best_path="" file branch_line quickfix_id
     shopt -s nullglob
-    for file in "$quickfix_dir"/*.md; do
-        branch_line=$(grep -m1 '^- \*\*Branch\*\*:' "$file" 2>/dev/null \
-            | sed 's/^- \*\*Branch\*\*:[[:space:]]*//' | sed 's/[[:space:]]*$//' || true)
+    for file in "$quickfix_dir"/*; do
+        [[ -d "$file" || -f "$file" ]] || continue
+        local source_file="$file"
+        [[ -d "$file" && -f "$file/work.yaml" ]] && source_file="$file/work.yaml"
+        [[ -d "$file" && -f "$file/quickfix.md" ]] && source_file="$file/quickfix.md"
+        branch_line=$(grep -m1 -E '^(branch:|- \*\*Branch\*\*:)' "$source_file" 2>/dev/null \
+            | sed -E 's/^branch:[[:space:]]*//;s/^- \*\*Branch\*\*:[[:space:]]*//' | sed 's/[[:space:]]*$//' || true)
         if [[ "$branch_line" == "$branch_name" ]]; then
-            quickfix_id=$(grep -m1 '^- \*\*ID\*\*:' "$file" 2>/dev/null \
-                | sed 's/^- \*\*ID\*\*:[[:space:]]*//' | sed 's/[[:space:]]*$//' || true)
+            quickfix_id=$(grep -m1 -E '^(id:|- \*\*ID\*\*:)' "$source_file" 2>/dev/null \
+                | sed -E 's/^id:[[:space:]]*//;s/^- \*\*ID\*\*:[[:space:]]*//' | sed 's/[[:space:]]*$//' || true)
             [[ -z "$quickfix_id" ]] && quickfix_id=$(basename "$file" .md)
             if [[ -z "$best_id" || "$quickfix_id" > "$best_id" ]]; then
                 best_id="$quickfix_id"
@@ -166,16 +170,19 @@ find_quickfix_record_for_branch() {
 
 build_quickfix_json() {
     local quickfix_path="$1"
-    [[ -f "$quickfix_path" ]] || { printf 'null\n'; return; }
+    [[ -f "$quickfix_path" || -d "$quickfix_path" ]] || { printf 'null\n'; return; }
+    local source_file="$quickfix_path"
+    [[ -d "$quickfix_path" && -f "$quickfix_path/work.yaml" ]] && source_file="$quickfix_path/work.yaml"
+    [[ -d "$quickfix_path" && -f "$quickfix_path/quickfix.md" ]] && source_file="$quickfix_path/quickfix.md"
     local classification risk_level required_gates recommended_next_step problem_statement gate_ack_text quickfix_title quickfix_id
-    classification=$(get_markdown_frontmatter_value "$quickfix_path" classification || true)
-    risk_level=$(get_markdown_frontmatter_value "$quickfix_path" risk_level || true)
-    required_gates=$(get_markdown_frontmatter_value "$quickfix_path" required_gates || true)
-    recommended_next_step=$(get_markdown_frontmatter_value "$quickfix_path" recommended_next_step || true)
-    quickfix_title=$(grep -m1 '^# ' "$quickfix_path" | sed 's/^# //' || true)
-    quickfix_id=$(grep -m1 '^- \*\*ID\*\*:' "$quickfix_path" | sed 's/^- \*\*ID\*\*:[[:space:]]*//' || true)
-    problem_statement=$(extract_section_text "$quickfix_path" "Problem Statement" | trim_text)
-    gate_ack_text=$(extract_section_text "$quickfix_path" "Gate Acknowledgements" | trim_text)
+    classification=$(get_markdown_frontmatter_value "$source_file" classification || grep -m1 '^classification:' "$source_file" 2>/dev/null | sed 's/^classification:[[:space:]]*//' || true)
+    risk_level=$(get_markdown_frontmatter_value "$source_file" risk_level || grep -m1 '^risk_level:' "$source_file" 2>/dev/null | sed 's/^risk_level:[[:space:]]*//' || true)
+    required_gates=$(get_markdown_frontmatter_value "$source_file" required_gates || true)
+    recommended_next_step=$(get_markdown_frontmatter_value "$source_file" recommended_next_step || true)
+    quickfix_title=$(grep -m1 '^# ' "$source_file" | sed 's/^# //' || true)
+    quickfix_id=$(grep -m1 -E '^(id:|- \*\*ID\*\*:)' "$source_file" 2>/dev/null | sed -E 's/^id:[[:space:]]*//;s/^- \*\*ID\*\*:[[:space:]]*//' || true)
+    problem_statement=$(extract_section_text "$source_file" "Problem Statement" | trim_text)
+    gate_ack_text=$(extract_section_text "$source_file" "Gate Acknowledgements" | trim_text)
 
     jq -n \
         --arg path "$quickfix_path" \

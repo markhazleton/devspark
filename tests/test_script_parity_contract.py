@@ -32,8 +32,6 @@ def main() -> None:
     ps_address_pr_review = _read('scripts/powershell/address-pr-review.ps1')
     bash_fix_score = _read('scripts/bash/fix-score-context.sh')
     ps_fix_score = _read('scripts/powershell/fix-score-context.ps1')
-    bash_knowledge = _read('scripts/bash/validate-knowledge-coverage.sh')
-    ps_knowledge = _read('scripts/powershell/validate-knowledge-coverage.ps1')
     fix_score_command = _read('templates/commands/fix-score.md')
 
     assert 'get_markdown_frontmatter()' in bash_common
@@ -91,17 +89,7 @@ def main() -> None:
         assert token in ps_fix_score
         assert token in fix_score_command
 
-    for token in ('devspark_cli/_knowledge.py', 'feature-dir'):
-        assert token in bash_knowledge
-    for token in ('devspark_cli/_knowledge.py', 'FeatureDir'):
-        assert token in ps_knowledge
-
-    # T064: run-workflow.* and generate-atomic-shims.* parity
-    bash_run = _read('scripts/bash/run-workflow.sh')
-    ps_run = _read('scripts/powershell/run-workflow.ps1')
-    assert 'python -m devspark_cli run' in bash_run
-    assert 'python -m devspark_cli run' in ps_run
-
+    # generate-atomic-shims.* parity
     bash_shims = _read('scripts/bash/generate-atomic-shims.sh')
     ps_shims = _read('scripts/powershell/generate-atomic-shims.ps1')
     assert '--check' in bash_shims

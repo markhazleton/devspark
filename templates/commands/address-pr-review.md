@@ -17,6 +17,17 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command fixes review findings against current truth. When any later
+section conflicts with this section, the v4 section wins.
+
+- Resolve findings by changing code, `.knowledge`, or governance as needed.
+- Do not introduce permanent references to the review thread or ephemeral work
+  package.
+- Commit review-thread updates outside the permanent current-truth layer.
+- Re-run current-truth validation before marking findings resolved.
+
 ## Overview
 
 This command is the **author-side companion** to `/devspark.pr-review`. It helps you address open findings in `/.documentation/specs/pr-review/pr-{PR_ID}.md` while enforcing commit isolation:

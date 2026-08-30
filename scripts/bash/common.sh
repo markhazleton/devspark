@@ -30,7 +30,7 @@ get_current_branch() {
     # For non-git repos, try to find the latest feature directory
     local repo_root
     repo_root=$(get_repo_root)
-    local specs_dir="$repo_root/.documentation/specs"
+    local specs_dir="$repo_root/.devspark.work/specs"
 
     if [[ -d "$specs_dir" ]]; then
         local latest_feature=""
@@ -84,14 +84,14 @@ check_feature_branch() {
     return 0
 }
 
-get_feature_dir() { echo "$1/.documentation/specs/$2"; }
+get_feature_dir() { echo "$1/.devspark.work/specs/$2"; }
 
 # Find feature directory by numeric prefix instead of exact branch match
 # This allows multiple branches to work on the same spec (e.g., 004-fix-bug, 004-add-feature)
 find_feature_dir_by_prefix() {
     local repo_root="$1"
     local branch_name="$2"
-    local specs_dir="$repo_root/.documentation/specs"
+    local specs_dir="$repo_root/.devspark.work/specs"
 
     # Extract numeric prefix from branch (e.g., "004" from "004-whatever")
     if [[ ! "$branch_name" =~ ^([0-9]{3})- ]]; then
@@ -102,7 +102,7 @@ find_feature_dir_by_prefix() {
 
     local prefix="${BASH_REMATCH[1]}"
 
-    # Search for directories in .documentation/specs/ that start with this prefix
+    # Search for work-package directories that start with this prefix
     local matches=()
     if [[ -d "$specs_dir" ]]; then
         for dir in "$specs_dir"/"$prefix"-*; do
@@ -415,7 +415,10 @@ resolve_constitution() {
     local repo_root="$1"
     local app_id="${2:-}"
 
-    local repo_constitution="$repo_root/.documentation/memory/constitution.md"
+    local repo_constitution="$repo_root/.knowledge/governance/constitution.md"
+    if [[ ! -f "$repo_constitution" && -f "$repo_root/.documentation/memory/constitution.md" ]]; then
+        repo_constitution="$repo_root/.documentation/memory/constitution.md"
+    fi
     if [[ ! -f "$repo_constitution" ]]; then
         echo "ERROR: Repository constitution required at $repo_constitution" >&2
         return 1
@@ -427,7 +430,10 @@ resolve_constitution() {
     if [[ -n "$app_id" ]]; then
         local app_doc_root
         app_doc_root=$(resolve_app_doc_root "$repo_root" "$app_id") || return 1
-        local app_constitution="$app_doc_root/memory/constitution.md"
+        local app_constitution="${app_doc_root%/.documentation}/.knowledge/governance/constitution.md"
+        if [[ ! -f "$app_constitution" ]]; then
+            app_constitution="$app_doc_root/memory/constitution.md"
+        fi
 
         if [[ -f "$app_constitution" ]]; then
             output="$output

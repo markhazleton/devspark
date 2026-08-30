@@ -10,27 +10,28 @@ Antigravity uses a markdown-based shim interface placed inside the `.gemini/comm
 
 ## Installation
 
-Since Antigravity operates natively within the environment, no external CLI tool needs to be installed. DevSpark automatically recognizes Antigravity using the `.gemini/commands/` folder structure and the `ANTIGRAVITY.md` context file.
-
 ### Bootstrapping DevSpark
 
-To initialize DevSpark with Antigravity:
+Open Antigravity in the target repository and run the Antigravity quickstart
+prompt:
 
-```bash
-devspark init --ai antigravity
+```text
+Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_antigravity.md
 ```
 
-This command will:
+The quickstart prompt will:
 
-1. Scaffold the DevSpark architecture (memory, specs, scripts).
-2. Generate the markdown command shims into `.gemini/commands/`.
-3. Create the `ANTIGRAVITY.md` context file to provide Antigravity with persistent instructions about the DevSpark methodology.
+1. Scaffold the DevSpark prompt architecture.
+2. Generate markdown command shims into `.gemini/commands/`.
+3. Create the `ANTIGRAVITY.md` context file with durable DevSpark guidance.
+4. Install or refresh framework-owned assets under `.devspark/`.
 
 ## How it Works
 
 DevSpark uses a multi-tier shim resolution strategy for Antigravity:
 
-- **Stock commands** are placed in `.gemini/commands/` and give Antigravity the ability to run DevSpark operations (like `plan`, `tasks`, `implement`).
-- Antigravity parses these markdown files for instructions on how to call the DevSpark CLI in the background to execute tasks securely and autonomously.
+- **Stock commands** are placed in `.devspark/defaults/commands/`.
+- **Antigravity shims** are placed in `.gemini/commands/` and resolve to the
+  personal, team, or stock prompt.
 
 Because Antigravity integrates so deeply with your local workspace, DevSpark helps maintain strict architectural boundaries by enforcing limits on where code can be modified and requiring explicit approvals for architectural changes.

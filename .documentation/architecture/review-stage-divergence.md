@@ -1,9 +1,8 @@
 # Review-Stage Divergence
 
 This document enumerates per-stage behavior differences across the five review
-prompts (`clarify`, `analyze`, `critic`, `pr-review`, `address-pr-review`) per
-FR-036, and tracks any commands that resist the thin-shim model from
-[T018b](../specs/001-interactive-analyze-flow/tasks.md).
+prompts (`clarify`, `analyze`, `critic`, `pr-review`, `address-pr-review`) and
+tracks any commands that resist the thin-shim model.
 
 ## Status
 
@@ -15,7 +14,7 @@ prose recommendations, but the structured `findings[]` block conforms to a
 single shape with the fields documented in
 `tests/test_review_resolution_contract.py`.
 
-## Thin-Shim Spike (T018b)
+## Thin-Shim Spike
 
 The thin-shim model under `templates/prompts/atomic/<command>.md` was
 validated against the three commands carrying the most prose business logic:
@@ -40,7 +39,7 @@ relevant atomic prompt body with:
 ```
 
 Then add a row to the table below. The contract test
-`tests/test_review_stage_divergence_contract.py` (T055a) will fail if a
+`tests/test_review_stage_divergence_contract.py` will fail if a
 prompt declares `<!-- DIVERGENT: ... -->` without an entry here.
 
 | Stage | Marker text | Ticket | Resolution plan |

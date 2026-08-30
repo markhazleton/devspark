@@ -22,6 +22,19 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command prepares implementation linkage for verify-before-delete. When any
+later section conflicts with this section, the v4 section wins.
+
+- Every generated task must include empty `code_ref` and `knowledge_ref`
+  placeholders from the start.
+- Tasks that may alter governance must also include an empty `governance_ref`
+  placeholder.
+- Completed tasks may use `n/a` only with a reason.
+- The task list remains ephemeral and must not be referenced from permanent
+  code, `.knowledge`, or governance files.
+
 ## Workflow Position
 
 **Step 4 of 4** in the authoring chain (`specify → clarify → plan → tasks`).

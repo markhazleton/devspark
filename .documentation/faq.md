@@ -27,8 +27,6 @@ DevSpark has right-sized workflows:
 
 No. DevSpark is pure markdown. The AI agent does the heavy lifting.
 
-If you want terminal-driven execution, there is an optional CLI runtime as well. That runtime adds `devspark doctor`, `devspark harness ...`, and `devspark adapter ...`, but the prompt-first workflow remains the default way to use DevSpark.
-
 ---
 
 ## AI-Assisted Coding
@@ -53,7 +51,9 @@ It will. Specs catch misunderstandings before coding starts. The constitution de
 
 ### What is a "constitution"?
 
-A markdown file (`.documentation/memory/constitution.md`) that defines your project's non-negotiable principles: coding standards, security requirements, testing expectations. Every DevSpark command reads and enforces it.
+A markdown file (`.knowledge/governance/constitution.md`) that defines your
+project's non-negotiable principles: coding standards, security requirements,
+testing expectations. Every DevSpark command reads and enforces it.
 
 ### I already have coding standards in a wiki. Do I need this too?
 
@@ -81,9 +81,11 @@ See the [Constitution Guide](constitution-guide.md) for full examples.
 
 In your AI agent's chat interface -- the same place you normally talk to your assistant. They are not terminal commands.
 
-### Do I have to use all 29 active commands?
+### Do I have to use every command?
 
-No. Most projects use a small subset of the 29 active stock commands. The shipped v2.8.0 template set contains 30 command files because `/devspark.archive` remains as a deprecated compatibility alias for `/devspark.harvest`.
+No. Most projects use a small subset of the stock commands. The shipped v4.0.0
+template set contains 29 command files because `/devspark.archive` remains as a
+deprecated compatibility alias for `/devspark.harvest`.
 
 **Everyday:** `/devspark.quickfix`, `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`, `/devspark.pr-review`
 
@@ -141,33 +143,14 @@ Run the matching quickstart prompt from the [Quick Start Guide](quickstart.md). 
 
 ### What files does DevSpark add?
 
-- **`.devspark/`** -- Framework files (prompt defaults, scripts). The "engine."
-- **`.documentation/`** -- Your project artifacts (specs, plans, constitution). "Your stuff."
+- **`.devspark/`** -- Framework-owned stock prompts, templates, scripts, and version stamp.
+- **`.knowledge/`** -- Current truth: governance, entities, decisions, and ontology reports.
+- **`.documentation/`** -- Repository-owned guides and work product.
+- **`.devspark.work/`** -- Temporary lifecycle work state.
 - **Agent shims** -- Platform-specific command files such as `.claude/commands/` or `.github/agents/`
 
-Uninstall removes `.devspark/` without touching your work.
-
-When you run the harness runtime, it also writes execution artifacts under `.documentation/devspark/runs/` by default. Those are generated run records, not stock framework files.
-
-### What is the harness runtime?
-
-An optional CLI execution layer for declarative engineering workflows. You define a YAML or JSON spec, validate it with `devspark harness validate`, execute it with `devspark harness run`, and inspect its event log with `devspark harness trace`.
-
-See [Harness Engineering](harness-engineering.md) for the full model.
-
-### Is the harness runtime part of the slash-command workflow?
-
-No. The 29 active stock slash commands remain prompt-driven. The harness runtime is additive and lives in the optional CLI.
-
-### What adapters are built in?
-
-`noop`, `manual`, `claude_code`, `codex`, `copilot`, and `cursor`.
-
-- `noop` is the safe default for dry runs, CI, and contract testing.
-- `manual` pauses for a human and requires a TTY.
-- `claude_code`, `codex`, `copilot`, and `cursor` call their corresponding local CLIs when available.
-
-Use `devspark adapter list` to inspect availability on the current machine and `devspark adapter default <name>` to save a local default.
+Uninstall removes `.devspark/` and agent shims without touching repository-owned
+work.
 
 ### Will DevSpark conflict with my existing tooling?
 
@@ -201,7 +184,7 @@ Multi-app is additive -- it doesn't change existing single-app behavior. See the
 
 ## Troubleshooting
 
-For upgrade-specific issues, see the [Upgrade Guide](upgrade.md#troubleshooting).
+For upgrade-specific issues, see the [Upgrade Guide](upgrade.md).
 
 ### Slash commands aren't working
 
@@ -211,7 +194,7 @@ For upgrade-specific issues, see the [Upgrade Guide](upgrade.md#troubleshooting)
 
 ### The AI isn't following my constitution
 
-- Verify `.documentation/memory/constitution.md` exists and isn't empty.
+- Verify `.knowledge/governance/constitution.md` exists and isn't empty.
 - Make principles specific and testable: "All public API endpoints MUST return proper HTTP status codes" not "write good code."
 - For large codebases, try working in smaller scopes.
 

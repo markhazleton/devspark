@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature or enhancement for DevSpark CLI or DevSpark
+description: Suggest a new feature or enhancement for DevSpark
 title: "[Feature]: "
 labels: ["enhancement", "needs-triage"]
 body:
@@ -39,7 +39,8 @@ body:
       label: Component
       description: Which component does this feature relate to?
       options:
-        - DevSpark CLI (initialization, commands)
+        - Quickstart prompts
+        - Command prompts
         - Spec templates (BDD, Testing Strategy, etc.)
         - Agent integrations (command files, workflows)
         - Scripts (Bash/PowerShell utilities)

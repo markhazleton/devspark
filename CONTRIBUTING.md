@@ -33,14 +33,17 @@ On [GitHub Codespaces](https://github.com/features/codespaces) it's even simpler
 ## Submitting a pull request
 
 > [!NOTE]
-> If your pull request introduces a large change that materially impacts the work of the CLI or the rest of the repository (e.g., you're introducing new templates, arguments, or otherwise major changes), make sure that it was **discussed and agreed upon** by the project maintainers. Pull requests with large changes that did not have a prior conversation and agreement will be closed.
+> If your pull request introduces a large change that materially impacts prompts,
+> scripts, quickstarts, templates, or other repository contracts, make sure that
+> it was **discussed and agreed upon** by the project maintainers. Pull requests
+> with large changes that did not have a prior conversation and agreement will be
+> closed.
 
 1. Fork and clone the repository
-1. Configure and install the dependencies: `uv sync`
-1. Make sure the CLI works on your machine: `uv run devspark --help`
+1. Configure local test dependencies for repository contracts
 1. Create a new branch: `git checkout -b my-branch-name`
 1. Make your change, add tests, and make sure everything still works
-1. Test the CLI functionality with a sample project if relevant
+1. Test quickstart behavior with a sample project if relevant
 1. Push to your fork and submit a pull request
 1. Wait for your pull request to be reviewed and merged.
 
@@ -59,18 +62,17 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 When working on devspark:
 
-1. Test changes with the `devspark` CLI commands in your coding agent of choice:
+1. Test changes with the DevSpark slash commands in your coding agent of choice:
    - Core: `/devspark.specify`, `/devspark.plan`, `/devspark.tasks`, `/devspark.implement`
    - Quality: `/devspark.pr-review`, `/devspark.site-audit`, `/devspark.critic`
 2. Verify templates are working correctly in `templates/` directory
-3. Test script functionality in the `.documentation/scripts/` directory
-4. Ensure memory files (`memory/constitution.md`) are updated if major process changes are made
+3. Test script functionality in the `.devspark/scripts/` layout produced by quickstarts
+4. Ensure current-truth files under `.knowledge/` are updated if major process changes are made
 5. **Lint all markdown before pushing** (Constitution §VIII): run `npx markdownlint-cli2 "**/*.md"`
    and resolve all errors. CI will block the PR if any errors remain.
 
 ### Testing template and command changes locally
 
-Running `uv run devspark init` pulls released packages, which won’t include your local changes.  
 To test your templates, commands, and other changes locally, follow these steps:
 
 1. **Create release packages**
@@ -93,7 +95,9 @@ To test your templates, commands, and other changes locally, follow these steps:
 
 ## About DevSpark
 
-DevSpark is an independent, community-maintained project. It provides a structured, spec-driven development process for AI coding assistants through 24 prompt templates and helper scripts.
+DevSpark is an independent, community-maintained project. It provides a
+structured, spec-driven development process for AI coding assistants through 29
+stock command prompts and helper scripts.
 
 ## AI contributions in DevSpark
 

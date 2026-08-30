@@ -68,7 +68,7 @@ fi
 
 # Test 3: Verify delivery check validation rule exists
 log_test "Delivery check rule defined"
-spec_path="$REPO_ROOT/.documentation/specs/001-harness-delivery-integrity"
+spec_path="$REPO_ROOT/.documentation/specs/001-delivery-integrity"
 if [[ -d "$spec_path" ]]; then
     log_pass "Feature spec directory exists"
     
@@ -92,7 +92,7 @@ fi
 
 # Test 5: Verify governance approval checkpoint exists
 log_test "Governance approval gate documentation"
-approval_file="$REPO_ROOT/.documentation/specs/001-harness-delivery-integrity/gates/governance-approval.md"
+approval_file="$REPO_ROOT/.documentation/specs/001-delivery-integrity/gates/governance-approval.md"
 if [[ -f "$approval_file" ]]; then
     if grep -q "Approver Name:" "$approval_file"; then
         log_pass "Governance approval template exists"

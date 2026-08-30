@@ -55,8 +55,11 @@ done
 
 # Get repository context
 REPO_ROOT=$(get_repo_root)
-CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
-QUICKFIX_DIR="$REPO_ROOT/.documentation/quickfixes"
+CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
+if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.documentation/memory/constitution.md" ]]; then
+    CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
+fi
+QUICKFIX_DIR="$REPO_ROOT/.devspark.work/quickfixes"
 CURRENT_BRANCH=$(get_current_branch)
 
 # Check constitution exists
@@ -65,18 +68,17 @@ if [[ -f "$CONSTITUTION_PATH" ]]; then
     CONSTITUTION_EXISTS="true"
 fi
 
-# Calculate next quickfix ID (QF-YYYY-NNN format)
+# Calculate next quickfix work-package ID
 YEAR=$(date +%Y)
 NEXT_NUM=1
 if [[ -d "$QUICKFIX_DIR" ]]; then
-    LATEST=$(find "$QUICKFIX_DIR" -maxdepth 1 -name "QF-${YEAR}-[0-9]*.md" -exec basename {} \; 2>/dev/null | grep -E "^QF-${YEAR}-[0-9]+\.md$" | sort -r | head -1 || echo "")
+    LATEST=$(find "$QUICKFIX_DIR" -maxdepth 1 -type d -name "qf-${YEAR}-[0-9]*" -exec basename {} \; 2>/dev/null | grep -E "^qf-${YEAR}-[0-9]+$" | sort -r | head -1 || echo "")
     if [[ -n "$LATEST" ]]; then
-        # Extract number from filename like QF-2026-001.md
-        CURRENT_NUM=$(echo "$LATEST" | sed -E "s/QF-$YEAR-0*([0-9]+)\.md/\1/")
+        CURRENT_NUM=$(echo "$LATEST" | sed -E "s/qf-$YEAR-0*([0-9]+)/\1/")
         NEXT_NUM=$((CURRENT_NUM + 1))
     fi
 fi
-NEXT_ID=$(printf "QF-%s-%03d" "$YEAR" "$NEXT_NUM")
+NEXT_ID=$(printf "qf-%s-%03d" "$YEAR" "$NEXT_NUM")
 
 # Get git user for attribution
 GIT_USER="unknown"
@@ -114,12 +116,10 @@ if [[ -n "$DESCRIPTION" ]]; then
     fi
 fi
 
-# List existing quickfixes for list action
+# List existing quickfix work packages for list action
 QUICKFIXES_JSON="[]"
 if [[ -d "$QUICKFIX_DIR" ]]; then
-    QUICKFIXES_JSON=$(ls "$QUICKFIX_DIR"/*.md 2>/dev/null | while read -r f; do
-        basename "$f" .md
-    done | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
+    QUICKFIXES_JSON=$(find "$QUICKFIX_DIR" -maxdepth 1 -type d -exec basename {} \; 2>/dev/null | sort | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
 fi
 
 # Output JSON if requested
@@ -129,6 +129,7 @@ if [[ "$JSON_MODE" == true ]]; then
   "REPO_ROOT": "$REPO_ROOT",
   "CONSTITUTION_PATH": "$CONSTITUTION_PATH",
   "CONSTITUTION_EXISTS": $CONSTITUTION_EXISTS,
+  "WORK_PACKAGE_DIR": "$QUICKFIX_DIR/$NEXT_ID",
   "QUICKFIX_DIR": "$QUICKFIX_DIR",
   "CURRENT_BRANCH": "$CURRENT_BRANCH",
   "NEXT_ID": "$NEXT_ID",
@@ -149,7 +150,8 @@ else
     echo "================"
     echo "Repository: $REPO_ROOT"
     echo "Constitution: $CONSTITUTION_PATH (exists: $CONSTITUTION_EXISTS)"
-    echo "Quickfix Directory: $QUICKFIX_DIR"
+    echo "Quickfix Work Root: $QUICKFIX_DIR"
+    echo "Work Package: $QUICKFIX_DIR/$NEXT_ID"
     echo "Current Branch: $CURRENT_BRANCH"
     echo "Next ID: $NEXT_ID"
     echo "Action: $ACTION"

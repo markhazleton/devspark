@@ -74,11 +74,14 @@ done
 
 # Get repository context
 REPO_ROOT=$(get_repo_root)
-CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
-PR_REVIEW_DIR="$REPO_ROOT/.documentation/specs/pr-review"
+CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
+if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.documentation/memory/constitution.md" ]]; then
+    CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
+fi
+PR_REVIEW_DIR="$REPO_ROOT/.devspark.work/pr-reviews"
 AUDIT_DIR="$REPO_ROOT/.documentation/copilot/audit"
-PROPOSALS_DIR="$REPO_ROOT/.documentation/memory/proposals"
-HISTORY_FILE="$REPO_ROOT/.documentation/memory/constitution-history.md"
+PROPOSALS_DIR="$REPO_ROOT/.devspark.work/governance-proposals"
+HISTORY_FILE="$REPO_ROOT/.knowledge/governance/constitution.md"
 
 # Check constitution exists
 CONSTITUTION_EXISTS="false"

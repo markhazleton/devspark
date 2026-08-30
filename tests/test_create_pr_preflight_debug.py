@@ -181,7 +181,8 @@ def main() -> None:
         _build_spec_repo(spec_repo)
         _init_git_repo(spec_repo, "001-feature-sample")
 
-        ps_preflight = _run_powershell_preflight(spec_repo); print(json.dumps(ps_preflight, indent=2))
+        ps_preflight = _run_powershell_preflight(spec_repo)
+        print(json.dumps(ps_preflight, indent=2))
         assert ps_preflight["feature"]["classification"] == "quick-spec"
         assert ps_preflight["prerequisites"]["clean_worktree"] is True
         assert ps_preflight["prerequisites"]["branch_pushed_to_remote"] is True

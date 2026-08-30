@@ -44,7 +44,7 @@ get_staged_paths() {
 }
 
 is_review_path() {
-    [[ "$1" =~ ^\.documentation/specs/pr-review/pr-.*\.md$ ]]
+    [[ "$1" =~ ^\.devspark\.work/pr-reviews/pr-.*\.md$ ]]
 }
 
 write_gate_failure() {
@@ -113,7 +113,7 @@ if ! [[ "$NORMALIZED" =~ ^[0-9]+$ ]]; then
 fi
 
 REPO_ROOT="$(get_repo_root)"
-REVIEW_FILE="$REPO_ROOT/.documentation/specs/pr-review/pr-${NORMALIZED}.md"
+REVIEW_FILE="$REPO_ROOT/.devspark.work/pr-reviews/pr-${NORMALIZED}.md"
 
 if [[ ! -f "$REVIEW_FILE" ]]; then
     printf 'DevSpark: Review file not found: %s\n' "$REVIEW_FILE" >&2

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devspark.local/schemas/devspark-derived.schema.json",
+  "title": "DevSpark v4 Derived Entity Metadata",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["generated_by", "constrained_by"],
+  "properties": {
+    "generated_by": {
+      "type": "string",
+      "const": "devspark.current_truth"
+    },
+    "constrained_by": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "default": []
+    }
+  }
+}

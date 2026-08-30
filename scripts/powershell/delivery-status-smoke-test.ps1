@@ -84,7 +84,7 @@ if (Test-Path $resultFile) {
 
 # Test 3: Verify delivery check validation rule exists
 LogTest "Delivery check rule defined"
-$specPath = "$RepoRoot\.documentation\specs\001-harness-delivery-integrity"
+$specPath = "$RepoRoot\.documentation\specs\001-delivery-integrity"
 if (Test-Path $specPath) {
     LogPass "Feature spec directory exists"
     
@@ -113,7 +113,7 @@ if (Test-Path $explainerFile) {
 
 # Test 5: Verify governance approval checkpoint exists
 LogTest "Governance approval gate documentation"
-$approvalFile = "$RepoRoot\.documentation\specs\001-harness-delivery-integrity\gates\governance-approval.md"
+$approvalFile = "$RepoRoot\.documentation\specs\001-delivery-integrity\gates\governance-approval.md"
 if (Test-Path $approvalFile) {
     $approvalContent = Get-Content $approvalFile -Raw
     if ($approvalContent -match "Approver Name:") {

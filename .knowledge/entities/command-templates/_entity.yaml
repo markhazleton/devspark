@@ -1,0 +1,11 @@
+id: command-templates
+name: Command Templates
+kind: framework-template-set
+summary: Canonical command prompts and atomic shims installed into supported AI agent surfaces.
+relations:
+  - type: generated_for
+    object: agent-shims
+evidence:
+  - type: test
+    ref: tests/test_atomic_prompt_frontmatter_contract.py
+    verified_by: execution

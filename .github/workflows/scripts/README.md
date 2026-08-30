@@ -104,8 +104,8 @@ Write-Host ".\.github\workflows\scripts\create-github-release.ps1 -Version $vers
 - **GitHub Actions uses bash scripts** (`.sh` files) on `ubuntu-latest` runners
 - **PowerShell scripts** (`.ps1` files) are for local Windows testing only
 - Both versions are kept in sync for the same functionality
-- `pyproject.toml` is the single source of truth for release versioning
-- Explicit release versions must match `pyproject.toml` or the workflow will fail
+- `.devspark/VERSION` is the single source of truth for release versioning
+- Explicit release versions must match `.devspark/VERSION` or the workflow will fail
 - Uses standard semantic versioning (vMAJOR.MINOR.PATCH)
 
 ## Differences from GitHub Actions

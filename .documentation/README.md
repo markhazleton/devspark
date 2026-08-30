@@ -2,7 +2,7 @@
 
 Current Release: [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
-Latest published release: [v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)
+Current version: [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
 
 This folder contains the documentation source files for DevSpark, built using [DocFX](https://dotnet.github.io/docfx/).
 
@@ -34,9 +34,8 @@ To build the documentation locally:
 - `index.md` - Main homepage and command reference
 - `quickstart.md` - Bootstrap and first-feature walkthrough
 - `implementation-lifecycle.md` - Full workflow with anti-patterns guide
-- `installation.md` - Advanced CLI alternatives
-- `harness-engineering.md` - Harness runtime commands, adapters, artifacts, and engineering model
-- `upgrade.md` - Prompt-first and CLI upgrade steps
+- `installation.md` - Approved quickstart-based installation
+- `upgrade.md` - Approved quickstart-based upgrades and repairs
 - `constitution-guide.md` - Constitution creation, structure, and best practices
 - `monorepo-guide.md` - Optional multi-app monorepo support
 - `pr-review-usage.md` - PR review command guide

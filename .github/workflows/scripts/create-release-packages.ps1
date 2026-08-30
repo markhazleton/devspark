@@ -67,10 +67,11 @@ New-Item -ItemType Directory -Path $GenReleasesDir -Force | Out-Null
 function Rewrite-Paths {
     param([string]$Content)
 
-    # DevSpark uses .devspark/ for framework files and .documentation/ for user work
+    # DevSpark uses .devspark/ for framework files, .knowledge/ for current truth,
+    # and .devspark.work/ for in-flight work packages.
     $Content = $Content -replace '(/?)\.specify/', '$1.documentation/'
-    $Content = $Content -replace '(^|\s|`)/specs/', '$1/.documentation/specs/'
-    $Content = $Content -replace '(^|\s|`)/memory/', '$1/.documentation/memory/'
+    $Content = $Content -replace '(^|\s|`)/specs/', '$1/.devspark.work/specs/'
+    $Content = $Content -replace '(^|\s|`)/memory/', '$1/.knowledge/governance/'
     $Content = $Content -replace '(^|\s|`)/scripts/', '$1/.devspark/scripts/'
     $Content = $Content -replace '(^|\s|`)/templates/', '$1/.devspark/templates/'
     return $Content
@@ -466,8 +467,11 @@ function Build-Variant {
     ) -join "`n"
     Set-Content -Path (Join-Path $devsparkDir "VERSION") -Value ($versionStamp + "`n") -NoNewline
 
-    # Constitution is user-owned and never included in release packages.
-    # Users create it via /devspark.constitution or /devspark.discover-constitution.
+    # Current truth is user-owned and never included as repository content.
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".knowledge/entities") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".knowledge/governance/decisions") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".knowledge/ontology") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".devspark.work/specs") -Force | Out-Null
     
     # ADR-001 / Constitution §VI: Always copy both script sets regardless of build variant.
     # The sh|ps variant only controls which {SCRIPT} path gets baked into command files.

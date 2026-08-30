@@ -325,7 +325,10 @@ main() {
     fi
 
     # Check for constitution
-    local constitution_path="$REPO_ROOT/.documentation/memory/constitution.md"
+    local constitution_path="$REPO_ROOT/.knowledge/governance/constitution.md"
+    if [[ ! -f "$constitution_path" && -f "$REPO_ROOT/.documentation/memory/constitution.md" ]]; then
+        constitution_path="$REPO_ROOT/.documentation/memory/constitution.md"
+    fi
     local constitution_exists="false"
     if [[ -f "$constitution_path" ]]; then
         constitution_exists="true"
@@ -371,7 +374,7 @@ main() {
     fi
 
     # Prepare review directory
-    local review_dir="$REPO_ROOT/.documentation/specs/pr-review"
+    local review_dir="$REPO_ROOT/.devspark.work/pr-reviews"
 
     # Build JSON output
     if [[ "$JSON_MODE" == true ]]; then

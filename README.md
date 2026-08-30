@@ -13,9 +13,9 @@
 </p>
 
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
-**Latest published release:** [v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)
+**Current version:** [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
 
-> **Not a program. Not a subscription.** Copy 30 stock command prompts (29 active commands plus one deprecated compatibility alias) plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 29 stock command prompts (28 active commands plus one deprecated compatibility alias) plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
 ---
 
@@ -24,9 +24,9 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 30 stock command prompt files (THE PRODUCT)
+├── templates/commands/   ← 29 stock command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
-├── src/devspark_cli/     ← Optional CLI for automated setup
+├── .knowledge/           ← Current truth: entities, governance, ontology reports
 └── .documentation/       ← Guides, media, and GitHub Pages site
 ```
 
@@ -77,21 +77,8 @@ contributor walkthrough for adding new skills.
 
 ## Get Started
 
-DevSpark v2.8.0 ships three flagship aliases that are the recommended entrypoints for every new feature. Run them via `devspark run <alias>` (note: `devspark run` is a CLI command — there is no `/devspark.run` slash command):
-
-| Alias | What it runs |
-|-------|--------------|
-| `create-spec` | `specify → plan → tasks → analyze` (pauses after analyze for review) |
-| `execute-plan` | `implement → create-pr → pr-review` (pauses after create-pr) |
-| `suggest-improvement` | `capture-context → classify-improvement → create-issue` (files an issue against `markhazleton/devspark`) |
-
-A fourth, more advanced alias, `full-cycle`, chains the entire lifecycle (`specify → plan → tasks → critic → analyze → tasks (remediate) → implement → create-pr → pr-review`) with `autonomy.level: autonomous` and guardrails instead of mandatory pauses — for users who want fewer checkpoints, not more. `devspark run full-cycle` still expects an agent already driving the conversation to act on each step; for genuinely unattended execution (no agent watching), use `devspark harness run full-cycle.harness.yaml --adapter claude_code --hands-off` instead.
-
-See [.documentation/workflows/getting-started.md](.documentation/workflows/getting-started.md) for the full walkthrough.
-
-For one-off work outside a workflow, the legacy entry command remains: `/devspark.specify`. It classifies the request as a one-off fix, a quick spec, or a full spec, explains the recommendation, and lets the human confirm the route before proceeding.
-
-**Option A — Agent Quickstart** (recommended — no install)
+DevSpark is installed, upgraded, and repaired only through quickstart prompts.
+Point your AI agent at the quickstart prompt for your platform:
 
 Point your AI agent at the quickstart prompt for your platform:
 
@@ -103,62 +90,19 @@ Point your AI agent at the quickstart prompt for your platform:
 
 The agent asks a few questions, then pulls and installs all DevSpark prompts.
 
-For ongoing updates, use the same no-install approach:
+For ongoing updates or repairs, run the same quickstart prompt again in the
+target repository. The quickstart compares the installed version, refreshes
+framework-owned files, repairs missing stock assets, and preserves
+repository-owned `.documentation/` and `.knowledge/` content.
 
-- Paste this [upgrade prompt URL](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) into your agent chat
-- Ask it to run an upgrade in your current repository
-
-This keeps upgrades prompt-first and does not require the CLI.
-
-## Option B — Download and Drop
+## Download and Drop
 
 1. Download the [latest release](https://github.com/markhazleton/devspark/releases) zip for your agent and unzip into your project
 2. Start using `/devspark.*` commands in your AI assistant
 
-### Option C — CLI (advanced/optional)
-
-```bash
-uv tool install devspark-cli --from git+https://github.com/markhazleton/devspark.git
-devspark init my-project          # new project
-devspark init --here --ai claude  # existing project
-```
-
-The CLI also exposes the optional harness runtime and environment checks:
-
-```bash
-devspark doctor
-devspark harness validate sample.harness.yaml
-devspark harness run sample.harness.yaml --dry-run
-devspark adapter list
-```
-
-For the full unattended lifecycle (specify through pr-review, no human checkpoints), see `full-cycle.harness.yaml`:
-
-```bash
-devspark adapter doctor                                   # confirm a write-capable adapter is ready
-devspark harness validate full-cycle.harness.yaml
-devspark harness run full-cycle.harness.yaml --adapter claude_code --hands-off
-```
-
 For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/implementation-lifecycle.md).
 
 Recommended review loop: `specify → implement → pr-review → address-pr-review → pr-review UPDATE → merge`.
-
-## Harness Runtime
-
-DevSpark also ships an additive CLI runtime for repeatable engineering workflows. This runtime is separate from the 29 active slash commands and is available when you install the optional CLI or work from a compatible source checkout.
-
-The harness runtime adds:
-
-- `devspark harness run` to execute a declarative workflow spec
-- `devspark harness validate` to check spec structure without execution
-- `devspark harness trace` to inspect the event log from a prior run
-- `devspark adapter list` and `devspark adapter default` to inspect and persist adapter preferences
-- `devspark doctor` to verify the local environment is ready for harness workflows
-
-Harness runs write structured artifacts to `.documentation/devspark/runs/` by default, preserve partial state on abort, and support repository or app-scoped execution when a multi-app registry is present.
-
-See [Harness Engineering](.documentation/harness-engineering.md) for the runtime model, command reference, artifact layout, adapters, and spec design guidance.
 
 ---
 
@@ -203,7 +147,6 @@ See [Harness Engineering](.documentation/harness-engineering.md) for the runtime
 | `/devspark.checklist` | Generate quality validation checklists |
 | `/devspark.personalize` | Create per-user command overrides |
 | `/devspark.discover-constitution` | Generate a constitution from existing code |
-| `/devspark.upgrade` | Pull latest DevSpark prompts into your project |
 
 `/devspark.harvest` is the canonical cleanup and archival workflow. `/devspark.archive` remains available only as a deprecated compatibility alias during migration.
 
@@ -316,10 +259,9 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 | Topic | Link |
 |-------|------|
 | Implementation lifecycle | [implementation-lifecycle.md](.documentation/implementation-lifecycle.md) |
-| Harness engineering | [harness-engineering.md](.documentation/harness-engineering.md) |
 | Quickstart | [quickstart.md](.documentation/quickstart.md) |
 | Constitution guide | [constitution-guide.md](.documentation/constitution-guide.md) |
-| CLI reference | [installation.md](.documentation/installation.md) |
+| Installation | [installation.md](.documentation/installation.md) |
 | Upgrading | [upgrade.md](.documentation/upgrade.md) |
 | PR review guide | [pr-review-usage.md](.documentation/pr-review-usage.md) |
 | Site audit guide | [site-audit-usage.md](.documentation/site-audit-usage.md) |
@@ -334,7 +276,6 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 - **Any OS** (Linux / macOS / Windows)
 - A [supported AI coding agent](#supported-ai-agents)
 - [Git](https://git-scm.com/downloads) (recommended)
-- [uv](https://docs.astral.sh/uv/) + [Python 3.11+](https://www.python.org/downloads/) (only if using the CLI)
 
 ## Contributing
 

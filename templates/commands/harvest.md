@@ -20,6 +20,17 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+Harvest no longer preserves old lifecycle artifacts. When any later section
+conflicts with this section, the v4 section wins.
+
+- Sweep abandoned in-flight work packages.
+- Run verify-before-delete before deleting any package that appears complete.
+- Move durable lessons into `.knowledge` or governance before cleanup.
+- Delete obsolete lifecycle scaffolding from the working tree rather than
+  archiving it into another repository folder.
+
 ## Prerequisites
 
 **Run `/devspark.release` before harvest** if you are closing out a version. Release seals the version, archives completed specs to `/.documentation/releases/v{VERSION}/`, and generates the CHANGELOG entry. Harvest then picks up afterward to clean up stale docs, rewrite spec-linked code comments, and move obsolete files to `/.archive/`.

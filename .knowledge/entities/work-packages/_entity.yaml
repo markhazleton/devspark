@@ -1,0 +1,11 @@
+id: work-packages
+name: Work Packages
+kind: ephemeral-state
+summary: v4 in-flight specification packages stored under `.devspark.work` until verify-before-delete succeeds.
+relations:
+  - type: validated_by
+    object: current-truth-ontology
+evidence:
+  - type: schema
+    ref: templates/schemas/devspark-work-package.schema.json
+    verified_by: inspection

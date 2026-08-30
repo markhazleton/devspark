@@ -21,6 +21,19 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command creates an ephemeral work package, not a durable record. When any
+later section conflicts with this section, the v4 section wins.
+
+- Write planning artifacts under the v4 work-package root.
+- Treat the package as temporary scaffolding that will be deleted after
+  verify-before-delete succeeds.
+- Do not write package IDs, task IDs, or planning paths into permanent code,
+  `.knowledge`, or governance files.
+- Load governance from `.knowledge/governance/constitution.md`, with legacy
+  fallback only when the v4 file is absent.
+
 ## Workflow Position
 
 **Step 1 of 4** in the authoring chain: `specify (WHAT) → clarify (resolve ambiguity) → plan (HOW) → tasks (ordered actions)`.

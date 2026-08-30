@@ -68,8 +68,8 @@ Use this split when designing or reviewing skill work:
 | Command-to-skill input and output mapping | Adapter contract |
 
 A skill must be useful outside DevSpark. It must not require branch creation,
-multi-app registry resolution, DevSpark gate execution, or any installed
-DevSpark CLI behavior to perform its core task.
+multi-app registry resolution or DevSpark gate execution to perform its core
+task.
 
 ## Skill Package Shape
 

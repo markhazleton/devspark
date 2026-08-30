@@ -13,6 +13,17 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command is the execution-evidence engine for v4 current truth. When any
+later section conflicts with this section, the v4 section wins.
+
+- Run `devspark verify-evidence` for execution evidence where available.
+- Validate current truth after evidence runs.
+- Treat inspection evidence as skipped execution, not as a pass.
+- Verification must prove behavior and current-truth linkage before any work
+  package deletion.
+
 ## Overview
 
 Verify that implemented work satisfies the relevant spec, tasks, gates, and

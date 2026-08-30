@@ -5,11 +5,10 @@ on:
     branches: [main]
     paths:
       - ".documentation/**"
+      - ".devspark/VERSION"
       - "CHANGELOG.md"
       - "README.md"
-      - "pyproject.toml"
       - "quickstart/**"
-      - "src/**"
       - "memory/**"
       - "scripts/**"
       - "templates/**"
@@ -52,22 +51,22 @@ jobs:
       - name: Skip if nothing to release
         if: steps.get_tag.outputs.skip_release == 'true'
         run: |
-          echo "::notice::pyproject.toml version is already tagged. No release needed for this push."
-      - name: Validate release version matches pyproject.toml
+          echo "::notice::.devspark/VERSION is already tagged. No release needed for this push."
+      - name: Validate release version matches .devspark/VERSION
         if: steps.get_tag.outputs.skip_release != 'true'
         run: |
-          pyproject_version=$(grep -oE '^[[:space:]]*version[[:space:]]*=[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' pyproject.toml | head -n1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
-          if [ -z "$pyproject_version" ]; then
-            echo "Unable to read version from pyproject.toml"
+          devspark_version=$(grep -oE '^[[:space:]]*version:[[:space:]]*[0-9]+\.[0-9]+\.[0-9]+' .devspark/VERSION | head -n1 | sed -E 's/.*version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          if [ -z "$devspark_version" ]; then
+            echo "Unable to read version from .devspark/VERSION"
             exit 1
           fi
 
           release_version="${{ steps.get_tag.outputs.new_version }}"
           release_version="${release_version#v}"
 
-          if [ "$pyproject_version" != "$release_version" ]; then
-            echo "Version mismatch: pyproject.toml=$pyproject_version release=$release_version"
-            echo "Update pyproject.toml before creating a release to keep DevSpark and DevSpark CLI in sync."
+          if [ "$devspark_version" != "$release_version" ]; then
+            echo "Version mismatch: .devspark/VERSION=$devspark_version release=$release_version"
+            echo "Update .devspark/VERSION before creating a release."
             exit 1
           fi
 

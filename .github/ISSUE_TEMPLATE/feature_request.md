@@ -10,7 +10,7 @@ assignees: ''
 A clear description of the pain point or gap.
 
 **Proposed solution**
-How should DevSpark handle this? (new command, template change, CLI feature, etc.)
+How should DevSpark handle this? (new command, template change, prompt behavior, etc.)
 
 **Alternatives considered**
 Any other approaches you've thought about.
@@ -21,5 +21,4 @@ Any other approaches you've thought about.
 - [ ] Copilot only
 - [ ] Claude Code only
 - [ ] Cursor only
-- [ ] CLI only
 - [ ] Other: ___

@@ -19,7 +19,7 @@ A typical monorepo might contain:
 - An admin API for internal operations
 - A React-based admin dashboard
 - A client-facing web application
-- A QA test harness
+- An internal QA tool
 - Shared libraries consumed by multiple services
 
 ### Why Teams Use Monorepos
@@ -38,7 +38,7 @@ Monorepos introduce governance and workflow problems that don't exist in single-
 
 | Challenge | Impact |
 |-----------|--------|
-| **Mixed governance** | A client-facing React app and an internal QA harness have different security, testing, and review requirements — but live side by side |
+| **Mixed governance** | A client-facing React app and an internal QA tool have different security, testing, and review requirements — but live side by side |
 | **Scope ambiguity** | When a PR touches multiple directories, it's unclear which applications are affected and which review rules apply |
 | **Dependency risk** | Changes to shared contracts or libraries can break downstream consumers without the author realizing it |
 | **Context overload** | AI coding assistants treat the entire repository as one unit, producing plans and reviews that conflate unrelated applications |

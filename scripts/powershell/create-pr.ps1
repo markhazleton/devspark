@@ -131,16 +131,23 @@ function Find-QuickfixRecordForBranch {
         [string]$BranchName
     )
 
-    $quickfixDir = Join-Path $RepoRoot '.documentation/quickfixes'
+    $quickfixDir = Join-Path $RepoRoot '.devspark.work/quickfixes'
     if (-not (Test-Path $quickfixDir)) {
         return $null
     }
 
-    $quickfixFiles = Get-ChildItem -Path $quickfixDir -Filter *.md -File -ErrorAction SilentlyContinue |
+    $quickfixFiles = Get-ChildItem -Path $quickfixDir -ErrorAction SilentlyContinue |
         Where-Object {
-            $content = Get-Content -LiteralPath $_.FullName -Encoding utf8
-            $branchLine = $content | Where-Object { $_ -match '^- \*\*Branch\*\*:\s*(.+)$' } | Select-Object -First 1
-            $branchLine -and (($branchLine -replace '^- \*\*Branch\*\*:\s*', '').Trim() -eq $BranchName)
+            $sourceFile = $_.FullName
+            if ($_.PSIsContainer -and (Test-Path (Join-Path $_.FullName 'work.yaml'))) {
+                $sourceFile = Join-Path $_.FullName 'work.yaml'
+            } elseif ($_.PSIsContainer -and (Test-Path (Join-Path $_.FullName 'quickfix.md'))) {
+                $sourceFile = Join-Path $_.FullName 'quickfix.md'
+            }
+            if (-not (Test-Path $sourceFile -PathType Leaf)) { return $false }
+            $content = Get-Content -LiteralPath $sourceFile -Encoding utf8
+            $branchLine = $content | Where-Object { $_ -match '^(branch:|- \*\*Branch\*\*:)\s*(.+)$' } | Select-Object -First 1
+            $branchLine -and (($branchLine -replace '^(branch:|- \*\*Branch\*\*:)\s*', '').Trim() -eq $BranchName)
         } |
         Sort-Object Name
 
@@ -157,18 +164,25 @@ function Get-QuickfixRecordSummary {
         return $null
     }
 
-    $heading = Get-Content -LiteralPath $QuickfixPath -Encoding utf8 | Where-Object { $_ -match '^# ' } | Select-Object -First 1
-    $idLine = Get-Content -LiteralPath $QuickfixPath -Encoding utf8 | Where-Object { $_ -match '^- \*\*ID\*\*:\s*(.+)$' } | Select-Object -First 1
+    $sourceFile = $QuickfixPath
+    if ((Test-Path $QuickfixPath -PathType Container) -and (Test-Path (Join-Path $QuickfixPath 'work.yaml'))) {
+        $sourceFile = Join-Path $QuickfixPath 'work.yaml'
+    } elseif ((Test-Path $QuickfixPath -PathType Container) -and (Test-Path (Join-Path $QuickfixPath 'quickfix.md'))) {
+        $sourceFile = Join-Path $QuickfixPath 'quickfix.md'
+    }
+
+    $heading = Get-Content -LiteralPath $sourceFile -Encoding utf8 | Where-Object { $_ -match '^# ' } | Select-Object -First 1
+    $idLine = Get-Content -LiteralPath $sourceFile -Encoding utf8 | Where-Object { $_ -match '^(id:|- \*\*ID\*\*:)\s*(.+)$' } | Select-Object -First 1
     return [PSCustomObject]@{
         path = $QuickfixPath
-        id = if ($idLine) { ($idLine -replace '^- \*\*ID\*\*:\s*', '').Trim() } else { [IO.Path]::GetFileNameWithoutExtension($QuickfixPath) }
+        id = if ($idLine) { ($idLine -replace '^(id:|- \*\*ID\*\*:)\s*', '').Trim() } else { [IO.Path]::GetFileNameWithoutExtension($QuickfixPath) }
         title = if ($heading) { $heading -replace '^#\s*', '' } else { '' }
-        classification = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'classification'
-        risk_level = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'risk_level'
-        required_gates = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'required_gates'
-        recommended_next_step = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'recommended_next_step'
-        problem_statement = Get-MarkdownSectionText -Path $QuickfixPath -SectionName 'Problem Statement'
-        gate_acknowledgements = Get-MarkdownSectionText -Path $QuickfixPath -SectionName 'Gate Acknowledgements'
+        classification = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'classification'
+        risk_level = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'risk_level'
+        required_gates = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'required_gates'
+        recommended_next_step = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'recommended_next_step'
+        problem_statement = Get-MarkdownSectionText -Path $sourceFile -SectionName 'Problem Statement'
+        gate_acknowledgements = Get-MarkdownSectionText -Path $sourceFile -SectionName 'Gate Acknowledgements'
     }
 }
 

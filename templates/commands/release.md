@@ -20,6 +20,18 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+Release seals current truth; it does not archive completed work packages. When
+any later section conflicts with this section, the v4 section wins.
+
+- Confirm current-truth validation is clean before release.
+- Confirm no in-flight work package remains for the release delta unless it is
+  intentionally still open.
+- Update version metadata, changelog, and release notes as current project
+  artifacts.
+- Do not move completed work packages into durable release folders.
+
 ## Overview
 
 This command seals a release by:
@@ -390,30 +402,30 @@ Create `/.documentation/releases/v{NEXT_VERSION}/metrics.json`:
 ### 9. Bump Version in Source Files
 
 After generating the CHANGELOG entry and release archive, and **before** committing,
-update the canonical version number so the next `devspark upgrade` stamps the new
-version into consumer projects.
+update the canonical version number so the next quickstart-driven upgrade stamps
+the new version into consumer projects.
 
 **Skip if DRY_RUN.**
 
-#### A. Bump `pyproject.toml` (DevSpark source repo)
+#### A. Bump `.devspark/VERSION` (DevSpark source repo)
 
-Edit `pyproject.toml` at the repository root:
+Edit `.devspark/VERSION` at the repository root:
 
-```toml
-[project]
-version = "{NEXT_VERSION}"   # was {CURRENT_VERSION}
+```yaml
+version: {NEXT_VERSION}
+installed: {TODAY}
 ```
 
 Make this edit now if {NEXT_VERSION} differs from {CURRENT_VERSION}.
 
-#### B. Confirm `.devspark/VERSION` (consumer repos)
+#### B. Consumer repositories
 
-`.devspark/VERSION` is **written automatically** by quickstart, `devspark init`, and
-upgrade flows. Maintainers do not need to update it manually in the source repo — it is
-a per-consumer-project stamp. Legacy installs may still contain `.documentation/DEVSPARK_VERSION`.
+`.devspark/VERSION` is written by quickstart prompts during install, upgrade,
+and repair. Legacy installs may still contain `.documentation/DEVSPARK_VERSION`.
 
-After bumping `pyproject.toml` and publishing the new release, consumer projects
-will receive the correct version stamp the next time they run `devspark upgrade`.
+After bumping `.devspark/VERSION` and publishing the new release, consumer
+projects receive the correct version stamp the next time they run the matching
+quickstart prompt.
 
 #### C. Verify version consistency
 
@@ -421,7 +433,7 @@ Confirm these three sources agree on {NEXT_VERSION}:
 
 | Source | Expected Value |
 |--------|----------------|
-| `pyproject.toml` → `version` | {NEXT_VERSION} |
+| `.devspark/VERSION` → `version` | {NEXT_VERSION} |
 | `CHANGELOG.md` top entry | `## [{NEXT_VERSION}]` |
 | Git tag (to be created) | `v{NEXT_VERSION}` |
 
@@ -577,7 +589,7 @@ To execute this release:
 
 ### Next Steps
 
-1. Confirm `pyproject.toml` has been bumped to `{NEXT_VERSION}` (Step 9A above).
+1. Confirm `.devspark/VERSION` has been bumped to `{NEXT_VERSION}` (Step 9A above).
 
 2. Confirm public docs have no hardcoded version strings (Step 10 above) — the release badges read `{NEXT_VERSION}` automatically once it's tagged.
 
@@ -610,11 +622,8 @@ To execute this release:
    gh release create v{NEXT_VERSION} --notes-file .documentation/releases/v{NEXT_VERSION}/release-notes.md
    ```
 
-4. Consumer projects will receive the new version stamp the next time they run:
-
-   ```bash
-   devspark upgrade
-   ```
+4. Consumer projects receive the new version stamp the next time they run their
+   matching quickstart prompt.
 
 5. Run `/devspark.harvest` to complete the cleanup cycle: rewrite spec-linked code comments, consolidate or archive stale docs, and move obsolete artifacts to `/.archive/`.
 

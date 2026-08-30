@@ -17,6 +17,19 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+PR review is the primary assimilation checkpoint. When any later section
+conflicts with this section, the v4 section wins.
+
+- Gate on current-truth validation for touched code, `.knowledge`, and
+  governance files.
+- Gate on no permanent references back to ephemeral work artifacts.
+- Gate on missing evidence for knowledge and decisions.
+- Warn on inspection evidence that lacks `fallback_reason`.
+- Use Git history and PR comments for review history; do not write permanent
+  review-history files into the repository.
+
 ## Overview
 
 This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are stored in `/.documentation/specs/pr-review/pr-{id}.md` for historical reference.

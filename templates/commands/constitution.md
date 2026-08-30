@@ -14,6 +14,18 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command writes current governance. When any later section conflicts with
+this section, the v4 section wins.
+
+- Write the constitution at `.knowledge/governance/constitution.md`.
+- Edit the constitution in place; do not append historical sync reports.
+- When an amendment conflicts with an existing current decision, update that
+  decision topic file in place.
+- Preserve legacy constitution files only as migration input, not as current
+  write targets.
+
 ## Lifecycle Position
 
 **Single writer of record** for `/.documentation/memory/constitution.md`. Two siblings feed in but never edit the constitution themselves:

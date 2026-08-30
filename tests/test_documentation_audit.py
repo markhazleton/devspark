@@ -40,6 +40,16 @@ FORBIDDEN_PHRASES = [
     "24 slash-command prompt files (the product)",
     "It provides 24 prompt templates",
     "redirect to shared canonical prompts",
+    "DevSpark " + "CL" + "I",
+    "devspark-" + "cli",
+    "devspark " + "init",
+    "devspark " + "upgrade",
+    "devspark " + "run",
+    "devspark " + "har" + "ness",
+    "devspark " + "doctor",
+    "/devspark." + "upgrade",
+    "templates/commands/" + "upgrade.md",
+    "src/devspark_" + "cli",
 ]
 
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")

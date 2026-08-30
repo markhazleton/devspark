@@ -71,7 +71,7 @@ fi
 find_repo_root() {
     local dir="$1"
     while [ "$dir" != "/" ]; do
-        if [ -d "$dir/.git" ] || [ -d "$dir/.documentation" ]; then
+        if [ -d "$dir/.git" ] || [ -d "$dir/.devspark" ] || [ -d "$dir/.knowledge" ]; then
             echo "$dir"
             return 0
         fi
@@ -186,16 +186,17 @@ if [[ ${#DEVSPARK_REMAINING_ARGS[@]} -gt 0 ]]; then
 fi
 FEATURE_DESCRIPTION="${ARGS[*]}"
 
-# Determine specs directory based on app context
+# Determine v4 work-package directory based on app context
 if [[ -n "${DEVSPARK_APP_ID:-}" ]]; then
     APP_DOC_ROOT=$(resolve_app_doc_root "$REPO_ROOT" "$DEVSPARK_APP_ID" 2>/dev/null || true)
     if [[ -n "$APP_DOC_ROOT" && "$APP_DOC_ROOT" != ERROR* ]]; then
-        SPECS_DIR="$APP_DOC_ROOT/specs"
+        APP_WORK_ROOT="${APP_DOC_ROOT%/.documentation}/.devspark.work"
+        SPECS_DIR="$APP_WORK_ROOT/specs"
     else
-        SPECS_DIR="$REPO_ROOT/.documentation/specs"
+        SPECS_DIR="$REPO_ROOT/.devspark.work/specs"
     fi
 else
-    SPECS_DIR="$REPO_ROOT/.documentation/specs"
+    SPECS_DIR="$REPO_ROOT/.devspark.work/specs"
 fi
 mkdir -p "$SPECS_DIR"
 

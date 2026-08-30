@@ -24,7 +24,7 @@ def main() -> None:
     pr_review = _read("templates/commands/pr-review.md")
     claude_shim = _read(".claude/commands/devspark.address-pr-review.md")
     copilot_shim = _read(".github/prompts/devspark.address-pr-review.prompt.md")
-    constitution = _read(".documentation/memory/constitution.md")
+    constitution = _read(".knowledge/governance/constitution.md")
 
     for phase in range(0, 8):
         assert f"Phase {phase}" in command
@@ -55,7 +55,7 @@ def main() -> None:
     assert "/devspark.address-pr-review {PR_ID}" in pr_review
     assert "templates/commands/address-pr-review.md" in claude_shim
     assert "agent: devspark.address-pr-review" in copilot_shim
-    assert "PR Review Artifact Commit Discipline (MUST)" in constitution
+    assert "Closed Permanent Reference Graph" in constitution
 
     print("Address PR review contract validated.")
 

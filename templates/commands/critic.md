@@ -26,6 +26,18 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command judges whether resolved current-truth context is sufficient for the
+planned delta. When any later section conflicts with this section, the v4
+section wins.
+
+- Do not re-run mechanical ontology resolution; that belongs to analyze.
+- Challenge missing entities, missing constrained decisions, or shallow
+  `context_resolved` coverage when the planned files imply broader impact.
+- Treat sufficiency findings as review judgment unless they expose a hard
+  constitution or evidence violation.
+
 ## Overview
 
 Act as a skeptical technical expert identifying risks, architectural flaws, implementation hazards, and failure scenarios that will prevent successful delivery. Focuses on **what will go wrong** rather than consistency checking.

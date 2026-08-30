@@ -12,7 +12,7 @@ Use this guide when you want Codex to do more than answer a one-off coding quest
 | Durable guidance | Loads `AGENTS.md` and scoped instructions | Writes and references constitution, specs, plans, tasks, and gates |
 | Reusable workflow | Uses prompts, skills, plugins, and `codex exec` | Provides `/devspark.*` command shims and stock prompt resolution |
 | Verification | Runs tests, lint, builds, and reviews | Defines when to run validation and where to record outcomes |
-| Team memory | Uses project files as context | Preserves decisions and release history under `.documentation/` |
+| Team memory | Uses project files as context | Preserves decisions and current truth under `.knowledge/` |
 
 The practical rule is simple: let Codex execute work, and let DevSpark shape the work into a reviewable lifecycle.
 
@@ -22,7 +22,8 @@ Start with the [Codex quickstart prompt](../quickstart/devspark_quickstart_codex
 
 - `.devspark/defaults/commands/` - stock DevSpark command prompts
 - `.codex/prompts/` - Codex prompt shims for `/devspark.*`
-- `.documentation/` - project-owned artifacts, specs, decisions, and overrides
+- `.documentation/` - project-owned guides and prompt overrides
+- `.knowledge/` - governance, entities, decisions, and ontology reports
 - `AGENTS.md` - repository guidance Codex can load automatically
 
 Keep `AGENTS.md` short and durable. It should tell Codex where DevSpark files live, how prompt resolution works, and which files are user-owned. Avoid putting long process manuals in `AGENTS.md`; link to DevSpark docs instead.
@@ -35,12 +36,13 @@ Recommended `AGENTS.md` guidance:
 ## DevSpark
 
 - Framework files live in `.devspark/`.
-- Project artifacts and team overrides live in `.documentation/`.
+- Project documentation and team overrides live in `.documentation/`.
+- Current truth lives in `.knowledge/`.
 - Resolve DevSpark commands through the first existing file:
   1. `.documentation/{git-user}/commands/devspark.{name}.md`
   2. `.documentation/commands/devspark.{name}.md`
   3. `.devspark/defaults/commands/devspark.{name}.md`
-- Preserve `.documentation/`; upgrades refresh `.devspark/` only.
+- Preserve `.documentation/` and `.knowledge/`; quickstart upgrades refresh `.devspark/`.
 ```
 
 Codex discovers `AGENTS.md` from global and project scopes, then merges files from the repository root down to the current directory. More specific files override broader guidance, so nested `AGENTS.md` files are useful for monorepos with different service rules.
@@ -120,17 +122,10 @@ If a full suite is too expensive, explain what was run and what remains.
 
 For frontend work, add visual verification. For API work, add contract or integration checks. For shared libraries, add both unit tests and at least one caller-facing check.
 
-## Automate Stable Workflows
+## Automate Stable Codex Workflows
 
-For repeatable terminal automation, use the DevSpark harness or Codex non-interactive mode.
-
-DevSpark harness:
-
-```bash
-devspark harness run sample.harness.yaml --adapter codex
-```
-
-Codex non-interactive mode:
+For repeatable terminal automation, use Codex non-interactive mode with explicit
+prompts.
 
 ```bash
 cat prompt.txt | codex exec --sandbox workspace-write -
@@ -178,7 +173,7 @@ Use these conventions for reliable Codex outcomes:
 | Codex edits too many unrelated files | Add constraints and done criteria before `/devspark.implement` |
 | Context gets too large | Point Codex to specific artifacts and ask it to summarize loaded context |
 | Review feedback is mixed into feature commits | Use `/devspark.address-pr-review` for isolated fixes |
-| Upgrade overwrites team work | Keep team work under `.documentation/`; DevSpark upgrades only refresh `.devspark/` |
+| Upgrade overwrites team work | Keep team work under `.documentation/` and `.knowledge/`; quickstart upgrades refresh framework-owned files |
 | `/devspark.*` does not appear in Codex CLI | Restart Codex, or set session-scoped `CODEX_HOME` to `.codex` |
 
 ## Reference Links
@@ -189,4 +184,3 @@ Use these conventions for reliable Codex outcomes:
 - [Codex non-interactive mode](https://developers.openai.com/codex/noninteractive)
 - [Codex skills](https://developers.openai.com/codex/skills)
 - [DevSpark Quick Start](quickstart.md)
-- [Harness Engineering](harness-engineering.md)

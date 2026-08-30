@@ -1,6 +1,7 @@
 # DevSpark Quickstart Guides
 
-Install DevSpark into any repository by pointing your AI agent at the right quickstart file. No CLI required.
+Install, upgrade, or repair DevSpark in any repository by pointing your AI agent
+at the right quickstart file.
 
 ## Pick Your Agent
 
@@ -17,23 +18,20 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 
 1. Open a chat with your AI agent in the target repository
 2. Paste the URL to the raw quickstart file, or copy its contents into the chat
-3. The agent detects the current OS (for plan preview only), then pulls and installs the full DevSpark framework payload — **both** PowerShell and Bash script sets are always installed regardless of OS
-4. For upgrades, run the [remote upgrade prompt](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) (no CLI required)
-5. Use CLI only if you want advanced automation (`devspark upgrade`)
+3. The agent detects the current OS for plan preview only, then pulls and installs the full DevSpark framework payload. **Both** PowerShell and Bash script sets are always installed regardless of OS.
+4. For upgrades or repairs, re-run the same quickstart prompt in the target repository.
 
 After installation, start new work with `/devspark.specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
 
-If you also install the optional CLI, you can validate the local environment with `devspark doctor` and run declarative harness workflows with `devspark harness run`, `devspark harness validate`, and `devspark harness trace`.
-
-The quickstart guides can handle fresh installs, legacy migrations, version-based upgrades, and repair of incomplete framework installs when expected stock files are missing.
+The quickstart guides are the only approved install, upgrade, and repair path.
+They handle fresh installs, legacy migrations, version-based upgrades, and repair
+of incomplete framework installs when expected stock files are missing.
 
 ## Upgrade Paths
 
-- Basic (recommended): remote upgrade prompt
-- Paste this [upgrade prompt URL](https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md) into your agent chat in the target repo
+- Re-run the same quickstart prompt in the target repository.
 - Tell the agent to run a dry run first, then apply the upgrade.
-- Advanced (optional): CLI
-- Run `devspark upgrade` if you have CLI tooling installed and prefer terminal-driven upgrades.
+- Do not use a terminal installer or separate upgrade command.
 
 Example (Copilot):
 

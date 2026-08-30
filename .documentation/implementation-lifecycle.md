@@ -2,15 +2,14 @@
 
 This guide defines the recommended DevSpark lifecycle for teams.
 
-Primary approach: prompt-first workflows through your AI agent using remote prompt files.
-Advanced option: CLI automation when you explicitly want terminal-driven operations.
+Primary approach: prompt-first workflows through your AI agent using remote
+prompt files.
 
 ## Lifecycle at a Glance
 
-1. Bootstrap with quickstart prompt (no CLI)
+1. Bootstrap with quickstart prompt
 2. Run the implementation workflow (`/devspark.constitution` -> `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement` -> `/devspark.create-pr` -> `/devspark.pr-review` -> `/devspark.address-pr-review` -> `/devspark.pr-review UPDATE`)
-3. Maintain with the remote upgrade prompt (no CLI)
-4. Use CLI only for advanced automation
+3. Maintain by re-running the matching quickstart prompt for install, upgrade, or repair
 
 ## 1. Bootstrap (Primary)
 
@@ -23,7 +22,8 @@ Open your AI agent in the target repository and run the matching quickstart prom
 
 The quickstart prompt installs stock framework files into `.devspark/` and preserves project work in `.documentation/`.
 
-This is the standard installation path for DevSpark.
+This is the standard installation path for DevSpark and the only approved
+maintenance path.
 
 ## 2. Implement Features
 
@@ -174,11 +174,9 @@ If your repository contains multiple applications, you can scope any command to 
 
 Multi-app support is entirely optional. Single-application repositories use the standard workflow above with no changes.
 
-## 3. Upgrade (Primary)
+## 3. Upgrade and Repair
 
-Use the remote upgrade prompt in chat (no CLI required):
-
-- `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md`
+Re-run the same quickstart prompt in the target repository.
 
 Recommended cadence:
 
@@ -190,34 +188,18 @@ Upgrade behavior:
 
 - Updates stock framework files in `.devspark/`
 - Preserves team and personal customizations in `.documentation/`
+- Preserves current-truth knowledge in `.knowledge/`
 - Warns when `.documentation/commands/` overrides may hide structural changes in updated stock prompts
 
-This is the standard update path for DevSpark.
+This is the standard update and repair path for DevSpark.
 
 ## 4. Version Stamping Rules
 
-Quickstart and upgrade flows must keep `.devspark/VERSION` authoritative.
+Quickstart flows must keep `.devspark/VERSION` authoritative.
 
 - The `version:` value must be the latest DevSpark semantic version (`X.Y.Z`)
 - Do not write `quickstart` as a version value
 - If missing or invalid, treat installed version as unknown and refresh from latest
 
-## 5. CLI (Advanced Only)
-
-Use CLI if you need terminal-driven automation, scripting, or CI-like control.
-
-- Install/update CLI: `uv tool install devspark-cli --force --from git+https://github.com/markhazleton/devspark.git`
-- Upgrade project via CLI: `devspark upgrade`
-- Validate runtime prerequisites: `devspark doctor`
-- Run declarative execution specs: `devspark harness validate`, `devspark harness run`, `devspark harness trace`
-- Inspect or persist adapter preferences: `devspark adapter list`, `devspark adapter default`
-
-For delivery-integrity runs, use:
-
-- `devspark adapter doctor` to classify adapter readiness (`ready`, `write_approval_required`, `write_incompatible`, `unavailable`)
-- `devspark harness run <spec> --hands-off` for non-interactive lifecycle execution
-- `decision-packet.json` and `max-pass-failure-report.md` artifacts for final go/no-go decisions
-
-If your team does not need CLI automation, stay with prompt-first quickstart and prompt-first upgrade.
-
-For the runtime model, artifact layout, and spec authoring guidance, see [Harness Engineering](harness-engineering.md).
+Do not use a separate DevSpark installer, updater, or repair command. Keep those
+flows in quickstart prompts.

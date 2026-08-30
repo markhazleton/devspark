@@ -32,7 +32,7 @@
     "qa-profile": {
       "description": "Environment-safe test execution and fixture isolation",
       "tags": { "runtime-class": "qa" },
-      "rules": ["QA harness must not mutate production data"],
+      "rules": ["QA tool must not mutate production data"],
       "hints": { "review-depth": "standard" }
     }
   },
@@ -118,10 +118,10 @@
       "overrides": {}
     },
     {
-      "id": "qa-harness",
-      "name": "Runtime API Test Harness",
-      "path": "apps/qa-harness",
-      "kind": "qa-harness",
+      "id": "qa-tool",
+      "name": "Runtime API QA Tool",
+      "path": "apps/qa-tool",
+      "kind": "qa-tool",
       "purpose": "Quality assurance execution against runtime APIs",
       "runtime": "node",
       "owner": "quality-engineering",

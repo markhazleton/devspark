@@ -20,6 +20,17 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command refreshes PR-visible current-truth status. When any later section
+conflicts with this section, the v4 section wins.
+
+- Update the PR body with current-truth validation, evidence, and task-linkage
+  status from the current branch.
+- Use Git history for previous review state instead of writing durable
+  review-history artifacts.
+- Do not introduce permanent references to ephemeral work packages.
+
 ## Overview
 
 This command updates an **existing** pull request description based on the current state of the branch. Unlike `/devspark.create-pr`, which is designed for initial PR creation and prompts for full context, `update-pr` focuses on the branch delta since the last review — rebuilding the PR body without re-prompting for work items or context already captured in the existing PR.

@@ -1,7 +1,7 @@
 # DevSpark Quickstart — Cursor
 
 You are bootstrapping **DevSpark**, a spec-driven development process, into this repository.
-No CLI installation is required. You will pull prompt files from the DevSpark repo and place them in the correct directories.
+You will pull prompt files from the DevSpark repo and place them in the correct directories.
 
 ## Step 1: Gather Project Context
 
@@ -169,7 +169,6 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `discover-constitution.md` | `.devspark/defaults/commands/devspark.discover-constitution.md` |
 | `repo-story.md` | `.devspark/defaults/commands/devspark.repo-story.md` |
 | `archive.md` | `.devspark/defaults/commands/devspark.archive.md` (deprecated compatibility alias for harvest) |
-| `upgrade.md` | `.devspark/defaults/commands/devspark.upgrade.md` |
 | `update-pr.md` | `.devspark/defaults/commands/devspark.update-pr.md` |
 | `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
 | `add-application.md` | `.devspark/defaults/commands/devspark.add-application.md` |
@@ -198,12 +197,10 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 
 Also fetch every file recursively under these template subdirectories, preserving the same relative paths under `.devspark/templates/`:
 
-- `aliases/`
-- `prompts/`
+- `knowledge/``r`n- `prompts/`
 - `risk-checklists/`
 - `schemas/`
-- `workflows/`
-
+- `skills/``r`n
 Do not fetch `templates/commands/` in this step — Step 4 installs command prompts into `.devspark/defaults/commands/`. Do not fetch `templates/vscode-settings.json`.
 
 Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-registry.json` and save it to `agents-registry.json` at the repository root.
@@ -262,55 +259,51 @@ Fetch **both** script sets from `https://raw.githubusercontent.com/markhazleton/
 
 Save to `.devspark/scripts/powershell/`:
 
-- `powershell/common.ps1`
-- `powershell/platform.ps1`
-- `powershell/check-prerequisites.ps1`
-- `powershell/create-new-feature.ps1`
-- `powershell/setup-plan.ps1`
-- `powershell/get-pr-context.ps1`
 - `powershell/address-pr-review.ps1`
+- `powershell/archive-context.ps1`
+- `powershell/check-prerequisites.ps1`
+- `powershell/common.ps1`
+- `powershell/create-new-feature.ps1`
 - `powershell/create-pr.ps1`
 - `powershell/delivery-status-smoke-test.ps1`
+- `powershell/evolution-context.ps1`
 - `powershell/fix-score-context.ps1`
 - `powershell/generate-atomic-shims.ps1`
-- `powershell/migrate-to-documentation.ps1`
-- `powershell/release-history-context.ps1`
-- `powershell/run-workflow.ps1`
-- `powershell/validate-knowledge-coverage.ps1`
-- `powershell/update-agent-context.ps1`
-- `powershell/archive-context.ps1` (deprecated compatibility wrapper around harvest)
-- `powershell/evolution-context.ps1`
+- `powershell/get-pr-context.ps1`
 - `powershell/harvest.ps1`
+- `powershell/migrate-to-documentation.ps1`
+- `powershell/platform.ps1`
 - `powershell/quickfix-context.ps1`
 - `powershell/release-context.ps1`
+- `powershell/release-history-context.ps1`
 - `powershell/repo-story-context.ps1`
+- `powershell/setup-plan.ps1`
 - `powershell/site-audit.ps1`
+- `powershell/update-agent-context.ps1`
 
 Save to `.devspark/scripts/bash/`:
 
-- `bash/common.sh`
-- `bash/platform.sh`
-- `bash/check-prerequisites.sh`
-- `bash/create-new-feature.sh`
-- `bash/setup-plan.sh`
-- `bash/get-pr-context.sh`
 - `bash/address-pr-review.sh`
+- `bash/archive-context.sh`
+- `bash/check-prerequisites.sh`
+- `bash/common.sh`
+- `bash/create-new-feature.sh`
 - `bash/create-pr.sh`
 - `bash/delivery-status-smoke-test.sh`
+- `bash/evolution-context.sh`
 - `bash/fix-score-context.sh`
 - `bash/generate-atomic-shims.sh`
-- `bash/migrate-to-documentation.sh`
-- `bash/release-history-context.sh`
-- `bash/run-workflow.sh`
-- `bash/validate-knowledge-coverage.sh`
-- `bash/update-agent-context.sh`
-- `bash/archive-context.sh` (deprecated compatibility wrapper around harvest)
-- `bash/evolution-context.sh`
+- `bash/get-pr-context.sh`
 - `bash/harvest.sh`
+- `bash/migrate-to-documentation.sh`
+- `bash/platform.sh`
 - `bash/quickfix-context.sh`
 - `bash/release-context.sh`
+- `bash/release-history-context.sh`
 - `bash/repo-story-context.sh`
+- `bash/setup-plan.sh`
 - `bash/site-audit.sh`
+- `bash/update-agent-context.sh`
 
 **Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Because both sets are always installed, switching between machines never requires a reinstall.
 
@@ -419,7 +412,7 @@ Confirm the installation:
 
 - Check that every stock prompt from Step 4 exists in `.devspark/defaults/commands/`
 - Check that every helper template from Step 5 exists in `.devspark/templates/`
-- Check that the selected script set from Step 6 exists under `.devspark/scripts/`
+- Check that both script sets from Step 6 exist under `.devspark/scripts/`
 - Check that the expected command shim files from Step 7 exist in `.cursor/commands/`
 - If any expected framework file is missing, stop and run **Repair Mode** before reporting success
 
@@ -436,10 +429,8 @@ Tell the user: type `/devspark.specify` (or any command) in Cursor to start usin
 Add maintenance guidance (prompt-first):
 
 - Basic (recommended): run the remote upgrade prompt in chat
-- `Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/upgrade.md`
-- Advanced (optional): if CLI is installed, run `devspark upgrade`
-
-For either path, upgrades refresh `.devspark/` stock files and preserve `.documentation/` customizations.
+- Re-run this quickstart prompt in the target repository for install, upgrade, or repair.`r`n
+Quickstart-driven upgrades refresh `.devspark/` stock files and preserve `.documentation/` customizations.
 
 ---
 

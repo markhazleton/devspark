@@ -4,7 +4,10 @@ This directory contains the **core deliverable** of DevSpark — prompt template
 
 ## Commands (`commands/`)
 
-Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`, `/devspark.plan`). When you run `devspark init`, stock prompts are deployed to `.devspark/defaults/commands/`. AI shims then resolve prompts via the 3-tier order: personal override, team override, then stock default.
+Each file in `commands/` is a slash-command prompt (e.g., `/devspark.specify`,
+`/devspark.plan`). Quickstart prompts deploy stock prompts to
+`.devspark/defaults/commands/`. AI shims then resolve prompts via the 3-tier
+order: personal override, team override, then stock default.
 
 Terminology used by these templates:
 
@@ -16,12 +19,14 @@ Terminology used by these templates:
 - **Roles** are responsibility labels for participants, such as owner, planner,
   implementer, reviewer, critic, or scribe.
 
-DevSpark ownership is strictly two-tier:
+DevSpark ownership is split by lifecycle:
 
 - `.devspark/` is framework-managed stock content
-- `.documentation/` is repository-owned work product and overrides
+- `.knowledge/` is repository-owned current truth
+- `.devspark.work/` is ephemeral in-flight work state
+- `.documentation/` is repository-owned guide content and overrides
 
-As of v2.8.0, the collection includes 29 active commands plus 1 deprecated compatibility alias.
+As of v4.0.0, the collection includes 28 active commands plus 1 deprecated compatibility alias.
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -39,8 +44,8 @@ As of v2.8.0, the collection includes 29 active commands plus 1 deprecated compa
 | `commit-audit.md` | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
 | `quickfix.md` | `/devspark.quickfix` | Lightweight bug fix workflow |
 | `fix-score.md` | `/devspark.fix-score` | Diagnose and remediate repository score blockers with verification guardrails |
-| `harvest.md` | `/devspark.harvest` | Canonical knowledge-preserving cleanup and archival workflow |
-| `release.md` | `/devspark.release` | Archive artifacts and prepare releases |
+| `harvest.md` | `/devspark.harvest` | Sweep abandoned work packages and update current truth |
+| `release.md` | `/devspark.release` | Verify current truth and prepare releases |
 | `evolve-constitution.md` | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `repo-story.md` | `/devspark.repo-story` | Narrative from commit history |
 | `critic.md` | `/devspark.critic` | Adversarial risk analysis |
@@ -49,7 +54,6 @@ As of v2.8.0, the collection includes 29 active commands plus 1 deprecated compa
 | `checklist.md` | `/devspark.checklist` | Quality validation checklists |
 | `personalize.md` | `/devspark.personalize` | Create per-user prompt overrides |
 | `archive.md` | `/devspark.archive` | Deprecated alias for `/devspark.harvest` |
-| `upgrade.md` | `/devspark.upgrade` | Upgrade project to latest templates |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
 | `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry (optional) |
@@ -69,7 +73,12 @@ As of v2.8.0, the collection includes 29 active commands plus 1 deprecated compa
 | `checklist-template.md` | Template structure for quality checklists |
 | `spec-validation-contract.md` | Shared validation contract for spec structure and required content |
 | `command-preamble-contract.md` | Shared command guidance, including Genuine Fix Discipline |
-| `schemas/okf-knowledge-document.schema.json` | OKF knowledge-document frontmatter schema |
+| `schemas/devspark-evidence.schema.json` | v4 evidence schema |
+| `schemas/devspark-entity.schema.json` | v4 entity metadata schema |
+| `schemas/devspark-decision.schema.json` | v4 governance decision schema |
+| `schemas/devspark-derived.schema.json` | v4 generated ontology metadata schema |
+| `schemas/devspark-task-linkage.schema.json` | v4 task linkage schema |
+| `schemas/devspark-work-package.schema.json` | v4 work-package schema |
 | `agent-file-template.md` | Template for agent configuration files |
 | `vscode-settings.json` | Recommended VS Code settings |
 

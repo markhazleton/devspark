@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devspark.local/schemas/devspark-work-package.schema.json",
+  "title": "DevSpark v4 Work Package",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["id", "status", "context_resolved", "tasks"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planning", "ready", "implementing", "verified", "blocked"]
+    },
+    "context_resolved": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["type", "ref"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["entity", "relation", "decision", "document"]
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "default": []
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "devspark-task-linkage.schema.json"
+      },
+      "default": []
+    }
+  }
+}

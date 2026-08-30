@@ -18,6 +18,19 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command audits the repository's current state. When any later section
+conflicts with this section, the v4 section wins.
+
+- Run current-truth validation across `.knowledge`, governance, and source-code
+  comments.
+- Re-run execution evidence where practical and report stale evidence.
+- Treat contradiction candidates across graph-adjacent knowledge as warnings
+  for human review.
+- Do not create durable audit-history files unless the user explicitly asks for
+  an external report.
+
 ## Overview
 
 This command performs a comprehensive codebase audit against the project constitution/standards document. It scans the entire repository (or specified scope) for compliance violations, code quality issues, unused dependencies, and architectural concerns.
@@ -158,7 +171,7 @@ Include in the audit report under a **DevSpark Version** section:
 ```
 
 If VER1 or VER2 is present, add to the Recommendations section:
-> Run the remote upgrade prompt or `/devspark.upgrade` to update DevSpark.
+> Re-run the matching quickstart prompt to update or repair DevSpark.
 
 ### 5. Spec Lifecycle Audit (Anti-Pattern Detection)
 
@@ -496,7 +509,7 @@ Use this format:
 | ID | Issue | Intent | Severity | Recommendation |
 |----|-------|--------|----------|----------------|
 | VER1 | VERSION stamp absent | Keep installed framework provenance auditable | HIGH | Run the remote upgrade prompt to install or refresh the version stamp |
-| VER2 | Version X.Y.Z installed, X.Y.Z available | Keep framework behavior aligned with current release contracts | MEDIUM | Run `/devspark.upgrade` to update |
+| VER2 | Version X.Y.Z installed, X.Y.Z available | Keep framework behavior aligned with current release contracts | MEDIUM | Re-run the matching quickstart prompt |
 
 ## Security Findings
 

@@ -34,7 +34,7 @@ function Get-StagedPaths {
 
 function Test-IsReviewPath {
     param([string]$Path)
-    return $Path -match '^\.documentation/specs/pr-review/pr-.*\.md$'
+    return $Path -match '^\.devspark\.work/pr-reviews/pr-.*\.md$'
 }
 
 function Write-GateFailure {
@@ -88,7 +88,7 @@ if ($normalizedPrId -notmatch '^\d+$') {
 }
 
 $repoRoot = Get-RepoRoot
-$reviewFile = Join-Path $repoRoot ".documentation/specs/pr-review/pr-$normalizedPrId.md"
+$reviewFile = Join-Path $repoRoot ".devspark.work/pr-reviews/pr-$normalizedPrId.md"
 
 if (-not (Test-Path -LiteralPath $reviewFile)) {
     Write-Error "DevSpark: Review file not found: $reviewFile"

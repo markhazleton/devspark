@@ -25,7 +25,7 @@ def test_quickstarts_use_github_releases_for_latest_version() -> None:
 
 def test_living_docs_name_current_release_explicitly() -> None:
     current_release_line = (
-        "[v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)"
+        "[v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)"
     )
     for rel_path in (
         "README.md",
@@ -37,18 +37,18 @@ def test_living_docs_name_current_release_explicitly() -> None:
         ".documentation/upgrade.md",
     ):
         text = (ROOT / rel_path).read_text(encoding="utf-8")
-        assert current_release_line in text, f"{rel_path} must explicitly name v2.8.0"
+        assert current_release_line in text, f"{rel_path} must explicitly name v4.0.0"
 
 
-def test_living_docs_use_v280_command_counts() -> None:
+def test_living_docs_use_v400_command_counts() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     docs_index = (ROOT / ".documentation" / "index.md").read_text(encoding="utf-8")
     templates_readme = (ROOT / "templates" / "README.md").read_text(encoding="utf-8")
 
-    assert "30 stock command prompts" in readme
-    assert "30 stock command prompt files" in readme
-    assert "30 stock command prompts" in docs_index
-    assert "As of v2.8.0, the collection includes 29 active commands plus 1 deprecated compatibility alias." in templates_readme
+    assert "29 stock command prompts" in readme
+    assert "29 stock command prompt files" in readme
+    assert "29 stock command prompts" in docs_index
+    assert "As of v4.0.0, the collection includes 28 active commands plus 1 deprecated compatibility alias." in templates_readme
 
 
 def test_quickstarts_do_not_reference_stale_240_version() -> None:
@@ -109,7 +109,7 @@ def test_quickstarts_include_current_template_surfaces() -> None:
         "spec-validation-contract.md",
         "tasks-template.md",
     }
-    required_subdirectories = {"aliases/", "prompts/", "risk-checklists/", "schemas/", "workflows/"}
+    required_subdirectories = {"knowledge/", "prompts/", "risk-checklists/", "schemas/", "skills/"}
 
     for path in sorted((ROOT / "quickstart").glob("devspark_quickstart_*.md")):
         text = path.read_text(encoding="utf-8")
@@ -119,16 +119,16 @@ def test_quickstarts_include_current_template_surfaces() -> None:
             assert f"`{directory}`" in text, f"{path.name} must fetch templates/{directory} recursively"
 
 
-def test_upgrade_prompts_use_releases_api_for_latest_version() -> None:
-    releases_api = "https://api.github.com/repos/markhazleton/devspark/releases/latest"
-    for rel_path in (
-        "templates/commands/upgrade.md",
-        "templates/commands/site-audit.md",
-    ):
-        text = (ROOT / rel_path).read_text(encoding="utf-8")
-        releases_pos = text.find(releases_api)
-        changelog_pos = text.find("Fallback if the Releases API is unreachable")
-        assert releases_pos != -1, f"{rel_path} must use GitHub Releases API"
-        assert changelog_pos == -1 or releases_pos < changelog_pos, (
-            f"{rel_path} must treat CHANGELOG parsing as a fallback."
-        )
+def test_quickstarts_are_only_devspark_maintenance_path() -> None:
+    forbidden = [
+        "devspark " + "init",
+        "devspark " + "upgrade",
+        "devspark-" + "cli",
+        "templates/commands/" + "upgrade.md",
+        "/devspark." + "upgrade",
+    ]
+
+    for path in sorted((ROOT / "quickstart").glob("devspark_quickstart_*.md")):
+        text = path.read_text(encoding="utf-8")
+        for phrase in forbidden:
+            assert phrase not in text, f"{path.name} must not reference {phrase}"

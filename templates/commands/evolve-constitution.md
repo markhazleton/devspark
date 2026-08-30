@@ -20,6 +20,17 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command proposes current-governance changes. When any later section
+conflicts with this section, the v4 section wins.
+
+- Compare proposed amendments against current decisions.
+- If a proposal changes an existing decision topic, plan an in-place update to
+  that decision instead of creating a numbered successor.
+- Store only current accepted governance in `.knowledge/governance`.
+- Use Git history for rejected, superseded, or draft proposal history.
+
 ## Lifecycle Position
 
 Continuous-improvement step: `PR reviews + audits → evolve-constitution → CAP-YYYY-NNN.md (DRAFT) → approve/reject → /devspark.constitution applies APPROVED CAPs`. Runs *after* a constitution exists, *between* version bumps.

@@ -12,7 +12,6 @@ Verifies:
 """
 from pathlib import Path
 
-import pytest
 
 REPO_ROOT = Path(__file__).parent.parent
 SPECIFY_MD = REPO_ROOT / "templates" / "commands" / "specify.md"

@@ -24,6 +24,20 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command enriches the ephemeral work package and resolves current-truth
+context before implementation. When any later section conflicts with this
+section, the v4 section wins.
+
+- Resolve relevant `.knowledge` entities and governance decisions 2-3 hops, or
+  until traversal stops finding relevant edges.
+- Record resolved context in `context_resolved` inside the work package.
+- Do not copy governance rationale into entity files; reference constrained
+  entities and decisions instead.
+- Load governance from `.knowledge/governance/constitution.md`, with legacy
+  fallback only when the v4 file is absent.
+
 ## Workflow Position
 
 **Step 3 of 4** in the authoring chain (`specify → clarify → plan → tasks`).

@@ -33,7 +33,7 @@ function Get-CurrentBranch {
     
     # For non-git repos, try to find the latest feature directory
     $repoRoot = Get-RepoRoot
-    $specsDir = Join-Path $repoRoot ".documentation/specs"
+    $specsDir = Join-Path $repoRoot ".devspark.work/specs"
     
     if (Test-Path $specsDir) {
         $latestFeature = ""
@@ -89,7 +89,7 @@ function Test-FeatureBranch {
 
 function Get-FeatureDir {
     param([string]$RepoRoot, [string]$Branch)
-    Join-Path $RepoRoot ".documentation/specs/$Branch"
+    Join-Path $RepoRoot ".devspark.work/specs/$Branch"
 }
 
 function Find-FeatureDirByPrefix {
@@ -98,7 +98,7 @@ function Find-FeatureDirByPrefix {
         [string]$BranchName
     )
 
-    $specsDir = Join-Path $RepoRoot '.documentation/specs'
+    $specsDir = Join-Path $RepoRoot '.devspark.work/specs'
     if ($BranchName -notmatch '^(\d{3})-') {
         return (Join-Path $specsDir $BranchName)
     }
@@ -469,7 +469,11 @@ function Resolve-Constitution {
         [string]$AppId = ''
     )
 
-    $repoConst = Join-Path $RepoRoot '.documentation/memory/constitution.md'
+    $repoConst = Join-Path $RepoRoot '.knowledge/governance/constitution.md'
+    $legacyRepoConst = Join-Path $RepoRoot '.documentation/memory/constitution.md'
+    if (-not (Test-Path $repoConst) -and (Test-Path $legacyRepoConst)) {
+        $repoConst = $legacyRepoConst
+    }
     if (-not (Test-Path $repoConst)) {
         throw "Repository constitution required at $repoConst"
     }
@@ -478,7 +482,12 @@ function Resolve-Constitution {
 
     if ($AppId) {
         $appDocRoot = Resolve-AppDocRoot -RepoRoot $RepoRoot -AppId $AppId
-        $appConst = Join-Path $appDocRoot 'memory/constitution.md'
+        $appRoot = Split-Path $appDocRoot -Parent
+        $appConst = Join-Path $appRoot '.knowledge/governance/constitution.md'
+        $legacyAppConst = Join-Path $appDocRoot 'memory/constitution.md'
+        if (-not (Test-Path $appConst) -and (Test-Path $legacyAppConst)) {
+            $appConst = $legacyAppConst
+        }
 
         if (Test-Path $appConst) {
             $appText = Get-Content $appConst -Raw

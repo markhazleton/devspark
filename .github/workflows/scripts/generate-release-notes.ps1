@@ -55,7 +55,7 @@ DevSpark is an Adaptive System Life Cycle Development (ASLCD) toolkit with const
 
 ## Using This Release
 
-For normal use, bootstrap and update DevSpark from your AI chat using the remote quickstart and upgrade prompt files. The CLI remains available for advanced terminal-driven automation.
+For normal use, bootstrap, update, and repair DevSpark from your AI chat using the remote quickstart prompt files.
 
 ## Changelog
 

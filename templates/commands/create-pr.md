@@ -17,6 +17,18 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command makes v4 evidence and linkage visible in the PR. When any later
+section conflicts with this section, the v4 section wins.
+
+- Summarize current-truth validation status.
+- Summarize task linkage status: populated `code_ref`, `knowledge_ref`, and
+  `governance_ref` where applicable.
+- Summarize evidence quality: execution evidence, inspection evidence, and any
+  missing fallback-reason warnings.
+- Do not create or update durable lifecycle-history files.
+
 ## Routing Contract
 
 If a spec exists for the active branch, read the YAML frontmatter in `spec.md` before drafting the PR. Treat `classification`, `risk_level`, and `required_gates` as authoritative metadata.

@@ -168,7 +168,7 @@ function Validate-Environment {
         } else {
             Write-Err "Template file not found at $TEMPLATE_FILE"
             Write-Info "Legacy fallback also not found at $LEGACY_TEMPLATE_FILE"
-            Write-Info 'Run devspark init to scaffold .documentation/templates, or add agent-file-template.md there.'
+            Write-Info 'Run the matching DevSpark quickstart prompt to scaffold .devspark/templates, or add agent-file-template.md there.'
             exit 1
         }
     }
@@ -491,4 +491,3 @@ function Main {
 }
 
 Main
-

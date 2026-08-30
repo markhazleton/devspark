@@ -20,6 +20,17 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command is a hard mechanical gate for current-truth consistency. When any
+later section conflicts with this section, the v4 section wins.
+
+- Validate every `context_resolved` entity, relation, and decision reference
+  against the current ontology.
+- Fail stale or hallucinated current-truth references.
+- Fail permanent references from code or `.knowledge` back to ephemeral work.
+- Surface missing code-evidence fallback reasons as warnings, not hard stops.
+
 ## Overview
 
 Identify inconsistencies, duplications, ambiguities, underspecified items, and traceability gaps across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/devspark.tasks` has successfully produced a complete `tasks.md`.

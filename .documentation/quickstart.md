@@ -4,7 +4,7 @@
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
-**Latest published release:** [v2.8.0](https://github.com/markhazleton/devspark/releases/tag/v2.8.0)
+**Current version:** [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
 
 ## Step 1: Bootstrap DevSpark
 
@@ -50,9 +50,11 @@ For Antigravity-specific workflow guidance, see [DevSpark and Antigravity](devsp
 Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_generic.md
 ```
 
-The agent first asks only the install-critical questions, checks for existing DevSpark or legacy layouts, and only asks for project name, tech stack, and core principles when a constitution still needs to be created. No CLI required.
+The agent first asks only the install-critical questions, checks for existing
+DevSpark or legacy layouts, and only asks for project name, tech stack, and core
+principles when a constitution still needs to be created.
 
-> Need terminal-driven setup or execution? See [Other Ways to Get Started](installation.md) for CLI installation options, then use the runtime guidance in [Harness Engineering](harness-engineering.md).
+Run the same quickstart prompt again for upgrades or repairs.
 
 ---
 
@@ -138,18 +140,6 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 - [Upgrade Guide](upgrade.md) -- keep DevSpark current
 - [DevSpark and Codex](devspark-and-codex.md) -- best practices for using Codex with DevSpark
 - [Implementation Lifecycle](implementation-lifecycle.md) -- full workflow overview
-- [Harness Engineering](harness-engineering.md) -- optional CLI runtime for declarative workflows
-- [Harness Strict Template](../templates/workflows/harness-strict-template.md) -- delivery-integrity defaults for hands-off runs
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
-- [Command Reference](index.md#command-categories) -- all 29 active commands
-
-## Strict Harness Path
-
-For delivery-integrity focused execution, use the strict harness template and run with an explicit write-capable adapter:
-
-```text
-devspark harness run sample.harness.yaml --hands-off --adapter claude_code
-```
-
-If the latest run is not create-pr ready, inspect `decision-packet.json` and `no-change-explainer.md` before continuing.
+- [Command Reference](index.md#command-categories) -- all DevSpark commands

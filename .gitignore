@@ -54,7 +54,8 @@ _site/
 # Generated reports
 reports/
 
-# Generated harness run artifacts
+# Generated DevSpark work artifacts
+.devspark.work/
 .documentation/devspark/runs/
 .documentation/telemetry/runs/
 

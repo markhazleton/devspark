@@ -20,6 +20,17 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+Quickfix is lightweight, not exempt. When any later section conflicts with this
+section, the v4 section wins.
+
+- Create a minimal ephemeral work package with `context_resolved` and task
+  linkage fields for touched code and knowledge.
+- Update `.knowledge` when the quickfix changes durable behavior or governance.
+- Run verify-before-delete before removing the package.
+- Do not create durable quickfix history; Git is the history.
+
 ## Workflow Position
 
 Alternative entry point to authoring: `[user request] → route decision → { specify → clarify → plan → tasks | quickfix } → implement`. Use **instead of** `/devspark.specify` for bug fixes, config tweaks, docs updates, hotfixes, or minor features under ~4 hours. `/devspark.specify` recommends this command automatically for `one-off-fix` classification.

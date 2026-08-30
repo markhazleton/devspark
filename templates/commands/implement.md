@@ -21,6 +21,24 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command applies the delta to code and current truth together. When any
+later section conflicts with this section, the v4 section wins.
+
+- Consume `context_resolved`; do not perform unbounded ontology traversal during
+  implementation.
+- Update code and `.knowledge` in the same pass for every durable behavior
+  change.
+- Prefer execution evidence; when using inspection evidence, record
+  `test_attempted` and `fallback_reason`.
+- Populate each completed task's `code_ref`, `knowledge_ref`, and
+  `governance_ref` when applicable.
+- Never write ephemeral package, task, spec, plan, review-thread, release, or
+  archive references into permanent code comments or `.knowledge`.
+- Run current-truth validation and verify-before-delete before deleting the work
+  package.
+
 ## Workflow Position
 
 Delivery gateway between authoring (`specify → clarify → plan → tasks → analyze + critic`) and shipping (`create-pr → pr-review`). Also the resume point for `/devspark.quickfix`.
@@ -200,7 +218,7 @@ unresolved.
    - Suggest next steps if implementation cannot proceed
 
    **Governance expectations for the create-pr/pr-review handoff**:
-   - Delivery status must be met (`create_pr_ready=true` in latest harness result)
+   - Delivery status must be met (`create_pr_ready=true` in the latest delivery result)
    - Branch sync must pass (`HEAD` not behind `origin/main`)
    - Every `## Gate Acknowledgements` entry and every `## Constitution Waivers` entry will be surfaced by `/devspark.create-pr` in the PR body — make sure they are accurate.
 

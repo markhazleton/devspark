@@ -12,7 +12,7 @@
 #   --require-tasks     Require tasks.md to exist (for implementation phase)
 #   --include-tasks     Include tasks.md in AVAILABLE_DOCS list
 #   --paths-only        Only output path variables (no validation)
-#   --require-delivery-status  Require latest harness run to be create-pr ready
+#   --require-delivery-status  Require latest delivery status to be create-pr ready
 #   --timeout-seconds=N  Timeout value reported in diagnostics
 #   --help, -h          Show help message
 #
@@ -69,7 +69,7 @@ OPTIONS:
   --require-tasks     Require tasks.md to exist (for implementation phase)
   --include-tasks     Include tasks.md in AVAILABLE_DOCS list
   --paths-only        Only output path variables (no prerequisite validation)
-    --require-delivery-status  Require latest harness run to be create-pr ready
+    --require-delivery-status  Require latest delivery status to be create-pr ready
     --timeout-seconds=N  Timeout value reported in diagnostics (default: 300)
   --help, -h          Show this help message
 
@@ -150,13 +150,13 @@ fi
 
 if $REQUIRE_DELIVERY_STATUS; then
     latest_result=""
-    if [[ -d ".documentation/devspark/runs" ]]; then
-        latest_result=$(ls -1dt .documentation/devspark/runs/*/result.json 2>/dev/null | head -n 1)
+    if [[ -d ".devspark.work/runs" ]]; then
+        latest_result=$(ls -1dt .devspark.work/runs/*/result.json 2>/dev/null | head -n 1)
     fi
     if [[ -n "$latest_result" ]] && [[ -f "$latest_result" ]] && command -v jq >/dev/null 2>&1; then
         create_pr_ready=$(jq -r '.create_pr_ready // false' "$latest_result")
         if [[ "$create_pr_ready" != "true" ]]; then
-            echo "ERROR: delivery-status gate failed; latest harness run is not create-pr ready (timeout-seconds=$TIMEOUT_SECONDS)" >&2
+            echo "ERROR: delivery-status gate failed; latest delivery status is not create-pr ready (timeout-seconds=$TIMEOUT_SECONDS)" >&2
             exit 1
         fi
     fi

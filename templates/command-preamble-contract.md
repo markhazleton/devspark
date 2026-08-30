@@ -3,6 +3,44 @@
 Shared command rules in this file are normative for command prompts that cite
 them. Commands may add stricter behavior, but must not weaken these sections.
 
+## 1. DevSpark v4 Current-Truth Discipline
+
+Durable DevSpark output is current truth: current code, `.knowledge` entities,
+`.knowledge/governance` rules, and generated ontology reports. Work packages are
+temporary coordination state. They exist only long enough to produce and verify
+a delta.
+
+Commands MUST NOT write work-package IDs, task IDs, old planning-artifact paths,
+review-thread paths, release snapshots, or archive paths into permanent code
+comments or permanent knowledge/governance files. If a durable explanation is
+needed, rewrite it as a self-contained current-state statement and cite code,
+knowledge, governance, or stable external evidence instead.
+
+## 2. Evidence And Linkage
+
+Knowledge and governance claims MUST include evidence. Prefer `type: test` with
+`verified_by: execution` when a focused test can reasonably assert the claim.
+When falling back to `type: code` with `verified_by: inspection`, include
+`test_attempted` and `fallback_reason`.
+
+Tasks in an in-flight work package MUST carry `code_ref` and `knowledge_ref`
+when completed, or `n/a` with a reason. Governance changes also require a
+`governance_ref`. Implementing commands must populate these fields as the work
+lands.
+
+## 3. Verify Before Delete
+
+Before deleting a work package, run the verify-before-delete check and confirm
+that every completed task has valid permanent references. Deletion is allowed
+only after the delta is represented in current code, current knowledge, and
+current governance when applicable.
+
+## 4. Governance Location
+
+The v4 constitution lives at `.knowledge/governance/constitution.md`. Legacy
+memory locations may be read only as backward-compatible fallback, never as the
+preferred write target.
+
 ## 9. Genuine Fix Discipline
 
 Commands that fix, review, audit, analyze, or verify work MUST resolve the
