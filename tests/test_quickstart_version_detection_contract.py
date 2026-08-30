@@ -25,7 +25,7 @@ def test_quickstarts_use_github_releases_for_latest_version() -> None:
 
 def test_living_docs_name_current_release_explicitly() -> None:
     current_release_line = (
-        "[v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)"
+        "[v4.1.0](https://github.com/markhazleton/devspark/releases/tag/v4.1.0)"
     )
     for rel_path in (
         "README.md",
@@ -37,7 +37,7 @@ def test_living_docs_name_current_release_explicitly() -> None:
         ".knowledge/entities/product-documentation/site/upgrade.md",
     ):
         text = (ROOT / rel_path).read_text(encoding="utf-8")
-        assert current_release_line in text, f"{rel_path} must explicitly name v4.0.0"
+        assert current_release_line in text, f"{rel_path} must explicitly name v4.1.0"
 
 
 def test_living_docs_use_v400_command_counts() -> None:
@@ -50,7 +50,7 @@ def test_living_docs_use_v400_command_counts() -> None:
     assert "29 stock command prompts" in readme
     assert "29 stock command prompt files" in readme
     assert "29 active stock command prompts" in docs_index
-    assert "As of v4.0.0, the collection includes 29 active commands." in templates_readme
+    assert "As of v4.1.0, the collection includes 29 active commands." in templates_readme
 
 
 def test_quickstarts_do_not_reference_stale_240_version() -> None:

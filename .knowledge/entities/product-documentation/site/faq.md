@@ -83,7 +83,7 @@ In your AI agent's chat interface -- the same place you normally talk to your as
 
 ### Do I have to use every command?
 
-No. Most projects use a small subset of the stock commands. The shipped v4.0.0
+No. Most projects use a small subset of the stock commands. The shipped v4.1.0
 template set contains 29 active command files.
 
 **Everyday:** `/devspark.quickfix`, `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`, `/devspark.pr-review`

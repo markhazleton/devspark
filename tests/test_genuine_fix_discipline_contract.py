@@ -77,7 +77,7 @@ def test_constitution_surfaces_genuine_fix_principle() -> None:
     assert "Genuine Fix Discipline" in command
     assert "current governance" in command
     assert "### IX. Genuine Fix Discipline" in constitution
-    assert "**Version**: 4.0.0" in constitution
+    assert "**Version**: 4.1.0" in constitution
     assert "genuine-fix.high" in governance
 
 

@@ -1,6 +1,6 @@
 ---
 document: severity-registry
-constitution_version: "4.0.0"
+constitution_version: "4.1.0"
 last_verified: "2026-08-30"
 evidence:
   - type: code

@@ -4,14 +4,14 @@
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
-**Current version:** [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
+**Current version:** [v4.1.0](https://github.com/markhazleton/devspark/releases/tag/v4.1.0)
 
 DevSpark is an Adaptive System Life Cycle Development toolkit for AI coding
 assistants. It is prompt-first: the product is the command prompt collection,
 quickstart prompts, helper scripts, schemas, skills, and current-truth knowledge
 model.
 
-The v4.0.0 release ships 29 active stock command prompts.
+The v4.1.0 release ships 29 active stock command prompts.
 
 Install, upgrade, and repair DevSpark only by running the matching quickstart
 prompt from `quickstart/` in the target repository.

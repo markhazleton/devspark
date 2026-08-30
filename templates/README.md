@@ -26,7 +26,7 @@ DevSpark ownership is split by lifecycle:
 - `.devspark.work/` is ephemeral in-flight work state
 - `.knowledge/` is repository-owned guide content and overrides
 
-As of v4.0.0, the collection includes 29 active commands.
+As of v4.1.0, the collection includes 29 active commands.
 
 | File | Command | Purpose |
 |------|---------|---------|

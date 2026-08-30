@@ -2,12 +2,27 @@
 
 All notable changes to DevSpark are documented here.
 
+## [v4.1.0] - 2026-08-30
+
+### Added
+
+- Added `/devspark.discover-knowledge` to build source-grounded
+  `.knowledge/entities` records, assimilate documentation intake, and refresh
+  generated ontology reports.
+
+### Changed
+
+- Updated every quickstart to initialize `.knowledge/entities/` and
+  `.knowledge/ontology/` on each execution.
+- Quickstarts now delegate incomplete knowledge bootstrap work to
+  `/devspark.discover-knowledge --bootstrap` instead of duplicating source
+  discovery rules.
+- Updated command catalogs and docs-site content for the 29-command inventory.
+
 ## [v4.0.0] - 2026-08-30
 
 ### Changed
 
-- Added `/devspark.discover-knowledge` to build source-grounded
-  `.knowledge/entities` and refresh ontology reports.
 - Repositioned DevSpark as a prompt-first lifecycle toolkit.
 - Made quickstart prompts the only approved install, upgrade, and repair path.
 - Removed the standalone DevSpark terminal application surface from the active
