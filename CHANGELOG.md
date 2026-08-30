@@ -6,6 +6,8 @@ All notable changes to DevSpark are documented here.
 
 ### Changed
 
+- Added `/devspark.discover-knowledge` to build source-grounded
+  `.knowledge/entities` and refresh ontology reports.
 - Repositioned DevSpark as a prompt-first lifecycle toolkit.
 - Made quickstart prompts the only approved install, upgrade, and repair path.
 - Removed the standalone DevSpark terminal application surface from the active

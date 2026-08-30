@@ -200,6 +200,8 @@ Upgrade behavior:
 - Updates stock framework files in `.devspark/`
 - Preserves team and personal customizations in `.knowledge/`
 - Preserves current-truth knowledge in `.knowledge/`
+- Initializes missing `.knowledge/entities/` and `.knowledge/ontology/` scaffold files
+- Classifies `.documentation/` intake into `.archive/`, `.devspark.work/`, or `.knowledge/`
 - Warns when `.knowledge/overrides/commands/` overrides may hide structural changes in updated stock prompts
 
 This is the standard update and repair path for DevSpark.

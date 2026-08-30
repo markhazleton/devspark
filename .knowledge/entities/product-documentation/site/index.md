@@ -11,7 +11,7 @@ assistants. It is prompt-first: the product is the command prompt collection,
 quickstart prompts, helper scripts, schemas, skills, and current-truth knowledge
 model.
 
-The v4.0.0 release ships 28 active stock command prompts.
+The v4.0.0 release ships 29 active stock command prompts.
 
 Install, upgrade, and repair DevSpark only by running the matching quickstart
 prompt from `quickstart/` in the target repository.
@@ -72,6 +72,7 @@ prompt from `quickstart/` in the target repository.
 | `/devspark.taskstoissues` | Convert tasks into GitHub issues |
 | `/devspark.personalize` | Create per-user prompt overrides |
 | `/devspark.discover-constitution` | Generate a constitution from an existing codebase |
+| `/devspark.discover-knowledge` | Build source-grounded `.knowledge/entities` and ontology |
 
 ### Multi-App
 

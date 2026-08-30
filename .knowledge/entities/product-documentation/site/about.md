@@ -7,7 +7,7 @@
 **Current version:** [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
 
 DevSpark is a structured development process for AI coding assistants. It
-provides 28 stock command prompts plus helper templates and scripts that give
+provides 29 stock command prompts plus helper templates and scripts that give
 any AI agent a repeatable current-truth workflow.
 
 ## What It Is

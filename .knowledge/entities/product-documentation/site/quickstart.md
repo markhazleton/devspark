@@ -54,7 +54,9 @@ The agent first asks only the install-critical questions, checks for existing
 DevSpark or legacy layouts, and only asks for project name, tech stack, and core
 principles when a constitution still needs to be created.
 
-Run the same quickstart prompt again for upgrades or repairs.
+Run the same quickstart prompt again for upgrades or repairs. Every run checks
+`.knowledge/entities/` and `.knowledge/ontology/`, initializes missing scaffold
+files, and classifies `.documentation/` intake when that folder exists.
 
 ---
 

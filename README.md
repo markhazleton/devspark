@@ -15,7 +15,7 @@
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 **Current version:** [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
 
-> **Not a program. Not a subscription.** Copy 28 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 29 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
 ---
 
@@ -24,7 +24,7 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 28 stock command prompt files (THE PRODUCT)
+├── templates/commands/   ← 29 stock command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── .knowledge/           ← Current truth: entities, governance, ontology reports
 └── .devspark.work/       ← Temporary lifecycle work products
@@ -88,8 +88,9 @@ Point your AI agent at the quickstart prompt for your platform:
 
 For ongoing updates or repairs, run the same quickstart prompt again in the
 target repository. The quickstart compares the installed version, refreshes
-framework-owned files, repairs missing stock assets, and preserves
-repository-owned `.knowledge/` content.
+framework-owned files, repairs missing stock assets, initializes missing
+`.knowledge/entities/` and `.knowledge/ontology/` scaffolding, and preserves
+authored repository-owned `.knowledge/` content.
 
 For a full walkthrough see the [Implementation Lifecycle Guide](.knowledge/entities/product-documentation/site/implementation-lifecycle.md).
 
@@ -138,6 +139,7 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 | `/devspark.checklist` | Generate quality validation checklists |
 | `/devspark.personalize` | Create per-user command overrides |
 | `/devspark.discover-constitution` | Generate a constitution from existing code |
+| `/devspark.discover-knowledge` | Build source-grounded `.knowledge/entities` and ontology |
 
 ### Multi-App (Optional)
 

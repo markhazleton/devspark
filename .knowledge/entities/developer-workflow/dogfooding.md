@@ -22,7 +22,7 @@ The core idea is always the same: if you won't use your own product, why should 
 Remember those old EDS commercials? A team of engineers rebuilding a fighter jet's engine mid-flight, swapping out parts while the plane screams through the sky. The tagline was something like "We solve complex problems." It was absurd. It was memorable. And it's a surprisingly good metaphor for what happens when you try to use a development tool to develop that same tool.
 
 Here's the fundamental tension: DevSpark is a spec-driven development workflow.
-In v4.0.0, it has 28 active commands that guide you from feature specification
+In v4.0.0, it has 29 active commands that guide you from feature specification
 through implementation, review, and release. When we decided to use DevSpark to
 build DevSpark, we immediately hit a question that doesn't come up in normal
 projects:

@@ -20,6 +20,7 @@ at the right quickstart file.
 2. Paste the URL to the raw quickstart file, or copy its contents into the chat
 3. The agent detects the current OS for plan preview only, then pulls and installs the full DevSpark framework payload. **Both** PowerShell and Bash script sets plus Python utility scripts are always installed regardless of OS.
 4. For upgrades or repairs, re-run the same quickstart prompt in the target repository.
+5. On every execution, the prompt checks `.knowledge/entities/` and `.knowledge/ontology/`, repairs missing scaffold files, runs ontology generation when possible, and triages `.documentation/` intake into `.archive/`, `.devspark.work/`, or `.knowledge/`.
 
 After installation, start new work with `/devspark.specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
 
@@ -54,11 +55,11 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 ## What Gets Installed
 
 - **`.devspark/`** — Framework files (stock prompts, templates, both PowerShell and Bash scripts, and Python utility scripts). Safe to refresh, replace, or remove intentionally.
-- **`.knowledge/`** — Your project artifacts (constitution, specs, decisions). Seeded during initial setup and preserved afterward.
+- **`.knowledge/`** — Your project artifacts (constitution, entities, governance decisions, and ontology reports). Missing scaffold files are initialized on every quickstart run while authored files are preserved.
 - **`agents-registry.json`** — Shared agent metadata used by context-generation and packaging workflows.
 - **Agent shims** — Platform-specific files that wire `/devspark.*` commands to personal, team, and stock prompt resolution.
 
-Framework upgrades only write to `.devspark/`. `.knowledge/` remains repository-owned work product after the initial quickstart seeds project artifacts.
+Framework upgrades refresh `.devspark/` and check the `.knowledge/` current-truth structure. Authored `.knowledge/` files remain repository-owned work product; quickstart only creates missing scaffold files, regenerates generated ontology reports, or assimilates reviewed `.documentation/` intake.
 
 ## Multi-App Support (Optional)
 
@@ -71,6 +72,7 @@ To opt in, run `/devspark.add-application` after installation to create a regist
 Each quickstart automatically detects and migrates from:
 
 - **Legacy `.specify/` layout** (`.specify/` directory) → moves user content to `.knowledge/`, renames old dir to `.specify.old/`
+- **Documentation intake** (`.documentation/` or `.documenation/`) → classifies each document as obsolete archive material, in-flight `.devspark.work/`, or durable `.knowledge/` current truth
 - **Pre-separation DevSpark** (`.devspark/`) → moves framework files to `.devspark/`
 - **Legacy root-level dirs** (`memory/`, `specs/`) → consolidates into `.knowledge/`
 

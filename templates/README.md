@@ -26,7 +26,7 @@ DevSpark ownership is split by lifecycle:
 - `.devspark.work/` is ephemeral in-flight work state
 - `.knowledge/` is repository-owned guide content and overrides
 
-As of v4.0.0, the collection includes 28 active commands.
+As of v4.0.0, the collection includes 29 active commands.
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -54,6 +54,7 @@ As of v4.0.0, the collection includes 28 active commands.
 | `checklist.md` | `/devspark.checklist` | Quality validation checklists |
 | `personalize.md` | `/devspark.personalize` | Create per-user prompt overrides |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
+| `discover-knowledge.md` | `/devspark.discover-knowledge` | Discover source-grounded entities and regenerate ontology |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
 | `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry (optional) |
 | `list-applications.md` | `/devspark.list-applications` | Display all registered applications (optional) |

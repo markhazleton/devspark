@@ -58,6 +58,6 @@ critic check) when it decides what the next command is.
 
 ## Shim parity
 
-The active v4 inventory has 28 command prompts. Claude and Copilot shims are
+The active v4 inventory has 29 command prompts. Claude and Copilot shims are
 present for every active command, including `verify`, `fix-score`, and
 `address-pr-review`.

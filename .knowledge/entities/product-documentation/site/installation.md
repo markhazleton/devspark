@@ -24,16 +24,21 @@ program to install.
 4. Start with `/devspark.specify`.
 
 The quickstart prompt installs stock command prompts, helper scripts, templates,
-schemas, skills, `.devspark/VERSION`, and agent-specific shims. It preserves
-repository-owned `.knowledge/` content.
+schemas, skills, `.devspark/VERSION`, and agent-specific shims. It also checks
+`.knowledge/entities/` and `.knowledge/ontology/` on every execution, repairs
+missing scaffold files, runs ontology generation when possible, and preserves
+authored repository-owned `.knowledge/` content.
 
 ## Repair
 
 Run the same quickstart prompt again. If expected stock files are missing or
-stale, the prompt enters repair mode and refreshes framework-owned assets.
+stale, the prompt enters repair mode, refreshes framework-owned assets, and
+rechecks the knowledge scaffold.
 
 ## Upgrade
 
 Run the same quickstart prompt again. It compares `.devspark/VERSION` with the
 latest GitHub release and refreshes framework-owned assets when a newer release
-is available.
+is available. If `.documentation/` or `.documenation/` exists, the quickstart
+classifies each document as archive-only, in-flight `.devspark.work/`, or
+durable `.knowledge/` current truth before moving it.

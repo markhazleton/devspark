@@ -27,8 +27,9 @@ Before creating anything, check for prior legacy / DevSpark installations:
 | Check for | What it means |
 |---|---|
 | `.devspark/` exists | **DevSpark already installed.** See "Version Check" below. |
-| `.knowledge/` exists | **User artifacts exist.** Preserve everything — never overwrite. |
+| `.knowledge/` exists | **User artifacts exist.** Preserve authored files; initialize missing entity and ontology scaffolding. |
 | `.specify/` exists | **Legacy layout detected.** Needs migration. |
+| `.documentation/` or `.documenation/` exists | **Documentation intake detected.** Classify and move into `.archive/`, `.devspark.work/`, or `.knowledge/`. |
 | `.devspark/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
 | Root `memory/` (without `.knowledge/governance/`) | **Legacy structure.** Needs migration. |
 | Root `scripts/` or `templates/` (without `.devspark/scripts/`) | **Legacy structure.** Needs migration. |
@@ -127,13 +128,13 @@ After detection and any migration work above, check whether `.knowledge/governan
 
 | Installed version | Latest version | Action |
 |---|---|---|
-| Same as latest | — | Verify framework files. If any stock prompt, template, script, or agent shim is missing, run **repair mode** below. Otherwise report: "DevSpark is already at vX.Y.Z — nothing to update." Skip to Step 12 (Verify & Report). |
+| Same as latest | — | Verify framework files. If any stock prompt, template, script, or agent shim is missing, run **repair mode** below. Otherwise run **Step 6.5** to initialize or repair `.knowledge/`, then report: "DevSpark is already at vX.Y.Z — framework files are current; knowledge initialization checked." Skip to Step 12 (Verify & Report). |
 | Older than latest | Newer | Report the version gap, then run **update mode** below. |
 | `unknown` (VERSION missing) | Any | Treat as outdated. Run **update mode**. |
 
 #### Update Mode
 
-Tell the user: "Updating DevSpark from vX.Y.Z → vY.Y.Y. Your `.knowledge/` files will not be touched."
+Tell the user: "Updating DevSpark from vX.Y.Z → vY.Y.Y. Existing `.knowledge/` files will be preserved; missing or incomplete knowledge scaffolding will be initialized."
 
 Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
 
@@ -141,14 +142,15 @@ Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
 - **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite)
 - **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite)
 - **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite)
+- **Step 6.5** — Initialize or repair `.knowledge/entities/` and `.knowledge/ontology/`, and classify `.documentation/` intake if present
 - **Step 7** — Re-create all agent shim files (overwrite — shims are framework files)
 - **Step 10** — Update `.devspark/VERSION` with new version and today's date
 
-**Never touch** `.knowledge/`, the constitution, `.gitignore`, or platform guide files (VS Code settings, etc.).
+**Preserve existing authored files** in `.knowledge/`, the constitution, `.gitignore`, and platform guide files (VS Code settings, etc.). Only create missing knowledge scaffolding, regenerate generated ontology files, or assimilate `.documentation/` content after review.
 
 #### Repair Mode
 
-If the installed version matches `LATEST_VERSION` but framework files are missing, tell the user: "DevSpark is already at vX.Y.Z, but the framework install is incomplete. Re-fetching stock files to repair it. Your `.knowledge/` files will not be touched."
+If the installed version matches `LATEST_VERSION` but framework files are missing, tell the user: "DevSpark is already at vX.Y.Z, but the framework install is incomplete. Re-fetching stock files and checking knowledge initialization. Existing `.knowledge/` files will be preserved."
 
 Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
 
@@ -156,6 +158,7 @@ Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
 - **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite missing or stale copies)
 - **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite missing or stale copies)
 - **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite missing or stale copies)
+- **Step 6.5** — Initialize or repair `.knowledge/entities/` and `.knowledge/ontology/`, and classify `.documentation/` intake if present
 - **Step 7** — Re-create all agent shim files (overwrite missing or stale copies)
 - **Step 10** — Re-write `.devspark/VERSION` using the current `LATEST_VERSION` and today's date
 
@@ -172,10 +175,12 @@ Create these directories (skip any that already exist):
 └── templates/
 
 .knowledge/
-├── memory/
-├── specs/
-├── commands/          ← team-level overrides (optional)
-└── decisions/
+├── entities/
+├── governance/
+│   └── decisions/
+├── ontology/
+└── overrides/
+    └── commands/          ← team-level overrides (optional)
 
 .github/
 ├── agents/
@@ -215,6 +220,7 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `site-audit.md` | `.devspark/defaults/commands/devspark.site-audit.md` |
 | `evolve-constitution.md` | `.devspark/defaults/commands/devspark.evolve-constitution.md` |
 | `discover-constitution.md` | `.devspark/defaults/commands/devspark.discover-constitution.md` |
+| `discover-knowledge.md` | `.devspark/defaults/commands/devspark.discover-knowledge.md` |
 | `repo-story.md` | `.devspark/defaults/commands/devspark.repo-story.md` |
 | `update-pr.md` | `.devspark/defaults/commands/devspark.update-pr.md` |
 | `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
@@ -262,10 +268,12 @@ Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templat
 
 Also fetch every file recursively under these template subdirectories, preserving the same relative paths under `.devspark/templates/`:
 
-- `knowledge/``r`n- `prompts/`
+- `knowledge/`
+- `prompts/`
 - `risk-checklists/`
 - `schemas/`
-- `skills/``r`n
+- `skills/`
+
 Do not fetch `templates/commands/` in this step — Step 4 installs command prompts into `.devspark/defaults/commands/`. Step 5.5 installs `templates/skills/`.
 
 Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-registry.json` and save it to `agents-registry.json` at the repository root.
@@ -420,6 +428,28 @@ If either count is 0 or the Python ontology utility is missing, re-fetch the mis
 
 ---
 
+## Step 6.5: Initialize Knowledge Current Truth
+
+Run this step on **every quickstart execution**: fresh install, migration, update, repair, and already-current verification. This step is repository-owned current-truth maintenance, not a framework overwrite.
+
+1. Create these directories if they are missing: `.knowledge/entities/`, `.knowledge/governance/decisions/`, `.knowledge/ontology/`, `.knowledge/overrides/commands/`, `.devspark.work/`, and `.archive/`.
+2. Seed missing knowledge scaffolding from the fetched templates without overwriting authored files:
+   - `.devspark/templates/knowledge/entities/README.md` -> `.knowledge/entities/README.md`
+   - `.devspark/templates/knowledge/ontology/schema.md` -> `.knowledge/ontology/schema.md`
+   - `.devspark/templates/knowledge/governance/decisions/README.md` -> `.knowledge/governance/decisions/README.md`
+3. If those template files were not fetched yet, fetch the same paths from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/knowledge/` and save only when the destination is missing.
+4. Inspect `.knowledge/entities/` and `.knowledge/ontology/` for completeness. Treat knowledge as incomplete when no entity folder contains `_entity.yaml`, required entity layer documents are missing, generated ontology files are missing or stale, or `.documentation/` / `.documenation/` intake exists.
+5. If knowledge is incomplete, execute the installed `discover-knowledge` command in bootstrap mode by reading and following `.devspark/defaults/commands/devspark.discover-knowledge.md` with `--bootstrap`. If agent shims already exist, `/devspark.discover-knowledge --bootstrap` is equivalent. The command body is authoritative for source-code scanning, entity creation, documentation intake classification, evidence updates, and ontology refresh.
+6. If knowledge is already complete, run the ontology generator only when generated files are stale or missing:
+   - Preferred: `python .devspark/scripts/python/build_knowledge_index.py --write`
+   - Fallback in the DevSpark source repository: `python scripts/python/build_knowledge_index.py --write`
+   - If Python or dependencies are unavailable, report the exact command the user must run and continue without fabricating generated reports.
+7. Do not delete documentation intake files. When `discover-knowledge` moves intake files, it must preserve relative paths and avoid overwriting by adding a numeric suffix if the target path already exists.
+8. Do not read, list, enumerate, or glob `.archive/` after any move has completed. Report only the destination root and counts.
+9. If generated ontology output changed, include that in the final summary.
+
+---
+
 ## Step 7: Create Copilot Agent Shims
 
 For each command in `.devspark/defaults/commands/devspark.{name}.md`, create two files:
@@ -539,6 +569,7 @@ Run a final presence check across all installed framework files and output a str
 - Agent shim files from Step 7 exist in both `.github/agents/` and `.github/prompts/`
 - Shim frontmatter is valid YAML (no doubled-quote defects)
 - `.devspark/VERSION` exists and contains a semver version
+- `.knowledge/entities/` and `.knowledge/ontology/schema.md` exist
 - `.gitignore` contains the personal-overrides exclusion
 
 If **any** check fails, run Repair Mode before reporting success. Do not tell the user the setup is done if framework files are broken or missing.
@@ -559,19 +590,22 @@ Files written:
   • {N} scripts         → .devspark/scripts/{powershell|bash}/
   • {N} agent shims     → .github/agents/
   • {N} prompt files    → .github/prompts/
+  • Knowledge scaffold  → .knowledge/entities/ + .knowledge/ontology/
   • VERSION stamp       → .devspark/VERSION
   • .gitignore updated
 
-Files preserved (never touched by DevSpark):
-  • .knowledge/    — all user artifacts untouched
+Files preserved:
+  • .knowledge/ authored files — preserved; missing scaffold may be created
   {IF migration: • Backup at .specify.old/ (move to .archive/YYYY-MM-DD/<topic>/ once satisfied)}
 
 Validation:
   • Shim frontmatter — {ok | repaired N file(s)}
   • Framework files  — all present
   • VERSION stamp    — {LATEST_VERSION}
+  • Knowledge scaffold — {ok | repaired | blocked with command}
 
 Constitution: {seeded fresh | migrated from .specify/ | already existed — not touched}
+Documentation intake: {not present | archived N | moved to .devspark.work N | assimilated N}
 ```
 
 ### 12c — Next steps
@@ -581,7 +615,7 @@ Tell the user:
 ```text
 Start DevSpark: type @devspark.specify in Copilot Chat.
 
-Recommended entrypoints (DevSpark v2):
+Recommended entrypoints:
   @devspark.run create-spec     — specify → plan → tasks → analyze
   @devspark.run execute-plan    — implement → create-pr → pr-review
   @devspark.run suggest-improvement  — file an improvement against markhazleton/devspark

@@ -15,16 +15,21 @@ for installation in the target repository.
 2. Paste the matching quickstart prompt from `quickstart/`.
 3. Ask the agent to run the version check and preview the upgrade plan.
 4. Approve the plan.
-5. Let the agent refresh framework-owned files under `.devspark/`.
+5. Let the agent refresh framework-owned files under `.devspark/` and verify
+   the `.knowledge` current-truth scaffold.
 
-The upgrade must preserve repository-owned `.knowledge/` and `.knowledge/`
-content. It may refresh stock prompts, helper scripts, templates, schemas,
-skills, agent shims, and `.devspark/VERSION`.
+The upgrade must preserve authored repository-owned `.knowledge/` content. It
+may refresh stock prompts, helper scripts, templates, schemas, skills, agent
+shims, and `.devspark/VERSION`. It may also create missing `.knowledge/entities/`
+and `.knowledge/ontology/` scaffold files, regenerate generated ontology
+reports, and assimilate reviewed `.documentation/` intake.
 
 ## Repair Flow
 
 Use the same quickstart prompt. Missing stock prompts, scripts, templates,
-schemas, skills, or shims are repaired by re-fetching the current release assets.
+schemas, skills, or shims are repaired by re-fetching the current release
+assets. Missing knowledge scaffold files are repaired without overwriting
+authored current-truth documents.
 
 ## Not Supported
 

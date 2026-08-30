@@ -47,10 +47,10 @@ def test_living_docs_use_v400_command_counts() -> None:
     ).read_text(encoding="utf-8")
     templates_readme = (ROOT / "templates" / "README.md").read_text(encoding="utf-8")
 
-    assert "28 stock command prompts" in readme
-    assert "28 stock command prompt files" in readme
-    assert "28 active stock command prompts" in docs_index
-    assert "As of v4.0.0, the collection includes 28 active commands." in templates_readme
+    assert "29 stock command prompts" in readme
+    assert "29 stock command prompt files" in readme
+    assert "29 active stock command prompts" in docs_index
+    assert "As of v4.0.0, the collection includes 29 active commands." in templates_readme
 
 
 def test_quickstarts_do_not_reference_stale_240_version() -> None:
@@ -66,6 +66,25 @@ def test_quickstart_update_and_repair_modes_include_agent_skills() -> None:
         assert occurrences >= 2, (
             f"{path.name} must re-fetch Agent Skill packages in both update and repair mode."
         )
+
+
+def test_quickstarts_initialize_knowledge_on_every_execution() -> None:
+    for path in sorted((ROOT / "quickstart").glob("devspark_quickstart_*.md")):
+        text = path.read_text(encoding="utf-8")
+        assert "## Step 6.5: Initialize Knowledge Current Truth" in text
+        assert "Run this step on **every quickstart execution**" in text
+        assert "`.documentation/` or `.documenation/` exists" in text
+        assert text.count(
+            "Initialize or repair `.knowledge/entities/` and `.knowledge/ontology/`"
+        ) >= 2, f"{path.name} must run knowledge initialization in update and repair modes."
+        assert ".devspark/templates/knowledge/entities/README.md" in text
+        assert ".devspark/templates/knowledge/ontology/schema.md" in text
+        assert ".devspark/defaults/commands/devspark.discover-knowledge.md" in text
+        assert "`discover-knowledge.md`" in text
+        assert "python .devspark/scripts/python/build_knowledge_index.py --write" in text
+        assert "Documentation intake" in text
+        assert "Your `.knowledge/` files will not be touched" not in text
+        assert "**Never touch** `.knowledge/`" not in text
 
 
 def test_quickstart_command_tables_match_current_command_inventory() -> None:
