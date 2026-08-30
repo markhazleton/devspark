@@ -6,9 +6,9 @@
 .DESCRIPTION
     Update-version.ps1 - Update .devspark/VERSION.
 .PARAMETER Version
-    The version to set (e.g., v1.0.0)
+    The version to set (e.g., v4.0.0)
 .EXAMPLE
-    .\update-version.ps1 -Version "v1.0.0"
+    .\update-version.ps1 -Version "v4.0.0"
 #>
 
 param(

@@ -10,7 +10,7 @@
 .PARAMETER LastTag
     The previous tag to compare against
 .EXAMPLE
-    .\generate-release-notes.ps1 -NewVersion "v1.0.0" -LastTag "v0.0.91"
+    .\generate-release-notes.ps1 -NewVersion "v4.0.0" -LastTag "v3.9.9"
 #>
 
 param(

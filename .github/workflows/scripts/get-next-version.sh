@@ -32,7 +32,7 @@ increment_patch() {
     echo "v$major.$minor.$patch"
     return 0
   fi
-  echo "v1.0.0"
+  echo "v4.0.0"
 }
 
 get_devspark_version() {

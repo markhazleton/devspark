@@ -11,11 +11,11 @@
       3. Otherwise, increment the latest tag patch version
     Uses standard semantic versioning (MAJOR.MINOR.PATCH)
 .PARAMETER ExplicitVersion
-    Optional explicit version (e.g., 1.4.6 or v1.4.6)
+    Optional explicit version (e.g., 4.0.0 or v4.0.0)
 .EXAMPLE
     .\get-next-version.ps1
 .EXAMPLE
-    .\get-next-version.ps1 -ExplicitVersion "v1.4.6"
+    .\get-next-version.ps1 -ExplicitVersion "v4.0.0"
 #>
 
 param(
@@ -63,7 +63,7 @@ function Increment-PatchVersion {
         return "v$major.$minor.$patch"
     }
 
-    return "v1.0.0"
+    return "v4.0.0"
 }
 
 # Get the latest tag, or use v0.0.0 if no tags exist

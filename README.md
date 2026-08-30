@@ -27,7 +27,7 @@ devspark/
 ├── templates/commands/   ← 28 stock command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── .knowledge/           ← Current truth: entities, governance, ontology reports
-└── .knowledge/           ← Current truth, overrides, docs source, and ontology reports
+└── .devspark.work/       ← Temporary lifecycle work products
 ```
 
 ## DevSpark Vocabulary
