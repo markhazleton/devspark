@@ -17,8 +17,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 DOC_PATHS = [
     ROOT / "README.md",
-    ROOT / ".documentation" / "implementation-lifecycle.md",
-    ROOT / ".documentation" / "constitution-guide.md",
+    ROOT / ".knowledge" / "entities" / "product-documentation" / "site" / "implementation-lifecycle.md",
+    ROOT / ".knowledge" / "entities" / "product-documentation" / "site" / "constitution-guide.md",
     ROOT / "templates" / "README.md",
 ]
 
@@ -120,11 +120,11 @@ def test_readme_defines_required_glossary_terms() -> None:
 def test_customization_resolution_layers_remain_documented() -> None:
     readme = read(ROOT / "README.md")
     assert "**3-tier prompt resolution**" in readme
-    assert ".documentation/{git-user}/commands/" in readme
-    assert ".documentation/commands/" in readme
+    assert ".knowledge/overrides/{git-user}/commands/" in readme
+    assert ".knowledge/overrides/commands/" in readme
     assert ".devspark/defaults/commands/" in readme
     assert "**2-tier script resolution**" in readme
-    assert ".documentation/scripts/" in readme
+    assert ".knowledge/overrides/scripts/" in readme
     assert ".devspark/scripts/" in readme
 
 

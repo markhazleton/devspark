@@ -18,19 +18,17 @@ outputs:
 
 ## Outline
 
-Invoke the issue adapter (`src/devspark_cli/issues.py::file_issue`) to create
-a new issue in `markhazleton/devspark`. The adapter constructs the payload
-as a Python dict and pipes JSON to `gh api` via stdin — model-generated
-content is never passed through argv.
+Create a new issue in `markhazleton/devspark` with `gh api`. Construct the JSON
+payload as structured data and pass it through stdin; do not place
+model-generated title or body content in command arguments.
 
 ## Steps
 
-1. Display the resolved repo, title, classification, and labels for
-   confirmation. In non-interactive mode without `--yes`, abort with
-   `EXIT_AUTONOMY_REQUIRED` (20).
-2. Call `file_issue(proposal, assume_yes=<--yes>, non_interactive=<--non-interactive>)`.
-3. Surface the returned URL as `proposal.issue_url` and emit a `completed`
-   telemetry event.
+1. Display the resolved repo, title, classification, and labels for confirmation.
+2. If the user declines, stop without creating an issue.
+3. Call `gh api repos/markhazleton/devspark/issues -X POST --input -` with a
+   JSON payload containing `title`, `body`, and labels.
+4. Surface the returned URL as `proposal.issue_url`.
 
 ## Failure exit codes
 
@@ -40,7 +38,7 @@ content is never passed through argv.
 | `gh` not authenticated | 11 (`EXIT_GH_UNAUTHENTICATED`) |
 | GitHub API error | 12 (`EXIT_GH_API`) |
 | Network unreachable | 13 (`EXIT_GH_NETWORK`) |
-| User declined / non-interactive | 20 (`EXIT_AUTONOMY_REQUIRED`) |
+| User declined | Stop without changes |
 
 ## Output
 

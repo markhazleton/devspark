@@ -273,7 +273,7 @@ def attention_signals() -> dict:
 
 
 def audit_artifacts() -> list[dict]:
-    roots = [repo_root / ".documentation", repo_root / ".devspark"]
+    roots = [repo_root / ".knowledge", repo_root / ".devspark"]
     patterns = ["*audit*.md", "*audit*.json", "*score*.json", "*score*.md", "*diagnostic*.json", "*diagnostic*.md"]
     found = []
     for root in roots:

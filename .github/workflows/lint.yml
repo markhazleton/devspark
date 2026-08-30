@@ -34,7 +34,7 @@ jobs:
         with:
           scandir: './scripts/bash'
           severity: warning
-          additional_files: '.github/workflows/scripts .documentation/scripts'
+          additional_files: '.github/workflows/scripts'
         env:
           # SC1091: ShellCheck cannot follow sourced files (e.g. `source ./lib.sh`)
           # because the referenced files may not be present in the scan context.

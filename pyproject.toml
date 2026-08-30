@@ -1,44 +1,7 @@
-[project]
-name = "devspark-cli"
-version = "2.8.0"
-description = "DevSpark CLI — AI development lifecycle prompts and scaffolding for any coding assistant."
-authors = [{ name = "Make Bold Spark" }]
-keywords = ["makeboldspark", "spark", "devspark", "ai-agents", "sdd"]
-requires-python = ">=3.11"
-dependencies = [
-    "typer",
-    "click>=8.1",
-    "rich",
-    "httpx[socks]",
-    "platformdirs",
-    "readchar",
-    "truststore>=0.10.4",
-    "pydantic>=2.0",
-    "jsonschema>=4.0",
-    "PyYAML>=6.0",
-]
-
-[project.optional-dependencies]
-dev = ["pytest>=7.0"]
-
-[project.scripts]
-devspark = "devspark_cli:main"
-
-[project.urls]
-Homepage = "https://dev.makeboldspark.com"
-Repository = "https://github.com/markhazleton/devspark"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/devspark_cli"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"agents-registry.json" = "src/devspark_cli/agents-registry.json"
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100

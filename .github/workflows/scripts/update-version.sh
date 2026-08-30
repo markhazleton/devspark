@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # update-version.sh
-# Update version in pyproject.toml (for release artifacts only)
+# Update the framework version stamp.
 # Usage: update-version.sh <version>
 
 if [[ $# -ne 1 ]]; then
@@ -12,12 +12,15 @@ fi
 
 VERSION="$1"
 
-# Remove 'v' prefix for Python versioning
-PYTHON_VERSION=${VERSION#v}
+VERSION_NO_V=${VERSION#v}
+TODAY=$(date +%F)
 
-if [ -f "pyproject.toml" ]; then
-  sed -i "s/version = \".*\"/version = \"$PYTHON_VERSION\"/" pyproject.toml
-  echo "Updated pyproject.toml version to $PYTHON_VERSION (for release artifacts only)"
+if [ -f ".devspark/VERSION" ]; then
+  {
+    echo "version: $VERSION_NO_V"
+    echo "installed: $TODAY"
+  } > .devspark/VERSION
+  echo "Updated .devspark/VERSION to $VERSION_NO_V"
 else
-  echo "Warning: pyproject.toml not found, skipping version update"
+  echo "Warning: .devspark/VERSION not found, skipping version update"
 fi

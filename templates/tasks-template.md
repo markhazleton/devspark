@@ -11,7 +11,7 @@ participants:
 
 # Tasks: [FEATURE NAME]
 
-**Input**: Design documents from `/.documentation/specs/[###-feature-name]/`
+**Input**: Design documents from `/.devspark.work/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
 **Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
@@ -176,7 +176,7 @@ Examples of foundational tasks (adjust based on your project):
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Documentation updates in .documentation/
+- [ ] TXXX [P] Documentation updates in .knowledge/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/

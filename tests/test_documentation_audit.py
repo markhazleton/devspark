@@ -19,7 +19,7 @@ SCOPE_PATHS = [
     ROOT / "CLAUDE.md",
 ]
 SCOPE_DIRS = [
-    ROOT / ".documentation",
+    ROOT / ".knowledge",
     ROOT / "quickstart",
     ROOT / "templates",
     ROOT / "examples",
@@ -31,15 +31,31 @@ EXCLUDED_PARTS = {
     ".claude",
     ".github/agents",
     ".github/prompts",
-    ".documentation/devspark/runs",
+    ".devspark.work/runs",
 }
 
 FORBIDDEN_PHRASES = [
-    "All canonical prompts live in `.documentation/commands/`",
-    "Canonical prompts live in `.documentation/commands/` as a single source of truth.",
+    "All canonical prompts live in `.knowledge/overrides/commands/`",
+    "Canonical prompts live in `.knowledge/overrides/commands/` as a single source of truth.",
     "24 slash-command prompt files (the product)",
     "It provides 24 prompt templates",
     "redirect to shared canonical prompts",
+    "DevSpark " + "CL" + "I",
+    "devspark-" + "cli",
+    "devspark " + "init",
+    "devspark " + "upgrade",
+    "devspark " + "run",
+    "devspark " + "har" + "ness",
+    "devspark " + "doctor",
+    "/devspark." + "upgrade",
+    "/devspark." + "archive",
+    "templates/commands/" + "upgrade.md",
+    "templates/commands/" + "arch" + "ive.md",
+    "src/devspark_" + "cli",
+    ".knowledge/" + "releases",
+    ".knowledge/" + "specs",
+    ".knowledge/" + "memory",
+    ".knowledge/" + "decisions",
 ]
 
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")

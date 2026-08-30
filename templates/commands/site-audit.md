@@ -4,7 +4,7 @@ description: Perform comprehensive codebase audit against project constitution/s
 handoffs:
   - label: View Audit History
     agent: devspark.site-audit
-    prompt: Show me previous audit reports in .documentation/copilot/audit/
+    prompt: Show me previous audit reports in .devspark.work/audits/
 scripts:
   sh: .devspark/scripts/bash/site-audit.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/site-audit.ps1 $ARGUMENTS -Json
@@ -18,6 +18,22 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command audits the repository's current state. When any later section
+conflicts with this section, the v4 section wins.
+
+- Run current-truth validation across `.knowledge`, governance, and source-code
+  comments.
+- Run `python .devspark/scripts/python/build_knowledge_index.py --check` when
+  available, falling back to `python scripts/python/build_knowledge_index.py
+  --check` in source repos.
+- Re-run execution evidence where practical and report stale evidence.
+- Treat contradiction candidates across graph-adjacent knowledge as warnings
+  for human review.
+- Do not create durable audit-history files unless the user explicitly asks for
+  an external report.
+
 ## Overview
 
 This command performs a comprehensive codebase audit against the project constitution/standards document. It scans the entire repository (or specified scope) for compliance violations, code quality issues, unused dependencies, and architectural concerns.
@@ -26,7 +42,7 @@ This command performs a comprehensive codebase audit against the project constit
 
 ## Prerequisites
 
-- Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
+- Project constitution at `/.knowledge/governance/constitution.md` (REQUIRED)
 - PowerShell 7+ (for script execution)
 - pip-audit (optional, for Python security scanning)
 
@@ -48,11 +64,11 @@ If no scope specified, default to `--scope=full`.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
 ### 1. Initialize Audit Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` to gather codebase data and parse JSON output for:
 - `REPO_ROOT`: Repository root path
@@ -82,7 +98,7 @@ For single quotes in args like "I'm auditing", use escape syntax: e.g 'I'\''m au
 
 ### 2. Load Constitution
 
-Read and parse `/.documentation/memory/constitution.md`:
+Read and parse `/.knowledge/governance/constitution.md`:
 - Extract all core principles with their names
 - Identify MUST requirements (non-negotiable/mandatory)
 - Identify SHOULD requirements (recommended)
@@ -120,7 +136,7 @@ current. Stale installations may have outdated command files or missing framewor
 
 #### A. Read Version Stamp
 
-Check for `.devspark/VERSION` first (fallback: legacy `.documentation/DEVSPARK_VERSION`):
+Check for `.devspark/VERSION` first (fallback: legacy `.knowledge/DEVSPARK_VERSION`):
 
 - **If both are missing**: Flag `VER1` — stamp absent, version unknown (HIGH)
 - **If present**: Parse `version`, `installed`, and `method` fields (legacy stamp may use `agent`)
@@ -158,15 +174,15 @@ Include in the audit report under a **DevSpark Version** section:
 ```
 
 If VER1 or VER2 is present, add to the Recommendations section:
-> Run the remote upgrade prompt or `/devspark.upgrade` to update DevSpark.
+> Re-run the matching quickstart prompt to update or repair DevSpark.
 
 ### 5. Spec Lifecycle Audit (Anti-Pattern Detection)
 
-Scan `/.documentation/specs/` for spec directories and flag lifecycle violations. This is critical to prevent incomplete specs from being merged to main.
+Scan `/.devspark.work/specs/` for spec directories and flag lifecycle violations. This is critical to prevent incomplete specs from being merged to main.
 
 #### A. Scan All Spec Directories
 
-For each directory in `/.documentation/specs/` (excluding `pr-review/`):
+For each directory in `/.devspark.work/specs/` (excluding `pr-review/`):
 1. Check if `spec.md` exists
 2. Read the `**Status**:` field (valid values: `Draft`, `In Progress`, `Complete`)
 3. Check if `tasks.md` exists and count completed vs incomplete tasks
@@ -313,8 +329,8 @@ Search for comments that reference specs, phases, or tasks that are now complete
 ```
 
 For each match:
-- Verify whether the referenced spec/task is actually complete (check `/.documentation/specs/`)
-- Flag as stale if the spec is archived or marked `Complete`
+- Verify whether the referenced spec/task still exists in `/.devspark.work/specs/`
+- Flag as stale if the package is complete or no longer present
 - Include file:line and the matched comment in the finding
 
 #### B. Old-Behavior Comments
@@ -327,11 +343,11 @@ Detect comments that describe behavior that no longer matches the code:
 
 #### C. Commented-Out Code Blocks
 
-Flag commented-out code blocks exceeding 3 consecutive lines. These accumulate technical debt and should either be deleted in a dedicated commit or restored as active code — use `git blame` to understand the original intent before removing.
+Flag commented-out code blocks exceeding 3 consecutive lines. These accumulate technical debt and should either be removed in a dedicated commit or restored as active code — use `git blame` to understand the original intent before removing.
 
 #### D. Version Migration Comments
 
-Flag comments of the form "Added in v2.8.0", "Deprecated since v3.0", "TODO: remove after upgrade" when the referenced version is already past. These provide no value over `git blame` and clutter the codebase.
+Flag comments of the form "Added in v4.0.0", "Deprecated since v4.1", "TODO: remove after upgrade" when the referenced version is already past. These provide no value over `git blame` and clutter the codebase.
 
 #### False-Positive Suppression Policy
 
@@ -418,10 +434,10 @@ Apply consistent severity across all findings:
 
 ### 13. Generate Audit Report
 
-Create comprehensive report at `/.documentation/copilot/audit/YYYY-MM-DD_results.md`:
+Create comprehensive report at `/.devspark.work/audits/YYYY-MM-DD_results.md`:
 
 #### Ensure Directory Exists
-- Check if `/.documentation/copilot/audit/` exists
+- Check if `/.devspark.work/audits/` exists
 - Create directory structure if missing
 
 #### Report Structure
@@ -496,7 +512,7 @@ Use this format:
 | ID | Issue | Intent | Severity | Recommendation |
 |----|-------|--------|----------|----------------|
 | VER1 | VERSION stamp absent | Keep installed framework provenance auditable | HIGH | Run the remote upgrade prompt to install or refresh the version stamp |
-| VER2 | Version X.Y.Z installed, X.Y.Z available | Keep framework behavior aligned with current release contracts | MEDIUM | Run `/devspark.upgrade` to update |
+| VER2 | Version X.Y.Z installed, X.Y.Z available | Keep framework behavior aligned with current release contracts | MEDIUM | Re-run the matching quickstart prompt |
 
 ## Security Findings
 
@@ -666,7 +682,7 @@ Use this format:
 
 ---
 
-*Audit generated by devspark.site-audit v1.0*
+*Audit generated by devspark.site-audit v4.0*
 *Constitution-driven codebase audit for [PROJECT_NAME]*
 *Next audit recommended: [DATE + 7 days]*
 *To re-run: `/devspark.site-audit` or `/devspark.site-audit --scope=constitution`*
@@ -679,7 +695,7 @@ Display concise summary:
 ```
 ✅ Site Audit Complete!
 
-📄 Report saved: /.documentation/copilot/audit/YYYY-MM-DD_results.md
+📄 Report saved: /.devspark.work/audits/YYYY-MM-DD_results.md
 📅 Audit date: {DATETIME}
 🎯 Scope: {SCOPE}
 
@@ -696,7 +712,7 @@ Overall Health: {HEALTHY/NEEDS ATTENTION/CRITICAL}
 ⚠️ Critical issues require immediate attention:
 - {ID}: {Brief description}
 
-View full report: /.documentation/copilot/audit/YYYY-MM-DD_results.md
+View full report: /.devspark.work/audits/YYYY-MM-DD_results.md
 ```
 
 ## Guidelines
@@ -752,13 +768,13 @@ Overall Health: HEALTHY
 
 Keep up the great work! 🎉
 
-Report saved: /.documentation/copilot/audit/YYYY-MM-DD_results.md
+Report saved: /.devspark.work/audits/YYYY-MM-DD_results.md
 ```
 
 ### Historical Comparison
 
 When previous audits exist:
-- Load most recent audit from `/.documentation/copilot/audit/`
+- Load most recent audit from `/.devspark.work/audits/`
 - Compare issue counts by severity
 - Show improvement/regression trends
 - Highlight newly introduced vs. fixed issues

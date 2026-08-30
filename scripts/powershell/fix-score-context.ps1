@@ -306,7 +306,7 @@ function Get-AttentionSignals {
 
 function Get-AuditArtifacts {
     param([string]$RepoRoot)
-    $roots = @('.documentation', '.devspark') | ForEach-Object { Join-Path $RepoRoot $_ }
+    $roots = @('.knowledge', '.devspark') | ForEach-Object { Join-Path $RepoRoot $_ }
     $patterns = @('*audit*.md', '*audit*.json', '*score*.json', '*score*.md', '*diagnostic*.json', '*diagnostic*.md')
     $found = @()
     foreach ($root in $roots) {

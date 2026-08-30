@@ -1,0 +1,19 @@
+id: brand-system
+name: Brand System
+kind: design-asset-set
+summary: Durable DevSpark and Make Bold Solutions brand assets, tokens, guides, and reusable media.
+owner: DevSpark maintainers
+lifecycle: current
+root: .knowledge/entities/brand-system/assets
+managed_by: human
+required_layers:
+- architecture.md
+relations:
+  - type: supports
+    object: product-documentation
+evidence:
+  - type: code
+    ref: .knowledge/entities/brand-system/assets
+    verified_by: inspection
+    test_attempted: true
+    fallback_reason: "Brand assets are binary/design files that require visual inspection."

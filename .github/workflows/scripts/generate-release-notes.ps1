@@ -10,7 +10,7 @@
 .PARAMETER LastTag
     The previous tag to compare against
 .EXAMPLE
-    .\generate-release-notes.ps1 -NewVersion "v1.0.0" -LastTag "v0.0.91"
+    .\generate-release-notes.ps1 -NewVersion "v4.0.0" -LastTag "v3.9.9"
 #>
 
 param(
@@ -51,11 +51,11 @@ DevSpark is an Adaptive System Life Cycle Development (ASLCD) toolkit with const
 - **Prompt-first lifecycle**: Quickstart and upgrade flows work directly from remote prompt files
 - **Constitution-powered workflows**: Requirements, planning, review, and audit flows stay aligned with project rules
 - **Agent-agnostic architecture**: Shared stock prompts plus thin shims for 18+ AI coding assistants
-- **Safe customization model**: `.devspark/` stays replaceable while `.documentation/` preserves project work
+- **Safe customization model**: `.devspark/` stays replaceable while `.knowledge/` preserves project work
 
 ## Using This Release
 
-For normal use, bootstrap and update DevSpark from your AI chat using the remote quickstart and upgrade prompt files. The CLI remains available for advanced terminal-driven automation.
+For normal use, bootstrap, update, and repair DevSpark from your AI chat using the remote quickstart prompt files.
 
 ## Changelog
 

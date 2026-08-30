@@ -48,11 +48,11 @@ $HAS_GIT       = $envData.HAS_GIT
 $IMPL_PLAN     = $envData.IMPL_PLAN
 $NEW_PLAN = $IMPL_PLAN
 $AGENT_REGISTRY_FILE = Join-Path $REPO_ROOT 'agents-registry.json'
-$SHARED_AGENT_CONTEXT_FILE = Join-Path $REPO_ROOT '.documentation/AGENTS.md'
+$SHARED_AGENT_CONTEXT_FILE = Join-Path $REPO_ROOT '.knowledge/AGENTS.md'
 $SHARED_CONTEXT_START = '<!-- DEVSPARK SHARED CONTEXT:START -->'
 $SHARED_CONTEXT_END = '<!-- DEVSPARK SHARED CONTEXT:END -->'
 
-$TEMPLATE_FILE = Join-Path $REPO_ROOT '.documentation/templates/agent-file-template.md'
+$TEMPLATE_FILE = Join-Path $REPO_ROOT '.knowledge/overrides/templates/agent-file-template.md'
 $LEGACY_TEMPLATE_FILE = Join-Path $REPO_ROOT 'templates/agent-file-template.md'
 
 # Parsed plan data placeholders
@@ -168,7 +168,7 @@ function Validate-Environment {
         } else {
             Write-Err "Template file not found at $TEMPLATE_FILE"
             Write-Info "Legacy fallback also not found at $LEGACY_TEMPLATE_FILE"
-            Write-Info 'Run devspark init to scaffold .documentation/templates, or add agent-file-template.md there.'
+            Write-Info 'Run the matching DevSpark quickstart prompt to scaffold .devspark/templates, or add agent-file-template.md there.'
             exit 1
         }
     }
@@ -491,4 +491,3 @@ function Main {
 }
 
 Main
-

@@ -37,7 +37,7 @@ If no scope is provided, infer repository/user defaults from local git/config co
 ## Guardrails (Non-Negotiable)
 
 - Do not weaken scoring policies, disable gates, or suppress failing checks just to improve the score.
-- Do not delete findings without fixing root causes.
+- Do not drop findings without fixing root causes.
 - Do not hand-edit generated artifacts to fake a pass.
 - Do not create empty/no-op commits, meaningless PR churn, fake engagement, or cosmetic-only dependency changes to manipulate score inputs.
 - If a limitation is external (for example an intentionally offline website), record it as an accepted external limitation with evidence.
@@ -58,15 +58,15 @@ Done when you provide:
 
 ### 1. Resolve Scope and Inputs
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check - if `.documentation/scripts/powershell/fix-score-context.ps1` (PowerShell) or `.documentation/scripts/bash/fix-score-context.sh` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check - if `.knowledge/overrides/scripts/powershell/fix-score-context.ps1` (PowerShell) or `.knowledge/overrides/scripts/bash/fix-score-context.sh` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 - Parse `repo`, `user`, `category`, and `audit` from `$ARGUMENTS`.
 - If `audit` is provided, treat it as an input signal, not a source of truth.
 - If the requested `repo` does not match the current workspace, stop and ask for confirmation before changing files.
 - Run `{SCRIPT}` once and parse its JSON output. Use it as the first-pass blocker map before reading broad file trees.
 - If stdout JSON is truncated or too large for the tool channel, rerun the same script with an output file and parse the file instead:
-  - Bash: `.devspark/scripts/bash/fix-score-context.sh $ARGUMENTS --output .documentation/fix-score/context.json`
-  - PowerShell: `.devspark/scripts/powershell/fix-score-context.ps1 $ARGUMENTS -Output .documentation/fix-score/context.json`
+  - Bash: `.devspark/scripts/bash/fix-score-context.sh $ARGUMENTS --output .devspark.work/fix-score/context.json`
+  - PowerShell: `.devspark/scripts/powershell/fix-score-context.ps1 $ARGUMENTS -Output .devspark.work/fix-score/context.json`
 
 The context JSON includes:
 

@@ -1,0 +1,19 @@
+id: application-registry
+name: Application Registry
+kind: repository-configuration
+summary: Durable multi-application registry metadata for DevSpark monorepo workflows.
+owner: DevSpark maintainers
+lifecycle: current
+root: .knowledge/entities/application-registry/registry.json
+managed_by: mixed
+required_layers:
+- architecture.md
+relations:
+  - type: scopes
+    object: work-packages
+evidence:
+  - type: code
+    ref: templates/commands/validate-registry.md
+    verified_by: inspection
+    test_attempted: true
+    fallback_reason: "Registry behavior is prompt-driven and validated through command contract review."

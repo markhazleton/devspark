@@ -21,6 +21,24 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+This command applies the delta to code and current truth together. When any
+later section conflicts with this section, the v4 section wins.
+
+- Consume `context_resolved`; do not perform unbounded ontology traversal during
+  implementation.
+- Update code and `.knowledge` in the same pass for every durable behavior
+  change.
+- Prefer execution evidence; when using inspection evidence, record
+  `test_attempted` and `fallback_reason`.
+- Populate each completed task's `code_ref`, `knowledge_ref`, and
+  `governance_ref` when applicable.
+- Never write ephemeral package, task, spec, plan, review-thread, release, or
+  archive references into permanent code comments or `.knowledge`.
+- Run current-truth validation and verify-before-archive before moving the work
+  package to `.archive/YYYY-MM-DD/<topic>/`.
+
 ## Workflow Position
 
 Delivery gateway between authoring (`specify → clarify → plan → tasks → analyze + critic`) and shipping (`create-pr → pr-review`). Also the resume point for `/devspark.quickfix`.
@@ -37,7 +55,7 @@ Done when: every task in `tasks.md` is `[X]`, every phase has a `**Checkpoint**:
 
 ## Constitution Authority
 
-Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated principle as **non-negotiable**:
+Load `/.knowledge/governance/constitution.md` at step 4. Treat every mandated principle as **non-negotiable**:
 
 - Missing task for a runtime-bearing principle (observability, accessibility, security baseline, test coverage, audit logging, telemetry) with no matching `## Constitution Waivers` entry in `plan.md` → **halt** and route to `/devspark.tasks`. Do not add the task yourself.
 - An implementation choice that conflicts with a principle MUST be refused even if the task description appears to permit it → amend via `/devspark.plan` or propose via `/devspark.evolve-constitution`.
@@ -52,9 +70,9 @@ unresolved.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 1. Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
@@ -99,7 +117,7 @@ unresolved.
 4. Load and analyze the implementation context:
    - **REQUIRED**: Read tasks.md for the complete task list and execution plan
    - **REQUIRED**: Read plan.md for tech stack, architecture, file structure, and any `## Constitution Waivers`
-   - **REQUIRED**: Read `/.documentation/memory/constitution.md` and extract mandated principles (see Constitution Authority above)
+   - **REQUIRED**: Read `/.knowledge/governance/constitution.md` and extract mandated principles (see Constitution Authority above)
    - **IF EXISTS**: Read data-model.md for entities and relationships
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints
@@ -200,7 +218,7 @@ unresolved.
    - Suggest next steps if implementation cannot proceed
 
    **Governance expectations for the create-pr/pr-review handoff**:
-   - Delivery status must be met (`create_pr_ready=true` in latest harness result)
+   - Delivery status must be met (`create_pr_ready=true` in the latest delivery result)
    - Branch sync must pass (`HEAD` not behind `origin/main`)
    - Every `## Gate Acknowledgements` entry and every `## Constitution Waivers` entry will be surfaced by `/devspark.create-pr` in the PR body — make sure they are accurate.
 

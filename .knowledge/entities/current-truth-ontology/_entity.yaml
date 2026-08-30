@@ -1,0 +1,20 @@
+id: current-truth-ontology
+name: Current-Truth Ontology
+kind: knowledge-model
+summary: v4 current-truth model that organizes durable knowledge, governance, evidence, and derived metadata.
+owner: DevSpark maintainers
+lifecycle: current
+root: .knowledge/ontology
+managed_by: mixed
+required_layers:
+- architecture.md
+- devspark-v4-philosophy.md
+relations:
+  - type: validates
+    object: command-templates
+  - type: validates
+    object: work-packages
+evidence:
+  - type: doc
+    ref: .knowledge/governance/constitution.md
+    verified_by: inspection

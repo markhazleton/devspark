@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devspark.local/schemas/devspark-task-linkage.schema.json",
+  "title": "DevSpark v4 Task Linkage",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["id", "description", "status", "code_ref", "knowledge_ref"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "in_progress", "complete", "blocked"]
+    },
+    "code_ref": {
+      "$ref": "#/$defs/refOrNa"
+    },
+    "knowledge_ref": {
+      "$ref": "#/$defs/refOrNa"
+    },
+    "governance_ref": {
+      "$ref": "#/$defs/refOrNa"
+    }
+  },
+  "$defs": {
+    "refOrNa": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "not": { "const": "n/a" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "reason"],
+          "properties": {
+            "value": { "const": "n/a" },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

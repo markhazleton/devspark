@@ -12,13 +12,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-Register a new application in the DevSpark multi-app registry at `.documentation/devspark.json`.
+Register a new application in the DevSpark multi-app registry at `.knowledge/entities/application-registry/registry.json`.
 
 1. **Collect application metadata** from the user input or interactively:
    - `id`: Unique, lowercase, path-safe identifier (e.g., `payments-api`)
    - `name`: Human-readable application name
    - `path`: Relative path from repo root (e.g., `apps/payments-api`)
-   - `kind`: Application type (e.g., `runtime-api`, `web-client`, `web-admin`, `library`, `qa-harness`)
+   - `kind`: Application type (e.g., `runtime-api`, `web-client`, `web-admin`, `library`, `qa-tool`)
    - `purpose`: One-line description of the application's role
    - `runtime`: Technology/framework (e.g., `dotnet`, `react`, `node`)
    - `owner`: Team or individual responsible
@@ -33,11 +33,11 @@ Register a new application in the DevSpark multi-app registry at `.documentation
    - Check that the `path` does not conflict with existing registered app paths
 
 3. **Update the registry**:
-   - Add the new application entry to the `apps` array in `.documentation/devspark.json`
+   - Add the new application entry to the `apps` array in `.knowledge/entities/application-registry/registry.json`
    - Ensure the registry passes full validation after the addition
 
 4. **Scaffold the application documentation** (always performed):
-   - Create `{path}/.documentation/` with standard subdirectories:
+   - Create `{path}/.knowledge/` with standard subdirectories:
      - `memory/` — for app-specific constitution
      - `commands/` — for app-specific command overrides
      - `scripts/` — for app-specific script overrides

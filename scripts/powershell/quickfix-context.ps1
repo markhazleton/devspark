@@ -32,30 +32,34 @@ $descriptionText = $description -join " "
 
 # Get repository context
 $repoRoot = Get-RepoRoot
-$constitutionPath = Join-Path $repoRoot ".documentation/memory/constitution.md"
-$quickfixDir = Join-Path $repoRoot ".documentation/quickfixes"
+$constitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
+$legacyConstitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
+if (-not (Test-Path $constitutionPath) -and (Test-Path $legacyConstitutionPath)) {
+    $constitutionPath = $legacyConstitutionPath
+}
+$quickfixDir = Join-Path $repoRoot ".devspark.work/quickfixes"
 $currentBranch = Get-CurrentBranch
 
 # Check constitution exists
 $constitutionExists = Test-Path $constitutionPath
 
-# Calculate next quickfix ID (QF-YYYY-NNN format)
+# Calculate next quickfix work-package ID
 $year = Get-Date -Format "yyyy"
 $nextNum = 1
 
 if (Test-Path $quickfixDir) {
-    $existingFiles = Get-ChildItem -Path $quickfixDir -Filter "QF-$year-*.md" -ErrorAction SilentlyContinue |
+    $existingFiles = Get-ChildItem -Path $quickfixDir -Directory -Filter "qf-$year-*" -ErrorAction SilentlyContinue |
         Sort-Object Name -Descending |
         Select-Object -First 1
 
     if ($existingFiles) {
-        if ($existingFiles.Name -match "QF-$year-(\d+)\.md") {
+        if ($existingFiles.Name -match "qf-$year-(\d+)") {
             $currentNum = [int]$matches[1]
             $nextNum = $currentNum + 1
         }
     }
 }
-$nextId = "QF-{0}-{1:D3}" -f $year, $nextNum
+$nextId = "qf-{0}-{1:D3}" -f $year, $nextNum
 
 # Get git user for attribution
 $gitUser = "unknown"
@@ -101,11 +105,11 @@ if ($descriptionText) {
     }
 }
 
-# List existing quickfixes
+# List existing quickfix work packages
 $quickfixes = @()
 if (Test-Path $quickfixDir) {
-    $quickfixes = Get-ChildItem -Path $quickfixDir -Filter "*.md" -ErrorAction SilentlyContinue |
-        ForEach-Object { $_.BaseName }
+    $quickfixes = Get-ChildItem -Path $quickfixDir -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object { $_.Name }
 }
 
 # Output
@@ -114,6 +118,7 @@ if ($Json) {
         REPO_ROOT           = $repoRoot
         CONSTITUTION_PATH   = $constitutionPath
         CONSTITUTION_EXISTS = $constitutionExists
+        WORK_PACKAGE_DIR    = (Join-Path $quickfixDir $nextId)
         QUICKFIX_DIR        = $quickfixDir
         CURRENT_BRANCH      = $currentBranch
         NEXT_ID             = $nextId
@@ -133,7 +138,8 @@ else {
     Write-Output "================"
     Write-Output "Repository: $repoRoot"
     Write-Output "Constitution: $constitutionPath (exists: $constitutionExists)"
-    Write-Output "Quickfix Directory: $quickfixDir"
+    Write-Output "Quickfix Work Root: $quickfixDir"
+    Write-Output "Work Package: $(Join-Path $quickfixDir $nextId)"
     Write-Output "Current Branch: $currentBranch"
     Write-Output "Next ID: $nextId"
     Write-Output "Action: $action"

@@ -32,16 +32,16 @@ increment_patch() {
     echo "v$major.$minor.$patch"
     return 0
   fi
-  echo "v1.0.0"
+  echo "v4.0.0"
 }
 
-get_pyproject_version() {
-  if [[ ! -f "pyproject.toml" ]]; then
+get_devspark_version() {
+  if [[ ! -f ".devspark/VERSION" ]]; then
     return 1
   fi
 
   local parsed
-  parsed=$(grep -oE '^[[:space:]]*version[[:space:]]*=[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' pyproject.toml | head -n1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
+  parsed=$(grep -oE '^[[:space:]]*version:[[:space:]]*[0-9]+\.[0-9]+\.[0-9]+' .devspark/VERSION | head -n1 | sed -E 's/.*version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
 
   if [[ -n "${parsed:-}" ]]; then
     echo "v$parsed"
@@ -54,10 +54,10 @@ get_pyproject_version() {
 # 1) Explicit manual input wins (workflow_dispatch input)
 if [[ -n "$EXPLICIT_VERSION" ]]; then
   if NEW_VERSION=$(normalize_version "$EXPLICIT_VERSION"); then
-    if PYPROJECT_VERSION=$(get_pyproject_version); then
-      if [[ "$NEW_VERSION" != "$PYPROJECT_VERSION" ]]; then
-        echo "Explicit version '$NEW_VERSION' does not match pyproject.toml version '$PYPROJECT_VERSION'." >&2
-        echo "Update pyproject.toml first to keep DevSpark and DevSpark CLI versions in sync." >&2
+    if DEVSPARK_VERSION=$(get_devspark_version); then
+      if [[ "$NEW_VERSION" != "$DEVSPARK_VERSION" ]]; then
+        echo "Explicit version '$NEW_VERSION' does not match .devspark/VERSION '$DEVSPARK_VERSION'." >&2
+        echo "Update .devspark/VERSION first to keep release assets in sync." >&2
         exit 1
       fi
     fi
@@ -71,18 +71,18 @@ if [[ -n "$EXPLICIT_VERSION" ]]; then
   fi
 fi
 
-# 2) Prefer pyproject.toml version when present and not already tagged
-if PYPROJECT_VERSION=$(get_pyproject_version); then
-  if ! git rev-parse -q --verify "refs/tags/$PYPROJECT_VERSION" >/dev/null 2>&1; then
-    echo "new_version=$PYPROJECT_VERSION" >> $GITHUB_OUTPUT
-    echo "New version will be: $PYPROJECT_VERSION (source: pyproject.toml)"
+# 2) Prefer .devspark/VERSION when present and not already tagged
+if DEVSPARK_VERSION=$(get_devspark_version); then
+  if ! git rev-parse -q --verify "refs/tags/$DEVSPARK_VERSION" >/dev/null 2>&1; then
+    echo "new_version=$DEVSPARK_VERSION" >> $GITHUB_OUTPUT
+    echo "New version will be: $DEVSPARK_VERSION (source: .devspark/VERSION)"
     exit 0
   fi
 
-  # pyproject.toml version is already tagged — nothing new to release
-  echo "new_version=$PYPROJECT_VERSION" >> $GITHUB_OUTPUT
+  # .devspark/VERSION is already tagged, so nothing new needs releasing.
+  echo "new_version=$DEVSPARK_VERSION" >> $GITHUB_OUTPUT
   echo "skip_release=true" >> $GITHUB_OUTPUT
-  echo "pyproject.toml version $PYPROJECT_VERSION is already tagged. Nothing to release."
+  echo ".devspark/VERSION $DEVSPARK_VERSION is already tagged. Nothing to release."
   exit 0
 fi
 

@@ -31,11 +31,11 @@ Done when: the questioning loop has ended (5 questions asked, full coverage reac
 
 ## Constitution Authority
 
-If `/.documentation/memory/constitution.md` exists, load it. The constitution is a **non-negotiable ambiguity-detection lens**: any mandated principle (privacy, accessibility, observability, testing, etc.) that the spec omits or leaves vague is a high-priority candidate question. Constitution conflicts cannot be resolved by answer choice — they must trigger a follow-up note in the spec recommending either spec amendment or an explicit constitution update.
+If `/.knowledge/governance/constitution.md` exists, load it. The constitution is a **non-negotiable ambiguity-detection lens**: any mandated principle (privacy, accessibility, observability, testing, etc.) that the spec omits or leaves vague is a high-priority candidate question. Constitution conflicts cannot be resolved by answer choice — they must trigger a follow-up note in the spec recommending either spec amendment or an explicit constitution update.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
 Goal: Detect and reduce ambiguity or missing decision points in the active feature specification and record the clarifications directly in the spec file.
 
@@ -43,7 +43,7 @@ Note: This clarification workflow is expected to run (and be completed) BEFORE i
 
 Execution steps:
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 1. Run `{SCRIPT}` from repo root **once** (combined `--json --paths-only` mode / `-Json -PathsOnly`). Parse minimal JSON payload fields:
    - `FEATURE_DIR`
@@ -51,7 +51,7 @@ Execution steps:
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
    - If JSON parsing fails, abort and instruct user to re-run `/devspark.specify` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
-   - If `/.documentation/memory/constitution.md` exists, load it. Cross-reference constitution principles when scanning for underspecified areas — flag requirements that conflict with or omit mandated principles.
+   - If `/.knowledge/governance/constitution.md` exists, load it. Cross-reference constitution principles when scanning for underspecified areas — flag requirements that conflict with or omit mandated principles.
    - Load the shared validation contract from `/.devspark/templates/spec-validation-contract.md` in installed repos, or `templates/spec-validation-contract.md` in source repos.
 
 2. Load the current spec file and validate it against the shared specification validation contract before ambiguity scanning.

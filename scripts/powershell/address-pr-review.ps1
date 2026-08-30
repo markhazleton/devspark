@@ -2,14 +2,14 @@
 #requires -Version 7.0
 # Helper script for /devspark.address-pr-review
 # -PrId: parse review file and emit open findings JSON
-# -Gate: enforce staged-path isolation for code-only or review-only commits
+# -Gate: enforce staged-path isolation for code commits
 
 param(
     [Parameter()]
     [string]$PrId,
 
     [Parameter()]
-    [ValidateSet('code-only', 'review-only')]
+    [ValidateSet('code-only')]
     [string]$Gate,
 
     [Parameter()]
@@ -34,7 +34,7 @@ function Get-StagedPaths {
 
 function Test-IsReviewPath {
     param([string]$Path)
-    return $Path -match '^\.documentation/specs/pr-review/pr-.*\.md$'
+    return $Path -match '^\.devspark\.work/'
 }
 
 function Write-GateFailure {
@@ -59,14 +59,7 @@ if ($Gate) {
     if ($Gate -eq 'code-only') {
         $reviewStaged = @($staged | Where-Object { Test-IsReviewPath $_ })
         if ($reviewStaged.Count -gt 0) {
-            Write-GateFailure -Message 'Code commit gate failed. Review files must not be staged for code-only commits.' -OffendingPaths $reviewStaged
-        }
-    }
-
-    if ($Gate -eq 'review-only') {
-        $nonReviewStaged = @($staged | Where-Object { -not (Test-IsReviewPath $_) })
-        if ($nonReviewStaged.Count -gt 0) {
-            Write-GateFailure -Message 'Review commit gate failed. Only PR review markdown files may be staged.' -OffendingPaths $nonReviewStaged
+            Write-GateFailure -Message 'Code commit gate failed. Ephemeral work files must not be staged.' -OffendingPaths $reviewStaged
         }
     }
 
@@ -77,7 +70,7 @@ if ($Gate) {
 }
 
 if (-not $PrId) {
-    Write-Error 'DevSpark: Provide -PrId <N> or -Gate <code-only|review-only>.'
+    Write-Error 'DevSpark: Provide -PrId <N> or -Gate code-only.'
     exit 1
 }
 
@@ -88,7 +81,7 @@ if ($normalizedPrId -notmatch '^\d+$') {
 }
 
 $repoRoot = Get-RepoRoot
-$reviewFile = Join-Path $repoRoot ".documentation/specs/pr-review/pr-$normalizedPrId.md"
+$reviewFile = Join-Path $repoRoot ".devspark.work/pr-reviews/pr-$normalizedPrId.md"
 
 if (-not (Test-Path -LiteralPath $reviewFile)) {
     Write-Error "DevSpark: Review file not found: $reviewFile"

@@ -325,7 +325,10 @@ main() {
     fi
 
     # Check for constitution
-    local constitution_path="$REPO_ROOT/.documentation/memory/constitution.md"
+    local constitution_path="$REPO_ROOT/.knowledge/governance/constitution.md"
+    if [[ ! -f "$constitution_path" && -f "$REPO_ROOT/.knowledge/governance/constitution.md" ]]; then
+        constitution_path="$REPO_ROOT/.knowledge/governance/constitution.md"
+    fi
     local constitution_exists="false"
     if [[ -f "$constitution_path" ]]; then
         constitution_exists="true"
@@ -349,7 +352,7 @@ main() {
         spec_feature_id="$source_branch"
 
         # Check for spec directory
-        local feature_dir="$REPO_ROOT/.documentation/specs/$spec_feature_id"
+        local feature_dir="$REPO_ROOT/.devspark.work/specs/$spec_feature_id"
         spec_path="$feature_dir/spec.md"
 
         if [[ -f "$spec_path" ]]; then
@@ -371,7 +374,7 @@ main() {
     fi
 
     # Prepare review directory
-    local review_dir="$REPO_ROOT/.documentation/specs/pr-review"
+    local review_dir="$REPO_ROOT/.devspark.work/pr-reviews"
 
     # Build JSON output
     if [[ "$JSON_MODE" == true ]]; then

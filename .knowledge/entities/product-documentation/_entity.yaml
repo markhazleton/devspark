@@ -1,0 +1,19 @@
+id: product-documentation
+name: Product Documentation
+kind: knowledge-site
+summary: Durable DevSpark user guides, docs-site source, and documentation publishing configuration.
+owner: DevSpark maintainers
+lifecycle: current
+root: .knowledge/entities/product-documentation/site
+managed_by: mixed
+required_layers:
+- architecture.md
+relations:
+  - type: describes
+    object: command-templates
+  - type: describes
+    object: work-packages
+evidence:
+  - type: test
+    ref: tests/test_documentation_audit.py
+    verified_by: execution

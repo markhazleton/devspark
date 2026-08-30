@@ -4,12 +4,12 @@ handoffs:
   - label: Run Site Audit
     agent: devspark.site-audit
     prompt: Run a full codebase audit to complement commit history insights
-  - label: View Harvest Report
+  - label: Check Current Truth
     agent: devspark.harvest
-    prompt: Review completed specs and stale documentation before archiving
+    prompt: Inspect in-flight work packages and current-truth cleanup candidates
 scripts:
-  sh: .devspark/scripts/bash/commit-audit.sh $ARGUMENTS --json
-  ps: .devspark/scripts/powershell/commit-audit.ps1 $ARGUMENTS -Json
+  sh: .devspark/scripts/bash/release-history-context.sh $ARGUMENTS --json
+  ps: .devspark/scripts/powershell/release-history-context.ps1 $ARGUMENTS -Json
 ---
 
 ## User Input
@@ -51,7 +51,7 @@ Multiple scope flags may be combined: `--scope=velocity,hygiene`
 
 ### 1. Initialize Audit Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` and parse its JSON output.
 
@@ -190,7 +190,9 @@ Summarize findings as a brief paragraph and flag any concerning patterns (e.g., 
 
 ### 8. Generate Commit Audit Report
 
-Write a report to the script-provided `report_path` (or `/.documentation/copilot/commit-audit-YYYY-MM-DD.md` if not provided).
+Write only the requested response unless the user explicitly asks for a saved
+report. Durable repository files should not preserve commit-audit output as
+current truth.
 
 #### Report Structure
 
@@ -262,7 +264,7 @@ Display a concise summary:
 ```text
 ✅ Commit Audit Complete!
 
-📄 Report saved: /.documentation/copilot/commit-audit-{DATE}.md
+Report generated from Git history for this session.
 📅 Range: {FIRST_DATE} to {LAST_DATE}
 🔢 {N} commits analyzed across {N} contributors
 
@@ -272,7 +274,7 @@ Highlights:
 - Deployment Frequency: {N}/month ({STATUS})
 - Bus Factor: {N} ({STATUS})
 
-View full report: /.documentation/copilot/commit-audit-{DATE}.md
+Review the response above for the full report.
 ```
 
 ## Guidelines

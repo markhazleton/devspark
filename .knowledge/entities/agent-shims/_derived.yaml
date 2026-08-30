@@ -1,0 +1,5 @@
+constrained_by:
+- agent-skills-as-portable-capability-packages-within-lifecycle-orchestration
+- always-install-both-powershell-and-bash-script-sets
+generated_by: devspark.current_truth
+generated_on: '2026-08-30'

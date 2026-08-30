@@ -4,14 +4,14 @@ set -euo pipefail
 # create-release-packages.sh (workflow-local)
 # Build DevSpark template release archives for each supported AI assistant and script type.
 # Usage: .github/workflows/scripts/create-release-packages.sh <version>
-#   Version argument should include leading 'v' (e.g., v1.0.0).
+#   Version argument should include leading 'v' (e.g., v4.0.0).
 #   Optionally set AGENTS and/or SCRIPTS env vars to limit what gets built.
 #     AGENTS  : space or comma separated subset of: claude gemini copilot cursor-agent qwen opencode windsurf codex amp shai bob antigravity (default: all)
 #     SCRIPTS : space or comma separated subset of: sh ps (default: both)
 #   Examples:
-#     AGENTS=claude SCRIPTS=sh $0 v1.0.0
-#     AGENTS="copilot,gemini" $0 v1.0.0
-#     SCRIPTS=ps $0 v1.0.0
+#     AGENTS=claude SCRIPTS=sh $0 v4.0.0
+#     AGENTS="copilot,gemini" $0 v4.0.0
+#     SCRIPTS=ps $0 v4.0.0
 
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 <version-with-v-prefix>" >&2
@@ -19,7 +19,7 @@ if [[ $# -ne 1 ]]; then
 fi
 NEW_VERSION="$1"
 if [[ ! $NEW_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "Version must look like v1.0.0 (standard semantic versioning)" >&2
+  echo "Version must look like v4.0.0 (standard semantic versioning)" >&2
   exit 1
 fi
 
@@ -38,11 +38,12 @@ mkdir -p "$GENRELEASES_DIR"
 rm -rf "${GENRELEASES_DIR:?}"/* || true
 
 rewrite_paths() {
-  # DevSpark uses .devspark/ for framework files and .documentation/ for user work
+  # DevSpark uses .devspark/ for framework files, .knowledge/ for current truth,
+  # and .devspark.work/ for in-flight work packages.
   sed -E \
-    -e 's@(/?)\.specify/@\1.documentation/@g' \
-    -e 's@(^|[[:space:]]|`)/specs/@\1/.documentation/specs/@g' \
-    -e 's@(^|[[:space:]]|`)/memory/@\1/.documentation/memory/@g' \
+    -e 's@(/?)\.specify/@\1.knowledge/@g' \
+    -e 's@(^|[[:space:]]|`)/specs/@\1/.devspark.work/specs/@g' \
+    -e 's@(^|[[:space:]]|`)/memory/@\1/.knowledge/governance/@g' \
     -e 's@(^|[[:space:]]|`)/scripts/@\1/.devspark/scripts/@g' \
     -e 's@(^|[[:space:]]|`)/templates/@\1/.devspark/templates/@g'
 }
@@ -79,7 +80,7 @@ copy_agent_support_files() {
 }
 
 generate_canonical_commands() {
-  # Generate canonical command files in .documentation/commands/ (agent-agnostic)
+  # Generate canonical command files in .knowledge/overrides/commands/ (agent-agnostic)
   local output_dir=$1 script_variant=$2
   mkdir -p "$output_dir"
   for template in templates/commands/*.md; do
@@ -136,7 +137,7 @@ generate_canonical_commands() {
 }
 
 generate_shims() {
-  # Generate thin platform shims that redirect to canonical commands in .documentation/commands/
+  # Generate thin platform shims that redirect to canonical commands in .knowledge/overrides/commands/
   local agent=$1 ext=$2 arg_format=$3 output_dir=$4
   mkdir -p "$output_dir"
   for template in templates/commands/*.md; do
@@ -169,8 +170,8 @@ Determine the current git user by running \`git config user.name\`.
 Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
 
 Read and execute the instructions from the **first file that exists**:
-1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)
-2. \`.documentation/commands/devspark.$name.md\` (team customization)
+1. \`.knowledge/overrides/{git-user}/commands/devspark.$name.md\` (personalized override)
+2. \`.knowledge/overrides/commands/devspark.$name.md\` (team customization)
 3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)
 
 Where \`{git-user}\` is the normalized slug from step above.
@@ -200,8 +201,8 @@ SHIMEOF
           echo "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars."
           echo ""
           echo "Read and execute the instructions from the **first file that exists**:"
-          echo "1. \`.documentation/{git-user}/commands/devspark.$name.md\` (personalized override)"
-          echo "2. \`.documentation/commands/devspark.$name.md\` (team customization)"
+          echo "1. \`.knowledge/overrides/{git-user}/commands/devspark.$name.md\` (personalized override)"
+          echo "2. \`.knowledge/overrides/commands/devspark.$name.md\` (team customization)"
           echo "3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)"
           echo ""
           echo "Where \`{git-user}\` is the normalized slug from step above."
@@ -321,15 +322,16 @@ build_variant() {
     echo "migrated-from: fresh"
   } > "$DEVSPARK_DIR/VERSION"
 
-  # Constitution is user-owned and never included in release packages.
-  # Users create it via /devspark.constitution or /devspark.discover-constitution.
+  # Current truth is user-owned and never included as repository content.
+  mkdir -p "$base_dir/.knowledge/entities" "$base_dir/.knowledge/governance/decisions" "$base_dir/.knowledge/ontology" "$base_dir/.devspark.work/specs"
   
-  # ADR-001: Always copy both script sets regardless of build variant.
+  # Current decision: Always copy both script sets regardless of build variant.
   # The sh|ps variant only controls which {SCRIPT} path gets baked into command files.
   if [[ -d scripts ]]; then
     mkdir -p "$DEVSPARK_DIR/scripts"
     [[ -d scripts/bash ]] && { cp -r scripts/bash "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/bash -> .devspark/scripts"; }
     [[ -d scripts/powershell ]] && { cp -r scripts/powershell "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/powershell -> .devspark/scripts"; }
+    [[ -d scripts/python ]] && { cp -r scripts/python "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/python -> .devspark/scripts"; }
     find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
   fi
   
@@ -339,12 +341,12 @@ build_variant() {
   }
   
   # Generate canonical command prompts in .devspark/defaults/commands/ (stock, upgrade-safe)
-  # Team customizations live in .documentation/commands/ and are never overwritten.
+  # Team customizations live in .knowledge/overrides/commands/ and are never overwritten.
   generate_canonical_commands "$DEVSPARK_DIR/defaults/commands" "$script"
   echo "Generated canonical commands -> .devspark/defaults/commands"
 
   # Generate thin platform shims in agent-specific directories
-  # Shims redirect to .documentation/commands/ with user-override resolution
+  # Shims redirect to .knowledge/overrides/commands/ with user-override resolution
   local commands_dir extension arg_format prompt_dir
   commands_dir=$(get_agent_release_field "$agent" commands_dir)
   extension=$(get_agent_release_field "$agent" extension)

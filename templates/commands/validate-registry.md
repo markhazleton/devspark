@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Run comprehensive validation on the DevSpark multi-app registry. This is a **read-only** command — no files are modified.
 
-1. **Load the registry** from `.documentation/devspark.json`:
+1. **Load the registry** from `.knowledge/entities/application-registry/registry.json`:
    - If the file does not exist, report: "No multi-app registry found."
    - If the file is invalid JSON, report the parse error and stop
 
@@ -40,7 +40,7 @@ Run comprehensive validation on the DevSpark multi-app registry. This is a **rea
    - Check rules for weakening of mandatory repo-wide rules
 
 6. **Constitution validation**:
-   - Check that `.documentation/memory/constitution.md` exists
+   - Check that `.knowledge/governance/constitution.md` exists
    - For each app with a local constitution, run weakening detection
 
 7. **Report results**:
@@ -54,7 +54,7 @@ Run comprehensive validation on the DevSpark multi-app registry. This is a **rea
 ```text
 DevSpark Registry Validation
 =============================
-Registry: .documentation/devspark.json
+Registry: .knowledge/entities/application-registry/registry.json
 Apps: N | Profiles: N
 
 Errors:

@@ -1,9 +1,9 @@
-"""Contract test: skills surface must be installed by quickstarts, upgrade prompt, and release packaging.
+"""Contract test: skills surface must be installed by quickstarts and release packaging.
 
 Closes GitHub issues #42, #43, #44 — `templates/skills/` (and specifically the
 `write-spec` skill required by `/devspark.specify`) MUST be installed alongside
 helper templates and scripts. This test guards against regressions where the
-skills directory is omitted from any install/upgrade surface.
+skills directory is omitted from any install, upgrade, or repair surface.
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 QUICKSTART_DIR = ROOT / "quickstart"
-UPGRADE_PROMPT = ROOT / "templates" / "commands" / "upgrade.md"
 RELEASE_PACKAGER = ROOT / ".github" / "workflows" / "scripts" / "create-release-packages.sh"
 SKILLS_ROOT = ROOT / "templates" / "skills"
 
@@ -58,28 +57,6 @@ def test_quickstart_installs_skills(quickstart: Path) -> None:
     )
     assert "Pull Agent Skills" in text or "Agent Skill" in text, (
         f"{quickstart.name} is missing a dedicated Agent Skills install step."
-    )
-
-
-def test_upgrade_prompt_lists_skills_as_framework_owned() -> None:
-    """templates/commands/upgrade.md must declare .devspark/templates/skills/ as framework-owned and refresh it on upgrade."""
-    text = UPGRADE_PROMPT.read_text(encoding="utf-8")
-
-    assert ".devspark/templates/skills/" in text, (
-        "upgrade.md does not mention .devspark/templates/skills/ — "
-        "upgrades will not refresh skills (regression of #42/#43/#44)."
-    )
-    # The skills directory must appear in the Framework-owned bullet list.
-    framework_owned_idx = text.find("Framework-owned")
-    user_owned_idx = text.find("User-owned")
-    assert 0 <= framework_owned_idx < user_owned_idx, "upgrade.md ownership sections out of order"
-    framework_section = text[framework_owned_idx:user_owned_idx]
-    assert ".devspark/templates/skills/" in framework_section, (
-        "skills directory must be listed under 'Framework-owned (safe to overwrite on upgrade)'"
-    )
-
-    assert "write-spec/SKILL.md" in text, (
-        "upgrade.md should reference write-spec/SKILL.md so the verify step catches a missing skill."
     )
 
 

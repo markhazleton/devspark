@@ -1,8 +1,0 @@
-apiVersion: devspark.ai/v1
-kind: HarnessSpec
-name: minimal-harness
-
-steps:
-  - id: specify
-    type: agent_task
-    prompt_file: prompts/specify.md

@@ -12,11 +12,7 @@ def _read(rel_path: str) -> str:
 
 
 def _read_spec_file(feature_id: str, rel_path: str) -> str:
-    active_path = ROOT / ".documentation" / "specs" / feature_id / rel_path
-    candidates = [active_path]
-    releases_dir = ROOT / ".documentation" / "releases"
-    if releases_dir.is_dir():
-        candidates.extend(sorted(releases_dir.glob(f"v*/specs/{feature_id}/{rel_path}"), reverse=True))
+    candidates = [ROOT / ".devspark.work" / "specs" / feature_id / rel_path]
 
     for candidate in candidates:
         if candidate.is_file():
@@ -69,30 +65,28 @@ def test_verify_command_and_atomic_shim_define_guard() -> None:
     assert "metric-only" in verify
     assert "unchanged behavior" in verify
     assert "status: fail" in verify
-    assert "legacy_command: verify" in shim
+    assert "command: verify" in shim
     assert "templates/commands/verify.md" in shim
 
 
 def test_constitution_surfaces_genuine_fix_principle() -> None:
     command = _read("templates/commands/constitution.md")
-    constitution = _read(".documentation/memory/constitution.md")
-    contract = _read_spec_file("001-okf-genuine-fix", "contracts/genuine-fix-discipline.md")
+    constitution = _read(".knowledge/governance/constitution.md")
+    governance = _read(".knowledge/governance/severity-registry.md")
 
     assert "Genuine Fix Discipline" in command
-    assert "behavioral intent before metric movement" in command
-    assert "### IX. Genuine Fix Discipline (MUST)" in constitution
-    assert "**Version**: 1.5.0" in constitution
-    assert "v1.4.0 → v1.5.0" in constitution
-    assert "Approval: the user requested" in contract
-    assert "Migration plan: existing features remain valid" in contract
+    assert "current governance" in command
+    assert "### IX. Genuine Fix Discipline" in constitution
+    assert "**Version**: 4.0.0" in constitution
+    assert "genuine-fix.high" in governance
 
 
 def test_verify_is_discoverable_through_atomic_catalog() -> None:
     shim = _read("templates/prompts/atomic/verify.md")
     assert "id: verify" in shim
     assert "exposed: false" in shim
-    assert "category: legacy-command" in shim
-    assert "legacy_command: verify" in shim
+    assert "category: prompt-adapter" in shim
+    assert "command: verify" in shim
 
 
 def test_release_packagers_ship_genuine_fix_surfaces() -> None:
@@ -101,9 +95,11 @@ def test_release_packagers_ship_genuine_fix_surfaces() -> None:
 
     assert "templates" in bash_packager
     assert "templates" in ps_packager
+    assert "scripts/python" in bash_packager
     assert "templates[/\\\\]commands" in ps_packager
     assert "Copy-Item -Path \"scripts/bash\"" in ps_packager
     assert "Copy-Item -Path \"scripts/powershell\"" in ps_packager
+    assert "Copy-Item -Path \"scripts/python\"" in ps_packager
 
 
 def test_docs_list_verify_and_genuine_fix_contracts() -> None:
@@ -112,7 +108,7 @@ def test_docs_list_verify_and_genuine_fix_contracts() -> None:
     changelog = _read("CHANGELOG.md")
 
     assert "/devspark.verify" in readme
-    assert "29 active commands" in templates_readme
+    assert "28 active commands" in templates_readme
     assert "command-preamble-contract.md" in templates_readme
-    assert "okf-knowledge-document.schema.json" in templates_readme
-    assert "Genuine Fix Discipline" in changelog
+    assert "devspark-evidence.schema.json" in templates_readme
+    assert "quickstart prompts" in changelog

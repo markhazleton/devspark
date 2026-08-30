@@ -10,7 +10,7 @@
     Build DevSpark template release archives for each supported AI assistant and script type.
     
 .PARAMETER Version
-    Version string with leading 'v' (e.g., v1.0.0)
+    Version string with leading 'v' (e.g., v4.0.0)
 
 .PARAMETER Agents
     Comma or space separated subset of agents to build (default: all)
@@ -21,13 +21,13 @@
     Valid scripts: sh, ps
 
 .EXAMPLE
-    .\create-release-packages.ps1 -Version v1.0.0
+    .\create-release-packages.ps1 -Version v4.0.0
 
 .EXAMPLE
-    .\create-release-packages.ps1 -Version v1.0.0 -Agents claude,copilot -Scripts sh
+    .\create-release-packages.ps1 -Version v4.0.0 -Agents claude,copilot -Scripts sh
 
 .EXAMPLE
-    .\create-release-packages.ps1 -Version v1.0.0 -Agents claude -Scripts ps
+    .\create-release-packages.ps1 -Version v4.0.0 -Agents claude -Scripts ps
 #>
 
 param(
@@ -45,7 +45,7 @@ $ErrorActionPreference = "Stop"
 
 # Validate version format
 if ($Version -notmatch '^v\d+\.\d+\.\d+$') {
-    Write-Error "Version must look like v1.0.0 (standard semantic versioning)"
+    Write-Error "Version must look like v4.0.0 (standard semantic versioning)"
     exit 1
 }
 
@@ -67,10 +67,11 @@ New-Item -ItemType Directory -Path $GenReleasesDir -Force | Out-Null
 function Rewrite-Paths {
     param([string]$Content)
 
-    # DevSpark uses .devspark/ for framework files and .documentation/ for user work
-    $Content = $Content -replace '(/?)\.specify/', '$1.documentation/'
-    $Content = $Content -replace '(^|\s|`)/specs/', '$1/.documentation/specs/'
-    $Content = $Content -replace '(^|\s|`)/memory/', '$1/.documentation/memory/'
+    # DevSpark uses .devspark/ for framework files, .knowledge/ for current truth,
+    # and .devspark.work/ for in-flight work packages.
+    $Content = $Content -replace '(/?)\.specify/', '$1.knowledge/'
+    $Content = $Content -replace '(^|\s|`)/specs/', '$1/.devspark.work/specs/'
+    $Content = $Content -replace '(^|\s|`)/memory/', '$1/.knowledge/governance/'
     $Content = $Content -replace '(^|\s|`)/scripts/', '$1/.devspark/scripts/'
     $Content = $Content -replace '(^|\s|`)/templates/', '$1/.devspark/templates/'
     return $Content
@@ -256,8 +257,8 @@ Determine the current git user by running ``git config user.name``.
 Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
 
 Read and execute the instructions from the **first file that exists**:
-1. ``.documentation/{git-user}/commands/devspark.$name.md`` (personalized override)
-2. ``.documentation/commands/devspark.$name.md`` (team customization)
+1. ``.knowledge/overrides/{git-user}/commands/devspark.$name.md`` (personalized override)
+2. ``.knowledge/overrides/commands/devspark.$name.md`` (team customization)
 3. ``.devspark/defaults/commands/devspark.$name.md`` (stock default)
 
 Where ``{git-user}`` is the normalized slug from step above.
@@ -288,8 +289,8 @@ Pass the user input above to the resolved prompt.
                 $shimLines += "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars."
                 $shimLines += ""
                 $shimLines += "Read and execute the instructions from the **first file that exists**:"
-                $shimLines += "1. ``.documentation/{git-user}/commands/devspark.$name.md`` (personalized override)"
-                $shimLines += "2. ``.documentation/commands/devspark.$name.md`` (team customization)"
+                $shimLines += "1. ``.knowledge/overrides/{git-user}/commands/devspark.$name.md`` (personalized override)"
+                $shimLines += "2. ``.knowledge/overrides/commands/devspark.$name.md`` (team customization)"
                 $shimLines += "3. ``.devspark/defaults/commands/devspark.$name.md`` (stock default)"
                 $shimLines += ""
                 $shimLines += "Where ``{git-user}`` is the normalized slug from step above."
@@ -466,10 +467,13 @@ function Build-Variant {
     ) -join "`n"
     Set-Content -Path (Join-Path $devsparkDir "VERSION") -Value ($versionStamp + "`n") -NoNewline
 
-    # Constitution is user-owned and never included in release packages.
-    # Users create it via /devspark.constitution or /devspark.discover-constitution.
+    # Current truth is user-owned and never included as repository content.
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".knowledge/entities") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".knowledge/governance/decisions") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".knowledge/ontology") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $baseDir ".devspark.work/specs") -Force | Out-Null
     
-    # ADR-001 / Constitution §VI: Always copy both script sets regardless of build variant.
+    # Current decision / Constitution §VI: Always copy both script sets regardless of build variant.
     # The sh|ps variant only controls which {SCRIPT} path gets baked into command files.
     if (Test-Path "scripts") {
         $scriptsDestDir = Join-Path $devsparkDir "scripts"
@@ -482,6 +486,10 @@ function Build-Variant {
         if (Test-Path "scripts/powershell") {
             Copy-Item -Path "scripts/powershell" -Destination $scriptsDestDir -Recurse -Force
             Write-Host "Copied scripts/powershell -> .devspark/scripts"
+        }
+        if (Test-Path "scripts/python") {
+            Copy-Item -Path "scripts/python" -Destination $scriptsDestDir -Recurse -Force
+            Write-Host "Copied scripts/python -> .devspark/scripts"
         }
         
         # Copy any script files that aren't in variant-specific directories

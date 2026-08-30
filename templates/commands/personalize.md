@@ -19,19 +19,19 @@ DevSpark uses a **3-tier override system**. When a `/devspark.*` command runs,
 the prompt is resolved in this order (first match wins):
 
 ```text
-1. .documentation/{git-user}/commands/   ← Per-user overrides (this command creates these)
-2. .documentation/commands/              ← Team customizations (shared, editable)
+1. .knowledge/overrides/{git-user}/commands/   ← Per-user overrides (this command creates these)
+2. .knowledge/overrides/commands/              ← Team customizations (shared, editable)
 3. .devspark/defaults/commands/     ← Stock DevSpark prompts (read-only, upgrade-safe)
 ```
 
 Upgrades only write to `defaults/commands/`. Team and user customizations are never touched.
 
-This command only personalizes repository-owned overrides under `.documentation/`. It never edits stock prompts under `.devspark/defaults/commands/`.
+This command only personalizes repository-owned overrides under `.knowledge/`. It never edits stock prompts under `.devspark/defaults/commands/`.
 
 ## Outline
 
 This command creates a per-user personalized copy of a DevSpark command prompt.
-Personalized prompts live in `.documentation/{git-user}/commands/` and take priority
+Personalized prompts live in `.knowledge/overrides/{git-user}/commands/` and take priority
 over both team customizations and stock defaults.
 
 ### Steps
@@ -53,14 +53,14 @@ over both team customizations and stock defaults.
    The argument should be a command name, with or without the `devspark.` prefix.
    Examples: `constitution`, `devspark.plan`, `implement`
 
-   If no argument is given, list all available commands from `.documentation/commands/`
+   If no argument is given, list all available commands from `.knowledge/overrides/commands/`
    (or `.devspark/defaults/commands/` if `commands/` is empty) and ask the user
    which one to personalize.
 
 3. **Resolve the source prompt** (follow the 3-tier order):
 
    Look for the prompt in this order:
-   1. `.documentation/commands/devspark.{command}.md` (team version)
+   1. `.knowledge/overrides/commands/devspark.{command}.md` (team version)
    2. `.devspark/defaults/commands/devspark.{command}.md` (stock version)
 
    Use the first one found as the base for the personalized copy.
@@ -69,18 +69,18 @@ over both team customizations and stock defaults.
 4. **Create the user directory**:
 
    ```text
-   .documentation/{git-user}/commands/
+   .knowledge/overrides/{git-user}/commands/
    ```
 
 5. **Check if a personalized version already exists**:
 
-   If `.documentation/{git-user}/commands/devspark.{command}.md` already exists:
+   If `.knowledge/overrides/{git-user}/commands/devspark.{command}.md` already exists:
    - Show the user and ask if they want to overwrite or edit the existing one
    - Default: open the existing file for review
 
 6. **Copy and annotate the prompt**:
 
-   Copy the resolved source to `.documentation/{git-user}/commands/devspark.{command}.md`.
+   Copy the resolved source to `.knowledge/overrides/{git-user}/commands/devspark.{command}.md`.
 
    Add a header comment block at the top:
 
@@ -91,7 +91,7 @@ over both team customizations and stock defaults.
      Created: {date}
      
      This file takes priority over team and stock defaults when you run /devspark.{command}.
-     Edit freely. To revert, delete this file.
+     Edit freely. To revert, move this file to `.archive/YYYY-MM-DD/<topic>/`.
    -->
    ```
 
@@ -99,15 +99,15 @@ over both team customizations and stock defaults.
 
    ```text
    Created personalized prompt:
-     .documentation/{git-user}/commands/devspark.{command}.md
+     .knowledge/overrides/{git-user}/commands/devspark.{command}.md
    
    Resolution order for /devspark.{command}:
-     1. ✅ .documentation/{git-user}/commands/  (this file — ACTIVE)
-     2.    .documentation/commands/              (team default)
+     1. ✅ .knowledge/overrides/{git-user}/commands/  (this file — ACTIVE)
+     2.    .knowledge/overrides/commands/              (team default)
      3.    .devspark/defaults/commands/     (stock DevSpark)
    
    Edit it to customize the behavior for your workflow.
-   To revert to the team/stock default, simply delete this file.
+   To revert to the team/stock default, move this file to `.archive/YYYY-MM-DD/<topic>/`.
    ```
 
 8. **Open the file** for editing so the user can customize it immediately.

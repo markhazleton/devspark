@@ -49,7 +49,7 @@ fi
 
 # Test 2: Verify delivery result file structure
 log_test "Delivery result JSON structure"
-result_file="$REPO_ROOT/.documentation/devspark/runs/latest/result.json"
+result_file="$REPO_ROOT/.devspark.work/runs/latest/result.json"
 if [[ -f "$result_file" ]]; then
     if grep -q '"delivery_status"' "$result_file"; then
         log_pass "delivery_status field present in result.json"
@@ -68,7 +68,7 @@ fi
 
 # Test 3: Verify delivery check validation rule exists
 log_test "Delivery check rule defined"
-spec_path="$REPO_ROOT/.documentation/specs/001-harness-delivery-integrity"
+spec_path="$REPO_ROOT/.devspark.work/specs/001-delivery-integrity"
 if [[ -d "$spec_path" ]]; then
     log_pass "Feature spec directory exists"
     
@@ -83,7 +83,7 @@ fi
 
 # Test 4: Verify no-change explainer can be generated
 log_test "No-change explainer artifact"
-if [[ -f "$REPO_ROOT/.documentation/devspark/runs/latest/no-change-explainer.md" ]]; then
+if [[ -f "$REPO_ROOT/.devspark.work/runs/latest/no-change-explainer.md" ]]; then
     log_pass "No-change explainer artifact can be generated"
 else
     # This is OK if no run yet - not a failure
@@ -92,7 +92,7 @@ fi
 
 # Test 5: Verify governance approval checkpoint exists
 log_test "Governance approval gate documentation"
-approval_file="$REPO_ROOT/.documentation/specs/001-harness-delivery-integrity/gates/governance-approval.md"
+approval_file="$REPO_ROOT/.devspark.work/specs/001-delivery-integrity/gates/governance-approval.md"
 if [[ -f "$approval_file" ]]; then
     if grep -q "Approver Name:" "$approval_file"; then
         log_pass "Governance approval template exists"

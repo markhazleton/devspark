@@ -1,0 +1,39 @@
+# Install DevSpark
+
+## Current Release
+
+[![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
+
+**Current version:** [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
+
+DevSpark is installed through quickstart prompts. There is no separate DevSpark
+program to install.
+
+## Approved Install Path
+
+1. Open your AI coding assistant in the target repository.
+2. Paste the raw quickstart prompt for your assistant:
+   - [GitHub Copilot](../../../../quickstart/devspark_quickstart_copilot.md)
+   - [Claude Code](../../../../quickstart/devspark_quickstart_claudecode.md)
+   - [Cursor](../../../../quickstart/devspark_quickstart_cursor.md)
+   - [Codex](../../../../quickstart/devspark_quickstart_codex.md)
+   - [Antigravity](../../../../quickstart/devspark_quickstart_antigravity.md)
+   - [Generic agent](../../../../quickstart/devspark_quickstart_generic.md)
+3. Let the agent detect the repository state, preview the plan, and install the
+   framework-owned files.
+4. Start with `/devspark.specify`.
+
+The quickstart prompt installs stock command prompts, helper scripts, templates,
+schemas, skills, `.devspark/VERSION`, and agent-specific shims. It preserves
+repository-owned `.knowledge/` content.
+
+## Repair
+
+Run the same quickstart prompt again. If expected stock files are missing or
+stale, the prompt enters repair mode and refreshes framework-owned assets.
+
+## Upgrade
+
+Run the same quickstart prompt again. It compares `.devspark/VERSION` with the
+latest GitHub release and refreshes framework-owned assets when a newer release
+is available.

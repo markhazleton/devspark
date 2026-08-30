@@ -52,8 +52,8 @@ case $SCOPE in
 esac
 
 REPO_ROOT=$(get_repo_root)
-CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
-AUDIT_DIR=".documentation/copilot/audit"
+CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
+AUDIT_DIR=".devspark.work/audits"
 
 # Check constitution
 CONSTITUTION_EXISTS="false"
@@ -69,7 +69,7 @@ if [[ -f "$CONSTITUTION_PATH" ]]; then
 fi
 
 # Exclusion predicates for find (bash array for reliable word-splitting)
-EXCLUDE_DIRS=(-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*' -o -path '*/.archive/*')
+EXCLUDE_DIRS=(-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*')
 
 # Count files by category
 count_files() {
@@ -152,7 +152,7 @@ if [[ "$OUTPUT_FORMAT" == "json" ]]; then
   "audit_dir": "$AUDIT_DIR",
   "constitution": {
     "exists": $CONSTITUTION_EXISTS,
-    "path": ".documentation/memory/constitution.md",
+    "path": ".knowledge/governance/constitution.md",
     "version": $(if [[ -n "$CONSTITUTION_VERSION" ]]; then echo "\"$CONSTITUTION_VERSION\""; else echo "null"; fi),
     "principles": $CONSTITUTION_PRINCIPLES
   },

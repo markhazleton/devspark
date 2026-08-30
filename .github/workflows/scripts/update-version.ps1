@@ -2,13 +2,13 @@
 #requires -Version 7.0
 <#
 .SYNOPSIS
-    Update version in pyproject.toml
+    Update the framework version stamp
 .DESCRIPTION
-    Update-version.ps1 - Update the version field in pyproject.toml (for release artifacts only)
+    Update-version.ps1 - Update .devspark/VERSION.
 .PARAMETER Version
-    The version to set (e.g., v1.0.0)
+    The version to set (e.g., v4.0.0)
 .EXAMPLE
-    .\update-version.ps1 -Version "v1.0.0"
+    .\update-version.ps1 -Version "v4.0.0"
 #>
 
 param(
@@ -18,22 +18,14 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Remove 'v' prefix for Python versioning
-$pythonVersion = $Version -replace '^v', ''
+$versionNoV = $Version -replace '^v', ''
+$today = Get-Date -Format 'yyyy-MM-dd'
 
-$pyprojectPath = "pyproject.toml"
+$versionPath = ".devspark/VERSION"
 
-if (Test-Path $pyprojectPath) {
-    # Read the file
-    $content = Get-Content $pyprojectPath -Raw
-    
-    # Replace the version
-    $content = $content -replace 'version\s*=\s*"[^"]*"', "version = `"$pythonVersion`""
-    
-    # Write back to file
-    $content | Set-Content $pyprojectPath -NoNewline
-    
-    Write-Host "Updated pyproject.toml version to $pythonVersion (for release artifacts only)"
+if (Test-Path $versionPath) {
+    "version: $versionNoV`ninstalled: $today`n" | Set-Content $versionPath -NoNewline
+    Write-Host "Updated .devspark/VERSION to $versionNoV"
 } else {
-    Write-Warning "pyproject.toml not found, skipping version update"
+    Write-Warning ".devspark/VERSION not found, skipping version update"
 }

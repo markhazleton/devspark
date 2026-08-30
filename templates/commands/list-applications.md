@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Read and display the DevSpark multi-app registry. This is a **read-only** command — no files are modified.
 
-1. **Load the registry** from `.documentation/devspark.json`:
+1. **Load the registry** from `.knowledge/entities/application-registry/registry.json`:
    - If the file does not exist, report: "No multi-app registry configured. This repository operates in single-app mode."
    - If the file is invalid JSON, report the parse error
 

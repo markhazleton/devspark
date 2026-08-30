@@ -6,7 +6,7 @@
 #        Then use $DEVSPARK_PLATFORM_NAME, $DEVSPARK_PR_CLI, etc.
 #
 # Override: Set DEVSPARK_PLATFORM env var to force a platform (github|azdo|gitlab)
-# Config:   Or set "platform" in .documentation/devspark.json
+# Config:   Or set "platform" in .knowledge/entities/application-registry/registry.json
 
 # Load common if not already loaded
 if ! type get_repo_root &>/dev/null; then
@@ -23,7 +23,7 @@ detect_platform() {
     # 2. Config file override
     local repo_root
     repo_root=$(get_repo_root)
-    local config_file="$repo_root/.documentation/devspark.json"
+    local config_file="$repo_root/.knowledge/entities/application-registry/registry.json"
     if [[ -f "$config_file" ]]; then
         local platform_val
         platform_val=$(jq -r '.platform // empty' "$config_file" 2>/dev/null || true)
@@ -139,7 +139,7 @@ resolve_devspark_script() {
         fi
     fi
 
-    local team_path="$repo_root/.documentation/scripts/$shell/$script_name"
+    local team_path="$repo_root/.knowledge/overrides/scripts/$shell/$script_name"
     local stock_path="$repo_root/.devspark/scripts/$shell/$script_name"
     local dev_path="$repo_root/scripts/$shell/$script_name"
 

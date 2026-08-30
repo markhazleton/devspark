@@ -26,4 +26,4 @@ Keep entries short, single-line, action-shaped. Map each entry implicitly to a r
 - **Drop dead entries.** If a check no longer applies (e.g., framework feature became the default), remove it.
 - **Prefer high-incident risks.** These lists are seeded from production-incident patterns; resist adding theoretical concerns.
 
-Teams override or extend these files by copying the relevant file into `.documentation/risk-checklists/` in their consuming repo (override path takes priority during load).
+Teams override or extend these files by copying the relevant file into `.knowledge/overrides/risk-checklists/` in their consuming repo (override path takes priority during load).

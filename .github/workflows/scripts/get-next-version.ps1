@@ -6,16 +6,16 @@
 .DESCRIPTION
     Get-next-version.ps1 - Calculate the next version and output GitHub Actions variables.
     Behavior mirrors the bash workflow script:
-      1. Explicit input version wins (and must match pyproject.toml when present)
-      2. Otherwise, prefer pyproject.toml version when not already tagged
+      1. Explicit input version wins (and must match .devspark/VERSION when present)
+      2. Otherwise, prefer .devspark/VERSION when not already tagged
       3. Otherwise, increment the latest tag patch version
     Uses standard semantic versioning (MAJOR.MINOR.PATCH)
 .PARAMETER ExplicitVersion
-    Optional explicit version (e.g., 1.4.6 or v1.4.6)
+    Optional explicit version (e.g., 4.0.0 or v4.0.0)
 .EXAMPLE
     .\get-next-version.ps1
 .EXAMPLE
-    .\get-next-version.ps1 -ExplicitVersion "v1.4.6"
+    .\get-next-version.ps1 -ExplicitVersion "v4.0.0"
 #>
 
 param(
@@ -39,13 +39,13 @@ function Normalize-Version {
     return $null
 }
 
-function Get-PyprojectVersion {
-    $pyprojectPath = "pyproject.toml"
-    if (-not (Test-Path $pyprojectPath)) {
+function Get-DevSparkVersion {
+    $versionPath = ".devspark/VERSION"
+    if (-not (Test-Path $versionPath)) {
         return $null
     }
 
-    $match = Select-String -Path $pyprojectPath -Pattern '^\s*version\s*=\s*"(\d+\.\d+\.\d+)"' | Select-Object -First 1
+    $match = Select-String -Path $versionPath -Pattern '^\s*version:\s*(\d+\.\d+\.\d+)' | Select-Object -First 1
     if ($match) {
         return "v$($match.Matches[0].Groups[1].Value)"
     }
@@ -63,7 +63,7 @@ function Increment-PatchVersion {
         return "v$major.$minor.$patch"
     }
 
-    return "v1.0.0"
+    return "v4.0.0"
 }
 
 # Get the latest tag, or use v0.0.0 if no tags exist
@@ -86,9 +86,9 @@ if ($ExplicitVersion) {
         throw "Invalid explicit version '$ExplicitVersion'. Use MAJOR.MINOR.PATCH (optionally prefixed with v)."
     }
 
-    $pyprojectVersion = Get-PyprojectVersion
-    if ($pyprojectVersion -and $newVersion -ne $pyprojectVersion) {
-        throw "Explicit version '$newVersion' does not match pyproject.toml version '$pyprojectVersion'. Update pyproject.toml first to keep DevSpark and DevSpark CLI versions in sync."
+    $devsparkVersion = Get-DevSparkVersion
+    if ($devsparkVersion -and $newVersion -ne $devsparkVersion) {
+        throw "Explicit version '$newVersion' does not match .devspark/VERSION '$devsparkVersion'. Update .devspark/VERSION first to keep release assets in sync."
     }
 
     if ($env:GITHUB_OUTPUT) {
@@ -98,15 +98,15 @@ if ($ExplicitVersion) {
     exit 0
 }
 
-# 2) Prefer pyproject.toml version when present and not already tagged
-$pyprojectVersion = Get-PyprojectVersion
-if ($pyprojectVersion) {
-    $tagExists = (& git rev-parse -q --verify "refs/tags/$pyprojectVersion" 2>$null)
+# 2) Prefer .devspark/VERSION when present and not already tagged
+$devsparkVersion = Get-DevSparkVersion
+if ($devsparkVersion) {
+    $tagExists = (& git rev-parse -q --verify "refs/tags/$devsparkVersion" 2>$null)
     if (-not $tagExists) {
         if ($env:GITHUB_OUTPUT) {
-            "new_version=$pyprojectVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            "new_version=$devsparkVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
         }
-        Write-Host "New version will be: $pyprojectVersion (source: pyproject.toml)"
+        Write-Host "New version will be: $devsparkVersion (source: .devspark/VERSION)"
         exit 0
     }
 }

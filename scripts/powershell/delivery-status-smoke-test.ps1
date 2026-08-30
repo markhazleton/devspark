@@ -63,7 +63,7 @@ if ($gitAvailable) {
 
 # Test 2: Verify delivery result file structure
 LogTest "Delivery result JSON structure"
-$resultFile = "$RepoRoot\.documentation\devspark\runs\latest\result.json"
+$resultFile = "$RepoRoot\.knowledge\devspark\runs\latest\result.json"
 if (Test-Path $resultFile) {
     $resultContent = Get-Content $resultFile -Raw
     
@@ -84,7 +84,7 @@ if (Test-Path $resultFile) {
 
 # Test 3: Verify delivery check validation rule exists
 LogTest "Delivery check rule defined"
-$specPath = "$RepoRoot\.documentation\specs\001-harness-delivery-integrity"
+$specPath = "$RepoRoot\.knowledge\specs\001-delivery-integrity"
 if (Test-Path $specPath) {
     LogPass "Feature spec directory exists"
     
@@ -103,7 +103,7 @@ if (Test-Path $specPath) {
 
 # Test 4: Verify no-change explainer can be generated
 LogTest "No-change explainer artifact"
-$explainerFile = "$RepoRoot\.documentation\devspark\runs\latest\no-change-explainer.md"
+$explainerFile = "$RepoRoot\.knowledge\devspark\runs\latest\no-change-explainer.md"
 if (Test-Path $explainerFile) {
     LogPass "No-change explainer artifact can be generated"
 } else {
@@ -113,7 +113,7 @@ if (Test-Path $explainerFile) {
 
 # Test 5: Verify governance approval checkpoint exists
 LogTest "Governance approval gate documentation"
-$approvalFile = "$RepoRoot\.documentation\specs\001-harness-delivery-integrity\gates\governance-approval.md"
+$approvalFile = "$RepoRoot\.knowledge\specs\001-delivery-integrity\gates\governance-approval.md"
 if (Test-Path $approvalFile) {
     $approvalContent = Get-Content $approvalFile -Raw
     if ($approvalContent -match "Approver Name:") {

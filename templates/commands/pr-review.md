@@ -1,9 +1,9 @@
 ---
 description: Perform constitution-aware pull request review with actionable feedback for any PR in the repository
 handoffs:
-  - label: View Review History
+  - label: View Local Review State
     agent: devspark.pr-review
-    prompt: Show me previous PR reviews in .documentation/specs/pr-review/
+    prompt: Show me the local PR review work files in .devspark.work/pr-reviews/
 scripts:
   sh: .devspark/scripts/bash/get-pr-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/get-pr-context.ps1 $ARGUMENTS -Json
@@ -17,9 +17,24 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## DevSpark v4 Override
+
+PR review is the primary assimilation checkpoint. When any later section
+conflicts with this section, the v4 section wins.
+
+- Gate on current-truth validation for touched code, `.knowledge`, and
+  governance files.
+- Gate on no permanent references back to ephemeral work artifacts.
+- Gate on missing evidence for knowledge and decisions.
+- Gate on stale generated ontology files by running the ontology generator in
+  `--check` mode when `.knowledge/` exists.
+- Warn on inspection evidence that lacks `fallback_reason`.
+- Use Git history and PR comments for review history; do not write permanent
+  review-history files into the repository.
+
 ## Overview
 
-This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are stored in `/.documentation/specs/pr-review/pr-{id}.md` for historical reference.
+This command reviews GitHub Pull Requests against the project constitution. It works for **any PR in the repository** regardless of feature branch or target branch. Reviews are written to `/.devspark.work/pr-reviews/pr-{id}.md` as temporary local work state.
 
 **IMPORTANT**: This command **only provides suggestions** - it does not make any code changes.
 
@@ -35,22 +50,22 @@ protected before recommending metric movement or style cleanup.
 
 ## Prerequisites
 
-- Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
+- Project constitution at `/.knowledge/governance/constitution.md` (REQUIRED)
 - GitHub repository with PR context
 - GitHub CLI (`gh`) installed and authenticated (required)
 - **HARD RULE — Branch Sync**: The source (head) branch **MUST** be fully in sync with the target (base) branch. Do **NOT** proceed with review or approval if the source branch is behind the target. Instruct the user to rebase or merge the target branch into the source branch first.
 
 ## Definition of Done
 
-Done when: the report is written to `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md` (step 9) and the step-10 chat summary is printed. The execution limits in §1 (max 20 findings, max 25 files, "stop once evidence is sufficient") are the convergence condition for the analysis itself — don't expand scope beyond them speculatively. Chat output is the step-10 template only; the full report (all tables, all sections) lives in the file — don't re-paste it into chat.
+Done when: the report is written to `/.devspark.work/pr-reviews/pr-{PR_NUMBER}.md` (step 9) and the step-10 chat summary is printed. The execution limits in §1 (max 20 findings, max 25 files, "stop once evidence is sufficient") are the convergence condition for the analysis itself — don't expand scope beyond them speculatively. Chat output is the step-10 template only; the full report (all tables, all sections) lives in the local work file — don't re-paste it into chat.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
 ### 1. Initialize Review Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` to extract PR context and parse JSON output for:
 
@@ -72,17 +87,24 @@ Execution limits (required):
 - Stop once evidence is sufficient for high-confidence conclusions
 - If confidence is low for a specific area, ask one clarifying question
 
+Run `python .devspark/scripts/python/build_knowledge_index.py --check` if
+available, otherwise run `python scripts/python/build_knowledge_index.py
+--check` in source repos. Stale `_derived.yaml` files, dangling entity
+relations, unknown governed entities, or missing evidence are review blockers
+for any PR that touches code, `.knowledge`, governance, templates, or DevSpark
+scripts.
+
 **Iteration Detection**:
 Before running a full review, check whether the user's input contains iteration keywords: "update", "re-review", "check my fixes", "revised", "changes made", "addressed". If detected:
 
-1. Load the existing review file at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`
+1. Load the existing review file at `/.devspark.work/pr-reviews/pr-{PR_NUMBER}.md`
 2. Extract all finding IDs and their last-known status
 3. Diff only what changed since the last reviewed commit SHA
 4. Carry forward all unresolved findings unchanged
 5. Mark previously flagged findings as `✅ Resolved`, `⚠️ Partially Addressed`, or `❌ Still Present` based on the new diff
 6. Append new findings (if any) introduced by the new commits
 7. Update the Revision Log section with the new commit SHA and pass/fail counts
-8. **Co-mingling check**: Detect whether the review file (`.documentation/specs/pr-review/pr-{PR_NUMBER}.md`) was committed in the same commit as production code changes. Compare commit SHAs from `git log main...{source_branch} --oneline -- .documentation/specs/pr-review/pr-{PR_NUMBER}.md` against `git log main...{source_branch} --oneline -- {app_path}/`. If any SHA appears in both outputs, flag it as an M-NN finding: "Review file and production code changes committed together — iteration diff may be polluted. Commit review updates separately from code fixes."
+8. **Ephemeral-state check**: If any `.devspark.work/` path is staged, flag it as an M-NN finding: "Temporary DevSpark work state is staged — remove it from the commit and assimilate durable results into code, tests, or `.knowledge/`."
 
 **PR Number Detection**:
 The script will try to determine PR number in this order:
@@ -110,7 +132,7 @@ For single quotes in args like "I'm reviewing", use escape syntax: e.g 'I'\''m r
 Detect workflow compliance for the PR's source branch before loading the constitution:
 
 1. Extract `head_branch` from PR context.
-2. Derive spec dir: `.documentation/specs/{head_branch}/`
+2. Derive spec dir: `.devspark.work/specs/{head_branch}/`
 3. Check file existence:
    - `spec.md` present?
    - `plan.md` present?
@@ -126,7 +148,7 @@ Detect workflow compliance for the PR's source branch before loading the constit
 findings:
   - finding_id: trust-tier-01
     severity: medium
-    description: "Branch has no spec artifacts under .documentation/specs/{head_branch}/. Constitution §Development Workflow requires features to be spec-driven: specify first, plan second, implement third."
+    description: "Branch has no spec artifacts under .devspark.work/specs/{head_branch}/. Constitution §Development Workflow requires features to be spec-driven: specify first, plan second, implement third."
     intent_cue: "Keep review behavior grounded in declared spec, plan, and task evidence before merge."
     recommended_action: "Run /devspark.specify to create the spec, then /devspark.plan and /devspark.tasks before merging."
     execution_mode: manual
@@ -142,13 +164,13 @@ findings:
 
 ### 2. Load Constitution
 
-Read and parse `/.documentation/memory/constitution.md`:
+Read and parse `/.knowledge/governance/constitution.md`:
 
 - Extract all core principles with their names
 - Identify MUST requirements (non-negotiable/mandatory)
 - Identify SHOULD requirements (recommended)
 - Note constitution version and amendment date
-- If `.documentation/memory/severity-registry.md` exists, load it and use its `§{section}.{LEVEL}` entries to validate finding codes when emitting findings
+- If `.knowledge/governance/severity-registry.md` exists, load it and use its `§{section}.{LEVEL}` entries to validate finding codes when emitting findings
 - Build a checklist of principles to evaluate
 
 If constitution doesn't exist:
@@ -177,7 +199,7 @@ For each file in `files_changed`:
 - Assign tier based on file path and purpose
 - Read the diff to understand what changed
 - Apply the corresponding review depth for that tier
-- Identify the type of change (new file, modified, deleted)
+- Identify the type of change (new file, modified, removed)
 - Note the scope of changes (lines added/removed)
 - Extract code snippets for analysis (depth depends on tier)
 
@@ -242,7 +264,7 @@ For each finding:
 
 #### C. Generate Findings
 
-Create structured findings with **stable IDs** that persist across re-reviews. Use zero-padded identifiers so status changes across revisions instead of being deleted:
+Create structured findings with **stable IDs** that persist across re-reviews. Use zero-padded identifiers so status changes across revisions instead of being dropped:
 
 - **ID**: Stable identifier with zero-padded number. The prefix maps to severity tier:
   - `C-NN` = Critical (blocking)
@@ -345,14 +367,14 @@ If constitution requires documentation:
 
 Determine if this PR maps to a feature spec and validate spec lifecycle status:
 
-1. **Detect feature spec**: Extract feature identifier from the source branch name pattern (e.g., `001-feature-name`). Check if `/.documentation/specs/{feature}/spec.md` exists. Also check `SPEC_STATUS` from the PR context script output (if available).
+1. **Detect feature spec**: Extract feature identifier from the source branch name pattern (e.g., `001-feature-name`). Check if `/.devspark.work/specs/{feature}/spec.md` exists. Also check `SPEC_STATUS` from the PR context script output (if available).
 
 2. **If spec exists**, validate lifecycle completeness:
 
    a. **Spec Status Check**: Read the `**Status**:` field in spec.md. Valid values are: `Draft`, `In Progress`, `Complete`.
       - If status is `Draft` or `In Progress`: **flag as CRITICAL finding** — spec must be `Complete` before merge.
 
-   b. **Task Completion Check**: Read `/.documentation/specs/{feature}/tasks.md` (if it exists).
+   b. **Task Completion Check**: Read `/.devspark.work/specs/{feature}/tasks.md` (if it exists).
       - Count total tasks (lines matching `- [ ]` or `- [x]` or `- [X]`)
       - Count completed tasks (lines matching `- [x]` or `- [X]`)
       - If any tasks are incomplete (`- [ ]`): **flag as CRITICAL finding** — all tasks must be checked off before merge.
@@ -376,11 +398,11 @@ Determine if this PR maps to a feature spec and validate spec lifecycle status:
 
 ### 6b. PR Scope Validation (Multi-App Mode)
 
-If the repository operates in multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), perform scope validation on the PR:
+If the repository operates in multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), perform scope validation on the PR:
 
 #### A. Check for Scope Declaration
 
-Look for a PR scope declaration in the PR description or in `.documentation/specs/` artifacts. A scope declaration specifies:
+Look for a PR scope declaration in the PR description or in `.devspark.work/specs/` artifacts. A scope declaration specifies:
 
 - **mode**: `single-app`, `cross-app`, or `repo-scope`
 - **primary_app**: The primary application being changed
@@ -394,10 +416,10 @@ If no scope declaration is present, infer scope from the changed files:
 
 #### B. Validate Scope Against Changed Paths
 
-Using the PR's changed file list and the registry from `.documentation/devspark.json`:
+Using the PR's changed file list and the registry from `.knowledge/entities/application-registry/registry.json`:
 
 1. Map each changed file to its owning application (by matching `app.path` prefixes).
-2. Identify shared paths (`.documentation/`, `.github/`, `.devspark/`, root-level config files).
+2. Identify shared paths (`.knowledge/`, `.github/`, `.devspark/`, root-level config files).
 3. Validate that the changed paths are consistent with the declared (or inferred) scope:
    - **single-app**: Only the declared app's path and approved shared paths should be touched. Flag files in other apps as scope mismatches.
    - **cross-app**: All touched app paths must be listed in `affected_apps`. Flag undeclared app paths.
@@ -415,7 +437,7 @@ Include scope validation results in the review output:
 
 ### 7. Generate Review Report
 
-Create comprehensive report at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`:
+Create comprehensive report at `/.devspark.work/pr-reviews/pr-{PR_NUMBER}.md`:
 
 #### Handle Existing Reviews
 
@@ -434,7 +456,7 @@ If file already exists:
    - Update findings resolved by the new commits to `✅ Resolved`
    - Add new findings with `🔴 Open` status
    - Append a new row to the Revision Log table
-   - Move previous review content to "Previous Review History" section at bottom
+   - Move previous review content to "Local Review Iterations" section at bottom
 
 #### Report Structure
 
@@ -532,7 +554,7 @@ Use this exact format:
 
 ## Findings Detail
 
-*Stable IDs persist across re-reviews. Status updates instead of deleting.*
+*Stable IDs persist across re-reviews. Status updates instead of dropping.*
 
 ### Critical Issues (Blocking)
 
@@ -657,16 +679,16 @@ Removed tests (if any):
 
 ---
 
-*Review generated by devspark.pr-review v1.2*
+*Review generated by devspark.pr-review v4.0*
 *Constitution-driven code review for [PROJECT_NAME]*
 *To re-review after fixes: `/devspark.pr-review #[PR_NUMBER] re-review`*
-*When addressing these findings, run `/devspark.address-pr-review {PR_ID}`. The review file must be committed on its own — this rule is enforced by the prompt and can also be enforced by the optional pre-commit hook.*
+*When addressing these findings, run `/devspark.address-pr-review {PR_ID}`. The local review file remains temporary `.devspark.work` state and must not be committed.*
 
 ---
 
-## Previous Review History
+## Local Review Iterations
 
-[If this is an updated review, previous reviews go here]
+[If this is an updated review, previous local iterations go here]
 
 ### Review 2: 2026-01-24 10:30:00 UTC
 
@@ -686,15 +708,15 @@ End of report template
 
 ### 8. Create Review Directory
 
-Ensure `/.documentation/specs/pr-review/` directory exists:
+Ensure `/.devspark.work/pr-reviews/` directory exists:
 
 - Check if directory exists
-- Create it if it doesn't (including parent `/.documentation/specs/` if needed)
+- Create it if it doesn't (including parent `/.devspark.work/specs/` if needed)
 - Set appropriate permissions
 
 ### 9. Write Review File
 
-Write the generated report to `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`:
+Write the generated report to `/.devspark.work/pr-reviews/pr-{PR_NUMBER}.md`:
 
 - Use UTF-8 encoding
 - Ensure proper line endings
@@ -707,7 +729,7 @@ Display concise summary to the user:
 ```text
 ✅ PR Review Complete!
 
-📄 Review saved: /.documentation/specs/pr-review/pr-{NUMBER}.md
+📄 Review saved: /.devspark.work/pr-reviews/pr-{NUMBER}.md
 🔍 Reviewed commit: {COMMIT_SHA}
 📅 Review date: {DATETIME}
 
@@ -725,7 +747,7 @@ Critical issues must be resolved before merge:
 - C-01: {Brief description}
 - C-02: {Brief description}
 
-View full review: /.documentation/specs/pr-review/pr-{NUMBER}.md
+View full review: /.devspark.work/pr-reviews/pr-{NUMBER}.md
 ```
 
 ## Guidelines
@@ -788,7 +810,7 @@ Use this scenario-to-severity mapping table to anchor classification. When two t
 #### Severity Code Format
 
 Every finding that references a constitution principle MUST include a severity code in the
-format `§{section}.{LEVEL}` matching an entry in `.documentation/memory/severity-registry.md`.
+format `§{section}.{LEVEL}` matching an entry in `.knowledge/governance/severity-registry.md`.
 
 **Examples**: `§VI.HIGH` (platform parity), `§VII.MEDIUM` (review file commit discipline),
 `§VIII.HIGH` (markdownlint CI block), `§I.SHOWSTOPPER` (backward compatibility violation)

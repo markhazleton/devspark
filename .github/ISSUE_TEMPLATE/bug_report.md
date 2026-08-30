@@ -7,7 +7,7 @@ assignees: ''
 ---
 
 **Command/Feature**
-Which DevSpark command or feature is affected? (e.g., `/devspark.specify`, CLI `devspark init`, quickstart guide)
+Which DevSpark command or feature is affected? (e.g., `/devspark.specify`, quickstart guide)
 
 **What happened?**
 A clear description of the bug.
@@ -25,4 +25,4 @@ What should have happened instead.
 
 - AI Agent: (Copilot / Claude Code / Cursor / other)
 - OS: (Windows / macOS / Linux)
-- CLI version (if applicable): `devspark version`
+- DevSpark version: `.devspark/VERSION`
