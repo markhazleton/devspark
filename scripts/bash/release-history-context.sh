@@ -130,11 +130,15 @@ PY
 if [[ "$JSON_MODE" == true ]]; then
   printf '%s\n' "$JSON_OUTPUT"
 else
-  "$PYTHON_CMD" - <<'PY' <<<"$JSON_OUTPUT"
+  JSON_FILE=$(mktemp)
+  trap 'rm -f "$JSON_FILE"' EXIT
+  printf '%s\n' "$JSON_OUTPUT" > "$JSON_FILE"
+  "$PYTHON_CMD" - "$JSON_FILE" <<'PY'
 import json
 import sys
+from pathlib import Path
 
-data = json.load(sys.stdin)
+data = json.loads(Path(sys.argv[1]).read_text())
 print("Release History Context")
 print("=======================")
 print(f"Commits: {len(data['COMMITS'])}")
