@@ -27,8 +27,8 @@ This command creates an ephemeral work package, not a durable record. When any
 later section conflicts with this section, the v4 section wins.
 
 - Write planning artifacts under the v4 work-package root.
-- Treat the package as temporary scaffolding that will be deleted after
-  verify-before-delete succeeds.
+- Treat the package as temporary scaffolding that will be moved to
+  `.archive/YYYY-MM-DD/<topic>/` after verify-before-archive succeeds.
 - Do not write package IDs, task IDs, or planning paths into permanent code,
   `.knowledge`, or governance files.
 - Load governance from `.knowledge/governance/constitution.md`, with legacy
@@ -48,7 +48,7 @@ Done when: the route is confirmed by the user, SPEC_FILE is written with `Status
 
 ## Constitution Authority
 
-If `/.documentation/memory/constitution.md` exists, load it before drafting. The spec MUST align with mandated principles (privacy, accessibility, observability, testing, etc.). If a principle conflicts with what the user asked for, surface it under `## Open Questions` or `## Constitution Conflicts` — do not silently dilute the principle. Changing a principle is an explicit constitution update, not a spec workaround.
+If `/.knowledge/governance/constitution.md` exists, load it before drafting. The spec MUST align with mandated principles (privacy, accessibility, observability, testing, etc.). If a principle conflicts with what the user asked for, surface it under `## Open Questions` or `## Constitution Conflicts` — do not silently dilute the principle. Changing a principle is an explicit constitution update, not a spec workaround.
 
 ## Routing Contract
 
@@ -77,7 +77,7 @@ This workflow MUST also validate the document against the shared specification v
 
 The text the user typed after `/devspark.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `{ARGS}` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
 Given that feature description, do this:
 
@@ -87,7 +87,7 @@ Given that feature description, do this:
    - Present the recommendation and reasoning to the user
    - Ask the user to confirm or override the route before creating artifacts. **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and proceed with the recommended route, noting that it was auto-confirmed.
    - If the confirmed (or auto-confirmed) route is `one-off-fix`, stop and instruct the user to run `/devspark.quickfix` unless they explicitly want to continue here — `--auto` does not override this redirect, since quickfix vs. full-spec is a workflow choice, not a gate.
-   - If `/.documentation/memory/constitution.md` exists, load it so the generated spec can reference mandatory principles and constraints
+   - If `/.knowledge/governance/constitution.md` exists, load it so the generated spec can reference mandatory principles and constraints
 
 1. **Generate a concise short name** (2-4 words) for the branch:
    - Analyze the feature description and extract the most meaningful keywords
@@ -112,14 +112,14 @@ Given that feature description, do this:
    b. Find the highest feature number across all sources for the short-name:
    - Remote branches: `git ls-remote --heads origin | grep -E 'refs/heads/[0-9]+-<short-name>$'`
    - Local branches: `git branch | grep -E '^[* ]*[0-9]+-<short-name>$'`
-   - Specs directories: Check for directories matching `.documentation/specs/[0-9]+-<short-name>`
+   - Specs directories: Check for directories matching `.devspark.work/specs/[0-9]+-<short-name>`
 
    c. Determine the next available number:
    - Extract all numbers from all three sources
    - Find the highest number N
    - Use N+1 for the new branch number
 
-   > **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+   > **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
    d. Run the script `{SCRIPT}` with the calculated number and short-name:
    - Pass `--number N+1` and `--short-name "your-short-name"` along with the feature description
@@ -148,7 +148,7 @@ Given that feature description, do this:
    Pass the following named adapter inputs to the skill:
 
    - `$FEATURE_DESCRIPTION` — the user's feature description text
-   - `$CONSTITUTION_PATH` — the resolved path to `.documentation/memory/constitution.md`
+   - `$CONSTITUTION_PATH` — the resolved path to `.knowledge/governance/constitution.md`
      (null when not found)
    - `$PRIOR_SPEC_SUMMARY` — the JSON output from the skill's context-gathering script
      (null when unavailable)

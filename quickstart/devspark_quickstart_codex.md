@@ -5,11 +5,11 @@ You will pull prompt files from the DevSpark repo and place them in the correct 
 
 This guide is tailored for OpenAI Codex. Codex should receive durable repository guidance through `AGENTS.md`, and DevSpark command shims should be placed in `.codex/prompts/` for Codex builds that discover custom prompt files.
 
-For best practices after installation, see [DevSpark and Codex](../.documentation/devspark-and-codex.md).
+For best practices after installation, see [DevSpark and Codex](../.knowledge/entities/product-documentation/site/devspark-and-codex.md).
 
 ## Step 1: Gather Project Context
 
-No install-critical questions are needed before proceeding — **both** script sets (PowerShell and Bash) are always installed regardless of OS.
+No install-critical questions are needed before proceeding — **both** shell script sets (PowerShell and Bash) plus Python utility scripts are always installed regardless of OS.
 
 Detect the current OS to display in the plan preview:
 
@@ -31,10 +31,10 @@ Before creating anything, check for prior legacy / DevSpark installations:
 | Check for | What it means |
 |---|---|
 | `.devspark/` exists | **DevSpark already installed.** See "Version Check" below. |
-| `.documentation/` exists | **User artifacts exist.** Preserve everything — never overwrite. |
+| `.knowledge/` exists | **User artifacts exist.** Preserve everything — never overwrite. |
 | `.specify/` exists | **Legacy layout detected.** Needs migration. |
-| `.documentation/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
-| Root `memory/` (without `.documentation/memory/`) | **Legacy structure.** Needs migration. |
+| `.devspark/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
+| Root `memory/` (without `.knowledge/governance/`) | **Legacy structure.** Needs migration. |
 | Root `scripts/` or `templates/` (without `.devspark/scripts/`) | **Legacy structure.** Needs migration. |
 | `.codex/prompts/specify.*.md` files | **Legacy Codex shims detected.** Rename to `devspark.*` prefix. |
 
@@ -44,39 +44,39 @@ Before creating anything, check for prior legacy / DevSpark installations:
 
 Tell the user what you found and ask for confirmation before proceeding.
 
-1. Copy `.specify/memory/*` → `.documentation/memory/` (skip files that already exist at destination)
-2. Copy `.specify/specs/*` → `.documentation/specs/` (skip files that already exist)
-3. Copy any `.specify/` root-level `.md` files → `.documentation/` (skip files that already exist)
+1. Copy `.specify/memory/*` → `.knowledge/governance/` (skip files that already exist at destination)
+2. Copy `.specify/specs/*` → `.devspark.work/specs/` (skip files that already exist)
+3. Copy any `.specify/` root-level `.md` files → `.knowledge/` (skip files that already exist)
 4. Rename `.specify/` → `.specify.old/` (preserve as backup)
-5. Report: "Migrated .specify/ → .documentation/. Backup at .specify.old/"
+5. Report: "Migrated .specify/ → .knowledge/. Backup at .specify.old/"
 
-### Migration: `.documentation/defaults/` (pre-separation DevSpark)
+### Migration: `.devspark/` (pre-separation DevSpark)
 
 1. Create `.devspark/` directory structure
-2. Move `.documentation/defaults/commands/*` → `.devspark/defaults/commands/`
-3. Move `.documentation/defaults/templates/*` → `.devspark/templates/` if present
-4. Move `.documentation/scripts/*` → `.devspark/scripts/` (only stock DevSpark scripts with framework header comments — leave user-created scripts)
-5. Move `.documentation/templates/*` → `.devspark/templates/` (only stock DevSpark templates)
-6. Delete empty `.documentation/defaults/` if nothing remains
-7. Report: "Migrated framework files from .documentation/ → .devspark/"
+2. Move `.devspark/defaults/commands/*` → `.devspark/defaults/commands/`
+3. Move `.devspark/templates/*` → `.devspark/templates/` if present
+4. Move `.knowledge/overrides/scripts/*` → `.devspark/scripts/` (only stock DevSpark scripts with framework header comments — leave user-created scripts)
+5. Move `.knowledge/overrides/templates/*` → `.devspark/templates/` (only stock DevSpark templates)
+6. Delete empty `.devspark/` if nothing remains
+7. Report: "Migrated framework files from .knowledge/ → .devspark/"
 
 ### Migration: Root-level directories (legacy layout)
 
-1. Copy `memory/*` → `.documentation/memory/` (skip existing)
-2. Copy `specs/*` → `.documentation/specs/` (skip existing)
+1. Copy `memory/*` → `.knowledge/governance/` (skip existing)
+2. Copy `specs/*` → `.devspark.work/specs/` (skip existing)
 3. Rename migrated directories → `{name}.old/` (e.g., `memory.old/`)
 
 ### Migration: Old Codex shims
 
 1. Rename `.codex/prompts/specify.*.md` → `.codex/prompts/devspark.*.md`
-2. In all shim files, replace `.documentation/defaults/commands/` → `.devspark/defaults/commands/`
+2. In all shim files, replace `.devspark/defaults/commands/` → `.devspark/defaults/commands/`
 3. Check other agent directories too (`.github/agents/`, `.claude/commands/`, `.cursor/commands/`) — rename `specify.*` → `devspark.*` if found
 
 After migration, continue with Step 3.
 
 ### Constitution bootstrap questions (only if needed)
 
-After detection and any migration work above, check whether `.documentation/memory/constitution.md` already exists.
+After detection and any migration work above, check whether `.knowledge/governance/constitution.md` already exists.
 
 - If it exists already, or was migrated into place, **do not** ask for project name, tech stack, or core principles.
 - If it does not exist, ask these additional questions before Step 3:
@@ -98,7 +98,7 @@ After detection and any migration work above, check whether `.documentation/memo
 
 #### Update Mode
 
-Tell the user: "Updating DevSpark from vX.Y.Z → vY.Y.Y. Your `.documentation/` files will not be touched."
+Tell the user: "Updating DevSpark from vX.Y.Z → vY.Y.Y. Your `.knowledge/` files will not be touched."
 
 Execute **only** these steps in order, then skip to Step 11 (Verify & Report):
 
@@ -109,11 +109,11 @@ Execute **only** these steps in order, then skip to Step 11 (Verify & Report):
 - **Step 7** — Re-create all Codex prompt shim files (overwrite — shims are framework files)
 - **Step 9** — Update `.devspark/VERSION` with new version and today's date
 
-**Never touch** `.documentation/`, the constitution, `.gitignore`, or any platform guide files.
+**Never touch** `.knowledge/`, the constitution, `.gitignore`, or any platform guide files.
 
 #### Repair Mode
 
-If the installed version matches `LATEST_VERSION` but framework files are missing, tell the user: "DevSpark is already at vX.Y.Z, but the framework install is incomplete. Re-fetching stock files to repair it. Your `.documentation/` files will not be touched."
+If the installed version matches `LATEST_VERSION` but framework files are missing, tell the user: "DevSpark is already at vX.Y.Z, but the framework install is incomplete. Re-fetching stock files to repair it. Your `.knowledge/` files will not be touched."
 
 Execute **only** these steps in order, then skip to Step 11 (Verify & Report):
 
@@ -136,7 +136,7 @@ Create these directories (skip any that already exist):
 ├── scripts/
 └── templates/
 
-.documentation/
+.knowledge/
 ├── memory/
 ├── specs/
 ├── commands/          ← team-level overrides (optional)
@@ -174,7 +174,6 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `evolve-constitution.md` | `.devspark/defaults/commands/devspark.evolve-constitution.md` |
 | `discover-constitution.md` | `.devspark/defaults/commands/devspark.discover-constitution.md` |
 | `repo-story.md` | `.devspark/defaults/commands/devspark.repo-story.md` |
-| `archive.md` | `.devspark/defaults/commands/devspark.archive.md` (deprecated compatibility alias for harvest) |
 | `update-pr.md` | `.devspark/defaults/commands/devspark.update-pr.md` |
 | `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
 | `add-application.md` | `.devspark/defaults/commands/devspark.add-application.md` |
@@ -228,7 +227,7 @@ Fetch each file below from `https://raw.githubusercontent.com/markhazleton/devsp
 - `templates/skills/write-spec/scripts/gather-context.ps1`
 - `templates/skills/write-spec/scripts/gather-context.sh`
 
-> Skills are framework-owned and safe to overwrite on every install or upgrade. They never touch `.documentation/`.
+> Skills are framework-owned and safe to overwrite on every install or upgrade. They never touch `.knowledge/`.
 
 ### Step 5.5 Validation (required)
 
@@ -261,12 +260,11 @@ If any skill file is missing, re-fetch it before continuing. A missing `write-sp
 
 ## Step 6: Pull Scripts
 
-Fetch **both** script sets from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` — always install both PowerShell and Bash, regardless of the current OS. This ensures the repository works for developers on macOS, Linux, and Windows without requiring a reinstall when switching machines.
+Fetch the script payload from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` — always install both PowerShell and Bash script sets plus Python utility scripts, regardless of the current OS. This ensures the repository works for developers on macOS, Linux, and Windows without requiring a reinstall when switching machines.
 
 Save to `.devspark/scripts/powershell/`:
 
 - `powershell/address-pr-review.ps1`
-- `powershell/archive-context.ps1`
 - `powershell/check-prerequisites.ps1`
 - `powershell/common.ps1`
 - `powershell/create-new-feature.ps1`
@@ -277,7 +275,6 @@ Save to `.devspark/scripts/powershell/`:
 - `powershell/generate-atomic-shims.ps1`
 - `powershell/get-pr-context.ps1`
 - `powershell/harvest.ps1`
-- `powershell/migrate-to-documentation.ps1`
 - `powershell/platform.ps1`
 - `powershell/quickfix-context.ps1`
 - `powershell/release-context.ps1`
@@ -290,7 +287,6 @@ Save to `.devspark/scripts/powershell/`:
 Save to `.devspark/scripts/bash/`:
 
 - `bash/address-pr-review.sh`
-- `bash/archive-context.sh`
 - `bash/check-prerequisites.sh`
 - `bash/common.sh`
 - `bash/create-new-feature.sh`
@@ -301,7 +297,6 @@ Save to `.devspark/scripts/bash/`:
 - `bash/generate-atomic-shims.sh`
 - `bash/get-pr-context.sh`
 - `bash/harvest.sh`
-- `bash/migrate-to-documentation.sh`
 - `bash/platform.sh`
 - `bash/quickfix-context.sh`
 - `bash/release-context.sh`
@@ -311,9 +306,13 @@ Save to `.devspark/scripts/bash/`:
 - `bash/site-audit.sh`
 - `bash/update-agent-context.sh`
 
-**Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Because both sets are always installed, switching between machines never requires a reinstall.
+Save to `.devspark/scripts/python/`:
 
-**Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.documentation/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.documentation/scripts/`.
+- `python/build_knowledge_index.py`
+
+**Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Python utility scripts are invoked directly by prompts that need deterministic ontology checks. Because the full script payload is always installed, switching between machines never requires a reinstall.
+
+**Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.knowledge/overrides/scripts/{bash|powershell|python}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.knowledge/overrides/scripts/`.
 
 `/devspark.specify` is the canonical intake command after bootstrap. It recommends a one-off fix, quick spec, or full spec route and asks the user to confirm before proceeding.
 
@@ -336,8 +335,8 @@ Determine the current git user by running `git config user.name`.
 Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
 
 Read and execute the instructions from the **first file that exists**:
-1. `.documentation/{git-user}/commands/devspark.{name}.md` (personalized override)
-2. `.documentation/commands/devspark.{name}.md` (team customization)
+1. `.knowledge/overrides/{git-user}/commands/devspark.{name}.md` (personalized override)
+2. `.knowledge/overrides/commands/devspark.{name}.md` (team customization)
 3. `.devspark/defaults/commands/devspark.{name}.md` (stock default)
 
 ## User Input
@@ -357,12 +356,12 @@ Then create or update root `AGENTS.md` if it does not already exist. Keep it con
 ## DevSpark
 
 - DevSpark framework files live in `.devspark/`.
-- Project artifacts and team overrides live in `.documentation/`.
+- Project artifacts and team overrides live in `.knowledge/`.
 - Resolve DevSpark commands through the first existing file:
-  1. `.documentation/{git-user}/commands/devspark.{name}.md`
-  2. `.documentation/commands/devspark.{name}.md`
+  1. `.knowledge/overrides/{git-user}/commands/devspark.{name}.md`
+  2. `.knowledge/overrides/commands/devspark.{name}.md`
   3. `.devspark/defaults/commands/devspark.{name}.md`
-- Preserve user work in `.documentation/`; upgrades refresh `.devspark/` only.
+- Preserve user work in `.knowledge/`; upgrades refresh `.devspark/` only.
 ```
 
 If `AGENTS.md` already exists, do not overwrite it. Add the DevSpark section only if it is clearly missing, preserving existing instructions.
@@ -371,11 +370,11 @@ If `AGENTS.md` already exists, do not overwrite it. Add the DevSpark section onl
 
 ## Step 8: Seed the Constitution
 
-If `.documentation/memory/constitution.md` does not already exist, fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.documentation/memory/constitution.md` and save it there.
+If `.knowledge/governance/constitution.md` does not already exist, fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.knowledge/governance/constitution.md` and save it there.
 
 If the file was migrated from `.specify/` or already existed, preserve it and do not overwrite it.
 
-Only when creating a new constitution, use the project name, tech stack, and core principles collected after Step 2 to customize `.documentation/memory/constitution.md`:
+Only when creating a new constitution, use the project name, tech stack, and core principles collected after Step 2 to customize `.knowledge/governance/constitution.md`:
 
 - Replace `[PROJECT_NAME]` with the actual project name
 - Fill in the core principles the user provided
@@ -404,7 +403,7 @@ Append to `.gitignore` if not already present:
 
 ```text
 # DevSpark — personal overrides (never commit)
-.documentation/*/commands/
+.knowledge/overrides/*/commands/
 ```
 
 ---
@@ -415,7 +414,7 @@ Confirm the installation:
 
 - Check that every stock prompt from Step 4 exists in `.devspark/defaults/commands/`
 - Check that every helper template from Step 5 exists in `.devspark/templates/`
-- Check that both script sets from Step 6 exist under `.devspark/scripts/`
+- Check that both shell script sets and Python utility scripts from Step 6 exist under `.devspark/scripts/`
 - Check that the expected Codex shim files from Step 7 exist in `.codex/prompts/`
 - Check that root `AGENTS.md` exists or that an existing one was preserved with DevSpark guidance added
 - If any expected framework file is missing, stop and run **Repair Mode** before reporting success
@@ -427,7 +426,7 @@ Confirm the installation:
 - `AGENTS.md` status: created, updated, or already existed
 - Repair status: not needed, or repaired missing framework files
 - Explain the 3-tier override system and that the personalize command creates per-user overrides
-- If backup directories exist, remind the user they can delete them once satisfied
+- If backup directories exist, remind the user they can move them to `.archive/YYYY-MM-DD/<topic>/` once satisfied
 
 Tell the user: type `/devspark.specify` in Codex to start using DevSpark.
 
@@ -453,7 +452,7 @@ Add maintenance guidance (prompt-first):
 
 - Approved maintenance path: re-run this quickstart prompt in chat
 - Re-run this quickstart prompt in the target repository for install, upgrade, or repair.`r`n
-Quickstart-driven upgrades refresh `.devspark/` stock files while preserving `.documentation/` team and personal customizations.
+Quickstart-driven upgrades refresh `.devspark/` stock files while preserving `.knowledge/` team and personal customizations.
 
 ---
 
@@ -471,14 +470,14 @@ For repositories containing **multiple applications** with different platforms, 
 
 ### Quick Setup
 
-1. Run `/devspark.add-application` to create a registry at `.documentation/devspark.json` interactively
-2. Each application gets its own `.documentation/` directory at `{app-path}/.documentation/`
+1. Run `/devspark.add-application` to create a registry at `.knowledge/entities/application-registry/registry.json` interactively
+2. Each application gets its own `.knowledge/` directory at `{app-path}/.knowledge/`
 3. Use `--app <id>` with any DevSpark command to scope it to a specific application
 4. Use `--repo-scope` for repository-wide operations
 
 ### Key Concepts
 
-- **Registry**: `.documentation/devspark.json` defines all applications, profiles, and dependencies
+- **Registry**: `.knowledge/entities/application-registry/registry.json` defines all applications, profiles, and dependencies
 - **Profiles**: Reusable rule bundles (e.g., `api-profile`, `web-profile`) that apps inherit
 - **App-local manifest**: Optional `{app-path}/app.json` for app-specific overrides
 - **Scope**: Every workflow runs in `repo`, `single-app`, or `cross-app` scope
@@ -491,4 +490,4 @@ For repositories containing **multiple applications** with different platforms, 
 | `/devspark.list-applications` | View all registered applications and profiles |
 | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
-For details, see the [Multi-App Specification](https://github.com/markhazleton/devspark/blob/main/.documentation/specs/001-multi-app-monorepo-support/spec.md).
+For details, see the [Multi-App Specification](https://github.com/markhazleton/devspark/blob/main/.devspark.work/specs/001-multi-app-monorepo-support/spec.md).

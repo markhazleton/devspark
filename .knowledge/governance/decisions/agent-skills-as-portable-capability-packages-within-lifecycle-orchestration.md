@@ -1,72 +1,49 @@
 ---
 id: agent-skills-as-portable-capability-packages-within-lifecycle-orchestration
 status: current
-constrains: []
+last_verified: "2026-08-30"
+governs:
+- command-templates
+- agent-shims
 evidence:
+- type: test
+  ref: tests/test_skills_install_contract.py
+  verified_by: execution
 - type: code
   ref: templates/skills/ADAPTER-contract.md
   verified_by: inspection
-  test_attempted: false
-  fallback_reason: migrated decision constrains framework behavior broadly; targeted
-    execution evidence is added as follow-up current-truth work
+  test_attempted: true
 ---
 
-## Migrated Source: ADR-003.md
+# Agent Skills as Portable Capability Packages
 
-# ADR-003: Agent Skills as Portable Capability Packages within Lifecycle Orchestration
+## Current Decision
 
-## Status
+DevSpark is a lifecycle orchestration layer that can host portable Agent Skills.
+Slash-command prompts own DevSpark-specific lifecycle routing, artifact
+placement, gate enforcement, and handoffs. Skills own portable capability
+instructions that can run in skills-compatible clients without requiring
+DevSpark-specific command metadata.
 
-Accepted
+The adapter contract between prompts and skills is explicit and testable.
 
-## Context
+## Rationale
 
-DevSpark's 28 `/devspark.*` slash-command prompts used a DevSpark-specific frontmatter
-contract (`handoffs`, `scripts`, `classification`) that is not interoperable with the
-open Agent Skills standard (agentskills.io). DevSpark capabilities could not be discovered,
-loaded, or executed by skills-compatible clients without bespoke DevSpark tooling.
+Keeping lifecycle orchestration separate from portable skill instructions lets
+DevSpark support agent-specific prompt surfaces while still producing reusable
+capability packages. This preserves the `/devspark.*` user experience and avoids
+turning DevSpark itself into a separate skills framework.
 
-The team needed to decide how to position DevSpark relative to the emerging Agent Skills
-ecosystem — as a skills framework itself, as a collection of skills, or as something else.
+## Alternatives Rejected
 
-## Decision
+Embedding all lifecycle behavior inside skills is rejected because it would make
+skills depend on DevSpark repository layout and command routing.
 
-Position DevSpark as a **lifecycle orchestration layer that hosts portable Agent Skills**,
-not as a skills framework. Establish a dual-surface model:
-
-```text
-command → adapter → skill → context scripts → agent reasoning → artifact
-```
-
-- **Slash-commands** (`templates/commands/`) own DevSpark-specific lifecycle concerns:
-  route classification, branch creation, multi-app scoping, artifact placement, gate enforcement.
-- **Agent Skills** (`templates/skills/`) own portable capability instructions that run
-  in any skills-compatible client without DevSpark installed.
-
-The pilot implementation ships one standalone skill — `write-spec` — that complies with
-the open Agent Skills specification. The `/devspark.specify` command is refactored as a
-thin wrapper that delegates spec-drafting reasoning to the skill via a documented adapter
-contract. All other 27 commands remain unchanged.
-
-Skill validation and adapter compliance are enforced by two dedicated test files
-(`tests/test_skill_contract.py`, `tests/test_adapter_contract.py`) that gate every PR.
+Treating skills as unrelated examples is rejected because it would leave the
+prompt-to-skill boundary undocumented and difficult to validate.
 
 ## Consequences
 
-### Positive
-
-- Any skills-compatible client can load `templates/skills/write-spec/` and run spec-drafting
-  with zero DevSpark-specific configuration.
-- The `command → invokes → skill` architectural boundary is defined, tested, and reusable
-  for future skills without redesigning the surface.
-- Context-engineering (dual-parity context-gathering scripts) is a first-class DevSpark
-  differentiator above bare prompt delivery.
-- Existing `/devspark.*` slash-command UX is preserved — the refactor is observably transparent
-  to current users.
-
-### Negative
-
-- Dual-surface (commands + skills) creates two locations contributors must understand.
-- Each new skill must ship dual-parity (PowerShell + Bash) context-gathering scripts per §VI,
-  which adds authoring overhead per skill.
-- Skill contract validation in CI adds a gate that must be kept green as the skills surface grows.
+Command templates may delegate bounded reasoning work to skills when a skill
+contract exists. New skills must include their own validation surface and dual
+script support when scripts are required.

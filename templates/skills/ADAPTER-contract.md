@@ -28,7 +28,7 @@ Path resolution is relative to the repository root. The command is responsible
 for resolving the absolute path before invoking the skill. The skill does not
 know its own installation location.
 
-`devspark skills list` enumerates all sibling directories under
+Skill inventory checks enumerate all sibling directories under
 `templates/skills/` that contain a `SKILL.md`. Clients load only `name` and
 `description` for indexing; the full body is loaded only on activation.
 
@@ -94,7 +94,7 @@ DevSpark-governed path.
 | `[NEEDS CLARIFICATION]` markers | Preserved; command may invoke `/devspark.clarify` |
 | `Assumptions` section | Preserved verbatim in the placed spec |
 
-The skill must not write directly to `SPEC_FILE` or any `.documentation/` path.
+The skill must not write directly to `SPEC_FILE` or any `.knowledge/` path.
 Writing to DevSpark-governed paths is always a command responsibility.
 
 ---
@@ -129,7 +129,7 @@ The `write-spec` skill is the pilot implementation of this contract.
 Resolve the write-spec skill at templates/skills/write-spec/SKILL.md.
 Pass the following named inputs to the skill:
   $FEATURE_DESCRIPTION — the user's feature request text
-  $CONSTITUTION_PATH — the resolved path to .documentation/memory/constitution.md
+  $CONSTITUTION_PATH — the resolved path to .knowledge/governance/constitution.md
   $PRIOR_SPEC_SUMMARY — the JSON output from the skill's gather-context script
 
 The skill will produce a draft spec body. Place the draft into SPEC_FILE

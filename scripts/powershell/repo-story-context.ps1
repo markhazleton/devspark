@@ -5,7 +5,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Output = ".documentation/repo-story/history.json",
+    [string]$Output = ".devspark.work/repo-story/history.json",
     [int]$Months = 12,
     [ValidateSet("full", "velocity", "quality", "business", "team")]
     [string]$Scope = "full",
@@ -18,7 +18,7 @@ if ($Help) {
     Write-Output @"
 Usage: repo-story-context.ps1 [-Output <path>] [-Months 12] [-Scope full] [-CompareBaseline YYYY-MM] [-Stdout]
 
-Generates a history.json file with full-repository historical context:
+Generates an ephemeral history.json file with full-repository Git context:
 - commit timeline
 - contributor trends
 - tag milestones
@@ -27,7 +27,7 @@ Generates a history.json file with full-repository historical context:
 - commit-audit metrics (velocity, quality, governance)
 
 Options:
-    -Output <path>           Output JSON path (default: .documentation/repo-story/history.json)
+    -Output <path>           Output JSON path (default: .devspark.work/repo-story/history.json)
     -Months <N>              Audit window in months from now (default: 12)
     -Scope <name>            full | velocity | quality | business | team
     -CompareBaseline YYYY-MM Optional baseline month override
@@ -394,8 +394,8 @@ if ($subjectRaw) {
 }
 
 $governancePath = ""
-if (Test-Path (Join-Path $repoRoot ".documentation/memory/constitution.md")) {
-    $governancePath = Join-Path $repoRoot ".documentation/memory/constitution.md"
+if (Test-Path (Join-Path $repoRoot ".knowledge/governance/constitution.md")) {
+    $governancePath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
 } elseif (Test-Path (Join-Path $repoRoot ".specify/memory/constitution.md")) {
     $governancePath = Join-Path $repoRoot ".specify/memory/constitution.md"
 }
@@ -410,9 +410,8 @@ if ($governancePath) {
     $constitutionAmendmentCount = ([regex]::Matches($constitutionText, '(?im)^##\s+amendment\b|CAP-\d{4}-\d{3}')).Count
 }
 
-$specDirs = @(Get-ChildItem -Path (Join-Path $repoRoot ".documentation/specs") -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "pr-review" })
-$archivedSpecs = @(Get-ChildItem -Path (Join-Path $repoRoot ".archive") -Recurse -Directory -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match '(\\|/)specs(\\|/)' })
-$governanceArtifactsCount = @(Get-ChildItem -Path (Join-Path $repoRoot ".documentation") -Recurse -File -ErrorAction SilentlyContinue |
+$specDirs = @(Get-ChildItem -Path (Join-Path $repoRoot ".devspark.work/specs") -Directory -ErrorAction SilentlyContinue)
+$governanceArtifactsCount = @(Get-ChildItem -Path (Join-Path $repoRoot ".knowledge") -Recurse -File -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -match 'audit|harvest|pr-review|constitution-history' }).Count
 
 $recent = @()
@@ -521,7 +520,6 @@ $history = [PSCustomObject]@{
         constitution_version = $constitutionVersion
         constitution_amendment_count = $constitutionAmendmentCount
         active_spec_count = $specDirs.Count
-        archived_spec_directory_count = $archivedSpecs.Count
         governance_artifact_count = $governanceArtifactsCount
     }
     milestones = [PSCustomObject]@{

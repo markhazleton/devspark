@@ -36,8 +36,8 @@ later section conflicts with this section, the v4 section wins.
   `governance_ref` when applicable.
 - Never write ephemeral package, task, spec, plan, review-thread, release, or
   archive references into permanent code comments or `.knowledge`.
-- Run current-truth validation and verify-before-delete before deleting the work
-  package.
+- Run current-truth validation and verify-before-archive before moving the work
+  package to `.archive/YYYY-MM-DD/<topic>/`.
 
 ## Workflow Position
 
@@ -55,7 +55,7 @@ Done when: every task in `tasks.md` is `[X]`, every phase has a `**Checkpoint**:
 
 ## Constitution Authority
 
-Load `/.documentation/memory/constitution.md` at step 4. Treat every mandated principle as **non-negotiable**:
+Load `/.knowledge/governance/constitution.md` at step 4. Treat every mandated principle as **non-negotiable**:
 
 - Missing task for a runtime-bearing principle (observability, accessibility, security baseline, test coverage, audit logging, telemetry) with no matching `## Constitution Waivers` entry in `plan.md` → **halt** and route to `/devspark.tasks`. Do not add the task yourself.
 - An implementation choice that conflicts with a principle MUST be refused even if the task description appears to permit it → amend via `/devspark.plan` or propose via `/devspark.evolve-constitution`.
@@ -70,9 +70,9 @@ unresolved.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 1. Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
@@ -117,7 +117,7 @@ unresolved.
 4. Load and analyze the implementation context:
    - **REQUIRED**: Read tasks.md for the complete task list and execution plan
    - **REQUIRED**: Read plan.md for tech stack, architecture, file structure, and any `## Constitution Waivers`
-   - **REQUIRED**: Read `/.documentation/memory/constitution.md` and extract mandated principles (see Constitution Authority above)
+   - **REQUIRED**: Read `/.knowledge/governance/constitution.md` and extract mandated principles (see Constitution Authority above)
    - **IF EXISTS**: Read data-model.md for entities and relationships
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints

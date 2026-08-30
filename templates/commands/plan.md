@@ -33,7 +33,10 @@ section, the v4 section wins.
 - Resolve relevant `.knowledge` entities and governance decisions 2-3 hops, or
   until traversal stops finding relevant edges.
 - Record resolved context in `context_resolved` inside the work package.
-- Do not copy governance rationale into entity files; reference constrained
+- Use `.knowledge/ontology/relations.generated.md` and
+  `.knowledge/ontology/governance.generated.md` as the bounded graph index after
+  confirming generated ontology files are current.
+- Do not copy governance rationale into entity files; reference governed
   entities and decisions instead.
 - Load governance from `.knowledge/governance/constitution.md`, with legacy
   fallback only when the v4 file is absent.
@@ -52,20 +55,24 @@ Done when: research.md has zero `NEEDS CLARIFICATION` markers, data-model.md/con
 
 ## Constitution Authority
 
-`/.documentation/memory/constitution.md` is **non-negotiable** for planning. Violations may not be carried forward as `NEEDS CLARIFICATION`; they must be resolved before exiting the Constitution Check gate. Justified deviations require an explicit `## Constitution Waivers` block in `plan.md` citing the principle, deviation, reason, and compensating control.
+`/.knowledge/governance/constitution.md` is **non-negotiable** for planning. Violations may not be carried forward as `NEEDS CLARIFICATION`; they must be resolved before exiting the Constitution Check gate. Justified deviations require an explicit `## Constitution Waivers` block in `plan.md` citing the principle, deviation, reason, and compensating control.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
-> **Script Resolution**: Before running `{SCRIPT}` or `{AGENT_SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}` or `{AGENT_SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 1. **Setup**: Run `{SCRIPT}` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
-2. **Load context**: Read FEATURE_SPEC and `/.documentation/memory/constitution.md`. Load IMPL_PLAN template (already copied).
+2. **Load context**: Read FEATURE_SPEC and `/.knowledge/governance/constitution.md`. Load IMPL_PLAN template (already copied).
    - Read the YAML frontmatter in FEATURE_SPEC before planning.
    - Treat frontmatter as authoritative for `classification`, `risk_level`, `recommended_next_step`, and `required_gates`.
    - If the body text appears to conflict with the frontmatter, flag the inconsistency to the user instead of overriding the metadata.
+   - Run `python .devspark/scripts/python/build_knowledge_index.py --check` if
+     available; otherwise run `python scripts/python/build_knowledge_index.py
+     --check` in source repos. If it reports stale generated files, refresh them
+     with `--write` before resolving `context_resolved`.
 
 3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
    - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")

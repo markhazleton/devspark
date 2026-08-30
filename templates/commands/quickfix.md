@@ -28,8 +28,9 @@ section, the v4 section wins.
 - Create a minimal ephemeral work package with `context_resolved` and task
   linkage fields for touched code and knowledge.
 - Update `.knowledge` when the quickfix changes durable behavior or governance.
-- Run verify-before-delete before removing the package.
-- Do not create durable quickfix history; Git is the history.
+- Run verify-before-archive before moving the package out of `.devspark.work/`.
+- Do not create durable quickfix history; Git is the durable history and
+  `.archive/YYYY-MM-DD/<topic>/` is only a short-term safety buffer.
 
 ## Workflow Position
 
@@ -41,7 +42,7 @@ Alternative entry point to authoring: `[user request] → route decision → { s
 
 ## Constitution Authority
 
-`/.documentation/memory/constitution.md` is **required** — if missing, halt and direct the user to `/devspark.constitution`. The targeted constitution check (§5) loads only principles relevant to the detected classification, but they remain non-negotiable: a FAIL must be surfaced and acknowledged in writing, never silently ignored.
+`/.knowledge/governance/constitution.md` is **required** — if missing, halt and direct the user to `/devspark.constitution`. The targeted constitution check (§5) loads only principles relevant to the detected classification, but they remain non-negotiable: a FAIL must be surfaced and acknowledged in writing, never silently ignored.
 
 ## Genuine Fix Discipline
 
@@ -68,7 +69,7 @@ Gate results from this workflow are advisory. The agent must surface blocking co
 
 ## Prerequisites
 
-- Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
+- Project constitution at `/.knowledge/governance/constitution.md` (REQUIRED)
 - Git repository with working branch
 
 ## Actions
@@ -87,11 +88,11 @@ Done when (for `create`): the quickfix record exists at `QUICKFIX_DIR/NEXT_ID.md
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
 ### 1. Initialize Quickfix Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` to gather context and parse JSON output for:
 
@@ -183,7 +184,7 @@ Consider upgrading to a full specification:
 
 ### 4. Load Constitution (Targeted)
 
-Read `/.documentation/memory/constitution.md` and extract only principles relevant to the change type:
+Read `/.knowledge/governance/constitution.md` and extract only principles relevant to the change type:
 
 | Classification  | Relevant Principles                 |
 | --------------- | ----------------------------------- |
@@ -221,7 +222,7 @@ From user description, extract:
 
 ### 7. Generate Quickfix Record
 
-Ensure directory exists: Create `/.documentation/quickfixes/` if missing.
+Ensure directory exists: Create `/.devspark.work/quickfixes/` if missing.
 
 Create record at `QUICKFIX_DIR/NEXT_ID.md`:
 
@@ -304,7 +305,7 @@ Quickfix Record Created: {NEXT_ID}
 - **Risk Level**: {RISK_LEVEL}
 - **Constitution Check**: PASS ({N} principles validated)
 
-Record saved: /.documentation/quickfixes/{NEXT_ID}.md
+Record saved: /.devspark.work/quickfixes/{NEXT_ID}.md
 
 ## Gate Result
 

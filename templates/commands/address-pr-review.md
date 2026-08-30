@@ -1,5 +1,5 @@
 ---
-description: Address open PR review findings with enforced commit isolation between code fixes and review-file updates
+description: Address open PR review findings while keeping ephemeral review state out of commits
 handoffs:
   - label: Re-Review Updated PR
     agent: devspark.pr-review
@@ -25,17 +25,18 @@ section conflicts with this section, the v4 section wins.
 - Resolve findings by changing code, `.knowledge`, or governance as needed.
 - Do not introduce permanent references to the review thread or ephemeral work
   package.
-- Commit review-thread updates outside the permanent current-truth layer.
+- Never commit `.devspark.work` review-thread updates.
 - Re-run current-truth validation before marking findings resolved.
 
 ## Overview
 
-This command is the **author-side companion** to `/devspark.pr-review`. It helps you address open findings in `/.documentation/specs/pr-review/pr-{PR_ID}.md` while enforcing commit isolation:
+This command is the **author-side companion** to `/devspark.pr-review`. It helps you address open findings in `/.devspark.work/pr-reviews/pr-{PR_ID}.md` while keeping the permanent commit history focused on real fixes:
 
-1. Commit code fixes first.
-2. Commit review-file updates second.
+1. Commit code, test, documentation, and `.knowledge` fixes.
+2. Update the local review work file only as ephemeral status.
+3. Run `/devspark.pr-review UPDATE` for a fresh review pass.
 
-**IMPORTANT**: The staging gates are mechanical and mandatory. Do not bypass them.
+**IMPORTANT**: `.devspark.work` is temporary work state and must not be staged.
 
 ## Genuine Fix Discipline
 
@@ -45,22 +46,22 @@ the behavior named by `intent_cue` unchanged.
 
 ## Prerequisites
 
-- Existing PR review file at `/.documentation/specs/pr-review/pr-{PR_ID}.md`
+- Existing PR review file at `/.devspark.work/pr-reviews/pr-{PR_ID}.md`
 - Git repository with the PR source branch checked out
 - PowerShell 7+ (`pwsh`) on Windows, or Bash on macOS/Linux, for the gate helper script
 
 ## Definition of Done
 
-Done when: every selected finding is fixed and committed (Phase 4), the review file is updated and committed separately (Phase 6), the two commits are verified disjoint, and the handoff message is printed (Phase 7). If validation (Phase 3) can't be made to pass, stop and report which finding is blocking — don't keep retrying silently.
+Done when: every selected finding is fixed and committed (Phase 4), the local review file is updated without staging it (Phase 5), and the handoff message is printed (Phase 6). If validation (Phase 3) can't be made to pass, stop and report which finding is blocking — don't keep retrying silently.
 
 ## Outline
 
 ### Phase 0 — Load context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/address-pr-review.ps1` (PowerShell) or `.documentation/scripts/bash/address-pr-review.sh` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/address-pr-review.ps1` (PowerShell) or `.knowledge/overrides/scripts/bash/address-pr-review.sh` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 1. Run `{SCRIPT}` with the PR id and JSON output enabled (`-PrId {PR_ID} -Json` on PowerShell, `--pr-id {PR_ID} --json` on Bash).
-2. Fail fast if `/.documentation/specs/pr-review/pr-{PR_ID}.md` is missing.
+2. Fail fast if `/.devspark.work/pr-reviews/pr-{PR_ID}.md` is missing.
 3. Parse open findings from checklist lines matching:
    - `- [ ] **C-##**`
    - `- [ ] **H-##**`
@@ -69,7 +70,7 @@ Done when: every selected finding is fixed and committed (Phase 4), the review f
    - `- [ ] **CON-##**`
 4. Confirm current branch equals the PR source branch. Refuse if mismatched.
 5. Capture `git status --short`.
-6. **Refuse to proceed** if any staged path matches `.documentation/specs/pr-review/pr-*.md`.
+6. **Refuse to proceed** if any staged path matches `.devspark.work/pr-reviews/pr-*.md`.
 
 If no open findings remain, print: `Nothing to address.` and stop.
 
@@ -87,7 +88,7 @@ For each selected finding:
 2. Apply the recommended fix, or propose an alternative and show the diff.
 3. Stage **only** code paths touched by that fix.
 4. Never run `git add .`.
-5. Never stage `/.documentation/specs/pr-review/pr-{PR_ID}.md` during this phase.
+5. Never stage `/.devspark.work/pr-reviews/pr-{PR_ID}.md` during this phase.
 
 ### Phase 3 — Validate
 
@@ -96,7 +97,7 @@ For each selected finding:
 3. If any validation fails, return to Phase 2.
 4. Do not continue until validations pass.
 
-### Phase 4 — Commit code fixes (isolation gate #1)
+### Phase 4 — Commit code fixes
 
 1. Run gate script with code-only mode before commit (`-Gate code-only` on PowerShell, `--gate code-only` on Bash).
 2. If the gate fails, **abort** and print offending staged paths.
@@ -121,29 +122,11 @@ Then update metadata:
 1. Bump revision in the header table (`Rev N -> Rev N+1`).
 2. Update `Stats` with current churn/test counts/commit snapshot.
 3. Append a new row to `Revision Log` for this iteration.
-4. Stage only `/.documentation/specs/pr-review/pr-{PR_ID}.md`.
+4. Do not stage the review file. It remains local `.devspark.work` state.
 
-### Phase 6 — Commit review file (isolation gate #2)
+### Phase 6 — Handoff
 
-1. Run gate script with review-only mode before commit (`-Gate review-only` on PowerShell, `--gate review-only` on Bash).
-2. If the gate fails, **abort** and print offending staged paths.
-3. Commit with:
-
-```text
-review(pr-{PR_ID}): rev {N} — {X} fixed, {Y} remaining
-```
-
-1. Verify commit disjointness:
-
-```bash
-git log HEAD~2..HEAD --name-only
-```
-
-Parse the two commits and assert they share zero file paths.
-
-### Phase 7 — Handoff
-
-1. Print both new commit hashes (`fix` and `review`).
+1. Print the new fix commit hash.
 2. Suggest focused re-review:
 
 ```text
@@ -154,13 +137,14 @@ Run `/devspark.pr-review UPDATE {PR_URL}` to trigger a focused re-review.
 
 ### Commit Discipline (MUST)
 
-- A commit touching `/.documentation/specs/pr-review/pr-{PR_ID}.md` MUST NOT include any other path.
-- Code fixes and review-file updates MUST be separate commits.
-- Do not amend/squash these two commits together.
+- No `.devspark.work` path may be staged or committed.
+- Review-file updates are local work state until superseded by GitHub PR
+  comments, refreshed review output, or deletion after assimilation.
+- Do not run `git add .`.
 
 ### Gate Execution (MUST)
 
-- Use the helper script as the source of truth for staging gates.
+- Use the helper script as the source of truth for the code-only staging gate.
 - If a gate exits non-zero, stop and resolve staging before retrying.
 
 ### Edit Scope (MUST)

@@ -33,7 +33,7 @@ planned delta. When any later section conflicts with this section, the v4
 section wins.
 
 - Do not re-run mechanical ontology resolution; that belongs to analyze.
-- Challenge missing entities, missing constrained decisions, or shallow
+- Challenge missing entities, missing governed decisions, or shallow
   `context_resolved` coverage when the planned files imply broader impact.
 - Treat sufficiency findings as review judgment unless they expose a hard
   constitution or evidence violation.
@@ -66,27 +66,29 @@ Read YAML frontmatter from `spec.md`. Treat `classification`, `risk_level`, `ris
 
 **Mindset**: Assume **limited team experience** with the stack, **optimistic estimates**, and **incomplete edge-case understanding**.
 
-**Constitution Authority**: `/.documentation/memory/constitution.md` is **non-negotiable**. Constitution violations are automatically SHOWSTOPPER.
+**Constitution Authority**: `/.knowledge/governance/constitution.md` is **non-negotiable**. Constitution violations are automatically SHOWSTOPPER.
 
 ## Outline
 
-**Multi-app support**: If `.documentation/devspark.json` exists with `mode: "multi-app"`, check for `--app <id>` in user input and resolve artifacts from `{app.path}/.documentation/` instead of repo root. Print resolved scope at start.
+**Multi-app support**: If `.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`, check for `--app <id>` in user input and resolve artifacts from `{app.path}/.knowledge/` instead of repo root. Print resolved scope at start.
 
 ### 1. Initialize Analysis Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply 2-tier override — if `.documentation/scripts/{powershell,bash}/<filename>` exists, run it instead. Team overrides in `.documentation/scripts/` take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply 2-tier override — if `.knowledge/overrides/scripts/{powershell,bash}/<filename>` exists, run it instead. Team overrides in `.knowledge/overrides/scripts/` take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` once from repo root, parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive:
 
 - SPEC = FEATURE_DIR/spec.md
 - PLAN = FEATURE_DIR/plan.md (optional)
 - TASKS = FEATURE_DIR/tasks.md (optional)
-- CONSTITUTION = /.documentation/memory/constitution.md
+- CONSTITUTION = /.knowledge/governance/constitution.md
 
 Run the advisory knowledge coverage validator after resolving `FEATURE_DIR`:
 
-- PowerShell: `.devspark/scripts/powershell/validate-knowledge-coverage.ps1 -FeatureDir "$FEATURE_DIR" -Json`
-- Bash: `.devspark/scripts/bash/validate-knowledge-coverage.sh --feature-dir "$FEATURE_DIR" --json`
+- Validate every `context_resolved` entity against `.knowledge/entities/`.
+- Validate every decision reference against `.knowledge/governance/decisions/`.
+- Treat missing obvious context as a risk finding even when analyze's mechanical
+  resolution check passes.
 
 This pass is additive and fail-soft. If `knowledge/` is absent, report the
 validator's clean skip and continue. If coverage is incomplete or invalid,
@@ -248,7 +250,7 @@ Load all matching checklists from disk:
 - `.devspark/risk-checklists/{stack}.md` (e.g., `python-fastapi.md`, `node-express.md`, `go-gin.md`, `java-spring.md`, `dotnet-aspnet.md`)
 - `.devspark/risk-checklists/{archetype}.md` (e.g., `library.md`, `cli.md`, `data-pipeline.md`)
 
-If none exist, derive risks from first principles using the universal failure-mode lens above. Note in the report output: *"No stack/archetype checklists found at `.devspark/risk-checklists/` — consider seeding from prior critic runs."* Stock seeds ship with DevSpark; teams override by placing files of the same name in `.documentation/risk-checklists/`.
+If none exist, derive risks from first principles using the universal failure-mode lens above. Note in the report output: *"No stack/archetype checklists found at `.devspark/risk-checklists/` — consider seeding from prior critic runs."* Stock seeds ship with DevSpark; teams override by placing files of the same name in `.knowledge/overrides/risk-checklists/`.
 
 Every named tool in a checklist must be paired with the underlying capability so the model can translate across ecosystems. Pattern:
 
@@ -473,6 +475,6 @@ Findings use the shared resolution contract so downstream tools (`/devspark.addr
 
 **Dual-gate cleanup (subsequent pass):** moved `rationale_traceability` out of the critic registry (table row + cue sheet bullet) and into `/devspark.analyze` §4G. Added an explicit non-overlap clause near the top of critic so the gate's scope is unambiguous; mirrored cross-references in `analyze.md`. Spec↔plan Core-Problem drift, Rationale Summary completeness, requirement↔task coverage, and wording-ambiguity findings are now exclusively analyze's responsibility.
 
-**Checklists seeded:** `.devspark/risk-checklists/` now ships with stock files for `web-service`, `python-fastapi`, `node-express`, `go-gin`, `java-spring`, `dotnet-aspnet`, `library`, `cli`, `data-pipeline`, `ml-training`, `infrastructure`, `mobile-app`, `embedded`, and `browser-extension`, plus a README documenting the capability-paired entry format. Teams override via `.documentation/risk-checklists/`.
+**Checklists seeded:** `.devspark/risk-checklists/` now ships with stock files for `web-service`, `python-fastapi`, `node-express`, `go-gin`, `java-spring`, `dotnet-aspnet`, `library`, `cli`, `data-pipeline`, `ml-training`, `infrastructure`, `mobile-app`, `embedded`, and `browser-extension`, plus a README documenting the capability-paired entry format. Teams override via `.knowledge/overrides/risk-checklists/`.
 
-**Deviations from instructions:** None material. Token count stays within the ~10% ceiling — growth from the new registry/cue sheets is offset by deleting the duplicated Section 8, the inline framework checklists, and the redundant report scaffolding.
+**Deviations from instructions:** None material. Token count stays within the ~10% ceiling — growth from the new registry/cue sheets is offset by removing the duplicated Section 8, the inline framework checklists, and the redundant report scaffolding.

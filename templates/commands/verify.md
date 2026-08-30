@@ -18,11 +18,17 @@ You **MUST** consider the user input before proceeding (if not empty).
 This command is the execution-evidence engine for v4 current truth. When any
 later section conflicts with this section, the v4 section wins.
 
-- Run `devspark verify-evidence` for execution evidence where available.
-- Validate current truth after evidence runs.
+- Run each cited `verified_by: execution` test directly with the repository's
+  native test command.
+- Validate current truth after evidence runs by checking `.knowledge` entity
+  metadata, decision evidence, generated `_derived.yaml` files, and the absence
+  of permanent references to ephemeral work packages.
+- Run `python .devspark/scripts/python/build_knowledge_index.py --check` when
+  available, falling back to `python scripts/python/build_knowledge_index.py
+  --check` in source repos.
 - Treat inspection evidence as skipped execution, not as a pass.
 - Verification must prove behavior and current-truth linkage before any work
-  package deletion.
+  package archival.
 
 ## Overview
 
@@ -55,11 +61,13 @@ manual verification note, or runtime signal tied to the intent.
    available documents.
 2. Load `spec.md`, `tasks.md`, gate artifacts, and any `knowledge/` documents if
    present. Missing knowledge documents do not block verification.
-3. Extract open findings, task IDs, requirement IDs, and intent cues from the
+3. Run the ontology generator in `--check` mode and treat stale generated
+   ontology files as a verification failure when `.knowledge/` exists.
+4. Extract open findings, task IDs, requirement IDs, and intent cues from the
    available artifacts.
-4. Compare the user-provided proof and local evidence against each relevant
+5. Compare the user-provided proof and local evidence against each relevant
    intent.
-5. Produce a concise verdict:
+6. Produce a concise verdict:
 
 ```yaml
 verification:

@@ -1,5 +1,5 @@
 <div align="center">
-    <img src=".documentation/media/brand/logo/makeboldsolutions-mark.svg" alt="Make Bold Solutions" width="56" height="56" />
+    <img src=".knowledge/entities/product-documentation/site/media/brand/logo/makeboldsolutions-mark.svg" alt="Make Bold Solutions" width="56" height="56" />
     <h1>DevSpark</h1>
     <h3><em>A structured development process for AI coding assistants.<br/>Just markdown files — no install required.</em></h3>
 </div>
@@ -15,7 +15,7 @@
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 **Current version:** [v4.0.0](https://github.com/markhazleton/devspark/releases/tag/v4.0.0)
 
-> **Not a program. Not a subscription.** Copy 29 stock command prompts (28 active commands plus one deprecated compatibility alias) plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 28 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
 ---
 
@@ -24,10 +24,10 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 29 stock command prompt files (THE PRODUCT)
+├── templates/commands/   ← 28 stock command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── .knowledge/           ← Current truth: entities, governance, ontology reports
-└── .documentation/       ← Guides, media, and GitHub Pages site
+└── .knowledge/           ← Current truth, overrides, docs source, and ontology reports
 ```
 
 ## DevSpark Vocabulary
@@ -80,27 +80,18 @@ contributor walkthrough for adding new skills.
 DevSpark is installed, upgraded, and repaired only through quickstart prompts.
 Point your AI agent at the quickstart prompt for your platform:
 
-Point your AI agent at the quickstart prompt for your platform:
-
 - [GitHub Copilot](quickstart/devspark_quickstart_copilot.md)
 - [Claude Code](quickstart/devspark_quickstart_claudecode.md)
 - [Cursor](quickstart/devspark_quickstart_cursor.md)
 - [Codex](quickstart/devspark_quickstart_codex.md)
 - [Any other agent](quickstart/devspark_quickstart_generic.md)
 
-The agent asks a few questions, then pulls and installs all DevSpark prompts.
-
 For ongoing updates or repairs, run the same quickstart prompt again in the
 target repository. The quickstart compares the installed version, refreshes
 framework-owned files, repairs missing stock assets, and preserves
-repository-owned `.documentation/` and `.knowledge/` content.
+repository-owned `.knowledge/` content.
 
-## Download and Drop
-
-1. Download the [latest release](https://github.com/markhazleton/devspark/releases) zip for your agent and unzip into your project
-2. Start using `/devspark.*` commands in your AI assistant
-
-For a full walkthrough see the [Implementation Lifecycle Guide](.documentation/implementation-lifecycle.md).
+For a full walkthrough see the [Implementation Lifecycle Guide](.knowledge/entities/product-documentation/site/implementation-lifecycle.md).
 
 Recommended review loop: `specify → implement → pr-review → address-pr-review → pr-review UPDATE → merge`.
 
@@ -125,14 +116,14 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 
 | Command | Purpose |
 |---------|---------|
-| `/devspark.pr-review` | [Constitution-based PR review](.documentation/pr-review-usage.md) |
+| `/devspark.pr-review` | [Constitution-based PR review](.knowledge/entities/product-documentation/site/pr-review-usage.md) |
 | `/devspark.address-pr-review` | Apply PR review fixes with mandatory commit isolation gates |
-| `/devspark.site-audit` | [Comprehensive codebase audit](.documentation/site-audit-usage.md) |
+| `/devspark.site-audit` | [Comprehensive codebase audit](.knowledge/entities/product-documentation/site/site-audit-usage.md) |
 | `/devspark.quickfix` | Lightweight workflow for bug fixes |
 | `/devspark.fix-score` | Diagnose and remediate repository score blockers without weakening scoring rules |
-| `/devspark.critic` | [Adversarial risk analysis](.documentation/critic-usage.md) |
-| `/devspark.release` | Archive dev artifacts and prepare releases |
-| `/devspark.harvest` | [Canonical knowledge-preserving cleanup and archival workflow](.documentation/harvest-usage.md) |
+| `/devspark.critic` | [Adversarial risk analysis](.knowledge/entities/product-documentation/site/critic-usage.md) |
+| `/devspark.release` | Validate current truth, version, and prepare releases |
+| `/devspark.harvest` | [Validate current truth and archive verified in-flight work packages](.knowledge/entities/product-documentation/site/harvest-usage.md) |
 | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `/devspark.repo-story` | Generate narrative from commit history |
 | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
@@ -148,8 +139,6 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 | `/devspark.personalize` | Create per-user command overrides |
 | `/devspark.discover-constitution` | Generate a constitution from existing code |
 
-`/devspark.harvest` is the canonical cleanup and archival workflow. `/devspark.archive` remains available only as a deprecated compatibility alias during migration.
-
 ### Multi-App (Optional)
 
 | Command | Purpose |
@@ -158,7 +147,7 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 | `/devspark.list-applications` | Display all registered applications |
 | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
-See [.documentation/index.md](.documentation/index.md#command-categories) for full command details.
+See [.knowledge/entities/product-documentation/site/index.md](.knowledge/entities/product-documentation/site/index.md#command-categories) for full command details.
 
 ---
 
@@ -179,10 +168,10 @@ For repositories containing **multiple applications** with different platforms, 
 
 ### How It Works
 
-1. **Create a registry** at `.documentation/devspark.json` — or run `/devspark.add-application` to create one interactively
+1. **Create a registry** at `.knowledge/entities/application-registry/registry.json` — or run `/devspark.add-application` to create one interactively
 2. **Assign profiles** — reusable rule bundles (e.g., `api-profile`, `web-profile`) that apps inherit
 3. **Scope commands** — use `--app <id>` to target a specific application, or `--repo-scope` for repo-wide operations
-4. **App-local overrides** — each app can have its own `.documentation/` directory and optional `app.json` manifest
+4. **App-local overrides** — each app can have its own `.knowledge/` directory and optional `app.json` manifest
 
 ### Multi-App Commands
 
@@ -192,7 +181,7 @@ For repositories containing **multiple applications** with different platforms, 
 | `/devspark.list-applications` | Display all registered applications and profiles |
 | `/devspark.validate-registry` | Validate registry schema, references, and consistency |
 
-For the full specification, see the [Monorepo Guide](.documentation/monorepo-guide.md).
+For the full specification, see the [Monorepo Guide](.knowledge/entities/product-documentation/site/monorepo-guide.md).
 
 ---
 
@@ -207,35 +196,39 @@ DevSpark cleanly separates **your work** from **its installation**:
 ├── templates/            ← Spec/plan templates
 └── VERSION               ← Installed version stamp
 
-.documentation/            ← Your work (never touched by DevSpark)
-├── memory/constitution.md
-├── specs/
-├── commands/             ← Team command overrides
-├── scripts/              ← Team script overrides (optional)
-├── devspark.json         ← Multi-app registry (optional)
-└── {git-user}/commands/  ← Personal overrides
+.knowledge/                ← Repository-owned current truth
+├── governance/constitution.md
+├── governance/decisions/
+├── entities/
+├── overrides/commands/             ← Team command overrides
+├── overrides/scripts/              ← Team script overrides (optional)
+└── overrides/{git-user}/commands/  ← Personal overrides
+
+.devspark.work/            ← Ephemeral in-flight work packages
 ```
 
-> **Multi-app layout** (optional): When using multi-app, each application also gets `{app-path}/.documentation/` for app-local constitutions and overrides.
+> **Multi-app layout** (optional): When using multi-app, each application also gets `{app-path}/.knowledge/` for app-local constitutions and overrides.
 
 **3-tier prompt resolution** (first match wins):
 
-1. `.documentation/{git-user}/commands/` — Personal tweaks
-2. `.documentation/commands/` — Team customizations
+1. `.knowledge/overrides/{git-user}/commands/` — Personal tweaks
+2. `.knowledge/overrides/commands/` — Team customizations
 3. `.devspark/defaults/commands/` — Stock prompts
 
 **2-tier script resolution** (first match wins):
 
-1. `.documentation/scripts/` — Team script overrides (e.g., Azure DevOps adapter)
+1. `.knowledge/overrides/scripts/` — Team script overrides (e.g., Azure DevOps adapter)
 2. `.devspark/scripts/` — Stock scripts
 
-There is no third ownership tier. If an organization wants a shared baseline in `.documentation/`, it manages that through its own repo practices; DevSpark still only writes to `.devspark/`.
+There is no third ownership tier. If an organization wants a shared baseline in `.knowledge/`, it manages that through its own repo practices; DevSpark still only writes to `.devspark/`.
 
 Participant metadata uses these existing repository-owned artifacts when present.
 It does not change how prompts or scripts are found; customization layers and
 precedence are unchanged.
 
-**Clean removal**: `devspark uninstall` removes `.devspark/` and agent shims, leaves `.documentation/` untouched.
+**Clean removal**: remove `.devspark/` and generated agent shims. Leave
+`.knowledge/` intact unless the user explicitly asks to remove repository-owned
+current truth.
 
 ---
 
@@ -258,16 +251,16 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 
 | Topic | Link |
 |-------|------|
-| Implementation lifecycle | [implementation-lifecycle.md](.documentation/implementation-lifecycle.md) |
-| Quickstart | [quickstart.md](.documentation/quickstart.md) |
-| Constitution guide | [constitution-guide.md](.documentation/constitution-guide.md) |
-| Installation | [installation.md](.documentation/installation.md) |
-| Upgrading | [upgrade.md](.documentation/upgrade.md) |
-| PR review guide | [pr-review-usage.md](.documentation/pr-review-usage.md) |
-| Site audit guide | [site-audit-usage.md](.documentation/site-audit-usage.md) |
-| Critic guide | [critic-usage.md](.documentation/critic-usage.md) |
-| Harvest guide | [harvest-usage.md](.documentation/harvest-usage.md) |
-| Repo story | [repo-story-usage.md](.documentation/repo-story-usage.md) |
+| Implementation lifecycle | [implementation-lifecycle.md](.knowledge/entities/product-documentation/site/implementation-lifecycle.md) |
+| Quickstart | [quickstart.md](.knowledge/entities/product-documentation/site/quickstart.md) |
+| Constitution guide | [constitution-guide.md](.knowledge/entities/product-documentation/site/constitution-guide.md) |
+| Installation | [installation.md](.knowledge/entities/product-documentation/site/installation.md) |
+| Upgrading | [upgrade.md](.knowledge/entities/product-documentation/site/upgrade.md) |
+| PR review guide | [pr-review-usage.md](.knowledge/entities/product-documentation/site/pr-review-usage.md) |
+| Site audit guide | [site-audit-usage.md](.knowledge/entities/product-documentation/site/site-audit-usage.md) |
+| Critic guide | [critic-usage.md](.knowledge/entities/product-documentation/site/critic-usage.md) |
+| Harvest guide | [harvest-usage.md](.knowledge/entities/product-documentation/site/harvest-usage.md) |
+| Repo story | [repo-story-usage.md](.knowledge/entities/product-documentation/site/repo-story-usage.md) |
 
 ---
 

@@ -33,7 +33,7 @@ $descriptionText = $description -join " "
 # Get repository context
 $repoRoot = Get-RepoRoot
 $constitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
-$legacyConstitutionPath = Join-Path $repoRoot ".documentation/memory/constitution.md"
+$legacyConstitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
 if (-not (Test-Path $constitutionPath) -and (Test-Path $legacyConstitutionPath)) {
     $constitutionPath = $legacyConstitutionPath
 }

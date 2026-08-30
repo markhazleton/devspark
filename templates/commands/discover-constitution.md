@@ -21,7 +21,7 @@ You **MUST** consider the user input before proceeding (if not empty). User may 
 
 **Brownfield bootstrap** step: `discover → constitution`, then later `evolve → constitution`.
 
-- **Owns**: scanning the codebase for implicit patterns, interactive validation, and producing a *draft* at `/.documentation/memory/constitution-draft.md`.
+- **Owns**: scanning the codebase for implicit patterns, interactive validation, and producing a *draft* at `/.devspark.work/governance/constitution-draft.md`.
 - **Does NOT own**: writing or amending the real `constitution.md` (→ always `/devspark.constitution`); evidence-based amendment proposals once a constitution exists (→ `/devspark.evolve-constitution`).
 - **When NOT to use**: constitution already exists and is broadly accurate (→ `/devspark.evolve-constitution`); greenfield codebase (→ `/devspark.constitution` directly with aspirational principles).
 
@@ -48,10 +48,10 @@ Identify the codebase structure:
 - Identify source directories (src/, lib/, app/, etc.)
 - Locate test directories and patterns
 - Find configuration files (.eslintrc, tsconfig, .editorconfig, etc.)
-- Check for existing documentation (README, CONTRIBUTING, .documentation/)
+- Check for existing documentation (README, CONTRIBUTING, .knowledge/)
 - Look for existing AI instruction files (.github/copilot-instructions.md, CLAUDE.md, etc.)
 
-If `/.documentation/memory/constitution.md` already exists:
+If `/.knowledge/governance/constitution.md` already exists:
 
 - Warn user: "A constitution already exists. This will create a draft to compare/merge."
 - Proceed with analysis to identify gaps or conflicts
@@ -266,12 +266,12 @@ Would you like to add any of these? (Reply with area names, or "none")
 
 ### 7. Output Draft and Next Steps
 
-Write draft to `/.documentation/memory/constitution-draft.md` (not overwriting existing constitution if present).
+Write draft to `/.devspark.work/governance/constitution-draft.md` (not overwriting existing constitution if present).
 
 ```markdown
 ## Discovery Complete
 
-**Draft saved to**: `/.documentation/memory/constitution-draft.md`
+**Draft saved to**: `/.devspark.work/governance/constitution-draft.md`
 
 ### Summary
 
@@ -282,7 +282,7 @@ Write draft to `/.documentation/memory/constitution-draft.md` (not overwriting e
 
 ### Recommended Next Steps
 
-1. **Review the draft**: Open `/.documentation/memory/constitution-draft.md` and refine wording
+1. **Review the draft**: Open `/.devspark.work/governance/constitution-draft.md` and refine wording
 2. **Team discussion**: Share draft with team for feedback
 3. **Finalize**: Run `/devspark.constitution` to create the official constitution
 4. **Validate**: Run `/devspark.site-audit` to check codebase against new principles

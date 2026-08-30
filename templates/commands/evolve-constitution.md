@@ -35,9 +35,9 @@ conflicts with this section, the v4 section wins.
 
 Continuous-improvement step: `PR reviews + audits → evolve-constitution → CAP-YYYY-NNN.md (DRAFT) → approve/reject → /devspark.constitution applies APPROVED CAPs`. Runs *after* a constitution exists, *between* version bumps.
 
-- **Owns**: pattern analysis across PR reviews and audits, gap detection, drafting Constitution Amendment Proposals (CAPs), and recording approve/reject decisions in `proposals/` and history.
+- **Owns**: pattern analysis across PR reviews and audits, gap detection, and drafting Constitution Amendment Proposals (CAPs) in temporary work state.
 - **Does NOT own**: editing `constitution.md` (only `/devspark.constitution` writes it — this command always emits a *proposal* file); bootstrapping (→ `/devspark.discover-constitution` brownfield, `/devspark.constitution` greenfield); performing the reviews themselves (→ `/devspark.pr-review`, `/devspark.site-audit`).
-- **Prerequisite**: if `/.documentation/memory/constitution.md` does not exist, halt and route to `/devspark.discover-constitution` (brownfield) or `/devspark.constitution` (greenfield). Never propose against a non-existent constitution.
+- **Prerequisite**: if `/.knowledge/governance/constitution.md` does not exist, halt and route to `/devspark.discover-constitution` (brownfield) or `/devspark.constitution` (greenfield). Never propose against a non-existent constitution.
 
 ## Overview
 
@@ -46,16 +46,16 @@ This command facilitates constitution evolution by:
 1. Analyzing PR review findings for recurring violation patterns
 2. Detecting issues not mapped to existing principles
 3. Generating draft amendment proposals (CAP - Constitution Amendment Proposal)
-4. Tracking constitution change history
+4. Keeping proposals temporary until accepted governance is applied
 5. Managing the approval workflow
 
 **IMPORTANT**: This command generates PROPOSALS only. Amendments must be explicitly approved before being applied via `/devspark.constitution`.
 
 ## Prerequisites
 
-- Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
-- PR review history in `/.documentation/specs/pr-review/` (recommended)
-- Site audit history in `/.documentation/copilot/audit/` (optional)
+- Project constitution at `/.knowledge/governance/constitution.md` (REQUIRED)
+- PR review history in `/.devspark.work/pr-reviews/` (recommended)
+- Site audit history in `/.devspark.work/audits/` (optional)
 
 ## Actions
 
@@ -72,7 +72,7 @@ Parse `$ARGUMENTS` for action type:
 
 ### 1. Initialize Evolution Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` to gather context and parse JSON output for:
 
@@ -112,7 +112,7 @@ If ACTION is "approve" and CAP_ID is provided:
 1. Read proposal from `PROPOSALS_DIR/CAP_ID.md`
 2. If file doesn't exist: ERROR "Proposal {CAP_ID} not found"
 3. Update proposal status to "APPROVED"
-4. Update `/.documentation/memory/constitution-history.md`:
+4. Update `/.knowledge/governance/constitution.md`:
    - Add entry to Amendment Log
    - Record approval date
 5. Output:
@@ -138,8 +138,8 @@ If ACTION is "reject" and CAP_ID is provided:
 2. If file doesn't exist: ERROR "Proposal {CAP_ID} not found"
 3. Update proposal status to "REJECTED"
 4. Add rejection reason from arguments
-5. Move to `PROPOSALS_DIR/rejected/` subdirectory
-6. Update history file with rejection record
+5. Delete the rejected proposal after confirming the rejection is understood
+6. Use Git history or PR discussion for any durable record of the rejection
 7. Output:
 
 ```markdown
@@ -147,8 +147,7 @@ Proposal Rejected: {CAP_ID}
 
 Reason: {rejection reason}
 
-The proposal has been archived in:
-/.documentation/memory/proposals/rejected/{CAP_ID}.md
+The rejected proposal was moved to the dated human-only archive.
 ```
 
 1. Stop execution
@@ -263,7 +262,7 @@ Stop execution if no proposals warranted.
 
 For each identified evolution need, create proposal at `PROPOSALS_DIR/NEXT_CAP_ID.md`:
 
-Ensure directory exists: Create `/.documentation/memory/proposals/` if missing.
+Ensure directory exists: Create `/.devspark.work/governance/proposals/` if missing.
 
 ```markdown
 # Constitution Amendment Proposal: {NEXT_CAP_ID}
@@ -367,8 +366,8 @@ Select one:
 - [ ] Evidence justifies the change
 - [ ] Impact assessment is realistic
 - [ ] Adoption plan is achievable
-- [ ] If the amendment adds, removes, or modifies a severity marker, `.documentation/memory/severity-registry.md` is updated in the same PR (FR-009)
-- [ ] Check whether the amendment implies new governance limitations; if so, update `.documentation/memory/known-limitations.md` in the same PR (FR-006)
+- [ ] If the amendment adds, removes, or modifies a severity marker, `.knowledge/governance/severity-registry.md` is updated in the same PR (FR-009)
+- [ ] Check whether the amendment implies new governance limitations; if so, update `.knowledge/governance/known-limitations.md` in the same PR (FR-006)
 
 ## Voting Record
 
@@ -388,40 +387,16 @@ _Generated by /devspark.evolve-constitution v1.0_
 _Review period: 14 days from creation_
 ```
 
-### 6. Update History File
+### 6. Current Truth Integration
 
-Create or update `/.documentation/memory/constitution-history.md`:
+Do not create a separate amendment history file. Accepted governance belongs in
+`/.knowledge/governance/constitution.md` and, when the change governs a
+specific topic, the matching decision file under
+`/.knowledge/governance/decisions/`.
 
-```markdown
-# Constitution Change History
-
-## Current Version
-
-**Version**: {CONSTITUTION_VERSION}
-**Last Updated**: {date of last amendment}
-
-## Pending Proposals
-
-| CAP ID        | Created | Type         | Principle | Status | Review Due       |
-| ------------- | ------- | ------------ | --------- | ------ | ---------------- |
-| {NEXT_CAP_ID} | {date}  | {ADD/MODIFY} | {name}    | DRAFT  | {date + 14 days} |
-
-## Amendment Log
-
-| Version                                    | Date | Type | Principle | CAP ID | Status |
-| ------------------------------------------ | ---- | ---- | --------- | ------ | ------ |
-| (entries added as amendments are approved) |
-
-## Rejected Proposals
-
-| CAP ID                                    | Date | Principle | Reason |
-| ----------------------------------------- | ---- | --------- | ------ |
-| (entries added as proposals are rejected) |
-
----
-
-_Maintained by /devspark.evolve-constitution_
-```
+When a proposal is accepted, route to `/devspark.constitution` to apply it and
+move the proposal to `.archive/YYYY-MM-DD/{CAP-ID}/`
+after assimilation.
 
 ### 7. Output Summary
 
@@ -460,7 +435,7 @@ _Maintained by /devspark.evolve-constitution_
 ### Next Steps
 
 1. **Review Proposals**:
-   `/.documentation/memory/proposals/{NEXT_CAP_ID}.md`
+   `/.devspark.work/governance/proposals/{NEXT_CAP_ID}.md`
 
 2. **Gather Team Feedback**:
    Share proposals with team for discussion
@@ -535,7 +510,7 @@ Recommendation: Run `/devspark.evolve-constitution --scope=audit`
 ```markdown
 Insufficient Data for Evolution Analysis
 
-No PR reviews found in /.documentation/specs/pr-review/
+No PR reviews found in /.devspark.work/pr-reviews/
 
 To build analysis data:
 

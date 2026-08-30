@@ -190,7 +190,7 @@ FEATURE_DESCRIPTION="${ARGS[*]}"
 if [[ -n "${DEVSPARK_APP_ID:-}" ]]; then
     APP_DOC_ROOT=$(resolve_app_doc_root "$REPO_ROOT" "$DEVSPARK_APP_ID" 2>/dev/null || true)
     if [[ -n "$APP_DOC_ROOT" && "$APP_DOC_ROOT" != ERROR* ]]; then
-        APP_WORK_ROOT="${APP_DOC_ROOT%/.documentation}/.devspark.work"
+        APP_WORK_ROOT="${APP_DOC_ROOT%/.knowledge}/.devspark.work"
         SPECS_DIR="$APP_WORK_ROOT/specs"
     else
         SPECS_DIR="$REPO_ROOT/.devspark.work/specs"
@@ -305,7 +305,7 @@ fi
 FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
 mkdir -p "$FEATURE_DIR"
 
-TEMPLATE="$REPO_ROOT/.documentation/templates/spec-template.md"
+TEMPLATE="$REPO_ROOT/templates/spec-template.md"
 SPEC_FILE="$FEATURE_DIR/spec.md"
 if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"; fi
 write_okf_knowledge_document "$FEATURE_DIR" "traceability-index" "traceability-index" "Traceability Index" "draft" "spec.md" 2>/dev/null || true

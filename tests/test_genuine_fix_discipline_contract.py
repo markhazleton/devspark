@@ -65,7 +65,7 @@ def test_verify_command_and_atomic_shim_define_guard() -> None:
     assert "metric-only" in verify
     assert "unchanged behavior" in verify
     assert "status: fail" in verify
-    assert "legacy_command: verify" in shim
+    assert "command: verify" in shim
     assert "templates/commands/verify.md" in shim
 
 
@@ -85,8 +85,8 @@ def test_verify_is_discoverable_through_atomic_catalog() -> None:
     shim = _read("templates/prompts/atomic/verify.md")
     assert "id: verify" in shim
     assert "exposed: false" in shim
-    assert "category: legacy-command" in shim
-    assert "legacy_command: verify" in shim
+    assert "category: prompt-adapter" in shim
+    assert "command: verify" in shim
 
 
 def test_release_packagers_ship_genuine_fix_surfaces() -> None:
@@ -95,9 +95,11 @@ def test_release_packagers_ship_genuine_fix_surfaces() -> None:
 
     assert "templates" in bash_packager
     assert "templates" in ps_packager
+    assert "scripts/python" in bash_packager
     assert "templates[/\\\\]commands" in ps_packager
     assert "Copy-Item -Path \"scripts/bash\"" in ps_packager
     assert "Copy-Item -Path \"scripts/powershell\"" in ps_packager
+    assert "Copy-Item -Path \"scripts/python\"" in ps_packager
 
 
 def test_docs_list_verify_and_genuine_fix_contracts() -> None:

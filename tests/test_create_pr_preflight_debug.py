@@ -52,7 +52,7 @@ def _write(path: Path, content: str) -> None:
 
 
 def _build_spec_repo(repo_root: Path) -> None:
-    feature_dir = repo_root / ".documentation" / "specs" / "001-feature-sample"
+    feature_dir = repo_root / ".knowledge" / "specs" / "001-feature-sample"
     _write(
         feature_dir / "spec.md",
         """---
@@ -117,7 +117,7 @@ summary: Migration rollback plan is underspecified.
 
 def _build_quickfix_repo(repo_root: Path) -> None:
     _write(
-        repo_root / ".documentation" / "quickfixes" / "QF-001.md",
+        repo_root / ".knowledge" / "quickfixes" / "QF-001.md",
         """---
 classification: one-off-fix
 risk_level: medium

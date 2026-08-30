@@ -15,7 +15,7 @@ repository is to run the appropriate quickstart prompt from `quickstart/`.
 ```text
 .devspark/       Framework version stamp and local installed stock assets
 .knowledge/      Current truth: entities, governance, decisions, ontology reports
-.documentation/  Guides, media, and site content
+.knowledge/  Guides, media, and site content
 quickstart/      Install, upgrade, and repair prompts
 templates/       Stock prompts, skills, schemas, and helper templates
 scripts/         Bash and PowerShell context helpers used by prompts

@@ -317,7 +317,7 @@ if (-not $IncludeAllFiles -and $filesChangedTotal -gt $FileSampleLimit) {
 
 # Check for constitution
 $constitutionPath = Join-Path $repoRoot ".knowledge\governance\constitution.md"
-$legacyConstitutionPath = Join-Path $repoRoot ".documentation\memory\constitution.md"
+$legacyConstitutionPath = Join-Path $repoRoot ".knowledge\memory\constitution.md"
 if (-not (Test-Path $constitutionPath) -and (Test-Path $legacyConstitutionPath)) {
     $constitutionPath = $legacyConstitutionPath
 }
@@ -341,7 +341,7 @@ if ($sourceBranch -match '^(\d+-[a-zA-Z].*)$') {
     $specFeatureId = $sourceBranch
 
     # Check for spec directory
-    $featureDir = Join-Path $repoRoot ".documentation\specs\$specFeatureId"
+    $featureDir = Join-Path $repoRoot ".knowledge\specs\$specFeatureId"
     $specPath = Join-Path $featureDir "spec.md"
 
     if (Test-Path $specPath) {

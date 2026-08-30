@@ -51,7 +51,7 @@ DevSpark is an Adaptive System Life Cycle Development (ASLCD) toolkit with const
 - **Prompt-first lifecycle**: Quickstart and upgrade flows work directly from remote prompt files
 - **Constitution-powered workflows**: Requirements, planning, review, and audit flows stay aligned with project rules
 - **Agent-agnostic architecture**: Shared stock prompts plus thin shims for 18+ AI coding assistants
-- **Safe customization model**: `.devspark/` stays replaceable while `.documentation/` preserves project work
+- **Safe customization model**: `.devspark/` stays replaceable while `.knowledge/` preserves project work
 
 ## Using This Release
 

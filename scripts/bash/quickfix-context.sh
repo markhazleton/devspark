@@ -56,8 +56,8 @@ done
 # Get repository context
 REPO_ROOT=$(get_repo_root)
 CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
-if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.documentation/memory/constitution.md" ]]; then
-    CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
+if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.knowledge/governance/constitution.md" ]]; then
+    CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
 fi
 QUICKFIX_DIR="$REPO_ROOT/.devspark.work/quickfixes"
 CURRENT_BRANCH=$(get_current_branch)

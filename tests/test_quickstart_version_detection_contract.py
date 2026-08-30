@@ -29,12 +29,12 @@ def test_living_docs_name_current_release_explicitly() -> None:
     )
     for rel_path in (
         "README.md",
-        ".documentation/README.md",
-        ".documentation/about.md",
-        ".documentation/index.md",
-        ".documentation/installation.md",
-        ".documentation/quickstart.md",
-        ".documentation/upgrade.md",
+        ".knowledge/entities/product-documentation/site/README.md",
+        ".knowledge/entities/product-documentation/site/about.md",
+        ".knowledge/entities/product-documentation/site/index.md",
+        ".knowledge/entities/product-documentation/site/installation.md",
+        ".knowledge/entities/product-documentation/site/quickstart.md",
+        ".knowledge/entities/product-documentation/site/upgrade.md",
     ):
         text = (ROOT / rel_path).read_text(encoding="utf-8")
         assert current_release_line in text, f"{rel_path} must explicitly name v4.0.0"
@@ -42,13 +42,15 @@ def test_living_docs_name_current_release_explicitly() -> None:
 
 def test_living_docs_use_v400_command_counts() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    docs_index = (ROOT / ".documentation" / "index.md").read_text(encoding="utf-8")
+    docs_index = (
+        ROOT / ".knowledge" / "entities" / "product-documentation" / "site" / "index.md"
+    ).read_text(encoding="utf-8")
     templates_readme = (ROOT / "templates" / "README.md").read_text(encoding="utf-8")
 
-    assert "29 stock command prompts" in readme
-    assert "29 stock command prompt files" in readme
-    assert "29 stock command prompts" in docs_index
-    assert "As of v4.0.0, the collection includes 28 active commands plus 1 deprecated compatibility alias." in templates_readme
+    assert "28 stock command prompts" in readme
+    assert "28 stock command prompt files" in readme
+    assert "28 active stock command prompts" in docs_index
+    assert "As of v4.0.0, the collection includes 28 active commands." in templates_readme
 
 
 def test_quickstarts_do_not_reference_stale_240_version() -> None:
@@ -126,6 +128,9 @@ def test_quickstarts_are_only_devspark_maintenance_path() -> None:
         "devspark-" + "cli",
         "templates/commands/" + "upgrade.md",
         "/devspark." + "upgrade",
+        "/devspark." + "archive",
+        "arch" + "ive.md",
+        ".knowledge/" + "releases",
     ]
 
     for path in sorted((ROOT / "quickstart").glob("devspark_quickstart_*.md")):

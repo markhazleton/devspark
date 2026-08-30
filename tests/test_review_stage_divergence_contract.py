@@ -2,7 +2,7 @@
 
 Each review stage prompt MAY contain ``<!-- DIVERGENT: <id> -->`` markers.
 Every such marker MUST also appear in
-``.documentation/architecture/review-stage-divergence.md`` so divergences are
+``.knowledge/entities/command-templates/review-stage-divergence.md`` so divergences are
 documented in one place (FR-036).
 """
 
@@ -13,7 +13,13 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DIVERGENCE_DOC = REPO_ROOT / ".documentation" / "architecture" / "review-stage-divergence.md"
+DIVERGENCE_DOC = (
+    REPO_ROOT
+    / ".knowledge"
+    / "entities"
+    / "command-templates"
+    / "review-stage-divergence.md"
+)
 REVIEW_FILES = [
     REPO_ROOT / "templates" / "commands" / n
     for n in ("clarify.md", "analyze.md", "critic.md", "pr-review.md", "address-pr-review.md")

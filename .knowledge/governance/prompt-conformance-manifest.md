@@ -32,7 +32,7 @@ Each command template must include or inherit these elements:
 | Phase | Prompt Responsibility |
 |---|---|
 | Plan and build | Produce temporary work packages and resolved current-truth context |
-| Implementation | Apply code and knowledge deltas together, then verify before delete |
+| Implementation | Apply code and knowledge deltas together, then verify before moving active work to `.archive/` |
 | Validation | Gate current-truth integrity, evidence, and permanent reference hygiene |
 | Governance | Edit constitution and decisions in place |
 | Framework operations | Preserve repository-owned current truth and active work state |

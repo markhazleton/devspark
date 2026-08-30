@@ -56,9 +56,8 @@ adapter contract defines the handoff.
 Run skill validation from the repository root:
 
 ```bash
-devspark skills list
-devspark skills validate
-devspark skills validate templates/skills/write-spec
+python tests/test_skills_install_contract.py
+python tests/test_adapter_contract.py
 ```
 
 See `SKILL-validation-contract.md` for the exit-code contract and diagnostic

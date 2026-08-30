@@ -1,0 +1,20 @@
+id: extension-catalog
+name: Extension Catalog
+kind: integration-catalog
+summary: Durable catalog metadata and guidance for community DevSpark extensions.
+owner: DevSpark maintainers
+lifecycle: current
+root: .knowledge/entities/extension-catalog
+managed_by: mixed
+required_layers:
+- architecture.md
+- README.md
+relations:
+  - type: extends
+    object: command-templates
+evidence:
+  - type: code
+    ref: .knowledge/entities/extension-catalog/catalog.community.json
+    verified_by: inspection
+    test_attempted: true
+    fallback_reason: "Community catalog entries reference external repositories and require review."

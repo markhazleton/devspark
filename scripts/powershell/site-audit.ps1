@@ -187,7 +187,7 @@ function Get-FileCategories {
         
         # Check documentation by extension
         if ($ext -in $docExtensions) {
-            $categories.documentation += $relativePath
+            $categories.knowledge += $relativePath
             continue
         }
         
@@ -479,7 +479,7 @@ function Get-DevSparkVersion {
     param([string]$RepoRoot)
     
     $stampPath = Join-Path $RepoRoot '.devspark/VERSION'
-    $legacyStampPath = Join-Path $RepoRoot '.documentation/DEVSPARK_VERSION'
+    $legacyStampPath = Join-Path $RepoRoot '.knowledge/DEVSPARK_VERSION'
     $info = @{
         stamp_exists = $false
         installed_version = $null
@@ -524,10 +524,10 @@ function Get-DevSparkVersion {
 function Get-ConstitutionInfo {
     param([string]$RepoRoot)
     
-    $constitutionPath = Join-Path $RepoRoot '.documentation/memory/constitution.md'
+    $constitutionPath = Join-Path $RepoRoot '.knowledge/governance/constitution.md'
     $info = @{
         exists = $false
-        path = '.documentation/memory/constitution.md'
+        path = '.knowledge/governance/constitution.md'
         principles = @()
         version = $null
     }
@@ -576,7 +576,7 @@ $result = @{
     repo_root = $repoRoot
     constitution = $constitutionInfo
     devspark = $devsparkVersion
-    audit_dir = '.documentation/copilot/audit'
+    audit_dir = '.devspark.work/audits'
 }
 
 # Get file categories (always needed for context)
@@ -584,14 +584,14 @@ $fileCategories = Get-FileCategories -RepoRoot $repoRoot
 $result.files = @{
     source = Get-SampledItems -Items $fileCategories.source -Limit $SampleLimit
     config = Get-SampledItems -Items $fileCategories.config -Limit $SampleLimit
-    documentation = Get-SampledItems -Items $fileCategories.documentation -Limit $SampleLimit
+    documentation = Get-SampledItems -Items $fileCategories.knowledge -Limit $SampleLimit
     tests = Get-SampledItems -Items $fileCategories.tests -Limit $SampleLimit
     scripts = Get-SampledItems -Items $fileCategories.scripts -Limit $SampleLimit
     build = Get-SampledItems -Items $fileCategories.build -Limit $SampleLimit
     counts = @{
         source = $fileCategories.source.Count
         config = $fileCategories.config.Count
-        documentation = $fileCategories.documentation.Count
+        documentation = $fileCategories.knowledge.Count
         tests = $fileCategories.tests.Count
         scripts = $fileCategories.scripts.Count
         build = $fileCategories.build.Count
@@ -602,7 +602,7 @@ if ($IncludeFullInventory) {
     $result.files.full_inventory = @{
         source = $fileCategories.source
         config = $fileCategories.config
-        documentation = $fileCategories.documentation
+        documentation = $fileCategories.knowledge
         tests = $fileCategories.tests
         scripts = $fileCategories.scripts
         build = $fileCategories.build
@@ -667,7 +667,7 @@ if ($OutputFormat -eq 'json') {
     Write-Output "File Counts:"
     Write-Output "  Source files: $($fileCategories.source.Count)"
     Write-Output "  Config files: $($fileCategories.config.Count)"
-    Write-Output "  Documentation: $($fileCategories.documentation.Count)"
+    Write-Output "  Documentation: $($fileCategories.knowledge.Count)"
     Write-Output "  Test files: $($fileCategories.tests.Count)"
     Write-Output "  Scripts: $($fileCategories.scripts.Count)"
     Write-Output "  Build files: $($fileCategories.build.Count)"

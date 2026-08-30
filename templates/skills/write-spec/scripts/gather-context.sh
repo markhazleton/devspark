@@ -44,7 +44,7 @@ fi
 # Load constitution summary
 CONSTITUTION_FOUND=false
 for CONST_PATH in \
-    "$REPO_ROOT/.documentation/memory/constitution.md" \
+    "$REPO_ROOT/.knowledge/governance/constitution.md" \
     "$REPO_ROOT/constitution.md"; do
     if [ -f "$CONST_PATH" ]; then
         # Extract first meaningful paragraph — first 10 non-empty, non-heading lines
@@ -82,8 +82,8 @@ if [ "$CONSTITUTION_FOUND" = false ]; then
     add_skipped "constitution-not-found"
 fi
 
-# Gather prior specs
-SPECS_DIR="$REPO_ROOT/.documentation/specs"
+# Gather in-flight specs
+SPECS_DIR="$REPO_ROOT/.devspark.work/specs"
 if [ -d "$SPECS_DIR" ]; then
     SPECS_JSON=""
     while IFS= read -r -d '' spec_file; do
@@ -110,7 +110,7 @@ if [ -d "$SPECS_DIR" ]; then
         else
             SPECS_JSON="$SPECS_JSON,$entry"
         fi
-    done < <(find "$SPECS_DIR" -name "spec.md" -not -path "*/.archive/*" -print0 2>/dev/null | sort -z)
+    done < <(find "$SPECS_DIR" -name "spec.md" -print0 2>/dev/null | sort -z)
 
     if [ -n "$SPECS_JSON" ]; then
         PRIOR_SPECS="[$SPECS_JSON]"

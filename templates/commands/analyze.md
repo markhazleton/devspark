@@ -28,6 +28,8 @@ later section conflicts with this section, the v4 section wins.
 - Validate every `context_resolved` entity, relation, and decision reference
   against the current ontology.
 - Fail stale or hallucinated current-truth references.
+- Run the ontology generator in `--check` mode before validating resolved
+  context; stale generated reports are a hard mechanical failure.
 - Fail permanent references from code or `.knowledge` back to ephemeral work.
 - Surface missing code-evidence fallback reasons as warnings, not hard stops.
 
@@ -55,15 +57,15 @@ The analysis itself is non-destructive. Do **not** edit `spec.md`, `plan.md`, `t
 
 Read the YAML frontmatter in `spec.md` before analyzing. Treat `classification`, `risk_level`, and `required_gates` as authoritative metadata.
 
-**Constitution Authority**: The project constitution (`/.documentation/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/devspark.analyze`.
+**Constitution Authority**: The project constitution (`/.knowledge/governance/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/devspark.analyze`.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.documentation/devspark.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.documentation/` instead of the repository root `.documentation/`. Print the resolved scope (app name, doc root) at the start of output.
+**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
 
 ### 1. Initialize Analysis Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
 
@@ -73,13 +75,17 @@ Run `{SCRIPT}` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_
 
 Run the advisory knowledge coverage validator after resolving `FEATURE_DIR`:
 
-- PowerShell: `.devspark/scripts/powershell/validate-knowledge-coverage.ps1 -FeatureDir "$FEATURE_DIR" -Json`
-- Bash: `.devspark/scripts/bash/validate-knowledge-coverage.sh --feature-dir "$FEATURE_DIR" --json`
+- Run `python .devspark/scripts/python/build_knowledge_index.py --check` if
+  available; otherwise run `python scripts/python/build_knowledge_index.py
+  --check` in source repos.
+- Validate every `context_resolved` entity against `.knowledge/entities/`.
+- Validate every decision reference against `.knowledge/governance/decisions/`.
+- Validate touched knowledge metadata against `templates/schemas/devspark-*.schema.json`.
 
-This pass is additive and fail-soft. If `knowledge/` is absent, report the
-validator's clean skip and continue. If coverage is incomplete or invalid,
-surface the warning in the analysis report without turning the gate into a
-blocking failure unless another independent finding already blocks the gate.
+This pass is additive only when `.knowledge/` is absent. If `.knowledge/` exists
+and the ontology generator reports stale files, dangling relations, missing
+evidence, or schema violations, block analysis until the current-truth graph is
+fixed.
 
 Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
@@ -113,7 +119,7 @@ Load only the minimal necessary context from each artifact:
 
 **From constitution:**
 
-- Load `/.documentation/memory/constitution.md` for principle validation
+- Load `/.knowledge/governance/constitution.md` for principle validation
 
 ### 3. Build Semantic Models
 

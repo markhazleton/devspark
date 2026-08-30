@@ -6,14 +6,14 @@ Given a feature description, produce a structured specification document.
 
 ## Instructions
 
-1. Read the project constitution at `.documentation/memory/constitution.md`
+1. Read the project constitution at `.knowledge/governance/constitution.md`
 2. Ask clarifying questions if the request is ambiguous
 3. Create a spec document with:
    - **User Stories**: Who benefits and how
    - **Acceptance Criteria**: Testable conditions for "done"
    - **Non-Functional Requirements**: Performance, security, accessibility
    - **Out of Scope**: What this feature does NOT include
-4. Save to `.documentation/specs/{feature-branch}/spec.md`
+4. Save temporary work to `.devspark.work/specs/{feature-branch}/spec.md`
 
 ## Constitution Compliance
 

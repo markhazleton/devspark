@@ -28,7 +28,7 @@ this section, the v4 section wins.
 
 ## Lifecycle Position
 
-**Single writer of record** for `/.documentation/memory/constitution.md`. Two siblings feed in but never edit the constitution themselves:
+**Single writer of record** for `/.knowledge/governance/constitution.md`. Two siblings feed in but never edit the constitution themselves:
 
 - `/devspark.discover-constitution` (brownfield bootstrap) → produces `constitution-draft.md`
 - `/devspark.evolve-constitution` (continuous improvement) → produces APPROVED CAPs in `proposals/`
@@ -43,12 +43,13 @@ All three paths converge here → this command writes `constitution.md` and bump
 
 Before drafting, scan for upstream artifacts produced by the sibling commands and incorporate them when present:
 
-1. **Discovery draft** — if `/.documentation/memory/constitution-draft.md` exists:
+1. **Discovery draft** — if `/.devspark.work/governance/constitution-draft.md` exists:
    - Treat it as the starting point for placeholder values when no constitution exists yet.
-   - After successfully writing `constitution.md`, archive the draft to `/.documentation/memory/archive/constitution-draft-YYYY-MM-DD.md` so it isn't reapplied.
-2. **Approved amendment proposals** — if `/.documentation/memory/proposals/` contains files whose `Status: APPROVED`:
+   - After successfully writing `constitution.md`, move the draft to `.archive/YYYY-MM-DD/constitution-draft/` so it isn't reapplied and is still recoverable short term.
+2. **Approved amendment proposals** — if `/.devspark.work/governance/proposals/` contains files whose `Status: APPROVED`:
    - List them to the user; for each, ask whether to apply now in this version bump.
-   - For every applied CAP, update its `Resolution.Applied in Version` field to the new constitution version and move the file to `proposals/applied/`.
+   - For every applied CAP, update the current constitution and any affected decision topic files in place.
+   - Move applied CAP files to `.archive/YYYY-MM-DD/{CAP-ID}/` after durable governance is updated.
    - Reflect each applied CAP in the Sync Impact Report (§5) under a new "Applied Amendments" block (CAP ID → principle change).
 3. **Rejected or pending proposals**: leave untouched. Never silently roll a non-approved proposal into the constitution.
 
@@ -56,11 +57,11 @@ If neither upstream artifact is present, proceed with user-supplied input as tod
 
 ## Outline
 
-You are updating the project constitution at `/.documentation/memory/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
+You are updating the project constitution at `/.knowledge/governance/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
 
 Follow this execution flow:
 
-1. Load the existing constitution template at `/.documentation/memory/constitution.md`.
+1. Load the existing constitution template at `/.knowledge/governance/constitution.md`.
    - Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]`.
      **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
 
@@ -87,7 +88,7 @@ Follow this execution flow:
    - Read `/.devspark/templates/tasks-template.md` (or `templates/tasks-template.md` in source repos) and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
    - Read command prompt templates from `templates/commands/*.md` when available; otherwise inspect generated command files under active agent folders (for example `.github/agents/`, `.claude/commands/`, `.cursor/commands/`, `.gemini/commands/`). Verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
    - If the update touches Genuine Fix Discipline, check `templates/command-preamble-contract.md` §9/§9.1/§9.2, `/devspark.verify`, and review/fix commands that emit or resolve findings.
-   - Read runtime guidance docs (for example `README.md`, `/.documentation/Guide.md`, and agent-specific guidance files if present). Update references to principles changed.
+   - Read runtime guidance docs (for example `README.md`, `/.knowledge/entities/product-documentation/site/Guide.md`, and agent-specific guidance files if present). Update references to principles changed.
 
 5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
    - Version change: old → new
@@ -103,7 +104,7 @@ Follow this execution flow:
    - Dates ISO format YYYY-MM-DD.
    - Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).
 
-7. Write the completed constitution back to `/.documentation/memory/constitution.md` (overwrite).
+7. Write the completed constitution back to `/.knowledge/governance/constitution.md` (overwrite).
 
 8. Output a final summary to the user with:
    - New version and bump rationale.
@@ -121,4 +122,4 @@ If the user supplies partial updates (e.g., only one principle revision), still 
 
 If critical info missing (e.g., ratification date truly unknown), insert `TODO(<FIELD_NAME>): explanation` and include in the Sync Impact Report under deferred items.
 
-Do not create a new template; always operate on the existing `/.documentation/memory/constitution.md` file.
+Do not create a new template; always operate on the existing `/.knowledge/governance/constitution.md` file.

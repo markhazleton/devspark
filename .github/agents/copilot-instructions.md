@@ -12,7 +12,7 @@ Preserve these boundaries:
 
 - `.devspark/` is framework-owned.
 - `.knowledge/` is current truth.
-- `.documentation/` is repository-owned documentation.
+- `.knowledge/` is repository-owned documentation.
 - `.devspark.work/` is temporary work state and should not be committed.
 
 When changing scripts, maintain Bash and PowerShell parity.

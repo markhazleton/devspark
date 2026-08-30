@@ -25,8 +25,8 @@
   "ignores": [
     ".genreleases/",           // generated release notes — machine-authored, not hand-edited
     "incoming/**",             // staging area for external content before review
-    ".documentation/drafts/**", // in-progress drafts not yet ready for lint enforcement
-    ".documentation/devspark/runs/**", // runtime artifacts — gitignored, not committed to repo
+    ".knowledge/drafts/**", // in-progress drafts not yet ready for lint enforcement
+    ".devspark.work/runs/**", // runtime artifacts — gitignored, not committed to repo
     ".venv/**",                 // local virtualenv packages — third-party generated content
     ".pytest_cache/**"         // pytest runtime cache — not markdown content
   ]

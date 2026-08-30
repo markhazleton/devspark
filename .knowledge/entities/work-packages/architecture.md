@@ -11,5 +11,6 @@ evidence:
 
 Work packages are ephemeral state under `.devspark.work`. Each task carries
 links to the permanent code and knowledge where its delta landed. The package
-can only be deleted after all complete-task references are populated and
-resolve, or are explicitly marked not applicable with a reason.
+can only be archived after all complete-task references are populated and
+resolve, or are explicitly marked not applicable with a reason. Verified
+packages move intact to `.archive/YYYY-MM-DD/<topic>/`, outside current truth.

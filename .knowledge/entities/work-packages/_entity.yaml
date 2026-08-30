@@ -1,7 +1,13 @@
 id: work-packages
 name: Work Packages
 kind: ephemeral-state
-summary: v4 in-flight specification packages stored under `.devspark.work` until verify-before-delete succeeds.
+summary: v4 in-flight specification packages stored under `.devspark.work` until verify-before-archive succeeds.
+owner: DevSpark maintainers
+lifecycle: current
+root: .devspark.work
+managed_by: prompt
+required_layers:
+- architecture.md
 relations:
   - type: validated_by
     object: current-truth-ontology

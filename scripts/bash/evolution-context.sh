@@ -75,11 +75,11 @@ done
 # Get repository context
 REPO_ROOT=$(get_repo_root)
 CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
-if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.documentation/memory/constitution.md" ]]; then
-    CONSTITUTION_PATH="$REPO_ROOT/.documentation/memory/constitution.md"
+if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.knowledge/governance/constitution.md" ]]; then
+    CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
 fi
 PR_REVIEW_DIR="$REPO_ROOT/.devspark.work/pr-reviews"
-AUDIT_DIR="$REPO_ROOT/.documentation/copilot/audit"
+AUDIT_DIR="$REPO_ROOT/.devspark.work/audits"
 PROPOSALS_DIR="$REPO_ROOT/.devspark.work/governance-proposals"
 HISTORY_FILE="$REPO_ROOT/.knowledge/governance/constitution.md"
 

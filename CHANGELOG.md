@@ -19,6 +19,6 @@ All notable changes to DevSpark are documented here.
 
 - Removed terminal runtime source, packaging metadata, runtime workflow fixtures,
   and tests.
-- Removed the standalone upgrade command prompt and generated shims.
+- Removed the standalone framework-maintenance prompt and generated shims.
 - Removed historical local archives and generated run/history artifacts from the
   working tree.

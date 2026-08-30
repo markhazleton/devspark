@@ -7,8 +7,8 @@
         "devspark.implement": true
     },
     "chat.tools.terminal.autoApprove": {
-        ".documentation/scripts/bash/": true,
-        ".documentation/scripts/powershell/": true
+        ".knowledge/overrides/scripts/bash/": true,
+        ".knowledge/overrides/scripts/powershell/": true
     }
 }
 

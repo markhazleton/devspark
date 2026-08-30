@@ -8,7 +8,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "enum": ["test", "code"]
+      "enum": ["test", "code", "doc", "schema"]
     },
     "ref": {
       "type": "string",
@@ -42,6 +42,24 @@
     {
       "if": {
         "properties": { "type": { "const": "code" } },
+        "required": ["type"]
+      },
+      "then": {
+        "properties": { "verified_by": { "const": "inspection" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "doc" } },
+        "required": ["type"]
+      },
+      "then": {
+        "properties": { "verified_by": { "const": "inspection" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "schema" } },
         "required": ["type"]
       },
       "then": {

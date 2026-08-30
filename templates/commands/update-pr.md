@@ -50,7 +50,7 @@ This command updates an **existing** pull request description based on the curre
 
 ## Prerequisites
 
-- Project constitution at `/.documentation/memory/constitution.md` (REQUIRED)
+- Project constitution at `/.knowledge/governance/constitution.md` (REQUIRED)
 - GitHub CLI (`gh`) installed and authenticated (required)
 - An existing open PR for the current branch
 - **HARD RULE — Branch Sync**: The source (head) branch **MUST** be fully in sync with the target (base) branch. Do **NOT** proceed if the source branch is behind the target. Instruct the user to rebase or merge first.
@@ -59,7 +59,7 @@ This command updates an **existing** pull request description based on the curre
 
 ### 1. Initialize PR Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` and parse its JSON output for:
 
@@ -97,7 +97,7 @@ Read the current PR body using `gh pr view {PR_NUMBER} --json body,title,labels,
 
 ### 3. Compute Branch Delta
 
-Determine what changed since the last commit SHA recorded in the PR review file (if one exists at `/.documentation/specs/pr-review/pr-{PR_NUMBER}.md`) or since PR creation.
+Determine what changed since the last commit SHA recorded in the PR review file (if one exists at `/.devspark.work/pr-reviews/pr-{PR_NUMBER}.md`) or since PR creation.
 
 **Finding the baseline commit SHA** (in order of preference):
 
@@ -118,7 +118,7 @@ Using the delta:
 
 ### 4. Load Constitution for PR Template Context
 
-Read `/.documentation/memory/constitution.md` to identify:
+Read `/.knowledge/governance/constitution.md` to identify:
 
 - Required PR checklist items from constitution principles
 - Mandatory sections for the project's PR template
@@ -141,7 +141,7 @@ Construct the updated PR body by:
 2. **Update the summary section** to reflect the current branch state and highlight new changes since last review
 3. **Update the "Changes in this PR" section** with the branch delta from step 3
 4. **Regenerate the checklist** from the constitution and PR template — pre-check items that are clearly satisfied by the current diff
-5. **Update spec lifecycle status** if the branch maps to a spec (`/.documentation/specs/{feature}/`)
+5. **Update spec lifecycle status** if the branch maps to a spec (`/.devspark.work/specs/{feature}/`)
 6. **Add a "Changes since last review" subsection** if a review file exists, listing what was addressed
 
 **Do not re-prompt the user** for any information already captured in the existing PR. If critical information is missing (e.g., the PR has no description at all), add a single focused question.

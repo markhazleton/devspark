@@ -22,8 +22,6 @@ def main() -> None:
     ps_update = _read('scripts/powershell/update-agent-context.ps1')
     bash_create_pr = _read('scripts/bash/create-pr.sh')
     ps_create_pr = _read('scripts/powershell/create-pr.ps1')
-    bash_archive = _read('scripts/bash/archive-context.sh')
-    ps_archive = _read('scripts/powershell/archive-context.ps1')
     bash_release_context = _read('scripts/bash/release-context.sh')
     ps_release_context = _read('scripts/powershell/release-context.ps1')
     bash_release_history = _read('scripts/bash/release-history-context.sh')
@@ -40,6 +38,8 @@ def main() -> None:
     assert 'function Get-MarkdownFrontmatterValue' in ps_common
     assert 'write_okf_knowledge_document()' in bash_common
     assert 'function Write-OkfKnowledgeDocument' in ps_common
+    assert 'archive_devspark_work_path()' in bash_common
+    assert 'function Move-DevSparkWorkPathToArchive' in ps_common
     assert 'KNOWLEDGE_DIR' in bash_common
     assert 'KNOWLEDGE_DIR' in ps_common
 
@@ -52,33 +52,31 @@ def main() -> None:
         assert token in bash_create_pr
         assert token in ps_create_pr
 
-    assert 'harvest.sh' in bash_archive
-    assert '--scope=docs' in bash_archive
-    assert 'jq' not in bash_archive
-    assert 'harvest.ps1' in ps_archive
-    assert '-Scope docs' in ps_archive
-
-    assert 'release-history-context.sh' in bash_release_context
-    assert 'ARCHIVE_RECOVERY_USED' in bash_release_context
+    assert '.devspark.work' in bash_release_context
+    assert 'VERIFY_READY_WORK_PACKAGES' in bash_release_context
+    assert 'ARCHIVE_ROOT' in bash_release_context
+    assert 'ARCHIVE_DATE' in bash_release_context
     assert 'RELEASE_FROM' in bash_release_context
-    assert 'MERGED_PR_COUNT' in bash_release_context
-    assert 'PR_REVIEW_SUMMARY' in bash_release_context
-    assert 'release-history-context.ps1' in ps_release_context
-    assert 'ARCHIVE_RECOVERY_USED' in ps_release_context
+    assert '.devspark.work' in ps_release_context
+    assert 'VERIFY_READY_WORK_PACKAGES' in ps_release_context
+    assert 'ARCHIVE_ROOT' in ps_release_context
+    assert 'ARCHIVE_DATE' in ps_release_context
     assert 'RELEASE_FROM' in ps_release_context
-    assert 'MERGED_PR_COUNT' in ps_release_context
-    assert 'PR_REVIEW_SUMMARY' in ps_release_context
 
-    assert 'RECOVERED_SPECS' in bash_release_history
-    assert 'RECOVERED_QUICKFIXES' in bash_release_history
+    bash_harvest = _read('scripts/bash/harvest.sh')
+    ps_harvest = _read('scripts/powershell/harvest.ps1')
+    for token in ('archive_date', 'archive_candidates', 'archive_targets', 'archive-after-verification'):
+        assert token in bash_harvest
+        assert token in ps_harvest
+    assert '.archive/$ARCHIVE_DATE/$package_name' in bash_harvest
+    assert '.archive/$archiveDate/$packageName' in ps_harvest
+
     assert 'MERGED_PR_NUMBERS' in bash_release_history
     assert 'PR_REVIEW_SUMMARY' in bash_release_history
-    assert 'RECOVERED_SPECS' in ps_release_history
-    assert 'RECOVERED_QUICKFIXES' in ps_release_history
     assert 'MERGED_PR_NUMBERS' in ps_release_history
     assert 'PR_REVIEW_SUMMARY' in ps_release_history
 
-    for token in ('Code commit gate failed', 'Review commit gate failed'):
+    for token in ('Code commit gate failed', '.devspark.work'):
         assert token in bash_address_pr_review
         assert token in ps_address_pr_review
 
@@ -94,7 +92,7 @@ def main() -> None:
     ps_shims = _read('scripts/powershell/generate-atomic-shims.ps1')
     assert '--check' in bash_shims
     assert '$Check' in ps_shims or '-Check' in ps_shims
-    for token in ('audience: expert', 'exposed: false', 'category: legacy-command'):
+    for token in ('audience: expert', 'exposed: false', 'category: prompt-adapter'):
         assert token in bash_shims, f'bash generate-atomic-shims missing {token!r}'
         assert token in ps_shims, f'ps generate-atomic-shims missing {token!r}'
 

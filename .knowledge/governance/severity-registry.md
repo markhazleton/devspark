@@ -32,7 +32,7 @@ clear behavioral intent cue.
 | Evidence Required | SHOWSTOPPER | Knowledge or governance claim has no evidence |
 | Evidence Required | MEDIUM | Inspection evidence lacks a fallback reason |
 | Closed Permanent Reference Graph | SHOWSTOPPER | Source comments, knowledge, or governance point back to ephemeral repository artifacts |
-| Verify Before Delete | SHOWSTOPPER | A work package is removed before task linkage verifies |
+| Verify Before Delete | SHOWSTOPPER | A work package is moved out of `.devspark.work` before task linkage verifies |
 | One Decision Per Topic | HIGH | Multiple current decisions govern the same topic |
 | Explicit Over Implied | SHOWSTOPPER | Scope-affecting context is guessed instead of declared |
 | Ownership Boundary | SHOWSTOPPER | Install or upgrade overwrites repository-owned current truth or active work state |

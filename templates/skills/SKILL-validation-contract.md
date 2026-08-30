@@ -93,7 +93,7 @@ Document the fallback explicitly in the body context-loading section.
 
 ## Three-Tier Exit-Code Table
 
-The `devspark skills validate` command and CI validation tests use this
+CI validation tests use this
 exit-code contract:
 
 | Tier | Exit Code | Stdout | Stderr | Meaning |

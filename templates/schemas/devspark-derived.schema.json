@@ -4,11 +4,15 @@
   "title": "DevSpark v4 Derived Entity Metadata",
   "type": "object",
   "additionalProperties": true,
-  "required": ["generated_by", "constrained_by"],
+  "required": ["generated_by", "generated_on", "constrained_by"],
   "properties": {
     "generated_by": {
       "type": "string",
       "const": "devspark.current_truth"
+    },
+    "generated_on": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
     },
     "constrained_by": {
       "type": "array",

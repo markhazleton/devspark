@@ -26,30 +26,28 @@ def main() -> None:
     copilot_shim = _read(".github/prompts/devspark.address-pr-review.prompt.md")
     constitution = _read(".knowledge/governance/constitution.md")
 
-    for phase in range(0, 8):
+    for phase in range(0, 7):
         assert f"Phase {phase}" in command
 
     assert "-Gate code-only" in command
-    assert "-Gate review-only" in command
     assert "--pr-id {PR_ID} --json" in command
     assert "--gate code-only" in command
-    assert "--gate review-only" in command
     assert "sh: .devspark/scripts/bash/address-pr-review.sh --pr-id $ARGUMENTS --json" in command
-    assert "git log HEAD~2..HEAD --name-only" in command
     assert "Nothing to address." in command
     assert "/devspark.pr-review UPDATE" in command
+    assert "No `.devspark.work` path may be staged or committed." in command
 
     assert "[string]$PrId" in script
-    assert "[ValidateSet('code-only', 'review-only')]" in script
+    assert "[ValidateSet('code-only')]" in script
     assert "Code commit gate failed" in script
-    assert "Review commit gate failed" in script
+    assert "Ephemeral work files must not be staged" in script
     assert "^\\s*-\\s*\\[\\s\\]\\s+\\*\\*((C|H|M|L|CON)-\\d{2})\\*\\*" in script
     assert "--pr-id" in bash_script
     assert "--gate" in bash_script
     assert "Code commit gate failed" in bash_script
-    assert "Review commit gate failed" in bash_script
+    assert "Expected code-only" in bash_script
 
-    assert "PR review files must be committed in isolation" in hook
+    assert ".devspark.work files must not be staged" in hook
     assert ".git/hooks/pre-commit" in hook_readme
 
     assert "/devspark.address-pr-review {PR_ID}" in pr_review

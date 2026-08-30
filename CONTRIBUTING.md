@@ -51,12 +51,12 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 - Follow the project's coding conventions.
 - Write tests for new functionality.
-- Update documentation (`README.md`, `.documentation/`) if your changes affect user-facing features.
+- Update documentation (`README.md`, `.knowledge/`) if your changes affect user-facing features.
 - Keep your change as focused as possible. If there are multiple changes you would like to make that are not dependent upon each other, consider submitting them as separate pull requests.
 - Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 - Test your changes with the Spec-Driven Development workflow to ensure compatibility.
-- **Agent-agnostic architecture**: Stock prompts live in `.devspark/defaults/commands/`, while repo-owned overrides live in `.documentation/commands/`. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) should only contain thin shims. If you add or modify a command template, ensure it works for all agents.
-- **Multi-user safe**: Changes should respect the per-user override pattern (`.documentation/{git-user}/commands/`). Shared prompts must not break when personalized overrides exist.
+- **Agent-agnostic architecture**: Stock prompts live in `.devspark/defaults/commands/`, while repo-owned overrides live in `.knowledge/overrides/commands/`. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) should only contain thin shims. If you add or modify a command template, ensure it works for all agents.
+- **Multi-user safe**: Changes should respect the per-user override pattern (`.knowledge/overrides/{git-user}/commands/`). Shared prompts must not break when personalized overrides exist.
 
 ## Development workflow
 

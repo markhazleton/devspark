@@ -16,7 +16,17 @@
     },
     "kind": {
       "type": "string",
-      "minLength": 1
+      "enum": [
+        "knowledge-model",
+        "framework-template-set",
+        "generated-integration-files",
+        "repository-configuration",
+        "ephemeral-state",
+        "knowledge-site",
+        "design-asset-set",
+        "integration-catalog",
+        "contributor-practice"
+      ]
     },
     "summary": {
       "type": "string",
@@ -31,7 +41,17 @@
         "properties": {
           "type": {
             "type": "string",
-            "minLength": 1
+            "enum": [
+              "describes",
+              "derives_from",
+              "extends",
+              "generated_for",
+              "scopes",
+              "supports",
+              "uses",
+              "validates",
+              "validated_by"
+            ]
           },
           "object": {
             "type": "string",
@@ -40,6 +60,31 @@
         }
       },
       "default": []
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle": {
+      "type": "string",
+      "enum": ["current", "transitional", "retired"],
+      "default": "current"
+    },
+    "root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "managed_by": {
+      "type": "string",
+      "enum": ["human", "prompt", "script", "generated", "mixed"]
+    },
+    "required_layers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^/\\\\]+\\.md$"
+      },
+      "uniqueItems": true
     },
     "evidence": {
       "type": "array",

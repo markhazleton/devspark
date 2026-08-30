@@ -18,7 +18,7 @@ at the right quickstart file.
 
 1. Open a chat with your AI agent in the target repository
 2. Paste the URL to the raw quickstart file, or copy its contents into the chat
-3. The agent detects the current OS for plan preview only, then pulls and installs the full DevSpark framework payload. **Both** PowerShell and Bash script sets are always installed regardless of OS.
+3. The agent detects the current OS for plan preview only, then pulls and installs the full DevSpark framework payload. **Both** PowerShell and Bash script sets plus Python utility scripts are always installed regardless of OS.
 4. For upgrades or repairs, re-run the same quickstart prompt in the target repository.
 
 After installation, start new work with `/devspark.specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
@@ -31,7 +31,7 @@ of incomplete framework installs when expected stock files are missing.
 
 - Re-run the same quickstart prompt in the target repository.
 - Tell the agent to run a dry run first, then apply the upgrade.
-- Do not use a terminal installer or separate upgrade command.
+- Do not use a terminal installer or separate maintenance command.
 
 Example (Copilot):
 
@@ -53,25 +53,25 @@ Follow the instructions at https://raw.githubusercontent.com/markhazleton/devspa
 
 ## What Gets Installed
 
-- **`.devspark/`** — Framework files (stock prompts, templates, both PowerShell and Bash scripts). Safe to delete or upgrade.
-- **`.documentation/`** — Your project artifacts (constitution, specs, decisions). Seeded during initial setup and preserved afterward.
+- **`.devspark/`** — Framework files (stock prompts, templates, both PowerShell and Bash scripts, and Python utility scripts). Safe to refresh, replace, or remove intentionally.
+- **`.knowledge/`** — Your project artifacts (constitution, specs, decisions). Seeded during initial setup and preserved afterward.
 - **`agents-registry.json`** — Shared agent metadata used by context-generation and packaging workflows.
 - **Agent shims** — Platform-specific files that wire `/devspark.*` commands to personal, team, and stock prompt resolution.
 
-Framework upgrades only write to `.devspark/`. `.documentation/` remains repository-owned work product after the initial quickstart seeds project artifacts.
+Framework upgrades only write to `.devspark/`. `.knowledge/` remains repository-owned work product after the initial quickstart seeds project artifacts.
 
 ## Multi-App Support (Optional)
 
 If your repository contains multiple applications with different platforms or governance rules, each quickstart includes an **optional** multi-app section at the end. Single-application repositories can skip this entirely — no registry or extra configuration is needed.
 
-To opt in, run `/devspark.add-application` after installation to create a registry at `.documentation/devspark.json`.
+To opt in, run `/devspark.add-application` after installation to create a registry at `.knowledge/entities/application-registry/registry.json`.
 
 ## Migration Support
 
 Each quickstart automatically detects and migrates from:
 
-- **Legacy `.specify/` layout** (`.specify/` directory) → moves user content to `.documentation/`, renames old dir to `.specify.old/`
-- **Pre-separation DevSpark** (`.documentation/defaults/`) → moves framework files to `.devspark/`
-- **Legacy root-level dirs** (`memory/`, `specs/`) → consolidates into `.documentation/`
+- **Legacy `.specify/` layout** (`.specify/` directory) → moves user content to `.knowledge/`, renames old dir to `.specify.old/`
+- **Pre-separation DevSpark** (`.devspark/`) → moves framework files to `.devspark/`
+- **Legacy root-level dirs** (`memory/`, `specs/`) → consolidates into `.knowledge/`
 
-No data is deleted — old directories are renamed with `.old` suffix as backups.
+No data is removed — old directories are renamed with `.old` suffix as backups.

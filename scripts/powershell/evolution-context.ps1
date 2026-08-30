@@ -45,12 +45,12 @@ while ($i -lt $Arguments.Count) {
 # Get repository context
 $repoRoot = Get-RepoRoot
 $constitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
-$legacyConstitutionPath = Join-Path $repoRoot ".documentation/memory/constitution.md"
+$legacyConstitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
 if (-not (Test-Path $constitutionPath) -and (Test-Path $legacyConstitutionPath)) {
     $constitutionPath = $legacyConstitutionPath
 }
 $prReviewDir = Join-Path $repoRoot ".devspark.work/pr-reviews"
-$auditDir = Join-Path $repoRoot ".documentation/copilot/audit"
+$auditDir = Join-Path $repoRoot ".devspark.work/audits"
 $proposalsDir = Join-Path $repoRoot ".devspark.work/governance-proposals"
 $historyFile = Join-Path $repoRoot ".knowledge/governance/constitution.md"
 

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 import textwrap
 from pathlib import Path
 
@@ -11,6 +13,10 @@ from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT / "templates" / "schemas" / "okf-knowledge-document.schema.json"
+DECISION_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-decision.schema.json"
+EVIDENCE_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-evidence.schema.json"
+ENTITY_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-entity.schema.json"
+DERIVED_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-derived.schema.json"
 
 
 def _read(rel_path: str) -> str:
@@ -52,6 +58,81 @@ def test_schema_accepts_valid_frontmatter_and_rejects_invalid() -> None:
     errors = [error.message for error in validator.iter_errors(invalid)]
     assert any("'metric' is not one of" in message for message in errors)
     assert any("'REQ-1' does not match" in message for message in errors)
+
+
+def test_decision_frontmatter_uses_governs_contract() -> None:
+    schema = json.loads(DECISION_SCHEMA_PATH.read_text(encoding="utf-8"))
+    schema["properties"]["evidence"]["items"] = json.loads(
+        EVIDENCE_SCHEMA_PATH.read_text(encoding="utf-8")
+    )
+    validator = Draft202012Validator(schema)
+    legacy_key = "con" + "strains"
+
+    valid = yaml.safe_load(
+        textwrap.dedent(
+            """\
+            id: current-truth-test
+            status: current
+            governs:
+              - command-templates
+            evidence:
+              - type: test
+                ref: tests/test_knowledge_document_contract.py
+                verified_by: execution
+            """
+        )
+    )
+    assert not list(validator.iter_errors(valid))
+
+    invalid = dict(valid)
+    invalid.pop("governs")
+    invalid[legacy_key] = ["command-templates"]
+    errors = [error.message for error in validator.iter_errors(invalid)]
+    assert any("'governs' is a required property" in message for message in errors)
+
+    decision_files = sorted((ROOT / ".knowledge" / "governance" / "decisions").glob("*.md"))
+    assert decision_files
+    for path in decision_files:
+        frontmatter = path.read_text(encoding="utf-8").split("---", 2)[1]
+        data = yaml.safe_load(frontmatter)
+        assert "governs" in data, f"{path.name} must declare governed entities"
+        assert legacy_key not in data, f"{path.name} must not use legacy decision key"
+        assert not list(validator.iter_errors(data)), f"{path.name} decision frontmatter must match schema"
+
+
+def test_entity_and_derived_metadata_match_ontology_schemas() -> None:
+    entity_schema = json.loads(ENTITY_SCHEMA_PATH.read_text(encoding="utf-8"))
+    derived_schema = json.loads(DERIVED_SCHEMA_PATH.read_text(encoding="utf-8"))
+    evidence_schema = json.loads(EVIDENCE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    entity_schema["properties"]["evidence"]["items"] = evidence_schema
+
+    entity_validator = Draft202012Validator(entity_schema)
+    derived_validator = Draft202012Validator(derived_schema)
+
+    entity_files = sorted((ROOT / ".knowledge" / "entities").glob("*/_entity.yaml"))
+    assert entity_files
+    for path in entity_files:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        assert data["id"] == path.parent.name
+        assert not list(entity_validator.iter_errors(data)), f"{path} must match entity schema"
+
+        derived_path = path.parent / "_derived.yaml"
+        assert derived_path.exists(), f"{path.parent.name} must have generated _derived.yaml"
+        derived = yaml.safe_load(derived_path.read_text(encoding="utf-8"))
+        assert not list(derived_validator.iter_errors(derived)), (
+            f"{derived_path} must match derived schema"
+        )
+
+
+def test_ontology_generator_outputs_are_current() -> None:
+    result = subprocess.run(
+        [sys.executable, "scripts/python/build_knowledge_index.py", "--check"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_lifecycle_json_contracts_remain_token_stable() -> None:

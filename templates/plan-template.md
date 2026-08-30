@@ -11,9 +11,9 @@ participants:
 # Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/.documentation/specs/[###-feature-name]/spec.md`
+**Input**: Feature specification from `/.devspark.work/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/devspark.plan` command. See `.documentation/templates/commands/plan.md` for the execution workflow.
+**Note**: This template is filled in by the `/devspark.plan` command. See `templates/commands/plan.md` for the execution workflow.
 
 ## Rationale Summary
 
@@ -86,7 +86,7 @@ participants:
 ### Documentation (this feature)
 
 ```text
-.documentation/specs/[###-feature]/
+.devspark.work/specs/[###-feature]/
 ├── plan.md              # This file (/devspark.plan command output)
 ├── research.md          # Phase 0 output (/devspark.plan command)
 ├── data-model.md        # Phase 1 output (/devspark.plan command)

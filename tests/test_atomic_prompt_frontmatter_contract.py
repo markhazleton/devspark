@@ -30,18 +30,18 @@ def test_every_command_has_atomic_shim() -> None:
     assert commands, "no command prompts present"
 
     missing: list[str] = []
-    bad_legacy: list[str] = []
+    bad_command: list[str] = []
     for command in commands:
         shim = atomic_dir / f"{command}.md"
         if not shim.is_file():
             missing.append(command)
             continue
         data = _frontmatter(shim)
-        if data.get("legacy_command") != command:
-            bad_legacy.append(f"{command}: legacy_command={data.get('legacy_command')!r}")
+        if data.get("command") != command:
+            bad_command.append(f"{command}: command={data.get('command')!r}")
 
     assert not missing, f"missing atomic shims: {missing}"
-    assert not bad_legacy, f"shims with wrong legacy_command: {bad_legacy}"
+    assert not bad_command, f"shims with wrong command: {bad_command}"
 
 
 @pytest.mark.parametrize("path", sorted((REPO_ROOT / "templates" / "prompts" / "atomic").glob("*.md")))

@@ -1,40 +1,46 @@
 ---
 id: participant-vocabulary-reserving-agent-for-ai-runtimes
 status: current
-constrains: []
+last_verified: "2026-08-30"
+governs:
+- command-templates
+- current-truth-ontology
 evidence:
+- type: test
+  ref: tests/test_participant_metadata_contract.py
+  verified_by: execution
 - type: code
-  ref: templates/command-preamble-contract.md
+  ref: README.md
   verified_by: inspection
-  test_attempted: false
-  fallback_reason: migrated decision constrains framework behavior broadly; targeted
-    execution evidence is added as follow-up current-truth work
+  test_attempted: true
 ---
 
-## Migrated Source: ADR-005.md
+# Participant Vocabulary Reserves Agent for AI Runtimes
 
-# ADR-005: Participant Vocabulary — Reserving `agent` for AI Runtimes
+## Current Decision
 
-## Status
+DevSpark uses `participant` for human or AI-filled workflow roles such as owner,
+planner, implementer, reviewer, critic, or scribe.
 
-Accepted
+DevSpark reserves `agent` for supported AI runtimes and client integrations as
+defined by `agents-registry.json` and the agent-specific prompt surfaces.
+Participant metadata is optional and advisory.
 
-## Context
+## Rationale
 
-DevSpark needed a durable term for Squad-style team members (human or AI-filled roles such as owner, planner, implementer, reviewer, critic, scribe). Reusing the existing term `agent` was considered but rejected because `agent` already carries a distinct meaning in DevSpark: a supported AI runtime or client integration (e.g., Claude Code, Copilot, Cursor). Overloading the term would create ambiguity in documentation, the agent registry, and future tooling.
+Separating these terms avoids ambiguity between the people or roles responsible
+for work and the AI client integrations that host DevSpark prompts.
 
-## Decision
+## Alternatives Rejected
 
-Introduce `participant` as the canonical term for human or AI-filled team members carrying workflow responsibility. Keep `agent` strictly reserved for AI runtime and client integrations as defined in `agents-registry.json`. Add optional `participants` YAML frontmatter examples to stock spec, plan, and task templates. Participant metadata is advisory-only and never required; artifacts that omit it remain fully valid.
+Using `agent` for both runtime integrations and workflow roles is rejected
+because it makes documentation and registry metadata ambiguous.
+
+Requiring participant metadata is rejected because it would add process burden to
+small changes without improving execution correctness.
 
 ## Consequences
 
-### Positive
-
-- Clear vocabulary boundary prevents term collision as DevSpark scales.
-- Optional frontmatter makes responsibility context visible without changing execution behavior.
-- Zero runtime impact: no routing, inheritance, or validation changes needed in this phase.
-
-### Negative
-
-- Two similar-sounding terms (`agent`, `participant`) require clear documentation to avoid new-contributor confusion.
+Spec, plan, and task templates may include optional participant examples.
+Validation must not require participant metadata for an otherwise valid
+artifact.

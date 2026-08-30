@@ -65,12 +65,12 @@ NEW_PLAN="$IMPL_PLAN"
 AGENT_TYPE="${1:-}"
 
 AGENT_REGISTRY_FILE="$REPO_ROOT/agents-registry.json"
-SHARED_AGENT_CONTEXT_FILE="$REPO_ROOT/.documentation/AGENTS.md"
+SHARED_AGENT_CONTEXT_FILE="$REPO_ROOT/.knowledge/AGENTS.md"
 SHARED_CONTEXT_START="<!-- DEVSPARK SHARED CONTEXT:START -->"
 SHARED_CONTEXT_END="<!-- DEVSPARK SHARED CONTEXT:END -->"
 
 # Template file
-TEMPLATE_FILE="$REPO_ROOT/.documentation/templates/agent-file-template.md"
+TEMPLATE_FILE="$REPO_ROOT/.knowledge/overrides/templates/agent-file-template.md"
 
 # Global variables for parsed plan data
 NEW_LANG=""

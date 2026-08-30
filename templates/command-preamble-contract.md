@@ -30,10 +30,12 @@ lands.
 
 ## 3. Verify Before Delete
 
-Before deleting a work package, run the verify-before-delete check and confirm
-that every completed task has valid permanent references. Deletion is allowed
-only after the delta is represented in current code, current knowledge, and
-current governance when applicable.
+Before moving a work package out of `.devspark.work`, run the
+verify-before-archive check and confirm that every completed task has valid
+permanent references. Archival is allowed only after the delta is represented in
+current code, current knowledge, and current governance when applicable. Move
+verified work intact to `.archive/YYYY-MM-DD/<topic>/`. DevSpark commands must not read,
+list, enumerate, or glob `.archive/` after the move.
 
 ## 4. Governance Location
 

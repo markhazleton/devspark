@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Helper script for /devspark.address-pr-review
 # --pr-id: parse review file and emit open findings
-# --gate:  enforce staged-path isolation for code-only or review-only commits
+# --gate:  enforce staged-path isolation for code commits
 
 set -euo pipefail
 
@@ -44,7 +44,7 @@ get_staged_paths() {
 }
 
 is_review_path() {
-    [[ "$1" =~ ^\.devspark\.work/pr-reviews/pr-.*\.md$ ]]
+    [[ "$1" =~ ^\.devspark\.work/ ]]
 }
 
 write_gate_failure() {
@@ -77,19 +77,8 @@ if [[ -n "$GATE" ]]; then
                 "${review_staged[@]}"
         fi
 
-    elif [[ "$GATE" == "review-only" ]]; then
-        non_review_staged=()
-        for p in "${STAGED[@]:-}"; do
-            is_review_path "$p" || non_review_staged+=("$p")
-        done
-        if [[ ${#non_review_staged[@]} -gt 0 ]]; then
-            write_gate_failure \
-                "Review commit gate failed. Only PR review markdown files may be staged." \
-                "${non_review_staged[@]}"
-        fi
-
     else
-        printf 'DevSpark: Invalid --gate value "%s". Expected code-only or review-only.\n' "$GATE" >&2
+        printf 'DevSpark: Invalid --gate value "%s". Expected code-only.\n' "$GATE" >&2
         exit 1
     fi
 
@@ -101,7 +90,7 @@ fi
 # PR findings mode
 # ---------------------------------------------------------------------------
 if [[ -z "$PR_ID" ]]; then
-    printf 'DevSpark: Provide --pr-id <N> or --gate <code-only|review-only>.\n' >&2
+    printf 'DevSpark: Provide --pr-id <N> or --gate code-only.\n' >&2
     exit 1
 fi
 

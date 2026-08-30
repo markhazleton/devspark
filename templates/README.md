@@ -24,9 +24,9 @@ DevSpark ownership is split by lifecycle:
 - `.devspark/` is framework-managed stock content
 - `.knowledge/` is repository-owned current truth
 - `.devspark.work/` is ephemeral in-flight work state
-- `.documentation/` is repository-owned guide content and overrides
+- `.knowledge/` is repository-owned guide content and overrides
 
-As of v4.0.0, the collection includes 28 active commands plus 1 deprecated compatibility alias.
+As of v4.0.0, the collection includes 28 active commands.
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -53,7 +53,6 @@ As of v4.0.0, the collection includes 28 active commands plus 1 deprecated compa
 | `analyze.md` | `/devspark.analyze` | Cross-artifact consistency check |
 | `checklist.md` | `/devspark.checklist` | Quality validation checklists |
 | `personalize.md` | `/devspark.personalize` | Create per-user prompt overrides |
-| `archive.md` | `/devspark.archive` | Deprecated alias for `/devspark.harvest` |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
 | `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry (optional) |
@@ -90,11 +89,10 @@ Customization layers and precedence are unchanged.
 
 ## Knowledge and Genuine Fix Contracts
 
-Feature lifecycle scripts may dual-write OKF Markdown under
-`.documentation/specs/<feature>/knowledge/` while preserving existing JSON
-contracts. Validate frontmatter with
-`templates/schemas/okf-knowledge-document.schema.json` and run advisory coverage
-with `scripts/{bash,powershell}/validate-knowledge-coverage.*`.
+Feature lifecycle prompts update durable current truth under `.knowledge/` while
+ephemeral planning state remains under `.devspark.work/`. Validate entity,
+decision, evidence, derived metadata, and task-linkage contracts with the
+`templates/schemas/devspark-*.schema.json` files.
 
 Commands that fix, review, audit, analyze, or verify findings reference
 `templates/command-preamble-contract.md` §9. Findings must name behavioral

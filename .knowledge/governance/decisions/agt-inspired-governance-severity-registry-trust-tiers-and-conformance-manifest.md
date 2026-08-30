@@ -1,48 +1,52 @@
 ---
 id: agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest
 status: current
-constrains: []
+last_verified: "2026-08-30"
+governs:
+- command-templates
+- current-truth-ontology
 evidence:
+- type: test
+  ref: tests/test_genuine_fix_discipline_contract.py
+  verified_by: execution
 - type: code
   ref: .knowledge/governance/severity-registry.md
   verified_by: inspection
-  test_attempted: false
-  fallback_reason: migrated decision constrains framework behavior broadly; targeted
-    execution evidence is added as follow-up current-truth work
+  test_attempted: true
+- type: code
+  ref: .knowledge/governance/prompt-conformance-manifest.md
+  verified_by: inspection
+  test_attempted: true
 ---
 
-## Migrated Source: ADR-006.md
+# Governance Severity Registry, Trust Tiers, and Conformance Manifest
 
-# ADR-006: AGT-Inspired Governance — Severity Registry, Trust Tiers, and Conformance Manifest
+## Current Decision
 
-## Status
+DevSpark maintains current governance artifacts for finding severity,
+limitations, and prompt conformance under `.knowledge/governance/`.
 
-Accepted
+PR review prompts apply trust-tier logic. Work backed by current, complete
+DevSpark evidence receives normal review depth. Work without adequate lifecycle
+evidence receives elevated scrutiny and must be explicit about the missing
+evidence.
 
-## Context
+## Rationale
 
-DevSpark's constitution and PR review workflow produced informal, inconsistent governance output. Severity labels were scattered with no central registry, review depth was uniform regardless of spec-workflow compliance, the framework lacked an honest public statement of its limits, and command templates could drift from the constitution silently. Microsoft AGT's governance model inspired a more structured approach adapted to DevSpark's human-in-the-loop, Markdown-conventions context.
+Governance output must be consistent across prompts. A central severity registry
+and conformance manifest keep review language stable, while a known-limitations
+document makes DevSpark's boundaries visible without overstating enforcement.
 
-## Decision
+## Alternatives Rejected
 
-Deliver four additive Markdown governance artifacts without new scripts, tool dependencies, or constitution amendments:
+Scattering severity definitions across command prompts is rejected because it
+creates drift.
 
-1. **Severity registry** (`.documentation/memory/severity-registry.md`): machine-trackable finding codes in `§{section}.{LEVEL}` format matching constitution section markers.
-2. **Known-limitations document** (`.documentation/memory/known-limitations.md`): honest, public statement of DevSpark's scope boundaries.
-3. **Prompt conformance manifest** (`.documentation/memory/prompt-conformance-manifest.md`): semantic checklist verifying command templates retain required governance sections.
-4. **`pr-review.md` update**: additive trust-tier logic — PRs backed by complete spec artifacts receive standard review depth; spec-less PRs receive elevated scrutiny with a MEDIUM trust-tier finding.
-
-Trust-tier detection uses file-presence only (no git history inspection).
+Treating all PRs with the same review depth is rejected because lifecycle
+evidence materially changes review confidence.
 
 ## Consequences
 
-### Positive
-
-- Severity codes are now machine-trackable and audit-ready across amendment cycles.
-- Trust tiers create a self-reinforcing incentive for spec-driven development.
-- Known-limitations document builds adopter trust through intellectual honesty.
-- Conformance manifest prevents silent constitution drift in command templates.
-
-### Negative
-
-- Introduces three new memory files to maintain when constitution sections change.
+Governance files are current truth, not amendment logs. Prompt updates that add
+or change review obligations must keep the severity registry and prompt
+conformance manifest aligned.

@@ -4,7 +4,7 @@
   "title": "DevSpark v4 Decision Frontmatter",
   "type": "object",
   "additionalProperties": true,
-  "required": ["id", "status", "constrains", "evidence"],
+  "required": ["id", "status", "governs", "evidence"],
   "properties": {
     "id": {
       "type": "string",
@@ -14,7 +14,7 @@
       "type": "string",
       "enum": ["current", "deprecated"]
     },
-    "constrains": {
+    "governs": {
       "type": "array",
       "items": {
         "type": "string",

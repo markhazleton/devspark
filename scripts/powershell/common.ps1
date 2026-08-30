@@ -92,6 +92,49 @@ function Get-FeatureDir {
     Join-Path $RepoRoot ".devspark.work/specs/$Branch"
 }
 
+function Move-DevSparkWorkPathToArchive {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SourcePath
+    )
+
+    $repoRoot = Get-RepoRoot
+    $sourceAbs = if ([System.IO.Path]::IsPathRooted($SourcePath)) {
+        $SourcePath
+    } else {
+        Join-Path $repoRoot $SourcePath
+    }
+
+    if (-not (Test-Path -LiteralPath $sourceAbs)) {
+        throw "Archive source does not exist: $sourceAbs"
+    }
+
+    $resolvedSource = (Resolve-Path -LiteralPath $sourceAbs).Path
+    $workRoot = (Join-Path $repoRoot '.devspark.work')
+    $resolvedWorkRoot = if (Test-Path -LiteralPath $workRoot) {
+        (Resolve-Path -LiteralPath $workRoot).Path
+    } else {
+        $workRoot
+    }
+
+    $workPrefix = $resolvedWorkRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+    if ($resolvedSource -ne $resolvedWorkRoot -and -not $resolvedSource.StartsWith($workPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to archive a path outside .devspark.work: $resolvedSource"
+    }
+
+    $archiveDate = Get-Date -Format 'yyyy-MM-dd'
+    $target = Join-Path (Join-Path (Join-Path $repoRoot '.archive') $archiveDate) (Split-Path -Leaf $resolvedSource)
+
+    $targetParent = Split-Path -Parent $target
+    New-Item -ItemType Directory -Path $targetParent -Force | Out-Null
+    if (Test-Path -LiteralPath $resolvedSource -PathType Leaf) {
+        [System.IO.File]::Move($resolvedSource, $target)
+    } else {
+        [System.IO.Directory]::Move($resolvedSource, $target)
+    }
+    return [System.IO.Path]::GetRelativePath($repoRoot, $target).Replace('\', '/')
+}
+
 function Find-FeatureDirByPrefix {
     param(
         [string]$RepoRoot,
@@ -268,7 +311,7 @@ function Test-DirHasFiles {
 # Detect whether the repository is operating in multi-app mode.
 function Detect-DevSparkMode {
     $repoRoot = Get-RepoRoot
-    $registryPath = Join-Path $repoRoot '.documentation/devspark.json'
+    $registryPath = Join-Path $repoRoot '.knowledge/entities/application-registry/registry.json'
 
     if (Test-Path $registryPath) {
         try {
@@ -340,10 +383,10 @@ function Resolve-AppDocRoot {
     )
 
     if (-not $AppId) {
-        return Join-Path $RepoRoot '.documentation'
+        return Join-Path $RepoRoot '.knowledge'
     }
 
-    $registryPath = Join-Path $RepoRoot '.documentation/devspark.json'
+    $registryPath = Join-Path $RepoRoot '.knowledge/entities/application-registry/registry.json'
     if (-not (Test-Path $registryPath)) {
         throw "No multi-app registry found"
     }
@@ -356,7 +399,7 @@ function Resolve-AppDocRoot {
         throw "Unknown application: $AppId. Available: $available"
     }
 
-    return Join-Path $RepoRoot "$($app.path)/.documentation"
+    return Join-Path $RepoRoot "$($app.path)/.knowledge"
 }
 
 # Parse --app and --repo-scope arguments (T027)
@@ -415,14 +458,14 @@ function Resolve-AppScope {
             return $result
         }
         $result.Scope = 'repo'
-        $result.DocRoot = Join-Path $repoRoot '.documentation'
+        $result.DocRoot = Join-Path $repoRoot '.knowledge'
         return $result
     }
 
     # Multi-app mode
     if ($RepoScope) {
         $result.Scope = 'repo'
-        $result.DocRoot = Join-Path $repoRoot '.documentation'
+        $result.DocRoot = Join-Path $repoRoot '.knowledge'
         return $result
     }
 
@@ -439,7 +482,7 @@ function Resolve-AppScope {
     }
 
     # No explicit scope
-    $registryPath = Join-Path $repoRoot '.documentation/devspark.json'
+    $registryPath = Join-Path $repoRoot '.knowledge/entities/application-registry/registry.json'
     $config = Get-Content $registryPath -Raw | ConvertFrom-Json
     $appCount = $config.apps.Count
 
@@ -453,12 +496,12 @@ function Resolve-AppScope {
         $app = $config.apps[0]
         $result.Scope = 'single-app'
         $result.AppId = $app.id
-        $result.DocRoot = Join-Path $repoRoot "$($app.path)/.documentation"
+        $result.DocRoot = Join-Path $repoRoot "$($app.path)/.knowledge"
         return $result
     }
 
     $result.Scope = 'repo'
-    $result.DocRoot = Join-Path $repoRoot '.documentation'
+    $result.DocRoot = Join-Path $repoRoot '.knowledge'
     return $result
 }
 
@@ -470,7 +513,7 @@ function Resolve-Constitution {
     )
 
     $repoConst = Join-Path $RepoRoot '.knowledge/governance/constitution.md'
-    $legacyRepoConst = Join-Path $RepoRoot '.documentation/memory/constitution.md'
+    $legacyRepoConst = Join-Path $RepoRoot '.knowledge/governance/constitution.md'
     if (-not (Test-Path $repoConst) -and (Test-Path $legacyRepoConst)) {
         $repoConst = $legacyRepoConst
     }
@@ -505,7 +548,7 @@ function Get-DownstreamApps {
         [string]$AppId
     )
 
-    $registryPath = Join-Path $RepoRoot '.documentation/devspark.json'
+    $registryPath = Join-Path $RepoRoot '.knowledge/entities/application-registry/registry.json'
     if (-not (Test-Path $registryPath)) { return @() }
 
     $config = Get-Content $registryPath -Raw | ConvertFrom-Json
@@ -566,7 +609,7 @@ function Resolve-AppProfiles {
         [string]$AppId
     )
 
-    $registryPath = Join-Path $RepoRoot '.documentation/devspark.json'
+    $registryPath = Join-Path $RepoRoot '.knowledge/entities/application-registry/registry.json'
     if (-not (Test-Path $registryPath)) {
         return [PSCustomObject]@{ tags = @{}; rules = @(); hints = @{} }
     }
@@ -616,7 +659,7 @@ function Get-FeaturePathsAppAware {
     $currentBranch = Get-CurrentBranch
     $hasGit = Test-HasGit
 
-    $docRoot = if ($Scope -and $Scope.DocRoot) { $Scope.DocRoot } else { Join-Path $repoRoot '.documentation' }
+    $docRoot = if ($Scope -and $Scope.DocRoot) { $Scope.DocRoot } else { Join-Path $repoRoot '.knowledge' }
     $specsDir = Join-Path $docRoot 'specs'
     $featureDir = Join-Path $specsDir $currentBranch
 

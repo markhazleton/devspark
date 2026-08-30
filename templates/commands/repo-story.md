@@ -3,7 +3,7 @@ description: Analyze full repository commit history and produce a compelling nar
 handoffs:
   - label: View Past Stories
     agent: devspark.repo-story
-    prompt: Show me previous repo stories in .documentation/repo-story/
+    prompt: Show me recent repo-story work state under .devspark.work/repo-story/
 scripts:
   sh: .devspark/scripts/bash/repo-story-context.sh $ARGUMENTS --stdout
   ps: .devspark/scripts/powershell/repo-story-context.ps1 $ARGUMENTS -Stdout
@@ -28,7 +28,7 @@ This command reviews the **full commit history** of the repository and produces 
 - Git repository with commit history (REQUIRED)
 - PowerShell 7+ or Bash (for script execution)
 - Python 3 (used by the bash script for JSON assembly)
-- Constitution at `/.documentation/memory/constitution.md` (optional — used for governance alignment section)
+- Constitution at `/.knowledge/governance/constitution.md` (optional — used for governance alignment section)
 
 ## Scope Options
 
@@ -50,7 +50,7 @@ If no scope specified, default to `--scope=full`.
 
 ### 1. Generate History Context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.documentation/scripts/powershell/<filename>` (PowerShell) or `.documentation/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.documentation/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` to produce `history.json` and parse the JSON output for these top-level sections:
 
@@ -160,7 +160,7 @@ Connect milestones to surrounding commit activity — did velocity spike before 
 
 #### E. Constitution Alignment (Optional)
 
-If `/.documentation/memory/constitution.md` exists:
+If `/.knowledge/governance/constitution.md` exists:
 
 - Read the constitution principles
 - Map governance metrics to relevant principles
@@ -169,7 +169,7 @@ If `/.documentation/memory/constitution.md` exists:
 
 ### 4. Produce Deliverable
 
-Save the narrative to: `/.documentation/repo-story/repo-story-{YYYY-MM-DD}.md`
+Save the narrative to: `/.devspark.work/repo-story/repo-story-{YYYY-MM-DD}.md`
 
 Use this document structure:
 
@@ -279,7 +279,7 @@ After saving the narrative, update the project's root `README.md` to surface the
 1. **If a "Learn More" or similar table exists** — add a row:
 
    ```markdown
-   | Repo story | [repo-story/repo-story-{YYYY-MM-DD}.md](.documentation/repo-story/repo-story-{YYYY-MM-DD}.md) |
+   | Repo story | Generated under `.devspark.work/repo-story/` |
    ```
 
    If a prior repo-story row already exists, replace it with the new dated link.
@@ -290,7 +290,7 @@ After saving the narrative, update the project's root `README.md` to surface the
    ## Repo Story
 
    An evidence-based narrative of this repository's development history, contributor patterns, and architecture:
-   [Repo Story ({YYYY-MM-DD})](.documentation/repo-story/repo-story-{YYYY-MM-DD}.md)
+   Repo Story generated under `.devspark.work/repo-story/` on {YYYY-MM-DD}
    ```
 
 **Rules**:

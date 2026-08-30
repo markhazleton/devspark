@@ -6,7 +6,7 @@
 #        Then use $DevSparkPlatform.Name, $DevSparkPlatform.PrCli, etc.
 #
 # Override: Set DEVSPARK_PLATFORM env var to force a platform (github|azdo|gitlab)
-# Config:   Or set "platform" in .documentation/devspark.json
+# Config:   Or set "platform" in .knowledge/entities/application-registry/registry.json
 
 # Load common if not already loaded
 if (-not (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue)) {
@@ -21,7 +21,7 @@ function Detect-Platform {
 
     # 2. Config file override
     $repoRoot = Get-RepoRoot
-    $configFile = Join-Path $repoRoot '.documentation/devspark.json'
+    $configFile = Join-Path $repoRoot '.knowledge/entities/application-registry/registry.json'
     if (Test-Path $configFile) {
         try {
             $config = Get-Content $configFile -Raw | ConvertFrom-Json
@@ -124,7 +124,7 @@ function Get-PlatformConfig {
 $script:DevSparkPlatformName = Detect-Platform
 $script:DevSparkPlatform = Get-PlatformConfig -PlatformName $script:DevSparkPlatformName
 
-# Resolve script path: team override in .documentation/scripts/ takes priority
+# Resolve script path: team override in .knowledge/overrides/scripts/ takes priority
 function Resolve-DevSparkScript {
     param(
         [Parameter(Mandatory)]
@@ -134,7 +134,7 @@ function Resolve-DevSparkScript {
     )
 
     $repoRoot = Get-RepoRoot
-    $teamPath = Join-Path $repoRoot ".documentation/scripts/$Shell/$ScriptName"
+    $teamPath = Join-Path $repoRoot ".knowledge/overrides/scripts/$Shell/$ScriptName"
     $stockPath = Join-Path $repoRoot ".devspark/scripts/$Shell/$ScriptName"
     $devPath = Join-Path $repoRoot "scripts/$Shell/$ScriptName"
 

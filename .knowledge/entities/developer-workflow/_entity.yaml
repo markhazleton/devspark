@@ -1,0 +1,21 @@
+id: developer-workflow
+name: Developer Workflow
+kind: contributor-practice
+summary: Durable contributor practices for dogfooding DevSpark and capturing improvement loops.
+owner: DevSpark maintainers
+lifecycle: current
+root: .knowledge/entities/developer-workflow
+managed_by: human
+required_layers:
+- architecture.md
+- dogfooding.md
+- improvement-loop.md
+relations:
+  - type: uses
+    object: command-templates
+evidence:
+  - type: code
+    ref: .knowledge/entities/developer-workflow
+    verified_by: inspection
+    test_attempted: true
+    fallback_reason: "Contributor workflow guidance is prose validated by review."
