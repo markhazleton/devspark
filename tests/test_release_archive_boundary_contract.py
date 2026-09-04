@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -88,8 +89,19 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
         encoding="utf-8",
     )
 
+    if sys.platform == "win32":
+        command = [
+            "pwsh",
+            "-NoProfile",
+            "-File",
+            str(ROOT / "scripts/powershell/release-context.ps1"),
+            "-Json",
+        ]
+    else:
+        command = ["bash", str(ROOT / "scripts/bash/release-context.sh"), "--json"]
+
     result = subprocess.run(
-        ["bash", str(ROOT / "scripts/bash/release-context.sh"), "--json"],
+        command,
         cwd=tmp_path,
         text=True,
         capture_output=True,
