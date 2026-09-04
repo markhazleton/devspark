@@ -2,6 +2,21 @@
 
 All notable changes to DevSpark are documented here.
 
+## [v4.2.0] - 2026-09-04
+
+### Added
+
+- Added a published DevSpark Philosophy guide covering external-pressure
+  discovery, current truth, evidence, assimilation, release rollover, and the
+  prompt-first/no-CLI product boundary.
+
+### Changed
+
+- Aligned lifecycle documentation with human-selected release events and
+  sprint reporting as a separate business view.
+- Fixed documentation links to quickstart prompts so the DocFX site builds
+  without warnings.
+
 ## [v4.1.0] - 2026-08-30
 
 ### Added
