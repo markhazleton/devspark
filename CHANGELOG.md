@@ -17,7 +17,7 @@ All notable changes to DevSpark are documented here.
 - Quickstarts now delegate incomplete knowledge bootstrap work to
   `/devspark.discover-knowledge --bootstrap` instead of duplicating source
   discovery rules.
-- Updated command catalogs and docs-site content for the 29-command inventory.
+- Updated command catalogs and docs-site content for the 30-command inventory.
 
 ## [v4.0.0] - 2026-08-30
 

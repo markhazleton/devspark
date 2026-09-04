@@ -1,6 +1,7 @@
 # DevSpark Implementation Lifecycle
 
-This guide defines the recommended DevSpark lifecycle for teams.
+This guide defines the recommended DevSpark lifecycle for teams. For the
+principles behind the mechanics, see the [DevSpark Philosophy](philosophy.md).
 
 Primary approach: prompt-first workflows through your AI agent using remote
 prompt files.
@@ -127,9 +128,10 @@ remains in `.devspark.work/` until release.
 - `/devspark.release` fails when completed work packages lack valid code, test,
   knowledge, or governance linkage and is the sole archive writer.
 
-### Release Cadence
+### Release Events and Sprint Reporting
 
-A typical sprint follows this pattern:
+The implementation loop repeats per feature. A release is a human-selected
+business event, not an automatic sprint boundary:
 
 ```text
 +--- Repeat per feature until ready to merge ----------+
@@ -151,6 +153,10 @@ A typical sprint follows this pattern:
 - **Anytime**: Run `/devspark.site-audit` as a health check to catch lifecycle violations.
 - **Blocked packages**: Release leaves incomplete or invalid packages in
   `.devspark.work/` and reports their blockers.
+
+Sprint reporting is layered on top of this lifecycle. Query released dates and
+Git history when a team needs a sprint view; DevSpark does not maintain sprint
+state as another source of truth.
 
 ### When to Use Technical Details vs. Product Language
 

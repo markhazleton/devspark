@@ -92,6 +92,7 @@ framework-owned files, repairs missing stock assets, initializes missing
 `.knowledge/entities/` and `.knowledge/ontology/` scaffolding, and preserves
 authored repository-owned `.knowledge/` content.
 
+For the governing principles, see the [DevSpark Philosophy](.knowledge/entities/product-documentation/site/philosophy.md).
 For a full walkthrough see the [Implementation Lifecycle Guide](.knowledge/entities/product-documentation/site/implementation-lifecycle.md).
 
 Canonical delivery loop: `specify → clarify when needed → plan → tasks → required gates → implement → focused verify when needed → commit/push → create-pr → pr-review ↔ address-pr-review → merge`. Run `release` separately when the team is ready to validate and archive completed packages.

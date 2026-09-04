@@ -18,7 +18,7 @@ The practical rule is simple: let Codex execute work, and let DevSpark shape the
 
 ## Configure Codex for DevSpark
 
-Start with the [Codex quickstart prompt](../../../../quickstart/devspark_quickstart_codex.md). It installs:
+Start with the [Codex quickstart prompt](https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_codex.md). It installs:
 
 - `.devspark/defaults/commands/` - stock DevSpark command prompts
 - `.codex/prompts/` - Codex prompt shims for `/devspark.*`

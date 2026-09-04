@@ -13,12 +13,12 @@ program to install.
 
 1. Open your AI coding assistant in the target repository.
 2. Paste the raw quickstart prompt for your assistant:
-   - [GitHub Copilot](../../../../quickstart/devspark_quickstart_copilot.md)
-   - [Claude Code](../../../../quickstart/devspark_quickstart_claudecode.md)
-   - [Cursor](../../../../quickstart/devspark_quickstart_cursor.md)
-   - [Codex](../../../../quickstart/devspark_quickstart_codex.md)
-   - [Antigravity](../../../../quickstart/devspark_quickstart_antigravity.md)
-   - [Generic agent](../../../../quickstart/devspark_quickstart_generic.md)
+   - [GitHub Copilot](https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_copilot.md)
+   - [Claude Code](https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_claudecode.md)
+   - [Cursor](https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_cursor.md)
+   - [Codex](https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_codex.md)
+   - [Antigravity](https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_antigravity.md)
+   - [Generic agent](https://raw.githubusercontent.com/markhazleton/devspark/main/quickstart/devspark_quickstart_generic.md)
 3. Let the agent detect the repository state, preview the plan, and install the
    framework-owned files.
 4. Start with `/devspark.specify`.

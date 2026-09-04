@@ -18,6 +18,7 @@ prompt from `quickstart/` in the target repository.
 
 ## Guides
 
+- [DevSpark Philosophy](philosophy.md) - External pressure, current truth, and assimilation
 - [Quick Start Guide](quickstart.md) - Install, upgrade, repair, and first workflow
 - [Installation Guide](installation.md) - Approved quickstart-based installation
 - [Upgrade Guide](upgrade.md) - Approved quickstart-based upgrades and repairs

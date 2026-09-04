@@ -68,6 +68,7 @@ DevSpark is an independent project maintained by [Mark Hazleton](https://github.
 ## Links
 
 - [GitHub Repository](https://github.com/MarkHazleton/devspark)
+- [DevSpark Philosophy](philosophy.md)
 - [Implementation Lifecycle Guide](implementation-lifecycle.md)
 - [Installation Guide](installation.md)
 - [Quick Start Guide](quickstart.md)

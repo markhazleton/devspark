@@ -32,6 +32,7 @@ To build the documentation locally:
 - `docfx.json` - DocFX configuration file
 - `toc.yml` - Table of contents / sidebar navigation
 - `index.md` - Main homepage and command reference
+- `philosophy.md` - Governing philosophy and current-truth model
 - `quickstart.md` - Bootstrap and first-feature walkthrough
 - `implementation-lifecycle.md` - Full workflow with anti-patterns guide
 - `release-usage.md` - Final validation and release-only archival guide
