@@ -74,4 +74,3 @@ Quickstart prompts are the only approved way to install, upgrade, or repair it.
 Small deterministic scripts are encouraged when a prompt needs one focused
 operation; a coordinating dispatcher would recreate the harness the project is
 deliberately avoiding.
-
