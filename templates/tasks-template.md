@@ -38,11 +38,28 @@ participants:
 
 [What should reviewers focus on?]
 
-## Format: `[ID] [P?] [Story] Description`
+## Format: task plus required linkage
+
+Every generated task uses this structure:
+
+```markdown
+- [ ] T001 [P] [US1] Description with an exact target path
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
+  - governance_ref: n/a — no governance change expected
+```
+
+`/devspark.implement` replaces every `TODO` as the task lands. A completed task
+may use `n/a` only with a concrete reason. The completed package remains under
+`.devspark.work/` until `/devspark.release` validates the references and archives
+it.
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
+- Include `code_ref`, `test_ref`, and `knowledge_ref` under every task
+- Include `governance_ref` under every task that may affect governance
 
 ## Path Conventions
 
@@ -75,8 +92,17 @@ participants:
 **Purpose**: Project initialization and basic structure
 
 - [ ] T001 Create project structure per implementation plan
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T002 Initialize [language] project with [framework] dependencies
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T003 [P] Configure linting and formatting tools
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 ---
 
@@ -89,11 +115,29 @@ participants:
 Examples of foundational tasks (adjust based on your project):
 
 - [ ] T004 Setup database schema and migrations framework
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T005 [P] Implement authentication/authorization framework
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T006 [P] Setup API routing and middleware structure
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T007 Create base models/entities that all stories depend on
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T008 Configure error handling and logging infrastructure
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T009 Setup environment configuration management
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -110,16 +154,40 @@ Examples of foundational tasks (adjust based on your project):
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
 - [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 ### Implementation for User Story 1
 
 - [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T016 [US1] Add validation and error handling
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T017 [US1] Add logging for user story 1 operations
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -134,14 +202,32 @@ Examples of foundational tasks (adjust based on your project):
 ### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
 - [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 ### Implementation for User Story 2
 
 - [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T021 [US2] Implement [Service] in src/services/[service].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -156,13 +242,28 @@ Examples of foundational tasks (adjust based on your project):
 ### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
 - [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 ### Implementation for User Story 3
 
 - [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T027 [US3] Implement [Service] in src/services/[service].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -177,11 +278,29 @@ Examples of foundational tasks (adjust based on your project):
 **Purpose**: Improvements that affect multiple user stories
 
 - [ ] TXXX [P] Documentation updates in .knowledge/
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] TXXX Code cleanup and refactoring
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] TXXX Performance optimization across all stories
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] TXXX Security hardening
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 - [ ] TXXX Run quickstart.md validation
+  - code_ref: TODO
+  - test_ref: TODO
+  - knowledge_ref: TODO
 
 ---
 

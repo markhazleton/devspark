@@ -4,7 +4,7 @@
   "title": "DevSpark v4 Task Linkage",
   "type": "object",
   "additionalProperties": true,
-  "required": ["id", "description", "status", "code_ref", "knowledge_ref"],
+  "required": ["id", "description", "status", "code_ref", "test_ref", "knowledge_ref"],
   "properties": {
     "id": {
       "type": "string",
@@ -19,6 +19,9 @@
       "enum": ["pending", "in_progress", "complete", "blocked"]
     },
     "code_ref": {
+      "$ref": "#/$defs/refOrNa"
+    },
+    "test_ref": {
       "$ref": "#/$defs/refOrNa"
     },
     "knowledge_ref": {

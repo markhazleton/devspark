@@ -67,7 +67,7 @@
     },
     "lifecycle": {
       "type": "string",
-      "enum": ["current", "transitional", "retired"],
+      "enum": ["current", "transitional"],
       "default": "current"
     },
     "root": {

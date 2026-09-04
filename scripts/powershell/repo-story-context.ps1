@@ -412,7 +412,7 @@ if ($governancePath) {
 
 $specDirs = @(Get-ChildItem -Path (Join-Path $repoRoot ".devspark.work/specs") -Directory -ErrorAction SilentlyContinue)
 $governanceArtifactsCount = @(Get-ChildItem -Path (Join-Path $repoRoot ".knowledge") -Recurse -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match 'audit|harvest|pr-review|constitution-history' }).Count
+    Where-Object { $_.Name -match 'audit|release|pr-review|constitution-history' }).Count
 
 $recent = @()
 $recentRaw = Invoke-GitSafe @("log", "--all", "--since=$sinceDate", "-n", "40", "--date=iso-strict", "--pretty=format:%H%x09%ad%x09%ae%x09%s")

@@ -23,8 +23,8 @@ This command makes v4 evidence and linkage visible in the PR. When any later
 section conflicts with this section, the v4 section wins.
 
 - Summarize current-truth validation status.
-- Summarize task linkage status: populated `code_ref`, `knowledge_ref`, and
-  `governance_ref` where applicable.
+- Summarize task linkage status: populated `code_ref`, `test_ref`,
+  `knowledge_ref`, and `governance_ref` where applicable.
 - Summarize evidence quality: execution evidence, inspection evidence, and any
   missing fallback-reason warnings.
 - Do not create or update durable lifecycle-history files.

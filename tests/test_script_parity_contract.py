@@ -53,23 +53,21 @@ def main() -> None:
         assert token in ps_create_pr
 
     assert '.devspark.work' in bash_release_context
-    assert 'VERIFY_READY_WORK_PACKAGES' in bash_release_context
+    assert 'RELEASE_ELIGIBLE_WORK_PACKAGES' in bash_release_context
     assert 'ARCHIVE_ROOT' in bash_release_context
     assert 'ARCHIVE_DATE' in bash_release_context
     assert 'RELEASE_FROM' in bash_release_context
     assert '.devspark.work' in ps_release_context
-    assert 'VERIFY_READY_WORK_PACKAGES' in ps_release_context
+    assert 'RELEASE_ELIGIBLE_WORK_PACKAGES' in ps_release_context
     assert 'ARCHIVE_ROOT' in ps_release_context
     assert 'ARCHIVE_DATE' in ps_release_context
     assert 'RELEASE_FROM' in ps_release_context
 
-    bash_harvest = _read('scripts/bash/harvest.sh')
-    ps_harvest = _read('scripts/powershell/harvest.ps1')
-    for token in ('archive_date', 'archive_candidates', 'archive_targets', 'archive-after-verification'):
-        assert token in bash_harvest
-        assert token in ps_harvest
-    assert '.archive/$ARCHIVE_DATE/$package_name' in bash_harvest
-    assert '.archive/$archiveDate/$packageName' in ps_harvest
+    assert 'test_ref' in bash_release_context
+    assert 'test_ref' in ps_release_context
+    removed_command = "har" + "vest"
+    assert not (ROOT / f"scripts/bash/{removed_command}.sh").exists()
+    assert not (ROOT / f"scripts/powershell/{removed_command}.ps1").exists()
 
     assert 'MERGED_PR_NUMBERS' in bash_release_history
     assert 'PR_REVIEW_SUMMARY' in bash_release_history

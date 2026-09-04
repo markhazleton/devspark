@@ -23,19 +23,19 @@ Knowledge and governance claims MUST include evidence. Prefer `type: test` with
 When falling back to `type: code` with `verified_by: inspection`, include
 `test_attempted` and `fallback_reason`.
 
-Tasks in an in-flight work package MUST carry `code_ref` and `knowledge_ref`
-when completed, or `n/a` with a reason. Governance changes also require a
-`governance_ref`. Implementing commands must populate these fields as the work
-lands.
+Tasks in an in-flight work package MUST carry `code_ref`, `test_ref`, and
+`knowledge_ref` when completed, or `n/a` with a reason. Governance changes also
+require a `governance_ref`. Implementing commands must populate these fields as
+the work lands.
 
-## 3. Verify Before Delete
+## 3. Release Is The Archive Boundary
 
-Before moving a work package out of `.devspark.work`, run the
-verify-before-archive check and confirm that every completed task has valid
-permanent references. Archival is allowed only after the delta is represented in
-current code, current knowledge, and current governance when applicable. Move
-verified work intact to `.archive/YYYY-MM-DD/<topic>/`. DevSpark commands must not read,
-list, enumerate, or glob `.archive/` after the move.
+Implementation and verification leave completed work packages in
+`.devspark.work`. Only `/devspark.release` may move a package to
+`.archive/YYYY-MM-DD/<topic>/`, and only after it confirms every completed task
+has valid permanent code, test, knowledge, and governance references as
+applicable. No other DevSpark command writes to `.archive/`. DevSpark commands
+must not read, list, enumerate, or glob `.archive/` after the release move.
 
 ## 4. Governance Location
 

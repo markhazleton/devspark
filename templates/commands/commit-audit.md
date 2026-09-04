@@ -4,9 +4,9 @@ handoffs:
   - label: Run Site Audit
     agent: devspark.site-audit
     prompt: Run a full codebase audit to complement commit history insights
-  - label: Check Current Truth
-    agent: devspark.harvest
-    prompt: Inspect in-flight work packages and current-truth cleanup candidates
+  - label: Prepare Release
+    agent: devspark.release
+    prompt: Validate current truth and completed in-flight work for release
 scripts:
   sh: .devspark/scripts/bash/release-history-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/release-history-context.ps1 $ARGUMENTS -Json

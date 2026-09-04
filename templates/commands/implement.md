@@ -5,9 +5,9 @@ handoffs:
     agent: devspark.create-pr
     prompt: Draft a pull request for the implemented changes
     send: true
-  - label: Run Analysis
-    agent: devspark.analyze
-    prompt: Analyze spec consistency after implementation
+  - label: Verify Evidence
+    agent: devspark.verify
+    prompt: Run focused behavioral and current-truth verification for the implemented changes
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
   ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
@@ -32,12 +32,13 @@ later section conflicts with this section, the v4 section wins.
   change.
 - Prefer execution evidence; when using inspection evidence, record
   `test_attempted` and `fallback_reason`.
-- Populate each completed task's `code_ref`, `knowledge_ref`, and
+- Populate each completed task's `code_ref`, `test_ref`, `knowledge_ref`, and
   `governance_ref` when applicable.
 - Never write ephemeral package, task, spec, plan, review-thread, release, or
   archive references into permanent code comments or `.knowledge`.
-- Run current-truth validation and verify-before-archive before moving the work
-  package to `.archive/YYYY-MM-DD/<topic>/`.
+- Run current-truth validation after implementation, but leave the work package
+  in `.devspark.work/`. Implementation never writes to `.archive/`; release is
+  the sole archival trigger.
 
 ## Workflow Position
 
@@ -49,7 +50,13 @@ Delivery gateway between authoring (`specify → clarify → plan → tasks → 
 
 ## Definition of Done
 
-Done when: every task in `tasks.md` is `[X]`, every phase has a `**Checkpoint**: Phase complete` line, every finished user story in `spec.md` carries `✅ Complete`, `spec.md` **Status** is `Complete`, and the step-4 gate pre-flight table re-run shows no regression. If any condition can't be met in one pass, stop and report exactly which one is unmet — don't keep narrating remaining steps.
+Done when: every task in `tasks.md` is `[X]`, every task records its code, test,
+and knowledge linkage (or an explained `n/a`), every phase has a
+`**Checkpoint**: Phase complete` line, every finished user story in `spec.md`
+carries `✅ Complete`, `spec.md` **Status** is `Complete`, and the step-4 gate
+pre-flight table re-run shows no regression. The completed package remains in
+`.devspark.work/` until `/devspark.release` validates and archives it. If any
+condition can't be met in one pass, stop and report exactly which one is unmet.
 
 **Chat output budget**: `tasks.md`/`spec.md`/`plan.md` carry full detail. In chat, report progress at phase checkpoints (one line per phase), not one line per task, plus the step 9 final summary. Don't restate file contents already written to disk.
 
@@ -131,8 +138,8 @@ unresolved.
    | ------------------------------- | ------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
    | Clarifications resolved         | `spec.md`                                   | No `[NEEDS CLARIFICATION]` markers remain                       | Route to `/devspark.clarify`                                                 |
    | Required gates from frontmatter | `spec.md` YAML `required_gates`             | Each listed gate has a matching artifact in FEATURE_DIR         | Route to the listed gate command                                             |
-   | Analyze findings                | FEATURE_DIR/analysis.md (or analyze output) | No `severity: critical` findings with `status: open`            | Route to `/devspark.analyze` (or `/devspark.address-pr-review`-style triage) |
-   | Critic findings                 | FEATURE_DIR/critique.md (or critic output)  | No `severity: critical` findings with `status: open`            | Route to `/devspark.critic`                                                  |
+   | Analyze findings                | `FEATURE_DIR/gates/analyze.md`               | No `severity: critical` findings with `status: open`            | Route to `/devspark.analyze`                                                 |
+   | Critic findings                 | `FEATURE_DIR/gates/critic.md`                | No `severity: critical` findings with `status: open`            | Route to `/devspark.critic`                                                  |
    | Checklists                      | step 2 result                               | All checklists at 0 incomplete (or explicit override recorded)  | Already handled in step 2                                                    |
    | Constitution coverage           | constitution.md vs tasks.md                 | Every runtime-bearing mandated principle has a task OR a waiver | Route to `/devspark.tasks` (regenerate) or `/devspark.plan` (record waiver)  |
    | Plan waivers acknowledged       | `plan.md` `## Constitution Waivers`         | All waivers have rationale + expiry                             | Route to `/devspark.plan`                                                    |
@@ -202,7 +209,12 @@ unresolved.
 8. Progress tracking, artifact sync, and error handling:
 
    **Continuous artifact sync** (required — do this as work happens, not at the end):
-   - **tasks.md** — mark each task `[X]` immediately on completion. Never batch updates at the end of a phase. If a task is partially done, leave it `[ ]` and add a brief `<!-- WIP: ... -->` note rather than half-checking it.
+   - **tasks.md** — mark each task `[X]` immediately on completion and populate
+     its `code_ref`, `test_ref`, and `knowledge_ref` fields with durable targets.
+     Use `n/a — <reason>` only when a linkage category genuinely does not apply.
+     Never batch updates at the end of a phase. If a task is partially done,
+     leave it `[ ]` and add a brief `<!-- WIP: ... -->` note rather than
+     half-checking it.
    - **tasks.md phase checkpoints** — when every task in a phase (Setup, Foundational, User Story N, Polish) is `[X]`, append a checkpoint line under that phase heading: `**Checkpoint**: Phase complete — YYYY-MM-DD`. For user-story phases, this is the signal that the story is independently shippable.
    - **spec.md user stories** — when all tasks tagged `[USn]` are `[X]`, update the corresponding `### User Story n` heading by appending `✅ Complete` (preserve the priority marker). This keeps the spec a live picture of delivered scope.
    - **spec.md lifecycle status** — flip `**Status**: Draft` to `**Status**: In Progress` on the first completed task (already done in step 3); the final flip to `Complete` happens in step 10.
@@ -240,7 +252,9 @@ unresolved.
          - Find the line matching `**Status**:` and replace its value with `Complete`
          - Preserve the lifecycle comment if present: `**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->`
       3. Report: "Spec status updated to Complete — all tasks finished."
-      4. Recommend `/devspark.create-pr` to draft or update the pull request before `/devspark.pr-review`
+      4. Keep the completed package in `.devspark.work/` and recommend
+         `/devspark.create-pr` before `/devspark.pr-review`; only
+         `/devspark.release` may archive it.
     - If any tasks remain incomplete (`- [ ]`):
       1. Update spec status to `In Progress` (if currently `Draft`)
       2. Report which tasks are still incomplete

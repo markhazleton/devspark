@@ -91,7 +91,7 @@ over both team customizations and stock defaults.
      Created: {date}
      
      This file takes priority over team and stock defaults when you run /devspark.{command}.
-     Edit freely. To revert, move this file to `.archive/YYYY-MM-DD/<topic>/`.
+     Edit freely. To revert, move this file under `.devspark.work/release-candidates/overrides/`; `/devspark.release` owns archival.
    -->
    ```
 
@@ -107,7 +107,7 @@ over both team customizations and stock defaults.
      3.    .devspark/defaults/commands/     (stock DevSpark)
    
    Edit it to customize the behavior for your workflow.
-   To revert to the team/stock default, move this file to `.archive/YYYY-MM-DD/<topic>/`.
+   To revert to the team/stock default, move this file under `.devspark.work/release-candidates/overrides/`; `/devspark.release` owns archival.
    ```
 
 8. **Open the file** for editing so the user can customize it immediately.

@@ -27,8 +27,10 @@ later section conflicts with this section, the v4 section wins.
   available, falling back to `python scripts/python/build_knowledge_index.py
   --check` in source repos.
 - Treat inspection evidence as skipped execution, not as a pass.
-- Verification must prove behavior and current-truth linkage before any work
-  package archival.
+- Verification proves behavior and current-truth linkage, but never archives a
+  work package. A successful result leaves the package in `.devspark.work/` for
+  `/devspark.release`, which revalidates it before archival.
+- This command never archives a work package and never writes to `.archive/`.
 
 ## Overview
 

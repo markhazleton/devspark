@@ -1,5 +1,5 @@
 ---
-description: Seal a DevSpark release by validating current truth, versioning, release notes, and archived lifecycle cleanup
+description: Validate code, tests, knowledge, and task linkage, then seal and archive a DevSpark release
 scripts:
   sh: .devspark/scripts/bash/release-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/release-context.ps1 $ARGUMENTS -Json
@@ -13,61 +13,81 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## DevSpark v4 Override
+## Lifecycle Authority
 
-Release seals current truth. It moves verified specs, quickfixes, review
-records, run logs, and other completed lifecycle artifacts from `.devspark.work`
-to a human-only `.archive/YYYY-MM-DD/<topic>/` folder. Git remains the durable history
-store; the archive is a short-term safety buffer, not current truth.
+Release is the only DevSpark command that writes to `.archive/`.
 
-When any later section conflicts with this section, this v4 section wins.
+Implementation updates code, tests, `.knowledge`, governance when applicable,
+and task linkage inside the work package. Verification and PR review may validate
+that state, but every work product remains in `.devspark.work/` until this
+command runs.
 
-- Read version context from `.devspark/VERSION`.
-- Validate `.knowledge` and governance before changing the version stamp.
-- Fail if `.devspark.work/specs/` contains completed work packages whose
-  `code_ref` and `knowledge_ref` linkage has not been verified.
-- Move verified work packages to `.archive/YYYY-MM-DD/<topic>/` after
-  confirming their code, knowledge, and governance deltas landed.
-- Generate release notes from Git history and current truth, not from obsolete
-  spec folders.
-- Never reference `.archive/` paths from permanent code, `.knowledge`, or
-  governance files.
-- Never read, list, enumerate, or glob `.archive/` under any circumstance.
+Release performs the final validation and then moves each eligible completed
+work package intact to `.archive/YYYY-MM-DD/<topic>/`. Git remains the durable
+history; `.archive/` is a short-term, human-only safety buffer and is never an
+input to a DevSpark command.
+
+## Release Eligibility
+
+A work package is release-eligible only when all of the following are true:
+
+- Its spec or quickfix status is complete.
+- Every task is complete.
+- Every task has a populated `code_ref`, `test_ref`, and `knowledge_ref`, or an
+  explicit `n/a — <reason>` for a category that does not apply.
+- Every governance-changing task has a populated `governance_ref`; other tasks
+  may use an explained `n/a`.
+- Referenced code, test, knowledge, and governance files exist.
+- Referenced tests pass using the repository's native test command.
+- Touched knowledge entities and governance decisions contain valid evidence.
+- Generated ontology output is current.
+- Permanent code and knowledge contain no references back to work-package,
+  task, plan, review-thread, or archive artifacts.
+
+Incomplete or invalid packages remain unchanged in `.devspark.work/` and are
+reported as release blockers. Completion or verification alone never archives
+anything.
 
 ## Procedure
 
 1. Run `{SCRIPT}` and parse the JSON result.
 2. Confirm `CONSTITUTION_PATH` exists.
-3. Confirm every entity under `.knowledge/entities/` has `_entity.yaml`,
-   evidence, and matching generated `_derived.yaml`.
-4. Confirm every decision under `.knowledge/governance/decisions/` has
-   frontmatter with `id`, `status: current`, `governs`, `evidence`, and
-   `last_verified`.
-5. Search permanent content for references to in-flight work package IDs, task
-   IDs, old spec folders, review-thread files, or previous lifecycle snapshots.
-   Any match outside explicit governance rules is a release blocker.
-6. Run the repository's validation suite.
-7. Update `.devspark/VERSION` only after validation passes.
-8. Move verified `.devspark.work` packages to `.archive/YYYY-MM-DD/<topic>/`.
-   Use the current date for `YYYY-MM-DD` and the package, quickfix, or review
-   identifier as `<topic>`. When invoking shell helpers, use
-   `archive_devspark_work_path` from
-   `scripts/bash/common.sh` or `Move-DevSparkWorkPathToArchive` from
-   `scripts/powershell/common.ps1`.
-9. Draft release notes from Git commits, merged PRs, and current-truth changes.
+3. Inspect every `RELEASE_ELIGIBLE_WORK_PACKAGES` and
+   `RELEASE_ELIGIBLE_QUICKFIXES` candidate, plus each completed item under
+   `.devspark.work/release-candidates/`. Treat the script result as a pre-scan,
+   not proof of validity.
+4. Resolve every task linkage. Strip any `::symbol` or `#fragment` only when
+   checking the containing file; preserve the full reference in the work
+   package.
+5. Run every test named by `test_ref`, plus the repository's required release
+   validation suite. An explained `n/a` is allowed only for tasks that cannot
+   reasonably have a test.
+6. Validate `.knowledge` and governance, including generated `_derived.yaml`
+   files and evidence references. Run the ontology generator in `--check` mode
+   when available.
+7. Search permanent content for forbidden references to ephemeral artifacts.
+8. If any candidate fails, leave it in `.devspark.work/`, do not update the
+   version, and report exact blockers.
+9. Update `.devspark/VERSION` only after all release validation passes.
+10. Move each validated package and staged release candidate to
+    `.archive/YYYY-MM-DD/<topic>/` using
+    `archive_devspark_work_path` from `scripts/bash/common.sh` or
+    `Move-DevSparkWorkPathToArchive` from `scripts/powershell/common.ps1`.
+11. Do not read, list, enumerate, glob, or summarize `.archive/` after the move.
+12. Draft release notes from Git commits, merged PRs, and the validated current
+    truth—not from `.archive/`.
 
 ## Output
 
 Return:
 
 - Current version and next version
-- Validation commands run and results
-- In-flight work-package status
-- Archive destinations used for verified work packages
-- Current-truth blockers, if any
+- Validation commands and results
+- Packages released and archive destinations written
+- Packages retained in `.devspark.work/` and their blockers
+- Code, test, knowledge, governance, or linkage failures
 - Release-note summary
 
-Do not keep lifecycle artifacts under `.devspark.work/` after verification. If
-a verified work package has completed its purpose, move it to the
-`.archive/YYYY-MM-DD/<topic>/` folder and report the destination. A human later
-decides what, if anything, to delete from `.archive/`.
+The successful terminal state is: validated release work is archived by this
+command, incomplete work remains in `.devspark.work/`, and no other DevSpark
+command has written to `.archive/`.

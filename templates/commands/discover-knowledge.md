@@ -161,16 +161,18 @@ content:
 
 | Classification | Destination |
 |---|---|
-| Obsolete, duplicate, or historical | `.archive/YYYY-MM-DD/documentation/<relative-path>` |
+| Obsolete, duplicate, or historical | `.devspark.work/release-candidates/documentation/<relative-path>` |
 | Draft, scratch, generated work product, or in-flight plan | `.devspark.work/documentation/<relative-path>` |
-| Durable current truth | Assimilate into `.knowledge/entities/<entity-id>/`, then move original to `.archive/YYYY-MM-DD/documentation/<relative-path>` |
+| Durable current truth | Assimilate into `.knowledge/entities/<entity-id>/`, then stage the original under `.devspark.work/release-candidates/documentation/<relative-path>` |
 
 Rules:
 
 - Do not delete intake files.
 - Preserve relative paths when moving files.
 - Avoid overwrites by adding a numeric suffix when a target already exists.
-- After moving files into `.archive/`, do not inspect `.archive/` again.
+- Never write to `.archive/`; release owns the final archival move.
+- Leave staged files in `.devspark.work/release-candidates/` for release; do not
+  inspect `.archive/`.
 - Permanent `.knowledge` files must not link to `.archive/` paths.
 
 ### 7. Refresh Ontology

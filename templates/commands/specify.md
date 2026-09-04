@@ -28,7 +28,8 @@ later section conflicts with this section, the v4 section wins.
 
 - Write planning artifacts under the v4 work-package root.
 - Treat the package as temporary scaffolding that will be moved to
-  `.archive/YYYY-MM-DD/<topic>/` after verify-before-archive succeeds.
+  `.archive/YYYY-MM-DD/<topic>/` only when `/devspark.release` validates the
+  completed package. Specify, implement, verify, and review never archive it.
 - Do not write package IDs, task IDs, or planning paths into permanent code,
   `.knowledge`, or governance files.
 - Load governance from `.knowledge/governance/constitution.md`, with legacy

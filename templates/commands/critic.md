@@ -438,7 +438,7 @@ After producing the report:
 | Output       | Remediation suggestions    | Go/No-Go recommendation  |
 | Constitution | CRITICAL violations        | SHOWSTOPPER violations   |
 
-## Backward Compatibility
+## Missing Metadata Defaults
 
 If spec.md lacks `archetype`, `risk_profile`, or `change_type` frontmatter, the command still runs with sensible defaults (`web-service`, `internal`, `greenfield`) AND emits HIGH findings (`archetype-ambiguity`, `missing-risk-profile`, `missing-change-type`) so the metadata gap is visible without blocking the review.
 
@@ -448,33 +448,10 @@ If spec.md lacks `archetype`, `risk_profile`, or `change_type` frontmatter, the 
 
 ## Shared Review Resolution Contract
 
-Findings use the shared resolution contract so downstream tools (`/devspark.address-pr-review`, telemetry, harvest) can act deterministically.
+Findings use the shared resolution contract so downstream tools
+(`/devspark.address-pr-review` and telemetry) can act deterministically.
 
 - `finding_id` MUST be stable across re-runs when the underlying issue is unchanged.
 - `intent_cue` MUST name the behavior, contract, safety property, or operational outcome the finding protects before metric-focused remediation.
 - `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation).
 - `status` and `outcome` are written by `/devspark.address-pr-review` (FR-028).
-
----
-
-## Changelog (this refactor)
-
-- Added archetype detection (§2) with frontmatter → constitution → heuristics priority; defaults to `web-service` plus HIGH `archetype-ambiguity` finding.
-- Added context-mode and risk-profile switches (§4) with a deterministic severity-shift table; missing metadata emits visible HIGH findings rather than blocking.
-- Replaced the out-of-order A→F→B→C→D→E sections with a single archetype-gated **Risk Category Registry** (§6). Added new categories: `api_compatibility`, `cli_ergonomics`, `mobile_platform`, `pipeline_semantics`, `ml_reproducibility`, `iac_blast_radius`, `embedded_safety`, `binary_size_perf`, `offline_sync`, `monorepo_coupling`, plus always-applicable `trust_boundaries`, `error_handling_resilience`, `dependency_supply_chain`, `secrets_handling`.
-- Externalized framework checklists to `.devspark/risk-checklists/{stack,archetype}.md` (§7) with a first-principles fallback list (`resource_leaks | error_swallowing | …`). The previously inline FastAPI/Express/Spring/Go/Web checklists should be seeded into that folder as a follow-up (noted in report output and below).
-- Generalized HTTP-centric phrasing: "pagination on list endpoints" → "unbounded result sets (endpoints, queries, iterators, streams)"; "health check endpoints" → "liveness/readiness signal appropriate to the runtime"; "zero-downtime deployment" → "safe-release strategy for this artifact type"; "DB indexes" → "persistent-storage access patterns without performance analysis"; "API key/token on protected endpoints" → "trust boundary enforcement on privileged operations." CORS, HTTPS, security headers, and API versioning moved to the web-service checklist (externalized).
-- Paired every named tool with capability (e.g., "durable queue with retry semantics — Celery/RQ/Sidekiq/BullMQ/Hangfire").
-- Tiered artifact requirements (§1): runs on spec-only, spec+plan, or full; prints `SPEC-ONLY | SPEC+PLAN | FULL`; only aborts if spec.md missing. Updated `scripts:` frontmatter to drop `--require-tasks`.
-- Fixed structural bugs: registry replaces the A→F→B→C→D→E ordering; removed the duplicate "Section 8"; moved the gate YAML block to the top of the §9 report template; fixed typos (`inding_id`→`finding_id`, `xecution_mode`→`execution_mode`); converted the verdict checkbox triple to a single `**VERDICT:**` line.
-- Made YAML `findings:` the single source of truth; tables are projections that drop when empty; every row maps to a `finding_id`.
-- Added the "What this command is NOT" scope-limits disclosure near the top.
-- Added third handoff `devspark.specify` for spec-level showstoppers.
-- Tightened the "Ignore" list: removed the "<1% probability" exemption; replaced with "low-probability AND low-impact."
-- Added explicit Backward Compatibility section so missing frontmatter never blocks the run.
-
-**Dual-gate cleanup (subsequent pass):** moved `rationale_traceability` out of the critic registry (table row + cue sheet bullet) and into `/devspark.analyze` §4G. Added an explicit non-overlap clause near the top of critic so the gate's scope is unambiguous; mirrored cross-references in `analyze.md`. Spec↔plan Core-Problem drift, Rationale Summary completeness, requirement↔task coverage, and wording-ambiguity findings are now exclusively analyze's responsibility.
-
-**Checklists seeded:** `.devspark/risk-checklists/` now ships with stock files for `web-service`, `python-fastapi`, `node-express`, `go-gin`, `java-spring`, `dotnet-aspnet`, `library`, `cli`, `data-pipeline`, `ml-training`, `infrastructure`, `mobile-app`, `embedded`, and `browser-extension`, plus a README documenting the capability-paired entry format. Teams override via `.knowledge/overrides/risk-checklists/`.
-
-**Deviations from instructions:** None material. Token count stays within the ~10% ceiling — growth from the new registry/cue sheets is offset by removing the duplicated Section 8, the inline framework checklists, and the redundant report scaffolding.

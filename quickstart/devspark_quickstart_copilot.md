@@ -29,7 +29,7 @@ Before creating anything, check for prior legacy / DevSpark installations:
 | `.devspark/` exists | **DevSpark already installed.** See "Version Check" below. |
 | `.knowledge/` exists | **User artifacts exist.** Preserve authored files; initialize missing entity and ontology scaffolding. |
 | `.specify/` exists | **Legacy layout detected.** Needs migration. |
-| `.documentation/` or `.documenation/` exists | **Documentation intake detected.** Classify and move into `.archive/`, `.devspark.work/`, or `.knowledge/`. |
+| `.documentation/` or `.documenation/` exists | **Documentation intake detected.** Classify into `.knowledge/` or `.devspark.work/`; obsolete inputs wait under `.devspark.work/release-candidates/` for release. |
 | `.devspark/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
 | Root `memory/` (without `.knowledge/governance/`) | **Legacy structure.** Needs migration. |
 | Root `scripts/` or `templates/` (without `.devspark/scripts/`) | **Legacy structure.** Needs migration. |
@@ -210,7 +210,6 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `pr-review.md` | `.devspark/defaults/commands/devspark.pr-review.md` |
 | `address-pr-review.md` | `.devspark/defaults/commands/devspark.address-pr-review.md` |
 | `quickfix.md` | `.devspark/defaults/commands/devspark.quickfix.md` |
-| `harvest.md` | `.devspark/defaults/commands/devspark.harvest.md` |
 | `release.md` | `.devspark/defaults/commands/devspark.release.md` |
 | `critic.md` | `.devspark/defaults/commands/devspark.critic.md` |
 | `clarify.md` | `.devspark/defaults/commands/devspark.clarify.md` |
@@ -218,6 +217,8 @@ Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/ma
 | `checklist.md` | `.devspark/defaults/commands/devspark.checklist.md` |
 | `personalize.md` | `.devspark/defaults/commands/devspark.personalize.md` |
 | `site-audit.md` | `.devspark/defaults/commands/devspark.site-audit.md` |
+| `explain.md` | `.devspark/defaults/commands/devspark.explain.md` |
+| `next.md` | `.devspark/defaults/commands/devspark.next.md` |
 | `evolve-constitution.md` | `.devspark/defaults/commands/devspark.evolve-constitution.md` |
 | `discover-constitution.md` | `.devspark/defaults/commands/devspark.discover-constitution.md` |
 | `discover-knowledge.md` | `.devspark/defaults/commands/devspark.discover-knowledge.md` |
@@ -364,7 +365,6 @@ Save to `.devspark/scripts/powershell/`:
 - `powershell/fix-score-context.ps1`
 - `powershell/generate-atomic-shims.ps1`
 - `powershell/get-pr-context.ps1`
-- `powershell/harvest.ps1`
 - `powershell/platform.ps1`
 - `powershell/quickfix-context.ps1`
 - `powershell/release-context.ps1`
@@ -372,6 +372,8 @@ Save to `.devspark/scripts/powershell/`:
 - `powershell/repo-story-context.ps1`
 - `powershell/setup-plan.ps1`
 - `powershell/site-audit.ps1`
+- `powershell/explain-context.ps1`
+- `powershell/next-context.ps1`
 - `powershell/update-agent-context.ps1`
 
 Save to `.devspark/scripts/bash/`:
@@ -386,7 +388,6 @@ Save to `.devspark/scripts/bash/`:
 - `bash/fix-score-context.sh`
 - `bash/generate-atomic-shims.sh`
 - `bash/get-pr-context.sh`
-- `bash/harvest.sh`
 - `bash/platform.sh`
 - `bash/quickfix-context.sh`
 - `bash/release-context.sh`
@@ -394,6 +395,8 @@ Save to `.devspark/scripts/bash/`:
 - `bash/repo-story-context.sh`
 - `bash/setup-plan.sh`
 - `bash/site-audit.sh`
+- `bash/explain-context.sh`
+- `bash/next-context.sh`
 - `bash/update-agent-context.sh`
 
 Save to `.devspark/scripts/python/`:
@@ -432,7 +435,7 @@ If either count is 0 or the Python ontology utility is missing, re-fetch the mis
 
 Run this step on **every quickstart execution**: fresh install, migration, update, repair, and already-current verification. This step is repository-owned current-truth maintenance, not a framework overwrite.
 
-1. Create these directories if they are missing: `.knowledge/entities/`, `.knowledge/governance/decisions/`, `.knowledge/ontology/`, `.knowledge/overrides/commands/`, `.devspark.work/`, and `.archive/`.
+1. Create these directories if they are missing: `.knowledge/entities/`, `.knowledge/governance/decisions/`, `.knowledge/ontology/`, `.knowledge/overrides/commands/`, `.devspark.work/`, and `.devspark.work/release-candidates/`. Release creates `.archive/` only when it has validated work to archive.
 2. Seed missing knowledge scaffolding from the fetched templates without overwriting authored files:
    - `.devspark/templates/knowledge/entities/README.md` -> `.knowledge/entities/README.md`
    - `.devspark/templates/knowledge/ontology/schema.md` -> `.knowledge/ontology/schema.md`
@@ -445,7 +448,7 @@ Run this step on **every quickstart execution**: fresh install, migration, updat
    - Fallback in the DevSpark source repository: `python scripts/python/build_knowledge_index.py --write`
    - If Python or dependencies are unavailable, report the exact command the user must run and continue without fabricating generated reports.
 7. Do not delete documentation intake files. When `discover-knowledge` moves intake files, it must preserve relative paths and avoid overwriting by adding a numeric suffix if the target path already exists.
-8. Do not read, list, enumerate, or glob `.archive/` after any move has completed. Report only the destination root and counts.
+8. Do not write to `.archive/`. Stage obsolete intake under `.devspark.work/release-candidates/`; `/devspark.release` is the sole archive writer.
 9. If generated ontology output changed, include that in the final summary.
 
 ---
@@ -596,7 +599,7 @@ Files written:
 
 Files preserved:
   • .knowledge/ authored files — preserved; missing scaffold may be created
-  {IF migration: • Backup at .specify.old/ (move to .archive/YYYY-MM-DD/<topic>/ once satisfied)}
+  {IF migration: • Backup at .specify.old/ (stage under .devspark.work/release-candidates/ for the next release once satisfied)}
 
 Validation:
   • Shim frontmatter — {ok | repaired N file(s)}
@@ -605,7 +608,7 @@ Validation:
   • Knowledge scaffold — {ok | repaired | blocked with command}
 
 Constitution: {seeded fresh | migrated from .specify/ | already existed — not touched}
-Documentation intake: {not present | archived N | moved to .devspark.work N | assimilated N}
+Documentation intake: {not present | staged for release N | moved to .devspark.work N | assimilated N}
 ```
 
 ### 12c — Next steps

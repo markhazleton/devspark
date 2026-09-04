@@ -45,11 +45,14 @@ Before drafting, scan for upstream artifacts produced by the sibling commands an
 
 1. **Discovery draft** — if `/.devspark.work/governance/constitution-draft.md` exists:
    - Treat it as the starting point for placeholder values when no constitution exists yet.
-   - After successfully writing `constitution.md`, move the draft to `.archive/YYYY-MM-DD/constitution-draft/` so it isn't reapplied and is still recoverable short term.
+   - After successfully writing `constitution.md`, move the draft to
+     `.devspark.work/release-candidates/constitution-draft/`; release archives
+     it after final validation.
 2. **Approved amendment proposals** — if `/.devspark.work/governance/proposals/` contains files whose `Status: APPROVED`:
    - List them to the user; for each, ask whether to apply now in this version bump.
    - For every applied CAP, update the current constitution and any affected decision topic files in place.
-   - Move applied CAP files to `.archive/YYYY-MM-DD/{CAP-ID}/` after durable governance is updated.
+   - Move applied CAP files to `.devspark.work/release-candidates/{CAP-ID}/`
+     after durable governance is updated. Release owns archival.
    - Reflect each applied CAP in the Sync Impact Report (§5) under a new "Applied Amendments" block (CAP ID → principle change).
 3. **Rejected or pending proposals**: leave untouched. Never silently roll a non-approved proposal into the constitution.
 

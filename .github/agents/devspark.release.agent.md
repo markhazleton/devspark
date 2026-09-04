@@ -1,6 +1,6 @@
 ---
 name: devspark.release
-description: Archive development artifacts at release, distill key decisions into permanent documentation, and prepare for next development cycle
+description: Validate code, tests, knowledge, and task linkage, then archive completed work at release
 ---
 
 Read and follow the instructions in `templates/commands/release.md` exactly.

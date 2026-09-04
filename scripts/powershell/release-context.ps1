@@ -5,9 +5,9 @@
     Build release context for DevSpark v4 current-truth releases.
 
 .DESCRIPTION
-    Emits repository version, git, and in-flight work-package state. DevSpark v4
-    moves verified work packages to dated human-only .archive folders after
-    their code and knowledge deltas land.
+    Emits repository version, git, and in-flight work-package state. Release is
+    the sole archival trigger after code, tests, knowledge, and task linkage
+    validate.
 #>
 
 param(
@@ -24,9 +24,40 @@ function Get-JsonArray {
     return ,@($Items | Where-Object { $_ } | Sort-Object -Unique)
 }
 
+function Test-CompletedTaskLinkage {
+    param([string]$Content)
+
+    $taskMatches = [regex]::Matches(
+        $Content,
+        '^\s*-\s+\[[xX]\]\s+T\d+.*?(?=^\s*-\s+\[[ xX]\]\s+T\d+|\z)',
+        [System.Text.RegularExpressions.RegexOptions]::Multiline -bor
+        [System.Text.RegularExpressions.RegexOptions]::Singleline
+    )
+    if ($taskMatches.Count -eq 0) { return $false }
+
+    foreach ($taskMatch in $taskMatches) {
+        foreach ($field in @('code_ref', 'test_ref', 'knowledge_ref')) {
+            $valueMatch = [regex]::Match(
+                $taskMatch.Value,
+                "(?m)^\s*-\s+$field\s*:\s*(.+?)\s*$"
+            )
+            if (-not $valueMatch.Success) { return $false }
+            $value = $valueMatch.Groups[1].Value.Trim()
+            if (-not $value -or $value -ieq 'TODO') { return $false }
+            if ($value -match '^(?i:n/a)') {
+                $reason = $value -replace '^(?i:n/a)\s*[-—:]\s*', ''
+                if (-not $reason -or $reason -ieq 'n/a') { return $false }
+            }
+        }
+    }
+    return $true
+}
+
 $repoRoot = Get-RepoRoot
 $workDir = Join-Path $repoRoot '.devspark.work'
 $workPackagesDir = Join-Path $workDir 'specs'
+$quickfixesDir = Join-Path $workDir 'quickfixes'
+$releaseCandidatesDir = Join-Path $workDir 'release-candidates'
 $knowledgeDir = Join-Path $repoRoot '.knowledge'
 $constitutionPath = Join-Path $knowledgeDir 'governance/constitution.md'
 $devsparkVersionPath = Join-Path $repoRoot '.devspark/VERSION'
@@ -67,8 +98,12 @@ if (-not $releaseFrom -and $lastReleaseDate) {
 $releaseTo = $releaseDate
 
 $inFlight = @()
-$verifyReady = @()
+$releaseEligible = @()
 $blocked = @()
+$stagedReleaseCandidates = @()
+$inFlightQuickfixes = @()
+$releaseEligibleQuickfixes = @()
+$blockedQuickfixes = @()
 if (Test-Path $workPackagesDir) {
     Get-ChildItem -Path $workPackagesDir -Directory -ErrorAction SilentlyContinue | ForEach-Object {
         $packageName = $_.Name
@@ -76,11 +111,11 @@ if (Test-Path $workPackagesDir) {
         $tasksFile = Join-Path $_.FullName 'tasks.md'
         if (Test-Path $tasksFile) {
             $content = Get-Content $tasksFile -Raw -ErrorAction SilentlyContinue
-            $unchecked = ([regex]::Matches($content, '^\s*- \[ \]', 'Multiline')).Count
-            $checked = ([regex]::Matches($content, '^\s*- \[[xX]\]', 'Multiline')).Count
-            $missingLinkage = ([regex]::Matches($content, 'code_ref:\s*$|knowledge_ref:\s*$|code_ref:\s*TODO|knowledge_ref:\s*TODO', 'Multiline')).Count
-            if ($unchecked -eq 0 -and $checked -gt 0 -and $missingLinkage -eq 0) {
-                $verifyReady += $packageName
+            $unchecked = ([regex]::Matches($content, '^\s*-\s+\[ \]\s+T\d+', 'Multiline')).Count
+            $checked = ([regex]::Matches($content, '^\s*-\s+\[[xX]\]\s+T\d+', 'Multiline')).Count
+            $linkageComplete = Test-CompletedTaskLinkage -Content $content
+            if ($unchecked -eq 0 -and $checked -gt 0 -and $linkageComplete) {
+                $releaseEligible += $packageName
             } else {
                 $blocked += $packageName
             }
@@ -88,6 +123,28 @@ if (Test-Path $workPackagesDir) {
             $blocked += $packageName
         }
     }
+}
+
+if (Test-Path $quickfixesDir) {
+    Get-ChildItem -LiteralPath $quickfixesDir -File -Filter '*.md' -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $inFlightQuickfixes += $_.Name
+            $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
+            $unchecked = ([regex]::Matches($content, '^\s*-\s+\[ \]\s+T\d+', 'Multiline')).Count
+            $checked = ([regex]::Matches($content, '^\s*-\s+\[[xX]\]\s+T\d+', 'Multiline')).Count
+            if ($unchecked -eq 0 -and $checked -gt 0 -and (Test-CompletedTaskLinkage -Content $content)) {
+                $releaseEligibleQuickfixes += $_.Name
+            } else {
+                $blockedQuickfixes += $_.Name
+            }
+        }
+}
+
+if (Test-Path $releaseCandidatesDir) {
+    Get-ChildItem -LiteralPath $releaseCandidatesDir -Force -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $stagedReleaseCandidates += [System.IO.Path]::GetRelativePath($repoRoot, $_.FullName).Replace('\', '/')
+        }
 }
 
 $nextVersion = $Version.TrimStart('v')
@@ -117,6 +174,8 @@ $result = [ordered]@{
     REPO_ROOT = $repoRoot
     WORK_DIR = $workDir
     WORK_PACKAGES_DIR = $workPackagesDir
+    QUICKFIXES_DIR = $quickfixesDir
+    RELEASE_CANDIDATES_DIR = $releaseCandidatesDir
     ARCHIVE_ROOT = $archiveRoot
     ARCHIVE_DATE = $archiveDate
     KNOWLEDGE_DIR = $knowledgeDir
@@ -128,8 +187,12 @@ $result = [ordered]@{
     RELEASE_FROM = $releaseFrom
     RELEASE_TO = $releaseTo
     IN_FLIGHT_WORK_PACKAGES = Get-JsonArray $inFlight
-    VERIFY_READY_WORK_PACKAGES = Get-JsonArray $verifyReady
+    RELEASE_ELIGIBLE_WORK_PACKAGES = Get-JsonArray $releaseEligible
     BLOCKED_WORK_PACKAGES = Get-JsonArray $blocked
+    STAGED_RELEASE_CANDIDATES = Get-JsonArray $stagedReleaseCandidates
+    IN_FLIGHT_QUICKFIXES = Get-JsonArray $inFlightQuickfixes
+    RELEASE_ELIGIBLE_QUICKFIXES = Get-JsonArray $releaseEligibleQuickfixes
+    BLOCKED_QUICKFIXES = Get-JsonArray $blockedQuickfixes
     LAST_TAG = $lastTag
     LAST_RELEASE_DATE = $lastReleaseDate
     COMMITS_SINCE_RELEASE = $commitsSince
@@ -155,8 +218,12 @@ if ($Json) {
     Write-Output "Archive Date: $archiveDate"
     Write-Output "Commits Since: $commitsSince"
     Write-Output "In-flight Work Packages: $($result.IN_FLIGHT_WORK_PACKAGES.Count)"
-    Write-Output "Verify-ready Work Packages: $($result.VERIFY_READY_WORK_PACKAGES.Count)"
+    Write-Output "Release-eligible Work Packages: $($result.RELEASE_ELIGIBLE_WORK_PACKAGES.Count)"
     Write-Output "Blocked Work Packages: $($result.BLOCKED_WORK_PACKAGES.Count)"
+    Write-Output "Staged Release Candidates: $($result.STAGED_RELEASE_CANDIDATES.Count)"
+    Write-Output "In-flight Quickfixes: $($result.IN_FLIGHT_QUICKFIXES.Count)"
+    Write-Output "Release-eligible Quickfixes: $($result.RELEASE_ELIGIBLE_QUICKFIXES.Count)"
+    Write-Output "Blocked Quickfixes: $($result.BLOCKED_QUICKFIXES.Count)"
     Write-Output "Contributors: $($result.CONTRIBUTORS.Count)"
     if ($DryRun) {
         Write-Output ''

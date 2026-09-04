@@ -37,12 +37,15 @@ Register a new application in the DevSpark multi-app registry at `.knowledge/ent
    - Ensure the registry passes full validation after the addition
 
 4. **Scaffold the application documentation** (always performed):
-   - Create `{path}/.knowledge/` with standard subdirectories:
-     - `memory/` — for app-specific constitution
-     - `commands/` — for app-specific command overrides
-     - `scripts/` — for app-specific script overrides
-     - `templates/` — for app-specific template overrides
-     - `specs/` — for app-scoped feature specifications
+   - Create the app-local current-truth roots under `{path}/.knowledge/`:
+     - `entities/` — app-specific current-truth entities
+     - `governance/decisions/` — app-specific current decisions
+     - `ontology/` — app-scoped generated ontology reports
+     - `overrides/commands/` — app-specific command overrides
+     - `overrides/scripts/` — app-specific script overrides
+     - `overrides/templates/` — app-specific template overrides
+   - Create `{path}/.devspark.work/specs/` for app-scoped temporary work
+     packages. Never place specs, plans, or tasks under `.knowledge/`.
    - Do NOT create or modify `.devspark/`
 
 5. **Report results**:
