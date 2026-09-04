@@ -4,7 +4,7 @@
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
-**Current version:** [v4.1.0](https://github.com/markhazleton/devspark/releases/tag/v4.1.0)
+**Current version:** [v4.2.0](https://github.com/markhazleton/devspark/releases/tag/v4.2.0)
 
 DevSpark is a structured development process for AI coding assistants. It
 provides 30 stock command prompts plus helper templates and scripts that give

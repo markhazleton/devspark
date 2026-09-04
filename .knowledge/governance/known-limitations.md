@@ -1,6 +1,6 @@
 ---
 document: known-limitations
-version: "4.1.0"
+version: "4.2.0"
 last_verified: "2026-08-30"
 evidence:
   - type: code

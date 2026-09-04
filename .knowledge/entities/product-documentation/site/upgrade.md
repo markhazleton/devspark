@@ -4,7 +4,7 @@
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
-**Current version:** [v4.1.0](https://github.com/markhazleton/devspark/releases/tag/v4.1.0)
+**Current version:** [v4.2.0](https://github.com/markhazleton/devspark/releases/tag/v4.2.0)
 
 DevSpark upgrades are quickstart-driven. Re-run the same quickstart prompt used
 for installation in the target repository.
