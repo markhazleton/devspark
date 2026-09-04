@@ -92,8 +92,8 @@ generate_canonical_commands() {
     file_content=$(tr -d '\r' < "$template")
     
     # Extract description and script command from YAML frontmatter
-    description=$(printf '%s\n' "$file_content" | awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}')
-    script_command=$(printf '%s\n' "$file_content" | awk -v sv="$script_variant" '/^[[:space:]]*'"$script_variant"':[[:space:]]*/ {sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, ""); print; exit}')
+    description=$(awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}' <<< "$file_content")
+    script_command=$(awk -v sv="$script_variant" '/^[[:space:]]*'"$script_variant"':[[:space:]]*/ {sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, ""); print; exit}' <<< "$file_content")
     
     if [[ -z $script_command ]]; then
       echo "Warning: no script command found for $script_variant in $template" >&2
@@ -101,7 +101,7 @@ generate_canonical_commands() {
     fi
     
     # Extract agent_script command from YAML frontmatter if present
-    agent_script_command=$(printf '%s\n' "$file_content" | awk '
+    agent_script_command=$(awk '
       /^agent_scripts:$/ { in_agent_scripts=1; next }
       in_agent_scripts && /^[[:space:]]*'"$script_variant"':[[:space:]]*/ {
         sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, "")
@@ -109,7 +109,7 @@ generate_canonical_commands() {
         exit
       }
       in_agent_scripts && /^[a-zA-Z]/ { in_agent_scripts=0 }
-    ')
+    ' <<< "$file_content")
     
     # Replace {SCRIPT} placeholder with the script command
     body=$(printf '%s\n' "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
