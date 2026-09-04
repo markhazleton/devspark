@@ -1,0 +1,79 @@
+{
+  "run_id": "run_20260524T150942Z_21fc18",
+  "status": "complete",
+  "harness_name": "delivery-contract",
+  "api_version": "devspark.ai/v1",
+  "scope": {
+    "type": "repo"
+  },
+  "started_at": "2026-05-24T15:09:42.428Z",
+  "finished_at": "2026-05-24T15:09:42.486Z",
+  "workflow_status": "complete",
+  "delivery_status": "unmet",
+  "create_pr_ready": false,
+  "failure_reason_code": "delivery_status_unmet",
+  "delivery_checks": [
+    {
+      "check_id": "default-src-test-changed-count",
+      "check_type": "git.changed_count",
+      "required": true,
+      "status": "fail",
+      "details": {
+        "base_ref": "origin/main",
+        "count": 0
+      }
+    },
+    {
+      "check_id": "default-src-test-path-match",
+      "check_type": "git.changed_path_match",
+      "required": true,
+      "status": "fail",
+      "details": {
+        "base_ref": "origin/main",
+        "matched_paths": []
+      }
+    }
+  ],
+  "findings": [],
+  "stage_iterations": [],
+  "steps": [
+    {
+      "step_id": "implement",
+      "status": "passed",
+      "attempts": 1,
+      "adapter": "noop",
+      "duration_ms": 0,
+      "validation_findings": [
+        {
+          "rule_id": "always",
+          "type": "always.pass",
+          "status": "passed",
+          "severity": "warning",
+          "message": "Rule passed"
+        }
+      ],
+      "artifacts": {
+        "created": [],
+        "modified": [],
+        "deleted": []
+      }
+    }
+  ],
+  "metrics": {
+    "duration_ms": 55,
+    "steps_total": 1,
+    "steps_passed": 1,
+    "steps_failed": 0,
+    "validation_failures": 0
+  },
+  "context": {
+    "run_id": "run_20260524T150942Z_21fc18",
+    "repo_root": "/private/var/folders/rb/0ghx2wjs79j4zyb6f064k2tc0000gn/T/pytest-of-markhazleton/pytest-2/test_delivery_status_unmet_wit0",
+    "spec_path": "/private/var/folders/rb/0ghx2wjs79j4zyb6f064k2tc0000gn/T/pytest-of-markhazleton/pytest-2/test_delivery_status_unmet_wit0/delivery.harness.yaml",
+    "doc_root": "/private/var/folders/rb/0ghx2wjs79j4zyb6f064k2tc0000gn/T/pytest-of-markhazleton/pytest-2/test_delivery_status_unmet_wit0/.documentation",
+    "adapter": "noop",
+    "dry_run": false,
+    "execution_mode": "act",
+    "hands_off": false
+  }
+}

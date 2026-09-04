@@ -1,0 +1,8 @@
+{
+  "run_id": "run_20260524T151154Z_de457c",
+  "workflow_status": "complete",
+  "delivery_status": "unmet",
+  "create_pr_ready": false,
+  "failure_reason_code": "delivery_status_unmet",
+  "generated_at": "2026-05-24T15:11:54.884Z"
+}

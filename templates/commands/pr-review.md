@@ -25,7 +25,8 @@ conflicts with this section, the v4 section wins.
 - Gate on current-truth validation for touched code, `.knowledge`, and
   governance files.
 - Gate on no permanent references back to ephemeral work artifacts.
-- Gate on missing evidence for knowledge and decisions.
+- Surface missing evidence for knowledge and decisions as a strong warning; do
+  not block the review solely for that absence.
 - Gate on missing or unresolved `code_ref`, `test_ref`, and `knowledge_ref`
   values for completed tasks.
 - Gate on stale generated ontology files by running the ontology generator in
@@ -92,7 +93,8 @@ Execution limits (required):
 Run `python .devspark/scripts/python/build_knowledge_index.py --check` if
 available, otherwise run `python scripts/python/build_knowledge_index.py
 --check` in source repos. Stale `_derived.yaml` files, dangling entity
-relations, unknown governed entities, or missing evidence are review blockers
+relations and unknown governed entities are review blockers. Missing evidence
+is a strong review warning, not a blocker.
 for any PR that touches code, `.knowledge`, governance, templates, or DevSpark
 scripts.
 

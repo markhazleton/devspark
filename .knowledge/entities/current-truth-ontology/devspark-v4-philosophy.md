@@ -85,8 +85,10 @@ evidence:
     fallback_reason: "requires live token expiry timing"
 ```
 
-Missing evidence is a blocker. Inspection evidence without a meaningful
-fallback reason is a warning surfaced by review and audit.
+Missing evidence is a strong warning surfaced by review and audit; it does not
+block normal work. Inspection evidence without a meaningful fallback reason is
+also a strong warning. Agents must report the gap clearly and must not present
+an unsupported claim as verified.
 
 ## Work-package contract
 
@@ -107,7 +109,10 @@ Every implementation task records where its result landed:
 ```
 
 Each reference must resolve, or use `n/a — <reason>` when the category does not
-apply. These links point from temporary work to permanent truth. Permanent code,
+apply. These links point from temporary work to permanent truth. `test_ref` and
+`governance_ref` are work-package linkage fields only: they are recorded in
+`.devspark.work` spec-related documents and are never persisted as linkage
+metadata in code, tests, entity documents, or governance files. Permanent code,
 tests, entity documents, and governance files never reference package names,
 spec IDs, task IDs, plan paths, review threads, or archive paths.
 
@@ -158,7 +163,8 @@ A package is release-eligible only when:
 - code, test, knowledge, and governance linkages resolve or carry explained
   `n/a` values;
 - referenced tests pass;
-- knowledge and decision evidence is valid;
+- knowledge and decision evidence status is reported, with missing evidence
+  surfaced as a strong warning rather than an automatic blocker;
 - generated ontology output is current;
 - permanent content contains no reference to temporary work or archive paths.
 

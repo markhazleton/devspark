@@ -1,0 +1,10 @@
+{
+  "run_id": "run_20260524T151116Z_2c6ca5",
+  "repo_root": "/private/var/folders/rb/0ghx2wjs79j4zyb6f064k2tc0000gn/T/pytest-of-markhazleton/pytest-3/test_delivery_status_unmet_wit0",
+  "spec_path": "/private/var/folders/rb/0ghx2wjs79j4zyb6f064k2tc0000gn/T/pytest-of-markhazleton/pytest-3/test_delivery_status_unmet_wit0/delivery.harness.yaml",
+  "doc_root": "/private/var/folders/rb/0ghx2wjs79j4zyb6f064k2tc0000gn/T/pytest-of-markhazleton/pytest-3/test_delivery_status_unmet_wit0/.documentation",
+  "adapter": "noop",
+  "dry_run": false,
+  "execution_mode": "act",
+  "hands_off": false
+}

@@ -26,7 +26,9 @@ When falling back to `type: code` with `verified_by: inspection`, include
 Tasks in an in-flight work package MUST carry `code_ref`, `test_ref`, and
 `knowledge_ref` when completed, or `n/a` with a reason. Governance changes also
 require a `governance_ref`. Implementing commands must populate these fields as
-the work lands.
+the work lands. These are temporary linkage fields in `.devspark.work` spec
+documents only; they MUST NOT be written into code, tests, knowledge, or
+governance files.
 
 ## 3. Release Is The Archive Boundary
 

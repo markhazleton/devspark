@@ -84,8 +84,9 @@ Run the advisory knowledge coverage validator after resolving `FEATURE_DIR`:
 
 This pass is additive only when `.knowledge/` is absent. If `.knowledge/` exists
 and the ontology generator reports stale files, dangling relations, missing
-evidence, or schema violations, block analysis until the current-truth graph is
-fixed.
+or schema violations, report the issue clearly. Missing evidence is a strong
+warning and must not by itself block analysis; stale or structurally invalid
+ontology data may still block analysis.
 
 Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").

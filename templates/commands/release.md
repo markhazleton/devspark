@@ -39,7 +39,9 @@ A work package is release-eligible only when all of the following are true:
   may use an explained `n/a`.
 - Referenced code, test, knowledge, and governance files exist.
 - Referenced tests pass using the repository's native test command.
-- Touched knowledge entities and governance decisions contain valid evidence.
+- Touched knowledge entities and governance decisions report evidence status.
+  Missing evidence is a strong warning, not an automatic release blocker;
+  unsupported claims must not be described as verified.
 - Generated ontology output is current.
 - Permanent code and knowledge contain no references back to work-package,
   task, plan, review-thread, or archive artifacts.
