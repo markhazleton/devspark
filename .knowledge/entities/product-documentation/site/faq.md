@@ -83,14 +83,14 @@ In your AI agent's chat interface -- the same place you normally talk to your as
 
 ### Do I have to use every command?
 
-No. Most projects use a small subset of the stock commands. The shipped v4.1.0
-template set contains 29 active command files.
+No. Most projects use a small subset of the stock commands. The current template
+set contains 30 active command files.
 
-**Everyday:** `/devspark.quickfix`, `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement`, `/devspark.pr-review`
+**Everyday:** `/devspark.next`, `/devspark.quickfix`, and `/devspark.specify` → `/devspark.clarify` when needed → `/devspark.plan` → `/devspark.tasks` → required gates → `/devspark.implement` → `/devspark.create-pr` → `/devspark.pr-review`
 
-**Occasional:** `/devspark.constitution`, `/devspark.site-audit`, `/devspark.release`
+**Occasional:** `/devspark.constitution`, `/devspark.site-audit`, `/devspark.explain`, `/devspark.release`
 
-**Specialized:** `/devspark.critic`, `/devspark.harvest`, `/devspark.evolve-constitution`, `/devspark.discover-knowledge`
+**Specialized:** `/devspark.critic`, `/devspark.evolve-constitution`, `/devspark.discover-knowledge`
 
 ### What is the spec status lifecycle?
 

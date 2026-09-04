@@ -40,5 +40,5 @@ rechecks the knowledge scaffold.
 Run the same quickstart prompt again. It compares `.devspark/VERSION` with the
 latest GitHub release and refreshes framework-owned assets when a newer release
 is available. If `.documentation/` or `.documenation/` exists, the quickstart
-classifies each document as archive-only, in-flight `.devspark.work/`, or
+classifies each document as staged for release, in-flight `.devspark.work/`, or
 durable `.knowledge/` current truth before moving it.

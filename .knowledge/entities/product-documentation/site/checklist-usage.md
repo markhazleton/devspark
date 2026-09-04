@@ -14,10 +14,10 @@ This is **not** a QA test plan. It does not check whether code works correctly. 
 
 ## When to Use
 
-Run `/devspark.checklist` **after** `/devspark.specify` or `/devspark.clarify`, **before** `/devspark.plan`:
+Run `/devspark.checklist` after `plan` and `tasks` when the spec frontmatter requires the checklist gate:
 
 ```text
-/devspark.specify -> /devspark.clarify -> /devspark.checklist -> /devspark.plan
+/devspark.specify -> /devspark.clarify when needed -> /devspark.plan -> /devspark.tasks -> /devspark.checklist -> remaining required gates
 ```
 
 Checklist outputs are gate artifacts. The checklist files live under `.devspark.work/specs/<feature>/checklists/`, and the current aggregate gate summary is persisted at `.devspark.work/specs/<feature>/gates/checklist.md`. Later commands such as `/devspark.tasks`, `/devspark.implement`, and `/devspark.create-pr` read them, summarize incomplete items, and ask whether you want to fix the gaps first or proceed with an explicit acknowledgement.

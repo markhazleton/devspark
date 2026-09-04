@@ -106,11 +106,22 @@ Ask about user needs and constraints, not implementation details.
 /devspark.tasks
 ```
 
-Optionally validate first with `/devspark.analyze` or `/devspark.critic`, then:
+Run every gate named in the spec frontmatter. A full spec normally requires:
+
+```text
+/devspark.checklist
+/devspark.analyze
+/devspark.critic
+```
+
+Then implement:
 
 ```text
 /devspark.implement
 ```
+
+Use `/devspark.verify` after implementation when the change needs a focused
+behavioral or evidence check. Release performs the final mandatory revalidation.
 
 ---
 
@@ -123,18 +134,22 @@ After implementation completes (spec status becomes `Complete`), draft the PR an
 /devspark.pr-review
 ```
 
-If you push more commits after review feedback or a rebase, refresh the description with `/devspark.update-pr` before re-reviewing.
+When review finds issues, run `/devspark.address-pr-review`, synchronize the
+branch as needed, refresh the description with `/devspark.update-pr`, and run
+`/devspark.pr-review UPDATE` against the current commit.
 
 The review checks that the spec is `Complete` and all tasks are done before recommending approval. Merge the PR after approval.
 
-At the end of the sprint, validate current truth, update the version, and
-generate release notes:
+At release time, validate code, tests, knowledge, governance, and task linkage;
+archive completed work; update the version; and generate release notes:
 
 ```text
 /devspark.release
 ```
 
-See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec status lifecycle and sprint cadence.
+See the [Release Guide](release-usage.md) for release validation and archival,
+and [Implementation Lifecycle](implementation-lifecycle.md) for the complete
+delivery flow.
 
 ---
 
@@ -143,6 +158,7 @@ See [Implementation Lifecycle](implementation-lifecycle.md) for the full spec st
 - [Upgrade Guide](upgrade.md) -- keep DevSpark current
 - [DevSpark and Codex](devspark-and-codex.md) -- best practices for using Codex with DevSpark
 - [Implementation Lifecycle](implementation-lifecycle.md) -- full workflow overview
+- [Release Guide](release-usage.md) -- final validation and release-only archival
 - [Constitution Guide](constitution-guide.md) -- writing effective project principles
 - [FAQ](faq.md) -- common questions answered
 - [Command Reference](index.md#command-categories) -- all DevSpark commands

@@ -34,14 +34,16 @@ To build the documentation locally:
 - `index.md` - Main homepage and command reference
 - `quickstart.md` - Bootstrap and first-feature walkthrough
 - `implementation-lifecycle.md` - Full workflow with anti-patterns guide
+- `release-usage.md` - Final validation and release-only archival guide
+- `next-usage.md` - State-aware next-command navigation and safe auto progression
 - `installation.md` - Approved quickstart-based installation
 - `upgrade.md` - Approved quickstart-based upgrades and repairs
 - `constitution-guide.md` - Constitution creation, structure, and best practices
 - `monorepo-guide.md` - Optional multi-app monorepo support
 - `pr-review-usage.md` - PR review command guide
 - `site-audit-usage.md` - Site audit command guide
+- `explain-usage.md` - Existing-functionality explanation and knowledge-sync guide
 - `critic-usage.md` - Critic command guide
-- `harvest-usage.md` - Harvest command guide
 - `checklist-usage.md` - Checklist command guide
 - `repo-story-usage.md` - Repo story command guide
 - `faq.md` - Frequently asked questions

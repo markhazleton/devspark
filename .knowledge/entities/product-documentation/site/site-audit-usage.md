@@ -193,6 +193,25 @@ Prioritized action items:
 | **MEDIUM** | Code quality concern, maintainability issue, missing tests |
 | **LOW** | Style suggestion, minor improvement, optimization opportunity |
 
+## Current-Truth Finding Codes
+
+When the audit compares implemented behavior with `.knowledge`, it uses a
+shared topic-level taxonomy:
+
+| Code | Meaning |
+|---|---|
+| `DELTA1` | Knowledge contradicts current code, configuration, or verified behavior. |
+| `DELTA2` | Cited evidence is stale, missing, or cannot be resolved. |
+| `DELTA3` | A material documented behavior lacks adequate passing test evidence. |
+| `DELTA4` | A knowledge link or current-truth cross-reference is broken. |
+| `KNOW1` | Implemented behavior has no matching current-truth knowledge. |
+| `KNOW2` | Matching knowledge is materially incomplete. |
+| `KNOW3` | A claim lacks checkable evidence or required fallback context. |
+| `KNOW4` | Current-truth objects are ambiguous, duplicated, or inconsistent. |
+
+`/devspark.explain` uses these same codes for a single free-text topic, while
+site-audit applies them across the repository.
+
 ## Common Workflows
 
 ### Workflow 1: Pre-Release Audit
@@ -228,7 +247,7 @@ Prioritized action items:
 # Monthly duplicate check
 /devspark.site-audit --scope=duplicate
 
-# Compare with previous audit reports for trends
+# Review the current report and resolve its highest-severity findings
 ```
 
 ### Workflow 4: Cleanup Sprint
@@ -277,21 +296,11 @@ This produces specific, actionable findings.
 
 This produces vague, less actionable findings.
 
-## Historical Comparison
+## Temporary Report Boundary
 
-When previous audits exist, the report includes trend analysis:
-
-```markdown
-## Comparative Analysis
-
-| Metric | Previous | Current | Trend |
-|--------|----------|---------|-------|
-| Critical Issues | 5 | 2 | ↓ Improved |
-| Code Quality Score | 72% | 85% | ↑ Improved |
-| Test Coverage | 80% | 78% | ↓ Degraded |
-```
-
-This helps track improvement over time.
+Each audit evaluates the current repository state. Reports remain under
+`.devspark.work/audits/` only as temporary evidence for active remediation.
+They are not a source for current knowledge, chronology, or trend narratives.
 
 ## Troubleshooting
 
@@ -349,11 +358,10 @@ pip install pip-audit
 - HIGH issues should be addressed within the sprint
 - MEDIUM/LOW can be scheduled
 
-### 3. Track Trends
+### 3. Keep Reports Temporary
 
-- Keep audit history in `/.devspark.work/audits/`
-- Compare scores over time
-- Celebrate improvements
+- Keep audit reports in `/.devspark.work/audits/` only while they support active work
+- Let release process eligible report artifacts according to the repository policy
 
 ### 4. Improve Your Constitution
 

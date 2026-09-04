@@ -10,7 +10,7 @@ evidence:
 # Work Packages
 
 Work packages are ephemeral state under `.devspark.work`. Each task carries
-links to the permanent code and knowledge where its delta landed. The package
-can only be archived after all complete-task references are populated and
-resolve, or are explicitly marked not applicable with a reason. Verified
-packages move intact to `.archive/YYYY-MM-DD/<topic>/`, outside current truth.
+links to the permanent code, tests, and knowledge where its delta landed. A
+completed or verified package remains there until release. Release is the sole
+archive writer and moves a package intact only after all task references are
+populated and resolve, or are explicitly marked not applicable with a reason.

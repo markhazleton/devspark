@@ -66,6 +66,11 @@ Then continue:
 /devspark.implement
 ```
 
+If you are resuming later or do not want to remember the sequence, run
+`/devspark.next`. It detects the current branch, artifacts, gates, and PR state
+before recommending a command; `--auto` stops before Git synchronization,
+commits, review-fix commits, and merge.
+
 For ambiguous work, ask Codex to plan before coding:
 
 ```text
@@ -96,7 +101,8 @@ Good context sets:
 - For planning: `spec.md`, constitution, relevant app docs, and current architecture files
 - For implementation: `tasks.md`, `plan.md`, target source files, and related tests
 - For review: PR diff, constitution, spec status, completed tasks, and test output
-- For release: completed specs, merged PRs, changelog, and prior release notes
+- For release: completed specs in `.devspark.work`, their task linkage, merged
+  PRs, current code/tests/knowledge, and Git history
 
 Avoid pasting entire directories into one prompt. Ask Codex to read the relevant files itself, then summarize what it loaded before making changes.
 
@@ -110,7 +116,8 @@ The best DevSpark and Codex workflow is evidence-driven:
 4. `/devspark.implement` changes code and runs focused tests.
 5. `/devspark.pr-review` checks the result against the constitution and spec.
 6. `/devspark.address-pr-review` fixes review findings in isolation.
-7. `/devspark.release` archives completed work and updates release notes.
+7. `/devspark.release` validates code, tests, knowledge, and task linkage,
+   archives completed work, and updates release notes.
 
 Tell Codex exactly what verification is required before it stops:
 
@@ -162,7 +169,8 @@ Use these conventions for reliable Codex outcomes:
 - Keep personal overrides in `.knowledge/overrides/{git-user}/commands/`.
 - Do not commit Codex auth files, tokens, or machine-local configuration.
 - Use `/devspark.personalize` for repeated prompt adjustments instead of editing stock prompts.
-- Run `/devspark.harvest` after large efforts to preserve useful findings and reduce stale context.
+- Keep completed work packages in `.devspark.work/` until `/devspark.release`
+  validates and archives them.
 
 ## Common Failure Modes
 

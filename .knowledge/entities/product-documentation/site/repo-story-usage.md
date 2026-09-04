@@ -143,7 +143,7 @@ The command also adds or updates a link in your root `README.md` pointing to the
 
 | Command | Relationship |
 |---------|-------------|
-| `/devspark.release` | Archives development artifacts at release time |
-| `/devspark.harvest` | Consolidates knowledge from stale docs |
+| `/devspark.release` | Validates current truth and archives completed work at release time |
+| `/devspark.discover-knowledge` | Assimilates source-grounded durable knowledge and documentation intake |
 | `/devspark.site-audit` | Code-level quality analysis (complements the commit-level repo story) |
 | `/devspark.constitution` | Defines principles that the repo story evaluates alignment against |

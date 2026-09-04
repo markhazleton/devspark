@@ -58,6 +58,10 @@ FORBIDDEN_PHRASES = [
     ".knowledge/" + "decisions",
 ]
 
+FORBIDDEN_TERMS = [
+    "har" + "vest",
+]
+
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
 
@@ -87,6 +91,18 @@ def check_forbidden_phrases(files: list[Path]) -> None:
     assert not problems, "\n".join(problems)
 
 
+def check_forbidden_terms(files: list[Path]) -> None:
+    problems: list[str] = []
+    for path in files:
+        text = path.read_text(encoding="utf-8").lower()
+        for term in FORBIDDEN_TERMS:
+            if term in text:
+                problems.append(
+                    f"{path.relative_to(ROOT).as_posix()}: contains removed product term: {term}"
+                )
+    assert not problems, "\n".join(problems)
+
+
 def check_internal_links(files: list[Path]) -> None:
     problems: list[str] = []
     for path in files:
@@ -112,6 +128,7 @@ def main() -> None:
     files = iter_scope_files()
     assert files, "No documentation files found for audit scope"
     check_forbidden_phrases(files)
+    check_forbidden_terms(files)
     check_internal_links(files)
     print(f"Documentation audit validated for {len(files)} files.")
 

@@ -9,7 +9,7 @@ evidence:
 
 # Command Template Architecture
 
-Command templates remain the canonical prompt source. Generated atomic prompt
-shims and agent-specific command shims derive from these templates, while v4
-changes the lifecycle semantics from durable spec history to ephemeral work
-packages and current-truth knowledge.
+Command templates are the canonical prompt source. Generated atomic prompts and
+agent-specific shims remain thin resolvers. Temporary lifecycle artifacts live
+in `.devspark.work/`; code, tests, and `.knowledge/` hold current truth; release
+alone moves validated completed packages to the human-only archive buffer.

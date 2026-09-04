@@ -108,7 +108,7 @@ def test_docs_list_verify_and_genuine_fix_contracts() -> None:
     changelog = _read("CHANGELOG.md")
 
     assert "/devspark.verify" in readme
-    assert "29 active commands" in templates_readme
+    assert "30 active commands" in templates_readme
     assert "command-preamble-contract.md" in templates_readme
     assert "devspark-evidence.schema.json" in templates_readme
     assert "quickstart prompts" in changelog

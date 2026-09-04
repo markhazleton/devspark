@@ -7,14 +7,14 @@
 **Current version:** [v4.1.0](https://github.com/markhazleton/devspark/releases/tag/v4.1.0)
 
 DevSpark is a structured development process for AI coding assistants. It
-provides 29 stock command prompts plus helper templates and scripts that give
+provides 30 stock command prompts plus helper templates and scripts that give
 any AI agent a repeatable current-truth workflow.
 
 ## What It Is
 
 - **Not a program.** Not a subscription. Just markdown files you copy into your project.
 - **Agent-agnostic.** Works with Claude Code, GitHub Copilot, Cursor, Gemini CLI, and 18+ AI agents.
-- **Current-truth powered.** Projects keep durable code, `.knowledge`, and governance aligned while moving completed planning scaffolding under human-only `.archive/YYYY-MM-DD/<topic>/` folders.
+- **Current-truth powered.** Projects keep durable code, `.knowledge`, and governance aligned while release moves completed planning scaffolding under human-only `.archive/YYYY-MM-DD/<topic>/` folders.
 - **Multi-app ready.** Optionally manage multiple applications in a monorepo with per-app governance, profiles, and scoped commands.
 
 ## Core Idea

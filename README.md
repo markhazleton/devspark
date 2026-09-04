@@ -15,7 +15,7 @@
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 **Current version:** [v4.1.0](https://github.com/markhazleton/devspark/releases/tag/v4.1.0)
 
-> **Not a program. Not a subscription.** Copy 29 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 30 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
 ---
 
@@ -24,7 +24,7 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 29 stock command prompt files (THE PRODUCT)
+├── templates/commands/   ← 30 stock command prompt files (THE PRODUCT)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 ├── .knowledge/           ← Current truth: entities, governance, ontology reports
 └── .devspark.work/       ← Temporary lifecycle work products
@@ -94,7 +94,7 @@ authored repository-owned `.knowledge/` content.
 
 For a full walkthrough see the [Implementation Lifecycle Guide](.knowledge/entities/product-documentation/site/implementation-lifecycle.md).
 
-Recommended review loop: `specify → implement → pr-review → address-pr-review → pr-review UPDATE → merge`.
+Canonical delivery loop: `specify → clarify when needed → plan → tasks → required gates → implement → focused verify when needed → commit/push → create-pr → pr-review ↔ address-pr-review → merge`. Run `release` separately when the team is ready to validate and archive completed packages.
 
 ---
 
@@ -112,19 +112,20 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 | `/devspark.verify` | Verify behavioral proof and reject metric-only fixes |
 | `/devspark.create-pr` | Draft or update a spec-aware pull request |
 | `/devspark.update-pr` | Refresh an existing pull request description from the current branch delta |
+| `/devspark.next` | Continue from detected repository, artifact, gate, and PR state |
 
-### Constitution-Powered (no spec required)
+### Review, Release, and Repository Utilities
 
 | Command | Purpose |
 |---------|---------|
 | `/devspark.pr-review` | [Constitution-based PR review](.knowledge/entities/product-documentation/site/pr-review-usage.md) |
 | `/devspark.address-pr-review` | Apply PR review fixes with mandatory commit isolation gates |
 | `/devspark.site-audit` | [Comprehensive codebase audit](.knowledge/entities/product-documentation/site/site-audit-usage.md) |
+| `/devspark.explain` | [Explain existing functionality and verify matching current truth](.knowledge/entities/product-documentation/site/explain-usage.md) |
 | `/devspark.quickfix` | Lightweight workflow for bug fixes |
 | `/devspark.fix-score` | Diagnose and remediate repository score blockers without weakening scoring rules |
 | `/devspark.critic` | [Adversarial risk analysis](.knowledge/entities/product-documentation/site/critic-usage.md) |
-| `/devspark.release` | Validate current truth, version, and prepare releases |
-| `/devspark.harvest` | [Validate current truth and archive verified in-flight work packages](.knowledge/entities/product-documentation/site/harvest-usage.md) |
+| `/devspark.release` | [Validate current truth and archive completed work at release time](.knowledge/entities/product-documentation/site/release-usage.md) |
 | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `/devspark.repo-story` | Generate narrative from commit history |
 | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
@@ -209,7 +210,9 @@ DevSpark cleanly separates **your work** from **its installation**:
 .devspark.work/            ← Ephemeral in-flight work packages
 ```
 
-> **Multi-app layout** (optional): When using multi-app, each application also gets `{app-path}/.knowledge/` for app-local constitutions and overrides.
+> **Multi-app layout** (optional): Each registered application may use
+> `{app-path}/.knowledge/` for app-local entities, decisions, ontology output,
+> and overrides, plus `{app-path}/.devspark.work/` for temporary work packages.
 
 **3-tier prompt resolution** (first match wins):
 
@@ -261,7 +264,6 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 | PR review guide | [pr-review-usage.md](.knowledge/entities/product-documentation/site/pr-review-usage.md) |
 | Site audit guide | [site-audit-usage.md](.knowledge/entities/product-documentation/site/site-audit-usage.md) |
 | Critic guide | [critic-usage.md](.knowledge/entities/product-documentation/site/critic-usage.md) |
-| Harvest guide | [harvest-usage.md](.knowledge/entities/product-documentation/site/harvest-usage.md) |
 | Repo story | [repo-story-usage.md](.knowledge/entities/product-documentation/site/repo-story-usage.md) |
 
 ---

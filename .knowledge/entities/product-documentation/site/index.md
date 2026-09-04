@@ -11,7 +11,7 @@ assistants. It is prompt-first: the product is the command prompt collection,
 quickstart prompts, helper scripts, schemas, skills, and current-truth knowledge
 model.
 
-The v4.1.0 release ships 29 active stock command prompts.
+The current source tree contains 30 active stock command prompts.
 
 Install, upgrade, and repair DevSpark only by running the matching quickstart
 prompt from `quickstart/` in the target repository.
@@ -22,17 +22,22 @@ prompt from `quickstart/` in the target repository.
 - [Installation Guide](installation.md) - Approved quickstart-based installation
 - [Upgrade Guide](upgrade.md) - Approved quickstart-based upgrades and repairs
 - [Implementation Lifecycle](implementation-lifecycle.md) - Prompt workflow from idea through release
+- [Release Guide](release-usage.md) - Final validation and release-only archival
 - [Constitution Guide](constitution-guide.md) - Governance principles and evolution
 - [PR Review Guide](pr-review-usage.md) - Constitution-based PR review
 - [Site Audit Guide](site-audit-usage.md) - Whole-repository audit prompt
 - [Critic Guide](critic-usage.md) - Adversarial risk analysis
-- [Harvest Guide](harvest-usage.md) - Knowledge-preserving cleanup
 - [Checklist Guide](checklist-usage.md) - Validation checklist generation
 - [Repo Story Guide](repo-story-usage.md) - Evidence-based repository narrative
 - [Monorepo Guide](monorepo-guide.md) - Optional multi-application support
 - [FAQ](faq.md) - Common questions
 
 ## Command Categories
+
+The canonical feature path is `specify → clarify when needed → plan → tasks →
+required checklist/analyze/critic gates → implement → focused verify when needed
+→ commit/push → create-pr → pr-review ↔ address-pr-review → merge`. Release is a
+separate human-triggered event.
 
 ### Core Workflow
 
@@ -46,6 +51,7 @@ prompt from `quickstart/` in the target repository.
 | `/devspark.verify` | Verify behavioral proof and reject metric-only fixes |
 | `/devspark.create-pr` | Draft a PR with workflow context |
 | `/devspark.update-pr` | Refresh an existing PR description |
+| `/devspark.next` | Detect the current workflow state and recommend the next command |
 
 ### Review and Quality
 
@@ -54,6 +60,7 @@ prompt from `quickstart/` in the target repository.
 | `/devspark.pr-review` | Review a PR against the constitution |
 | `/devspark.address-pr-review` | Resolve review findings with commit isolation |
 | `/devspark.site-audit` | Audit repository quality and compliance |
+| `/devspark.explain` | Explain existing behavior and verify its current-truth knowledge |
 | `/devspark.critic` | Perform adversarial risk analysis |
 | `/devspark.analyze` | Check cross-artifact consistency |
 | `/devspark.checklist` | Generate validation checklists |
@@ -64,8 +71,7 @@ prompt from `quickstart/` in the target repository.
 | Command | Purpose |
 |---------|---------|
 | `/devspark.quickfix` | Handle small fixes with lightweight records |
-| `/devspark.release` | Validate current truth, version, and prepare releases |
-| `/devspark.harvest` | Archive verified ephemeral work packages after current-truth assimilation |
+| `/devspark.release` | Validate code, tests, knowledge, and linkage; archive completed work |
 | `/devspark.evolve-constitution` | Propose governance amendments |
 | `/devspark.repo-story` | Generate a repository narrative from evidence |
 | `/devspark.commit-audit` | Analyze commit history for delivery signals |
@@ -85,6 +91,5 @@ prompt from `quickstart/` in the target repository.
 ## Current-Truth Model
 
 - `.devspark/` contains framework-owned stock assets and the version stamp.
-- `.knowledge/` contains durable governance, entities, decisions, and ontology reports.
-- `.knowledge/` contains repository-owned documentation and guides.
+- `.knowledge/` contains durable governance, entities, decisions, ontology reports, repository documentation, and overrides.
 - `.devspark.work/` contains temporary lifecycle work and should not be committed.

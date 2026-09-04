@@ -7,6 +7,10 @@
   items:
     - name: Implementation Lifecycle
       href: implementation-lifecycle.md
+    - name: Release Guide
+      href: release-usage.md
+    - name: Next Command Navigator
+      href: next-usage.md
     - name: Quick Start
       href: quickstart.md
     - name: DevSpark and Codex
@@ -20,8 +24,8 @@
     - name: Monorepo Guide
       href: monorepo-guide.md
 
-# Quality & Review commands
-- name: Constitution-Powered Commands
+# Quality and review commands
+- name: Quality and Review Commands
   items:
     - name: Constitution Guide
       href: constitution-guide.md
@@ -29,10 +33,10 @@
       href: pr-review-usage.md
     - name: Site Audit Guide
       href: site-audit-usage.md
+    - name: Explain Guide
+      href: explain-usage.md
     - name: Critic Guide (Spec Workflow)
       href: critic-usage.md
-    - name: Harvest Guide
-      href: harvest-usage.md
     - name: Checklist Guide
       href: checklist-usage.md
     - name: Repo Story Guide

@@ -7,9 +7,18 @@ prompt files.
 
 ## Lifecycle at a Glance
 
-1. Bootstrap with quickstart prompt
-2. Run the implementation workflow (`/devspark.constitution` -> `/devspark.specify` -> `/devspark.plan` -> `/devspark.tasks` -> `/devspark.implement` -> `/devspark.create-pr` -> `/devspark.pr-review` -> `/devspark.address-pr-review` -> `/devspark.pr-review UPDATE`)
-3. Maintain by re-running the matching quickstart prompt for install, upgrade, or repair
+At any point, run `/devspark.next` to detect the current branch, artifacts,
+gates, and PR state and receive one recommended next command. Use
+`/devspark.next --auto` to chain safe steps until a human-owned Git or merge
+boundary is reached.
+
+1. Bootstrap with the matching quickstart prompt.
+2. Establish the repository constitution.
+3. Run `specify → clarify when needed → plan → tasks → required gates → implement`.
+4. Run focused verification when the change needs explicit behavioral proof.
+5. Commit and synchronize the branch, then run `create-pr → pr-review ↔ address-pr-review → merge`.
+6. Run `release` as a separate human-triggered event to revalidate and archive completed packages.
+7. Re-run the matching quickstart prompt whenever installation, upgrade, or repair is needed.
 
 ## 1. Bootstrap (Primary)
 
@@ -35,13 +44,16 @@ After bootstrap, run the standard implementation lifecycle in chat:
 3. `/devspark.clarify` (optional but recommended)
 4. `/devspark.plan`
 5. `/devspark.tasks`
-6. `/devspark.analyze` and `/devspark.critic` (optional quality gates)
+6. Run the gates named by spec frontmatter: `/devspark.checklist`, `/devspark.analyze`, and `/devspark.critic` as required
 7. `/devspark.implement`
-8. `/devspark.create-pr`
-9. `/devspark.pr-review`
-10. `/devspark.address-pr-review` (author-side fix loop when findings are open)
-11. `/devspark.pr-review UPDATE`
-12. Merge PR after approval
+8. `/devspark.verify` when focused behavioral or evidence proof is needed
+9. Commit and synchronize the branch
+10. `/devspark.create-pr`
+11. `/devspark.pr-review`
+12. `/devspark.address-pr-review` when findings are open
+13. `/devspark.pr-review UPDATE`
+14. Merge the PR after approval
+15. `/devspark.release` at the selected release event, not automatically after merge
 
 ### Lifecycle Terminology
 
@@ -73,8 +85,9 @@ Downstream commands must read the spec frontmatter first and treat that metadata
 ### Ephemeral Work-Package Lifecycle
 
 Specs, plans, tasks, and gates are temporary work-package files under
-`.devspark.work/`. They exist to land a delta in code and `.knowledge`, then
-they move to `.archive/YYYY-MM-DD/<topic>/` after verify-before-archive passes.
+`.devspark.work/`. They remain there after implementation, verification, and PR
+review. Release validates their code, test, knowledge, and governance linkage,
+then moves eligible packages to `.archive/YYYY-MM-DD/<topic>/`.
 
 ```text
 /devspark.specify     -->  Status: Draft
@@ -87,53 +100,57 @@ they move to `.archive/YYYY-MM-DD/<topic>/` after verify-before-archive passes.
 /devspark.pr-review   -->  Reviewer findings and disposition
 /devspark.address-pr-review -->  Author applies fixes with commit-isolation gates
 /devspark.pr-review UPDATE -->  Focused re-review against latest fix iteration
-/devspark.verify      -->  Confirms evidence and task linkage
-/devspark.harvest     -->  Archives verified ephemeral work packages
+/devspark.verify      -->  Confirms evidence and task linkage; package remains live
+/devspark.release     -->  Revalidates and archives eligible work packages
 ```
 
 Quality gate outputs are written inside the in-flight work package:
 
-- `analyze.md` for cross-artifact consistency review
-- `critic.md` for adversarial technical risk review
-- `checklist.md` as the current checklist gate summary across checklist files
+- `gates/analyze.md` for cross-artifact consistency review
+- `gates/critic.md` for adversarial technical risk review
+- `gates/checklist.md` as the current checklist gate summary across checklist files
 
 Downstream commands treat those gate files as temporary implementation state,
 not durable repository knowledge.
 
-Valid status values: `Draft`, `In Progress`, `Complete`.
+Valid status values: `Draft`, `In Progress`, `Complete`. A complete package
+remains in `.devspark.work/` until release.
 
 **Key rules:**
 
-- A work package must pass verify-before-archive before it can leave
-  `.devspark.work/`.
+- A work package cannot leave `.devspark.work/` before release, even after it
+  passes verification.
 - `/devspark.pr-review` flags missing code/knowledge linkage as a blocking
   current-truth issue.
 - `/devspark.site-audit` flags stale `.devspark.work/` packages on main as
   anti-patterns.
-- `/devspark.release` fails when completed work packages still lack verified
-  task linkage.
+- `/devspark.release` fails when completed work packages lack valid code, test,
+  knowledge, or governance linkage and is the sole archive writer.
 
-### Sprint Cadence
+### Release Cadence
 
 A typical sprint follows this pattern:
 
 ```text
-+--- Repeat per feature (N times during sprint) ------+
-|  /specify -> /clarify -> /plan -> /tasks -> /implement |
-|  -> git push -> /devspark.create-pr -> /devspark.pr-review -> /devspark.address-pr-review -> /devspark.pr-review UPDATE -> merge |
++--- Repeat per feature until ready to merge ----------+
+|  /specify -> /clarify when needed -> /plan -> /tasks     |
+|  -> required gates -> /implement -> focused /verify      |
+|  -> commit/push -> /create-pr -> /pr-review               |
+|  <-> /address-pr-review -> merge                          |
 +--------------------------------------------------------+
                          |
-                    (end of sprint)
+               (human-selected release event)
                          |
                     /devspark.release
 ```
 
-- **Per feature**: Run the full lifecycle from specify through implement, draft the PR with `/devspark.create-pr`, review it, and merge.
-- **End of sprint**: Run `/devspark.release` once to validate current truth,
-  generate release notes, and bump the version.
+- **Per feature**: Run the route-defined lifecycle from specify through required gates and implement, gather focused verification evidence when needed, draft the PR with `/devspark.create-pr`, review it, and merge.
+- **At the selected release event**: Run `/devspark.release` once to validate
+  current truth, generate release notes, bump the version, and archive eligible
+  completed packages.
 - **Anytime**: Run `/devspark.site-audit` as a health check to catch lifecycle violations.
-- **Periodically**: Run `/devspark.harvest` to archive verified ephemeral work
-  packages under `.archive/YYYY-MM-DD/<topic>/` and report blocked ones.
+- **Blocked packages**: Release leaves incomplete or invalid packages in
+  `.devspark.work/` and reports their blockers.
 
 ### When to Use Technical Details vs. Product Language
 

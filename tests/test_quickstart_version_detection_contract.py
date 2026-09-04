@@ -40,17 +40,17 @@ def test_living_docs_name_current_release_explicitly() -> None:
         assert current_release_line in text, f"{rel_path} must explicitly name v4.1.0"
 
 
-def test_living_docs_use_v400_command_counts() -> None:
+def test_living_docs_use_current_command_counts() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     docs_index = (
         ROOT / ".knowledge" / "entities" / "product-documentation" / "site" / "index.md"
     ).read_text(encoding="utf-8")
     templates_readme = (ROOT / "templates" / "README.md").read_text(encoding="utf-8")
 
-    assert "29 stock command prompts" in readme
-    assert "29 stock command prompt files" in readme
-    assert "29 active stock command prompts" in docs_index
-    assert "As of v4.1.0, the collection includes 29 active commands." in templates_readme
+    assert "30 stock command prompts" in readme
+    assert "30 stock command prompt files" in readme
+    assert "30 active stock command prompts" in docs_index
+    assert "The current source collection includes 30 active commands." in templates_readme
 
 
 def test_quickstarts_do_not_reference_stale_240_version() -> None:

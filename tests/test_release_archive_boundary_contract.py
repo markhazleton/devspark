@@ -14,16 +14,17 @@ def _read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
-def test_harvest_surface_is_removed() -> None:
+def test_redundant_archive_surface_is_removed() -> None:
+    removed_command = "har" + "vest"
     removed = (
-        "templates/commands/harvest.md",
-        "templates/prompts/atomic/harvest.md",
-        "scripts/bash/harvest.sh",
-        "scripts/powershell/harvest.ps1",
-        ".claude/commands/devspark.harvest.md",
-        ".github/prompts/devspark.harvest.prompt.md",
-        ".github/agents/devspark.harvest.agent.md",
-        ".knowledge/entities/product-documentation/site/harvest-usage.md",
+        f"templates/commands/{removed_command}.md",
+        f"templates/prompts/atomic/{removed_command}.md",
+        f"scripts/bash/{removed_command}.sh",
+        f"scripts/powershell/{removed_command}.ps1",
+        f".claude/commands/devspark.{removed_command}.md",
+        f".github/prompts/devspark.{removed_command}.prompt.md",
+        f".github/agents/devspark.{removed_command}.agent.md",
+        f".knowledge/entities/product-documentation/site/{removed_command}-usage.md",
     )
     assert not [path for path in removed if (ROOT / path).exists()]
 

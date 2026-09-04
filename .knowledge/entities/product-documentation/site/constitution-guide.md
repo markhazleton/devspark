@@ -214,7 +214,8 @@ simplifies testing, and prevents N+1 query issues.
 
 ### 4. Version Your Constitution
 
-Track changes with version numbers and dates. This helps understand which version was used for past reviews.
+Keep one current constitution with its current semantic version and effective
+date. Amend that file in place; Git retains committed change records.
 
 ### 5. Keep It Focused
 

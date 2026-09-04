@@ -20,13 +20,15 @@ at the right quickstart file.
 2. Paste the URL to the raw quickstart file, or copy its contents into the chat
 3. The agent detects the current OS for plan preview only, then pulls and installs the full DevSpark framework payload. **Both** PowerShell and Bash script sets plus Python utility scripts are always installed regardless of OS.
 4. For upgrades or repairs, re-run the same quickstart prompt in the target repository.
-5. On every execution, the prompt checks `.knowledge/entities/` and `.knowledge/ontology/`, repairs missing scaffold files, runs ontology generation when possible, and triages `.documentation/` intake into `.archive/`, `.devspark.work/`, or `.knowledge/`.
+5. On every execution, the prompt checks `.knowledge/entities/` and `.knowledge/ontology/`, repairs missing scaffold files, runs ontology generation when possible, and triages `.documentation/` intake into `.devspark.work/` or `.knowledge/`. Release is the only DevSpark command that writes to `.archive/`.
 
 After installation, start new work with `/devspark.specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
+When resuming existing work, run `/devspark.next` to detect the current branch,
+artifact, gate, and PR state without memorizing the lifecycle order.
 
 The quickstart guides are the only approved install, upgrade, and repair path.
-They handle fresh installs, legacy migrations, version-based upgrades, and repair
-of incomplete framework installs when expected stock files are missing.
+They handle installation, supported layout migration, version-based upgrades,
+and repair when expected stock files are missing.
 
 ## Upgrade Paths
 
@@ -67,13 +69,13 @@ If your repository contains multiple applications with different platforms or go
 
 To opt in, run `/devspark.add-application` after installation to create a registry at `.knowledge/entities/application-registry/registry.json`.
 
-## Migration Support
+## Supported Layout Migration
 
 Each quickstart automatically detects and migrates from:
 
-- **Legacy `.specify/` layout** (`.specify/` directory) → moves user content to `.knowledge/`, renames old dir to `.specify.old/`
-- **Documentation intake** (`.documentation/` or `.documenation/`) → classifies each document as obsolete archive material, in-flight `.devspark.work/`, or durable `.knowledge/` current truth
-- **Pre-separation DevSpark** (`.devspark/`) → moves framework files to `.devspark/`
-- **Legacy root-level dirs** (`memory/`, `specs/`) → consolidates into `.knowledge/`
+- **`.specify/` layout** (`.specify/` directory) → moves user content to `.knowledge/` and retains a `.specify.old/` recovery copy
+- **Documentation intake** (`.documentation/` or `.documenation/`) → classifies each document as in-flight `.devspark.work/`, a release candidate, or durable `.knowledge/` current truth
+- **Combined framework/project layout** (`.devspark/`) → preserves framework files in `.devspark/` and repository truth in `.knowledge/`
+- **Root-level `memory/` or `specs/` directories** → consolidates repository-owned content into the current roots
 
-No data is removed — old directories are renamed with `.old` suffix as backups.
+Migration preserves recovery copies with `.old` suffixes instead of deleting input data.

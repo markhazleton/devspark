@@ -22,11 +22,11 @@ Terminology used by these templates:
 DevSpark ownership is split by lifecycle:
 
 - `.devspark/` is framework-managed stock content
-- `.knowledge/` is repository-owned current truth
+- `.knowledge/` is repository-owned current truth, governance, and overrides
 - `.devspark.work/` is ephemeral in-flight work state
-- `.knowledge/` is repository-owned guide content and overrides
+- source and tests are the current executable product behavior
 
-As of v4.1.0, the collection includes 29 active commands.
+The current source collection includes 30 active commands.
 
 | File | Command | Purpose |
 |------|---------|---------|
@@ -41,11 +41,12 @@ As of v4.1.0, the collection includes 29 active commands.
 | `pr-review.md` | `/devspark.pr-review` | Review PRs against constitution |
 | `address-pr-review.md` | `/devspark.address-pr-review` | Address PR review findings with enforced commit isolation |
 | `site-audit.md` | `/devspark.site-audit` | Comprehensive codebase audit |
+| `explain.md` | `/devspark.explain` | Explain existing functionality and verify matching current truth |
+| `next.md` | `/devspark.next` | Detect workflow state and safely dispatch the next command |
 | `commit-audit.md` | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
 | `quickfix.md` | `/devspark.quickfix` | Lightweight bug fix workflow |
 | `fix-score.md` | `/devspark.fix-score` | Diagnose and remediate repository score blockers with verification guardrails |
-| `harvest.md` | `/devspark.harvest` | Sweep abandoned work packages and update current truth |
-| `release.md` | `/devspark.release` | Verify current truth and prepare releases |
+| `release.md` | `/devspark.release` | Validate current truth and archive completed work packages |
 | `evolve-constitution.md` | `/devspark.evolve-constitution` | Propose constitution amendments |
 | `repo-story.md` | `/devspark.repo-story` | Narrative from commit history |
 | `critic.md` | `/devspark.critic` | Adversarial risk analysis |

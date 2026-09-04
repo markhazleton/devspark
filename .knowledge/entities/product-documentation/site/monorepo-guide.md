@@ -1,11 +1,9 @@
 # Multi-Application Monorepo Support
 
-<video controls width="100%">
-  <source src="https://github.com/markhazleton/devspark/releases/download/v0.1.1/DevSpark__Taming_the_Monorepo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-DevSpark's multi-app monorepo support lets you manage multiple applications in a single repository with per-app governance, scoped workflows, and dependency-aware reviews — while keeping full backward compatibility with single-app repositories.
+DevSpark's multi-app monorepo support lets you manage multiple applications in a
+single repository with per-app governance, scoped workflows, and dependency-aware
+reviews. Repositories without an application registry continue to use the
+single-app workflow.
 
 ---
 
@@ -223,7 +221,7 @@ DevSpark provides three dedicated commands for managing applications in a monore
 
 ### `/devspark.add-application`
 
-Registers a new application in the repository registry through a guided workflow. Collects the application's identifier, path, kind, owner, criticality, profile inheritance, and dependencies. Validates all inputs against the registry and scaffolds the application's `.knowledge/` directory with standard subdirectories.
+Registers a new application in the repository registry through a guided workflow. Collects the application's identifier, path, kind, owner, criticality, profile inheritance, and dependencies. Validates all inputs, initializes app-local `.knowledge/` current-truth roots, and creates `{app.path}/.devspark.work/specs/` for temporary work packages.
 
 ```text
 /devspark.add-application Add payments-api as a new critical API service owned by platform-team
@@ -253,21 +251,32 @@ A multi-app repository using DevSpark follows this structure:
 
 ```text
 repo-root/
-├── .knowledge/                  # Repository-wide governance
-│   ├── memory/
-│   │   └── constitution.md          # Repo-wide constitution (mandatory)
-│   ├── commands/                    # Shared command overrides
-│   ├── scripts/                     # Shared script overrides
-│   ├── devspark.json                # Application registry
-│   └── specs/                       # Repo-scoped specifications
+├── .knowledge/                      # Repository-wide current truth
+│   ├── governance/
+│   │   ├── constitution.md          # Repo-wide constitution
+│   │   └── decisions/               # Current repository decisions
+│   ├── entities/
+│   │   └── application-registry/
+│   │       └── registry.json        # Application registry
+│   ├── ontology/                    # Generated relationship and coverage reports
+│   └── overrides/
+│       ├── commands/                # Shared command overrides
+│       └── scripts/                 # Shared script overrides
+├── .devspark.work/
+│   └── specs/                       # Repo-scoped temporary work packages
 ├── .devspark/                       # DevSpark framework (don't edit)
 ├── apps/
 │   ├── runtime-api-a/
-│   │   ├── .knowledge/          # App-specific governance
-│   │   │   ├── memory/
-│   │   │   │   └── constitution.md  # App constitution overlay
-│   │   │   ├── commands/            # App-specific command overrides
-│   │   │   └── specs/               # App-scoped specifications
+│   │   ├── .knowledge/              # App-specific current truth
+│   │   │   ├── entities/
+│   │   │   ├── governance/decisions/
+│   │   │   ├── ontology/
+│   │   │   └── overrides/
+│   │   │       ├── commands/
+│   │   │       ├── scripts/
+│   │   │       └── templates/
+│   │   ├── .devspark.work/
+│   │   │   └── specs/               # App-scoped temporary work packages
 │   │   ├── app.json                 # Optional local overrides (tags, hints, rules)
 │   │   └── src/                     # Application source code
 │   ├── admin-web/
@@ -283,30 +292,30 @@ repo-root/
 ### Key Boundaries
 
 - **`.devspark/`** contains only framework files. DevSpark installation and upgrade flows never touch `.knowledge/`.
-- **`.knowledge/`** at the repo root contains shared governance that applies to all applications.
-- **`{app.path}/.knowledge/`** contains app-specific overlays that extend (never weaken) repo-wide governance.
+- **`.knowledge/`** at the repo root contains repository current truth and governance that applies to all applications.
+- **`{app.path}/.knowledge/`** contains app-specific entities, decisions, ontology output, and overrides that extend but never weaken repository governance.
+- **`.devspark.work/`** at either scope contains temporary specs, plans, tasks, and gates. These files never live under `.knowledge/`.
 - **`{app.path}/app.json`** is an optional local manifest for app-specific tags, hints, and rules. Identity fields (id, path, kind, owner) are ignored here — the registry is authoritative.
 
 ---
 
 ## Constitution Weakening Detection
 
-A core guarantee of DevSpark's monorepo model is that app-level governance can never silently weaken mandatory repository-wide rules. The MVP uses a keyword-based detection model:
+A core guarantee of DevSpark's monorepo model is that app-level governance can never silently weaken mandatory repository-wide rules. Validation uses a keyword-based detection model:
 
 1. The repository constitution is parsed for lines containing `NON-NEGOTIABLE`, `MUST`, or `MANDATORY` markers — these form the mandatory rule set
-2. If an application constitution contains a line that explicitly contradicts, relaxes, or removes a mandatory rule (detected via negation patterns such as "not required", "optional", "may skip", or "does not apply"), validation emits a **CONFLICT** warning
-3. Detected conflicts appear in validation output and scope reports — they do not silently pass, but they also do not hard-block workflows in v1
-4. A future version may introduce structured YAML rules for machine-enforceable validation
+2. If an application overlay contains a line that explicitly contradicts, relaxes, or removes a mandatory rule (detected via negation patterns such as "not required", "optional", "may skip", or "does not apply"), validation emits a **CONFLICT** warning.
+3. Detected conflicts appear in validation output and scope reports and require explicit human disposition.
 
 ---
 
-## Backward Compatibility
+## Single-App Behavior
 
-Multi-app support is entirely **opt-in**. Repositories without a `devspark.json` registry continue to work exactly as they do today:
+Multi-app support is entirely **opt-in**. Repositories without `.knowledge/entities/application-registry/registry.json` use single-app behavior:
 
 - No directory restructure required
 - No configuration changes needed
-- All existing workflows behave identically
+- Standard workflows resolve repository-wide current truth
 - The multi-app commands (`add-application`, `list-applications`, `validate-registry`) gracefully report that no registry is configured
 
 A repository enters multi-app mode only when `.knowledge/entities/application-registry/registry.json` is created — either manually or through `/devspark.add-application`.
@@ -319,13 +328,11 @@ Not every entry in the registry is a deployable service. Shared libraries — au
 
 ---
 
-## What's in the MVP
-
-The initial release (v1) provides the foundation for monorepo support:
+## Supported Capabilities
 
 | Capability | Status |
 |------------|--------|
-| Application registry (`devspark.json`) | Included |
+| Application registry (`registry.json`) | Included |
 | Registry validation (schema, references, cycles, paths) | Included |
 | Profile inheritance and composition | Included |
 | App-local manifest (`app.json`) overrides | Included |
@@ -336,27 +343,12 @@ The initial release (v1) provides the foundation for monorepo support:
 | `/devspark.list-applications` command | Included |
 | `/devspark.validate-registry` command | Included |
 | Scope report generation | Included |
-| App lifecycle commands (remove, rename, move, split) | Deferred |
-| Shared package release orchestration | Deferred |
-
----
-
-## Design Decisions
-
-Several alternative approaches were evaluated during the design of monorepo support. Understanding why they were rejected helps explain the current design:
-
-| Alternative | Why It Was Rejected |
-|------------|--------------------|
-| **Independent DevSpark installation per application** | Duplicates framework files, creates upgrade drift, and makes cross-app reviews harder |
-| **Single repo-wide DevSpark with no app-specific overrides** | Doesn't reflect operational and governance differences between runtime APIs, web applications, admin surfaces, and QA tooling |
-| **Infer app context only from working directory or branch naming** | Brittle in CI, unclear for root-level workflows, unsafe for leadership review |
-| **Allow app constitutions to fully override repo-wide governance** | Destroys the meaning of repo-wide governance and makes compliance non-deterministic |
 
 ---
 
 ## Getting Started
 
-1. **Run `/devspark.add-application`** to register your first application. This creates the registry file and scaffolds the app's documentation directory.
+1. **Run `/devspark.add-application`** to register your first application. This creates the registry file and initializes its current-truth and temporary-work roots.
 2. **Repeat** for each additional application in the repository.
 3. **Run `/devspark.validate-registry`** to confirm the registry is consistent.
 4. **Run `/devspark.list-applications`** to see the full registry at a glance.

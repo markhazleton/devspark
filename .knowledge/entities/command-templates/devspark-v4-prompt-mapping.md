@@ -1,63 +1,85 @@
-# DevSpark v4: Prompt Inventory Mapped to Philosophy
+# DevSpark Prompt Inventory and Lifecycle Map
 
-Companion to `devspark-v4-philosophy.md`. Each `devspark.*` command grouped
-by lifecycle phase, with what v4 changes about its purpose — not a rewrite
-of every prompt, but a note on where the current one-line purpose is silent
-about a v4 discipline it now needs to enforce.
+The canonical product surface is the 30 prompt files under
+`templates/commands/`. This document describes their current roles and artifact
+boundaries.
 
-## Plan & build — produces the ephemeral spec package
+## Governance
 
-| Command | v4 guidance |
+| Command | Current role |
 |---|---|
-| **specify** | No behavior change to the spec's own content, but the artifact it creates is now explicitly ephemeral from creation — nothing it writes should assume it will exist after `implement` completes. |
-| **clarify** | Unchanged in mechanism. Answers still get encoded into the spec; the spec still dies with everything else in the package. |
-| **plan** | **New responsibility**: this is where the multi-hop ontology traversal happens and gets pinned down as `context_resolved` in the spec package. Design-time budget is generous (2–3 hops or until traversal stops finding new relevant edges) — this is the phase where retrieval complexity gets worked out so `implement` never has to. |
-| **tasks** | **New responsibility**: each generated task carries empty `code_ref` / `knowledge_ref` placeholders from the start, not added later. `tasks` sets up the linkage contract that `implement` fills and `analyze`/verify-before-archive later checks. |
-| **analyze** | **New responsibility**, added to its existing cross-artifact consistency check: validate that every entity and relation named in `context_resolved` actually resolves against the current ontology. Mechanical, hard-stop — a stale or hallucinated reference fails analyze outright, the same class of check the generator runs on `relations[].object`. |
-| **critic** | **New responsibility**, added to its existing adversarial risk pass: judge whether `context_resolved` is *sufficient* for the delta being planned — not whether it resolves (that's analyze's job), but whether something the spec obviously touches was never resolved at all. Judgment-based, not a hard stop. |
-| **checklist** | Unchanged — still an ephemeral planning aid, same lifecycle as the rest of the package. |
-| **quickfix** | Bypasses the full spec, but should still populate a minimal `context_resolved` and task-level `code_ref`/`knowledge_ref` for whatever it touches — "lightweight" should mean less ceremony, not exemption from the linkage that makes verify-before-archive possible. Worth deciding explicitly whether quickfix skips analyze/critic entirely or runs a lighter version of the same two checks. |
+| `constitution` | Creates or updates `.knowledge/governance/constitution.md`, the current governing contract. |
+| `discover-constitution` | Derives a proposed constitution from current code and conventions, then hands the proposal to `constitution`. |
+| `evolve-constitution` | Proposes amendments from current evidence; approved changes update the current constitution and affected decisions in place. |
 
-## Implementation — applies the delta
+## Specification and design
 
-| Command | v4 guidance |
+| Command | Current role |
 |---|---|
-| **implement** | This prompt now carries the heaviest v4 discipline, matching what the philosophy calls "the cost deliberately moved to implement": (1) consumes `context_resolved` as already-resolved context — never traverses more than one hop itself; escalation past one hop is logged and attributable, not silent; (2) updates code and knowledge together in one pass, preferring test evidence over code-only evidence, recording `test_attempted`/`fallback_reason` when it falls back; (3) populates `code_ref`/`knowledge_ref` on every task as it completes it; (4) never writes a spec, task, or plan identifier into a code comment (rule 1/5); (5) only moves the spec package to `.archive/YYYY-MM-DD/<topic>/` after every task's linkage is verified populated — this is where verify-before-archive actually executes, not just gets checked. |
+| `specify` | Classifies a request as one-off fix, quick spec, or full spec and creates the corresponding temporary work package. |
+| `clarify` | Resolves material product ambiguity in an existing spec before technical planning. |
+| `plan` | Produces technical design artifacts and records bounded `context_resolved` knowledge and governance context. |
+| `tasks` | Produces dependency-ordered work with `code_ref`, `test_ref`, `knowledge_ref`, and applicable `governance_ref` placeholders. |
+| `checklist` | Evaluates requirements quality and persists the current result at `gates/checklist.md`. |
+| `analyze` | Checks artifact consistency and validates resolved ontology references at `gates/analyze.md`. |
+| `critic` | Performs adversarial design and production-risk review at `gates/critic.md`. |
+| `quickfix` | Creates and completes a minimal branch-linked work record for a bounded change while preserving the same linkage and release boundary. |
 
-## Validation — carries assimilation forward, enforces the permanent record
+## Implementation and evidence
 
-| Command | v4 guidance |
+| Command | Current role |
 |---|---|
-| **pr-review** | **Primary assimilation trigger.** Nothing merges without this, which is what makes it the reliable checkpoint (vs. harvest's old role as a sweep someone had to remember to run). Should now: run the ontology generator against the diff's touched entities, gate on gap-report failures for those entities, gate on rule 1 (no ephemeral-artifact references introduced in code or knowledge), and surface — as non-blocking warnings — missing `fallback_reason` entries and any contradiction candidates among graph-adjacent objects touched by the diff. |
-| **address-pr-review** | Fixes review findings through code, test, documentation, or `.knowledge` changes while keeping `.devspark.work` review state out of commits. A fix that patches code must not introduce a spec/task reference to "explain" what review comment it addresses. |
-| **create-pr / update-pr** | Should surface evidence and linkage status in the PR description itself — which tasks have populated `code_ref`/`knowledge_ref`, which evidence entries are test- vs. code-verified — so a human reviewer sees the v4 checklist state without having to dig for it. This turns pr-review's mechanical checks into something visible in the artifact humans actually read. |
-| **verify** | Evidence mechanism engine. Produces empirical proof-of-change evidence, not document review, for declared verification modes. This is the prompt that runs cited tests and produces the pass/fail result that can be written into a knowledge object or decision evidence entry. |
-| **audit / site-audit** | *(Note: only `site-audit` appears in the inventory as a standing command; if a separate repo-wide `audit` is planned per the philosophy's "audit" references, it may be this command under a different name — worth confirming there's one command, not two overlapping ones.)* Repo-wide, not diff-scoped. Should run: the accuracy pass (resolve every `execution`-type evidence entry and re-run its test — existence and accuracy are separate reports, per the philosophy), and the contradiction scan, scoped to graph-adjacent objects (same entity, entities sharing a `governs` decision, objects citing the same evidence) rather than brute-force comparison. Contradiction findings are warnings for human review, always — never a gate. |
-| **harvest** | **Role shrinks under v4.** Its old purpose — "verify durable knowledge still matches the code" as a periodic sweep — is now pr-review's and audit's job, running continuously/at-merge instead of whenever someone remembers to run harvest. What's left for harvest: sweeping `.devspark.work` for orphaned or abandoned in-flight state (a spec package that stalled without completing verify-before-archive), not primary knowledge verification. Worth an explicit purpose-statement rewrite so it's not read as doing the same job as audit. |
-| **taskstoissues** | Already fully aligned with v4 without any change needed — its entire purpose is explaining why ephemeral tasks don't get exported as durable records, which is rule 1 stated as a user-facing explanation rather than an enforcement mechanism. |
+| `implement` | Applies tasks to code and tests, updates current knowledge and governance, fills linkage, and leaves the package in `.devspark.work/`. |
+| `verify` | Runs focused behavioral and evidence checks. It does not change task state or archive work. |
 
-## Governance & framework — Constitution, framework lifecycle
+## Pull-request delivery
 
-| Command | v4 guidance |
+| Command | Current role |
 |---|---|
-| **constitution** | Should now be explicit that the Constitution is one of three current-truth categories (not documentation), and that dependent templates being kept "in sync" includes the `.knowledge/governance/decisions/` contract, not just prose templates. |
-| **discover-constitution** | Unchanged in mechanism — discovering implicit patterns is a different activity than maintaining the current-truth categories, and doesn't need v4-specific revision. |
-| **evolve-constitution** | Worth connecting explicitly to the decision-editing discipline: a constitution amendment that contradicts an existing current decision should trigger updating that decision in place, not leaving two governance documents making incompatible claims — the same one-current-file-per-topic rule extended to the Constitution/decision boundary. |
-| **release** | Should confirm, before sealing, that every spec included in the release completed verify-before-archive (task linkage populated) rather than just checking the repository delta and knowledge are current — release is a natural second checkpoint for the same guarantee pr-review already checked once. |
-| **commit-audit / repo-story** | These read Git history, not the repo's current-truth layer — they're naturally exempt from current-truth-only, since Git is explicitly *where* history is supposed to live under v4. No change needed; worth noting this exemption explicitly somewhere so it doesn't read as an inconsistency. |
-| **quickstart install / repair** | Framework-version concern handled only through quickstart prompts. No command prompt owns install, upgrade, or repair as an in-repo lifecycle action. |
+| `create-pr` | Creates or refreshes a spec- or quickfix-aware pull request after confirmation and exposes linkage and gate state. |
+| `update-pr` | Refreshes an existing pull-request description from the current branch delta. |
+| `pr-review` | Validates the pull-request delta against governance, behavior, tests, knowledge, ontology, and task linkage. |
+| `address-pr-review` | Applies review fixes to code, tests, and knowledge while keeping temporary review state out of commits. |
 
-## App/framework operations — unaffected
+## Release
 
-**add-application, list-applications, migrate-registry, validate-registry,
-personalize, next** — these manage the multi-app registry and framework
-mechanics, not the knowledge/spec lifecycle. No v4-specific revision needed,
-though `next` should be aware of the new gate order (plan → tasks → analyze
-→ critic → implement, with `context_resolved` now part of what analyze and
-critic check) when it decides what the next command is.
+| Command | Current role |
+|---|---|
+| `release` | Revalidates completed packages, updates the version, and is the sole command that moves eligible work from `.devspark.work/` to `.archive/`. |
 
-## Shim parity
+## Current-truth utilities
 
-The active v4 inventory has 29 command prompts. Claude and Copilot shims are
-present for every active command, including `verify`, `fix-score`, and
-`address-pr-review`.
+| Command | Current role |
+|---|---|
+| `next` | Detects current Git, package, gate, PR, and review state and recommends or safely dispatches one next command. It creates no work record. |
+| `explain` | Explains one existing topic from code and tests, checks matching knowledge with DELTA/KNOW findings, and confirms before writing proposals. |
+| `discover-knowledge` | Builds or refreshes source-grounded entities and generated ontology content. |
+| `site-audit` | Audits repository-wide code, tests, knowledge, evidence, and lifecycle boundaries. Reports remain temporary work. |
+| `fix-score` | Repairs concrete score blockers while preserving behavioral intent and scoring rules. |
+
+## External tracking and repository analysis
+
+| Command | Current role |
+|---|---|
+| `taskstoissues` | Copies dependency-ordered tasks into GitHub issues for the repository matching the configured remote. Issues are an external execution surface, not current-truth documents. |
+| `repo-story` | Produces a temporary narrative from Git commit data for stakeholder and onboarding use. |
+| `commit-audit` | Evaluates Git commit data for delivery, hygiene, and engineering signals. |
+
+## Customization and multi-app operations
+
+| Command | Current role |
+|---|---|
+| `personalize` | Creates repository-owned, per-user command overrides under `.knowledge/overrides/<git-user>/commands/`. |
+| `add-application` | Registers an application and initializes its app-local knowledge and work roots. |
+| `list-applications` | Displays registered applications, profiles, dependencies, and document roots without writing files. |
+| `validate-registry` | Validates the application registry, references, cycles, paths, and app-local manifests without writing files. |
+
+## Artifact rules
+
+- Canonical prompt bodies live in `templates/commands/`.
+- Atomic prompts and agent integrations are thin resolvers; they do not duplicate
+  lifecycle prose.
+- Framework stock files install under `.devspark/`.
+- Repository current truth and overrides live under `.knowledge/`.
+- Temporary workflow artifacts live under `.devspark.work/` until release.
+- Only `release` writes `.archive/`; no command reads it.

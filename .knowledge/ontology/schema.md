@@ -1,7 +1,7 @@
 # DevSpark Knowledge Ontology
 
 DevSpark v4 stores current truth under `.knowledge`. The ontology makes that
-truth navigable without turning historical work packages into permanent context.
+truth navigable while temporary work packages remain outside permanent context.
 
 ## Roots
 
@@ -36,7 +36,7 @@ Entity ids are lowercase slugs matching `^[a-z0-9][a-z0-9._-]*$`.
 | `kind` | yes | Entity kind from the allowed kind registry |
 | `summary` | yes | Present-tense current-truth summary |
 | `owner` | no | Responsible role or team |
-| `lifecycle` | no | `current`, `transitional`, or `retired` |
+| `lifecycle` | no | `current` or `transitional`; remove entities that no longer describe current truth |
 | `root` | no | Primary repository root or path this entity describes |
 | `managed_by` | no | `human`, `prompt`, `script`, `generated`, or `mixed` |
 | `required_layers` | no | Required layer documents for this entity |

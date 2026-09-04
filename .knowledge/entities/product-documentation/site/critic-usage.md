@@ -20,7 +20,7 @@ This is a **pre-mortem** analysis tool—it imagines the project has already fai
 Run `/devspark.critic` **after** `/devspark.tasks` and **before** `/devspark.implement`:
 
 ```text
-/devspark.specify → /devspark.plan → /devspark.tasks → /devspark.critic → /devspark.implement
+/devspark.specify → /devspark.clarify when needed → /devspark.plan → /devspark.tasks → /devspark.analyze → /devspark.critic → /devspark.implement
 ```
 
 Critic findings are advisory. The command surfaces severity and recommended action, persists the gate artifact at `.devspark.work/specs/<feature>/gates/critic.md`, and lets you proceed with an explicit acknowledgement. Downstream commands should carry that acknowledgement forward instead of silently discarding it.
@@ -375,7 +375,7 @@ Critical risks exist that should be addressed.
 1. Fix critical risks if time permits
 2. If proceeding, document each accepted risk
 3. Add monitoring/alerting for risk areas
-4. Plan mitigation tasks post-MVP
+4. Plan mitigation tasks in the implementation work package
 
 ### PROCEED WITH CAUTION
 
