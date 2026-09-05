@@ -13,7 +13,7 @@ any AI agent a repeatable current-truth workflow.
 ## What It Is
 
 - **Not a program.** Not a subscription. Just markdown files you copy into your project.
-- **Agent-agnostic.** Works with Claude Code, GitHub Copilot, Cursor, Gemini CLI, and 18+ AI agents.
+- **Agent-agnostic.** Works with the 18 supported agents listed in the compatibility table, including Claude Code, GitHub Copilot, Cursor, and Gemini CLI.
 - **Current-truth powered.** Projects keep durable code, `.knowledge`, and governance aligned while release moves completed planning scaffolding under human-only `.archive/YYYY-MM-DD/<topic>/` folders.
 - **Multi-app ready.** Optionally manage multiple applications in a monorepo with per-app governance, profiles, and scoped commands.
 
@@ -53,6 +53,11 @@ This means teams share a common workflow while individuals can customize any com
 DevSpark keeps its framework files (`.devspark/`) separate from repository
 guides (`.knowledge/`), current truth (`.knowledge/`), and ephemeral work
 packages (`.devspark.work/`).
+
+In this source repository, development shims may point directly to the tracked
+`templates/commands/` files. A consumer installation uses the generated stock
+copies under `.devspark/defaults/commands/`; both layouts resolve commands
+through the same personal, team, and stock precedence order.
 
 ## Who It's For
 

@@ -33,7 +33,7 @@ No. DevSpark is pure markdown. The AI agent does the heavy lifting.
 
 ### Where do I start with AI coding assistants?
 
-1. Pick an agent (GitHub Copilot, Claude Code, Cursor, Gemini CLI, or any of 17+ supported agents).
+1. Pick one of the 18 supported agents (GitHub Copilot, Claude Code, Cursor, Gemini CLI, or another agent listed in the compatibility table).
 2. Bootstrap DevSpark with the [Quick Start Guide](quickstart.md).
 3. Follow the [Implementation Lifecycle](implementation-lifecycle.md).
 
@@ -126,7 +126,7 @@ Use `/devspark.personalize` to create personal overrides.
 
 ### Which AI assistants work with DevSpark?
 
-18+ agents including GitHub Copilot, Claude Code, Cursor, Gemini CLI, Windsurf, Amazon Q Developer, and more. See the [Quick Start Guide](quickstart.md) for the full list.
+18 agents including GitHub Copilot, Claude Code, Cursor, Gemini CLI, Windsurf, Amazon Q Developer, and more. See the [Quick Start Guide](quickstart.md) for the full list.
 
 ### Can I use multiple agents on the same project?
 
@@ -144,7 +144,7 @@ Run the matching quickstart prompt from the [Quick Start Guide](quickstart.md). 
 
 - **`.devspark/`** -- Framework-owned stock prompts, templates, scripts, and version stamp.
 - **`.knowledge/`** -- Current truth: governance, entities, decisions, and ontology reports.
-- **`.knowledge/`** -- Repository-owned guides and work product.
+- **`.knowledge/entities/product-documentation/`** -- Repository-owned guides and documentation work product.
 - **`.devspark.work/`** -- Temporary lifecycle work state.
 - **Agent shims** -- Platform-specific command files such as `.claude/commands/` or `.github/agents/`
 

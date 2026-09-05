@@ -15,7 +15,7 @@
 **Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 **Current version:** [v4.2.0](https://github.com/markhazleton/devspark/releases/tag/v4.2.0)
 
-> **Not a program. Not a subscription.** Copy 30 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 30 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with the [18 supported agents listed below](#supported-ai-agents).
 
 ---
 
