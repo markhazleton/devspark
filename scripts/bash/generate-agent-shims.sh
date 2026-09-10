@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1083
 set -euo pipefail
 agent="${1:-}"
 root="${2:-$(pwd)}"
