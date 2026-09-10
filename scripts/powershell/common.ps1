@@ -513,10 +513,6 @@ function Resolve-Constitution {
     )
 
     $repoConst = Join-Path $RepoRoot '.knowledge/governance/constitution.md'
-    $legacyRepoConst = Join-Path $RepoRoot '.knowledge/governance/constitution.md'
-    if (-not (Test-Path $repoConst) -and (Test-Path $legacyRepoConst)) {
-        $repoConst = $legacyRepoConst
-    }
     if (-not (Test-Path $repoConst)) {
         throw "Repository constitution required at $repoConst"
     }

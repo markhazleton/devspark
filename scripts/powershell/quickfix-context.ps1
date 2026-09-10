@@ -33,10 +33,6 @@ $descriptionText = $description -join " "
 # Get repository context
 $repoRoot = Get-RepoRoot
 $constitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
-$legacyConstitutionPath = Join-Path $repoRoot ".knowledge/governance/constitution.md"
-if (-not (Test-Path $constitutionPath) -and (Test-Path $legacyConstitutionPath)) {
-    $constitutionPath = $legacyConstitutionPath
-}
 $quickfixDir = Join-Path $repoRoot ".devspark.work/quickfixes"
 $currentBranch = Get-CurrentBranch
 
