@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -133,6 +134,34 @@ def test_ontology_generator_outputs_are_current() -> None:
         check=False,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_packaged_ontology_generator_uses_consumer_root_and_ignores_scaffold_readme(tmp_path: Path) -> None:
+    """Exercise the layout produced by release packages, not only the source checkout."""
+    consumer = tmp_path / "consumer"
+    script = consumer / ".devspark" / "scripts" / "python" / "build_knowledge_index.py"
+    script.parent.mkdir(parents=True)
+    shutil.copy(ROOT / "scripts" / "python" / "build_knowledge_index.py", script)
+    (consumer / ".knowledge" / "entities").mkdir(parents=True)
+    decisions = consumer / ".knowledge" / "governance" / "decisions"
+    decisions.mkdir(parents=True)
+    (decisions / "README.md").write_text(
+        "# Decisions\n\nThis file documents the decision directory.\n", encoding="utf-8"
+    )
+    (consumer / ".knowledge" / "ontology").mkdir(parents=True)
+
+    result = subprocess.run(
+        [sys.executable, str(script), "--write"],
+        cwd=consumer,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "0 decisions" in result.stdout
+    assert (consumer / ".knowledge" / "ontology" / "coverage.generated.md").exists()
+    assert not (consumer / ".devspark" / ".knowledge").exists()
 
 
 def test_lifecycle_json_contracts_remain_token_stable() -> None:

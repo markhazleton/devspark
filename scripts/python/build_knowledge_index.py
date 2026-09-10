@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -14,7 +15,26 @@ from typing import Any
 import yaml
 
 
-ROOT = Path(__file__).resolve().parents[2]
+def discover_root(explicit_root: str | None = None) -> Path:
+    """Find the consumer repository for both source and installed layouts."""
+    if explicit_root:
+        return Path(explicit_root).expanduser().resolve()
+
+    configured_root = os.environ.get("DEVSPARK_REPO_ROOT")
+    if configured_root:
+        return Path(configured_root).expanduser().resolve()
+
+    script_path = Path(__file__).resolve()
+    # Source checkout: scripts/python/<script> -> parents[2].
+    # Installed copy: .devspark/scripts/python/<script> -> parents[3].
+    candidates = [script_path.parents[2], script_path.parents[3]]
+    for candidate in candidates:
+        if (candidate / ".knowledge").is_dir() or (candidate / ".git").exists():
+            return candidate
+    return candidates[0]
+
+
+ROOT = discover_root()
 ENTITIES_DIR = ROOT / ".knowledge" / "entities"
 DECISIONS_DIR = ROOT / ".knowledge" / "governance" / "decisions"
 ONTOLOGY_DIR = ROOT / ".knowledge" / "ontology"
@@ -162,6 +182,10 @@ def load_decisions(findings: list[Finding]) -> dict[str, Decision]:
 
     for path in sorted(DECISIONS_DIR.glob("*.md")):
         data = read_frontmatter(path)
+        # README files document the collection and are not decision records.
+        # More generally, only Markdown files with frontmatter can be decisions.
+        if not data:
+            continue
         decision_id = str(data.get("id", path.stem))
         if not ID_RE.match(decision_id):
             findings.append(
@@ -420,7 +444,12 @@ def compare_or_write(path: Path, expected: str, write: bool, problems: list[str]
         problems.append(diff)
 
 
-def run(write: bool) -> int:
+def run(write: bool, root: str | None = None) -> int:
+    global ROOT, ENTITIES_DIR, DECISIONS_DIR, ONTOLOGY_DIR
+    ROOT = discover_root(root)
+    ENTITIES_DIR = ROOT / ".knowledge" / "entities"
+    DECISIONS_DIR = ROOT / ".knowledge" / "governance" / "decisions"
+    ONTOLOGY_DIR = ROOT / ".knowledge" / "ontology"
     findings: list[Finding] = []
     entities = load_entities(findings)
     decisions = load_decisions(findings)
@@ -458,8 +487,9 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--write", action="store_true", help="write generated ontology files")
     mode.add_argument("--check", action="store_true", help="check generated ontology files")
+    parser.add_argument("--root", help="consumer repository root (defaults to automatic discovery)")
     args = parser.parse_args()
-    return run(write=args.write)
+    return run(write=args.write, root=args.root)
 
 
 if __name__ == "__main__":
