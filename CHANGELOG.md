@@ -2,6 +2,20 @@
 
 All notable changes to DevSpark are documented here.
 
+## [v4.3.0] - 2026-09-09
+
+### Added
+
+- Added the Knowledge, Code, and Tests guide to the static site and navigation.
+- Added deterministic Bash and PowerShell generators for supported agent shims.
+
+### Changed
+
+- Clarified agent compatibility, descriptions, and current-release documentation.
+- Removed legacy constitution path handling from helper scripts.
+- Fixed installed knowledge-generator path resolution.
+- Fixed ShellCheck parsing of generated shim Markdown.
+
 ## [v4.2.0] - 2026-09-04
 
 ### Added
