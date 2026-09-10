@@ -276,6 +276,8 @@ Save to `.devspark/scripts/powershell/`:
 - `powershell/evolution-context.ps1`
 - `powershell/fix-score-context.ps1`
 - `powershell/generate-atomic-shims.ps1`
+- `powershell/generate-codex-shims.ps1`
+- `powershell/generate-agent-shims.ps1`
 - `powershell/get-pr-context.ps1`
 - `powershell/platform.ps1`
 - `powershell/quickfix-context.ps1`
@@ -299,6 +301,8 @@ Save to `.devspark/scripts/bash/`:
 - `bash/evolution-context.sh`
 - `bash/fix-score-context.sh`
 - `bash/generate-atomic-shims.sh`
+- `bash/generate-codex-shims.sh`
+- `bash/generate-agent-shims.sh`
 - `bash/get-pr-context.sh`
 - `bash/platform.sh`
 - `bash/quickfix-context.sh`
@@ -344,6 +348,10 @@ Run this step on **every quickstart execution**: fresh install, migration, updat
 ---
 
 ## Step 7: Create Cursor Command Shims
+
+Run `bash .devspark/scripts/bash/generate-agent-shims.sh cursor` or
+`pwsh .devspark/scripts/powershell/generate-agent-shims.ps1 -Agent cursor`.
+This deterministic generator owns shim Markdown; do not copy the example below manually.
 
 For each command in `.devspark/defaults/commands/devspark.{name}.md`, create a file at `.cursor/commands/devspark.{name}.md`:
 

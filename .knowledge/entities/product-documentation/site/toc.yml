@@ -9,6 +9,8 @@
       href: implementation-lifecycle.md
     - name: DevSpark Philosophy
       href: philosophy.md
+    - name: Three Pillars: Knowledge, Code, and Tests
+      href: three-pillars.md
     - name: Release Guide
       href: release-usage.md
     - name: Next Command Navigator

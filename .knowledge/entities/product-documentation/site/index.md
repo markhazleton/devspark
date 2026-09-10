@@ -11,6 +11,19 @@ assistants. It is prompt-first: the product is the command prompt collection,
 quickstart prompts, helper scripts, schemas, skills, and current-truth knowledge
 model.
 
+## The Three Pillars
+
+DevSpark connects three concerns that make AI-assisted development reliable:
+
+- **Knowledge** captures current truth, architecture, decisions, and governance.
+- **Code** turns intent into executable behavior through prompts, scripts,
+  schemas, and integrations.
+- **Tests** provide behavioral evidence that the change works as intended.
+
+Every meaningful change moves through all three: understand the system, change
+the behavior, prove the result, and update current truth. Read [The Three
+Pillars of DevSpark](three-pillars.md) for the complete model.
+
 The current source tree contains 30 active stock command prompts.
 
 Install, upgrade, and repair DevSpark only by running the matching quickstart

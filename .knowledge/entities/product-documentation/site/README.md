@@ -33,6 +33,7 @@ To build the documentation locally:
 - `toc.yml` - Table of contents / sidebar navigation
 - `index.md` - Main homepage and command reference
 - `philosophy.md` - Governing philosophy and current-truth model
+- `three-pillars.md` - Knowledge, Code, and Tests as DevSpark's operating model
 - `quickstart.md` - Bootstrap and first-feature walkthrough
 - `implementation-lifecycle.md` - Full workflow with anti-patterns guide
 - `release-usage.md` - Final validation and release-only archival guide

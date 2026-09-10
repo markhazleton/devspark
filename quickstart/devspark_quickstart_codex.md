@@ -282,6 +282,8 @@ Save to `.devspark/scripts/powershell/`:
 - `powershell/evolution-context.ps1`
 - `powershell/fix-score-context.ps1`
 - `powershell/generate-atomic-shims.ps1`
+- `powershell/generate-codex-shims.ps1`
+- `powershell/generate-agent-shims.ps1`
 - `powershell/get-pr-context.ps1`
 - `powershell/platform.ps1`
 - `powershell/quickfix-context.ps1`
@@ -305,6 +307,8 @@ Save to `.devspark/scripts/bash/`:
 - `bash/evolution-context.sh`
 - `bash/fix-score-context.sh`
 - `bash/generate-atomic-shims.sh`
+- `bash/generate-codex-shims.sh`
+- `bash/generate-agent-shims.sh`
 - `bash/get-pr-context.sh`
 - `bash/platform.sh`
 - `bash/quickfix-context.sh`
@@ -353,33 +357,14 @@ Run this step on **every quickstart execution**: fresh install, migration, updat
 
 ## Step 7: Create Codex Prompt Shims and AGENTS.md
 
-For each command in `.devspark/defaults/commands/devspark.{name}.md`, create a shim file in `.codex/prompts/`.
+Run the installed deterministic shim generator from the repository root:
 
-Create `.codex/prompts/devspark.{name}.md`:
+- Bash: `bash .devspark/scripts/bash/generate-agent-shims.sh codex`
+- PowerShell: `pwsh .devspark/scripts/powershell/generate-agent-shims.ps1 -Agent codex`
 
-```markdown
----
-description: DevSpark {name} command shim.
----
-
-## Prompt Resolution
-
-Determine the current git user by running `git config user.name`.
-Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
-
-Read and execute the instructions from the **first file that exists**:
-1. `.knowledge/overrides/{git-user}/commands/devspark.{name}.md` (personalized override)
-2. `.knowledge/overrides/commands/devspark.{name}.md` (team customization)
-3. `.devspark/defaults/commands/devspark.{name}.md` (stock default)
-
-## User Input
-
-$ARGUMENTS
-
-Pass the user input above to the resolved prompt.
-```
-
-Replace `{name}` in every file with the actual command name.
+The generator creates one valid Markdown shim for every installed
+`.devspark/defaults/commands/devspark.*.md` file. Do not copy the example into
+individual shim files manually.
 
 Then create or update root `AGENTS.md` if it does not already exist. Keep it concise so Codex can load it reliably:
 
