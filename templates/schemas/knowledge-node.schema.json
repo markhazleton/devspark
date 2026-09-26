@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devspark.local/schemas/knowledge-node.schema.json",
+  "title": "DevSpark Knowledge Node (Markdown frontmatter)",
+  "description": "Frontmatter for current-truth knowledge documents: entity layer documents and governance decisions (type: governance-decision). Lifecycle keys are banned; current knowledge is edited in place or deleted.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "governance-decision"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "appliesTo": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "constrains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      },
+      "uniqueItems": true
+    },
+    "source_of_truth": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "digest",
+              "baseline",
+              "verification"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "profile": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "exact"
+                ],
+                "default": "text"
+              },
+              "region": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "lines"
+                    ],
+                    "properties": {
+                      "lines": {
+                        "type": "string",
+                        "pattern": "^[0-9]+-[0-9]+$"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "start_marker"
+                    ],
+                    "properties": {
+                      "start_marker": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "end_marker": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "baseline": {
+                "type": "string",
+                "pattern": "^\\.knowledge/ontology/baselines/[0-9a-f]{64}\\.txt$"
+              },
+              "verification": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "state"
+                ],
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "unverified"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "last_verified": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "devspark-evidence.schema.json"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "status"
+            ]
+          },
+          {
+            "required": [
+              "lifecycle"
+            ]
+          },
+          {
+            "required": [
+              "supersedes"
+            ]
+          },
+          {
+            "required": [
+              "superseded-by"
+            ]
+          },
+          {
+            "required": [
+              "superseded_by"
+            ]
+          },
+          {
+            "required": [
+              "replaced"
+            ]
+          },
+          {
+            "required": [
+              "obsolete"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "const": "governance-decision"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "id",
+          "type",
+          "title",
+          "constrains",
+          "evidence",
+          "last_verified"
+        ],
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "layer"
+              ]
+            },
+            {
+              "required": [
+                "governs"
+              ]
+            }
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "source_of_truth",
+          "last_verified"
+        ]
+      }
+    }
+  ]
+}

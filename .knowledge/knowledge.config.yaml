@@ -1,0 +1,5 @@
+# DevSpark knowledge settings (repository-owned).
+knowledge_drift:
+  # last-verified: source_of_truth may be plain paths; currency is last_verified.
+  # pinned-claims: source_of_truth entries are object claims checked for content drift.
+  enforcement: last-verified

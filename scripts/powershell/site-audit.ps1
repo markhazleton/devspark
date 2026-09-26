@@ -644,6 +644,8 @@ if ($Scope -in @('full', 'constitution', 'quality', 'unused')) {
     }
 }
 
+$result.knowledge_engine = Get-KnowledgeEngineInfo -RepoRoot $repoRoot
+
 $result.pre_scan_limits = @{
     include_full_inventory = [bool]$IncludeFullInventory
     sample_limit = $SampleLimit

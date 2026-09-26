@@ -1,10 +1,13 @@
 ---
+source_of_truth:
+- templates/schemas/devspark-work-package.schema.json
+last_verified: '2026-09-04'
 evidence:
-  - type: schema
-    ref: templates/schemas/devspark-work-package.schema.json
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "Work-package structure is enforced by prompt instructions and schema review."
+- type: schema
+  ref: templates/schemas/devspark-work-package.schema.json
+  verified_by: inspection
+  test_attempted: true
+  fallback_reason: Work-package structure is enforced by prompt instructions and schema review.
 ---
 
 # Work Packages

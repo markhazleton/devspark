@@ -677,3 +677,46 @@ function Get-FeaturePathsAppAware {
         KNOWLEDGE_DIR  = Join-Path $featureDir 'knowledge'
     }
 }
+
+# Resolve the single DevSpark knowledge engine (build_knowledge_index.py).
+# Prefers the framework-managed .devspark/scripts/ copy and falls back to a
+# legacy repository-root scripts/ copy only when the framework copy is absent.
+# Returns the repository-relative path, or $null when no engine exists.
+function Resolve-KnowledgeEngine {
+    param([string]$RepoRoot = (Get-RepoRoot))
+
+    foreach ($candidate in @('.devspark/scripts/build_knowledge_index.py', 'scripts/build_knowledge_index.py')) {
+        if (Test-Path -LiteralPath (Join-Path $RepoRoot $candidate) -PathType Leaf) {
+            return $candidate
+        }
+    }
+    return $null
+}
+
+# List lingering legacy engine copies that the quickstart upgrade flow must
+# reconcile. Only reported when the framework-managed engine is present.
+function Get-LegacyKnowledgeEngines {
+    param([string]$RepoRoot = (Get-RepoRoot))
+
+    if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot '.devspark/scripts/build_knowledge_index.py') -PathType Leaf)) {
+        return @()
+    }
+    $legacy = @()
+    foreach ($candidate in @('.devspark/scripts/python/build_knowledge_index.py', 'scripts/build_knowledge_index.py', 'scripts/python/build_knowledge_index.py')) {
+        if (Test-Path -LiteralPath (Join-Path $RepoRoot $candidate) -PathType Leaf) {
+            $legacy += $candidate
+        }
+    }
+    return $legacy
+}
+
+# Build @{ engine = '<path|empty>'; legacy_copies = @(...) } for helper JSON output.
+function Get-KnowledgeEngineInfo {
+    param([string]$RepoRoot = (Get-RepoRoot))
+
+    $engine = Resolve-KnowledgeEngine -RepoRoot $RepoRoot
+    return [ordered]@{
+        engine        = if ($engine) { $engine } else { '' }
+        legacy_copies = @(Get-LegacyKnowledgeEngines -RepoRoot $RepoRoot)
+    }
+}

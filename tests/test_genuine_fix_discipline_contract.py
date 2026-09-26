@@ -95,11 +95,14 @@ def test_release_packagers_ship_genuine_fix_surfaces() -> None:
 
     assert "templates" in bash_packager
     assert "templates" in ps_packager
-    assert "scripts/python" in bash_packager
+    assert "scripts/python" not in bash_packager
+    assert "find scripts -maxdepth 1 -type f" in bash_packager
+    assert "build_knowledge_index.py" in bash_packager
+    assert "build_knowledge_index.py" in ps_packager
     assert "templates[/\\\\]commands" in ps_packager
     assert "Copy-Item -Path \"scripts/bash\"" in ps_packager
     assert "Copy-Item -Path \"scripts/powershell\"" in ps_packager
-    assert "Copy-Item -Path \"scripts/python\"" in ps_packager
+    assert "scripts/python" not in ps_packager
 
 
 def test_docs_list_verify_and_genuine_fix_contracts() -> None:

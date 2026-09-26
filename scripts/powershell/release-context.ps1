@@ -180,6 +180,7 @@ $result = [ordered]@{
     ARCHIVE_DATE = $archiveDate
     KNOWLEDGE_DIR = $knowledgeDir
     CONSTITUTION_PATH = $constitutionPath
+    KNOWLEDGE_ENGINE = Get-KnowledgeEngineInfo -RepoRoot $repoRoot
     CURRENT_VERSION = $currentVersion
     VERSION_SOURCE = $versionSource
     NEXT_VERSION = $nextVersion

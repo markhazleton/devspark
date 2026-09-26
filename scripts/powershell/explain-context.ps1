@@ -101,6 +101,30 @@ if (Test-Path -LiteralPath $knowledgeRoot) {
     }
 }
 
+# Prefer the single knowledge engine's deterministic concept ranking; fall back
+# to the bounded text scan when the engine or Python is unavailable.
+$rankingSource = 'fallback'
+$rankingEngine = ''
+$rankingResults = @()
+$enginePath = Resolve-KnowledgeEngine -RepoRoot $repoRoot
+if ($enginePath) {
+    $rankingEngine = $enginePath
+    $rankingScript = Join-Path (Join-Path $repoRoot (Split-Path $enginePath -Parent)) 'explain-context.py'
+    $python = Get-Command python3, python -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($python -and (Test-Path -LiteralPath $rankingScript)) {
+        try {
+            $rankedText = & $python.Source $rankingScript --root $repoRoot --limit 60 -- $topic 2>$null
+            if ($LASTEXITCODE -eq 0 -and $rankedText) {
+                $ranked = ($rankedText -join "`n") | ConvertFrom-Json
+                $rankingSource = 'engine'
+                $rankingResults = @($ranked.results)
+                $knowledgeMatches = [System.Collections.Generic.List[string]]::new()
+                foreach ($item in $rankingResults) { $knowledgeMatches.Add([string]$item.path) }
+            }
+        } catch { }
+    }
+}
+
 $codeMatches = [System.Collections.Generic.List[string]]::new()
 $testMatches = [System.Collections.Generic.List[string]]::new()
 # Explicitly exclude .archive, .devspark.work, and .documentation from retrieval.
@@ -148,6 +172,11 @@ $result = [ordered]@{
     terms = @($terms)
     dry_run = [bool]$DryRun
     knowledge_matches = @($knowledgeMatches)
+    knowledge_ranking = [ordered]@{
+        source = $rankingSource
+        engine = $rankingEngine
+        results = @($rankingResults)
+    }
     code_matches = @($codeMatches)
     test_matches = @($testMatches)
     counts = [ordered]@{
@@ -162,4 +191,4 @@ $result = [ordered]@{
     }
 }
 
-$result | ConvertTo-Json -Depth 6
+$result | ConvertTo-Json -Depth 10

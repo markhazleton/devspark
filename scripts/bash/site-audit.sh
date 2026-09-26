@@ -150,6 +150,7 @@ if [[ "$OUTPUT_FORMAT" == "json" ]]; then
   "scope": "$SCOPE",
   "repo_root": "$REPO_ROOT",
   "audit_dir": "$AUDIT_DIR",
+  "knowledge_engine": $(knowledge_engine_json "$REPO_ROOT"),
   "constitution": {
     "exists": $CONSTITUTION_EXISTS,
     "path": ".knowledge/governance/constitution.md",

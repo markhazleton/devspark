@@ -1,14 +1,15 @@
 ---
 id: okf-knowledge-layer-and-genuine-fix-discipline
-status: current
-last_verified: "2026-08-30"
-governs:
+type: governance-decision
+title: Current Truth Knowledge Layer and Genuine Fix Discipline
+constrains:
 - application-registry
 - command-templates
 - current-truth-ontology
 - developer-workflow
 - product-documentation
 - work-packages
+last_verified: '2026-08-30'
 evidence:
 - type: test
   ref: tests/test_knowledge_document_contract.py

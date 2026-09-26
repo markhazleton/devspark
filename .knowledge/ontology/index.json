@@ -1,0 +1,1841 @@
+{
+  "generated_by": "devspark.build_knowledge_index",
+  "schema_version": 1,
+  "entities": [
+    {
+      "id": "agent-shims",
+      "name": "Agent Shims",
+      "kind": "generated-integration-files",
+      "summary": "Thin command files for supported AI assistants that resolve to canonical DevSpark command templates.",
+      "path": ".knowledge/entities/agent-shims/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "derives_from",
+          "object": "command-templates"
+        }
+      ],
+      "constrained_by": [
+        "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
+        "always-install-both-powershell-and-bash-script-sets"
+      ],
+      "evidence": [
+        "tests/test_atomic_prompt_frontmatter_contract.py"
+      ],
+      "layers": [
+        "architecture.md"
+      ]
+    },
+    {
+      "id": "application-registry",
+      "name": "Application Registry",
+      "kind": "repository-configuration",
+      "summary": "Durable multi-application registry metadata for DevSpark monorepo workflows.",
+      "path": ".knowledge/entities/application-registry/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "scopes",
+          "object": "work-packages"
+        }
+      ],
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "evidence": [
+        "templates/commands/validate-registry.md"
+      ],
+      "layers": [
+        "architecture.md"
+      ]
+    },
+    {
+      "id": "brand-system",
+      "name": "Brand System",
+      "kind": "design-asset-set",
+      "summary": "Durable DevSpark and Make Bold Solutions brand assets, tokens, guides, and reusable media.",
+      "path": ".knowledge/entities/brand-system/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "supports",
+          "object": "product-documentation"
+        }
+      ],
+      "constrained_by": [],
+      "evidence": [
+        ".knowledge/entities/brand-system/assets"
+      ],
+      "layers": [
+        "architecture.md"
+      ]
+    },
+    {
+      "id": "command-templates",
+      "name": "Command Templates",
+      "kind": "framework-template-set",
+      "summary": "Canonical command prompts and atomic shims installed into supported AI agent surfaces.",
+      "path": ".knowledge/entities/command-templates/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "generated_for",
+          "object": "agent-shims"
+        }
+      ],
+      "constrained_by": [
+        "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
+        "agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
+        "always-install-both-powershell-and-bash-script-sets",
+        "okf-knowledge-layer-and-genuine-fix-discipline",
+        "participant-vocabulary-reserving-agent-for-ai-runtimes"
+      ],
+      "evidence": [
+        "tests/test_atomic_prompt_frontmatter_contract.py"
+      ],
+      "layers": [
+        "architecture.md",
+        "devspark-prompt-mapping.md",
+        "review-stage-divergence.md"
+      ]
+    },
+    {
+      "id": "current-truth-ontology",
+      "name": "Current-Truth Ontology",
+      "kind": "knowledge-model",
+      "summary": "v4 current-truth model that organizes durable knowledge, governance, evidence, and derived metadata.",
+      "path": ".knowledge/entities/current-truth-ontology/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "validates",
+          "object": "command-templates"
+        },
+        {
+          "type": "validates",
+          "object": "work-packages"
+        }
+      ],
+      "constrained_by": [
+        "agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
+        "okf-knowledge-layer-and-genuine-fix-discipline",
+        "participant-vocabulary-reserving-agent-for-ai-runtimes"
+      ],
+      "evidence": [
+        ".knowledge/governance/constitution.md"
+      ],
+      "layers": [
+        "architecture.md",
+        "devspark-philosophy.md"
+      ]
+    },
+    {
+      "id": "developer-workflow",
+      "name": "Developer Workflow",
+      "kind": "contributor-practice",
+      "summary": "Durable contributor practices for dogfooding DevSpark and capturing improvement loops.",
+      "path": ".knowledge/entities/developer-workflow/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "uses",
+          "object": "command-templates"
+        }
+      ],
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "evidence": [
+        ".knowledge/entities/developer-workflow"
+      ],
+      "layers": [
+        "architecture.md",
+        "dogfooding.md",
+        "improvement-loop.md"
+      ]
+    },
+    {
+      "id": "extension-catalog",
+      "name": "Extension Catalog",
+      "kind": "integration-catalog",
+      "summary": "Durable catalog metadata and guidance for community DevSpark extensions.",
+      "path": ".knowledge/entities/extension-catalog/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "extends",
+          "object": "command-templates"
+        }
+      ],
+      "constrained_by": [],
+      "evidence": [
+        ".knowledge/entities/extension-catalog/catalog.community.json"
+      ],
+      "layers": [
+        "README.md",
+        "architecture.md"
+      ]
+    },
+    {
+      "id": "product-documentation",
+      "name": "Product Documentation",
+      "kind": "knowledge-site",
+      "summary": "Durable DevSpark user guides, docs-site source, and documentation publishing configuration.",
+      "path": ".knowledge/entities/product-documentation/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "describes",
+          "object": "command-templates"
+        },
+        {
+          "type": "describes",
+          "object": "work-packages"
+        }
+      ],
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "evidence": [
+        "tests/test_documentation_audit.py"
+      ],
+      "layers": [
+        "architecture.md"
+      ]
+    },
+    {
+      "id": "work-packages",
+      "name": "Work Packages",
+      "kind": "ephemeral-state",
+      "summary": "v4 specification packages retained under `.devspark.work` through implementation and verification until release validates and archives them.",
+      "path": ".knowledge/entities/work-packages/_entity.yaml",
+      "aliases": [],
+      "relations": [
+        {
+          "type": "validated_by",
+          "object": "current-truth-ontology"
+        }
+      ],
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "evidence": [
+        "templates/schemas/devspark-work-package.schema.json"
+      ],
+      "layers": [
+        "architecture.md"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "path": ".knowledge/governance/decisions/agent-skills-as-portable-capability-packages-within-lifecycle-orchestration.md",
+      "owner": "governance",
+      "type": "governance-decision",
+      "title": "Agent Skills as Portable Capability Packages",
+      "aliases": [],
+      "headings": [
+        "Agent Skills as Portable Capability Packages",
+        "Current Decision",
+        "Rationale",
+        "Alternatives Rejected",
+        "Consequences"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "tests/test_skills_install_contract.py",
+        "templates/skills/ADAPTER-contract.md"
+      ],
+      "last_verified": "2026-08-30",
+      "id": "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
+      "constrains": [
+        "agent-shims",
+        "command-templates"
+      ]
+    },
+    {
+      "path": ".knowledge/governance/decisions/agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest.md",
+      "owner": "governance",
+      "type": "governance-decision",
+      "title": "Governance Severity Registry, Trust Tiers, and Conformance Manifest",
+      "aliases": [],
+      "headings": [
+        "Governance Severity Registry, Trust Tiers, and Conformance Manifest",
+        "Current Decision",
+        "Rationale",
+        "Alternatives Rejected",
+        "Consequences"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "tests/test_genuine_fix_discipline_contract.py",
+        ".knowledge/governance/severity-registry.md",
+        ".knowledge/governance/prompt-conformance-manifest.md"
+      ],
+      "last_verified": "2026-08-30",
+      "id": "agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
+      "constrains": [
+        "command-templates",
+        "current-truth-ontology"
+      ]
+    },
+    {
+      "path": ".knowledge/governance/decisions/always-install-both-powershell-and-bash-script-sets.md",
+      "owner": "governance",
+      "type": "governance-decision",
+      "title": "Always Install Both PowerShell and Bash Script Sets",
+      "aliases": [],
+      "headings": [
+        "Always Install Both PowerShell and Bash Script Sets",
+        "Current Decision",
+        "Rationale",
+        "Alternatives Rejected",
+        "Consequences"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "tests/test_script_parity_contract.py",
+        "quickstart/README.md"
+      ],
+      "last_verified": "2026-08-30",
+      "id": "always-install-both-powershell-and-bash-script-sets",
+      "constrains": [
+        "agent-shims",
+        "command-templates"
+      ]
+    },
+    {
+      "path": ".knowledge/governance/decisions/okf-knowledge-layer-and-genuine-fix-discipline.md",
+      "owner": "governance",
+      "type": "governance-decision",
+      "title": "Current Truth Knowledge Layer and Genuine Fix Discipline",
+      "aliases": [],
+      "headings": [
+        "Current Truth Knowledge Layer and Genuine Fix Discipline",
+        "Current Decision",
+        "Rationale",
+        "Alternatives Rejected",
+        "Consequences"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "tests/test_knowledge_document_contract.py",
+        "templates/schemas/devspark-evidence.schema.json"
+      ],
+      "last_verified": "2026-08-30",
+      "id": "okf-knowledge-layer-and-genuine-fix-discipline",
+      "constrains": [
+        "application-registry",
+        "command-templates",
+        "current-truth-ontology",
+        "developer-workflow",
+        "product-documentation",
+        "work-packages"
+      ]
+    },
+    {
+      "path": ".knowledge/governance/decisions/participant-vocabulary-reserving-agent-for-ai-runtimes.md",
+      "owner": "governance",
+      "type": "governance-decision",
+      "title": "Participant Vocabulary Reserves Agent for AI Runtimes",
+      "aliases": [],
+      "headings": [
+        "Participant Vocabulary Reserves Agent for AI Runtimes",
+        "Current Decision",
+        "Rationale",
+        "Alternatives Rejected",
+        "Consequences"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "tests/test_participant_metadata_contract.py",
+        "README.md"
+      ],
+      "last_verified": "2026-08-30",
+      "id": "participant-vocabulary-reserving-agent-for-ai-runtimes",
+      "constrains": [
+        "command-templates",
+        "current-truth-ontology"
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "path": ".knowledge/entities/agent-shims/architecture.md",
+      "owner": "agent-shims",
+      "type": "entity-layer",
+      "title": "Agent Shim Architecture",
+      "aliases": [],
+      "headings": [
+        "Agent Shim Architecture"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "agents-registry.json"
+      ],
+      "evidence": [
+        "agents-registry.json"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/application-registry/architecture.md",
+      "owner": "application-registry",
+      "type": "entity-layer",
+      "title": "Application Registry",
+      "aliases": [],
+      "headings": [
+        "Application Registry"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "templates/commands/add-application.md"
+      ],
+      "evidence": [
+        "templates/commands/add-application.md"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/brand-system/architecture.md",
+      "owner": "brand-system",
+      "type": "entity-layer",
+      "title": "Brand System",
+      "aliases": [],
+      "headings": [
+        "Brand System"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets"
+      ],
+      "evidence": [
+        ".knowledge/entities/brand-system/assets"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/brand-system/assets/MakeBoldSolutions/LinkedIn/README.md",
+      "owner": "brand-system",
+      "type": "entity-content",
+      "title": "Make Bold Solutions — LinkedIn Company Page Brand Guide",
+      "aliases": [],
+      "headings": [
+        "Make Bold Solutions — LinkedIn Company Page Brand Guide",
+        "1. Required Assets",
+        "2. Page Setup — Field by Field",
+        "Page identity",
+        "About / Overview (long description)",
+        "Visuals",
+        "Call-to-action button",
+        "Specialties (keyword field, comma-separated)",
+        "3. Brand Recap (for anyone building further LinkedIn graphics)",
+        "4. Content Strategy for a \"World Class\" Page",
+        "Content pillars (rotate across these)",
+        "Cadence",
+        "Hashtags",
+        "Employee advocacy",
+        "5. Launch Checklist",
+        "Sources"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/lesleyhazleton/contact.md",
+      "owner": "brand-system",
+      "type": "entity-content",
+      "title": "Contact Card Metadata — Lesley Hazleton",
+      "aliases": [],
+      "headings": [
+        "Contact Card Metadata — Lesley Hazleton",
+        "Identity",
+        "Contact",
+        "Photo",
+        "Tagline",
+        "Full Bio (About)",
+        "vCard (.vcf) Fields",
+        "Open Graph / Share Preview",
+        "Theme",
+        "Notes / Open Questions",
+        "Sign-off"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/markhazleton/contact.md",
+      "owner": "brand-system",
+      "type": "entity-content",
+      "title": "Contact Card Metadata — Mark Hazleton",
+      "aliases": [],
+      "headings": [
+        "Contact Card Metadata — Mark Hazleton",
+        "Identity",
+        "Contact",
+        "Photo",
+        "Tagline",
+        "Full Bio (About)",
+        "vCard (.vcf) Fields",
+        "Open Graph / Share Preview",
+        "Theme",
+        "Notes / Open Questions",
+        "Sign-off"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/brand-system/assets/makeboldspark/README.md",
+      "owner": "brand-system",
+      "type": "entity-content",
+      "title": "Make Bold Spark Brand Package",
+      "aliases": [],
+      "headings": [
+        "Make Bold Spark Brand Package",
+        "Contents",
+        "Quick Start",
+        "Canonical Name"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/brand-system/assets/makeboldspark/brand-guide.md",
+      "owner": "brand-system",
+      "type": "entity-content",
+      "title": "Make Bold Spark Brand Guide",
+      "aliases": [],
+      "headings": [
+        "Make Bold Spark Brand Guide",
+        "Brand Foundation",
+        "Name Usage",
+        "Positioning",
+        "Voice",
+        "Logo System",
+        "Clear Space",
+        "Minimum Sizes",
+        "Logo Misuse",
+        "Color Palette",
+        "Primary",
+        "Supporting",
+        "Color Usage",
+        "Accessibility",
+        "Typography",
+        "Type Scale",
+        "Layout Principles",
+        "UI Components",
+        "Iconography",
+        "Imagery",
+        "Motion",
+        "Website Guidance",
+        "Social and App Usage",
+        "File Naming",
+        "Implementation Checklist"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/brand-system/assets/makeboldspark/spark-project-brand-guide.md",
+      "owner": "brand-system",
+      "type": "entity-content",
+      "title": "Spark Project Brand Guide",
+      "aliases": [],
+      "headings": [
+        "Spark Project Brand Guide",
+        "Purpose",
+        "What Makes a Spark Project",
+        "Naming a Spark Project",
+        "Project Name Structure",
+        "Subdomain Pattern",
+        "Package Namespace",
+        "NuGet packages",
+        "npm packages",
+        "Project Identity Elements",
+        "Project Accent Colors",
+        "Project Short Line",
+        "Color Usage in Spark Projects",
+        "Base Token Reference",
+        "Project Accent Override Pattern",
+        "CSS Framework Implementations",
+        "Path A — Plain CSS (no framework)",
+        "Path B — Bootstrap 5",
+        "Path C — Tailwind CSS v3 / v4",
+        "Typography Rules (All Frameworks)",
+        "Framework-Specific Typography Setup",
+        "Logo and Mark Usage in Spark Projects",
+        "Navigation Header",
+        "Footer Attribution",
+        "Back-Link Policy",
+        "Project Mark Files",
+        "Page Structure",
+        "Hero Section Rules",
+        "Documentation Pages",
+        "Iconography",
+        "Imagery",
+        "Package Presentation",
+        "NuGet Package Requirements",
+        "npm Package Requirements",
+        "Motion",
+        "Dark Mode",
+        "Accessibility",
+        "Subdomain Implementation Checklist",
+        "Identity",
+        "Branding Assets",
+        "Styles",
+        "Framework-Specific",
+        "Accessibility",
+        "Packages (if applicable)",
+        "File Naming for Spark Projects"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/command-templates/architecture.md",
+      "owner": "command-templates",
+      "type": "entity-layer",
+      "title": "Command Template Architecture",
+      "aliases": [],
+      "headings": [
+        "Command Template Architecture"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "templates/commands"
+      ],
+      "evidence": [
+        "templates/commands"
+      ],
+      "last_verified": "2026-09-04"
+    },
+    {
+      "path": ".knowledge/entities/command-templates/devspark-prompt-mapping.md",
+      "owner": "command-templates",
+      "type": "entity-layer",
+      "title": "DevSpark Prompt Inventory and Lifecycle Map",
+      "aliases": [],
+      "headings": [
+        "DevSpark Prompt Inventory and Lifecycle Map",
+        "Governance",
+        "Specification and design",
+        "Implementation and evidence",
+        "Pull-request delivery",
+        "Release",
+        "Current-truth utilities",
+        "External tracking and repository analysis",
+        "Customization and multi-app operations",
+        "Artifact rules"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "tests/test_atomic_prompt_frontmatter_contract.py"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-26"
+    },
+    {
+      "path": ".knowledge/entities/command-templates/review-stage-divergence.md",
+      "owner": "command-templates",
+      "type": "entity-layer",
+      "title": "Review-Stage Resolution Contract",
+      "aliases": [],
+      "headings": [
+        "Review-Stage Resolution Contract",
+        "Current status",
+        "Divergence marker"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "tests/test_atomic_prompt_frontmatter_contract.py"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
+    },
+    {
+      "path": ".knowledge/entities/current-truth-ontology/architecture.md",
+      "owner": "current-truth-ontology",
+      "type": "entity-layer",
+      "title": "Current-Truth Ontology",
+      "aliases": [
+        "knowledge engine",
+        "knowledge index",
+        "ontology generator"
+      ],
+      "headings": [
+        "Current-Truth Ontology"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "scripts/build_knowledge_index.py",
+        "scripts/explain-context.py",
+        "scripts/migrate-knowledge-to-entities.py",
+        "templates/schemas/entity-node.schema.json",
+        "templates/schemas/knowledge-node.schema.json",
+        "templates/knowledge/ontology/schema.md"
+      ],
+      "evidence": [
+        "tests/test_knowledge_engine_contract.py"
+      ],
+      "last_verified": "2026-09-26"
+    },
+    {
+      "path": ".knowledge/entities/current-truth-ontology/devspark-philosophy.md",
+      "owner": "current-truth-ontology",
+      "type": "entity-layer",
+      "title": "DevSpark Philosophy & Guide: Plan Temporarily, Review the Delta",
+      "aliases": [
+        "current truth",
+        "plan temporarily review the delta",
+        "ephemeral spec"
+      ],
+      "headings": [
+        "DevSpark Philosophy & Guide: Plan Temporarily, Review the Delta",
+        "The core shift",
+        "The governing principle: current truth, not lifecycle history",
+        "Three categories of \"current truth,\" not one",
+        "Decisions (ADRs) are current governance, not history",
+        "Decisions live in governance, not inside entities",
+        "Evidence: every knowledge and governance claim must be checkable",
+        "What triggers assimilation",
+        "The minimum non-negotiable rules",
+        "In-flight linkage: how verify-before-archive actually gets checked",
+        "The ontology implementation: `.knowledge/ontology/`",
+        "Discovery: reaching knowledge by concept, not only by id",
+        "Prompt inventory",
+        "The `.archive/` retention: preserving short-lived value without keeping it active",
+        "No CLI, no harness — scripts and prompts instead",
+        "Contradiction judgment is a human call, not a mechanized gate",
+        "Retrieval budgets: design time vs. runtime"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "scripts/build_knowledge_index.py",
+        "templates/schemas/entity-node.schema.json",
+        "templates/schemas/knowledge-node.schema.json",
+        "templates/commands/release.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-26"
+    },
+    {
+      "path": ".knowledge/entities/developer-workflow/architecture.md",
+      "owner": "developer-workflow",
+      "type": "entity-layer",
+      "title": "Developer Workflow",
+      "aliases": [],
+      "headings": [
+        "Developer Workflow"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        ".knowledge/entities/developer-workflow"
+      ],
+      "evidence": [
+        ".knowledge/entities/developer-workflow"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/developer-workflow/dogfooding.md",
+      "owner": "developer-workflow",
+      "type": "entity-layer",
+      "title": "Dogfooding DevSpark",
+      "aliases": [],
+      "headings": [
+        "Dogfooding DevSpark",
+        "Eating Your Own Dog Food",
+        "Building the Plane While Flying It",
+        "The Meta Challenges",
+        "The Stale Copy Trap",
+        "The Override Paradox",
+        "The Source Maintenance Boundary",
+        "The Chicken-and-Egg Spec Problem",
+        "Our Solution: Cut the Indirection",
+        "What We Didn't Create",
+        "Commands That Got a Bouncer",
+        "Living With the Recursion",
+        "Consumer Repos vs. Source Repo"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        ".knowledge/entities/developer-workflow"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
+    },
+    {
+      "path": ".knowledge/entities/developer-workflow/improvement-loop.md",
+      "owner": "developer-workflow",
+      "type": "entity-layer",
+      "title": "Improvement Loop",
+      "aliases": [],
+      "headings": [
+        "Improvement Loop",
+        "Workflow",
+        "Canonical issue target",
+        "Confirmation",
+        "GitHub issue template",
+        "Classification → label map"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        ".knowledge/entities/developer-workflow"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/extension-catalog/README.md",
+      "owner": "extension-catalog",
+      "type": "entity-layer",
+      "title": "DevSpark Community Extensions",
+      "aliases": [],
+      "headings": [
+        "DevSpark Community Extensions",
+        "Available Extensions",
+        "Adding Your Extension"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        ".knowledge/entities/extension-catalog/catalog.community.json"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/extension-catalog/architecture.md",
+      "owner": "extension-catalog",
+      "type": "entity-layer",
+      "title": "Extension Catalog",
+      "aliases": [],
+      "headings": [
+        "Extension Catalog"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        ".knowledge/entities/extension-catalog/catalog.community.json"
+      ],
+      "evidence": [
+        ".knowledge/entities/extension-catalog/catalog.community.json"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/architecture.md",
+      "owner": "product-documentation",
+      "type": "entity-layer",
+      "title": "Product Documentation",
+      "aliases": [],
+      "headings": [
+        "Product Documentation"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        ".knowledge/entities/product-documentation/site"
+      ],
+      "evidence": [
+        ".knowledge/entities/product-documentation/site"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/AGENTS.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "DevSpark Documentation Guidance",
+      "aliases": [],
+      "headings": [
+        "DevSpark Documentation Guidance"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/README.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Documentation",
+      "aliases": [],
+      "headings": [
+        "Documentation",
+        "Building Locally",
+        "Structure",
+        "Deployment"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/about.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "About DevSpark",
+      "aliases": [],
+      "headings": [
+        "About DevSpark",
+        "Current Release",
+        "What It Is",
+        "Core Idea",
+        "Design Principles",
+        "Markdown-First",
+        "Three-Tier Prompt Resolution",
+        "Clean Separation",
+        "Who It's For",
+        "Origin",
+        "Links"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/checklist-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Checklist Command Guide",
+      "aliases": [],
+      "headings": [
+        "Checklist Command Guide",
+        "Overview",
+        "Prerequisites",
+        "When to Use",
+        "Quick Start",
+        "Basic Usage",
+        "Domain-Specific Checklists",
+        "What It Checks",
+        "Anti-Pattern: Implementation Testing vs. Requirements Testing",
+        "Example Output",
+        "Multiple Checklists",
+        "Related Commands"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/constitution-guide.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Constitution Guide",
+      "aliases": [],
+      "headings": [
+        "Constitution Guide",
+        "Overview",
+        "Why a Constitution?",
+        "Creating Your Constitution",
+        "Greenfield vs. Brownfield Projects",
+        "Example Prompts",
+        "Constitution Structure",
+        "Core Principles",
+        "Requirement Levels",
+        "Governance Section",
+        "Example Constitution",
+        "Commands That Use the Constitution",
+        "Constitution Creation Commands",
+        "Constitution-Powered Commands (No Spec Required)",
+        "Spec Workflow Commands",
+        "Best Practices",
+        "1. Be Specific and Measurable",
+        "2. Use MUST/SHOULD Consistently",
+        "3. Include Rationale",
+        "4. Version Your Constitution",
+        "5. Keep It Focused",
+        "6. Review and Update",
+        "Writing for Automated Review",
+        "What Works Well in Automated Reviews",
+        "What's Harder to Verify Automatically",
+        "Tips for Auditable Principles",
+        "What Belongs in Your Constitution",
+        "The Litmus Test",
+        "Constitution vs. Other Documents",
+        "Example Separation",
+        "Why This Matters for Automated Review",
+        "Multi-App Constitutions (Optional)",
+        "How It Works",
+        "Example",
+        "When to Use App-Local Constitutions",
+        "Integrating with AI Agent Instructions",
+        "The Instruction File Landscape",
+        "The Hierarchy: Constitution as Source of Truth",
+        "Best Practice: Reference, Don't Duplicate",
+        "What Goes Where",
+        "Example: Complementary Files",
+        "Handling Multiple AI Agents",
+        "Resolving Conflicts",
+        "Cross-Referencing Syntax",
+        "Template: Agent Instruction File Header",
+        "Troubleshooting",
+        "\"Constitution not found\"",
+        "Findings seem irrelevant",
+        "Too many violations",
+        "Team disagrees on findings",
+        "Next Steps"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/critic-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Critic Command Guide",
+      "aliases": [],
+      "headings": [
+        "Critic Command Guide",
+        "Overview",
+        "Prerequisites",
+        "When to Use",
+        "Quick Start",
+        "Basic Usage",
+        "Focus on Specific Concerns",
+        "Key Distinction from /devspark.analyze",
+        "Understanding Severity Levels",
+        "SHOWSTOPPER",
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "Risk Categories Analyzed",
+        "Architectural Risks",
+        "Async/Concurrency Risks",
+        "Scale Naivety",
+        "Distributed System Blindness",
+        "Security & Compliance Risks",
+        "Authentication/Authorization",
+        "Input Validation",
+        "Regulatory Blindness",
+        "Operational Hazards",
+        "Observability Gaps",
+        "Deployment Risks",
+        "Testing Gaps",
+        "Implementation Traps",
+        "Optimistic Estimates",
+        "Missing Dependencies",
+        "Report Structure",
+        "Framework-Specific Analysis",
+        "Python + FastAPI",
+        "Node.js + Express",
+        "Go + Gin/Fiber",
+        "Java + Spring Boot",
+        "Common Workflows",
+        "Workflow 1: Standard Development",
+        "Workflow 2: Focus on Specific Concerns",
+        "Workflow 3: Team Review",
+        "Interpreting the Go/No-Go Recommendation",
+        "STOP",
+        "CONDITIONAL",
+        "PROCEED WITH CAUTION",
+        "Best Practices",
+        "1. Run Before Every Implementation",
+        "2. Don't Ignore Showstoppers",
+        "3. Document Accepted Risks",
+        "4. Use Focus Arguments",
+        "5. Combine with /devspark.analyze",
+        "6. Learn from Findings",
+        "Comparison to Other Commands",
+        "Troubleshooting",
+        "\"Required file missing\"",
+        "\"Constitution missing\"",
+        "Too many showstoppers",
+        "Disagree with finding",
+        "Support"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/devspark-and-antigravity.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "DevSpark and Antigravity",
+      "aliases": [],
+      "headings": [
+        "DevSpark and Antigravity",
+        "Installation",
+        "Bootstrapping DevSpark",
+        "How it Works"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/devspark-and-codex.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "DevSpark and Codex",
+      "aliases": [],
+      "headings": [
+        "DevSpark and Codex",
+        "What Each Tool Owns",
+        "Configure Codex for DevSpark",
+        "Prompt Codex Through DevSpark",
+        "Use The Right Reasoning Level",
+        "Keep Context Lean",
+        "Run A Tight Validation Loop",
+        "Automate Stable Codex Workflows",
+        "Use Skills When A Workflow Repeats",
+        "Team Practices",
+        "Common Failure Modes",
+        "Reference Links"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/explain-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Explain Existing Functionality",
+      "aliases": [],
+      "headings": [
+        "Explain Existing Functionality",
+        "Usage",
+        "What It Checks",
+        "Output",
+        "Write Safety",
+        "Lifecycle Position"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/faq.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Frequently Asked Questions",
+      "aliases": [],
+      "headings": [
+        "Frequently Asked Questions",
+        "Getting Started",
+        "What exactly is DevSpark?",
+        "What is \"spec-driven development\"?",
+        "Isn't this overkill for small changes?",
+        "Do I need to learn a new tool?",
+        "AI-Assisted Coding",
+        "Where do I start with AI coding assistants?",
+        "How do I know the AI-generated code is any good?",
+        "What if the AI makes a mistake?",
+        "The Constitution",
+        "What is a \"constitution\"?",
+        "I already have coding standards in a wiki. Do I need this too?",
+        "Can the constitution change over time?",
+        "What goes in the constitution?",
+        "Workflow and Commands",
+        "Where do I type slash commands?",
+        "Do I have to use every command?",
+        "What is the spec status lifecycle?",
+        "What's the difference between quickfix and the full workflow?",
+        "Can I customize commands for my team?",
+        "Agent Compatibility",
+        "Which AI assistants work with DevSpark?",
+        "Can I use multiple agents on the same project?",
+        "Project Setup",
+        "How do I add DevSpark to an existing project?",
+        "What files does DevSpark add?",
+        "Will DevSpark conflict with my existing tooling?",
+        "Can I use DevSpark with any programming language?",
+        "Is my code sent anywhere?",
+        "Multi-App Monorepo Support",
+        "Do I need multi-app support?",
+        "How do I enable it?",
+        "Troubleshooting",
+        "Slash commands aren't working",
+        "The AI isn't following my constitution",
+        "Still Have Questions?"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/implementation-lifecycle.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "DevSpark Implementation Lifecycle",
+      "aliases": [],
+      "headings": [
+        "DevSpark Implementation Lifecycle",
+        "Lifecycle at a Glance",
+        "1. Bootstrap (Primary)",
+        "2. Implement Features",
+        "Lifecycle Terminology",
+        "Route-Aware Intake",
+        "Ephemeral Work-Package Lifecycle",
+        "Release Events and Sprint Reporting",
+        "When to Use Technical Details vs. Product Language",
+        "Specify and Clarify: Product language only",
+        "Plan: Technical details belong here",
+        "Tasks and Implement: Implementation specifics",
+        "Quick reference: What goes where",
+        "Multi-App Workflows (Optional)",
+        "3. Upgrade and Repair",
+        "4. Version Stamping Rules"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/index.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "DevSpark",
+      "aliases": [],
+      "headings": [
+        "DevSpark",
+        "Current Release",
+        "The Three Pillars",
+        "Guides",
+        "Command Categories",
+        "Core Workflow",
+        "Review and Quality",
+        "Lifecycle",
+        "Multi-App",
+        "Current-Truth Model"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/installation.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Install DevSpark",
+      "aliases": [],
+      "headings": [
+        "Install DevSpark",
+        "Current Release",
+        "Approved Install Path",
+        "Repair",
+        "Upgrade"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/monorepo-guide.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Multi-Application Monorepo Support",
+      "aliases": [],
+      "headings": [
+        "Multi-Application Monorepo Support",
+        "What Is a Monorepo?",
+        "Why Teams Use Monorepos",
+        "The Challenges",
+        "How DevSpark Addresses Monorepo Challenges",
+        "Explicit Application Registry",
+        "Layered Governance — Not Fragmented Governance",
+        "Resolution Order",
+        "Profiles — Reusable Rule Bundles",
+        "Profile Composition in Detail",
+        "Dependency-Aware Scope Analysis",
+        "PR Scope Governance",
+        "Approved Shared Paths for Single-App PRs",
+        "Commands for Monorepo Management",
+        "`/devspark.add-application`",
+        "`/devspark.list-applications`",
+        "`/devspark.validate-registry`",
+        "On-Disk Layout",
+        "Key Boundaries",
+        "Constitution Weakening Detection",
+        "Single-App Behavior",
+        "Shared Libraries",
+        "Supported Capabilities",
+        "Getting Started"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/next-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Next Command Navigator",
+      "aliases": [],
+      "headings": [
+        "Next Command Navigator",
+        "When to Use It",
+        "Basic Usage",
+        "Automatic Progression",
+        "Detected Lifecycle",
+        "Release Boundary"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/philosophy.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "DevSpark Philosophy",
+      "aliases": [],
+      "headings": [
+        "DevSpark Philosophy",
+        "Start with external pressure",
+        "Current truth, not lifecycle history",
+        "Evidence and closed references",
+        "Release and rollover",
+        "No CLI or harness"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/pr-review-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "PR Review Command Guide",
+      "aliases": [],
+      "headings": [
+        "PR Review Command Guide",
+        "Overview",
+        "Prerequisites",
+        "Quick Start",
+        "Install GitHub CLI",
+        "Create Constitution",
+        "Basic Usage",
+        "Review Current PR",
+        "Review Specific PR",
+        "Re-Review After Changes",
+        "Understanding Review Output",
+        "Review File Location",
+        "Review Structure",
+        "1. Review Metadata",
+        "2. Executive Summary",
+        "3. Issue Categories",
+        "Critical Issues (Blocking)",
+        "High Priority Issues",
+        "Medium Priority Suggestions",
+        "Low Priority Improvements",
+        "4. Constitution Alignment",
+        "5. Security Checklist",
+        "6. Detailed Findings",
+        "7. Next Steps",
+        "Understanding Severity Levels",
+        "Critical (Blocking)",
+        "High Priority",
+        "Medium Priority",
+        "Low Priority",
+        "Common Workflows",
+        "Workflow 1: Feature Development",
+        "Workflow 2: Code Review",
+        "Workflow 3: Quality Audit",
+        "Review Updates",
+        "First Review",
+        "Subsequent Reviews (Same Commit)",
+        "Updates (New Commits)",
+        "Working with Constitution",
+        "Good Constitution Example",
+        "Weak Constitution Example",
+        "Troubleshooting",
+        "\"Constitution not found\"",
+        "\"PR not found\" or \"Failed to fetch PR\"",
+        "\"GitHub CLI not installed\"",
+        "\"Unable to detect PR number\"",
+        "Review seems incomplete or superficial",
+        "Large PR takes too long",
+        "Best Practices",
+        "1. Review Early and Often",
+        "2. Address Critical Issues First",
+        "3. Keep Reviews Out of Commits",
+        "4. Improve Your Constitution",
+        "5. Use Reviews in Team Discussions",
+        "6. Review All PRs Consistently",
+        "7. Learn from Patterns",
+        "Integration with Spec-Driven Development",
+        "Feature PRs",
+        "Non-Feature PRs",
+        "Examples",
+        "Example 1: Clean PR",
+        "Example 2: Needs Work",
+        "Example 3: Incremental Improvement",
+        "Additional Resources",
+        "Support"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/quickstart.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Quick Start Guide",
+      "aliases": [],
+      "headings": [
+        "Quick Start Guide",
+        "Current Release",
+        "Step 1: Bootstrap DevSpark",
+        "GitHub Copilot",
+        "Claude Code",
+        "Cursor",
+        "Codex",
+        "Antigravity",
+        "Any Other Agent",
+        "Step 2: Build Your First Feature",
+        "2a. Define Your Constitution",
+        "2b. Create the Spec",
+        "2c. Refine the Spec (Optional)",
+        "2d. Create the Implementation Plan",
+        "2e. Generate Tasks and Implement",
+        "Step 3: Review and Release",
+        "What's Next"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/release-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "DevSpark Release",
+      "aliases": [],
+      "headings": [
+        "DevSpark Release",
+        "Lifecycle position",
+        "What release validates",
+        "What release changes",
+        "Archive boundary",
+        "Usage"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/repo-story-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Repo Story Command Guide",
+      "aliases": [],
+      "headings": [
+        "Repo Story Command Guide",
+        "Overview",
+        "Prerequisites",
+        "When to Use",
+        "Quick Start",
+        "Basic Usage",
+        "Scoped Analysis",
+        "Compare Against a Baseline",
+        "What It Produces",
+        "Executive Summary (Business Audience)",
+        "Technical Deep Dive",
+        "Change Pattern Analysis",
+        "Milestone Timeline",
+        "Constitution Alignment (Optional)",
+        "Developer FAQ",
+        "How It Keeps README Small",
+        "Output Location",
+        "Related Commands"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/site-audit-usage.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Site Audit Command Guide",
+      "aliases": [],
+      "headings": [
+        "Site Audit Command Guide",
+        "Overview",
+        "Prerequisites",
+        "Quick Start",
+        "Create Constitution",
+        "Run Full Audit",
+        "Audit Scopes",
+        "Full Audit (Default)",
+        "Constitution Compliance Only",
+        "Package/Dependency Analysis",
+        "Code Quality Metrics",
+        "Unused Code Detection",
+        "Duplicate Code Detection",
+        "Understanding Audit Output",
+        "Report Location",
+        "Report Structure",
+        "1. Audit Metadata",
+        "2. Executive Summary",
+        "3. Constitution Compliance",
+        "4. Security Findings",
+        "5. Package Analysis",
+        "6. Code Quality Metrics",
+        "7. Recommendations",
+        "Severity Classification",
+        "Current-Truth Finding Codes",
+        "Common Workflows",
+        "Workflow 1: Pre-Release Audit",
+        "Workflow 2: Security Focus",
+        "Workflow 3: Code Health Monitoring",
+        "Workflow 4: Cleanup Sprint",
+        "Working with Constitution",
+        "Good Constitution Example",
+        "Weak Constitution Example",
+        "Temporary Report Boundary",
+        "Troubleshooting",
+        "\"Constitution not found\"",
+        "\"Script execution failed\"",
+        "\"pip-audit not available\"",
+        "Audit takes too long",
+        "Best Practices",
+        "1. Regular Audits",
+        "2. Address Critical Issues First",
+        "3. Keep Reports Temporary",
+        "4. Improve Your Constitution",
+        "5. Automate",
+        "Integration with Development Workflow",
+        "During Development",
+        "Code Review",
+        "Continuous Integration",
+        "Support"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/three-pillars.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "The Three Pillars of DevSpark",
+      "aliases": [],
+      "headings": [
+        "The Three Pillars of DevSpark",
+        "Why three pillars?",
+        "Knowledge: current truth",
+        "Code: executable intent",
+        "Tests: behavioral evidence",
+        "How the pillars work together",
+        "Start with the pillars"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/product-documentation/site/upgrade.md",
+      "owner": "product-documentation",
+      "type": "entity-content",
+      "title": "Upgrade DevSpark",
+      "aliases": [],
+      "headings": [
+        "Upgrade DevSpark",
+        "Current Release",
+        "Upgrade Flow",
+        "Repair Flow",
+        "Not Supported"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/entities/work-packages/architecture.md",
+      "owner": "work-packages",
+      "type": "entity-layer",
+      "title": "Work Packages",
+      "aliases": [],
+      "headings": [
+        "Work Packages"
+      ],
+      "applies_to": [],
+      "source_of_truth": [
+        "templates/schemas/devspark-work-package.schema.json"
+      ],
+      "evidence": [
+        "templates/schemas/devspark-work-package.schema.json"
+      ],
+      "last_verified": "2026-09-04"
+    },
+    {
+      "path": ".knowledge/governance/constitution.md",
+      "owner": "governance",
+      "type": "governance",
+      "title": "DevSpark v4 Constitution",
+      "aliases": [],
+      "headings": [
+        "DevSpark v4 Constitution",
+        "Core Principles",
+        "I. Current Truth Over Lifecycle History",
+        "II. Evidence Required",
+        "III. Closed Permanent Reference Graph",
+        "IV. Verify, Then Release",
+        "V. One Decision Per Topic",
+        "VI. Explicit Over Implied",
+        "VII. Ownership Boundary",
+        "VIII. Platform Parity",
+        "IX. Genuine Fix Discipline",
+        "X. Backward-Compatible Migration",
+        "Development Workflow",
+        "Governance"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": []
+    },
+    {
+      "path": ".knowledge/governance/known-limitations.md",
+      "owner": "governance",
+      "type": "governance",
+      "title": "Known Governance Limitations",
+      "aliases": [],
+      "headings": [
+        "Known Governance Limitations",
+        "Runtime Agent Behavior",
+        "Production Outcome Verification",
+        "Multi-PR Sequencing",
+        "Contributor Bypass",
+        "AI Context Provenance"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "scripts/build_knowledge_index.py"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/governance/prompt-conformance-manifest.md",
+      "owner": "governance",
+      "type": "governance",
+      "title": "Prompt Conformance Manifest",
+      "aliases": [],
+      "headings": [
+        "Prompt Conformance Manifest",
+        "Required Elements",
+        "Phase-Specific Expectations",
+        "Review Procedure"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "templates/command-preamble-contract.md"
+      ],
+      "last_verified": "2026-08-30"
+    },
+    {
+      "path": ".knowledge/governance/severity-registry.md",
+      "owner": "governance",
+      "type": "governance",
+      "title": "Severity Registry",
+      "aliases": [],
+      "headings": [
+        "Severity Registry",
+        "Severity Levels",
+        "Registry Entries",
+        "Finding Codes"
+      ],
+      "applies_to": [],
+      "source_of_truth": [],
+      "evidence": [
+        "scripts/build_knowledge_index.py"
+      ],
+      "last_verified": "2026-08-30"
+    }
+  ],
+  "contradiction_scopes": [
+    {
+      "basis": "entity:agent-shims",
+      "members": [
+        ".knowledge/entities/agent-shims/_entity.yaml",
+        ".knowledge/entities/agent-shims/architecture.md"
+      ]
+    },
+    {
+      "basis": "entity:application-registry",
+      "members": [
+        ".knowledge/entities/application-registry/_entity.yaml",
+        ".knowledge/entities/application-registry/architecture.md"
+      ]
+    },
+    {
+      "basis": "entity:brand-system",
+      "members": [
+        ".knowledge/entities/brand-system/_entity.yaml",
+        ".knowledge/entities/brand-system/architecture.md"
+      ]
+    },
+    {
+      "basis": "entity:command-templates",
+      "members": [
+        ".knowledge/entities/command-templates/_entity.yaml",
+        ".knowledge/entities/command-templates/architecture.md",
+        ".knowledge/entities/command-templates/devspark-prompt-mapping.md",
+        ".knowledge/entities/command-templates/review-stage-divergence.md"
+      ]
+    },
+    {
+      "basis": "entity:current-truth-ontology",
+      "members": [
+        ".knowledge/entities/current-truth-ontology/_entity.yaml",
+        ".knowledge/entities/current-truth-ontology/architecture.md",
+        ".knowledge/entities/current-truth-ontology/devspark-philosophy.md"
+      ]
+    },
+    {
+      "basis": "entity:developer-workflow",
+      "members": [
+        ".knowledge/entities/developer-workflow/_entity.yaml",
+        ".knowledge/entities/developer-workflow/architecture.md",
+        ".knowledge/entities/developer-workflow/dogfooding.md",
+        ".knowledge/entities/developer-workflow/improvement-loop.md"
+      ]
+    },
+    {
+      "basis": "entity:extension-catalog",
+      "members": [
+        ".knowledge/entities/extension-catalog/_entity.yaml",
+        ".knowledge/entities/extension-catalog/README.md",
+        ".knowledge/entities/extension-catalog/architecture.md"
+      ]
+    },
+    {
+      "basis": "entity:product-documentation",
+      "members": [
+        ".knowledge/entities/product-documentation/_entity.yaml",
+        ".knowledge/entities/product-documentation/architecture.md"
+      ]
+    },
+    {
+      "basis": "entity:work-packages",
+      "members": [
+        ".knowledge/entities/work-packages/_entity.yaml",
+        ".knowledge/entities/work-packages/architecture.md"
+      ]
+    },
+    {
+      "basis": "decision:agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
+      "members": [
+        ".knowledge/governance/decisions/agent-skills-as-portable-capability-packages-within-lifecycle-orchestration.md",
+        ".knowledge/entities/agent-shims/_entity.yaml",
+        ".knowledge/entities/command-templates/_entity.yaml"
+      ]
+    },
+    {
+      "basis": "decision:agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
+      "members": [
+        ".knowledge/governance/decisions/agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest.md",
+        ".knowledge/entities/command-templates/_entity.yaml",
+        ".knowledge/entities/current-truth-ontology/_entity.yaml"
+      ]
+    },
+    {
+      "basis": "decision:always-install-both-powershell-and-bash-script-sets",
+      "members": [
+        ".knowledge/governance/decisions/always-install-both-powershell-and-bash-script-sets.md",
+        ".knowledge/entities/agent-shims/_entity.yaml",
+        ".knowledge/entities/command-templates/_entity.yaml"
+      ]
+    },
+    {
+      "basis": "decision:okf-knowledge-layer-and-genuine-fix-discipline",
+      "members": [
+        ".knowledge/governance/decisions/okf-knowledge-layer-and-genuine-fix-discipline.md",
+        ".knowledge/entities/application-registry/_entity.yaml",
+        ".knowledge/entities/command-templates/_entity.yaml",
+        ".knowledge/entities/current-truth-ontology/_entity.yaml",
+        ".knowledge/entities/developer-workflow/_entity.yaml",
+        ".knowledge/entities/product-documentation/_entity.yaml",
+        ".knowledge/entities/work-packages/_entity.yaml"
+      ]
+    },
+    {
+      "basis": "decision:participant-vocabulary-reserving-agent-for-ai-runtimes",
+      "members": [
+        ".knowledge/governance/decisions/participant-vocabulary-reserving-agent-for-ai-runtimes.md",
+        ".knowledge/entities/command-templates/_entity.yaml",
+        ".knowledge/entities/current-truth-ontology/_entity.yaml"
+      ]
+    },
+    {
+      "basis": "evidence:.knowledge/entities/brand-system/assets",
+      "members": [
+        ".knowledge/entities/brand-system/_entity.yaml",
+        ".knowledge/entities/brand-system/architecture.md"
+      ]
+    },
+    {
+      "basis": "evidence:.knowledge/entities/developer-workflow",
+      "members": [
+        ".knowledge/entities/developer-workflow/_entity.yaml",
+        ".knowledge/entities/developer-workflow/architecture.md",
+        ".knowledge/entities/developer-workflow/dogfooding.md",
+        ".knowledge/entities/developer-workflow/improvement-loop.md"
+      ]
+    },
+    {
+      "basis": "evidence:.knowledge/entities/extension-catalog/catalog.community.json",
+      "members": [
+        ".knowledge/entities/extension-catalog/README.md",
+        ".knowledge/entities/extension-catalog/_entity.yaml",
+        ".knowledge/entities/extension-catalog/architecture.md"
+      ]
+    },
+    {
+      "basis": "evidence:scripts/build_knowledge_index.py",
+      "members": [
+        ".knowledge/entities/current-truth-ontology/architecture.md",
+        ".knowledge/entities/current-truth-ontology/devspark-philosophy.md",
+        ".knowledge/governance/known-limitations.md",
+        ".knowledge/governance/severity-registry.md"
+      ]
+    },
+    {
+      "basis": "evidence:templates/schemas/devspark-work-package.schema.json",
+      "members": [
+        ".knowledge/entities/work-packages/_entity.yaml",
+        ".knowledge/entities/work-packages/architecture.md"
+      ]
+    },
+    {
+      "basis": "evidence:templates/schemas/entity-node.schema.json",
+      "members": [
+        ".knowledge/entities/current-truth-ontology/architecture.md",
+        ".knowledge/entities/current-truth-ontology/devspark-philosophy.md"
+      ]
+    },
+    {
+      "basis": "evidence:templates/schemas/knowledge-node.schema.json",
+      "members": [
+        ".knowledge/entities/current-truth-ontology/architecture.md",
+        ".knowledge/entities/current-truth-ontology/devspark-philosophy.md"
+      ]
+    },
+    {
+      "basis": "evidence:tests/test_atomic_prompt_frontmatter_contract.py",
+      "members": [
+        ".knowledge/entities/agent-shims/_entity.yaml",
+        ".knowledge/entities/command-templates/_entity.yaml",
+        ".knowledge/entities/command-templates/devspark-prompt-mapping.md",
+        ".knowledge/entities/command-templates/review-stage-divergence.md"
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@ version: "4.2.0"
 last_verified: "2026-08-30"
 evidence:
   - type: code
-    ref: templates/schemas/devspark-evidence.schema.json/ontology.py
+    ref: scripts/build_knowledge_index.py
     verified_by: inspection
     test_attempted: true
     fallback_reason: "Limitations describe governance scope; contract tests cover the enforceable subset"

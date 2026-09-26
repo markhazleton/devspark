@@ -1,10 +1,11 @@
 ---
 id: agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest
-status: current
-last_verified: "2026-08-30"
-governs:
+type: governance-decision
+title: Governance Severity Registry, Trust Tiers, and Conformance Manifest
+constrains:
 - command-templates
 - current-truth-ontology
+last_verified: '2026-08-30'
 evidence:
 - type: test
   ref: tests/test_genuine_fix_discipline_contract.py

@@ -402,6 +402,7 @@ if ($Json) {
             is_behind_target = $isBehindTarget
         }
         CONSTITUTION_PATH = $constitutionPath
+        KNOWLEDGE_ENGINE = Get-KnowledgeEngineInfo -RepoRoot $repoRoot
         CONSTITUTION_EXISTS = $constitutionExists
         REVIEW_DIR = $reviewDir
         SPEC_LIFECYCLE = @{

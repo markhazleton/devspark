@@ -629,3 +629,50 @@ CONTRACTS_DIR='$feature_dir/contracts'
 KNOWLEDGE_DIR='$feature_dir/knowledge'
 EOF
 }
+
+# Resolve the single DevSpark knowledge engine (build_knowledge_index.py).
+# Prefers the framework-managed .devspark/scripts/ copy and falls back to a
+# legacy repository-root scripts/ copy only when the framework copy is absent.
+# Prints the repository-relative path; returns 1 when no engine exists.
+resolve_knowledge_engine() {
+    local repo_root="${1:-$(get_repo_root)}"
+    local candidate
+    for candidate in \
+        ".devspark/scripts/build_knowledge_index.py" \
+        "scripts/build_knowledge_index.py"; do
+        if [[ -f "$repo_root/$candidate" ]]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# List lingering legacy engine copies that the quickstart upgrade flow must
+# reconcile. Only reported when the framework-managed engine is present.
+list_legacy_knowledge_engines() {
+    local repo_root="${1:-$(get_repo_root)}"
+    [[ -f "$repo_root/.devspark/scripts/build_knowledge_index.py" ]] || return 0
+    local candidate
+    for candidate in \
+        ".devspark/scripts/python/build_knowledge_index.py" \
+        "scripts/build_knowledge_index.py" \
+        "scripts/python/build_knowledge_index.py"; do
+        [[ -f "$repo_root/$candidate" ]] && echo "$candidate"
+    done
+    return 0
+}
+
+# Emit {"engine": "<path|empty>", "legacy_copies": [...]} for helper JSON output.
+# Candidate paths are fixed literals, so no JSON escaping is required.
+knowledge_engine_json() {
+    local repo_root="${1:-$(get_repo_root)}"
+    local engine legacy item items=""
+    engine=$(resolve_knowledge_engine "$repo_root" || true)
+    legacy=$(list_legacy_knowledge_engines "$repo_root")
+    while IFS= read -r item; do
+        [[ -z "$item" ]] && continue
+        items="${items:+$items,}\"$item\""
+    done <<< "$legacy"
+    printf '{"engine":"%s","legacy_copies":[%s]}' "$engine" "$items"
+}

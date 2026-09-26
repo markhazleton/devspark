@@ -1,10 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://devspark.local/schemas/devspark-entity.schema.json",
-  "title": "DevSpark v4 Entity Metadata",
+  "$id": "https://devspark.local/schemas/entity-node.schema.json",
+  "title": "DevSpark Entity Node (_entity.yaml)",
   "type": "object",
   "additionalProperties": true,
-  "required": ["id", "name", "kind", "summary", "evidence"],
+  "required": [
+    "id",
+    "name",
+    "kind",
+    "summary",
+    "evidence"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -37,7 +43,10 @@
       "items": {
         "type": "object",
         "additionalProperties": true,
-        "required": ["type", "object"],
+        "required": [
+          "type",
+          "object"
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -65,18 +74,19 @@
       "type": "string",
       "minLength": 1
     },
-    "lifecycle": {
-      "type": "string",
-      "enum": ["current", "transitional"],
-      "default": "current"
-    },
     "root": {
       "type": "string",
       "minLength": 1
     },
     "managed_by": {
       "type": "string",
-      "enum": ["human", "prompt", "script", "generated", "mixed"]
+      "enum": [
+        "human",
+        "prompt",
+        "script",
+        "generated",
+        "mixed"
+      ]
     },
     "required_layers": {
       "type": "array",
@@ -92,6 +102,64 @@
       "items": {
         "$ref": "devspark-evidence.schema.json"
       }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "description": "Concept names this entity is reachable by in discovery."
+    },
+    "constrained_by": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "description": "Governance decision ids that constrain this entity (hand-authored reciprocal of constrains)."
     }
+  },
+  "description": "Structural metadata for one entity. constrained_by is hand-authored and must reciprocate each governance decision's constrains list; the knowledge engine validates the pair.",
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "status"
+        ]
+      },
+      {
+        "required": [
+          "lifecycle"
+        ]
+      },
+      {
+        "required": [
+          "supersedes"
+        ]
+      },
+      {
+        "required": [
+          "superseded-by"
+        ]
+      },
+      {
+        "required": [
+          "superseded_by"
+        ]
+      },
+      {
+        "required": [
+          "replaced"
+        ]
+      },
+      {
+        "required": [
+          "obsolete"
+        ]
+      }
+    ]
   }
 }

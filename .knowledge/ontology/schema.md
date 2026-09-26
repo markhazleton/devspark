@@ -1,33 +1,49 @@
 # DevSpark Knowledge Ontology
 
-DevSpark v4 stores current truth under `.knowledge`. The ontology makes that
-truth navigable while temporary work packages remain outside permanent context.
+DevSpark stores current truth under `.knowledge`. The ontology makes that truth
+navigable and checkable while temporary work packages stay outside permanent
+context. The contract is enforced by the single knowledge engine,
+`build_knowledge_index.py`, against `templates/schemas/entity-node.schema.json`
+and `templates/schemas/knowledge-node.schema.json`.
 
 ## Roots
 
 | Root | Purpose | Managed By |
 |---|---|---|
 | `.knowledge/entities/<id>/` | Durable current-truth entity records | Humans, assisted by prompts |
-| `.knowledge/governance/decisions/<topic>.md` | Current governance decisions | Humans, assisted by prompts |
-| `.knowledge/ontology/*.generated.md` | Generated ontology reports | `scripts/python/build_knowledge_index.py` |
+| `.knowledge/governance/constitution.md` | Current rules of the game | Humans, amended explicitly |
+| `.knowledge/governance/decisions/<topic>.md` | Current governance decisions, one file per topic | Humans, assisted by prompts |
+| `.knowledge/ontology/index.json` | Generated discovery index | Knowledge engine |
+| `.knowledge/ontology/coverage.json` | Generated existence and gap report | Knowledge engine |
+| `.knowledge/ontology/baselines/` | Retained canonical baselines for pinned claims | Knowledge engine (`--pin-claim`) |
+| `.knowledge/knowledge.config.yaml` | Repository knowledge settings | Humans |
 | `.devspark.work/` | In-flight work packages only | DevSpark prompts |
-| `.archive/YYYY-MM-DD/<topic>/` | Human-only short-term holding area | Humans only |
+| `.archive/YYYY-MM-DD/` | Write-only retention for retired planning artifacts | Written by release (and constitution proposals); purged by humans |
 
-DevSpark commands must not read, list, enumerate, or glob `.archive/`.
+No DevSpark command reads, lists, enumerates, or globs `.archive/`.
 
-## Entity Folders
+## Resolving the engine
 
-Each entity folder must contain:
+Every entry point resolves the engine through `resolve_knowledge_engine`
+(`common.sh`) or `Resolve-KnowledgeEngine` (`common.ps1`):
 
-- `_entity.yaml`: hand-authored metadata.
-- `_derived.yaml`: generated metadata written by the ontology generator.
+1. `.devspark/scripts/build_knowledge_index.py` (framework-managed; preferred)
+2. `scripts/build_knowledge_index.py` (legacy repository-root copy; used only
+   when the framework-managed copy is absent)
+
+When both exist, helper JSON reports the extra copy under `legacy_copies` and
+the quickstart upgrade flow reconciles it.
+
+## Entity folders
+
+Each entity folder contains:
+
+- `_entity.yaml`: hand-authored entity-node metadata.
 - One or more layer documents, usually `architecture.md`.
 
 Entity ids are lowercase slugs matching `^[a-z0-9][a-z0-9._-]*$`.
 
-## Entity Metadata
-
-`_entity.yaml` fields:
+### `_entity.yaml` fields
 
 | Field | Required | Meaning |
 |---|---:|---|
@@ -35,19 +51,37 @@ Entity ids are lowercase slugs matching `^[a-z0-9][a-z0-9._-]*$`.
 | `name` | yes | Human-readable name |
 | `kind` | yes | Entity kind from the allowed kind registry |
 | `summary` | yes | Present-tense current-truth summary |
+| `evidence` | yes | At least one evidence entry supporting the entity |
+| `constrained_by` | no | Decision ids that constrain this entity (hand-authored reciprocal of `constrains`) |
+| `aliases` | no | Concept names this entity is reachable by |
 | `owner` | no | Responsible role or team |
-| `lifecycle` | no | `current` or `transitional`; remove entities that no longer describe current truth |
 | `root` | no | Primary repository root or path this entity describes |
 | `managed_by` | no | `human`, `prompt`, `script`, `generated`, or `mixed` |
-| `required_layers` | no | Required layer documents for this entity |
+| `required_layers` | no | Required layer documents (default `architecture.md`) |
 | `relations` | no | Typed edges to other entities |
-| `evidence` | yes | Evidence entries supporting the entity |
 
-If `required_layers` is omitted, `architecture.md` is expected.
+### Layer document frontmatter
 
-## Entity Kinds
+Every top-level Markdown file in an entity folder is a knowledge node and
+carries the currency pair:
 
-Allowed entity kinds:
+| Field | Required | Meaning |
+|---|---:|---|
+| `source_of_truth` | yes | Paths (or pinned claim objects) this document describes |
+| `last_verified` | yes | Date the document was last confirmed against its sources |
+| `title` | no | Title; defaults to the first H1 |
+| `aliases` | no | Concept names used by discovery |
+| `appliesTo` | no | Paths or globs the document applies to |
+| `evidence` | no | Additional evidence entries |
+
+## Banned keys
+
+`status`, `lifecycle`, `supersedes`, `superseded-by`, `replaced`, and
+`obsolete` are banned on every current-knowledge document, decisions included.
+There is no deprecated state: current knowledge is edited in place or deleted.
+Git holds the history.
+
+## Entity kinds
 
 | Kind | Use |
 |---|---|
@@ -61,9 +95,7 @@ Allowed entity kinds:
 | `integration-catalog` | Extension or integration catalog |
 | `contributor-practice` | Contributor workflow and dogfooding guidance |
 
-## Relation Types
-
-Allowed relation types:
+## Relation types
 
 | Type | Meaning |
 |---|---|
@@ -81,45 +113,101 @@ Relation objects must resolve to existing entity ids.
 
 ## Decisions
 
-Decision files live at `.knowledge/governance/decisions/<topic>.md`. Each
-current decision must contain frontmatter with:
+Decision files live at `.knowledge/governance/decisions/<topic>.md`, keyed by
+domain or topic, never by sequential number. The filename equals the `id`.
+Exactly one current file may govern a topic. Frontmatter:
 
-- `id`
-- `status: current`
-- `governs`
-- `evidence`
-- `last_verified` when evidence requires inspection recency
+| Field | Required | Meaning |
+|---|---:|---|
+| `id` | yes | Topic slug equal to the filename |
+| `type` | yes | `governance-decision` |
+| `title` | yes | Topic title (must be unique) |
+| `constrains` | yes | Non-empty list of entity ids this decision constrains |
+| `evidence` | yes | At least one evidence entry |
+| `last_verified` | yes | Date the decision was last confirmed |
 
-`governs` lists entity ids. The generator inverts that list into each entity's
-`_derived.yaml` as `constrained_by`.
+No `layer` key: a decision is one document, one topic. Each entity a decision
+`constrains` must list the decision in its own `constrained_by`, and vice
+versa; the engine fails on any unreciprocated pointer.
 
 ## Evidence
 
-Evidence entries must include `type`, `ref`, and `verified_by`.
+Evidence entries include `type`, `ref`, and `verified_by`.
 
-Allowed evidence types:
-
-| Type | Expected Verification |
+| Type | Expected verification |
 |---|---|
 | `test` | `verified_by: execution` |
 | `code` | `verified_by: inspection` |
 | `doc` | `verified_by: inspection` |
 | `schema` | `verified_by: inspection` |
 
-Local evidence refs must resolve to files or directories unless they are external
-URLs. Code-inspection evidence should include `test_attempted` and
-`fallback_reason` when executable test evidence was not practical.
+Missing evidence on an entity or decision is an error: a claim with nothing
+behind it is not checkable. Code-only evidence without `test_attempted` and
+`fallback_reason` is a warning, never a gate. Local refs must resolve, and no
+evidence or `source_of_truth` entry may point into `.devspark.work/` or
+`.archive/`.
 
-## Generated Reports
+## Pinned claims and drift
 
-`scripts/python/build_knowledge_index.py --write` owns:
+`.knowledge/knowledge.config.yaml`:
 
-- `.knowledge/entities/*/_derived.yaml`
-- `.knowledge/ontology/coverage.generated.md`
-- `.knowledge/ontology/evidence.generated.md`
-- `.knowledge/ontology/relations.generated.md`
-- `.knowledge/ontology/governance.generated.md`
-- `.knowledge/ontology/gaps.generated.md`
+```yaml
+knowledge_drift:
+  enforcement: last-verified   # or pinned-claims
+```
 
-Run `scripts/python/build_knowledge_index.py --check` to fail when generated
-metadata or reports are stale.
+A `source_of_truth` entry may be a plain path or an object claim:
+
+```yaml
+source_of_truth:
+  - path: src/Auth/TokenService.cs
+    profile: text                     # text (whitespace-normalized) or exact
+    region: {start_marker: "RefreshToken(", end_marker: "}"}   # or {lines: "10-40"}
+    digest: sha256:<hex>
+    baseline: .knowledge/ontology/baselines/<hex>.txt
+    verification: {state: verified}   # or unverified
+```
+
+- `--pin-claim <path>` retains the canonical baseline and prints a claim with
+  `verification.state: unverified`. Only `/devspark.explain` records
+  `verified`, after the human confirms the retained-baseline diff.
+- `--detect-drift` compares each claim's current canonical content with its
+  retained baseline, bounded to `--base <ref> [--head <ref>]` or a history-free
+  `--full-inventory`. It is read-only and never asserts human verification.
+- Under `pinned-claims`, drift fails the run and plain-path entries warn.
+
+## Discovery
+
+The engine indexes each document's id, title, `aliases`, headings, and path
+metadata (`appliesTo`, `source_of_truth`) into `index.json`. Body prose is
+searched only at query time by `explain-context.py`. Ranking is deterministic:
+
+| Evidence class | Weight |
+|---|---:|
+| Exact id/title | 100 |
+| Alias | 60 |
+| Heading | 30 |
+| Path/`appliesTo`/`source_of_truth` metadata | 15 |
+| Body | 5 |
+
+Each class contributes its weight at most once per query term; every match
+reports `matched_on` explaining why it scored.
+
+## Engine commands
+
+| Command | Effect |
+|---|---|
+| `build_knowledge_index.py` | Validate and write `index.json` and `coverage.json` |
+| `build_knowledge_index.py --check [--entity <id>]` | Fail on stale output or gating errors; never writes |
+| `build_knowledge_index.py --search "<query>"` | Ranked discovery over index classes (JSON) |
+| `build_knowledge_index.py --detect-drift --base <ref>` | Pinned-claim drift for changed paths (JSON) |
+| `build_knowledge_index.py --detect-drift --full-inventory` | Pinned-claim drift for every claim (JSON) |
+| `build_knowledge_index.py --pin-claim <path>` | Retain a baseline and print a claim (JSON) |
+| `explain-context.py "<topic>"` | Ranked discovery including body prose (JSON) |
+| `migrate-knowledge-to-entities.py [--dry-run]` | Migrate older `.knowledge` layouts to this contract |
+
+`coverage.json` answers existence (required layers, evidence counts, findings).
+`/devspark.site-audit` owns accuracy: it re-runs `execution` evidence and
+judges `inspection` evidence. `index.json` includes `contradiction_scopes`
+(same entity, entities sharing a decision, objects citing the same evidence)
+that bound audit's contradiction scan; judging a contradiction stays human.

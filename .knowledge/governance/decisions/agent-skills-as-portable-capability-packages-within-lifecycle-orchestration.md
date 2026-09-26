@@ -1,10 +1,11 @@
 ---
 id: agent-skills-as-portable-capability-packages-within-lifecycle-orchestration
-status: current
-last_verified: "2026-08-30"
-governs:
-- command-templates
+type: governance-decision
+title: Agent Skills as Portable Capability Packages
+constrains:
 - agent-shims
+- command-templates
+last_verified: '2026-08-30'
 evidence:
 - type: test
   ref: tests/test_skills_install_contract.py

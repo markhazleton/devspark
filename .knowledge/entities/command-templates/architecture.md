@@ -1,10 +1,13 @@
 ---
+source_of_truth:
+- templates/commands
+last_verified: '2026-09-04'
 evidence:
-  - type: code
-    ref: templates/commands
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "Prompt behavior is prose-driven and requires review plus frontmatter contract tests"
+- type: code
+  ref: templates/commands
+  verified_by: inspection
+  test_attempted: true
+  fallback_reason: Prompt behavior is prose-driven and requires review plus frontmatter contract tests
 ---
 
 # Command Template Architecture

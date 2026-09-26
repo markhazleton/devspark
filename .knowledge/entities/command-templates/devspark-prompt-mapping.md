@@ -1,3 +1,8 @@
+---
+source_of_truth:
+- tests/test_atomic_prompt_frontmatter_contract.py
+last_verified: '2026-09-26'
+---
 # DevSpark Prompt Inventory and Lifecycle Map
 
 The canonical product surface is the 30 prompt files under

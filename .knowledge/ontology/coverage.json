@@ -1,0 +1,219 @@
+{
+  "generated_by": "devspark.build_knowledge_index",
+  "schema_version": 1,
+  "drift_enforcement": "last-verified",
+  "summary": {
+    "entities": 9,
+    "decisions": 5,
+    "errors": 0,
+    "warnings": 0
+  },
+  "entities": [
+    {
+      "id": "agent-shims",
+      "required_layers": [
+        "architecture.md"
+      ],
+      "present_layers": [
+        "architecture.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [
+        "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
+        "always-install-both-powershell-and-bash-script-sets"
+      ],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "application-registry",
+      "required_layers": [
+        "architecture.md"
+      ],
+      "present_layers": [
+        "architecture.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "brand-system",
+      "required_layers": [
+        "architecture.md"
+      ],
+      "present_layers": [
+        "architecture.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "command-templates",
+      "required_layers": [
+        "architecture.md",
+        "devspark-prompt-mapping.md",
+        "review-stage-divergence.md"
+      ],
+      "present_layers": [
+        "architecture.md",
+        "devspark-prompt-mapping.md",
+        "review-stage-divergence.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [
+        "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
+        "agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
+        "always-install-both-powershell-and-bash-script-sets",
+        "okf-knowledge-layer-and-genuine-fix-discipline",
+        "participant-vocabulary-reserving-agent-for-ai-runtimes"
+      ],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "current-truth-ontology",
+      "required_layers": [
+        "architecture.md",
+        "devspark-philosophy.md"
+      ],
+      "present_layers": [
+        "architecture.md",
+        "devspark-philosophy.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [
+        "agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
+        "okf-knowledge-layer-and-genuine-fix-discipline",
+        "participant-vocabulary-reserving-agent-for-ai-runtimes"
+      ],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "developer-workflow",
+      "required_layers": [
+        "architecture.md",
+        "dogfooding.md",
+        "improvement-loop.md"
+      ],
+      "present_layers": [
+        "architecture.md",
+        "dogfooding.md",
+        "improvement-loop.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "extension-catalog",
+      "required_layers": [
+        "architecture.md",
+        "README.md"
+      ],
+      "present_layers": [
+        "README.md",
+        "architecture.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "product-documentation",
+      "required_layers": [
+        "architecture.md"
+      ],
+      "present_layers": [
+        "architecture.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "id": "work-packages",
+      "required_layers": [
+        "architecture.md"
+      ],
+      "present_layers": [
+        "architecture.md"
+      ],
+      "missing_layers": [],
+      "evidence_count": 1,
+      "constrained_by": [
+        "okf-knowledge-layer-and-genuine-fix-discipline"
+      ],
+      "errors": 0,
+      "warnings": 0
+    }
+  ],
+  "decisions": [
+    {
+      "id": "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
+      "constrains": [
+        "agent-shims",
+        "command-templates"
+      ],
+      "evidence_count": 2
+    },
+    {
+      "id": "agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
+      "constrains": [
+        "command-templates",
+        "current-truth-ontology"
+      ],
+      "evidence_count": 3
+    },
+    {
+      "id": "always-install-both-powershell-and-bash-script-sets",
+      "constrains": [
+        "agent-shims",
+        "command-templates"
+      ],
+      "evidence_count": 2
+    },
+    {
+      "id": "okf-knowledge-layer-and-genuine-fix-discipline",
+      "constrains": [
+        "application-registry",
+        "command-templates",
+        "current-truth-ontology",
+        "developer-workflow",
+        "product-documentation",
+        "work-packages"
+      ],
+      "evidence_count": 2
+    },
+    {
+      "id": "participant-vocabulary-reserving-agent-for-ai-runtimes",
+      "constrains": [
+        "command-templates",
+        "current-truth-ontology"
+      ],
+      "evidence_count": 2
+    }
+  ],
+  "findings": []
+}

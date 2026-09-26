@@ -99,6 +99,24 @@ all_repo_matches() {
 }
 
 KNOWLEDGE_JSON=$(knowledge_matches | jq -R -s 'split("\n") | map(select(length > 0))')
+
+# Prefer the single knowledge engine's deterministic concept ranking; fall back
+# to the bounded text scan when the engine or Python is unavailable.
+RANKING_SOURCE="fallback"
+RANKING_ENGINE=""
+RANKING_RESULTS='[]'
+if ENGINE_PATH=$(resolve_knowledge_engine "$REPO_ROOT"); then
+    RANKING_ENGINE="$ENGINE_PATH"
+    RANKING_SCRIPT="$(dirname "$ENGINE_PATH")/explain-context.py"
+    PYTHON_BIN=$(command -v python3 || command -v python || true)
+    if [[ -n "$PYTHON_BIN" && -f "$RANKING_SCRIPT" ]] &&
+        RANKED=$("$PYTHON_BIN" "$RANKING_SCRIPT" --root "$REPO_ROOT" --limit 60 -- "$TOPIC" 2>/dev/null) &&
+        jq -e '.results' >/dev/null 2>&1 <<<"$RANKED"; then
+        RANKING_SOURCE="engine"
+        RANKING_RESULTS=$(jq -c '.results' <<<"$RANKED")
+        KNOWLEDGE_JSON=$(jq -c '[.results[].path]' <<<"$RANKED")
+    fi
+fi
 ALL_MATCHES=$(all_repo_matches)
 TEST_JSON=$(printf '%s\n' "$ALL_MATCHES" |
     awk '{ path=tolower($0) } path ~ /(^|\/)(tests?|specs?)(\/|$)|(^|\/)(test_[^\/]*|[^\/]*(_test|\.test|_spec|\.spec)\.)/ && count < 40 { print; count++ }' |
@@ -116,6 +134,9 @@ jq -n \
     --argjson knowledge_matches "$KNOWLEDGE_JSON" \
     --argjson code_matches "$CODE_JSON" \
     --argjson test_matches "$TEST_JSON" \
+    --arg ranking_source "$RANKING_SOURCE" \
+    --arg ranking_engine "$RANKING_ENGINE" \
+    --argjson ranking_results "$RANKING_RESULTS" \
     '{
         timestamp: $timestamp,
         repo_root: $repo_root,
@@ -123,6 +144,11 @@ jq -n \
         terms: $terms,
         dry_run: $dry_run,
         knowledge_matches: $knowledge_matches,
+        knowledge_ranking: {
+            source: $ranking_source,
+            engine: $ranking_engine,
+            results: $ranking_results
+        },
         code_matches: $code_matches,
         test_matches: $test_matches,
         counts: {

@@ -1,3 +1,8 @@
+---
+source_of_truth:
+- .knowledge/entities/developer-workflow
+last_verified: '2026-09-04'
+---
 # Dogfooding DevSpark
 
 How we set up the DevSpark source repository to use its own spec-driven workflow — and what happens when your development process tool becomes both the product and the workbench.

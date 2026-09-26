@@ -403,6 +403,7 @@ function Get-CreatePrPreflight {
 
     return [PSCustomObject]@{
         repo_root = $repoRoot
+        knowledge_engine = [PSCustomObject](Get-KnowledgeEngineInfo -RepoRoot $repoRoot)
         current_branch = $currentBranch
         target_branch = $targetBranch
         dirty_worktree = $dirty

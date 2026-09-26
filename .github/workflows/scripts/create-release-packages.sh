@@ -331,7 +331,8 @@ build_variant() {
     mkdir -p "$DEVSPARK_DIR/scripts"
     [[ -d scripts/bash ]] && { cp -r scripts/bash "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/bash -> .devspark/scripts"; }
     [[ -d scripts/powershell ]] && { cp -r scripts/powershell "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/powershell -> .devspark/scripts"; }
-    [[ -d scripts/python ]] && { cp -r scripts/python "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/python -> .devspark/scripts"; }
+    # Root-level scripts include the single knowledge engine (build_knowledge_index.py),
+    # explain-context.py, and migrate-knowledge-to-entities.py.
     find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
   fi
   
