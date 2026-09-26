@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/pr-review.md
+last_verified: '2026-08-30'
+---
+
 # PR Review Command Guide
 
 ## Overview

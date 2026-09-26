@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- .knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/lesleyhazleton
+last_verified: '2026-08-30'
+---
+
 # Contact Card Metadata — Lesley Hazleton
 
 > **Status:** APPROVED

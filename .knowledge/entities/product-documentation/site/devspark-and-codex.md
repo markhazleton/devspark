@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- quickstart/devspark_quickstart_codex.md
+last_verified: '2026-09-04'
+---
+
 # DevSpark and Codex
 
 Codex is strongest when it has clear task context, durable repository guidance, and a verification loop. DevSpark supplies that operating system: command prompts, specs, plans, tasks, gates, scripts, and release artifacts that keep Codex focused from idea through merge.

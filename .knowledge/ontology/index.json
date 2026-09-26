@@ -444,8 +444,11 @@
         "Sources"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets/MakeBoldSolutions/LinkedIn"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/lesleyhazleton/contact.md",
@@ -467,8 +470,11 @@
         "Sign-off"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/lesleyhazleton"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/markhazleton/contact.md",
@@ -490,8 +496,11 @@
         "Sign-off"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/markhazleton"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/brand-system/assets/makeboldspark/README.md",
@@ -506,8 +515,11 @@
         "Canonical Name"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets/makeboldspark"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/brand-system/assets/makeboldspark/brand-guide.md",
@@ -543,8 +555,11 @@
         "Implementation Checklist"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets/makeboldspark"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/brand-system/assets/makeboldspark/spark-project-brand-guide.md",
@@ -600,8 +615,11 @@
         "File Naming for Spark Projects"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets/makeboldspark"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/command-templates/architecture.md",
@@ -862,8 +880,11 @@
         "DevSpark Documentation Guidance"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "AGENTS.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/README.md",
@@ -878,8 +899,11 @@
         "Deployment"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-09"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/about.md",
@@ -901,8 +925,11 @@
         "Links"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-09"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/checklist-usage.md",
@@ -925,8 +952,11 @@
         "Related Commands"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/checklist.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/constitution-guide.md",
@@ -988,8 +1018,12 @@
         "Next Steps"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/constitution.md",
+        ".knowledge/governance/constitution.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/critic-usage.md",
@@ -1057,8 +1091,11 @@
         "Support"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/critic.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/devspark-and-antigravity.md",
@@ -1073,8 +1110,11 @@
         "How it Works"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "quickstart/devspark_quickstart_antigravity.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/devspark-and-codex.md",
@@ -1097,8 +1137,11 @@
         "Reference Links"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "quickstart/devspark_quickstart_codex.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/explain-usage.md",
@@ -1115,8 +1158,11 @@
         "Lifecycle Position"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/explain.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/faq.md",
@@ -1164,8 +1210,11 @@
         "Still Have Questions?"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-05"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/implementation-lifecycle.md",
@@ -1192,8 +1241,12 @@
         "4. Version Stamping Rules"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/implement.md",
+        "templates/commands/release.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-26"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/index.md",
@@ -1214,8 +1267,11 @@
         "Current-Truth Model"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-09"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/installation.md",
@@ -1231,8 +1287,11 @@
         "Upgrade"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "quickstart/README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-09"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/monorepo-guide.md",
@@ -1267,8 +1326,11 @@
         "Getting Started"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/add-application.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/next-usage.md",
@@ -1285,8 +1347,11 @@
         "Release Boundary"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/next.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-26"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/philosophy.md",
@@ -1303,8 +1368,11 @@
         "No CLI or harness"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        ".knowledge/entities/current-truth-ontology/devspark-philosophy.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-26"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/pr-review-usage.md",
@@ -1379,8 +1447,11 @@
         "Support"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/pr-review.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-08-30"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/quickstart.md",
@@ -1408,8 +1479,11 @@
         "What's Next"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "quickstart/README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-09"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/release-usage.md",
@@ -1426,8 +1500,11 @@
         "Usage"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/release.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-26"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/repo-story-usage.md",
@@ -1456,8 +1533,11 @@
         "Related Commands"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/repo-story.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/site-audit-usage.md",
@@ -1518,8 +1598,11 @@
         "Support"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "templates/commands/site-audit.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-04"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/three-pillars.md",
@@ -1537,8 +1620,11 @@
         "Start with the pillars"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-09"
     },
     {
       "path": ".knowledge/entities/product-documentation/site/upgrade.md",
@@ -1554,8 +1640,11 @@
         "Not Supported"
       ],
       "applies_to": [],
-      "source_of_truth": [],
-      "evidence": []
+      "source_of_truth": [
+        "quickstart/README.md"
+      ],
+      "evidence": [],
+      "last_verified": "2026-09-09"
     },
     {
       "path": ".knowledge/entities/work-packages/architecture.md",
@@ -1783,6 +1872,14 @@
       ]
     },
     {
+      "basis": "evidence:.knowledge/entities/brand-system/assets/makeboldspark",
+      "members": [
+        ".knowledge/entities/brand-system/assets/makeboldspark/README.md",
+        ".knowledge/entities/brand-system/assets/makeboldspark/brand-guide.md",
+        ".knowledge/entities/brand-system/assets/makeboldspark/spark-project-brand-guide.md"
+      ]
+    },
+    {
       "basis": "evidence:.knowledge/entities/developer-workflow",
       "members": [
         ".knowledge/entities/developer-workflow/_entity.yaml",
@@ -1800,6 +1897,33 @@
       ]
     },
     {
+      "basis": "evidence:.knowledge/governance/constitution.md",
+      "members": [
+        ".knowledge/entities/current-truth-ontology/_entity.yaml",
+        ".knowledge/entities/product-documentation/site/constitution-guide.md"
+      ]
+    },
+    {
+      "basis": "evidence:README.md",
+      "members": [
+        ".knowledge/entities/product-documentation/site/README.md",
+        ".knowledge/entities/product-documentation/site/about.md",
+        ".knowledge/entities/product-documentation/site/faq.md",
+        ".knowledge/entities/product-documentation/site/index.md",
+        ".knowledge/entities/product-documentation/site/three-pillars.md",
+        ".knowledge/governance/decisions/participant-vocabulary-reserving-agent-for-ai-runtimes.md"
+      ]
+    },
+    {
+      "basis": "evidence:quickstart/README.md",
+      "members": [
+        ".knowledge/entities/product-documentation/site/installation.md",
+        ".knowledge/entities/product-documentation/site/quickstart.md",
+        ".knowledge/entities/product-documentation/site/upgrade.md",
+        ".knowledge/governance/decisions/always-install-both-powershell-and-bash-script-sets.md"
+      ]
+    },
+    {
       "basis": "evidence:scripts/build_knowledge_index.py",
       "members": [
         ".knowledge/entities/current-truth-ontology/architecture.md",
@@ -1813,6 +1937,21 @@
       "members": [
         ".knowledge/entities/command-templates/architecture.md",
         ".knowledge/entities/command-templates/devspark-prompt-mapping.md"
+      ]
+    },
+    {
+      "basis": "evidence:templates/commands/add-application.md",
+      "members": [
+        ".knowledge/entities/application-registry/architecture.md",
+        ".knowledge/entities/product-documentation/site/monorepo-guide.md"
+      ]
+    },
+    {
+      "basis": "evidence:templates/commands/release.md",
+      "members": [
+        ".knowledge/entities/current-truth-ontology/devspark-philosophy.md",
+        ".knowledge/entities/product-documentation/site/implementation-lifecycle.md",
+        ".knowledge/entities/product-documentation/site/release-usage.md"
       ]
     },
     {

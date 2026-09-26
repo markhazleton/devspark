@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/repo-story.md
+last_verified: '2026-09-04'
+---
+
 # Repo Story Command Guide
 
 ## Overview

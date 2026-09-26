@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- quickstart/README.md
+last_verified: '2026-09-09'
+---
+
 # Upgrade DevSpark
 
 ## Current Release

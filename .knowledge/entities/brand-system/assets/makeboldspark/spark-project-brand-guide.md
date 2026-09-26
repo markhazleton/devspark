@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- .knowledge/entities/brand-system/assets/makeboldspark
+last_verified: '2026-08-30'
+---
+
 # Spark Project Brand Guide
 
 Version: 1.0

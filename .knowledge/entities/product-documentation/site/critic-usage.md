@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/critic.md
+last_verified: '2026-09-04'
+---
+
 # Critic Command Guide
 
 ## Overview

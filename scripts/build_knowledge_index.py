@@ -718,10 +718,10 @@ def validate_currency(
 def validate_documents(knowledge: Knowledge) -> None:
     findings = knowledge.findings
     enforcement = knowledge.config["knowledge_drift"]["enforcement"]
+    # Every Markdown document under an entity, including subfolders, is a
+    # knowledge node and carries the currency pair.
     for entity in knowledge.entities.values():
         for document in entity.documents:
-            if not document.is_layer:
-                continue
             check_banned_keys(document.frontmatter, document.path, findings, entity.entity_id)
             validate_currency(document, findings, enforcement, entity.entity_id, required=True)
             validate_evidence_list(document.frontmatter, document.path, findings, entity.entity_id, required=False)

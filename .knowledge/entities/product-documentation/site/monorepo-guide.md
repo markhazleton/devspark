@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/add-application.md
+last_verified: '2026-09-04'
+---
+
 # Multi-Application Monorepo Support
 
 DevSpark's multi-app monorepo support lets you manage multiple applications in a

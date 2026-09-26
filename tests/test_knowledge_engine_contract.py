@@ -183,6 +183,18 @@ def test_evidence_is_required_but_fallback_reason_only_warns(tmp_path: Path) -> 
     assert "missing-evidence" in _codes(missing)
 
 
+def test_subfolder_documents_require_the_currency_pair(tmp_path: Path) -> None:
+    repo = _consumer(tmp_path)
+    assert _engine(repo).returncode == 0
+    guide = repo / ".knowledge" / "entities" / "auth" / "guides" / "rotation.md"
+    _write(guide, "# Rotation Guide\n")
+    result = _engine(repo)
+    assert result.returncode == 1
+    assert {"missing-source-of-truth", "missing-last-verified"} <= _codes(result)
+    guide.write_text("---\nsource_of_truth:\n- src/auth.py\nlast_verified: '2026-09-01'\n---\n\n# Rotation Guide\n", encoding="utf-8")
+    assert _engine(repo).returncode == 0
+
+
 def test_permanent_knowledge_cannot_cite_ephemeral_work(tmp_path: Path) -> None:
     repo = _consumer(tmp_path)
     _write(repo / ".devspark.work" / "specs" / "001-auth" / "spec.md", "# Spec\n")

@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- README.md
+last_verified: '2026-09-09'
+---
+
 # Documentation
 
 Current Release: [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)

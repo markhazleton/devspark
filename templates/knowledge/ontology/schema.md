@@ -62,8 +62,9 @@ Entity ids are lowercase slugs matching `^[a-z0-9][a-z0-9._-]*$`.
 
 ### Layer document frontmatter
 
-Every top-level Markdown file in an entity folder is a knowledge node and
-carries the currency pair:
+Every Markdown file under an entity folder, including subfolders such as a
+documentation site or asset guides, is a knowledge node and carries the
+currency pair. Top-level files are the entity's layers:
 
 | Field | Required | Meaning |
 |---|---:|---|

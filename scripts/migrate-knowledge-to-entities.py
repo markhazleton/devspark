@@ -7,8 +7,9 @@ One deterministic operation, safe to re-run:
 - entities: fold generated `_derived.yaml` `constrained_by` into the
   hand-authored `_entity.yaml`, then delete `_derived.yaml`; drop banned keys.
 - constrains / constrained_by: add any missing reciprocal pointer.
-- entity layer documents: add `source_of_truth` (from their own or the entity's
-  evidence refs) and `last_verified` (last Git commit date, else today).
+- entity documents (every Markdown file under an entity, including
+  subfolders): add `source_of_truth` (from their own or the entity's evidence
+  refs) and `last_verified` (last Git commit date, else today).
 - ontology: delete retired `*.generated.md` reports.
 
 Run the knowledge engine afterwards to write index.json and coverage.json.
@@ -227,7 +228,7 @@ class Migration:
     def migrate_layers(self, root: Path, entities: dict[str, tuple[Path, dict[str, Any]]]) -> None:
         for entity_id, (entity_path, entity_data) in entities.items():
             folder = entity_path.parent
-            for path in sorted(folder.glob("*.md")):
+            for path in sorted(folder.rglob("*.md")):
                 if path.name.startswith("_"):
                     continue
                 text = path.read_text(encoding="utf-8")

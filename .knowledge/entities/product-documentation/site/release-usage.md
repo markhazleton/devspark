@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/release.md
+last_verified: '2026-09-26'
+---
+
 # DevSpark Release
 
 `/devspark.release` is the final validation and archival command. It runs at a

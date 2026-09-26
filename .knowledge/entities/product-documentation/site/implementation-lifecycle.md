@@ -1,3 +1,10 @@
+---
+source_of_truth:
+- templates/commands/implement.md
+- templates/commands/release.md
+last_verified: '2026-09-26'
+---
+
 # DevSpark Implementation Lifecycle
 
 This guide defines the recommended DevSpark lifecycle for teams. For the

@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/next.md
+last_verified: '2026-09-26'
+---
+
 # Next Command Navigator
 
 `/devspark.next` detects where the current repository and branch are in the

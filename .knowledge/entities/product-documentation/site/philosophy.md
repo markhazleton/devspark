@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- .knowledge/entities/current-truth-ontology/devspark-philosophy.md
+last_verified: '2026-09-26'
+---
+
 # DevSpark Philosophy
 
 DevSpark is agile product development made explicit enough for an AI agent to
