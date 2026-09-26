@@ -325,7 +325,50 @@ def test_migration_converts_legacy_layout_and_is_idempotent(tmp_path: Path) -> N
     assert "changed 0 file(s)" in second.stdout
 
 
-@pytest.mark.skipif(shutil.which("bash") is None, reason="requires bash")
+def test_decision_errors_gate_only_the_entities_they_constrain(tmp_path: Path) -> None:
+    repo = _consumer(tmp_path)
+    _write(
+        repo / ".knowledge" / "entities" / "billing" / "_entity.yaml",
+        """\
+        id: billing
+        name: Billing
+        kind: knowledge-model
+        summary: Invoices.
+        constrained_by:
+        - billing-policy
+        evidence:
+        - type: test
+          ref: tests/test_auth.py
+          verified_by: execution
+        """,
+    )
+    _write(
+        repo / ".knowledge" / "entities" / "billing" / "architecture.md",
+        "---\nsource_of_truth:\n- src/auth.py\nlast_verified: '2026-09-01'\n---\n\n# Billing\n",
+    )
+    _write(
+        repo / ".knowledge" / "governance" / "decisions" / "billing-policy.md",
+        "---\nid: billing-policy\ntype: governance-decision\ntitle: Billing Policy\n"
+        "constrains:\n- billing\nlast_verified: '2026-09-01'\n---\n\n# Billing Policy\n",
+    )
+    result = _engine(repo)
+    assert "missing-evidence" in _codes(result)
+    assert _engine(repo, "--check", "--entity", "auth").returncode == 0
+    assert _engine(repo, "--check", "--entity", "billing").returncode == 1
+
+
+def test_engine_writes_never_delete_pinned_baselines(tmp_path: Path) -> None:
+    repo = _consumer(tmp_path)
+    claim = json.loads(_engine(repo, "--pin-claim", "src/auth.py").stdout)
+    baseline = repo / claim["baseline"]
+
+    written = _engine(repo)
+    assert written.returncode == 0, written.stdout
+    assert baseline.is_file(), "a freshly pinned baseline must survive an engine write"
+    assert "orphan-baseline" in _codes(written)
+
+
+@pytest.mark.skipif(shutil.which("bash") is None or sys.platform == "win32", reason="requires POSIX bash")
 def test_bash_resolver_prefers_framework_copy_and_reports_legacy(tmp_path: Path) -> None:
     repo = _consumer(tmp_path)
 
@@ -343,6 +386,28 @@ def test_bash_resolver_prefers_framework_copy_and_reports_legacy(tmp_path: Path)
     (repo / "scripts").mkdir()
     shutil.copy(ROOT / "scripts" / ENGINE, repo / "scripts" / ENGINE)
     assert json.loads(resolve()) == {"engine": "scripts/build_knowledge_index.py", "legacy_copies": []}
+
+
+@pytest.mark.skipif(shutil.which("pwsh") is None, reason="requires PowerShell 7")
+def test_powershell_resolver_prefers_framework_copy_and_reports_legacy(tmp_path: Path) -> None:
+    repo = _consumer(tmp_path)
+    common = ROOT / "scripts" / "powershell" / "common.ps1"
+
+    def resolve() -> dict:
+        command = f". '{common}'; Get-KnowledgeEngineInfo -RepoRoot '{repo}' | ConvertTo-Json -Compress"
+        result = subprocess.run(["pwsh", "-NoProfile", "-Command", command], text=True, capture_output=True, check=True)
+        return json.loads(result.stdout)
+
+    assert resolve() == {"engine": ".devspark/scripts/build_knowledge_index.py", "legacy_copies": []}
+    legacy = repo / ".devspark" / "scripts" / "python" / ENGINE
+    legacy.parent.mkdir(parents=True)
+    shutil.copy(ROOT / "scripts" / ENGINE, legacy)
+    assert resolve()["legacy_copies"] == [".devspark/scripts/python/build_knowledge_index.py"]
+
+    shutil.rmtree(repo / ".devspark")
+    (repo / "scripts").mkdir()
+    shutil.copy(ROOT / "scripts" / ENGINE, repo / "scripts" / ENGINE)
+    assert resolve() == {"engine": "scripts/build_knowledge_index.py", "legacy_copies": []}
 
 
 def test_resolver_is_paired_and_used_by_every_entry_point() -> None:

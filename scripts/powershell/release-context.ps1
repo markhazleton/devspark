@@ -24,8 +24,11 @@ function Get-JsonArray {
     return ,@($Items | Where-Object { $_ } | Sort-Object -Unique)
 }
 
+# Unresolved linkage refs recorded as "<item>: <ref>".
+$script:unresolvedLinkage = [System.Collections.Generic.List[string]]::new()
+
 function Test-CompletedTaskLinkage {
-    param([string]$Content)
+    param([string]$Content, [string]$RepoRoot, [string]$Label)
 
     $taskMatches = [regex]::Matches(
         $Content,
@@ -34,6 +37,7 @@ function Test-CompletedTaskLinkage {
         [System.Text.RegularExpressions.RegexOptions]::Singleline
     )
     if ($taskMatches.Count -eq 0) { return $false }
+    $complete = $true
 
     foreach ($taskMatch in $taskMatches) {
         foreach ($field in @('code_ref', 'test_ref', 'knowledge_ref')) {
@@ -47,10 +51,22 @@ function Test-CompletedTaskLinkage {
             if ($value -match '^(?i:n/a)') {
                 $reason = $value -replace '^(?i:n/a)\s*[-—:]\s*', ''
                 if (-not $reason -or $reason -ieq 'n/a') { return $false }
+                continue
+            }
+            # Concrete refs must resolve to an existing path.
+            $ref = ($value -replace '`', '')
+            $ref = ($ref -split '::', 2)[0]
+            $ref = ($ref -split '#', 2)[0]
+            $ref = $ref.Trim()
+            if (-not $ref -or $ref -match '^[A-Za-z][A-Za-z0-9+.-]*:') { continue }
+            if ($ref.StartsWith('./')) { $ref = $ref.Substring(2) }
+            if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $ref))) {
+                $script:unresolvedLinkage.Add("${Label}: $ref")
+                $complete = $false
             }
         }
     }
-    return $true
+    return $complete
 }
 
 $repoRoot = Get-RepoRoot
@@ -113,7 +129,7 @@ if (Test-Path $workPackagesDir) {
             $content = Get-Content $tasksFile -Raw -ErrorAction SilentlyContinue
             $unchecked = ([regex]::Matches($content, '^\s*-\s+\[ \]\s+T\d+', 'Multiline')).Count
             $checked = ([regex]::Matches($content, '^\s*-\s+\[[xX]\]\s+T\d+', 'Multiline')).Count
-            $linkageComplete = Test-CompletedTaskLinkage -Content $content
+            $linkageComplete = Test-CompletedTaskLinkage -Content $content -RepoRoot $repoRoot -Label $packageName
             if ($unchecked -eq 0 -and $checked -gt 0 -and $linkageComplete) {
                 $releaseEligible += $packageName
             } else {
@@ -132,7 +148,7 @@ if (Test-Path $quickfixesDir) {
             $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
             $unchecked = ([regex]::Matches($content, '^\s*-\s+\[ \]\s+T\d+', 'Multiline')).Count
             $checked = ([regex]::Matches($content, '^\s*-\s+\[[xX]\]\s+T\d+', 'Multiline')).Count
-            if ($unchecked -eq 0 -and $checked -gt 0 -and (Test-CompletedTaskLinkage -Content $content)) {
+            if ($unchecked -eq 0 -and $checked -gt 0 -and (Test-CompletedTaskLinkage -Content $content -RepoRoot $repoRoot -Label $_.Name)) {
                 $releaseEligibleQuickfixes += $_.Name
             } else {
                 $blockedQuickfixes += $_.Name
@@ -194,6 +210,7 @@ $result = [ordered]@{
     IN_FLIGHT_QUICKFIXES = Get-JsonArray $inFlightQuickfixes
     RELEASE_ELIGIBLE_QUICKFIXES = Get-JsonArray $releaseEligibleQuickfixes
     BLOCKED_QUICKFIXES = Get-JsonArray $blockedQuickfixes
+    UNRESOLVED_LINKAGE_REFS = Get-JsonArray $script:unresolvedLinkage.ToArray()
     LAST_TAG = $lastTag
     LAST_RELEASE_DATE = $lastReleaseDate
     COMMITS_SINCE_RELEASE = $commitsSince

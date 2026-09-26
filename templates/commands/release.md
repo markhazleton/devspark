@@ -70,9 +70,11 @@ anything.
    `RELEASE_ELIGIBLE_QUICKFIXES` candidate, plus each completed item under
    `.devspark.work/release-candidates/`. Treat the script result as a pre-scan,
    not proof of validity.
-4. Resolve every task linkage. Strip any `::symbol` or `#fragment` only when
-   checking the containing file; preserve the full reference in the work
-   package.
+4. Resolve every task linkage. The pre-scan already blocks packages whose
+   concrete refs do not resolve and lists them in `UNRESOLVED_LINKAGE_REFS`
+   (`<package>: <ref>`); report each as a blocker to repair. Strip any
+   `::symbol` or `#fragment` only when checking the containing file; preserve
+   the full reference in the work package.
 5. Run every test named by `test_ref`, plus the repository's required release
    validation suite. An explained `n/a` is allowed only for tasks that cannot
    reasonably have a test.

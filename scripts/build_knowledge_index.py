@@ -1085,11 +1085,28 @@ def referenced_baselines(knowledge: Knowledge) -> set[str]:
     return referenced
 
 
+def finding_entities(knowledge: Knowledge, finding: Finding) -> set[str] | None:
+    """Entities a finding belongs to; None means repository-wide."""
+    if finding.entity:
+        return {finding.entity}
+    path = finding.path.split("#", 1)[0]
+    for decision in knowledge.decisions.values():
+        if rel(decision.path) == path:
+            constrains = {item for item in string_list(decision.data.get("constrains")) if item in knowledge.entities}
+            return constrains or None
+    return None
+
+
 def gating_errors(knowledge: Knowledge, scope: set[str] | None) -> list[Finding]:
     errors = [item for item in knowledge.findings if item.level == "error"]
     if not scope:
         return errors
-    return [item for item in errors if item.entity is None or item.entity in scope]
+    gating = []
+    for item in errors:
+        entities = finding_entities(knowledge, item)
+        if entities is None or entities & scope:
+            gating.append(item)
+    return gating
 
 
 def run_build(check: bool, scope: set[str] | None) -> int:
@@ -1104,12 +1121,9 @@ def run_build(check: bool, scope: set[str] | None) -> int:
                 path.write_text(expected, encoding="utf-8")
         for legacy in sorted(ontology_dir().glob("*.generated.md")):
             legacy.unlink()
-        referenced = referenced_baselines(knowledge)
-        if baselines_dir().exists():
-            for baseline in sorted(baselines_dir().iterdir()):
-                if baseline.is_file() and rel(baseline) not in referenced:
-                    baseline.unlink()
-        # Re-validate after pruning so the written coverage reflects the final state.
+        # Unreferenced baselines are reported (orphan-baseline warning), never
+        # deleted: a freshly pinned claim may not be in its document yet.
+        # Re-validate after removing retired reports so coverage reflects the final state.
         knowledge = validate(load_knowledge())
         for path, expected in expected_outputs(knowledge).items():
             if path.read_text(encoding="utf-8") != expected:
