@@ -22,7 +22,8 @@ conflicts with this section, the v4 section wins.
 - Audit is synchronic: check whether the whole current state holds together,
   never whether two past changes conflicted.
 - Run current-truth validation across `.knowledge`, governance, and source-code
-  comments (no comment may name a spec ID, task ID, or plan identifier).
+  comments. No comment may name a spec ID, task ID, or plan identifier; check it
+  with `python .devspark/scripts/scan-ephemeral-refs.py --full-inventory`.
 - Run the knowledge engine reported in `knowledge_engine.engine` (resolved by
   `resolve_knowledge_engine`) with `--check` and gate on gap-report failures
   for all entities. Report `knowledge_engine.legacy_copies` as upgrade work.

@@ -28,7 +28,7 @@ fi
 source "$SCRIPT_DIR/platform.sh"
 source "$SCRIPT_DIR/common.sh"
 
-# Multi-app support (T041, T066)
+# Multi-app support
 parse_app_context "$@" 2>/dev/null || true
 if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
     resolve_app_scope 2>/dev/null || true

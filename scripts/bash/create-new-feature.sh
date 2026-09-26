@@ -179,7 +179,7 @@ cd "$REPO_ROOT"
 # Load common for multi-app helpers
 source "$SCRIPT_DIR/common.sh" 2>/dev/null || source "$(dirname "${BASH_SOURCE[0]}")/common.sh" 2>/dev/null || true
 
-# Multi-app support: parse --app and --repo-scope from ARGS (T031)
+# Multi-app support: parse --app and --repo-scope from ARGS
 parse_app_context "${ARGS[@]}" 2>/dev/null || true
 if [[ ${#DEVSPARK_REMAINING_ARGS[@]} -gt 0 ]]; then
     ARGS=("${DEVSPARK_REMAINING_ARGS[@]}")

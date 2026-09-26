@@ -152,7 +152,7 @@ Set-Location $repoRoot
 $specsDir = Join-Path (Join-Path $repoRoot '.devspark.work') 'specs'
 New-Item -ItemType Directory -Path $specsDir -Force | Out-Null
 
-# Multi-app support (T032)
+# Multi-app support
 if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
     . "$PSScriptRoot/common.ps1"
 }

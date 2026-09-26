@@ -381,7 +381,7 @@ function Test-RegistryJson {
     }
 }
 
-# Resolve app documentation root (T015)
+# Resolve app documentation root
 function Resolve-AppDocRoot {
     param(
         [string]$RepoRoot,
@@ -408,7 +408,7 @@ function Resolve-AppDocRoot {
     return Join-Path $RepoRoot "$($app.path)/.knowledge"
 }
 
-# Parse --app and --repo-scope arguments (T027)
+# Parse --app and --repo-scope arguments
 function Parse-AppContext {
     param([string[]]$Arguments)
 
@@ -441,7 +441,7 @@ function Parse-AppContext {
     return $result
 }
 
-# Resolve scope and validate (T029)
+# Resolve scope and validate
 function Resolve-AppScope {
     param(
         [string]$AppId = '',
@@ -511,7 +511,7 @@ function Resolve-AppScope {
     return $result
 }
 
-# Resolve constitution with app overlay (T023)
+# Resolve constitution with app overlay
 function Resolve-Constitution {
     param(
         [string]$RepoRoot,
@@ -543,7 +543,7 @@ function Resolve-Constitution {
     return $output
 }
 
-# Get direct downstream consumers of an app (T040)
+# Get direct downstream consumers of an app
 function Get-DownstreamApps {
     param(
         [string]$RepoRoot,
@@ -565,7 +565,7 @@ function Get-DownstreamApps {
     return $downstream
 }
 
-# Generate scope report (T040)
+# Generate scope report
 function Write-ScopeReport {
     param([PSCustomObject]$Scope)
 
@@ -590,7 +590,7 @@ function Write-ScopeReport {
     }
 }
 
-# Print scope summary (T035)
+# Print scope summary
 function Write-ScopeSummary {
     param([PSCustomObject]$Scope)
 
@@ -604,7 +604,7 @@ function Write-ScopeSummary {
     Write-Output "---"
 }
 
-# Resolve inherited profile chain for an app (T053)
+# Resolve inherited profile chain for an app
 function Resolve-AppProfiles {
     param(
         [string]$RepoRoot,
@@ -653,7 +653,7 @@ function Resolve-AppProfiles {
     return [PSCustomObject]@{ tags = $tags; rules = $rules; hints = $hints }
 }
 
-# App-aware feature paths (T029)
+# App-aware feature paths
 function Get-FeaturePathsAppAware {
     param([PSCustomObject]$Scope)
 

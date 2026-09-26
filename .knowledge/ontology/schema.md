@@ -208,6 +208,7 @@ reports `matched_on` explaining why it scored.
 | `build_knowledge_index.py --pin-claim <path>` | Retain a baseline and print a claim (JSON) |
 | `explain-context.py "<topic>"` | Ranked discovery including body prose (JSON) |
 | `migrate-knowledge-to-entities.py [--dry-run]` | Migrate older `.knowledge` layouts to this contract |
+| `scan-ephemeral-refs.py --base <ref> \| --full-inventory` | Fail when code comments name spec, task, requirement, proposal, or archive identifiers |
 
 `coverage.json` answers existence (required layers, evidence counts, findings).
 `/devspark.site-audit` owns accuracy: it re-runs `execution` evidence and

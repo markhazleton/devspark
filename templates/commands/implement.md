@@ -46,7 +46,9 @@ later section conflicts with this section, the v4 section wins.
   `governance_ref` when applicable, or an explicit `n/a — <reason>`.
 - Never track specs, requirements, or tasks as comments in code, and never write
   ephemeral package, task, spec, plan, review-thread, release, or archive
-  references into permanent code or `.knowledge`.
+  references into permanent code or `.knowledge`. Before finishing, run
+  `python .devspark/scripts/scan-ephemeral-refs.py --base <target-branch>` and
+  remove anything it reports.
 - Run the knowledge engine (`.devspark/scripts/build_knowledge_index.py`, else
   `scripts/build_knowledge_index.py`) without flags to refresh `index.json` and
   `coverage.json`, then with `--check`. Leave the work package live in

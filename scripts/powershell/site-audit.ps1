@@ -65,7 +65,7 @@ param(
 # Import common functions
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-# Multi-app support (T090)
+# Multi-app support
 if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
     . "$PSScriptRoot/common.ps1"
 }

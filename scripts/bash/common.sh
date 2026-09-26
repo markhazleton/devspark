@@ -324,7 +324,7 @@ validate_registry_json() {
     echo "{\"valid\":true,\"apps\":$app_count,\"profiles\":$profile_count}"
 }
 
-# Resolve app documentation root (T014)
+# Resolve app documentation root
 resolve_app_doc_root() {
     local repo_root="$1"
     local app_id="$2"
@@ -348,7 +348,7 @@ resolve_app_doc_root() {
     echo "$repo_root/$app_path/.knowledge"
 }
 
-# Parse --app and --repo-scope arguments (T026)
+# Parse --app and --repo-scope arguments
 # Sets DEVSPARK_APP_ID and DEVSPARK_REPO_SCOPE
 parse_app_context() {
     DEVSPARK_APP_ID=""
@@ -381,7 +381,7 @@ parse_app_context() {
     DEVSPARK_REMAINING_ARGS=("${remaining_args[@]}")
 }
 
-# Resolve scope and validate (T028, T030)
+# Resolve scope and validate
 # Sets DEVSPARK_SCOPE, DEVSPARK_DOC_ROOT, DEVSPARK_SCOPE_ERROR (used by callers)
 # shellcheck disable=SC2034
 resolve_app_scope() {
@@ -449,7 +449,7 @@ resolve_app_scope() {
     DEVSPARK_DOC_ROOT="$repo_root/.knowledge"
 }
 
-# Resolve constitution with app overlay (T022)
+# Resolve constitution with app overlay
 resolve_constitution() {
     local repo_root="$1"
     local app_id="${2:-}"
@@ -488,7 +488,7 @@ $(cat "$app_constitution")"
     echo "$output"
 }
 
-# Get direct downstream consumers of an app (T039)
+# Get direct downstream consumers of an app
 get_downstream_apps() {
     local repo_root="$1"
     local app_id="$2"
@@ -504,7 +504,7 @@ get_downstream_apps() {
         "$registry" 2>/dev/null || true
 }
 
-# Generate scope report (T039)
+# Generate scope report
 generate_scope_report() {
     local repo_root
     repo_root=$(get_repo_root)
@@ -531,7 +531,7 @@ generate_scope_report() {
     fi
 }
 
-# Print scope summary (T035)
+# Print scope summary
 print_scope_summary() {
     echo "--- DevSpark Scope ---"
     echo "scope: ${DEVSPARK_SCOPE:-unknown}"
@@ -543,7 +543,7 @@ print_scope_summary() {
     echo "---"
 }
 
-# Resolve inherited profile chain for an app (T052)
+# Resolve inherited profile chain for an app
 # Composes all inherited profiles + overrides + app.json into one effective profile
 resolve_app_profiles() {
     local repo_root="$1"
@@ -583,7 +583,7 @@ resolve_app_profiles() {
     '
 }
 
-# Override get_feature_paths for app-scoped workflows (T028)
+# Override get_feature_paths for app-scoped workflows
 get_feature_paths_app_aware() {
     local repo_root
     repo_root=$(get_repo_root)

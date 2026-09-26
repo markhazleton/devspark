@@ -82,7 +82,10 @@ anything.
    `KNOWLEDGE_ENGINE.engine` (resolved by `resolve_knowledge_engine`):
    `python <engine> --check`. If `KNOWLEDGE_ENGINE.legacy_copies` is non-empty,
    report it as an upgrade task; never run a legacy copy.
-7. Search permanent content for forbidden references to ephemeral artifacts.
+7. Search permanent content for forbidden references to ephemeral artifacts:
+   run `python .devspark/scripts/scan-ephemeral-refs.py --base <last release
+   tag>` (or `--full-inventory` when there is no tag) for code comments, and
+   the knowledge engine `--check` for knowledge references.
 8. If any candidate fails, leave it in `.devspark.work/`, do not update the
    version, and report exact blockers.
 9. Update `.devspark/VERSION` only after all release validation passes.

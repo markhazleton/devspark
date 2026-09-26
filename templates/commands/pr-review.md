@@ -29,7 +29,9 @@ conflicts with this section, the v4 section wins.
   governance files.
 - Gate on the closed, one-way reference graph: no permanent code, knowledge, or
   governance may reference a spec, task, plan, PR thread, or archive path, and
-  no code comment may name a spec ID, task ID, or plan identifier.
+  no code comment may name a spec ID, task ID, or plan identifier. Check it
+  mechanically with `python .devspark/scripts/scan-ephemeral-refs.py --base
+  <target-branch>` (exit 1 lists each finding with path, line, and match).
 - Gate on missing evidence for touched knowledge objects and decisions: a claim
   with nothing behind it is not checkable.
 - Gate on one current decision file per topic and on reciprocal `constrains` /

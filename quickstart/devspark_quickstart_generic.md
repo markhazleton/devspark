@@ -338,6 +338,7 @@ Save to `.devspark/scripts/` (the scripts root, not a subfolder):
 - `build_knowledge_index.py` (the single knowledge engine)
 - `explain-context.py`
 - `migrate-knowledge-to-entities.py`
+- `scan-ephemeral-refs.py`
 
 **Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Python utility scripts are invoked directly by prompts that need deterministic ontology checks. Because the full script payload is always installed, switching between machines never requires a reinstall.
 

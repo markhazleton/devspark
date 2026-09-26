@@ -27,7 +27,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Multi-app support (T042, T067)
+# Multi-app support
 if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
     . "$PSScriptRoot/common.ps1"
 }
