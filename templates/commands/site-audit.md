@@ -19,14 +19,24 @@ You **MUST** consider the user input before proceeding (if not empty).
 This command audits the repository's current state. When any later section
 conflicts with this section, the v4 section wins.
 
+- Audit is synchronic: check whether the whole current state holds together,
+  never whether two past changes conflicted.
 - Run current-truth validation across `.knowledge`, governance, and source-code
-  comments.
-- Run `python .devspark/scripts/python/build_knowledge_index.py --check` when
-  available, falling back to `python scripts/python/build_knowledge_index.py
-  --check` in source repos.
-- Re-run execution evidence where practical and report stale evidence.
-- Treat contradiction candidates across graph-adjacent knowledge as warnings
-  for human review.
+  comments (no comment may name a spec ID, task ID, or plan identifier).
+- Run the knowledge engine reported in `knowledge_engine.engine` (resolved by
+  `resolve_knowledge_engine`) with `--check` and gate on gap-report failures
+  for all entities. Report `knowledge_engine.legacy_copies` as upgrade work.
+- Existence and accuracy are separate reports: `coverage.json` answers
+  existence. This audit owns accuracy: re-run every `verified_by: execution`
+  test it cites, and judge `verified_by: inspection` evidence by reading the
+  cited code. Report missing evidence as a failure and code-only evidence
+  without `fallback_reason` as a warning.
+- When pinned claims exist, run `--detect-drift --full-inventory` and report
+  drifted claims.
+- Scope the contradiction scan to `index.json` `contradiction_scopes` (same
+  entity, entities sharing a `constrains` decision, objects citing the same
+  evidence); never compare all pairs. Judging whether a candidate is a genuine
+  contradiction or an acceptable nuance stays a warning for human review.
 - Do not create durable audit-history files unless the user explicitly asks for
   an external report.
 

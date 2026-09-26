@@ -35,15 +35,19 @@ def test_release_is_the_archive_boundary() -> None:
     implement = _read("templates/commands/implement.md")
     verify = _read("templates/commands/verify.md")
 
-    assert "Release is the only DevSpark command that writes to `.archive/`" in release
+    assert "Release is the only DevSpark command that moves work out of `.devspark.work/`" in release
+    assert "`/devspark.constitution`" in release and "`/devspark.evolve-constitution`" in release
     assert "code_ref" in release
     assert "test_ref" in release
     assert "knowledge_ref" in release
     assert "Implementation never writes to `.archive/`" in implement
     assert "never archives a work package" in verify
 
+    # Release sweeps .devspark.work/; constitution and evolve-constitution may
+    # archive only their own resolved proposals. No other command writes .archive/.
+    archive_writers = {"release.md", "constitution.md", "evolve-constitution.md"}
     for path in (ROOT / "templates" / "commands").glob("*.md"):
-        if path.name == "release.md":
+        if path.name in archive_writers:
             continue
         text = path.read_text(encoding="utf-8")
         assert "archive_devspark_work_path" not in text

@@ -6,10 +6,10 @@ SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 source "$SCRIPT_DIR/platform.sh"
 
-AUTO=false
+# Fact-gathering only: this script reports state and a suggested next command.
+# It never runs, dispatches, or chains commands; judgment stays in the prompt.
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --auto) AUTO=true ;;
         --json|-Json) ;;
     esac
     shift
@@ -173,50 +173,49 @@ fi
 RECOMMENDED_COMMAND="none"
 RECOMMENDATION_REASON="The detected workflow is complete."
 ACTION_KIND="complete"
-SAFE_TO_AUTO=false
 HUMAN_BOUNDARY="none"
 MANUAL_COMMAND=""
 ORIENTATION_STATE="complete"
 
 recommend_devspark() {
     RECOMMENDED_COMMAND="$1"; RECOMMENDATION_REASON="$2"; ORIENTATION_STATE="$3"
-    ACTION_KIND="devspark"; SAFE_TO_AUTO="$4"; HUMAN_BOUNDARY="none"; MANUAL_COMMAND=""
+    ACTION_KIND="devspark"; HUMAN_BOUNDARY="none"; MANUAL_COMMAND=""
 }
 recommend_manual() {
     RECOMMENDED_COMMAND="$1"; RECOMMENDATION_REASON="$2"; ORIENTATION_STATE="$3"
-    ACTION_KIND="manual"; SAFE_TO_AUTO=false; HUMAN_BOUNDARY="$4"; MANUAL_COMMAND="$5"
+    ACTION_KIND="manual"; HUMAN_BOUNDARY="$4"; MANUAL_COMMAND="$5"
 }
 
 if ! $HAS_GIT; then
     recommend_manual "none" "DevSpark workflow detection requires a Git repository." "git-required" "repository" "git init"
 elif ! $CONSTITUTION_EXISTS; then
-    recommend_devspark "/devspark.constitution" "No project constitution exists yet; lifecycle work needs current governance first." "constitution-missing" false
+    recommend_devspark "/devspark.constitution" "No project constitution exists yet; lifecycle work needs current governance first." "constitution-missing"
     HUMAN_BOUNDARY="governance"
     MANUAL_COMMAND="/devspark.constitution"
 elif ! $HAS_SPEC; then
-    recommend_devspark "/devspark.specify" "No spec or branch-linked quickfix work package exists for '$BRANCH'." "work-not-started" false
+    recommend_devspark "/devspark.specify" "No spec or branch-linked quickfix work package exists for '$BRANCH'." "work-not-started"
     HUMAN_BOUNDARY="branch"
     MANUAL_COMMAND="/devspark.specify <describe the requested change>"
 elif [[ "$WORK_KIND" == "spec" && "$HAS_PLAN" == false ]]; then
-    recommend_devspark "/devspark.plan" "The spec exists, but plan.md has not been created." "spec-ready" true
+    recommend_devspark "/devspark.plan" "The spec exists, but plan.md has not been created." "spec-ready"
 elif [[ "$WORK_KIND" == "spec" && "$HAS_TASKS" == false ]]; then
-    recommend_devspark "/devspark.tasks" "The implementation plan exists, but tasks.md has not been created." "plan-ready" true
+    recommend_devspark "/devspark.tasks" "The implementation plan exists, but tasks.md has not been created." "plan-ready"
 elif [[ "$WORK_KIND" == "spec" && "$CHECKLIST_STATE" == "missing" ]]; then
-    recommend_devspark "/devspark.checklist" "The spec requires the checklist gate and no checklist gate result exists." "checklist-required" true
+    recommend_devspark "/devspark.checklist" "The spec requires the checklist gate and no checklist gate result exists." "checklist-required"
 elif [[ "$WORK_KIND" == "spec" && "$CHECKLIST_STATE" == "fail" ]]; then
     recommend_manual "/devspark.checklist" "The checklist gate is blocking and needs human-guided requirement repair." "checklist-blocked" "gate" "Review $FEATURE_DIR/gates/checklist.md, repair the requirements, then run /devspark.checklist"
 elif [[ "$WORK_KIND" == "spec" && "$ANALYZE_STATE" == "missing" ]]; then
-    recommend_devspark "/devspark.analyze" "Tasks exist, but the required cross-artifact analysis gate has not run." "analyze-required" true
+    recommend_devspark "/devspark.analyze" "Tasks exist, but the required cross-artifact analysis gate has not run." "analyze-required"
 elif [[ "$WORK_KIND" == "spec" && "$ANALYZE_STATE" == "fail" ]]; then
     recommend_manual "/devspark.analyze" "The analyze gate is blocking and its findings need to be resolved." "analyze-blocked" "gate" "Review $FEATURE_DIR/gates/analyze.md, repair the cited artifacts, then run /devspark.analyze"
 elif [[ "$WORK_KIND" == "spec" && "$CRITIC_STATE" == "missing" ]]; then
-    recommend_devspark "/devspark.critic" "Analysis is complete, but the required adversarial risk gate has not run." "critic-required" true
+    recommend_devspark "/devspark.critic" "Analysis is complete, but the required adversarial risk gate has not run." "critic-required"
 elif [[ "$WORK_KIND" == "spec" && "$CRITIC_STATE" == "fail" ]]; then
     recommend_manual "/devspark.critic" "The critic gate is blocking and its risks need a human decision or repair." "critic-blocked" "gate" "Review $FEATURE_DIR/gates/critic.md, repair or acknowledge the risks, then run /devspark.critic"
 elif [[ "$TASKS_INCOMPLETE" -gt 0 || "$TASKS_TOTAL" -eq 0 ]]; then
-    recommend_devspark "/devspark.implement" "$TASKS_INCOMPLETE implementation task(s) remain incomplete." "implementation-ready" true
+    recommend_devspark "/devspark.implement" "$TASKS_INCOMPLETE implementation task(s) remain incomplete." "implementation-ready"
 elif [[ "$WORK_KIND" == "spec" && "$(printf '%s' "$SPEC_STATUS" | tr '[:upper:]' '[:lower:]')" != "complete" ]]; then
-    recommend_devspark "/devspark.implement" "All tasks are checked off, but the spec lifecycle status still needs completion validation." "implementation-finalization" true
+    recommend_devspark "/devspark.implement" "All tasks are checked off, but the spec lifecycle status still needs completion validation." "implementation-finalization"
 elif $GIT_DIRTY; then
     recommend_manual "git commit" "Implementation is complete, but code/test/knowledge changes are still uncommitted." "commit-required" "commit" "git status --short && git add <code-test-knowledge-files> && git commit -m \"<message>\""
 elif [[ "$BEHIND" -gt 0 ]]; then
@@ -230,9 +229,9 @@ elif [[ -z "$PR_NUMBER" && "$PLATFORM_CLI_AVAILABLE" == false ]]; then
 elif [[ -z "$PR_NUMBER" && "$PLATFORM_AUTHENTICATED" == false ]]; then
     recommend_manual "/devspark.create-pr" "The platform CLI is not authenticated, so PR state cannot be verified or created safely." "platform-auth-required" "shared-service" "$DEVSPARK_PR_CLI auth login"
 elif [[ -z "$PR_NUMBER" ]]; then
-    recommend_devspark "/devspark.create-pr" "Implementation is committed and synchronized, but no pull request exists." "pr-required" true
+    recommend_devspark "/devspark.create-pr" "Implementation is committed and synchronized, but no pull request exists." "pr-required"
 elif [[ "$PR_STATE" == "merged" || "$PR_STATE" == "completed" ]]; then
-    RECOMMENDED_COMMAND="none"; RECOMMENDATION_REASON="PR $PR_NUMBER is merged; this development flow is complete. Release remains a separate human-triggered event."; ORIENTATION_STATE="merged"; ACTION_KIND="complete"; SAFE_TO_AUTO=false
+    RECOMMENDED_COMMAND="none"; RECOMMENDATION_REASON="PR $PR_NUMBER is merged; this development flow is complete. Release remains a separate human-triggered event."; ORIENTATION_STATE="merged"; ACTION_KIND="complete"
 elif [[ "$PR_STATE" == "closed" || "$PR_STATE" == "abandoned" ]]; then
     case "$DEVSPARK_PLATFORM_NAME" in
         github) REOPEN_COMMAND="gh pr reopen $PR_NUMBER" ;;
@@ -245,7 +244,7 @@ elif [[ "$PR_MERGE_STATE" == "BEHIND" ]]; then
 elif [[ "$PR_REVIEW_DECISION" == "CHANGES_REQUESTED" || "$REVIEW_OPEN_FINDINGS" -gt 0 || "$REVIEW_STATE" == "fail" ]]; then
     recommend_manual "/devspark.address-pr-review" "PR $PR_NUMBER has unresolved review findings; the repair flow may create commits." "review-findings" "commit" "/devspark.address-pr-review $PR_NUMBER"
 elif [[ "$REVIEW_STATE" == "missing" || "$REVIEW_STATE" == "unknown" ]]; then
-    recommend_devspark "/devspark.pr-review" "PR $PR_NUMBER exists, but no current local PR-review gate result is available." "review-required" true
+    recommend_devspark "/devspark.pr-review" "PR $PR_NUMBER exists, but no current local PR-review gate result is available." "review-required"
 else
     case "$DEVSPARK_PLATFORM_NAME" in
         github) MERGE_COMMAND="gh pr merge $PR_NUMBER" ;;
@@ -276,7 +275,6 @@ jq -n \
     --arg action_kind "$ACTION_KIND" \
     --arg human_boundary "$HUMAN_BOUNDARY" \
     --arg manual_command "$MANUAL_COMMAND" \
-    --argjson auto "$AUTO" \
     --argjson has_git "$HAS_GIT" \
     --argjson git_dirty "$GIT_DIRTY" \
     --argjson has_spec "$HAS_SPEC" \
@@ -288,12 +286,10 @@ jq -n \
     --argjson ahead "$AHEAD" \
     --argjson behind "$BEHIND" \
     --argjson review_open_findings "$REVIEW_OPEN_FINDINGS" \
-    --argjson safe_to_auto "$SAFE_TO_AUTO" \
     '{
         REPO_ROOT: $repo_root,
         BRANCH: $branch,
         PLATFORM: $platform,
-        AUTO: $auto,
         HAS_GIT: $has_git,
         GIT_DIRTY: $git_dirty,
         UPSTREAM: $upstream,
@@ -313,7 +309,6 @@ jq -n \
         RECOMMENDED_COMMAND: $recommended_command,
         RECOMMENDATION_REASON: $recommendation_reason,
         ACTION_KIND: $action_kind,
-        SAFE_TO_AUTO: $safe_to_auto,
         HUMAN_BOUNDARY: $human_boundary,
         MANUAL_COMMAND: $manual_command,
         READ_ONLY: true

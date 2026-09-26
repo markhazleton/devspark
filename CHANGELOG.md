@@ -2,6 +2,39 @@
 
 All notable changes to DevSpark are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Added the single knowledge engine at `scripts/build_knowledge_index.py`
+  (installed at `.devspark/scripts/`), writing `.knowledge/ontology/index.json`
+  and `coverage.json`, with `--check`, `--search`, `--detect-drift`, and
+  `--pin-claim` modes.
+- Added deterministic concept discovery (aliases, headings, path metadata, and
+  query-time body search through `scripts/explain-context.py`) with fixed
+  per-class weights counted once per query term.
+- Added pinned `source_of_truth` claims with retained baselines and the
+  `knowledge_drift.enforcement` setting in `.knowledge/knowledge.config.yaml`.
+- Added `scripts/migrate-knowledge-to-entities.py`, the `entity-node` and
+  `knowledge-node` schemas, `resolve_knowledge_engine` /
+  `Resolve-KnowledgeEngine`, and agent/prompt shims for `discover-knowledge`.
+
+### Changed
+
+- Decisions now declare `constrains`; entities hand-author the reciprocal
+  `constrained_by`, validated by the engine. `_derived.yaml` and the Markdown
+  ontology reports are retired.
+- Lifecycle keys (`status`, `lifecycle`, `supersedes`, `superseded-by`,
+  `replaced`, `obsolete`) are banned on current knowledge; missing evidence is
+  now a gate, while a missing `fallback_reason` stays a warning.
+- Release archives packages under `.archive/YYYY-MM-DD/` preserving their path
+  relative to `.devspark.work/` and also sweeps routine work-product retention
+  and orphaned state; constitution commands archive their own resolved
+  proposals.
+- `/devspark.next` now only recommends; `--auto` and dispatching were removed.
+- Replaced the current-truth philosophy with "Plan Temporarily, Review the
+  Delta" and aligned command prompts, quickstarts, and the constitution.
+
 ## [v4.3.0] - 2026-09-09
 
 ### Added

@@ -169,7 +169,8 @@ source_of_truth:
 ```
 
 - `--pin-claim <path>` retains the canonical baseline and prints a claim with
-  `verification.state: unverified`. Only `/devspark.explain` records
+  `verification.state: unverified`. Add the claim to the document before the
+  next engine write: unreferenced baselines are pruned when the engine writes. Only `/devspark.explain` records
   `verified`, after the human confirms the retained-baseline diff.
 - `--detect-drift` compares each claim's current canonical content with its
   retained baseline, bounded to `--base <ref> [--head <ref>]` or a history-free

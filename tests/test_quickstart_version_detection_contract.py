@@ -81,7 +81,10 @@ def test_quickstarts_initialize_knowledge_on_every_execution() -> None:
         assert ".devspark/templates/knowledge/ontology/schema.md" in text
         assert ".devspark/defaults/commands/devspark.discover-knowledge.md" in text
         assert "`discover-knowledge.md`" in text
-        assert "python .devspark/scripts/python/build_knowledge_index.py --write" in text
+        assert "python .devspark/scripts/build_knowledge_index.py" in text
+        assert "migrate-knowledge-to-entities.py" in text
+        assert "scripts/python/build_knowledge_index.py" not in text.replace("legacy copy remains at `.devspark/scripts/python/build_knowledge_index.py`", "").replace("`scripts/python/build_knowledge_index.py` exists", "")
+        assert "--write" not in text
         assert "Documentation intake" in text
         assert "Your `.knowledge/` files will not be touched" not in text
         assert "**Never touch** `.knowledge/`" not in text

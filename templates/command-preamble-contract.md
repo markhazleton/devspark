@@ -34,10 +34,13 @@ governance files.
 
 Implementation and verification leave completed work packages in
 `.devspark.work`. Only `/devspark.release` may move a package to
-`.archive/YYYY-MM-DD/<topic>/`, and only after it confirms every completed task
+`.archive/YYYY-MM-DD/`, and only after it confirms every completed task
 has valid permanent code, test, knowledge, and governance references as
-applicable. No other DevSpark command writes to `.archive/`. DevSpark commands
-must not read, list, enumerate, or glob `.archive/` after the release move.
+applicable. Release is also the only command that sweeps work-product retention
+and orphaned in-flight state. `/devspark.constitution` and
+`/devspark.evolve-constitution` may archive only their own resolved proposals;
+no other DevSpark command writes to `.archive/`. DevSpark commands must never
+read, list, enumerate, or glob `.archive/`.
 
 ## 4. Governance Location
 

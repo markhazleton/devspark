@@ -22,11 +22,14 @@ You **MUST** consider the user input before proceeding (if not empty).
 This command makes v4 evidence and linkage visible in the PR. When any later
 section conflicts with this section, the v4 section wins.
 
-- Summarize current-truth validation status.
+- Summarize current-truth validation status from the knowledge engine named in
+  the preflight `knowledge_engine.engine` (`--check`), and note any
+  `knowledge_engine.legacy_copies`.
 - Summarize task linkage status: populated `code_ref`, `test_ref`,
   `knowledge_ref`, and `governance_ref` where applicable.
-- Summarize evidence quality: execution evidence, inspection evidence, and any
-  missing fallback-reason warnings.
+- Summarize evidence quality: `verified_by: execution` (test) evidence,
+  `verified_by: inspection` (code) evidence, any missing evidence (a blocker),
+  and any missing `fallback_reason` (a warning).
 - Do not create or update durable lifecycle-history files.
 
 ## Routing Contract

@@ -15,36 +15,48 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Lifecycle Authority
 
-Release is the only DevSpark command that writes to `.archive/`.
+Release is the only DevSpark command that moves work out of `.devspark.work/`.
+It is the sole command that sweeps completed, linkage-verified specs and
+quickfixes, routine work-product retention, and orphaned in-flight state into
+`.archive/`. The only other writers of `.archive/` are `/devspark.constitution`
+and `/devspark.evolve-constitution`, and only for their own resolved
+constitution proposals.
 
-Implementation updates code, tests, `.knowledge`, governance when applicable,
-and task linkage inside the work package. Verification and PR review may validate
-that state, but every work product remains in `.devspark.work/` until this
-command runs.
+Verify before archive is a two-stage gate. `/devspark.implement` verifies the
+delta and populates each task's linkage, then deliberately leaves the package
+live in `.devspark.work/`. Release re-checks that linkage and performs the move.
+A verified package may stay unarchived across more than one release window;
+that is normal, not a stall.
 
-Release performs the final validation and then moves each eligible completed
-work package intact to `.archive/YYYY-MM-DD/<topic>/`. Git remains the durable
-history; `.archive/` is a short-term, human-only safety buffer and is never an
-input to a DevSpark command.
+Release moves each eligible package intact (plan, tasks, checklists, gates,
+`context_resolved`) to `.archive/YYYY-MM-DD/`, preserving its path relative to
+`.devspark.work/`. Git remains the durable history. `.archive/` is write-only:
+no DevSpark command reads, lists, enumerates, or globs it, and only a human
+purges it or copies a file back out.
 
 ## Release Eligibility
 
 A work package is release-eligible only when all of the following are true:
 
-- Its spec or quickfix status is complete.
+- Its spec or quickfix status is complete. Stalled or incomplete records never
+  move.
 - Every task is complete.
-- Every task has a populated `code_ref`, `test_ref`, and `knowledge_ref`, or an
-  explicit `n/a — <reason>` for a category that does not apply.
+- Every task has a populated `code_ref` and `knowledge_ref`, plus `test_ref`,
+  or an explicit `n/a — <reason>` for a category that does not apply.
 - Every governance-changing task has a populated `governance_ref`; other tasks
   may use an explained `n/a`.
-- Referenced code, test, knowledge, and governance files exist.
+- Referenced code, test, knowledge, and governance files still exist. A
+  `code_ref` that went stale after a later refactor is a blocker to repair, not
+  a reason to skip the check.
 - Referenced tests pass using the repository's native test command.
-- Touched knowledge entities and governance decisions report evidence status.
-  Missing evidence is a strong warning, not an automatic release blocker;
-  unsupported claims must not be described as verified.
-- Generated ontology output is current.
+- Every touched knowledge entity and decision cites at least one piece of
+  evidence. Missing evidence is a blocker (engine `missing-evidence` error).
+  Code-only evidence without `fallback_reason` is a warning only.
+- The knowledge engine's `--check` passes: `index.json` and `coverage.json`
+  are current and there are no gating errors.
 - Permanent code and knowledge contain no references back to work-package,
-  task, plan, review-thread, or archive artifacts.
+  task, plan, review-thread, or archive artifacts, and no code comment names a
+  spec ID, task ID, or plan identifier.
 
 Incomplete or invalid packages remain unchanged in `.devspark.work/` and are
 reported as release blockers. Completion or verification alone never archives
@@ -64,19 +76,24 @@ anything.
 5. Run every test named by `test_ref`, plus the repository's required release
    validation suite. An explained `n/a` is allowed only for tasks that cannot
    reasonably have a test.
-6. Validate `.knowledge` and governance, including generated `_derived.yaml`
-   files and evidence references. Run the ontology generator in `--check` mode
-   when available.
+6. Validate `.knowledge` and governance with the knowledge engine named by
+   `KNOWLEDGE_ENGINE.engine` (resolved by `resolve_knowledge_engine`):
+   `python <engine> --check`. If `KNOWLEDGE_ENGINE.legacy_copies` is non-empty,
+   report it as an upgrade task; never run a legacy copy.
 7. Search permanent content for forbidden references to ephemeral artifacts.
 8. If any candidate fails, leave it in `.devspark.work/`, do not update the
    version, and report exact blockers.
 9. Update `.devspark/VERSION` only after all release validation passes.
 10. Move each validated package and staged release candidate to
-    `.archive/YYYY-MM-DD/<topic>/` using
+    `.archive/YYYY-MM-DD/<path relative to .devspark.work>/` using
     `archive_devspark_work_path` from `scripts/bash/common.sh` or
     `Move-DevSparkWorkPathToArchive` from `scripts/powershell/common.ps1`.
-11. Do not read, list, enumerate, glob, or summarize `.archive/` after the move.
-12. Draft release notes from Git commits, merged PRs, and the validated current
+11. Sweep routine work products whose retention purpose has ended (PR reviews
+    and review state for merged or closed PRs, site audits, commit audits,
+    repo stories) and orphaned in-flight state with the same helper. Never
+    sweep a stalled or incomplete spec or quickfix.
+12. Do not read, list, enumerate, glob, or summarize `.archive/` after the move.
+13. Draft release notes from Git commits, merged PRs, and the validated current
     truth—not from `.archive/`.
 
 ## Output
@@ -91,5 +108,5 @@ Return:
 - Release-note summary
 
 The successful terminal state is: validated release work is archived by this
-command, incomplete work remains in `.devspark.work/`, and no other DevSpark
-command has written to `.archive/`.
+command, incomplete work remains in `.devspark.work/`, and no command read
+`.archive/`.

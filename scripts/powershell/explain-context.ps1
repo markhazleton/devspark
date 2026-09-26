@@ -86,7 +86,7 @@ if (Test-Path -LiteralPath $knowledgeRoot) {
         $knowledgeFiles = @(
             & rg --files --hidden `
                 --glob '!.knowledge/overrides/**' `
-                --glob '!.knowledge/ontology/*.generated.md' `
+                --glob '!.knowledge/ontology/**' `
                 -- '.knowledge' 2>$null
         )
     } finally {

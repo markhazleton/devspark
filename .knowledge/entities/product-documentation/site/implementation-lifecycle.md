@@ -9,9 +9,8 @@ prompt files.
 ## Lifecycle at a Glance
 
 At any point, run `/devspark.next` to detect the current branch, artifacts,
-gates, and PR state and receive one recommended next command. Use
-`/devspark.next --auto` to chain safe steps until a human-owned Git or merge
-boundary is reached.
+gates, and PR state and receive one recommended next command. Next only
+recommends; you run the command.
 
 1. Bootstrap with the matching quickstart prompt.
 2. Establish the repository constitution.
@@ -88,7 +87,7 @@ Downstream commands must read the spec frontmatter first and treat that metadata
 Specs, plans, tasks, and gates are temporary work-package files under
 `.devspark.work/`. They remain there after implementation, verification, and PR
 review. Release validates their code, test, knowledge, and governance linkage,
-then moves eligible packages to `.archive/YYYY-MM-DD/<topic>/`.
+then moves eligible packages to `.archive/YYYY-MM-DD/`.
 
 ```text
 /devspark.specify     -->  Status: Draft
@@ -120,13 +119,15 @@ remains in `.devspark.work/` until release.
 **Key rules:**
 
 - A work package cannot leave `.devspark.work/` before release, even after it
-  passes verification.
+  passes verification. It may stay verified-but-unarchived across more than one
+  release window.
 - `/devspark.pr-review` flags missing code/knowledge linkage as a blocking
   current-truth issue.
 - `/devspark.site-audit` flags stale `.devspark.work/` packages on main as
   anti-patterns.
 - `/devspark.release` fails when completed work packages lack valid code, test,
-  knowledge, or governance linkage and is the sole archive writer.
+  knowledge, or governance linkage and is the only command that sweeps
+  `.devspark.work/` into `.archive/`.
 
 ### Release Events and Sprint Reporting
 

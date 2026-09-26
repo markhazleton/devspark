@@ -333,13 +333,15 @@ Save to `.devspark/scripts/bash/`:
 - `bash/next-context.sh`
 - `bash/update-agent-context.sh`
 
-Save to `.devspark/scripts/python/`:
+Save to `.devspark/scripts/` (the scripts root, not a subfolder):
 
-- `python/build_knowledge_index.py`
+- `build_knowledge_index.py` (the single knowledge engine)
+- `explain-context.py`
+- `migrate-knowledge-to-entities.py`
 
 **Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Python utility scripts are invoked directly by prompts that need deterministic ontology checks. Because the full script payload is always installed, switching between machines never requires a reinstall.
 
-**Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.knowledge/overrides/scripts/{bash|powershell|python}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.knowledge/overrides/scripts/`.
+**Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.knowledge/overrides/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.knowledge/overrides/scripts/`. The Python knowledge scripts are never overridden: every entry point must resolve the same engine.
 
 `/devspark.specify` is the canonical intake command after bootstrap. It recommends a one-off fix, quick spec, or full spec route and asks the user to confirm before proceeding.
 
@@ -354,15 +356,19 @@ Run this step on **every quickstart execution**: fresh install, migration, updat
    - `.devspark/templates/knowledge/entities/README.md` -> `.knowledge/entities/README.md`
    - `.devspark/templates/knowledge/ontology/schema.md` -> `.knowledge/ontology/schema.md`
    - `.devspark/templates/knowledge/governance/decisions/README.md` -> `.knowledge/governance/decisions/README.md`
+   - `.devspark/templates/knowledge/knowledge.config.yaml` -> `.knowledge/knowledge.config.yaml`
 3. If those template files were not fetched yet, fetch the same paths from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/knowledge/` and save only when the destination is missing.
 4. Inspect `.knowledge/entities/` and `.knowledge/ontology/` for completeness. Treat knowledge as incomplete when no entity folder contains `_entity.yaml`, required entity layer documents are missing, generated ontology files are missing or stale, or `.documentation/` / `.documenation/` intake exists.
 5. If knowledge is incomplete, execute the installed `discover-knowledge` command in bootstrap mode by reading and following `.devspark/defaults/commands/devspark.discover-knowledge.md` with `--bootstrap`. If agent shims already exist, `/devspark.discover-knowledge --bootstrap` is equivalent. The command body is authoritative for source-code scanning, entity creation, documentation intake classification, evidence updates, and ontology refresh.
-6. If knowledge is already complete, run the ontology generator only when generated files are stale or missing:
-   - Preferred: `python .devspark/scripts/python/build_knowledge_index.py --write`
-   - Fallback in the DevSpark source repository: `python scripts/python/build_knowledge_index.py --write`
-   - If Python or dependencies are unavailable, report the exact command the user must run and continue without fabricating generated reports.
+6. Reconcile the knowledge engine and layout:
+   - The framework-managed engine is `.devspark/scripts/build_knowledge_index.py`. If a legacy copy remains at `.devspark/scripts/python/build_knowledge_index.py`, delete it (and the `python/` folder when empty) so no entry point can resolve a second engine.
+   - In a consumer repository (not the DevSpark source repository), if `scripts/build_knowledge_index.py` or `scripts/python/build_knowledge_index.py` exists and is an unmodified DevSpark copy, ask the user before removing it; otherwise report it as a lingering legacy copy.
+   - If `.knowledge/` uses the pre-contract layout (any `_derived.yaml`, decisions with `governs` or `status`, entities with `lifecycle`, or `.knowledge/ontology/*.generated.md`), run `python .devspark/scripts/migrate-knowledge-to-entities.py --dry-run`, show the planned changes, and after confirmation run it without `--dry-run`.
+   - Refresh the index when it is stale or missing: `python .devspark/scripts/build_knowledge_index.py` (writes `.knowledge/ontology/index.json` and `coverage.json`), then `python .devspark/scripts/build_knowledge_index.py --check`.
+   - Fallback in the DevSpark source repository: `python scripts/build_knowledge_index.py`.
+   - If Python or dependencies are unavailable, report the exact command the user must run and continue without fabricating generated output.
 7. Do not delete documentation intake files. When `discover-knowledge` moves intake files, it must preserve relative paths and avoid overwriting by adding a numeric suffix if the target path already exists.
-8. Do not write to `.archive/`. Stage obsolete intake under `.devspark.work/release-candidates/`; `/devspark.release` is the sole archive writer.
+8. Do not write to `.archive/`. Stage obsolete intake under `.devspark.work/release-candidates/`; `/devspark.release` is the only command that sweeps `.devspark.work/` into `.archive/`.
 9. If generated ontology output changed, include that in the final summary.
 
 ---

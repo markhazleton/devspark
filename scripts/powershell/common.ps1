@@ -122,8 +122,14 @@ function Move-DevSparkWorkPathToArchive {
         throw "Refusing to archive a path outside .devspark.work: $resolvedSource"
     }
 
+    # Preserve the path relative to .devspark.work/ (minus that prefix).
+    $relativePath = if ($resolvedSource -eq $resolvedWorkRoot) {
+        Split-Path -Leaf $resolvedSource
+    } else {
+        [System.IO.Path]::GetRelativePath($resolvedWorkRoot, $resolvedSource)
+    }
     $archiveDate = Get-Date -Format 'yyyy-MM-dd'
-    $target = Join-Path (Join-Path (Join-Path $repoRoot '.archive') $archiveDate) (Split-Path -Leaf $resolvedSource)
+    $target = Join-Path (Join-Path (Join-Path $repoRoot '.archive') $archiveDate) $relativePath
 
     $targetParent = Split-Path -Parent $target
     New-Item -ItemType Directory -Path $targetParent -Force | Out-Null

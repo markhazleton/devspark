@@ -114,8 +114,11 @@ archive_devspark_work_path() {
             ;;
     esac
 
+    # Preserve the path relative to .devspark.work/ (minus that prefix).
+    local relative_path="${source_abs#"$work_root"/}"
+    [[ "$source_abs" == "$work_root" ]] && relative_path="$(basename "$source_abs")"
     archive_date=$(date +"%Y-%m-%d")
-    target_abs="$repo_root/.archive/$archive_date/$(basename "$source_abs")"
+    target_abs="$repo_root/.archive/$archive_date/$relative_path"
     target_dir="$(dirname "$target_abs")"
     mkdir -p "$target_dir"
     mv -T "$source_abs" "$target_abs"

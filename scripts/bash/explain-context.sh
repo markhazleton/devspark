@@ -62,11 +62,11 @@ knowledge_matches() {
     [[ -d .knowledge ]] || return 0
     {
         rg -l -i \
-            --glob '!.knowledge/ontology/*.generated.md' \
+            --glob '!.knowledge/ontology/**' \
             --glob '!.knowledge/overrides/**' \
             -- "$TERM_PATTERN" .knowledge 2>/dev/null || true
         find .knowledge -type f \
-            ! -path '.knowledge/ontology/*.generated.md' \
+            ! -path '.knowledge/ontology/*' \
             ! -path '.knowledge/overrides/*' -print 2>/dev/null |
             rg -i -- "$TERM_PATTERN" || true
     } | sed 's#^\./##' | LC_ALL=C sort -u | awk 'NR <= 60'

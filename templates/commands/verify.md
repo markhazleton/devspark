@@ -19,13 +19,18 @@ This command is the execution-evidence engine for v4 current truth. When any
 later section conflicts with this section, the v4 section wins.
 
 - Run each cited `verified_by: execution` test directly with the repository's
-  native test command.
+  native test command, and record the passing proof as a `test_ref` pointer
+  that `/devspark.implement` consumes for `verified_by: execution` evidence.
 - Validate current truth after evidence runs by checking `.knowledge` entity
-  metadata, decision evidence, generated `_derived.yaml` files, and the absence
-  of permanent references to ephemeral work packages.
-- Run `python .devspark/scripts/python/build_knowledge_index.py --check` when
-  available, falling back to `python scripts/python/build_knowledge_index.py
-  --check` in source repos.
+  metadata, decision evidence, the `constrains` / `constrained_by` pair, and the
+  absence of permanent references to ephemeral work packages.
+- Run the knowledge engine with `--check`: `python
+  .devspark/scripts/build_knowledge_index.py --check`, falling back to `python
+  scripts/build_knowledge_index.py --check` only when the framework copy is
+  absent. When pinned claims are in use, also run `--detect-drift --base
+  <target-branch>` and report drifted claims.
+- Report code-only evidence missing `fallback_reason` as a warning; report
+  missing evidence as a failure.
 - Treat inspection evidence as skipped execution, not as a pass.
 - Verification proves behavior and current-truth linkage, but never archives a
   work package. A successful result leaves the package in `.devspark.work/` for

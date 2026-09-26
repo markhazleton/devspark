@@ -25,8 +25,8 @@
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
 ├── templates/commands/   ← 30 stock command prompt files (THE PRODUCT)
-├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
-├── .knowledge/           ← Current truth: entities, governance, ontology reports
+├── scripts/              ← Context-gathering scripts (PowerShell + Bash) and the knowledge engine (Python)
+├── .knowledge/           ← Current truth: entities, governance, ontology index
 └── .devspark.work/       ← Temporary lifecycle work products
 ```
 

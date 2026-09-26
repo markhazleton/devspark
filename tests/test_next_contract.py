@@ -67,13 +67,13 @@ def _write_gate(feature: Path, name: str, status: str = "pass", blocking: bool =
     )
 
 
-def test_next_prompt_has_confirmation_auto_and_human_boundary_contracts() -> None:
+def test_next_prompt_is_recommend_only_with_human_boundaries() -> None:
     command = _read("templates/commands/next.md")
     assert "next-context.sh $ARGUMENTS --json" in command
     assert "next-context.ps1 $ARGUMENTS -Json" in command
-    assert "ask exactly one yes/no confirmation" in command
-    assert "Maximum 10 dispatched commands" in command
-    assert "Re-run detection after every command" in command
+    assert "Never execute, dispatch, or chain the recommended command" in command
+    assert "--auto" not in command
+    assert "SAFE_TO_AUTO" not in command
     for boundary in ("branch creation", "commits", "pushes", "rebases", "branch sync", "merges"):
         assert boundary in command
     assert "/devspark.address-pr-review` is a commit boundary" in command
@@ -97,13 +97,15 @@ def test_next_surfaces_and_parity_scripts_are_present() -> None:
     for token in (
         "RECOMMENDED_COMMAND",
         "RECOMMENDATION_REASON",
-        "SAFE_TO_AUTO",
         "HUMAN_BOUNDARY",
         "MANUAL_COMMAND",
         "READ_ONLY",
     ):
         assert token in bash
         assert token in powershell
+    for removed in ("SAFE_TO_AUTO", "--auto"):
+        assert removed not in bash
+        assert removed not in powershell
 
 
 @pytest.mark.skipif(
@@ -116,15 +118,14 @@ def test_next_detects_spec_plan_tasks_gates_and_implementation(tmp_path: Path) -
 
     state = _run_next(repo)
     assert state["RECOMMENDED_COMMAND"] == "/devspark.plan"
-    assert state["SAFE_TO_AUTO"] is True
+    assert "SAFE_TO_AUTO" not in state and "AUTO" not in state
 
     (feature / "plan.md").write_text("# Plan\n", encoding="utf-8")
     state = _run_next(repo)
     assert state["RECOMMENDED_COMMAND"] == "/devspark.tasks"
 
     (feature / "tasks.md").write_text("- [ ] T001 Implement behavior\n", encoding="utf-8")
-    state = _run_next(repo, "--auto")
-    assert state["AUTO"] is True
+    state = _run_next(repo)
     assert state["RECOMMENDED_COMMAND"] == "/devspark.checklist"
 
     _write_gate(feature, "checklist")
@@ -145,7 +146,7 @@ def test_next_detects_spec_plan_tasks_gates_and_implementation(tmp_path: Path) -
     any(shutil.which(tool) is None for tool in ("git", "jq", "rg")),
     reason="next-context smoke tests require git, jq, and rg",
 )
-def test_next_stops_auto_at_commit_and_failed_gate_boundaries(tmp_path: Path) -> None:
+def test_next_reports_commit_and_failed_gate_boundaries(tmp_path: Path) -> None:
     repo = _init_repo(tmp_path)
     feature = _write_spec(repo, status="Complete")
     (feature / "plan.md").write_text("# Plan\n", encoding="utf-8")
@@ -154,16 +155,15 @@ def test_next_stops_auto_at_commit_and_failed_gate_boundaries(tmp_path: Path) ->
     _write_gate(feature, "analyze")
     _write_gate(feature, "critic", status="fail", blocking=True)
 
-    state = _run_next(repo, "--auto")
+    state = _run_next(repo)
     assert state["ORIENTATION_STATE"] == "critic-blocked"
     assert state["ACTION_KIND"] == "manual"
-    assert state["SAFE_TO_AUTO"] is False
     assert state["HUMAN_BOUNDARY"] == "gate"
 
     _write_gate(feature, "critic")
     source = repo / "src.py"
     source.write_text("value = 1\n", encoding="utf-8")
-    state = _run_next(repo, "--auto")
+    state = _run_next(repo)
     assert state["ORIENTATION_STATE"] == "commit-required"
     assert state["HUMAN_BOUNDARY"] == "commit"
     assert state["MANUAL_COMMAND"].startswith("git status --short")
@@ -211,14 +211,13 @@ def test_next_uses_pr_review_state_and_never_merges(tmp_path: Path) -> None:
         }
     )
 
-    state = _run_next(repo, "--auto", env=env)
+    state = _run_next(repo, env=env)
     assert state["RECOMMENDED_COMMAND"] == "/devspark.pr-review"
-    assert state["SAFE_TO_AUTO"] is True
 
     review = repo / ".devspark.work/pr-reviews/pr-42.md"
     review.parent.mkdir(parents=True)
     review.write_text("gate: pr-review\nstatus: pass\nblocking: false\n", encoding="utf-8")
-    state = _run_next(repo, "--auto", env=env)
+    state = _run_next(repo, env=env)
     assert state["ORIENTATION_STATE"] == "merge-ready"
     assert state["ACTION_KIND"] == "manual"
     assert state["HUMAN_BOUNDARY"] == "merge"

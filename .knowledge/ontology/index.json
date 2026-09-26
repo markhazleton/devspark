@@ -641,6 +641,7 @@
       ],
       "applies_to": [],
       "source_of_truth": [
+        "templates/commands",
         "tests/test_atomic_prompt_frontmatter_contract.py"
       ],
       "evidence": [],
@@ -1279,7 +1280,7 @@
         "Next Command Navigator",
         "When to Use It",
         "Basic Usage",
-        "Automatic Progression",
+        "Human Boundaries",
         "Detected Lifecycle",
         "Release Boundary"
       ],
@@ -1805,6 +1806,13 @@
         ".knowledge/entities/current-truth-ontology/devspark-philosophy.md",
         ".knowledge/governance/known-limitations.md",
         ".knowledge/governance/severity-registry.md"
+      ]
+    },
+    {
+      "basis": "evidence:templates/commands",
+      "members": [
+        ".knowledge/entities/command-templates/architecture.md",
+        ".knowledge/entities/command-templates/devspark-prompt-mapping.md"
       ]
     },
     {

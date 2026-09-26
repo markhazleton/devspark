@@ -22,16 +22,24 @@ You **MUST** consider the user input before proceeding (if not empty).
 PR review is the primary assimilation checkpoint. When any later section
 conflicts with this section, the v4 section wins.
 
+- The PR diff itself, not the spec (which may already be gone), is what proves
+  a delta's code and knowledge changes landed together. Validate knowledge/code
+  linkage and consistency; spec completion stays implement's job.
 - Gate on current-truth validation for touched code, `.knowledge`, and
   governance files.
-- Gate on no permanent references back to ephemeral work artifacts.
-- Surface missing evidence for knowledge and decisions as a strong warning; do
-  not block the review solely for that absence.
+- Gate on the closed, one-way reference graph: no permanent code, knowledge, or
+  governance may reference a spec, task, plan, PR thread, or archive path, and
+  no code comment may name a spec ID, task ID, or plan identifier.
+- Gate on missing evidence for touched knowledge objects and decisions: a claim
+  with nothing behind it is not checkable.
+- Gate on one current decision file per topic and on reciprocal `constrains` /
+  `constrained_by` pairs.
 - Gate on missing or unresolved `code_ref`, `test_ref`, and `knowledge_ref`
   values for completed tasks.
-- Gate on stale generated ontology files by running the ontology generator in
-  `--check` mode when `.knowledge/` exists.
-- Warn on inspection evidence that lacks `fallback_reason`.
+- Gate on gap-report failures for touched entities by running the knowledge
+  engine (`KNOWLEDGE_ENGINE.engine`) with `--check --entity <id>` for each
+  touched entity when `.knowledge/` exists.
+- Warn (never block) on code-only evidence that lacks `fallback_reason`.
 - Use Git history and PR comments for review history; do not write permanent
   review-history files into the repository.
 
@@ -90,11 +98,16 @@ Execution limits (required):
 - Stop once evidence is sufficient for high-confidence conclusions
 - If confidence is low for a specific area, ask one clarifying question
 
-Run `python .devspark/scripts/python/build_knowledge_index.py --check` if
-available, otherwise run `python scripts/python/build_knowledge_index.py
---check` in source repos. Stale `_derived.yaml` files, dangling entity
-relations and unknown governed entities are review blockers. Missing evidence
-is a strong review warning, not a blocker.
+Run the knowledge engine reported in `KNOWLEDGE_ENGINE.engine` (resolved by
+`resolve_knowledge_engine`: `.devspark/scripts/build_knowledge_index.py`, else
+`scripts/build_knowledge_index.py`) with `--check`, scoped with `--entity <id>`
+to the touched entities. Stale `index.json` / `coverage.json`, unreciprocated
+`constrains` / `constrained_by`, banned lifecycle keys, dangling relations,
+unknown constrained entities, and missing evidence are review blockers. A
+missing `fallback_reason` is a warning. When the repository enforces
+`pinned-claims`, also run `--detect-drift --base <target-branch>` and treat
+drifted claims on touched documents as blockers. Report any
+`KNOWLEDGE_ENGINE.legacy_copies` as an upgrade finding.
 for any PR that touches code, `.knowledge`, governance, templates, or DevSpark
 scripts.
 

@@ -138,10 +138,12 @@ If ACTION is "reject" and CAP_ID is provided:
 2. If file doesn't exist: ERROR "Proposal {CAP_ID} not found"
 3. Update proposal status to "REJECTED"
 4. Add rejection reason from arguments
-5. Move the rejected proposal under `.devspark.work/release-candidates/{CAP-ID}/`
-   after confirming the rejection is understood
-6. Let `/devspark.release` archive the staged proposal; use Git history or PR
-   discussion for any durable record of the rejection
+5. After confirming the rejection is understood, move the rejected proposal to
+   `.archive/YYYY-MM-DD/governance/proposals/` with `archive_devspark_work_path`
+   (Bash `common.sh`) or `Move-DevSparkWorkPathToArchive` (PowerShell
+   `common.ps1`). This command writes only its own resolved proposals to
+   `.archive/` and never reads `.archive/`.
+6. Use Git history or PR discussion for any durable record of the rejection
 7. Output:
 
 ```markdown

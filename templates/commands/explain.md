@@ -68,6 +68,14 @@ Run `{SCRIPT}` and parse its JSON. Use its normalized terms and bounded
 `knowledge_matches`, `code_matches`, and `test_matches` as discovery leads, not
 as proof. The script is deterministic and read-only.
 
+When `knowledge_ranking.source` is `engine`, `knowledge_matches` is ordered by
+the single knowledge engine's deterministic ranking (exact id/title, alias,
+heading, path metadata, then body prose searched at query time), and each
+`knowledge_ranking.results[].matched_on` entry explains why a document scored.
+Each evidence class counts once per query term, so a long document never
+outranks a terse one by volume alone. When the source is `fallback`, the list is
+an unranked text scan; say so in `## Agent Summary`.
+
 If the script fails, report the command and error inside `## Findings`. Do not
 replace missing evidence with an uncited answer.
 
@@ -130,6 +138,20 @@ knowledge evidence contract; otherwise use a finding or an inconclusive status.
   proposed new or updated knowledge document grounded only in cited code/tests.
 - **Knowledge exists but is stale/incomplete**: propose the smallest in-place
   correction. Do not create historical or superseding copies.
+- **Ownership, scope, layer, or intent is ambiguous**: ask targeted
+  clarification questions before proposing a write (which entity owns the
+  claim, which layer document, whether a decision or entity is the right home).
+- **No owner exists**: propose a new typed node (an entity folder with
+  `_entity.yaml` and a layer document, or a topic-keyed decision with
+  `constrains` and the reciprocal `constrained_by`). Every proposal cites
+  durable code and tests only, with `source_of_truth`, `last_verified`, and at
+  least one evidence entry.
+- **Pinned claim drifted**: run the knowledge engine with `--detect-drift
+  --base <ref>` (or `--full-inventory`) and show the retained-baseline diff for
+  the topic's claims. Only after the human explicitly confirms the claim still
+  holds (or confirms the corrected wording) may you re-pin with `--pin-claim`,
+  set `verification.state: verified`, and update `last_verified`. The engine
+  never records human verification on its own.
 - **Requested behavior does not exist**: say so plainly, cite the nearest
   relevant current behavior, and set the handoff to `/devspark.specify`. Do not
   create a spec or quickfix record.
@@ -145,8 +167,10 @@ exact question there: `No files were changed. Apply the proposed knowledge
 changes above?` Do not write while awaiting the answer.
 
 After explicit confirmation, apply only those proposed knowledge/documentation
-edits, refresh generated ontology artifacts when metadata changed, re-check the
-affected evidence and links, and return the same three-section output contract.
+edits to the owning knowledge document and its durable references, refresh
+`index.json` / `coverage.json` by running the knowledge engine without flags,
+re-check with `--check`, re-check the affected evidence and links, and return
+the same three-section output contract.
 This command never changes application code or tests.
 
 When `--dry-run` is present, show preview proposals but omit the confirmation

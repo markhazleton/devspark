@@ -6,7 +6,6 @@
 #>
 [CmdletBinding()]
 param(
-    [switch]$Auto,
     [switch]$Json,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$RemainingArgs
@@ -15,9 +14,8 @@ param(
 . (Join-Path $PSScriptRoot 'common.ps1')
 . (Join-Path $PSScriptRoot 'platform.ps1')
 
-foreach ($arg in @($RemainingArgs)) {
-    if ($arg -eq '--auto') { $Auto = $true }
-}
+# Fact-gathering only: this script reports state and a suggested next command.
+# It never runs, dispatches, or chains commands; judgment stays in the prompt.
 
 $repoRoot = Get-RepoRoot
 $hasGit = Test-HasGit
@@ -192,55 +190,55 @@ if ($prNumber) {
 }
 
 function New-DevSparkRecommendation {
-    param([string]$Command, [string]$Reason, [string]$State, [bool]$SafeToAuto)
+    param([string]$Command, [string]$Reason, [string]$State)
     [ordered]@{
         command = $Command; reason = $Reason; state = $State; kind = 'devspark'
-        safe = $SafeToAuto; boundary = 'none'; manual = ''
+        boundary = 'none'; manual = ''
     }
 }
 function New-ManualRecommendation {
     param([string]$Command, [string]$Reason, [string]$State, [string]$Boundary, [string]$Manual)
     [ordered]@{
         command = $Command; reason = $Reason; state = $State; kind = 'manual'
-        safe = $false; boundary = $Boundary; manual = $Manual
+        boundary = $Boundary; manual = $Manual
     }
 }
 
 $recommendation = [ordered]@{
     command = 'none'; reason = 'The detected workflow is complete.'; state = 'complete'
-    kind = 'complete'; safe = $false; boundary = 'none'; manual = ''
+    kind = 'complete'; boundary = 'none'; manual = ''
 }
 
 if (-not $hasGit) {
     $recommendation = New-ManualRecommendation 'none' 'DevSpark workflow detection requires a Git repository.' 'git-required' 'repository' 'git init'
 } elseif (-not $constitutionExists) {
-    $recommendation = New-DevSparkRecommendation '/devspark.constitution' 'No project constitution exists yet; lifecycle work needs current governance first.' 'constitution-missing' $false
+    $recommendation = New-DevSparkRecommendation '/devspark.constitution' 'No project constitution exists yet; lifecycle work needs current governance first.' 'constitution-missing'
     $recommendation.boundary = 'governance'
     $recommendation.manual = '/devspark.constitution'
 } elseif (-not $hasSpec) {
-    $recommendation = New-DevSparkRecommendation '/devspark.specify' "No spec or branch-linked quickfix work package exists for '$branch'." 'work-not-started' $false
+    $recommendation = New-DevSparkRecommendation '/devspark.specify' "No spec or branch-linked quickfix work package exists for '$branch'." 'work-not-started'
     $recommendation.boundary = 'branch'
     $recommendation.manual = '/devspark.specify <describe the requested change>'
 } elseif ($workKind -eq 'spec' -and -not $hasPlan) {
-    $recommendation = New-DevSparkRecommendation '/devspark.plan' 'The spec exists, but plan.md has not been created.' 'spec-ready' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.plan' 'The spec exists, but plan.md has not been created.' 'spec-ready'
 } elseif ($workKind -eq 'spec' -and -not $hasTasks) {
-    $recommendation = New-DevSparkRecommendation '/devspark.tasks' 'The implementation plan exists, but tasks.md has not been created.' 'plan-ready' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.tasks' 'The implementation plan exists, but tasks.md has not been created.' 'plan-ready'
 } elseif ($workKind -eq 'spec' -and $checklistState -eq 'missing') {
-    $recommendation = New-DevSparkRecommendation '/devspark.checklist' 'The spec requires the checklist gate and no checklist gate result exists.' 'checklist-required' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.checklist' 'The spec requires the checklist gate and no checklist gate result exists.' 'checklist-required'
 } elseif ($workKind -eq 'spec' -and $checklistState -eq 'fail') {
     $recommendation = New-ManualRecommendation '/devspark.checklist' 'The checklist gate is blocking and needs human-guided requirement repair.' 'checklist-blocked' 'gate' "Review $featureDir/gates/checklist.md, repair the requirements, then run /devspark.checklist"
 } elseif ($workKind -eq 'spec' -and $analyzeState -eq 'missing') {
-    $recommendation = New-DevSparkRecommendation '/devspark.analyze' 'Tasks exist, but the required cross-artifact analysis gate has not run.' 'analyze-required' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.analyze' 'Tasks exist, but the required cross-artifact analysis gate has not run.' 'analyze-required'
 } elseif ($workKind -eq 'spec' -and $analyzeState -eq 'fail') {
     $recommendation = New-ManualRecommendation '/devspark.analyze' 'The analyze gate is blocking and its findings need to be resolved.' 'analyze-blocked' 'gate' "Review $featureDir/gates/analyze.md, repair the cited artifacts, then run /devspark.analyze"
 } elseif ($workKind -eq 'spec' -and $criticState -eq 'missing') {
-    $recommendation = New-DevSparkRecommendation '/devspark.critic' 'Analysis is complete, but the required adversarial risk gate has not run.' 'critic-required' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.critic' 'Analysis is complete, but the required adversarial risk gate has not run.' 'critic-required'
 } elseif ($workKind -eq 'spec' -and $criticState -eq 'fail') {
     $recommendation = New-ManualRecommendation '/devspark.critic' 'The critic gate is blocking and its risks need a human decision or repair.' 'critic-blocked' 'gate' "Review $featureDir/gates/critic.md, repair or acknowledge the risks, then run /devspark.critic"
 } elseif ($tasksIncomplete -gt 0 -or $tasksTotal -eq 0) {
-    $recommendation = New-DevSparkRecommendation '/devspark.implement' "$tasksIncomplete implementation task(s) remain incomplete." 'implementation-ready' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.implement' "$tasksIncomplete implementation task(s) remain incomplete." 'implementation-ready'
 } elseif ($workKind -eq 'spec' -and $specStatus.ToLowerInvariant() -ne 'complete') {
-    $recommendation = New-DevSparkRecommendation '/devspark.implement' 'All tasks are checked off, but the spec lifecycle status still needs completion validation.' 'implementation-finalization' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.implement' 'All tasks are checked off, but the spec lifecycle status still needs completion validation.' 'implementation-finalization'
 } elseif ($gitDirty) {
     $recommendation = New-ManualRecommendation 'git commit' 'Implementation is complete, but code/test/knowledge changes are still uncommitted.' 'commit-required' 'commit' 'git status --short && git add <code-test-knowledge-files> && git commit -m "<message>"'
 } elseif ($behind -gt 0) {
@@ -254,9 +252,9 @@ if (-not $hasGit) {
 } elseif (-not $prNumber -and -not $platformAuthenticated) {
     $recommendation = New-ManualRecommendation '/devspark.create-pr' 'The platform CLI is not authenticated, so PR state cannot be verified or created safely.' 'platform-auth-required' 'shared-service' "$($DevSparkPlatform.PrCli) auth login"
 } elseif (-not $prNumber) {
-    $recommendation = New-DevSparkRecommendation '/devspark.create-pr' 'Implementation is committed and synchronized, but no pull request exists.' 'pr-required' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.create-pr' 'Implementation is committed and synchronized, but no pull request exists.' 'pr-required'
 } elseif ($prState -in @('merged', 'completed')) {
-    $recommendation = [ordered]@{ command = 'none'; reason = "PR $prNumber is merged; this development flow is complete. Release remains a separate human-triggered event."; state = 'merged'; kind = 'complete'; safe = $false; boundary = 'none'; manual = '' }
+    $recommendation = [ordered]@{ command = 'none'; reason = "PR $prNumber is merged; this development flow is complete. Release remains a separate human-triggered event."; state = 'merged'; kind = 'complete'; boundary = 'none'; manual = '' }
 } elseif ($prState -in @('closed', 'abandoned')) {
     $reopen = switch ($DevSparkPlatform.Name) { 'github' { "gh pr reopen $prNumber" } 'gitlab' { "glab mr reopen $prNumber" } default { "Review PR $prNumber in Azure DevOps" } }
     $recommendation = New-ManualRecommendation '/devspark.create-pr' "PR $prNumber is closed without merge; reopening or replacing it needs a human decision." 'pr-closed' 'pull-request' $reopen
@@ -265,7 +263,7 @@ if (-not $hasGit) {
 } elseif ($prReviewDecision -eq 'CHANGES_REQUESTED' -or $reviewOpenFindings -gt 0 -or $reviewState -eq 'fail') {
     $recommendation = New-ManualRecommendation '/devspark.address-pr-review' "PR $prNumber has unresolved review findings; the repair flow may create commits." 'review-findings' 'commit' "/devspark.address-pr-review $prNumber"
 } elseif ($reviewState -in @('missing', 'unknown')) {
-    $recommendation = New-DevSparkRecommendation '/devspark.pr-review' "PR $prNumber exists, but no current local PR-review gate result is available." 'review-required' $true
+    $recommendation = New-DevSparkRecommendation '/devspark.pr-review' "PR $prNumber exists, but no current local PR-review gate result is available." 'review-required'
 } else {
     $merge = switch ($DevSparkPlatform.Name) { 'github' { "gh pr merge $prNumber" } 'azdo' { "az repos pr update --id $prNumber --status completed" } 'gitlab' { "glab mr merge $prNumber" } }
     $recommendation = New-ManualRecommendation 'merge PR' "PR $prNumber has a non-blocking review result; merging is a human-owned shared operation." 'merge-ready' 'merge' $merge
@@ -275,7 +273,6 @@ if (-not $hasGit) {
     REPO_ROOT = $repoRoot
     BRANCH = $branch
     PLATFORM = $DevSparkPlatform.Name
-    AUTO = [bool]$Auto
     HAS_GIT = $hasGit
     GIT_DIRTY = $gitDirty
     UPSTREAM = $upstream
@@ -295,7 +292,6 @@ if (-not $hasGit) {
     RECOMMENDED_COMMAND = $recommendation.command
     RECOMMENDATION_REASON = $recommendation.reason
     ACTION_KIND = $recommendation.kind
-    SAFE_TO_AUTO = $recommendation.safe
     HUMAN_BOUNDARY = $recommendation.boundary
     MANUAL_COMMAND = $recommendation.manual
     READ_ONLY = $true
