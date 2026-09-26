@@ -19,6 +19,7 @@
         "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
         "always-install-both-powershell-and-bash-script-sets"
       ],
+      "references": [],
       "evidence": [
         "tests/test_atomic_prompt_frontmatter_contract.py"
       ],
@@ -42,6 +43,7 @@
       "constrained_by": [
         "okf-knowledge-layer-and-genuine-fix-discipline"
       ],
+      "references": [],
       "evidence": [
         "templates/commands/validate-registry.md"
       ],
@@ -63,6 +65,7 @@
         }
       ],
       "constrained_by": [],
+      "references": [],
       "evidence": [
         ".knowledge/entities/brand-system/assets"
       ],
@@ -90,6 +93,7 @@
         "okf-knowledge-layer-and-genuine-fix-discipline",
         "participant-vocabulary-reserving-agent-for-ai-runtimes"
       ],
+      "references": [],
       "evidence": [
         "tests/test_atomic_prompt_frontmatter_contract.py"
       ],
@@ -121,6 +125,7 @@
         "okf-knowledge-layer-and-genuine-fix-discipline",
         "participant-vocabulary-reserving-agent-for-ai-runtimes"
       ],
+      "references": [],
       "evidence": [
         ".knowledge/governance/constitution.md"
       ],
@@ -145,6 +150,7 @@
       "constrained_by": [
         "okf-knowledge-layer-and-genuine-fix-discipline"
       ],
+      "references": [],
       "evidence": [
         ".knowledge/entities/developer-workflow"
       ],
@@ -168,6 +174,7 @@
         }
       ],
       "constrained_by": [],
+      "references": [],
       "evidence": [
         ".knowledge/entities/extension-catalog/catalog.community.json"
       ],
@@ -196,6 +203,7 @@
       "constrained_by": [
         "okf-knowledge-layer-and-genuine-fix-discipline"
       ],
+      "references": [],
       "evidence": [
         "tests/test_documentation_audit.py"
       ],
@@ -219,6 +227,7 @@
       "constrained_by": [
         "okf-knowledge-layer-and-genuine-fix-discipline"
       ],
+      "references": [],
       "evidence": [
         "templates/schemas/devspark-work-package.schema.json"
       ],
@@ -247,6 +256,7 @@
         "tests/test_skills_install_contract.py",
         "templates/skills/ADAPTER-contract.md"
       ],
+      "references": [],
       "last_verified": "2026-08-30",
       "id": "agent-skills-as-portable-capability-packages-within-lifecycle-orchestration",
       "constrains": [
@@ -274,6 +284,7 @@
         ".knowledge/governance/severity-registry.md",
         ".knowledge/governance/prompt-conformance-manifest.md"
       ],
+      "references": [],
       "last_verified": "2026-08-30",
       "id": "agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest",
       "constrains": [
@@ -300,6 +311,7 @@
         "tests/test_script_parity_contract.py",
         "quickstart/README.md"
       ],
+      "references": [],
       "last_verified": "2026-08-30",
       "id": "always-install-both-powershell-and-bash-script-sets",
       "constrains": [
@@ -326,6 +338,7 @@
         "tests/test_knowledge_document_contract.py",
         "templates/schemas/devspark-evidence.schema.json"
       ],
+      "references": [],
       "last_verified": "2026-08-30",
       "id": "okf-knowledge-layer-and-genuine-fix-discipline",
       "constrains": [
@@ -356,6 +369,7 @@
         "tests/test_participant_metadata_contract.py",
         "README.md"
       ],
+      "references": [],
       "last_verified": "2026-08-30",
       "id": "participant-vocabulary-reserving-agent-for-ai-runtimes",
       "constrains": [
@@ -381,6 +395,7 @@
       "evidence": [
         "agents-registry.json"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -399,6 +414,7 @@
       "evidence": [
         "templates/commands/add-application.md"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -417,6 +433,7 @@
       "evidence": [
         ".knowledge/entities/brand-system/assets"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -448,6 +465,7 @@
         ".knowledge/entities/brand-system/assets/MakeBoldSolutions/LinkedIn"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -474,6 +492,7 @@
         ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/lesleyhazleton"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -500,6 +519,7 @@
         ".knowledge/entities/brand-system/assets/MakeBoldSolutions/contacts/markhazleton"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -519,6 +539,7 @@
         ".knowledge/entities/brand-system/assets/makeboldspark"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -559,6 +580,7 @@
         ".knowledge/entities/brand-system/assets/makeboldspark"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -619,6 +641,7 @@
         ".knowledge/entities/brand-system/assets/makeboldspark"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -637,6 +660,7 @@
       "evidence": [
         "templates/commands"
       ],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -663,6 +687,7 @@
         "tests/test_atomic_prompt_frontmatter_contract.py"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-26"
     },
     {
@@ -681,6 +706,7 @@
         "tests/test_atomic_prompt_frontmatter_contract.py"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -708,6 +734,7 @@
       "evidence": [
         "tests/test_knowledge_engine_contract.py"
       ],
+      "references": [],
       "last_verified": "2026-09-26"
     },
     {
@@ -747,6 +774,7 @@
         "templates/commands/release.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-26"
     },
     {
@@ -765,6 +793,7 @@
       "evidence": [
         ".knowledge/entities/developer-workflow"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -793,6 +822,7 @@
         ".knowledge/entities/developer-workflow"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -814,6 +844,7 @@
         ".knowledge/entities/developer-workflow"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -832,6 +863,7 @@
         ".knowledge/entities/extension-catalog/catalog.community.json"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -850,6 +882,7 @@
       "evidence": [
         ".knowledge/entities/extension-catalog/catalog.community.json"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -868,6 +901,7 @@
       "evidence": [
         ".knowledge/entities/product-documentation/site"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -884,6 +918,7 @@
         "AGENTS.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -903,6 +938,7 @@
         "README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-09"
     },
     {
@@ -929,6 +965,7 @@
         "README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-09"
     },
     {
@@ -956,6 +993,7 @@
         "templates/commands/checklist.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1023,6 +1061,7 @@
         ".knowledge/governance/constitution.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1095,6 +1134,7 @@
         "templates/commands/critic.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1114,6 +1154,7 @@
         "quickstart/devspark_quickstart_antigravity.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -1141,6 +1182,7 @@
         "quickstart/devspark_quickstart_codex.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1162,6 +1204,7 @@
         "templates/commands/explain.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1214,6 +1257,7 @@
         "README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-05"
     },
     {
@@ -1246,6 +1290,7 @@
         "templates/commands/release.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-26"
     },
     {
@@ -1271,6 +1316,7 @@
         "README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-09"
     },
     {
@@ -1291,6 +1337,7 @@
         "quickstart/README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-09"
     },
     {
@@ -1330,6 +1377,7 @@
         "templates/commands/add-application.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1351,6 +1399,7 @@
         "templates/commands/next.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-26"
     },
     {
@@ -1372,6 +1421,7 @@
         ".knowledge/entities/current-truth-ontology/devspark-philosophy.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-26"
     },
     {
@@ -1451,6 +1501,7 @@
         "templates/commands/pr-review.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -1483,6 +1534,7 @@
         "quickstart/README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-09"
     },
     {
@@ -1504,6 +1556,7 @@
         "templates/commands/release.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-26"
     },
     {
@@ -1537,6 +1590,7 @@
         "templates/commands/repo-story.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1602,6 +1656,7 @@
         "templates/commands/site-audit.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1624,6 +1679,7 @@
         "README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-09"
     },
     {
@@ -1644,6 +1700,7 @@
         "quickstart/README.md"
       ],
       "evidence": [],
+      "references": [],
       "last_verified": "2026-09-09"
     },
     {
@@ -1662,6 +1719,7 @@
       "evidence": [
         "templates/schemas/devspark-work-package.schema.json"
       ],
+      "references": [],
       "last_verified": "2026-09-04"
     },
     {
@@ -1688,7 +1746,8 @@
       ],
       "applies_to": [],
       "source_of_truth": [],
-      "evidence": []
+      "evidence": [],
+      "references": []
     },
     {
       "path": ".knowledge/governance/known-limitations.md",
@@ -1709,6 +1768,7 @@
       "evidence": [
         "scripts/build_knowledge_index.py"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -1728,6 +1788,7 @@
       "evidence": [
         "templates/command-preamble-contract.md"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     },
     {
@@ -1747,6 +1808,7 @@
       "evidence": [
         "scripts/build_knowledge_index.py"
       ],
+      "references": [],
       "last_verified": "2026-08-30"
     }
   ],

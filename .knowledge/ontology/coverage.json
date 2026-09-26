@@ -5,6 +5,7 @@
   "summary": {
     "entities": 9,
     "decisions": 5,
+    "flat_nodes": 0,
     "errors": 0,
     "warnings": 0
   },
@@ -215,5 +216,6 @@
       "evidence_count": 2
     }
   ],
+  "flat_nodes": [],
   "findings": []
 }

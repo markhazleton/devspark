@@ -75,6 +75,38 @@ currency pair. Top-level files are the entity's layers:
 | `appliesTo` | no | Paths or globs the document applies to |
 | `evidence` | no | Additional evidence entries |
 
+## Flat knowledge nodes
+
+Not every piece of current truth justifies an entity. A simple guide or a
+single-purpose architectural note is a flat knowledge node:
+
+- `.knowledge/<topic>.md` or `.knowledge/guides/**/<topic>.md`
+- Node id: frontmatter `id`, else the filename stem; unique across entities,
+  decisions, and flat nodes.
+- Same currency rules as entity layers (`source_of_truth`, `last_verified`),
+  optional `aliases`, `appliesTo`, `evidence`, and `links`.
+
+Prefer a flat node until a concept earns an entity through several signals: a
+durable named domain concept, clear ownership, multiple meaningful layers,
+specific source ownership, relationships to other entities, and value from
+coverage or drift validation.
+
+## Links
+
+Any knowledge node (`_entity.yaml`, entity documents, flat nodes, decisions)
+may declare:
+
+```yaml
+links:
+  references:
+    - token-service          # a node id (entity, decision, or flat node)
+    - src/Auth/TokenService.cs   # or an existing repository path
+```
+
+References are validated: each must be a known node id, an existing path, or an
+external URL, and never temporary work. They record that two current truths
+relate without asserting a typed entity relation.
+
 ## Banned keys
 
 `status`, `lifecycle`, `supersedes`, `superseded-by`, `replaced`, and

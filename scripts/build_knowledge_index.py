@@ -62,6 +62,7 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 DECISION_TYPE = "governance-decision"
+FLAT_TYPE = "flat-knowledge"
 BANNED_KEYS = ("status", "lifecycle", "supersedes", "superseded-by", "superseded_by", "replaced", "obsolete")
 EPHEMERAL_PREFIXES = (".devspark.work/", ".archive/")
 ENFORCEMENT_MODES = ("last-verified", "pinned-claims")
@@ -174,6 +175,7 @@ class Knowledge:
     governance_docs: list[Document]
     config: dict[str, Any]
     findings: list[Finding]
+    flat_docs: list[Document] = field(default_factory=list)
 
     def all_documents(self) -> list[Document]:
         docs: list[Document] = []
@@ -181,6 +183,7 @@ class Knowledge:
             docs.extend(entity.documents)
         docs.extend(decision.document for decision in self.decisions.values())
         docs.extend(self.governance_docs)
+        docs.extend(self.flat_docs)
         return sorted(docs, key=lambda doc: rel(doc.path))
 
 
@@ -545,6 +548,30 @@ def load_governance_docs() -> list[Document]:
     ]
 
 
+def load_flat_docs() -> list[Document]:
+    """Flat knowledge nodes: `.knowledge/<topic>.md` and `.knowledge/guides/**`.
+
+    A flat node is a current-truth guide or architectural note that does not
+    justify an entity. It follows the same currency rules as entity layers.
+    """
+    root = knowledge_dir()
+    if not root.exists():
+        return []
+    paths = [path for path in root.glob("*.md")]
+    guides = root / "guides"
+    if guides.is_dir():
+        paths.extend(guides.rglob("*.md"))
+    return [
+        load_document(path, "knowledge", FLAT_TYPE)
+        for path in sorted(paths)
+        if path.name.lower() != "readme.md" and not path.name.startswith("_")
+    ]
+
+
+def node_id(document: Document) -> str:
+    return str(document.frontmatter.get("id") or document.path.stem)
+
+
 def load_knowledge(root: Path | None = None) -> Knowledge:
     global ROOT
     if root is not None:
@@ -554,11 +581,13 @@ def load_knowledge(root: Path | None = None) -> Knowledge:
     entities = load_entities(findings)
     decisions = load_decisions(findings)
     governance_docs = load_governance_docs()
+    flat_docs = load_flat_docs()
     return Knowledge(
         root=ROOT,
         entities=entities,
         decisions=decisions,
         governance_docs=governance_docs,
+        flat_docs=flat_docs,
         config=config,
         findings=findings,
     )
@@ -879,11 +908,75 @@ def validate_legacy_outputs(knowledge: Knowledge) -> None:
         )
 
 
+def validate_flat_docs(knowledge: Knowledge) -> None:
+    findings = knowledge.findings
+    enforcement = knowledge.config["knowledge_drift"]["enforcement"]
+    taken = set(knowledge.entities) | set(knowledge.decisions)
+    seen: dict[str, str] = {}
+    for document in knowledge.flat_docs:
+        identifier = node_id(document)
+        if not ID_RE.match(identifier):
+            findings.append(Finding("error", "invalid-node-id", rel(document.path), f"Node id {identifier!r} is not a valid slug."))
+        if identifier in taken or identifier in seen:
+            other = seen.get(identifier, "an entity or decision")
+            findings.append(
+                Finding("error", "duplicate-node-id", rel(document.path), f"Node id {identifier!r} is already used by {other}.")
+            )
+        seen.setdefault(identifier, rel(document.path))
+        check_banned_keys(document.frontmatter, document.path, findings)
+        validate_currency(document, findings, enforcement, None, required=True)
+        validate_evidence_list(document.frontmatter, document.path, findings, None, required=False)
+
+
+def known_node_ids(knowledge: Knowledge) -> set[str]:
+    return set(knowledge.entities) | set(knowledge.decisions) | {node_id(doc) for doc in knowledge.flat_docs}
+
+
+def link_references(data: dict[str, Any]) -> Any:
+    links = data.get("links")
+    if links is None:
+        return []
+    if not isinstance(links, dict):
+        return None
+    return links.get("references", [])
+
+
+def validate_links(knowledge: Knowledge) -> None:
+    """`links.references` must resolve to a node id or an existing path."""
+    ids = known_node_ids(knowledge)
+    subjects: list[tuple[Path, dict[str, Any], str | None]] = [
+        (entity.path, entity.data, entity.entity_id) for entity in knowledge.entities.values()
+    ]
+    subjects.extend((doc.path, doc.frontmatter, doc.owner if doc.owner in knowledge.entities else None) for doc in knowledge.all_documents())
+    for path, data, entity in subjects:
+        references = link_references(data)
+        if references is None or not isinstance(references, list):
+            knowledge.findings.append(
+                Finding("error", "invalid-links", rel(path), "links must be a mapping with a `references` list.", entity)
+            )
+            continue
+        for index, value in enumerate(references, start=1):
+            where = f"{rel(path)}#links.references[{index}]"
+            target = str(value).strip()
+            if not target or is_external(target):
+                continue
+            if is_ephemeral(target):
+                knowledge.findings.append(
+                    Finding("error", "ephemeral-reference", where, f"links must not cite temporary work: {target}", entity)
+                )
+            elif target not in ids and not local_ref_exists(target):
+                knowledge.findings.append(
+                    Finding("error", "dangling-reference", where, f"Reference is not a node id or existing path: {target}", entity)
+                )
+
+
 def validate(knowledge: Knowledge) -> Knowledge:
     validate_relations(knowledge)
     validate_entity_evidence(knowledge)
     validate_constraints(knowledge)
     validate_documents(knowledge)
+    validate_flat_docs(knowledge)
+    validate_links(knowledge)
     validate_layers(knowledge)
     validate_baselines(knowledge)
     validate_legacy_outputs(knowledge)
@@ -913,7 +1006,10 @@ def document_record(document: Document) -> dict[str, Any]:
         if isinstance(data.get("source_of_truth"), list)
         else [],
         "evidence": evidence_refs(data),
+        "references": string_list(link_references(data)) if isinstance(link_references(data), list) else [],
     }
+    if document.doc_type == FLAT_TYPE:
+        record["id"] = node_id(document)
     if data.get("last_verified"):
         record["last_verified"] = str(data.get("last_verified"))
     return record
@@ -972,6 +1068,7 @@ def build_index(knowledge: Knowledge) -> dict[str, Any]:
                     if isinstance(item, dict)
                 ],
                 "constrained_by": string_list(data.get("constrained_by")),
+                "references": string_list(link_references(data)) if isinstance(link_references(data), list) else [],
                 "evidence": evidence_refs(data),
                 "layers": list(entity.layers),
             }
@@ -1037,11 +1134,13 @@ def build_coverage(knowledge: Knowledge) -> dict[str, Any]:
         "summary": {
             "entities": len(entities),
             "decisions": len(decisions),
+            "flat_nodes": len(knowledge.flat_docs),
             "errors": sum(1 for item in findings if item.level == "error"),
             "warnings": sum(1 for item in findings if item.level == "warning"),
         },
         "entities": entities,
         "decisions": decisions,
+        "flat_nodes": [{"id": node_id(doc), "path": rel(doc.path)} for doc in knowledge.flat_docs],
         "findings": [item.as_dict() for item in findings],
     }
 

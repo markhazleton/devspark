@@ -120,6 +120,21 @@
       },
       "uniqueItems": true,
       "description": "Governance decision ids that constrain this entity (hand-authored reciprocal of constrains)."
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Knowledge node ids (entity, decision, or flat node) or existing repository paths this node refers to. Never temporary work."
+        }
+      }
     }
   },
   "description": "Structural metadata for one entity. constrained_by is hand-authored and must reciprocate each governance decision's constrains list; the knowledge engine validates the pair.",

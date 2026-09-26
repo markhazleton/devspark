@@ -2,13 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://devspark.local/schemas/knowledge-node.schema.json",
   "title": "DevSpark Knowledge Node (Markdown frontmatter)",
-  "description": "Frontmatter for current-truth knowledge documents: entity layer documents and governance decisions (type: governance-decision). Lifecycle keys are banned; current knowledge is edited in place or deleted.",
+  "description": "Frontmatter for current-truth knowledge documents: entity documents, flat knowledge nodes (.knowledge/<topic>.md and .knowledge/guides/**), and governance decisions (type: governance-decision). Lifecycle keys are banned; current knowledge is edited in place or deleted.",
   "type": "object",
   "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "description": "Node id. Required for decisions; optional for flat nodes (defaults to the filename stem)."
     },
     "type": {
       "type": "string",
@@ -147,6 +148,21 @@
       "minItems": 1,
       "items": {
         "$ref": "devspark-evidence.schema.json"
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Knowledge node ids (entity, decision, or flat node) or existing repository paths this node refers to. Never temporary work."
+        }
       }
     }
   },

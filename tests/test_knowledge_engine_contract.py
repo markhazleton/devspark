@@ -437,3 +437,41 @@ def test_resolver_is_paired_and_used_by_every_entry_point() -> None:
         assert "resolve_knowledge_engine" in bash or "knowledge_engine_json" in bash, name
         assert "Resolve-KnowledgeEngine" in powershell or "Get-KnowledgeEngineInfo" in powershell, name
     assert not (ROOT / "scripts" / "python").exists(), "one engine, one location"
+
+
+def test_flat_nodes_follow_currency_rules_and_are_searchable(tmp_path: Path) -> None:
+    repo = _consumer(tmp_path)
+    guide = repo / ".knowledge" / "guides" / "local-setup.md"
+    _write(guide, "# Local Setup\n\nRun the service locally.\n")
+    missing = _engine(repo)
+    assert missing.returncode == 1
+    assert "missing-source-of-truth" in _codes(missing)
+
+    guide.write_text(
+        "---\nsource_of_truth:\n- src/auth.py\nlast_verified: '2026-09-01'\n---\n\n# Local Setup\n",
+        encoding="utf-8",
+    )
+    assert _engine(repo).returncode == 0
+    coverage = json.loads((repo / ".knowledge" / "ontology" / "coverage.json").read_text(encoding="utf-8"))
+    assert coverage["flat_nodes"] == [{"id": "local-setup", "path": ".knowledge/guides/local-setup.md"}]
+    top = json.loads(_engine(repo, "--search", "local setup").stdout)["results"][0]
+    assert top["path"] == ".knowledge/guides/local-setup.md"
+
+    _write(repo / ".knowledge" / "auth.md", "---\nsource_of_truth:\n- src/auth.py\nlast_verified: '2026-09-01'\n---\n\n# Auth\n")
+    assert "duplicate-node-id" in _codes(_engine(repo)), "flat ids may not collide with entity ids"
+
+
+def test_links_references_must_resolve(tmp_path: Path) -> None:
+    repo = _consumer(tmp_path)
+    doc = repo / ".knowledge" / "entities" / "auth" / "architecture.md"
+    base = doc.read_text(encoding="utf-8")
+    doc.write_text(base.replace("aliases:", "links:\n  references:\n  - auth-strategy\n  - src/auth.py\n  - https://example.com/rfc\naliases:"), encoding="utf-8")
+    ok = _engine(repo)
+    assert ok.returncode == 0, ok.stdout
+    index = json.loads((repo / ".knowledge" / "ontology" / "index.json").read_text(encoding="utf-8"))
+    layer = [item for item in index["documents"] if item["path"].endswith("auth/architecture.md")][0]
+    assert layer["references"] == ["auth-strategy", "src/auth.py", "https://example.com/rfc"]
+
+    doc.write_text(base.replace("aliases:", "links:\n  references:\n  - billing\n  - .devspark.work/specs/001-auth\naliases:"), encoding="utf-8")
+    codes = _codes(_engine(repo))
+    assert {"dangling-reference", "ephemeral-reference"} <= codes
