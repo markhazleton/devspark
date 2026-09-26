@@ -163,6 +163,24 @@ if (Test-Path $releaseCandidatesDir) {
         }
 }
 
+# Routine work products the release may sweep once their retention purpose
+# ends. Facts only: the release prompt decides (for example, whether a PR is
+# still open) and never sweeps specs or quickfixes from this list.
+$retentionCandidates = @()
+foreach ($retentionKind in @('pr-reviews', 'audits', 'repo-story', 'runs', 'fix-score', 'knowledge-discovery', 'documentation')) {
+    $retentionDir = Join-Path $workDir $retentionKind
+    if (-not (Test-Path -LiteralPath $retentionDir)) { continue }
+    Get-ChildItem -LiteralPath $retentionDir -Force -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+        $prNumber = $null
+        if ($retentionKind -eq 'pr-reviews' -and $_.Name -match '^pr-(\d+)') { $prNumber = [int]$matches[1] }
+        $retentionCandidates += [ordered]@{
+            path = [System.IO.Path]::GetRelativePath($repoRoot, $_.FullName).Replace('\', '/')
+            kind = $retentionKind
+            pr_number = $prNumber
+        }
+    }
+}
+
 $nextVersion = $Version.TrimStart('v')
 $versionBump = 'patch'
 if (-not $nextVersion) {
@@ -211,6 +229,7 @@ $result = [ordered]@{
     RELEASE_ELIGIBLE_QUICKFIXES = Get-JsonArray $releaseEligibleQuickfixes
     BLOCKED_QUICKFIXES = Get-JsonArray $blockedQuickfixes
     UNRESOLVED_LINKAGE_REFS = Get-JsonArray $script:unresolvedLinkage.ToArray()
+    RETENTION_CANDIDATES = @($retentionCandidates)
     LAST_TAG = $lastTag
     LAST_RELEASE_DATE = $lastReleaseDate
     COMMITS_SINCE_RELEASE = $commitsSince

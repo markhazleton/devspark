@@ -205,6 +205,24 @@ if [[ -d "$RELEASE_CANDIDATES_DIR" ]]; then
     done < <(find "$RELEASE_CANDIDATES_DIR" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
 fi
 
+# Routine work products the release may sweep once their retention purpose
+# ends. Facts only: the release prompt decides (for example, whether a PR is
+# still open) and never sweeps specs or quickfixes from this list.
+RETENTION_CANDIDATES='[]'
+for retention_kind in pr-reviews audits repo-story runs fix-score knowledge-discovery documentation; do
+    retention_dir="$WORK_DIR/$retention_kind"
+    [[ -d "$retention_dir" ]] || continue
+    while IFS= read -r -d '' retention_item; do
+        retention_rel="${retention_item#"$REPO_ROOT/"}"
+        retention_pr=""
+        if [[ "$retention_kind" == "pr-reviews" && "$(basename "$retention_item")" =~ ^pr-([0-9]+) ]]; then
+            retention_pr="${BASH_REMATCH[1]}"
+        fi
+        RETENTION_CANDIDATES=$(jq -c --arg path "$retention_rel" --arg kind "$retention_kind" --arg pr "$retention_pr" \
+            '. + [{path: $path, kind: $kind, pr_number: (if $pr == "" then null else ($pr | tonumber) end)}]' <<<"$RETENTION_CANDIDATES")
+    done < <(find "$retention_dir" -mindepth 1 -maxdepth 1 -print0 2>/dev/null | sort -z)
+done
+
 UNRESOLVED_LINKAGE_REFS=$(jq -R -s 'split("\n") | map(select(length > 0)) | unique' < "$UNRESOLVED_LINKAGE_FILE")
 
 NEXT_VERSION="$VERSION_ARG"
@@ -253,6 +271,7 @@ if [[ "$JSON_MODE" == true ]]; then
   "RELEASE_ELIGIBLE_QUICKFIXES": $RELEASE_ELIGIBLE_QUICKFIXES,
   "BLOCKED_QUICKFIXES": $BLOCKED_QUICKFIXES,
   "UNRESOLVED_LINKAGE_REFS": $UNRESOLVED_LINKAGE_REFS,
+  "RETENTION_CANDIDATES": $RETENTION_CANDIDATES,
   "LAST_TAG": "$LAST_TAG",
   "LAST_RELEASE_DATE": "$LAST_RELEASE_DATE",
   "COMMITS_SINCE_RELEASE": $COMMITS_SINCE,

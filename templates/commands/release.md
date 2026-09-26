@@ -93,10 +93,13 @@ anything.
     `.archive/YYYY-MM-DD/<path relative to .devspark.work>/` using
     `archive_devspark_work_path` from `scripts/bash/common.sh` or
     `Move-DevSparkWorkPathToArchive` from `scripts/powershell/common.ps1`.
-11. Sweep routine work products whose retention purpose has ended (PR reviews
-    and review state for merged or closed PRs, site audits, commit audits,
-    repo stories) and orphaned in-flight state with the same helper. Never
-    sweep a stalled or incomplete spec or quickfix.
+11. Review `RETENTION_CANDIDATES` (`{path, kind, pr_number}`): routine work
+    products under `pr-reviews`, `audits`, `repo-story`, `runs`, `fix-score`,
+    `knowledge-discovery`, and `documentation`. Sweep each one whose retention
+    purpose has ended (for `pr-reviews`, confirm with the platform CLI that the
+    PR is merged or closed; otherwise the product must predate this release)
+    with the same helper, and report the ones you keep and why. Never sweep a
+    stalled or incomplete spec or quickfix.
 12. Do not read, list, enumerate, glob, or summarize `.archive/` after the move.
 13. Draft release notes from Git commits, merged PRs, and the validated current
     truth—not from `.archive/`.

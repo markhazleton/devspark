@@ -108,6 +108,13 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
         encoding="utf-8",
     )
 
+    reviews = tmp_path / ".devspark.work" / "pr-reviews"
+    reviews.mkdir(parents=True)
+    (reviews / "pr-42.md").write_text("review\n", encoding="utf-8")
+    audits = tmp_path / ".devspark.work" / "audits"
+    audits.mkdir()
+    (audits / "2026-09-01-audit.md").write_text("audit\n", encoding="utf-8")
+
     if sys.platform == "win32":
         command = [
             "pwsh",
@@ -130,6 +137,11 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
     payload = json.loads(result.stdout)
     assert payload["RELEASE_ELIGIBLE_WORK_PACKAGES"] == ["003-eligible"]
     assert sorted(payload["BLOCKED_WORK_PACKAGES"]) == ["001-missing", "002-unexplained", "004-unresolved"]
+    assert payload["RETENTION_CANDIDATES"] == [
+        {"path": ".devspark.work/pr-reviews/pr-42.md", "kind": "pr-reviews", "pr_number": 42},
+        {"path": ".devspark.work/audits/2026-09-01-audit.md", "kind": "audits", "pr_number": None},
+    ]
+    assert all(not item["path"].startswith(".devspark.work/specs/") for item in payload["RETENTION_CANDIDATES"])
     assert payload["UNRESOLVED_LINKAGE_REFS"] == [
         "002-unexplained: .knowledge/entities/docs/architecture.md",
         "004-unresolved: src/renamed.py",

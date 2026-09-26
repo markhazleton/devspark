@@ -67,6 +67,15 @@ def strip_strings(line: str) -> str:
     return re.sub(r"(\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')", lambda m: " " * len(m.group(0)), line)
 
 
+def blank_triple_quoted(text: str) -> str:
+    """Blank Python triple-quoted strings, keeping line numbers intact."""
+    return re.sub(
+        r'("""|\'\'\')(?:.|\n)*?\1',
+        lambda m: re.sub(r"[^\n]", " ", m.group(0)),
+        text,
+    )
+
+
 def comments(text: str, kind: str, powershell: bool) -> list[tuple[int, str]]:
     """Return (line number, comment text) pairs for one file."""
     found: list[tuple[int, str]] = []
@@ -134,6 +143,8 @@ def scan(root: Path, files: list[str]) -> list[dict[str, object]]:
             continue
         kind = comment_kind(path)
         assert kind is not None
+        if Path(path).suffix.lower() in {".py", ".pyi"}:
+            text = blank_triple_quoted(text)
         for number, comment in comments(text, kind, Path(path).suffix.lower() in {".ps1", ".psm1"}):
             spans: list[tuple[int, int]] = []
             for name, pattern in PATTERNS:
