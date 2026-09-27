@@ -156,4 +156,4 @@ This constitution supersedes other DevSpark development practices. Amendments
 must update the current constitution and any conflicting current decisions in
 place.
 
-**Version**: 4.3.0 | **Ratified**: 2026-08-30 | **Last Amended**: 2026-09-27
+**Version**: 5.0.0 | **Ratified**: 2026-08-30 | **Last Amended**: 2026-09-27
