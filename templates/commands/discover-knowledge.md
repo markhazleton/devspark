@@ -252,7 +252,8 @@ quickstarts call it on first install).
 2. If the repository still has a pre-contract layout (`_derived.yaml`,
    decisions with `governs` or `status`, or `.knowledge/ontology/*.generated.md`),
    run `python <scripts>/migrate-knowledge-to-entities.py --dry-run`, show the
-   plan, and run it after confirmation.
+   plan and any `conflict` lines, and run it after confirmation. Pass `--force`
+   only when the user confirms overwriting the conflicting files.
 3. Run `discover-knowledge-context.py --all` and propose a minimal initial
    structure: a few entity candidates for clearly durable concepts, flat
    knowledge documents for everything simpler, and gaps for low-confidence

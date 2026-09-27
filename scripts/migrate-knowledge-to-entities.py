@@ -14,6 +14,10 @@ One deterministic operation, safe to re-run:
 
 Run the knowledge engine afterwards to write index.json and coverage.json.
 Use --dry-run to list the changes without writing.
+
+Conflicts are reported, never resolved silently: a file whose YAML carries
+comments (rewriting would drop them) or a decision whose `governs` and
+`constrains` disagree is skipped unless --force is given, and the run exits 1.
 """
 
 from __future__ import annotations
@@ -92,6 +96,18 @@ def git_last_date(root: Path, path: Path) -> str:
     return value or date.today().isoformat()
 
 
+def yaml_has_comments(path: Path, text: str) -> bool:
+    """True when the YAML part of a file (whole .yaml, or Markdown frontmatter) has comments."""
+    if path.suffix.lower() in {".yaml", ".yml"}:
+        block = text
+    elif text.startswith("---"):
+        parts = text.split("---", 2)
+        block = parts[1] if len(parts) == 3 else ""
+    else:
+        return False
+    return any(re.match(r"^\s*#", line) or re.search(r"\s#\s", line) for line in block.splitlines())
+
+
 def evidence_refs(data: dict[str, Any]) -> list[str]:
     refs = []
     for entry in data.get("evidence") or []:
@@ -103,16 +119,26 @@ def evidence_refs(data: dict[str, Any]) -> list[str]:
 
 
 class Migration:
-    def __init__(self, root: Path, dry_run: bool) -> None:
+    def __init__(self, root: Path, dry_run: bool, force: bool = False) -> None:
         self.root = root
         self.dry_run = dry_run
+        self.force = force
         self.changes: list[str] = []
+        self.conflicts: dict[Path, str] = {}
+
+    def conflict(self, path: Path, reason: str) -> None:
+        self.conflicts.setdefault(path, reason)
 
     def rel(self, path: Path) -> str:
         return path.relative_to(self.root).as_posix()
 
     def write(self, path: Path, content: str, reason: str) -> None:
-        if path.read_text(encoding="utf-8") == content:
+        current = path.read_text(encoding="utf-8")
+        if current == content:
+            return
+        if yaml_has_comments(path, current):
+            self.conflict(path, "YAML comments would be lost by rewriting")
+        if path in self.conflicts and not self.force:
             return
         self.changes.append(f"update {self.rel(path)}: {reason}")
         if not self.dry_run:
@@ -138,8 +164,14 @@ class Migration:
                 self.delete(legacy, "retired Markdown ontology report")
         for change in self.changes:
             print(change)
+        for path, reason in sorted(self.conflicts.items(), key=lambda item: posix_key(item[0])):
+            action = "applied with --force" if self.force else "skipped"
+            print(f"conflict {self.rel(path)}: {reason} ({action})")
         verb = "would change" if self.dry_run else "changed"
         print(f"Knowledge migration {verb} {len(self.changes)} file(s).")
+        if self.conflicts and not self.force:
+            print("Resolve the conflicts above, or rerun with --force to overwrite them.", file=sys.stderr)
+            return 1
         return 0
 
     # entities -------------------------------------------------------------
@@ -186,6 +218,9 @@ class Migration:
                 "type": DECISION_TYPE,
                 "title": str(data.get("title") or first_heading(body) or path.stem.replace("-", " ")),
             }
+            if data.get("governs") and data.get("constrains"):
+                if sorted(map(str, data["governs"])) != sorted(map(str, data["constrains"])):
+                    self.conflict(path, "`governs` and `constrains` disagree; resolve by hand or pass --force (constrains wins)")
             constrains = [str(item) for item in (data.get("constrains") or data.get("governs") or [])]
             migrated["constrains"] = constrains
             for key, value in data.items():
@@ -258,8 +293,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--root", help="repository root (defaults to automatic discovery)")
     parser.add_argument("--dry-run", action="store_true", help="list changes without writing")
+    parser.add_argument("--force", action="store_true", help="overwrite files reported as conflicts")
     args = parser.parse_args(argv)
-    return Migration(discover_root(args.root), args.dry_run).run()
+    return Migration(discover_root(args.root), args.dry_run, args.force).run()
 
 
 if __name__ == "__main__":

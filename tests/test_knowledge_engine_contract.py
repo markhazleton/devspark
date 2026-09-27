@@ -475,3 +475,28 @@ def test_links_references_must_resolve(tmp_path: Path) -> None:
     doc.write_text(base.replace("aliases:", "links:\n  references:\n  - billing\n  - .devspark.work/specs/001-auth\naliases:"), encoding="utf-8")
     codes = _codes(_engine(repo))
     assert {"dangling-reference", "ephemeral-reference"} <= codes
+
+
+def test_migration_reports_conflicts_and_needs_force(tmp_path: Path) -> None:
+    repo = _consumer(tmp_path)
+    knowledge = repo / ".knowledge"
+    entity = knowledge / "entities" / "auth" / "_entity.yaml"
+    entity.write_text("# Owned by the platform team\n" + entity.read_text(encoding="utf-8") + "lifecycle: current\n", encoding="utf-8")
+    decision = knowledge / "governance" / "decisions" / "auth-strategy.md"
+    decision.write_text(
+        decision.read_text(encoding="utf-8").replace("constrains:\n- auth\n", "constrains:\n- auth\ngoverns:\n- billing\n"),
+        encoding="utf-8",
+    )
+    migrate = [sys.executable, str(repo / ".devspark" / "scripts" / "migrate-knowledge-to-entities.py"), "--root", str(repo)]
+
+    blocked = subprocess.run(migrate, text=True, capture_output=True, check=False)
+    assert blocked.returncode == 1
+    assert "conflict .knowledge/entities/auth/_entity.yaml: YAML comments would be lost" in blocked.stdout
+    assert "conflict .knowledge/governance/decisions/auth-strategy.md: `governs` and `constrains` disagree" in blocked.stdout
+    assert entity.read_text(encoding="utf-8").startswith("# Owned by the platform team"), "conflicting files are untouched"
+    assert "governs:" in decision.read_text(encoding="utf-8")
+
+    forced = subprocess.run([*migrate, "--force"], text=True, capture_output=True, check=False)
+    assert forced.returncode == 0, forced.stdout + forced.stderr
+    assert "lifecycle" not in entity.read_text(encoding="utf-8")
+    assert "governs" not in decision.read_text(encoding="utf-8")

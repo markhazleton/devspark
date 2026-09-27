@@ -239,7 +239,7 @@ reports `matched_on` explaining why it scored.
 | `build_knowledge_index.py --detect-drift --full-inventory` | Pinned-claim drift for every claim (JSON) |
 | `build_knowledge_index.py --pin-claim <path>` | Retain a baseline and print a claim (JSON) |
 | `explain-context.py "<topic>"` | Ranked discovery including body prose (JSON) |
-| `migrate-knowledge-to-entities.py [--dry-run]` | Migrate older `.knowledge` layouts to this contract |
+| `migrate-knowledge-to-entities.py [--dry-run] [--force]` | Migrate older `.knowledge` layouts to this contract; reports conflicts (YAML comments, disagreeing `governs`/`constrains`) and skips them unless `--force` |
 | `discover-knowledge-context.py <entity \| path \| term> \| --all` | Read-only discovery signals (gaps, mapping breadth, overlaps, relationship and alias candidates, stale references, historical leakage) for `/devspark.discover-knowledge` |
 | `scan-ephemeral-refs.py --base <ref> \| --full-inventory` | Fail when code comments name spec, task, requirement, proposal, or archive identifiers |
 
