@@ -141,7 +141,7 @@ Canonical delivery loop: `specify → clarify when needed → plan → tasks →
 | `/devspark.checklist` | Generate quality validation checklists |
 | `/devspark.personalize` | Create per-user command overrides |
 | `/devspark.discover-constitution` | Generate a constitution from existing code |
-| `/devspark.discover-knowledge` | Build source-grounded `.knowledge/entities` and ontology |
+| `/devspark.discover-knowledge` | Propose evidence-backed fixes for knowledge gaps, mappings, relationships, and aliases |
 
 ### Multi-App (Optional)
 

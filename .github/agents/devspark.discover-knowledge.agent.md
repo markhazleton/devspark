@@ -1,6 +1,6 @@
 ---
 name: devspark.discover-knowledge
-description: Discover source-grounded current-truth entities and regenerate the knowledge index
+description: Propose evidence-backed improvements to current .knowledge and apply only approved findings
 ---
 
 Read and follow the instructions in `templates/commands/discover-knowledge.md` exactly.

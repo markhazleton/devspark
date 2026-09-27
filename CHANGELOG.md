@@ -19,8 +19,26 @@ All notable changes to DevSpark are documented here.
   `knowledge-node` schemas, `resolve_knowledge_engine` /
   `Resolve-KnowledgeEngine`, and agent/prompt shims for `discover-knowledge`.
 
+- Added `scripts/scan-ephemeral-refs.py`, which fails when code comments name
+  spec, task, requirement, proposal, work-package, or archive identifiers.
+- Added flat knowledge nodes (`.knowledge/<topic>.md`, `.knowledge/guides/**`)
+  and validated `links.references` on any knowledge node.
+- Added `scripts/discover-knowledge-context.py`, read-only discovery signals
+  for `/devspark.discover-knowledge`.
+- The release pre-scan now blocks unresolved linkage refs
+  (`UNRESOLVED_LINKAGE_REFS`) and lists `RETENTION_CANDIDATES`.
+
 ### Changed
 
+- `/devspark.discover-knowledge` is now a propose-only authoring aid: it reports
+  knowledge gaps, mapping gaps and ambiguities, relationship and alias
+  candidates, contradictions, historical leakage, and entity candidates, and
+  applies only findings a human selects and confirms. `--bootstrap` remains for
+  first-time setup.
+- Every Markdown document under an entity, including subfolders, now carries
+  `source_of_truth` and `last_verified`.
+- Engine writes keep unreferenced pinned baselines (reported as warnings), and
+  `--check --entity` scopes decision errors to the entities they constrain.
 - Decisions now declare `constrains`; entities hand-author the reciprocal
   `constrained_by`, validated by the engine. `_derived.yaml` and the Markdown
   ontology reports are retired.

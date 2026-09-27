@@ -34,6 +34,9 @@ conflicts with this section, the v4 section wins.
   without `fallback_reason` as a warning.
 - When pinned claims exist, run `--detect-drift --full-inventory` and report
   drifted claims.
+- When coverage shows structural knowledge gaps (unmapped code areas, weak or
+  over-broad mappings, missing relationships), recommend
+  `/devspark.discover-knowledge <area>` rather than drafting knowledge here.
 - Scope the contradiction scan to `index.json` `contradiction_scopes` (same
   entity, entities sharing a `constrains` decision, objects citing the same
   evidence); never compare all pairs. Judging whether a candidate is a genuine

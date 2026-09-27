@@ -15,6 +15,9 @@ import sys
 from pathlib import Path
 
 
+sys.dont_write_bytecode = True  # read-only: importing the engine must not leave __pycache__ behind
+
+
 def load_engine():
     engine_path = Path(__file__).resolve().with_name("build_knowledge_index.py")
     spec = importlib.util.spec_from_file_location("build_knowledge_index", engine_path)

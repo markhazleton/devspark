@@ -327,6 +327,7 @@ Save to `.devspark/scripts/` (the scripts root, not a subfolder):
 - `explain-context.py`
 - `migrate-knowledge-to-entities.py`
 - `scan-ephemeral-refs.py`
+- `discover-knowledge-context.py`
 
 **Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Python utility scripts are invoked directly by prompts that need deterministic ontology checks. Because the full script payload is always installed, switching between machines never requires a reinstall.
 
@@ -340,7 +341,7 @@ Save to `.devspark/scripts/` (the scripts root, not a subfolder):
 
 Run this step on **every quickstart execution**: fresh install, migration, update, repair, and already-current verification. This step is repository-owned current-truth maintenance, not a framework overwrite.
 
-1. Create these directories if they are missing: `.knowledge/entities/`, `.knowledge/governance/decisions/`, `.knowledge/ontology/`, `.knowledge/overrides/commands/`, `.devspark.work/`, and `.devspark.work/release-candidates/`. Release creates `.archive/` only when it has validated work to archive.
+1. Create these directories if they are missing: `.knowledge/entities/`, `.knowledge/governance/decisions/`, `.knowledge/ontology/`, `.knowledge/guides/`, `.knowledge/overrides/commands/`, `.devspark.work/`, and `.devspark.work/release-candidates/`. Release creates `.archive/` only when it has validated work to archive.
 2. Seed missing knowledge scaffolding from the fetched templates without overwriting authored files:
    - `.devspark/templates/knowledge/entities/README.md` -> `.knowledge/entities/README.md`
    - `.devspark/templates/knowledge/ontology/schema.md` -> `.knowledge/ontology/schema.md`

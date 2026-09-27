@@ -1,9 +1,9 @@
 ---
-description: Discover source-grounded current-truth entities and regenerate the knowledge ontology
+description: Find gaps, weak mappings, missing relationships, aliases, contradictions, and historical leakage in current .knowledge, and apply only the findings a human approves
 handoffs:
-  - label: Validate Knowledge
-    agent: devspark.verify
-    prompt: Check generated ontology reports and current-truth evidence after knowledge discovery
+  - label: Explain a Topic
+    agent: devspark.explain
+    prompt: Explain one topic from code and tests and verify its knowledge
   - label: Audit Current Truth
     agent: devspark.site-audit
     prompt: Audit source code and knowledge for current-truth gaps
@@ -15,234 +15,259 @@ handoffs:
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding. Supported focus hints
-include `--bootstrap`, `--check-only`, `--scope <path>`, `--entity <id>`, and
-plain-language focus areas such as "API layer only" or "refresh product docs".
+You **MUST** consider the user input before proceeding.
+
+## Purpose
+
+`/devspark.discover-knowledge` helps humans improve the quality and
+navigability of the repository's current authoritative `.knowledge`. It finds
+gaps, weak or over-broad source mappings, missing relationships, legitimate
+aliases, contradictions, and historical leakage, and proposes the smallest
+evidence-backed changes.
+
+> Discovery proposes. Evidence supports. Humans approve.
+
+It is an authoring and maintenance aid. It is not agent memory, automatic
+documentation generation, historical reconstruction, a replacement for
+`/devspark.explain` (which answers one topic), or a runtime retrieval
+mechanism. It may derive candidate knowledge from repository evidence, but it
+never silently promotes inferred information into `.knowledge`.
 
 ## Lifecycle Position
 
-**Brownfield current-truth discovery** step: `source/docs -> .knowledge/entities -> ontology`.
+Not a lifecycle gate and never required for a feature or spec. Use it:
 
-- **Owns**: source-code and documentation review, entity metadata creation,
-  entity layer updates, evidence references, relation updates, and generated
-  ontology refresh.
-- **Does NOT own**: changing source behavior, changing governance principles
-  (use `/devspark.constitution` or `/devspark.evolve-constitution`), preserving
-  work-package history as current truth, or reading `.archive/`.
-- **When to use**: bootstrapping `.knowledge` for an existing repository,
-  repairing incomplete entity coverage, assimilating `.documentation/` intake,
-  or refreshing ontology after significant source changes.
+- when adopting DevSpark in an existing repository (`--bootstrap`);
+- periodically as the repository evolves, or after a major refactor;
+- when retrieval or `/devspark.explain` repeatedly misses relevant knowledge;
+- before improving the `context_resolved` quality that plan relies on.
 
-## Core Rules
+`/devspark.site-audit` may recommend it when it detects structural knowledge
+gaps.
 
-- Treat code, committed documentation, `.knowledge/governance`, and existing
-  `.knowledge/entities` as the current truth surface.
-- Do not read, list, enumerate, or glob `.archive/`.
-- Preserve authored `.knowledge` files. Update them in place only when source
-  evidence supports the change.
-- Do not invent entities, owners, dependencies, or behavior. If evidence is
-  weak, create a gap note instead of confident metadata.
-- Every entity must have a hand-authored `_entity.yaml` and at least one current
-  layer document such as `architecture.md`. Layer documents carry
-  `source_of_truth` and `last_verified` frontmatter, plus optional `aliases` so
-  the concept is discoverable by name.
-- Every hand-authored claim must cite evidence with resolvable `ref` values.
-  Prefer test evidence; code-only evidence records `test_attempted` and
-  `fallback_reason`. Never cite `.devspark.work/` or `.archive/`.
-- Never write `status`, `lifecycle`, `supersedes`, `superseded-by`, `replaced`,
-  or `obsolete` into current knowledge.
-- When a decision `constrains` an entity, add the decision id to that entity's
-  `constrained_by` in the same run.
-
-## Procedure
-
-### 1. Initialize Knowledge Roots
-
-Create these directories if missing:
-
-- `.knowledge/entities/`
-- `.knowledge/governance/decisions/`
-- `.knowledge/ontology/`
-- `.knowledge/overrides/commands/`
-- `.devspark.work/knowledge-discovery/`
-
-Seed missing scaffold files from `.devspark/templates/knowledge/` if available:
-
-- `.knowledge/entities/README.md`
-- `.knowledge/ontology/schema.md`
-- `.knowledge/governance/decisions/README.md`
-
-If a scaffold template is unavailable, create the directory and record the
-missing template in the discovery report. Do not overwrite existing scaffold
-or authored files.
-
-### 2. Determine Scope
-
-Parse `$ARGUMENTS`:
+## Scope
 
 | Input | Behavior |
 |---|---|
-| `--bootstrap` | Build minimum useful entity coverage for the whole repository |
-| `--check-only` | Report missing or stale knowledge without writing changes |
-| `--scope <path>` | Limit discovery to a repository subpath |
-| `--entity <id>` | Refresh one existing or proposed entity |
-| no flags | Discover gaps, propose updates, and apply clear, source-grounded changes |
+| `<entity-id>` | That node and its declared neighbors |
+| `<path>` (for example `app/logic_handlers`) | Code under the path and the nodes that map it |
+| `<term>` (for example `conversations`) | Nodes the knowledge engine ranks for the term, plus code whose paths match it |
+| no argument | Repository-wide. It is more expensive, so ask once — `Run repository-wide discovery? (yes/no)` — then use `--all` |
+| `--all` | Repository-wide without asking |
+| `--check-only` | Report findings only; skip the application step |
+| `--bootstrap` | First-time setup for a repository with no entities (see Bootstrap) |
 
-Exclude generated, dependency, binary, and temporary folders such as
-`.git/`, `.devspark/`, `.devspark.work/`, `.archive/`, `node_modules/`,
-`bin/`, `obj/`, `dist/`, `build/`, `.venv/`, and `.pytest_cache/`.
+## Rules
 
-### 3. Inventory Current Truth Inputs
+- Evidence surface: current code, tests, `.knowledge` (entities, entity
+  documents, flat nodes, governance decisions, `index.json`), registered
+  applications, and each node's `source_of_truth`, `appliesTo`, relations,
+  `constrains` / `constrained_by`, and `links.references`.
+- Git metadata (for example recent commit counts) is supporting evidence only,
+  never current behavioral truth.
+- Never read, list, or glob `.archive/`, and never treat `.devspark.work/`,
+  archived specs, or historical documentation as current authority.
+- Every finding cites repository evidence (paths, and line numbers where
+  useful). Do not emit generic advice that the evidence does not support.
+- Do not write to `.knowledge` until the user selects a finding and explicitly
+  confirms the exact proposed change. Do not bulk-apply all findings by
+  default. Never commit.
+- Out of scope: embeddings, vector stores, persistent agent memory, automatic
+  documentation generation, automatic relationships, aliases, or semantic
+  rewrites, mandatory entity migration, deletion of knowledge, and autonomous
+  commits.
 
-Inspect the scoped repository surface:
+## Procedure
 
-- Root documentation: `README.md`, `CONTRIBUTING.md`, `SECURITY.md`,
-  `SUPPORT.md`, changelog files, and platform guide files.
-- Source layout: application folders, libraries, packages, service boundaries,
-  public APIs, scripts, workflows, and configuration.
-- Tests: test frameworks, test directories, fixtures, smoke tests, and contract
-  tests.
-- Existing knowledge: `.knowledge/entities/*/_entity.yaml`,
-  `.knowledge/entities/*/*.md`, `.knowledge/governance/decisions/*.md`, and
-  `.knowledge/ontology/schema.md`.
-- Documentation intake roots if present: `.documentation/` and `.documenation/`.
+### 1. Gather signals
 
-For large repositories, sample within each top-level subsystem and prefer files
-that define public behavior, build/runtime configuration, interfaces, or tests.
-
-### 4. Identify Entity Candidates
-
-Build candidate entities for durable concepts, not arbitrary folders.
-
-Good entity candidates include:
-
-- Applications, services, libraries, packages, APIs, workers, data pipelines,
-  CLIs, sites, integration adapters, command/template sets, governance models,
-  deployment/runtime configuration, and durable documentation sets.
-
-Do not create entities for:
-
-- Single throwaway files, generated outputs, temporary work packages, completed
-  specs/plans/tasks, run logs, local caches, dependency folders, or archive
-  contents.
-
-For each candidate, record:
-
-- `id`: lowercase slug matching the ontology schema.
-- `name`: human-readable entity name.
-- `kind`: closest allowed kind from `.knowledge/ontology/schema.md`.
-- `summary`: present-tense statement of what is true now.
-- `root`: primary path the entity describes.
-- `relations`: typed edges to existing or newly created entity ids.
-- `evidence`: source, test, doc, or schema references that support the entity.
-- `confidence`: high, medium, or low for the discovery report.
-
-### 5. Apply Entity Updates
-
-For each high-confidence entity:
-
-1. Create `.knowledge/entities/<entity-id>/` if missing.
-2. Create or update `_entity.yaml` to match
-   `templates/schemas/entity-node.schema.json`, and layer-document frontmatter
-   to match `templates/schemas/knowledge-node.schema.json`.
-3. Create or update `architecture.md` with current behavior only:
-   - purpose and boundaries
-   - owned source paths
-   - public interfaces or command surfaces
-   - runtime/configuration notes when supported by evidence
-   - tests or validation evidence
-4. Preserve existing useful content and remove stale claims only when current
-   evidence contradicts them.
-5. Add relations only when the target entity exists or is being created in the
-   same run.
-
-For medium-confidence candidates, either update an existing entity with careful
-wording or write the candidate to
-`.devspark.work/knowledge-discovery/candidates.md` for human review.
-
-For low-confidence candidates, write a gap entry instead of creating an entity.
-
-### 6. Assimilate Documentation Intake
-
-If `.documentation/` or `.documenation/` exists, classify each document by
-content:
-
-| Classification | Destination |
-|---|---|
-| Obsolete, duplicate, or historical | `.devspark.work/release-candidates/documentation/<relative-path>` |
-| Draft, scratch, generated work product, or in-flight plan | `.devspark.work/documentation/<relative-path>` |
-| Durable current truth | Assimilate into `.knowledge/entities/<entity-id>/`, then stage the original under `.devspark.work/release-candidates/documentation/<relative-path>` |
-
-Rules:
-
-- Do not delete intake files.
-- Preserve relative paths when moving files.
-- Avoid overwrites by adding a numeric suffix when a target already exists.
-- Never write to `.archive/`; release owns the final archival move.
-- Leave staged files in `.devspark.work/release-candidates/` for release; do not
-  inspect `.archive/`.
-- Permanent `.knowledge` files must not link to `.archive/` paths.
-
-### 7. Refresh Ontology
-
-If the repository still has a pre-contract layout (`_derived.yaml`, decisions
-with `governs` or `status`, or `.knowledge/ontology/*.generated.md`), run the
-migration first:
+Resolve the scripts directory: `.devspark/scripts/`, or `scripts/` only when the
+framework copy is absent. Then run, from the repository root:
 
 ```text
-python .devspark/scripts/migrate-knowledge-to-entities.py
+python <scripts>/build_knowledge_index.py --check
+python <scripts>/discover-knowledge-context.py <entity-id | path | term>   # or --all
 ```
 
-Run the knowledge engine after entity or decision metadata changes. It writes
-`.knowledge/ontology/index.json` and `.knowledge/ontology/coverage.json`:
+`discover-knowledge-context.py` is deterministic and read-only. It returns
+mechanical signals only — `source_clusters`, `mapping_breadth`,
+`ownership_overlaps`, `relationship_signals`, `alias_signals`,
+`stale_references`, `historical_signals`, and `node_shape` — and never judges
+them. Engine errors appear in `engine_findings`; report them, but do not repair
+them silently.
+
+### 2. Verify before you report
+
+A signal is a lead, not a finding. For each signal worth reporting, read the
+cited code, tests, and knowledge and confirm the evidence yourself. Drop
+signals that do not hold up (for example, a repeated term that is language
+syntax, or an overlap that is a deliberate shared kernel). Record why a strong
+signal was dropped when a reader would expect it.
+
+### 3. Classify findings
+
+**Knowledge Gaps** — meaningful code areas with no knowledge ownership
+(`source_clusters` with empty or over-broad-only `mapped_by`). Do not require
+every file to have knowledge. Report a cluster only when durable behavior
+exists, several files implement one concept, tests reveal important behavior,
+or missing knowledge is likely to cause implementation mistakes. Example:
 
 ```text
-python .devspark/scripts/build_knowledge_index.py
+KNOWLEDGE GAP
+Area: app/foo/**
+Evidence: 14 production files; 22 tests; repeated concept "foo routing";
+          no source_of_truth mapping; no entity or flat node
+Recommendation: consider current knowledge for Foo Routing (flat knowledge document)
 ```
 
-Use `scripts/build_knowledge_index.py` only when the framework-managed copy is
-absent (for example, in the DevSpark source repository).
+**Mapping Gaps** — knowledge clearly describes code it does not map (the prose
+names paths or symbols absent from its `source_of_truth` / `appliesTo`).
 
-If generation fails because Python dependencies are missing, report the exact
-command and error. Do not hand-edit `index.json` or `coverage.json`.
+**Mapping Ambiguities** — over-broad mappings (large `code_files` with low
+`concept_density` in `mapping_breadth`: only a narrow part supports the
+concept) and competing ownership (`ownership_overlaps`). Overlap is not wrong by
+default: explain why this overlap may or may not be meaningful, noting
+`declared_related`.
 
-Then run the corresponding `--check` command when possible. Treat unresolved
-errors as blockers and warnings as follow-up items unless they indicate missing
-evidence for touched entities.
-
-### 8. Discovery Report
-
-Write a report to:
+**Relationship Candidates** — existing entities with strong evidence of
+participating in the same durable behavior (`relationship_signals`: direct
+dependencies, orchestration, shared contracts, tests exercising both,
+documentation naming both). Use an existing relation type (`describes`,
+`derives_from`, `extends`, `generated_for`, `scopes`, `supports`, `uses`,
+`validates`, `validated_by`) or `links.references`. Propose a new relation type
+only when the ontology cannot represent a recurring, clearly useful
+relationship. Example:
 
 ```text
-.devspark.work/knowledge-discovery/discover-knowledge-YYYY-MM-DD.md
+RELATIONSHIP CANDIDATE
+order_checkout → payment_authorization
+Evidence: src/orders/checkout.py imports authorize_payment; tests/test_checkout.py
+          exercises both; order_checkout guide describes authorization
+Suggested relation: uses
 ```
 
-Include:
+**Alias Candidates** — terminology developers or code genuinely use for the same
+current concept (domain abbreviations, renamed concepts still in common use,
+operational or external-system vocabulary) from `alias_signals`. The alias must
+be supported by current repository evidence. Never add an alias only because
+retrieval performed poorly, and never add obsolete terms that are no longer
+useful vocabulary. Example:
 
-- scope and arguments
-- source paths inspected
-- entities created
-- entities updated
-- candidates deferred
-- documentation intake counts by classification
-- ontology generation result
-- gaps and follow-up recommendations
+```text
+ALIAS CANDIDATE
+Entity: payment_authorization
+Candidate: PSP capture
+Evidence: src/payments/psp_capture.py, tests/test_psp_capture.py
+Confidence: high | medium | low
+```
 
-Do not write reports into `.knowledge`; reports are temporary work state.
+**Contradictions** — knowledge that disagrees with the constitution or a
+decision, with code behavior, with tests, or with another knowledge node
+(`stale_references` and your own reading; scope comparisons to
+`index.json` `contradiction_scopes`). Label each one:
+
+- `PROVEN CONTRADICTION` — repository evidence settles it (for example, a test
+  asserts `MAX_RETRIES == 5` while knowledge says 3, or a cited file no longer
+  exists).
+- `POSSIBLE INCONSISTENCY — HUMAN REVIEW REQUIRED` — the evidence is ambiguous.
+  Do not decide the semantic dispute.
+
+**Historical Leakage** — content that is primarily history rather than needed to
+understand current behavior (`historical_signals`: retired implementation
+details, old requirement identifiers, migration narratives, superseded
+approaches, long "previously…" passages). Recommend one of: keep (current
+understanding requires it), move to the team's documentation or history
+repository, or remove because Git already preserves it. Never delete it
+yourself.
+
+**Potential Entity Candidates** — only when several signals justify an entity
+(`node_shape`): a durable named domain concept, clear ownership, multiple
+meaningful documentation layers, specific source ownership, relationships to
+other entities, and value from coverage or drift validation. Do not encourage
+entity proliferation. Classify every recommendation for new knowledge as a
+**flat knowledge document** (`.knowledge/<topic>.md` or
+`.knowledge/guides/<topic>.md`) or an **entity candidate**. A simple guide or a
+single-purpose architectural note stays flat; leave well-shaped flat nodes
+alone.
+
+### 4. Report
+
+Group findings under these headings, in this order, omitting empty groups:
+`Knowledge Gaps`, `Mapping Gaps`, `Mapping Ambiguities`, `Relationship
+Candidates`, `Alias Candidates`, `Contradictions`, `Historical Leakage`,
+`Potential Entity Candidates`.
+
+Number findings `DK-01`, `DK-02`, … and give each:
+
+- affected node, entity, or area;
+- supporting code and test paths;
+- reason;
+- confidence (`high`, `medium`, `low`);
+- recommended action (for new knowledge: flat knowledge document or entity
+  candidate);
+- whether applying it changes current authoritative truth (`yes` / `no`).
+
+For mapping and relationship findings, also show the deterministic context path
+they would give plan's context resolution, so the repository-owned structure
+improves without discovery becoming the retrieval engine:
+
+```text
+task
+ ↓ lexical seed: order_checkout
+ ↓ declared relation: payment_authorization
+ ↓ source mapping: src/payments/**
+```
+
+Write the same report to
+`.devspark.work/knowledge-discovery/discover-knowledge-YYYY-MM-DD.md` as
+temporary work state (never into `.knowledge`), then ask: `Which findings should
+I apply? (list DK ids, or none)`. With `--check-only`, stop after the report.
+
+### 5. Apply approved findings
+
+For each finding the user selects, one at a time:
+
+1. Draft the smallest `.knowledge` change: a frontmatter edit (`aliases`,
+   `source_of_truth`, `appliesTo`, `relations`, `links.references`,
+   `constrained_by`), an in-place sentence correction, or a new flat node or
+   entity with `source_of_truth`, `last_verified`, and evidence.
+2. Show the exact change and ask for explicit confirmation. Do not write until
+   the user confirms.
+3. After writing, run the knowledge engine without flags to refresh
+   `index.json` / `coverage.json`, then `--check`, plus any cited tests.
+4. Report the result. Keep reciprocal pairs intact (`constrains` ↔
+   `constrained_by`) and never write lifecycle keys (`status`, `lifecycle`,
+   `supersedes`, `superseded-by`, `replaced`, `obsolete`).
+
+### Bootstrap
+
+Use `--bootstrap` only when `.knowledge/entities/` has no entity yet (the
+quickstarts call it on first install).
+
+1. Create any missing roots: `.knowledge/entities/`,
+   `.knowledge/governance/decisions/`, `.knowledge/ontology/`,
+   `.knowledge/guides/`, `.knowledge/overrides/commands/`, and
+   `.devspark.work/knowledge-discovery/`. Seed missing scaffold files from
+   `.devspark/templates/knowledge/` without overwriting anything.
+2. If the repository still has a pre-contract layout (`_derived.yaml`,
+   decisions with `governs` or `status`, or `.knowledge/ontology/*.generated.md`),
+   run `python <scripts>/migrate-knowledge-to-entities.py --dry-run`, show the
+   plan, and run it after confirmation.
+3. Run `discover-knowledge-context.py --all` and propose a minimal initial
+   structure: a few entity candidates for clearly durable concepts, flat
+   knowledge documents for everything simpler, and gaps for low-confidence
+   areas. Show the whole proposal and write it only after one explicit
+   confirmation.
+4. If `.documentation/` or `.documenation/` exists, propose a classification
+   for each intake document: durable current truth (assimilate into the owning
+   node), draft or work product (stage under `.devspark.work/documentation/`),
+   or obsolete (stage under
+   `.devspark.work/release-candidates/documentation/`). Preserve relative
+   paths, add a numeric suffix instead of overwriting, never delete intake
+   files, and never write to `.archive/`. Apply only after confirmation.
+5. Run the knowledge engine without flags, then `--check`.
 
 ## Output
 
-Return a concise summary:
-
-- entities created/updated
-- documentation intake actions
-- ontology status
-- report path
-- blockers, if any
-
-If run with `--check-only`, return proposed actions only and do not write files.
-
-## Context
-
-{ARGS}
+Return the grouped findings (or the bootstrap proposal), the report path, what
+was applied after confirmation, the engine `--check` result, and any blockers.

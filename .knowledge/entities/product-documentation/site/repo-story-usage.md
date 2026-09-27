@@ -150,6 +150,6 @@ The command also adds or updates a link in your root `README.md` pointing to the
 | Command | Relationship |
 |---------|-------------|
 | `/devspark.release` | Validates current truth and archives completed work at release time |
-| `/devspark.discover-knowledge` | Assimilates source-grounded durable knowledge and documentation intake |
+| `/devspark.discover-knowledge` | Propose evidence-backed fixes for knowledge gaps, mappings, relationships, and aliases; bootstraps knowledge on first install |
 | `/devspark.site-audit` | Code-level quality analysis (complements the commit-level repo story) |
 | `/devspark.constitution` | Defines principles that the repo story evaluates alignment against |

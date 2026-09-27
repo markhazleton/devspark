@@ -55,7 +55,7 @@ The current source collection includes 30 active commands.
 | `checklist.md` | `/devspark.checklist` | Quality validation checklists |
 | `personalize.md` | `/devspark.personalize` | Create per-user prompt overrides |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
-| `discover-knowledge.md` | `/devspark.discover-knowledge` | Discover source-grounded entities and regenerate ontology |
+| `discover-knowledge.md` | `/devspark.discover-knowledge` | Propose evidence-backed fixes for knowledge gaps, mappings, relationships, and aliases |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
 | `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry (optional) |
 | `list-applications.md` | `/devspark.list-applications` | Display all registered applications (optional) |

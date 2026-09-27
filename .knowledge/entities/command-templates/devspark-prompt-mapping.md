@@ -70,7 +70,7 @@ The prompt set groups into three phases:
 |---|---|
 | `next` | Detects current Git, package, gate, PR, and review state and recommends one next command without running it. It creates no work record. |
 | `explain` | Topic-scoped: detects and remediates knowledge drift in one interactive run using deterministic concept ranking and DELTA/KNOW findings, and writes the correction or drafts the missing typed node after one explicit confirmation. The only command that can record human verification of a pinned claim. |
-| `discover-knowledge` | Builds or refreshes source-grounded entities, migrates older layouts, and regenerates the knowledge index. |
+| `discover-knowledge` | Authoring aid, not a gate: reports knowledge gaps, mapping gaps and ambiguities, relationship and alias candidates, contradictions, historical leakage, and entity candidates from deterministic signals (`discover-knowledge-context.py`), then applies only the findings a human selects and confirms. `--bootstrap` proposes the first structure for a new repository. |
 | `site-audit` | Repo-wide and synchronic: runs the accuracy pass (re-runs execution evidence, judges inspection evidence) and scans `contradiction_scopes` for human review. Reports remain temporary work. |
 | `fix-score` | Repairs concrete score blockers while preserving behavioral intent and scoring rules. |
 

@@ -98,7 +98,7 @@ separate human-triggered event.
 | `/devspark.taskstoissues` | Convert tasks into GitHub issues |
 | `/devspark.personalize` | Create per-user prompt overrides |
 | `/devspark.discover-constitution` | Generate a constitution from an existing codebase |
-| `/devspark.discover-knowledge` | Build source-grounded `.knowledge/entities` and ontology |
+| `/devspark.discover-knowledge` | Propose evidence-backed fixes for knowledge gaps, mappings, relationships, and aliases |
 
 ### Multi-App
 
