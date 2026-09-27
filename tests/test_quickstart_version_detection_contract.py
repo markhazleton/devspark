@@ -159,3 +159,17 @@ def test_quickstarts_are_only_devspark_maintenance_path() -> None:
         text = path.read_text(encoding="utf-8")
         for phrase in forbidden:
             assert phrase not in text, f"{path.name} must not reference {phrase}"
+
+
+def test_generated_knowledge_index_is_marked_generated() -> None:
+    lines = (
+        ".knowledge/ontology/index.json linguist-generated=true",
+        ".knowledge/ontology/coverage.json linguist-generated=true",
+    )
+    attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+    for line in lines:
+        assert line in attributes
+    for path in sorted((ROOT / "quickstart").glob("devspark_quickstart_*.md")):
+        text = path.read_text(encoding="utf-8")
+        for line in lines:
+            assert line in text, f"{path.name} must seed {line}"

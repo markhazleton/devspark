@@ -475,6 +475,16 @@ Append to `.gitignore` if not already present:
 .knowledge/overrides/*/commands/
 ```
 
+Also append to `.gitattributes` if not already present, so pull requests
+collapse the generated knowledge index (on a merge conflict, regenerate it with
+the knowledge engine instead of hand-merging):
+
+```text
+# DevSpark — generated knowledge index
+.knowledge/ontology/index.json linguist-generated=true
+.knowledge/ontology/coverage.json linguist-generated=true
+```
+
 ---
 
 ## Step 11: Verify & Report
