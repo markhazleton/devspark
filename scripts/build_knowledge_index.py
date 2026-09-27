@@ -32,6 +32,11 @@ from typing import Any, Callable, Iterable
 import yaml
 
 
+def posix_key(path: Path) -> str:
+    """Sort paths identically on every OS (Windows Path ordering ignores case)."""
+    return path.as_posix()
+
+
 def discover_root(explicit_root: str | None = None) -> Path:
     """Find the consumer repository for both source and installed layouts."""
     if explicit_root:
@@ -386,7 +391,7 @@ def load_entities(findings: list[Finding]) -> dict[str, Entity]:
         findings.append(Finding("error", "missing-entities-root", rel(root), "Entity root is missing."))
         return entities
 
-    for folder in sorted(path for path in root.iterdir() if path.is_dir()):
+    for folder in sorted((path for path in root.iterdir() if path.is_dir()), key=posix_key):
         entity_path = folder / "_entity.yaml"
         content_files = [path for path in folder.iterdir() if path.is_file()]
         if not entity_path.exists():
@@ -450,7 +455,7 @@ def load_entities(findings: list[Finding]) -> dict[str, Entity]:
             )
         )
         entity = Entity(entity_id=entity_id, path=entity_path, data=data, layers=layers)
-        for md_path in sorted(folder.rglob("*.md")):
+        for md_path in sorted(folder.rglob("*.md"), key=posix_key):
             if md_path.name.startswith("_"):
                 continue
             is_layer = md_path.parent == folder and md_path.name in layers
@@ -468,7 +473,7 @@ def load_decisions(findings: list[Finding]) -> dict[str, Decision]:
         return decisions
 
     titles: dict[str, str] = {}
-    for path in sorted(root.glob("*.md")):
+    for path in sorted(root.glob("*.md"), key=posix_key):
         document = load_document(path, "governance", DECISION_TYPE)
         data = document.frontmatter
         # README files document the collection and are not decision records.
@@ -543,7 +548,7 @@ def load_governance_docs() -> list[Document]:
         return []
     return [
         load_document(path, "governance", "governance")
-        for path in sorted(root.glob("*.md"))
+        for path in sorted(root.glob("*.md"), key=posix_key)
         if path.name.lower() != "readme.md"
     ]
 
@@ -563,7 +568,7 @@ def load_flat_docs() -> list[Document]:
         paths.extend(guides.rglob("*.md"))
     return [
         load_document(path, "knowledge", FLAT_TYPE)
-        for path in sorted(paths)
+        for path in sorted(paths, key=posix_key)
         if path.name.lower() != "readme.md" and not path.name.startswith("_")
     ]
 
@@ -886,7 +891,7 @@ def validate_baselines(knowledge: Knowledge) -> None:
     root = baselines_dir()
     if not root.exists():
         return
-    for path in sorted(root.iterdir()):
+    for path in sorted(root.iterdir(), key=posix_key):
         if path.is_file() and rel(path) not in referenced:
             knowledge.findings.append(
                 Finding("warning", "orphan-baseline", rel(path), "No pinned claim references this baseline.")
@@ -897,7 +902,7 @@ def validate_legacy_outputs(knowledge: Knowledge) -> None:
     root = ontology_dir()
     if not root.exists():
         return
-    for path in sorted(root.glob("*.generated.md")):
+    for path in sorted(root.glob("*.generated.md"), key=posix_key):
         knowledge.findings.append(
             Finding(
                 "error",
@@ -1218,7 +1223,7 @@ def run_build(check: bool, scope: set[str] | None) -> int:
         for path, expected in outputs.items():
             if not path.exists() or path.read_text(encoding="utf-8") != expected:
                 path.write_text(expected, encoding="utf-8")
-        for legacy in sorted(ontology_dir().glob("*.generated.md")):
+        for legacy in sorted(ontology_dir().glob("*.generated.md"), key=posix_key):
             legacy.unlink()
         # Unreferenced baselines are reported (orphan-baseline warning), never
         # deleted: a freshly pinned claim may not be in its document yet.

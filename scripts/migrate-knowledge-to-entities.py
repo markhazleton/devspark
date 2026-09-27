@@ -34,6 +34,11 @@ DECISION_TYPE = "governance-decision"
 EPHEMERAL_PREFIXES = (".devspark.work/", ".archive/")
 
 
+def posix_key(path: Path) -> str:
+    """Sort paths identically on every OS (Windows Path ordering ignores case)."""
+    return path.as_posix()
+
+
 def discover_root(explicit_root: str | None) -> Path:
     if explicit_root:
         return Path(explicit_root).expanduser().resolve()
@@ -129,7 +134,7 @@ class Migration:
         self.migrate_layers(knowledge / "entities", entities)
         ontology = knowledge / "ontology"
         if ontology.is_dir():
-            for legacy in sorted(ontology.glob("*.generated.md")):
+            for legacy in sorted(ontology.glob("*.generated.md"), key=posix_key):
                 self.delete(legacy, "retired Markdown ontology report")
         for change in self.changes:
             print(change)
@@ -143,7 +148,7 @@ class Migration:
         entities: dict[str, tuple[Path, dict[str, Any]]] = {}
         if not root.is_dir():
             return entities
-        for folder in sorted(path for path in root.iterdir() if path.is_dir()):
+        for folder in sorted((path for path in root.iterdir() if path.is_dir()), key=posix_key):
             entity_path = folder / "_entity.yaml"
             if not entity_path.exists():
                 continue
@@ -172,7 +177,7 @@ class Migration:
         decisions: dict[str, tuple[Path, dict[str, Any], str]] = {}
         if not root.is_dir():
             return decisions
-        for path in sorted(root.glob("*.md")):
+        for path in sorted(root.glob("*.md"), key=posix_key):
             data, body = split_frontmatter(path.read_text(encoding="utf-8"))
             if not data:
                 continue
@@ -228,7 +233,7 @@ class Migration:
     def migrate_layers(self, root: Path, entities: dict[str, tuple[Path, dict[str, Any]]]) -> None:
         for entity_id, (entity_path, entity_data) in entities.items():
             folder = entity_path.parent
-            for path in sorted(folder.rglob("*.md")):
+            for path in sorted(folder.rglob("*.md"), key=posix_key):
                 if path.name.startswith("_"):
                     continue
                 text = path.read_text(encoding="utf-8")

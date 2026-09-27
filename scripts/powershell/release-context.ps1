@@ -45,12 +45,13 @@ function Test-CompletedTaskLinkage {
                 $taskMatch.Value,
                 "(?m)^\s*-\s+$field\s*:\s*(.+?)\s*$"
             )
-            if (-not $valueMatch.Success) { return $false }
+            # Keep scanning after a failure so every unresolved ref is reported, matching bash.
+            if (-not $valueMatch.Success) { $complete = $false; continue }
             $value = $valueMatch.Groups[1].Value.Trim()
-            if (-not $value -or $value -ieq 'TODO') { return $false }
+            if (-not $value -or $value -ieq 'TODO') { $complete = $false; continue }
             if ($value -match '^(?i:n/a)') {
                 $reason = $value -replace '^(?i:n/a)\s*[-—:]\s*', ''
-                if (-not $reason -or $reason -ieq 'n/a') { return $false }
+                if (-not $reason -or $reason -ieq 'n/a') { $complete = $false }
                 continue
             }
             # Concrete refs must resolve to an existing path.
