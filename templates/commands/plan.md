@@ -33,10 +33,14 @@ section, the v4 section wins.
 - Resolve relevant `.knowledge` entities and governance decisions 2-3 hops, or
   until traversal stops finding relevant edges.
 - Record resolved context in `context_resolved` inside the work package.
-- Use `.knowledge/ontology/relations.generated.md` and
-  `.knowledge/ontology/governance.generated.md` as the bounded graph index after
-  confirming generated ontology files are current.
-- Do not copy governance rationale into entity files; reference governed
+- Design time does the expensive multi-hop traversal so implement never has to.
+  Use `.knowledge/ontology/index.json` (entities, relations, `constrained_by`,
+  decisions and their `constrains`) as the bounded graph index after confirming
+  it is current, and the engine's `--search "<concept>"` to reach knowledge by
+  concept rather than by an id you already know.
+- For every entity you will touch, check its `constrained_by` and include those
+  decisions in `context_resolved`.
+- Do not copy governance rationale into entity files; reference constrained
   entities and decisions instead.
 - Load governance from `.knowledge/governance/constitution.md`, with legacy
   fallback only when the v4 file is absent.
@@ -69,10 +73,10 @@ Done when: research.md has zero `NEEDS CLARIFICATION` markers, data-model.md/con
    - Read the YAML frontmatter in FEATURE_SPEC before planning.
    - Treat frontmatter as authoritative for `classification`, `risk_level`, `recommended_next_step`, and `required_gates`.
    - If the body text appears to conflict with the frontmatter, flag the inconsistency to the user instead of overriding the metadata.
-   - Run `python .devspark/scripts/python/build_knowledge_index.py --check` if
-     available; otherwise run `python scripts/python/build_knowledge_index.py
-     --check` in source repos. If it reports stale generated files, refresh them
-     with `--write` before resolving `context_resolved`.
+   - Run the knowledge engine with `--check` (`.devspark/scripts/build_knowledge_index.py`,
+     else `scripts/build_knowledge_index.py` when the framework copy is absent).
+     If it reports a stale index, refresh it by running the engine without
+     flags before resolving `context_resolved`.
 
 3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
    - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")

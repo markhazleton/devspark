@@ -90,7 +90,34 @@ IN_FLIGHT_QUICKFIXES='[]'
 RELEASE_ELIGIBLE_QUICKFIXES='[]'
 BLOCKED_QUICKFIXES='[]'
 
+UNRESOLVED_LINKAGE_FILE=$(mktemp)
+trap 'rm -f "$UNRESOLVED_LINKAGE_FILE"' EXIT
+
+# Count completed tasks with missing linkage, plus concrete refs that do not
+# resolve to an existing path. Unresolved refs are recorded as "<item>: <ref>".
 task_linkage_failures() {
+    local file="$1" label="$2" failures=0 kind value ref
+    while IFS=$'\t' read -r kind value; do
+        case "$kind" in
+            FAILURES) failures=$((failures + value)) ;;
+            REF)
+                ref="${value//\`/}"
+                ref="${ref%%::*}"
+                ref="${ref%%#*}"
+                ref="${ref#"${ref%%[![:space:]]*}"}"
+                ref="${ref%"${ref##*[![:space:]]}"}"
+                [[ -z "$ref" || "$ref" =~ ^[A-Za-z][A-Za-z0-9+.-]*: ]] && continue
+                if [[ ! -e "$REPO_ROOT/${ref#./}" ]]; then
+                    failures=$((failures + 1))
+                    printf '%s: %s\n' "$label" "$ref" >> "$UNRESOLVED_LINKAGE_FILE"
+                fi
+                ;;
+        esac
+    done < <(task_linkage_scan "$file")
+    echo "$failures"
+}
+
+task_linkage_scan() {
     awk '
         function trim(value) {
             sub(/^[[:space:]]+/, "", value)
@@ -105,6 +132,7 @@ task_linkage_failures() {
                 sub(/^n\/a[[:space:]]*[-—:][[:space:]]*/, "", lowered)
                 return trim(lowered) != "" && lowered != "n/a"
             }
+            printf "REF\t%s\n", value
             return 1
         }
         function finish_task() {
@@ -130,7 +158,7 @@ task_linkage_failures() {
         in_task && /^[[:space:]]*-[[:space:]]+knowledge_ref:/ {
             value = $0; sub(/^.*knowledge_ref:[[:space:]]*/, "", value); has_knowledge = valid(value); next
         }
-        END { finish_task(); print failures + 0 }
+        END { finish_task(); printf "FAILURES\t%d\n", failures + 0 }
     ' "$1"
 }
 
@@ -143,7 +171,7 @@ if [[ -d "$WORK_PACKAGES_DIR" ]]; then
         if [[ -f "$tasks_file" ]]; then
             unchecked=$(grep -c '^[[:space:]]*-[[:space:]]*\[ \][[:space:]]*T[0-9]' "$tasks_file" 2>/dev/null || true)
             checked=$(grep -ci '^[[:space:]]*-[[:space:]]*\[x\][[:space:]]*T[0-9]' "$tasks_file" 2>/dev/null || true)
-            missing_linkage=$(task_linkage_failures "$tasks_file")
+            missing_linkage=$(task_linkage_failures "$tasks_file" "$package_name")
             if [[ "$unchecked" -eq 0 && "$checked" -gt 0 && "$missing_linkage" -eq 0 ]]; then
                 RELEASE_ELIGIBLE_WORK_PACKAGES=$(jq -c --arg value "$package_name" '. + [$value]' <<<"$RELEASE_ELIGIBLE_WORK_PACKAGES")
             else
@@ -161,7 +189,7 @@ if [[ -d "$QUICKFIXES_DIR" ]]; then
         IN_FLIGHT_QUICKFIXES=$(jq -c --arg value "$quickfix_name" '. + [$value]' <<<"$IN_FLIGHT_QUICKFIXES")
         unchecked=$(grep -c '^[[:space:]]*-[[:space:]]*\[ \][[:space:]]*T[0-9]' "$quickfix_file" 2>/dev/null || true)
         checked=$(grep -ci '^[[:space:]]*-[[:space:]]*\[x\][[:space:]]*T[0-9]' "$quickfix_file" 2>/dev/null || true)
-        missing_linkage=$(task_linkage_failures "$quickfix_file")
+        missing_linkage=$(task_linkage_failures "$quickfix_file" "$quickfix_name")
         if [[ "$unchecked" -eq 0 && "$checked" -gt 0 && "$missing_linkage" -eq 0 ]]; then
             RELEASE_ELIGIBLE_QUICKFIXES=$(jq -c --arg value "$quickfix_name" '. + [$value]' <<<"$RELEASE_ELIGIBLE_QUICKFIXES")
         else
@@ -176,6 +204,26 @@ if [[ -d "$RELEASE_CANDIDATES_DIR" ]]; then
         STAGED_RELEASE_CANDIDATES=$(jq -c --arg value "$candidate_rel" '. + [$value]' <<<"$STAGED_RELEASE_CANDIDATES")
     done < <(find "$RELEASE_CANDIDATES_DIR" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
 fi
+
+# Routine work products the release may sweep once their retention purpose
+# ends. Facts only: the release prompt decides (for example, whether a PR is
+# still open) and never sweeps specs or quickfixes from this list.
+RETENTION_CANDIDATES='[]'
+for retention_kind in pr-reviews audits repo-story runs fix-score knowledge-discovery documentation; do
+    retention_dir="$WORK_DIR/$retention_kind"
+    [[ -d "$retention_dir" ]] || continue
+    while IFS= read -r -d '' retention_item; do
+        retention_rel="${retention_item#"$REPO_ROOT/"}"
+        retention_pr=""
+        if [[ "$retention_kind" == "pr-reviews" && "$(basename "$retention_item")" =~ ^pr-([0-9]+) ]]; then
+            retention_pr="${BASH_REMATCH[1]}"
+        fi
+        RETENTION_CANDIDATES=$(jq -c --arg path "$retention_rel" --arg kind "$retention_kind" --arg pr "$retention_pr" \
+            '. + [{path: $path, kind: $kind, pr_number: (if $pr == "" then null else ($pr | tonumber) end)}]' <<<"$RETENTION_CANDIDATES")
+    done < <(find "$retention_dir" -mindepth 1 -maxdepth 1 -print0 2>/dev/null | sort -z)
+done
+
+UNRESOLVED_LINKAGE_REFS=$(jq -R -s 'split("\n") | map(select(length > 0)) | unique' < "$UNRESOLVED_LINKAGE_FILE")
 
 NEXT_VERSION="$VERSION_ARG"
 VERSION_BUMP="patch"
@@ -208,6 +256,7 @@ if [[ "$JSON_MODE" == true ]]; then
   "ARCHIVE_DATE": "$ARCHIVE_DATE",
   "KNOWLEDGE_DIR": "$KNOWLEDGE_DIR",
   "CONSTITUTION_PATH": "$CONSTITUTION_PATH",
+  "KNOWLEDGE_ENGINE": $(knowledge_engine_json "$REPO_ROOT"),
   "CURRENT_VERSION": "$CURRENT_VERSION",
   "VERSION_SOURCE": "$VERSION_SOURCE",
   "NEXT_VERSION": "$NEXT_VERSION",
@@ -221,6 +270,8 @@ if [[ "$JSON_MODE" == true ]]; then
   "IN_FLIGHT_QUICKFIXES": $IN_FLIGHT_QUICKFIXES,
   "RELEASE_ELIGIBLE_QUICKFIXES": $RELEASE_ELIGIBLE_QUICKFIXES,
   "BLOCKED_QUICKFIXES": $BLOCKED_QUICKFIXES,
+  "UNRESOLVED_LINKAGE_REFS": $UNRESOLVED_LINKAGE_REFS,
+  "RETENTION_CANDIDATES": $RETENTION_CANDIDATES,
   "LAST_TAG": "$LAST_TAG",
   "LAST_RELEASE_DATE": "$LAST_RELEASE_DATE",
   "COMMITS_SINCE_RELEASE": $COMMITS_SINCE,

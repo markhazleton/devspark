@@ -25,8 +25,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 This command refreshes PR-visible current-truth status. When any later section
 conflicts with this section, the v4 section wins.
 
-- Update the PR body with current-truth validation, evidence, and task-linkage
-  status from the current branch.
+- Update the PR body with current-truth validation (knowledge engine
+  `--check`), evidence, and task-linkage status from the current branch.
+  Report `verified_by: execution` versus `verified_by: inspection` evidence,
+  missing evidence as a blocker, and missing `fallback_reason` as a warning.
 - Use Git history for previous review state instead of writing durable
   review-history artifacts.
 - Do not introduce permanent references to ephemeral work packages.

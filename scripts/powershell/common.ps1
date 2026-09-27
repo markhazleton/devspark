@@ -122,8 +122,14 @@ function Move-DevSparkWorkPathToArchive {
         throw "Refusing to archive a path outside .devspark.work: $resolvedSource"
     }
 
+    # Preserve the path relative to .devspark.work/ (minus that prefix).
+    $relativePath = if ($resolvedSource -eq $resolvedWorkRoot) {
+        Split-Path -Leaf $resolvedSource
+    } else {
+        [System.IO.Path]::GetRelativePath($resolvedWorkRoot, $resolvedSource)
+    }
     $archiveDate = Get-Date -Format 'yyyy-MM-dd'
-    $target = Join-Path (Join-Path (Join-Path $repoRoot '.archive') $archiveDate) (Split-Path -Leaf $resolvedSource)
+    $target = Join-Path (Join-Path (Join-Path $repoRoot '.archive') $archiveDate) $relativePath
 
     $targetParent = Split-Path -Parent $target
     New-Item -ItemType Directory -Path $targetParent -Force | Out-Null
@@ -375,7 +381,7 @@ function Test-RegistryJson {
     }
 }
 
-# Resolve app documentation root (T015)
+# Resolve app documentation root
 function Resolve-AppDocRoot {
     param(
         [string]$RepoRoot,
@@ -402,7 +408,7 @@ function Resolve-AppDocRoot {
     return Join-Path $RepoRoot "$($app.path)/.knowledge"
 }
 
-# Parse --app and --repo-scope arguments (T027)
+# Parse --app and --repo-scope arguments
 function Parse-AppContext {
     param([string[]]$Arguments)
 
@@ -435,7 +441,7 @@ function Parse-AppContext {
     return $result
 }
 
-# Resolve scope and validate (T029)
+# Resolve scope and validate
 function Resolve-AppScope {
     param(
         [string]$AppId = '',
@@ -505,7 +511,7 @@ function Resolve-AppScope {
     return $result
 }
 
-# Resolve constitution with app overlay (T023)
+# Resolve constitution with app overlay
 function Resolve-Constitution {
     param(
         [string]$RepoRoot,
@@ -537,7 +543,7 @@ function Resolve-Constitution {
     return $output
 }
 
-# Get direct downstream consumers of an app (T040)
+# Get direct downstream consumers of an app
 function Get-DownstreamApps {
     param(
         [string]$RepoRoot,
@@ -559,7 +565,7 @@ function Get-DownstreamApps {
     return $downstream
 }
 
-# Generate scope report (T040)
+# Generate scope report
 function Write-ScopeReport {
     param([PSCustomObject]$Scope)
 
@@ -584,7 +590,7 @@ function Write-ScopeReport {
     }
 }
 
-# Print scope summary (T035)
+# Print scope summary
 function Write-ScopeSummary {
     param([PSCustomObject]$Scope)
 
@@ -598,7 +604,7 @@ function Write-ScopeSummary {
     Write-Output "---"
 }
 
-# Resolve inherited profile chain for an app (T053)
+# Resolve inherited profile chain for an app
 function Resolve-AppProfiles {
     param(
         [string]$RepoRoot,
@@ -647,7 +653,7 @@ function Resolve-AppProfiles {
     return [PSCustomObject]@{ tags = $tags; rules = $rules; hints = $hints }
 }
 
-# App-aware feature paths (T029)
+# App-aware feature paths
 function Get-FeaturePathsAppAware {
     param([PSCustomObject]$Scope)
 
@@ -675,5 +681,48 @@ function Get-FeaturePathsAppAware {
         QUICKSTART     = Join-Path $featureDir 'quickstart.md'
         CONTRACTS_DIR  = Join-Path $featureDir 'contracts'
         KNOWLEDGE_DIR  = Join-Path $featureDir 'knowledge'
+    }
+}
+
+# Resolve the single DevSpark knowledge engine (build_knowledge_index.py).
+# Prefers the framework-managed .devspark/scripts/ copy and falls back to a
+# legacy repository-root scripts/ copy only when the framework copy is absent.
+# Returns the repository-relative path, or $null when no engine exists.
+function Resolve-KnowledgeEngine {
+    param([string]$RepoRoot = (Get-RepoRoot))
+
+    foreach ($candidate in @('.devspark/scripts/build_knowledge_index.py', 'scripts/build_knowledge_index.py')) {
+        if (Test-Path -LiteralPath (Join-Path $RepoRoot $candidate) -PathType Leaf) {
+            return $candidate
+        }
+    }
+    return $null
+}
+
+# List lingering legacy engine copies that the quickstart upgrade flow must
+# reconcile. Only reported when the framework-managed engine is present.
+function Get-LegacyKnowledgeEngines {
+    param([string]$RepoRoot = (Get-RepoRoot))
+
+    if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot '.devspark/scripts/build_knowledge_index.py') -PathType Leaf)) {
+        return @()
+    }
+    $legacy = @()
+    foreach ($candidate in @('.devspark/scripts/python/build_knowledge_index.py', 'scripts/build_knowledge_index.py', 'scripts/python/build_knowledge_index.py')) {
+        if (Test-Path -LiteralPath (Join-Path $RepoRoot $candidate) -PathType Leaf) {
+            $legacy += $candidate
+        }
+    }
+    return $legacy
+}
+
+# Build @{ engine = '<path|empty>'; legacy_copies = @(...) } for helper JSON output.
+function Get-KnowledgeEngineInfo {
+    param([string]$RepoRoot = (Get-RepoRoot))
+
+    $engine = Resolve-KnowledgeEngine -RepoRoot $RepoRoot
+    return [ordered]@{
+        engine        = if ($engine) { $engine } else { '' }
+        legacy_copies = @(Get-LegacyKnowledgeEngines -RepoRoot $RepoRoot)
     }
 }

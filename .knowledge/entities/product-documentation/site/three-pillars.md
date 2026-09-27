@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- README.md
+last_verified: '2026-09-09'
+---
+
 # The Three Pillars of DevSpark
 
 DevSpark makes AI-assisted software development easier to understand, verify,

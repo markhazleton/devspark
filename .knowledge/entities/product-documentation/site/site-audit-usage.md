@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/site-audit.md
+last_verified: '2026-09-04'
+---
+
 # Site Audit Command Guide
 
 ## Overview

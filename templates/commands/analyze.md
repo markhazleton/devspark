@@ -75,18 +75,24 @@ Run `{SCRIPT}` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_
 
 Run the advisory knowledge coverage validator after resolving `FEATURE_DIR`:
 
-- Run `python .devspark/scripts/python/build_knowledge_index.py --check` if
-  available; otherwise run `python scripts/python/build_knowledge_index.py
-  --check` in source repos.
-- Validate every `context_resolved` entity against `.knowledge/entities/`.
-- Validate every decision reference against `.knowledge/governance/decisions/`.
-- Validate touched knowledge metadata against `templates/schemas/devspark-*.schema.json`.
+- Run the knowledge engine with `--check`: `python
+  .devspark/scripts/build_knowledge_index.py --check`, or `python
+  scripts/build_knowledge_index.py --check` only when the framework copy is
+  absent.
+- Gate on resolution validity (mechanical, hard stop): every entity, decision,
+  and relation named in `context_resolved` must resolve against the current
+  `.knowledge/ontology/index.json`. A stale or hallucinated reference is a
+  CRITICAL finding and a spec-quality problem, not a gate problem.
+- Validate touched knowledge metadata against
+  `templates/schemas/entity-node.schema.json` and
+  `templates/schemas/knowledge-node.schema.json`.
 
 This pass is additive only when `.knowledge/` is absent. If `.knowledge/` exists
-and the ontology generator reports stale files, dangling relations, missing
-or schema violations, report the issue clearly. Missing evidence is a strong
-warning and must not by itself block analysis; stale or structurally invalid
-ontology data may still block analysis.
+and the knowledge engine reports a stale index, dangling relations,
+unreciprocated `constrains` / `constrained_by`, or schema violations, report the
+issue clearly; unresolvable `context_resolved` references block analysis.
+Missing evidence on knowledge the plan touches is a HIGH finding the delta must
+repair during implement; a missing `fallback_reason` is only a warning.
 
 Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").

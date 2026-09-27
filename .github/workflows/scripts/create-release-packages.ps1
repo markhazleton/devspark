@@ -487,12 +487,9 @@ function Build-Variant {
             Copy-Item -Path "scripts/powershell" -Destination $scriptsDestDir -Recurse -Force
             Write-Host "Copied scripts/powershell -> .devspark/scripts"
         }
-        if (Test-Path "scripts/python") {
-            Copy-Item -Path "scripts/python" -Destination $scriptsDestDir -Recurse -Force
-            Write-Host "Copied scripts/python -> .devspark/scripts"
-        }
-        
-        # Copy any script files that aren't in variant-specific directories
+        # Copy any script files that aren't in variant-specific directories.
+        # Root-level scripts include the single knowledge engine (build_knowledge_index.py),
+        # explain-context.py, and migrate-knowledge-to-entities.py.
         Get-ChildItem -Path "scripts" -File -ErrorAction SilentlyContinue | ForEach-Object {
             Copy-Item -Path $_.FullName -Destination $scriptsDestDir -Force
         }

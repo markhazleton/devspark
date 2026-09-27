@@ -8,7 +8,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# Multi-app support (T089)
+# Multi-app support
 parse_app_context "$@" 2>/dev/null || true
 if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
     resolve_app_scope 2>/dev/null || true
@@ -150,6 +150,7 @@ if [[ "$OUTPUT_FORMAT" == "json" ]]; then
   "scope": "$SCOPE",
   "repo_root": "$REPO_ROOT",
   "audit_dir": "$AUDIT_DIR",
+  "knowledge_engine": $(knowledge_engine_json "$REPO_ROOT"),
   "constitution": {
     "exists": $CONSTITUTION_EXISTS,
     "path": ".knowledge/governance/constitution.md",

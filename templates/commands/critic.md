@@ -33,8 +33,12 @@ planned delta. When any later section conflicts with this section, the v4
 section wins.
 
 - Do not re-run mechanical ontology resolution; that belongs to analyze.
-- Challenge missing entities, missing governed decisions, or shallow
+- Gate on resolution sufficiency (adversarial judgment, not a hard stop): ask
+  what design time missed. Challenge missing entities, missing constraining
+  decisions (each touched entity's `constrained_by`), or shallow
   `context_resolved` coverage when the planned files imply broader impact.
+  Implement escalations past one hop despite a passing `context_resolved` mean
+  this sufficiency check needs tightening.
 - Treat sufficiency findings as review judgment unless they expose a hard
   constitution or evidence violation.
 

@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/explain.md
+last_verified: '2026-09-04'
+---
+
 # Explain Existing Functionality
 
 `/devspark.explain` answers questions about how the repository works today. It

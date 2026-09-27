@@ -7,9 +7,10 @@
 The repository must describe what is true now: current code, current
 knowledge, and current governance. Historical planning artifacts are not durable
 repository knowledge. Completed work packages remain in `.devspark.work/` after
-implementation and verification. Only a release may move them to a short-term
-human-only folder under `.archive/YYYY-MM-DD/<topic>/`; they are never promoted
-into permanent documentation.
+implementation and verification. Only a release may move them to the
+write-only `.archive/YYYY-MM-DD/` retention folder (preserving their path
+relative to `.devspark.work/`); they are never promoted into permanent
+documentation and never influence current behavior once archived.
 
 Git is the durable source for previous states. Permanent DevSpark files must not
 preserve lifecycle traces that are only useful for reconstructing how a change
@@ -26,8 +27,10 @@ Execution evidence is preferred when a test can reasonably assert the claim.
 Inspection evidence is allowed when execution evidence is not practical, but it
 must state whether a test was attempted and why inspection is the fallback.
 
-Claims with no evidence are invalid. Code-only evidence without a fallback
-reason is a warning.
+Claims with no evidence are invalid and fail the knowledge engine. Code-only
+evidence without a fallback reason is a warning, surfaced by audit and PR
+review, and never blocks: degree questions get warnings, existence questions get
+gates.
 
 ### III. Closed Permanent Reference Graph
 
@@ -39,13 +42,16 @@ snapshots, archive folders, or other ephemeral repository artifacts.
 The inverse direction is allowed while work is in progress: an ephemeral work
 package may point to the permanent files it changes. Those references remain in
 `.devspark.work/` through implementation, verification, and review, then move
-with the package into `.archive/YYYY-MM-DD/<topic>/` storage at release. They
-must not be referenced by permanent files.
+with the package into `.archive/YYYY-MM-DD/` storage at release, where they go
+inert. They must not be referenced by permanent files, and no code comment may
+name a spec ID, task ID, or plan identifier.
 
 No DevSpark command may read, list, enumerate, glob, summarize, or otherwise use
-`.archive/` as input. Release is the sole DevSpark command permitted to move
-verified active work into `.archive/YYYY-MM-DD/<topic>/`; any purge or later
-inspection is human-only.
+`.archive/` as input. Release is the sole DevSpark command permitted to sweep
+verified work packages, work-product retention, and orphaned in-flight state
+from `.devspark.work/` into `.archive/YYYY-MM-DD/`. `/devspark.constitution` and
+`/devspark.evolve-constitution` may archive only their own resolved proposals.
+Any purge, inspection, or recovery is human-only.
 
 ### IV. Verify, Then Release
 
@@ -56,7 +62,8 @@ does not archive the package; it remains in `.devspark.work/` until release.
 Every completed task in an in-flight package must have populated `code_ref`,
 `test_ref`, and `knowledge_ref` values, or an explicit `n/a` value with a reason.
 Verification must check that referenced files exist. Release reruns the required
-checks and moves eligible packages intact to `.archive/YYYY-MM-DD/<topic>/`.
+checks and moves eligible packages intact to `.archive/YYYY-MM-DD/`. A verified
+package may stay unarchived across more than one release window.
 
 ### V. One Decision Per Topic
 
@@ -65,8 +72,11 @@ Each decision topic has exactly one current file. If a decision changes, edit
 that topic file in place. If a decision becomes moot because the governed
 system no longer exists, remove it from current truth.
 
-Decision files must declare the entities they govern. Entity-derived metadata
-is generated from those declarations and must not be hand-maintained.
+Decision files are keyed by topic, never by sequence, and must declare the
+entities they constrain in `constrains`. Each constrained entity lists the
+decision back in its own `constrained_by`; the knowledge engine validates the
+reciprocal pair. Current knowledge carries no lifecycle state (`status`,
+`lifecycle`, `supersedes`, `superseded-by`, `replaced`, `obsolete`).
 
 ### VI. Explicit Over Implied
 
@@ -121,11 +131,15 @@ Implementation applies code, test, and knowledge deltas together, records task
 linkage, updates evidence, and runs current-truth validation. The package stays
 in `.devspark.work/` through verification and review. Release validates the
 landed delta and is the only workflow that moves it to
-`.archive/YYYY-MM-DD/<topic>/` storage.
+`.archive/YYYY-MM-DD/` storage.
 
-PR review validates the permanent record introduced by the diff: evidence,
-current-truth graph integrity, no ephemeral references, and governance
-constraints for touched entities.
+PR review is the primary assimilation trigger. It validates the permanent
+record introduced by the diff: evidence, current-truth graph integrity, no
+ephemeral references, and governance constraints for touched entities.
+
+Every knowledge entry point resolves one knowledge engine,
+`build_knowledge_index.py`, so the repository never has two answers to what the
+knowledge index looks like.
 
 Repository-wide audits validate the current state rather than reconstructing
 past lifecycle narratives.
@@ -136,4 +150,4 @@ This constitution supersedes other DevSpark development practices. Amendments
 must update the current constitution and any conflicting current decisions in
 place.
 
-**Version**: 4.3.0 | **Ratified**: 2026-08-30 | **Last Amended**: 2026-09-09
+**Version**: 4.3.0 | **Ratified**: 2026-08-30 | **Last Amended**: 2026-09-26

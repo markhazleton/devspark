@@ -1,10 +1,14 @@
 ---
+source_of_truth:
+- agents-registry.json
+last_verified: '2026-08-30'
 evidence:
-  - type: code
-    ref: agents-registry.json
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "Supported agent behavior spans generated files and release packaging, so inspection supplements shim contract tests"
+- type: code
+  ref: agents-registry.json
+  verified_by: inspection
+  test_attempted: true
+  fallback_reason: Supported agent behavior spans generated files and release packaging, so inspection
+    supplements shim contract tests
 ---
 
 # Agent Shim Architecture

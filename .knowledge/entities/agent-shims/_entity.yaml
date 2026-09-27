@@ -3,15 +3,17 @@ name: Agent Shims
 kind: generated-integration-files
 summary: Thin command files for supported AI assistants that resolve to canonical DevSpark command templates.
 owner: DevSpark maintainers
-lifecycle: current
 root: .claude, .github, generated agent command folders
 managed_by: generated
 required_layers:
 - architecture.md
 relations:
-  - type: derives_from
-    object: command-templates
+- type: derives_from
+  object: command-templates
 evidence:
-  - type: test
-    ref: tests/test_atomic_prompt_frontmatter_contract.py
-    verified_by: execution
+- type: test
+  ref: tests/test_atomic_prompt_frontmatter_contract.py
+  verified_by: execution
+constrained_by:
+- agent-skills-as-portable-capability-packages-within-lifecycle-orchestration
+- always-install-both-powershell-and-bash-script-sets

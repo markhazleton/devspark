@@ -25,8 +25,8 @@
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
 ├── templates/commands/   ← 30 stock command prompt files (THE PRODUCT)
-├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
-├── .knowledge/           ← Current truth: entities, governance, ontology reports
+├── scripts/              ← Context-gathering scripts (PowerShell + Bash) and the knowledge engine (Python)
+├── .knowledge/           ← Current truth: entities, governance, ontology index
 └── .devspark.work/       ← Temporary lifecycle work products
 ```
 
@@ -141,7 +141,7 @@ Canonical delivery loop: `specify → clarify when needed → plan → tasks →
 | `/devspark.checklist` | Generate quality validation checklists |
 | `/devspark.personalize` | Create per-user command overrides |
 | `/devspark.discover-constitution` | Generate a constitution from existing code |
-| `/devspark.discover-knowledge` | Build source-grounded `.knowledge/entities` and ontology |
+| `/devspark.discover-knowledge` | Propose evidence-backed fixes for knowledge gaps, mappings, relationships, and aliases |
 
 ### Multi-App (Optional)
 

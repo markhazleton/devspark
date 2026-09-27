@@ -485,11 +485,13 @@ collect_preflight() {
         --argjson gate_artifacts "$gate_artifacts_json" \
         --argjson gate_acknowledgements "$gate_acknowledgements_json" \
         --argjson quickfix_record "$quickfix_json" \
+        --argjson knowledge_engine "$(knowledge_engine_json "$repo_root")" \
         '{
             repo_root: $repo_root,
             current_branch: $current_branch,
             target_branch: $target_branch,
             dirty_worktree: $dirty,
+            knowledge_engine: $knowledge_engine,
             prerequisites: {
                 clean_worktree: $clean_worktree,
                 branch_pushed_to_remote: $branch_pushed_to_remote

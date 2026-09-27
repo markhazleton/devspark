@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devspark.local/schemas/entity-node.schema.json",
+  "title": "DevSpark Entity Node (_entity.yaml)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "id",
+    "name",
+    "kind",
+    "summary",
+    "evidence"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "knowledge-model",
+        "framework-template-set",
+        "generated-integration-files",
+        "repository-configuration",
+        "ephemeral-state",
+        "knowledge-site",
+        "design-asset-set",
+        "integration-catalog",
+        "contributor-practice"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "type",
+          "object"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "describes",
+              "derives_from",
+              "extends",
+              "generated_for",
+              "scopes",
+              "supports",
+              "uses",
+              "validates",
+              "validated_by"
+            ]
+          },
+          "object": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$"
+          }
+        }
+      },
+      "default": []
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "managed_by": {
+      "type": "string",
+      "enum": [
+        "human",
+        "prompt",
+        "script",
+        "generated",
+        "mixed"
+      ]
+    },
+    "required_layers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^/\\\\]+\\.md$"
+      },
+      "uniqueItems": true
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "devspark-evidence.schema.json"
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "description": "Concept names this entity is reachable by in discovery."
+    },
+    "constrained_by": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "description": "Governance decision ids that constrain this entity (hand-authored reciprocal of constrains)."
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Knowledge node ids (entity, decision, or flat node) or existing repository paths this node refers to. Never temporary work."
+        }
+      }
+    }
+  },
+  "description": "Structural metadata for one entity. constrained_by is hand-authored and must reciprocate each governance decision's constrains list; the knowledge engine validates the pair.",
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "status"
+        ]
+      },
+      {
+        "required": [
+          "lifecycle"
+        ]
+      },
+      {
+        "required": [
+          "supersedes"
+        ]
+      },
+      {
+        "required": [
+          "superseded-by"
+        ]
+      },
+      {
+        "required": [
+          "superseded_by"
+        ]
+      },
+      {
+        "required": [
+          "replaced"
+        ]
+      },
+      {
+        "required": [
+          "obsolete"
+        ]
+      }
+    ]
+  }
+}

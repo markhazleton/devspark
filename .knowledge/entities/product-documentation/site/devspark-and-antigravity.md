@@ -1,5 +1,9 @@
 ---
-description: Learn how DevSpark integrates with Antigravity as a first-class AI coding assistant.
+description: Learn how DevSpark integrates with Antigravity as a first-class AI coding
+  assistant.
+source_of_truth:
+- quickstart/devspark_quickstart_antigravity.md
+last_verified: '2026-08-30'
 ---
 
 # DevSpark and Antigravity

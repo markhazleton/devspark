@@ -1,3 +1,10 @@
+---
+source_of_truth:
+- templates/commands/constitution.md
+- .knowledge/governance/constitution.md
+last_verified: '2026-09-04'
+---
+
 # Constitution Guide
 
 ## Overview

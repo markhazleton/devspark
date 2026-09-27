@@ -1,10 +1,13 @@
 ---
+source_of_truth:
+- .knowledge/entities/product-documentation/site
+last_verified: '2026-08-30'
 evidence:
-  - type: code
-    ref: .knowledge/entities/product-documentation/site
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "Documentation accuracy is validated by link and phrase audits plus human review."
+- type: code
+  ref: .knowledge/entities/product-documentation/site
+  verified_by: inspection
+  test_attempted: true
+  fallback_reason: Documentation accuracy is validated by link and phrase audits plus human review.
 ---
 
 # Product Documentation

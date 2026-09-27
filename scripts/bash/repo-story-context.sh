@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-# Multi-app support (T087)
+# Multi-app support
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh" 2>/dev/null || true
 parse_app_context "$@" 2>/dev/null || true
 if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then

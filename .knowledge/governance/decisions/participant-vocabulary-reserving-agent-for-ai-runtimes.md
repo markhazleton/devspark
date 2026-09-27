@@ -1,10 +1,11 @@
 ---
 id: participant-vocabulary-reserving-agent-for-ai-runtimes
-status: current
-last_verified: "2026-08-30"
-governs:
+type: governance-decision
+title: Participant Vocabulary Reserves Agent for AI Runtimes
+constrains:
 - command-templates
 - current-truth-ontology
+last_verified: '2026-08-30'
 evidence:
 - type: test
   ref: tests/test_participant_metadata_contract.py

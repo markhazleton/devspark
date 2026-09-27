@@ -114,8 +114,11 @@ archive_devspark_work_path() {
             ;;
     esac
 
+    # Preserve the path relative to .devspark.work/ (minus that prefix).
+    local relative_path="${source_abs#"$work_root"/}"
+    [[ "$source_abs" == "$work_root" ]] && relative_path="$(basename "$source_abs")"
     archive_date=$(date +"%Y-%m-%d")
-    target_abs="$repo_root/.archive/$archive_date/$(basename "$source_abs")"
+    target_abs="$repo_root/.archive/$archive_date/$relative_path"
     target_dir="$(dirname "$target_abs")"
     mkdir -p "$target_dir"
     mv -T "$source_abs" "$target_abs"
@@ -321,7 +324,7 @@ validate_registry_json() {
     echo "{\"valid\":true,\"apps\":$app_count,\"profiles\":$profile_count}"
 }
 
-# Resolve app documentation root (T014)
+# Resolve app documentation root
 resolve_app_doc_root() {
     local repo_root="$1"
     local app_id="$2"
@@ -345,7 +348,7 @@ resolve_app_doc_root() {
     echo "$repo_root/$app_path/.knowledge"
 }
 
-# Parse --app and --repo-scope arguments (T026)
+# Parse --app and --repo-scope arguments
 # Sets DEVSPARK_APP_ID and DEVSPARK_REPO_SCOPE
 parse_app_context() {
     DEVSPARK_APP_ID=""
@@ -378,7 +381,7 @@ parse_app_context() {
     DEVSPARK_REMAINING_ARGS=("${remaining_args[@]}")
 }
 
-# Resolve scope and validate (T028, T030)
+# Resolve scope and validate
 # Sets DEVSPARK_SCOPE, DEVSPARK_DOC_ROOT, DEVSPARK_SCOPE_ERROR (used by callers)
 # shellcheck disable=SC2034
 resolve_app_scope() {
@@ -446,7 +449,7 @@ resolve_app_scope() {
     DEVSPARK_DOC_ROOT="$repo_root/.knowledge"
 }
 
-# Resolve constitution with app overlay (T022)
+# Resolve constitution with app overlay
 resolve_constitution() {
     local repo_root="$1"
     local app_id="${2:-}"
@@ -485,7 +488,7 @@ $(cat "$app_constitution")"
     echo "$output"
 }
 
-# Get direct downstream consumers of an app (T039)
+# Get direct downstream consumers of an app
 get_downstream_apps() {
     local repo_root="$1"
     local app_id="$2"
@@ -501,7 +504,7 @@ get_downstream_apps() {
         "$registry" 2>/dev/null || true
 }
 
-# Generate scope report (T039)
+# Generate scope report
 generate_scope_report() {
     local repo_root
     repo_root=$(get_repo_root)
@@ -528,7 +531,7 @@ generate_scope_report() {
     fi
 }
 
-# Print scope summary (T035)
+# Print scope summary
 print_scope_summary() {
     echo "--- DevSpark Scope ---"
     echo "scope: ${DEVSPARK_SCOPE:-unknown}"
@@ -540,7 +543,7 @@ print_scope_summary() {
     echo "---"
 }
 
-# Resolve inherited profile chain for an app (T052)
+# Resolve inherited profile chain for an app
 # Composes all inherited profiles + overrides + app.json into one effective profile
 resolve_app_profiles() {
     local repo_root="$1"
@@ -580,7 +583,7 @@ resolve_app_profiles() {
     '
 }
 
-# Override get_feature_paths for app-scoped workflows (T028)
+# Override get_feature_paths for app-scoped workflows
 get_feature_paths_app_aware() {
     local repo_root
     repo_root=$(get_repo_root)
@@ -628,4 +631,51 @@ QUICKSTART='$feature_dir/quickstart.md'
 CONTRACTS_DIR='$feature_dir/contracts'
 KNOWLEDGE_DIR='$feature_dir/knowledge'
 EOF
+}
+
+# Resolve the single DevSpark knowledge engine (build_knowledge_index.py).
+# Prefers the framework-managed .devspark/scripts/ copy and falls back to a
+# legacy repository-root scripts/ copy only when the framework copy is absent.
+# Prints the repository-relative path; returns 1 when no engine exists.
+resolve_knowledge_engine() {
+    local repo_root="${1:-$(get_repo_root)}"
+    local candidate
+    for candidate in \
+        ".devspark/scripts/build_knowledge_index.py" \
+        "scripts/build_knowledge_index.py"; do
+        if [[ -f "$repo_root/$candidate" ]]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# List lingering legacy engine copies that the quickstart upgrade flow must
+# reconcile. Only reported when the framework-managed engine is present.
+list_legacy_knowledge_engines() {
+    local repo_root="${1:-$(get_repo_root)}"
+    [[ -f "$repo_root/.devspark/scripts/build_knowledge_index.py" ]] || return 0
+    local candidate
+    for candidate in \
+        ".devspark/scripts/python/build_knowledge_index.py" \
+        "scripts/build_knowledge_index.py" \
+        "scripts/python/build_knowledge_index.py"; do
+        [[ -f "$repo_root/$candidate" ]] && echo "$candidate"
+    done
+    return 0
+}
+
+# Emit {"engine": "<path|empty>", "legacy_copies": [...]} for helper JSON output.
+# Candidate paths are fixed literals, so no JSON escaping is required.
+knowledge_engine_json() {
+    local repo_root="${1:-$(get_repo_root)}"
+    local engine legacy item items=""
+    engine=$(resolve_knowledge_engine "$repo_root" || true)
+    legacy=$(list_legacy_knowledge_engines "$repo_root")
+    while IFS= read -r item; do
+        [[ -z "$item" ]] && continue
+        items="${items:+$items,}\"$item\""
+    done <<< "$legacy"
+    printf '{"engine":"%s","legacy_copies":[%s]}' "$engine" "$items"
 }

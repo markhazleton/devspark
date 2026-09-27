@@ -65,7 +65,7 @@ param(
 # Import common functions
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-# Multi-app support (T090)
+# Multi-app support
 if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
     . "$PSScriptRoot/common.ps1"
 }
@@ -643,6 +643,8 @@ if ($Scope -in @('full', 'constitution', 'quality', 'unused')) {
         $result.patterns.quality.todo_comments = Get-SampledItems -Items $allTodoComments -Limit $PatternSampleLimit
     }
 }
+
+$result.knowledge_engine = Get-KnowledgeEngineInfo -RepoRoot $repoRoot
 
 $result.pre_scan_limits = @{
     include_full_inventory = [bool]$IncludeFullInventory

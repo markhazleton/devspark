@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- .knowledge/entities/brand-system/assets/MakeBoldSolutions/LinkedIn
+last_verified: '2026-08-30'
+---
+
 # Make Bold Solutions — LinkedIn Company Page Brand Guide
 
 This guide applies the official Make Bold Solutions brand (see `../BrandGuide/MakeBoldSolutions.pdf`) to a LinkedIn Company Page for **Make Bold Solutions, LLC**. It covers every field on the page, the exact image assets to upload, and the voice/content standards to keep the page consistent with [makeboldsolutions.com](https://makeboldsolutions.com).

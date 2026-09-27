@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- .knowledge/entities/current-truth-ontology/devspark-philosophy.md
+last_verified: '2026-09-26'
+---
+
 # DevSpark Philosophy
 
 DevSpark is agile product development made explicit enough for an AI agent to
@@ -37,15 +43,27 @@ The repository is optimized for what is true now:
 
 Entities and governance are current-state records, not an archive. Decisions
 are keyed by domain or topic, not creation order; when the reasoning changes,
-edit the decision in place. Git preserves committed history. Completed work
-products leave the active work surface only through the release boundary.
+edit the decision in place, and when the governed subsystem is gone, delete it.
+There is no deprecated state. A decision declares the entities it `constrains`,
+and each constrained entity lists the decision back in its own
+`constrained_by`, so an agent can always see what constrains the entity it is
+about to touch. Git preserves committed history. Completed work products leave
+the active work surface only through the release boundary.
 
 ## Evidence and closed references
 
 Every durable knowledge or governance claim needs checkable evidence. Use test
 evidence when execution proves the claim and inspection evidence when a human or
-agent must compare the claim with code. Code-only evidence should explain why a
-test was not used when a practical test was attempted or unavailable.
+agent must compare the claim with code. A claim with no evidence fails the
+knowledge check; code-only evidence without a `fallback_reason` is only a
+warning, because how cheaply a claim can be verified is a question of degree,
+not existence.
+
+Knowledge must be reachable by the concept it explains, not only by an id you
+already know. The single knowledge engine ranks documents deterministically
+(id/title, alias, heading, path metadata, then body), counting each evidence
+class once per query term so terse current-truth documents are never outranked
+by sprawling ones.
 
 Permanent code and knowledge may reference one another, but they must not point
 to specifications, tasks, plans, spikes, pull-request threads, or other
@@ -56,8 +74,9 @@ one-way boundary keeps the permanent graph usable after a work package is gone.
 
 Verification makes tasks and their code/knowledge linkage eligible; it does not
 archive them. A spec stays whole in `.devspark.work/` until every task is
-verified. Release is the sole command that validates and archives eligible
-packages, so incomplete packages remain intact for the next release. Release
+verified. Release is the sole command that sweeps `.devspark.work/` into the
+write-only `.archive/`, so incomplete packages remain intact for the next
+release, and a verified package may wait across more than one release window. Release
 cadence is a human-selected business event; sprint reporting can be derived
 from dates and Git history rather than becoming another state DevSpark must
 track.

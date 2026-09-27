@@ -26,8 +26,9 @@ fi
 
 # Load platform adapter (sets DEVSPARK_PLATFORM_NAME, DEVSPARK_PR_CLI, etc.)
 source "$SCRIPT_DIR/platform.sh"
+source "$SCRIPT_DIR/common.sh"
 
-# Multi-app support (T041, T066)
+# Multi-app support
 parse_app_context "$@" 2>/dev/null || true
 if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]]; then
     resolve_app_scope 2>/dev/null || true
@@ -406,6 +407,7 @@ main() {
     "is_behind_target": $is_behind_target
   },
   "CONSTITUTION_PATH": "$constitution_path",
+  "KNOWLEDGE_ENGINE": $(knowledge_engine_json "$REPO_ROOT"),
   "CONSTITUTION_EXISTS": $constitution_exists,
   "REVIEW_DIR": "$review_dir",
   "SPEC_LIFECYCLE": {

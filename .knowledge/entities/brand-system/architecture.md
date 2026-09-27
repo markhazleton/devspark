@@ -1,10 +1,13 @@
 ---
+source_of_truth:
+- .knowledge/entities/brand-system/assets
+last_verified: '2026-08-30'
 evidence:
-  - type: code
-    ref: .knowledge/entities/brand-system/assets
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "Brand package correctness depends on file presence and visual review."
+- type: code
+  ref: .knowledge/entities/brand-system/assets
+  verified_by: inspection
+  test_attempted: true
+  fallback_reason: Brand package correctness depends on file presence and visual review.
 ---
 
 # Brand System

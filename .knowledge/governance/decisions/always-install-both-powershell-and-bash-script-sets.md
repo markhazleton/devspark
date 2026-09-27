@@ -1,10 +1,11 @@
 ---
 id: always-install-both-powershell-and-bash-script-sets
-status: current
-last_verified: "2026-08-30"
-governs:
-- command-templates
+type: governance-decision
+title: Always Install Both PowerShell and Bash Script Sets
+constrains:
 - agent-shims
+- command-templates
+last_verified: '2026-08-30'
 evidence:
 - type: test
   ref: tests/test_script_parity_contract.py

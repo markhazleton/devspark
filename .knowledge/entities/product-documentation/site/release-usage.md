@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/release.md
+last_verified: '2026-09-26'
+---
+
 # DevSpark Release
 
 `/devspark.release` is the final validation and archival command. It runs at a
@@ -40,7 +46,7 @@ After every validation passes, release:
 
 1. Updates `.devspark/VERSION`.
 2. Moves each eligible package intact to
-   `.archive/YYYY-MM-DD/<topic>/`.
+   `.archive/YYYY-MM-DD/`.
 3. Processes validated items under `.devspark.work/release-candidates/`.
 4. Produces release notes from Git commits, merged pull requests, and current
    code and knowledge.

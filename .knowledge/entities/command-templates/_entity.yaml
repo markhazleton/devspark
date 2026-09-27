@@ -3,17 +3,22 @@ name: Command Templates
 kind: framework-template-set
 summary: Canonical command prompts and atomic shims installed into supported AI agent surfaces.
 owner: DevSpark maintainers
-lifecycle: current
 root: templates/commands
 managed_by: mixed
 required_layers:
 - architecture.md
-- devspark-v4-prompt-mapping.md
+- devspark-prompt-mapping.md
 - review-stage-divergence.md
 relations:
-  - type: generated_for
-    object: agent-shims
+- type: generated_for
+  object: agent-shims
 evidence:
-  - type: test
-    ref: tests/test_atomic_prompt_frontmatter_contract.py
-    verified_by: execution
+- type: test
+  ref: tests/test_atomic_prompt_frontmatter_contract.py
+  verified_by: execution
+constrained_by:
+- agent-skills-as-portable-capability-packages-within-lifecycle-orchestration
+- agt-inspired-governance-severity-registry-trust-tiers-and-conformance-manifest
+- always-install-both-powershell-and-bash-script-sets
+- okf-knowledge-layer-and-genuine-fix-discipline
+- participant-vocabulary-reserving-agent-for-ai-runtimes

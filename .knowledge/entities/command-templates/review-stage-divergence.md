@@ -1,3 +1,8 @@
+---
+source_of_truth:
+- tests/test_atomic_prompt_frontmatter_contract.py
+last_verified: '2026-09-04'
+---
 # Review-Stage Resolution Contract
 
 The five review-oriented prompts—`clarify`, `analyze`, `critic`, `pr-review`,

@@ -10,7 +10,7 @@ param(
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-# Multi-app support (T084)
+# Multi-app support
 if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
     . "$PSScriptRoot/common.ps1"
 }

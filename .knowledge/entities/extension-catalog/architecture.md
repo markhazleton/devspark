@@ -1,10 +1,13 @@
 ---
+source_of_truth:
+- .knowledge/entities/extension-catalog/catalog.community.json
+last_verified: '2026-08-30'
 evidence:
-  - type: code
-    ref: .knowledge/entities/extension-catalog/catalog.community.json
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "Catalog validity includes external project metadata not fully testable locally."
+- type: code
+  ref: .knowledge/entities/extension-catalog/catalog.community.json
+  verified_by: inspection
+  test_attempted: true
+  fallback_reason: Catalog validity includes external project metadata not fully testable locally.
 ---
 
 # Extension Catalog

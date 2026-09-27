@@ -1,3 +1,8 @@
+---
+source_of_truth:
+- .knowledge/entities/extension-catalog/catalog.community.json
+last_verified: '2026-08-30'
+---
 # DevSpark Community Extensions
 
 Community-contributed extensions for [DevSpark](https://github.com/MarkHazleton/devspark).

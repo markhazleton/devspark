@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/checklist.md
+last_verified: '2026-09-04'
+---
+
 # Checklist Command Guide
 
 ## Overview

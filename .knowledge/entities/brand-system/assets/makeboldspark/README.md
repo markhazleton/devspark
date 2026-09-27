@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- .knowledge/entities/brand-system/assets/makeboldspark
+last_verified: '2026-08-30'
+---
+
 # Make Bold Spark Brand Package
 
 This package is the reusable branding kit for Make Bold Spark projects, products, demos, and websites.

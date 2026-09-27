@@ -35,15 +35,19 @@ def test_release_is_the_archive_boundary() -> None:
     implement = _read("templates/commands/implement.md")
     verify = _read("templates/commands/verify.md")
 
-    assert "Release is the only DevSpark command that writes to `.archive/`" in release
+    assert "Release is the only DevSpark command that moves work out of `.devspark.work/`" in release
+    assert "`/devspark.constitution`" in release and "`/devspark.evolve-constitution`" in release
     assert "code_ref" in release
     assert "test_ref" in release
     assert "knowledge_ref" in release
     assert "Implementation never writes to `.archive/`" in implement
     assert "never archives a work package" in verify
 
+    # Release sweeps .devspark.work/; constitution and evolve-constitution may
+    # archive only their own resolved proposals. No other command writes .archive/.
+    archive_writers = {"release.md", "constitution.md", "evolve-constitution.md"}
     for path in (ROOT / "templates" / "commands").glob("*.md"):
-        if path.name == "release.md":
+        if path.name in archive_writers:
             continue
         text = path.read_text(encoding="utf-8")
         assert "archive_devspark_work_path" not in text
@@ -79,15 +83,37 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
         encoding="utf-8",
     )
 
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "example.py").write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_example.py").write_text("def test_value():\n    pass\n", encoding="utf-8")
+
+    unresolved = specs / "004-unresolved"
+    unresolved.mkdir(parents=True)
+    (unresolved / "tasks.md").write_text(
+        "- [X] T001 Change code\n"
+        "  - code_ref: `src/renamed.py::Example`\n"
+        "  - test_ref: tests/test_example.py\n"
+        "  - knowledge_ref: n/a — covered by existing knowledge\n",
+        encoding="utf-8",
+    )
+
     eligible = specs / "003-eligible"
     eligible.mkdir()
     (eligible / "tasks.md").write_text(
         "- [X] T001 Change code\n"
-        "  - code_ref: src/example.py\n"
-        "  - test_ref: tests/test_example.py\n"
+        "  - code_ref: src/example.py::value\n"
+        "  - test_ref: tests/test_example.py#test_value\n"
         "  - knowledge_ref: n/a — behavior is fully described by existing knowledge\n",
         encoding="utf-8",
     )
+
+    reviews = tmp_path / ".devspark.work" / "pr-reviews"
+    reviews.mkdir(parents=True)
+    (reviews / "pr-42.md").write_text("review\n", encoding="utf-8")
+    audits = tmp_path / ".devspark.work" / "audits"
+    audits.mkdir()
+    (audits / "2026-09-01-audit.md").write_text("audit\n", encoding="utf-8")
 
     if sys.platform == "win32":
         command = [
@@ -110,4 +136,13 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
     assert result.returncode == 0, result.stdout + result.stderr
     payload = json.loads(result.stdout)
     assert payload["RELEASE_ELIGIBLE_WORK_PACKAGES"] == ["003-eligible"]
-    assert sorted(payload["BLOCKED_WORK_PACKAGES"]) == ["001-missing", "002-unexplained"]
+    assert sorted(payload["BLOCKED_WORK_PACKAGES"]) == ["001-missing", "002-unexplained", "004-unresolved"]
+    assert payload["RETENTION_CANDIDATES"] == [
+        {"path": ".devspark.work/pr-reviews/pr-42.md", "kind": "pr-reviews", "pr_number": 42},
+        {"path": ".devspark.work/audits/2026-09-01-audit.md", "kind": "audits", "pr_number": None},
+    ]
+    assert all(not item["path"].startswith(".devspark.work/specs/") for item in payload["RETENTION_CANDIDATES"])
+    assert payload["UNRESOLVED_LINKAGE_REFS"] == [
+        "002-unexplained: .knowledge/entities/docs/architecture.md",
+        "004-unresolved: src/renamed.py",
+    ]

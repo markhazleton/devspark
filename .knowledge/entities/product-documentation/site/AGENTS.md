@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- AGENTS.md
+last_verified: '2026-08-30'
+---
+
 # DevSpark Documentation Guidance
 
 DevSpark documentation must describe a prompt-first product.

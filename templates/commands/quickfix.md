@@ -31,7 +31,7 @@ section, the v4 section wins.
 - Record code, test, and knowledge linkage and leave the completed quickfix in
   `.devspark.work/`; only `/devspark.release` validates and archives it.
 - Do not create durable quickfix history; Git is the durable history and
-  `.archive/YYYY-MM-DD/<topic>/` is only a short-term safety buffer.
+  `.archive/YYYY-MM-DD/` is only a short-term safety buffer.
 
 ## Workflow Position
 

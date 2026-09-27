@@ -1,3 +1,9 @@
+---
+source_of_truth:
+- templates/commands/next.md
+last_verified: '2026-09-26'
+---
+
 # Next Command Navigator
 
 `/devspark.next` detects where the current repository and branch are in the
@@ -11,8 +17,7 @@ Use Next when:
 - finishing a lifecycle step without remembering what follows;
 - switching among repositories or branches;
 - checking whether plan, tasks, gates, implementation, PR, or review work is
-  still outstanding;
-- walking through safe workflow steps with `--auto`.
+  still outstanding.
 
 ## Basic Usage
 
@@ -31,33 +36,18 @@ Recommended: /devspark.analyze
 Reason: Tasks exist, but the required cross-artifact analysis gate has not run.
 ```
 
-Before dispatching the recommendation, it asks one yes/no question. The
+Next only recommends. It never runs, dispatches, or chains the recommended
+command; you run it when ready and rerun Next for a fresh recommendation. The
 underlying detection script is read-only and derives the recommendation from
 Git, spec artifacts, task completion, required gates, PR state, and local review
 state—not from conversational memory.
 
-## Automatic Progression
+## Human Boundaries
 
-```text
-/devspark.next --auto
-```
-
-After one initial confirmation, auto mode can chain safe prompt steps such as
-plan, tasks, checklist, analyze, critic, implement, draft PR creation, and PR
-review. It reruns state detection after every completed command and stops if the
-state fails to advance.
-
-Auto mode always stops before:
-
-- creating a branch or beginning a new specification;
-- committing changes;
-- pushing, pulling, rebasing, or synchronizing a branch;
-- addressing review findings through a flow that may commit;
-- merging a pull request;
-- creating a release.
-
-At those boundaries it prints the exact command for the human to run. It never
-executes the command itself.
+When the next step is creating a branch, committing, pushing, pulling,
+rebasing, addressing review findings through a flow that may commit, merging,
+or releasing, Next prints the exact command for the human to run. It never
+executes anything itself.
 
 ## Detected Lifecycle
 
@@ -79,4 +69,5 @@ Next never chooses quickfix instead of specify on the user's behalf.
 
 A merged PR completes the development flow detected by Next. The command does
 not automatically invoke `/devspark.release`: releases are separate,
-human-triggered events, and release remains the sole writer to `.archive/`.
+human-triggered events, and release remains the only command that sweeps
+`.devspark.work/` into `.archive/`.

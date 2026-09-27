@@ -14,10 +14,9 @@ from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT / "templates" / "schemas" / "okf-knowledge-document.schema.json"
-DECISION_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-decision.schema.json"
+KNOWLEDGE_NODE_SCHEMA_PATH = ROOT / "templates" / "schemas" / "knowledge-node.schema.json"
 EVIDENCE_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-evidence.schema.json"
-ENTITY_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-entity.schema.json"
-DERIVED_SCHEMA_PATH = ROOT / "templates" / "schemas" / "devspark-derived.schema.json"
+ENTITY_SCHEMA_PATH = ROOT / "templates" / "schemas" / "entity-node.schema.json"
 
 
 def _read(rel_path: str) -> str:
@@ -61,21 +60,27 @@ def test_schema_accepts_valid_frontmatter_and_rejects_invalid() -> None:
     assert any("'REQ-1' does not match" in message for message in errors)
 
 
-def test_decision_frontmatter_uses_governs_contract() -> None:
-    schema = json.loads(DECISION_SCHEMA_PATH.read_text(encoding="utf-8"))
-    schema["properties"]["evidence"]["items"] = json.loads(
-        EVIDENCE_SCHEMA_PATH.read_text(encoding="utf-8")
-    )
-    validator = Draft202012Validator(schema)
-    legacy_key = "con" + "strains"
+def _knowledge_node_validator() -> Draft202012Validator:
+    schema = json.loads(KNOWLEDGE_NODE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    schema["properties"]["evidence"]["items"] = json.loads(EVIDENCE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    return Draft202012Validator(schema)
 
+
+def _frontmatter(path: Path) -> dict:
+    return yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1])
+
+
+def test_decision_frontmatter_uses_constrains_contract() -> None:
+    validator = _knowledge_node_validator()
     valid = yaml.safe_load(
         textwrap.dedent(
             """\
             id: current-truth-test
-            status: current
-            governs:
+            type: governance-decision
+            title: Current Truth Test
+            constrains:
               - command-templates
+            last_verified: "2026-09-26"
             evidence:
               - type: test
                 ref: tests/test_knowledge_document_contract.py
@@ -85,63 +90,62 @@ def test_decision_frontmatter_uses_governs_contract() -> None:
     )
     assert not list(validator.iter_errors(valid))
 
-    invalid = dict(valid)
-    invalid.pop("governs")
-    invalid[legacy_key] = ["command-templates"]
-    errors = [error.message for error in validator.iter_errors(invalid)]
-    assert any("'governs' is a required property" in message for message in errors)
+    for banned in ("status", "supersedes", "governs", "layer"):
+        invalid = dict(valid)
+        invalid[banned] = "x"
+        assert list(validator.iter_errors(invalid)), f"{banned} must be rejected on decisions"
+    missing = dict(valid)
+    missing.pop("constrains")
+    assert any("'constrains' is a required property" in error.message for error in validator.iter_errors(missing))
 
     decision_files = sorted((ROOT / ".knowledge" / "governance" / "decisions").glob("*.md"))
+    decision_files = [path for path in decision_files if path.name != "README.md"]
     assert decision_files
     for path in decision_files:
-        frontmatter = path.read_text(encoding="utf-8").split("---", 2)[1]
-        data = yaml.safe_load(frontmatter)
-        assert "governs" in data, f"{path.name} must declare governed entities"
-        assert legacy_key not in data, f"{path.name} must not use legacy decision key"
+        data = _frontmatter(path)
+        assert data["id"] == path.stem, f"{path.name} must be keyed by topic"
         assert not list(validator.iter_errors(data)), f"{path.name} decision frontmatter must match schema"
 
 
-def test_entity_and_derived_metadata_match_ontology_schemas() -> None:
+def test_entity_nodes_and_layer_documents_match_schemas() -> None:
     entity_schema = json.loads(ENTITY_SCHEMA_PATH.read_text(encoding="utf-8"))
-    derived_schema = json.loads(DERIVED_SCHEMA_PATH.read_text(encoding="utf-8"))
-    evidence_schema = json.loads(EVIDENCE_SCHEMA_PATH.read_text(encoding="utf-8"))
-    entity_schema["properties"]["evidence"]["items"] = evidence_schema
-
+    entity_schema["properties"]["evidence"]["items"] = json.loads(EVIDENCE_SCHEMA_PATH.read_text(encoding="utf-8"))
     entity_validator = Draft202012Validator(entity_schema)
-    derived_validator = Draft202012Validator(derived_schema)
+    layer_validator = _knowledge_node_validator()
 
     entity_files = sorted((ROOT / ".knowledge" / "entities").glob("*/_entity.yaml"))
     assert entity_files
     for path in entity_files:
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert data["id"] == path.parent.name
-        assert not list(entity_validator.iter_errors(data)), f"{path} must match entity schema"
+        assert not list(entity_validator.iter_errors(data)), f"{path} must match entity-node schema"
+        assert not (path.parent / "_derived.yaml").exists(), "constrained_by is hand-authored in _entity.yaml"
+        for layer in sorted(path.parent.glob("*.md")):
+            assert not list(layer_validator.iter_errors(_frontmatter(layer))), f"{layer} must match knowledge-node schema"
 
-        derived_path = path.parent / "_derived.yaml"
-        assert derived_path.exists(), f"{path.parent.name} must have generated _derived.yaml"
-        derived = yaml.safe_load(derived_path.read_text(encoding="utf-8"))
-        assert not list(derived_validator.iter_errors(derived)), (
-            f"{derived_path} must match derived schema"
-        )
+    lifecycle_entity = {"id": "x", "name": "X", "kind": "knowledge-model", "summary": "x", "lifecycle": "current",
+                        "evidence": [{"type": "test", "ref": "tests", "verified_by": "execution"}]}
+    assert list(entity_validator.iter_errors(lifecycle_entity)), "lifecycle is banned on entity nodes"
 
 
 def test_ontology_generator_outputs_are_current() -> None:
     result = subprocess.run(
-        [sys.executable, "scripts/python/build_knowledge_index.py", "--check"],
+        [sys.executable, "scripts/build_knowledge_index.py", "--check"],
         cwd=ROOT,
         text=True,
         capture_output=True,
         check=False,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+    assert not list((ROOT / ".knowledge" / "ontology").glob("*.generated.md"))
 
 
 def test_packaged_ontology_generator_uses_consumer_root_and_ignores_scaffold_readme(tmp_path: Path) -> None:
     """Exercise the layout produced by release packages, not only the source checkout."""
     consumer = tmp_path / "consumer"
-    script = consumer / ".devspark" / "scripts" / "python" / "build_knowledge_index.py"
+    script = consumer / ".devspark" / "scripts" / "build_knowledge_index.py"
     script.parent.mkdir(parents=True)
-    shutil.copy(ROOT / "scripts" / "python" / "build_knowledge_index.py", script)
+    shutil.copy(ROOT / "scripts" / "build_knowledge_index.py", script)
     (consumer / ".knowledge" / "entities").mkdir(parents=True)
     decisions = consumer / ".knowledge" / "governance" / "decisions"
     decisions.mkdir(parents=True)
@@ -151,7 +155,7 @@ def test_packaged_ontology_generator_uses_consumer_root_and_ignores_scaffold_rea
     (consumer / ".knowledge" / "ontology").mkdir(parents=True)
 
     result = subprocess.run(
-        [sys.executable, str(script), "--write"],
+        [sys.executable, str(script)],
         cwd=consumer,
         text=True,
         capture_output=True,
@@ -160,7 +164,8 @@ def test_packaged_ontology_generator_uses_consumer_root_and_ignores_scaffold_rea
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert "0 decisions" in result.stdout
-    assert (consumer / ".knowledge" / "ontology" / "coverage.generated.md").exists()
+    assert (consumer / ".knowledge" / "ontology" / "coverage.json").exists()
+    assert (consumer / ".knowledge" / "ontology" / "index.json").exists()
     assert not (consumer / ".devspark" / ".knowledge").exists()
 
 

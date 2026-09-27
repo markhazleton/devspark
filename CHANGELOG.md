@@ -2,6 +2,57 @@
 
 All notable changes to DevSpark are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Added the single knowledge engine at `scripts/build_knowledge_index.py`
+  (installed at `.devspark/scripts/`), writing `.knowledge/ontology/index.json`
+  and `coverage.json`, with `--check`, `--search`, `--detect-drift`, and
+  `--pin-claim` modes.
+- Added deterministic concept discovery (aliases, headings, path metadata, and
+  query-time body search through `scripts/explain-context.py`) with fixed
+  per-class weights counted once per query term.
+- Added pinned `source_of_truth` claims with retained baselines and the
+  `knowledge_drift.enforcement` setting in `.knowledge/knowledge.config.yaml`.
+- Added `scripts/migrate-knowledge-to-entities.py`, the `entity-node` and
+  `knowledge-node` schemas, `resolve_knowledge_engine` /
+  `Resolve-KnowledgeEngine`, and agent/prompt shims for `discover-knowledge`.
+
+- Added `scripts/scan-ephemeral-refs.py`, which fails when code comments name
+  spec, task, requirement, proposal, work-package, or archive identifiers.
+- Added flat knowledge nodes (`.knowledge/<topic>.md`, `.knowledge/guides/**`)
+  and validated `links.references` on any knowledge node.
+- Added `scripts/discover-knowledge-context.py`, read-only discovery signals
+  for `/devspark.discover-knowledge`.
+- The release pre-scan now blocks unresolved linkage refs
+  (`UNRESOLVED_LINKAGE_REFS`) and lists `RETENTION_CANDIDATES`.
+
+### Changed
+
+- `/devspark.discover-knowledge` is now a propose-only authoring aid: it reports
+  knowledge gaps, mapping gaps and ambiguities, relationship and alias
+  candidates, contradictions, historical leakage, and entity candidates, and
+  applies only findings a human selects and confirms. `--bootstrap` remains for
+  first-time setup.
+- Every Markdown document under an entity, including subfolders, now carries
+  `source_of_truth` and `last_verified`.
+- Engine writes keep unreferenced pinned baselines (reported as warnings), and
+  `--check --entity` scopes decision errors to the entities they constrain.
+- Decisions now declare `constrains`; entities hand-author the reciprocal
+  `constrained_by`, validated by the engine. `_derived.yaml` and the Markdown
+  ontology reports are retired.
+- Lifecycle keys (`status`, `lifecycle`, `supersedes`, `superseded-by`,
+  `replaced`, `obsolete`) are banned on current knowledge; missing evidence is
+  now a gate, while a missing `fallback_reason` stays a warning.
+- Release archives packages under `.archive/YYYY-MM-DD/` preserving their path
+  relative to `.devspark.work/` and also sweeps routine work-product retention
+  and orphaned state; constitution commands archive their own resolved
+  proposals.
+- `/devspark.next` now only recommends; `--auto` and dispatching were removed.
+- Replaced the current-truth philosophy with "Plan Temporarily, Review the
+  Delta" and aligned command prompts, quickstarts, and the constitution.
+
 ## [v4.3.0] - 2026-09-09
 
 ### Added

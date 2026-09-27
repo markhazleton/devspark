@@ -42,7 +42,7 @@ The current source collection includes 30 active commands.
 | `address-pr-review.md` | `/devspark.address-pr-review` | Address PR review findings with enforced commit isolation |
 | `site-audit.md` | `/devspark.site-audit` | Comprehensive codebase audit |
 | `explain.md` | `/devspark.explain` | Explain existing functionality and verify matching current truth |
-| `next.md` | `/devspark.next` | Detect workflow state and safely dispatch the next command |
+| `next.md` | `/devspark.next` | Detect workflow state and recommend one next command |
 | `commit-audit.md` | `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
 | `quickfix.md` | `/devspark.quickfix` | Lightweight bug fix workflow |
 | `fix-score.md` | `/devspark.fix-score` | Diagnose and remediate repository score blockers with verification guardrails |
@@ -55,7 +55,7 @@ The current source collection includes 30 active commands.
 | `checklist.md` | `/devspark.checklist` | Quality validation checklists |
 | `personalize.md` | `/devspark.personalize` | Create per-user prompt overrides |
 | `discover-constitution.md` | `/devspark.discover-constitution` | Reverse-engineer principles from code |
-| `discover-knowledge.md` | `/devspark.discover-knowledge` | Discover source-grounded entities and regenerate ontology |
+| `discover-knowledge.md` | `/devspark.discover-knowledge` | Propose evidence-backed fixes for knowledge gaps, mappings, relationships, and aliases |
 | `taskstoissues.md` | `/devspark.taskstoissues` | Convert tasks to GitHub issues |
 | `add-application.md` | `/devspark.add-application` | Register a new application in the multi-app registry (optional) |
 | `list-applications.md` | `/devspark.list-applications` | Display all registered applications (optional) |
@@ -75,9 +75,8 @@ The current source collection includes 30 active commands.
 | `spec-validation-contract.md` | Shared validation contract for spec structure and required content |
 | `command-preamble-contract.md` | Shared command guidance, including Genuine Fix Discipline |
 | `schemas/devspark-evidence.schema.json` | v4 evidence schema |
-| `schemas/devspark-entity.schema.json` | v4 entity metadata schema |
-| `schemas/devspark-decision.schema.json` | v4 governance decision schema |
-| `schemas/devspark-derived.schema.json` | v4 generated ontology metadata schema |
+| `schemas/entity-node.schema.json` | Entity node (`_entity.yaml`) schema, including hand-authored `constrained_by` |
+| `schemas/knowledge-node.schema.json` | Knowledge node frontmatter schema for layer documents and `governance-decision` files |
 | `schemas/devspark-task-linkage.schema.json` | v4 task linkage schema |
 | `schemas/devspark-work-package.schema.json` | v4 work-package schema |
 | `agent-file-template.md` | Template for agent configuration files |
@@ -93,8 +92,9 @@ Customization layers and precedence are unchanged.
 
 Feature lifecycle prompts update durable current truth under `.knowledge/` while
 ephemeral planning state remains under `.devspark.work/`. Validate entity,
-decision, evidence, derived metadata, and task-linkage contracts with the
-`templates/schemas/devspark-*.schema.json` files.
+knowledge-node, decision, evidence, and task-linkage contracts with the
+schemas under `templates/schemas/`; the single knowledge engine
+(`scripts/build_knowledge_index.py`) enforces them.
 
 Commands that fix, review, audit, analyze, or verify findings reference
 `templates/command-preamble-contract.md` §9. Findings must name behavioral

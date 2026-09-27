@@ -26,19 +26,35 @@ You **MUST** consider the user input before proceeding (if not empty).
 This command applies the delta to code and current truth together. When any
 later section conflicts with this section, the v4 section wins.
 
-- Consume `context_resolved`; do not perform unbounded ontology traversal during
-  implementation.
-- Update code and `.knowledge` in the same pass for every durable behavior
-  change.
-- Prefer execution evidence; when using inspection evidence, record
-  `test_attempted` and `fallback_reason`.
+- Consume `context_resolved` as already-resolved context. Never traverse more
+  than one ontology hop from it. If you must go further, record an explicit
+  context-gap escalation in the work package naming the entity pair; it is an
+  attributable signal (sparse relations, a critic sufficiency miss, or stale
+  spec context), not a silent workaround.
+- Update code, tests, and `.knowledge` in the same pass for every durable
+  behavior change, and update governance (constitution or the one current
+  decision file for the topic, edited in place) when the change affects it.
+- Every knowledge object and decision you create or touch must cite at least
+  one piece of evidence. Attempt a test first (`type: test`, `verified_by:
+  execution`, recording the `test_ref` from `/devspark.verify` when available).
+  Fall back to code evidence (`verified_by: inspection`) only when a test is
+  not practical, and then record `test_attempted` and `fallback_reason`. A
+  missing `fallback_reason` never blocks shipping; missing evidence does.
+- When a decision `constrains` an entity, keep the entity's `_entity.yaml`
+  `constrained_by` reciprocal in the same pass.
 - Populate each completed task's `code_ref`, `test_ref`, `knowledge_ref`, and
-  `governance_ref` when applicable.
-- Never write ephemeral package, task, spec, plan, review-thread, release, or
-  archive references into permanent code comments or `.knowledge`.
-- Run current-truth validation after implementation, but leave the work package
-  in `.devspark.work/`. Implementation never writes to `.archive/`; release is
-  the sole archival trigger.
+  `governance_ref` when applicable, or an explicit `n/a — <reason>`.
+- Never track specs, requirements, or tasks as comments in code, and never write
+  ephemeral package, task, spec, plan, review-thread, release, or archive
+  references into permanent code or `.knowledge`. Before finishing, run
+  `python .devspark/scripts/scan-ephemeral-refs.py --base <target-branch>` and
+  remove anything it reports.
+- Run the knowledge engine (`.devspark/scripts/build_knowledge_index.py`, else
+  `scripts/build_knowledge_index.py`) without flags to refresh `index.json` and
+  `coverage.json`, then with `--check`. Leave the work package live in
+  `.devspark.work/` with its linkage populated.
+- Implementation never writes to `.archive/`; release is the sole archival
+  trigger for work packages.
 
 ## Workflow Position
 

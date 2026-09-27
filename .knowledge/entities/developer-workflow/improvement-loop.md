@@ -1,3 +1,8 @@
+---
+source_of_truth:
+- .knowledge/entities/developer-workflow
+last_verified: '2026-08-30'
+---
 # Improvement Loop
 
 DevSpark closes the loop on its own quality through prompt-driven improvement
