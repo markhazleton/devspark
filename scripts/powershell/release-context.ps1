@@ -59,7 +59,8 @@ function Test-CompletedTaskLinkage {
             $ref = ($ref -split '::', 2)[0]
             $ref = ($ref -split '#', 2)[0]
             $ref = $ref.Trim()
-            if (-not $ref -or $ref -match '^[A-Za-z][A-Za-z0-9+.-]*:') { continue }
+            # URI schemes have 2+ characters; a drive path such as C:/x is a local ref.
+            if (-not $ref -or $ref -match '^[A-Za-z][A-Za-z0-9+.-]+:') { continue }
             if ($ref.StartsWith('./')) { $ref = $ref.Substring(2) }
             if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $ref))) {
                 $script:unresolvedLinkage.Add("${Label}: $ref")

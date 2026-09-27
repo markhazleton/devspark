@@ -500,3 +500,17 @@ def test_migration_reports_conflicts_and_needs_force(tmp_path: Path) -> None:
     assert forced.returncode == 0, forced.stdout + forced.stderr
     assert "lifecycle" not in entity.read_text(encoding="utf-8")
     assert "governs" not in decision.read_text(encoding="utf-8")
+
+
+def test_drive_letter_paths_are_local_refs_not_urls() -> None:
+    sys.dont_write_bytecode = True
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("engine_under_test", ROOT / "scripts" / ENGINE)
+    engine = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = engine
+    spec.loader.exec_module(engine)
+    assert engine.is_external("https://example.com/rfc")
+    assert engine.is_external("mailto:team@example.com")
+    assert not engine.is_external("C:/repo/src/auth.py")
+    assert not engine.is_external("c:\\repo\\src\\auth.py")

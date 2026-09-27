@@ -106,7 +106,8 @@ task_linkage_failures() {
                 ref="${ref%%#*}"
                 ref="${ref#"${ref%%[![:space:]]*}"}"
                 ref="${ref%"${ref##*[![:space:]]}"}"
-                [[ -z "$ref" || "$ref" =~ ^[A-Za-z][A-Za-z0-9+.-]*: ]] && continue
+                # URI schemes have 2+ characters; a drive path such as C:/x is a local ref.
+                [[ -z "$ref" || "$ref" =~ ^[A-Za-z][A-Za-z0-9+.-]+: ]] && continue
                 if [[ ! -e "$REPO_ROOT/${ref#./}" ]]; then
                     failures=$((failures + 1))
                     printf '%s: %s\n' "$label" "$ref" >> "$UNRESOLVED_LINKAGE_FILE"

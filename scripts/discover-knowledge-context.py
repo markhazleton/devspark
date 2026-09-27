@@ -44,6 +44,11 @@ EXCLUDED_PREFIXES = (
 TEST_RE = re.compile(r"(^|/)(tests?|specs?|__tests__)(/|$)|(^|/)(test_[^/]*|[^/]*(_test|\.test|_spec|\.spec)\.[^/]+)$", re.I)
 IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]{3,}")
 ACRONYM_RE_VOCAB = re.compile(r"(?<![$\w{])[A-Z]{2,5}(?![\w=}\[])")
+# A bare identifier counts as a reference only when it is not the tail of a
+# dotted path (`pkg.module` must not match a needle `module` from another package).
+REF_WORD_RE = re.compile(r"(?<![\w.])[A-Za-z_]\w*")
+ANY_WORD_RE = re.compile(r"[A-Za-z_]\w*")
+REF_COMPOUND_RE = re.compile(r"[A-Za-z_]\w*(?:[./][A-Za-z_]\w*)+")
 BACKTICK_RE = re.compile(r"`([^`\n]{2,120})`")
 STOP = {
     "self", "this", "that", "with", "from", "import", "return", "true", "false", "none", "null",
@@ -102,8 +107,12 @@ class Repo:
         self.files = self._tracked()
         self.code = [path for path in self.files if self._is_code(path)]
         self.tests = [path for path in self.code if TEST_RE.search(path)]
-        self.production = [path for path in self.code if path not in set(self.tests)]
+        self.test_set = frozenset(self.tests)
+        self.production = [path for path in self.code if path not in self.test_set]
         self._text: dict[str, str] = {}
+        self._refs: dict[str, frozenset[str]] = {}
+        self._words: dict[str, frozenset[str]] = {}
+        self._terms: dict[str, set[str]] = {}
         self.common: set[str] = set()
 
     def _tracked(self) -> list[str]:
@@ -125,6 +134,34 @@ class Repo:
             except (OSError, UnicodeDecodeError):
                 self._text[path] = ""
         return self._text[path]
+
+    def refs(self, path: str) -> frozenset[str]:
+        """Identifiers and dotted/slashed module references in a file, computed once.
+
+        Relationship and test signals intersect these sets with module needles
+        instead of running one regex per needle per file, which kept large
+        repositories from scanning in minutes.
+        """
+        if path not in self._refs:
+            text = self.text(path)
+            found = set(REF_WORD_RE.findall(text))
+            for compound in REF_COMPOUND_RE.findall(text):
+                parts = re.split(r"[./]", compound)
+                for end in range(2, len(parts) + 1):
+                    found.add(".".join(parts[:end]))
+                    found.add("/".join(parts[:end]))
+            self._refs[path] = frozenset(found)
+        return self._refs[path]
+
+    def words_anywhere(self, path: str) -> frozenset[str]:
+        if path not in self._words:
+            self._words[path] = frozenset(ANY_WORD_RE.findall(self.text(path)))
+        return self._words[path]
+
+    def terms(self, path: str) -> set[str]:
+        if path not in self._terms:
+            self._terms[path] = file_terms(self, path)
+        return self._terms[path]
 
     def recent_commits(self, days: int = 180) -> Counter[str]:
         result = subprocess.run(
@@ -226,25 +263,22 @@ def repo_vocabulary(repo: Repo) -> set[str]:
         return set()
     frequency: Counter[str] = Counter()
     for path in repo.production:
-        frequency.update(file_terms(repo, path))
+        frequency.update(repo.terms(path))
     return {term for term, count in frequency.items() if count > len(repo.production) / 2}
 
 
 def repeated_terms(repo: Repo, files: list[str], exclude: set[str], limit: int = 6) -> list[dict[str, Any]]:
     seen: Counter[str] = Counter()
     for path in files:
-        seen.update(file_terms(repo, path) - exclude - repo.common)
-    return [{"term": term, "files": count} for term, count in seen.most_common(40) if count >= 2][:limit]
+        seen.update(repo.terms(path) - exclude - repo.common)
+    # Sort by count, then term: Counter ties follow set order, which varies per run.
+    ranked = sorted(seen.items(), key=lambda item: (-item[1], item[0]))
+    return [{"term": term, "files": count} for term, count in ranked if count >= 2][:limit]
 
 
 def tests_touching(repo: Repo, files: list[str]) -> list[str]:
     needles = {Path(path).stem for path in files if len(Path(path).stem) >= 4 and Path(path).stem not in {"__init__", "index", "main"}}
-    hits = []
-    for test in repo.tests:
-        text = repo.text(test)
-        if any(re.search(rf"\b{re.escape(needle)}\b", text) for needle in needles):
-            hits.append(test)
-    return hits
+    return [test for test in repo.tests if not needles.isdisjoint(repo.words_anywhere(test))]
 
 
 def source_clusters(repo: Repo, nodes: dict[str, Node], churn: Counter[str], in_scope: Any) -> list[dict[str, Any]]:
@@ -325,8 +359,8 @@ def module_needles(files: set[str]) -> set[str]:
     return needles
 
 
-def mentions(text: str, needles: set[str]) -> bool:
-    return any(re.search(rf"(?<![\w.]){re.escape(needle)}(?![\w])", text) for needle in needles)
+def mentions(repo: Repo, path: str, needles: set[str]) -> bool:
+    return not needles.isdisjoint(repo.refs(path))
 
 
 def relationship_signals(repo: Repo, knowledge_text: dict[str, str], nodes: dict[str, Node]) -> list[dict[str, Any]]:
@@ -340,11 +374,11 @@ def relationship_signals(repo: Repo, knowledge_text: dict[str, str], nodes: dict
             if not left_only or not right_only:
                 continue
             left_needles, right_needles = module_needles(right_only), module_needles(left_only)
-            left_to_right = sorted(path for path in left_only if path not in repo.tests and mentions(repo.text(path), left_needles))
-            right_to_left = sorted(path for path in right_only if path not in repo.tests and mentions(repo.text(path), right_needles))
+            left_to_right = sorted(path for path in left_only if path not in repo.test_set and mentions(repo, path, left_needles))
+            right_to_left = sorted(path for path in right_only if path not in repo.test_set and mentions(repo, path, right_needles))
             together = sorted(
                 test for test in repo.tests
-                if mentions(repo.text(test), left_needles) and mentions(repo.text(test), right_needles)
+                if mentions(repo, test, left_needles) and mentions(repo, test, right_needles)
             )
             docs = sorted(
                 doc for doc in left.docs + right.docs
@@ -391,7 +425,7 @@ def alias_signals(repo: Repo, knowledge_text: dict[str, str], nodes: dict[str, N
         ]
         candidates += [
             {"candidate": acronym, "files": count, "in_node_knowledge": acronym.lower() in doc_text}
-            for acronym, count in acronyms.most_common(5)
+            for acronym, count in sorted(acronyms.items(), key=lambda item: (-item[1], item[0]))[:5]
             if count >= 2 and acronym.lower() not in known
         ]
         if candidates:

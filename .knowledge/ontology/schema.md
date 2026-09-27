@@ -243,6 +243,12 @@ reports `matched_on` explaining why it scored.
 | `discover-knowledge-context.py <entity \| path \| term> \| --all` | Read-only discovery signals (gaps, mapping breadth, overlaps, relationship and alias candidates, stale references, historical leakage) for `/devspark.discover-knowledge` |
 | `scan-ephemeral-refs.py --base <ref> \| --full-inventory` | Fail when code comments name spec, task, requirement, proposal, or archive identifiers |
 
+`index.json` and `coverage.json` are committed so reviewers and `--check` see the
+same index, and they change whenever knowledge headings, aliases, or mappings
+change. Mark them `linguist-generated=true` in `.gitattributes` so pull requests
+collapse their diffs, and on a merge conflict regenerate them by running the
+engine instead of hand-merging.
+
 `coverage.json` answers existence (required layers, evidence counts, findings).
 `/devspark.site-audit` owns accuracy: it re-runs `execution` evidence and
 judges `inspection` evidence. `index.json` includes `contradiction_scopes`

@@ -18,7 +18,6 @@ All notable changes to DevSpark are documented here.
 - Added `scripts/migrate-knowledge-to-entities.py`, the `entity-node` and
   `knowledge-node` schemas, `resolve_knowledge_engine` /
   `Resolve-KnowledgeEngine`, and agent/prompt shims for `discover-knowledge`.
-
 - Added `scripts/scan-ephemeral-refs.py`, which fails when code comments name
   spec, task, requirement, proposal, work-package, or archive identifiers.
 - Added flat knowledge nodes (`.knowledge/<topic>.md`, `.knowledge/guides/**`)
@@ -28,8 +27,21 @@ All notable changes to DevSpark are documented here.
 - The release pre-scan now blocks unresolved linkage refs
   (`UNRESOLVED_LINKAGE_REFS`) and lists `RETENTION_CANDIDATES`.
 
+### Fixed
+
+- `discover-knowledge-context.py` scales to large repositories (about 80x
+  faster: 800 files across 20 entities went from over a minute to about a
+  second) and its output no longer depends on hash ordering.
+- Windows drive paths (`C:/...`) are treated as local references, not URLs, by
+  the knowledge engine and both release pre-scans.
+
 ### Changed
 
+- Constitution §X now covers migrations of repository-owned knowledge:
+  preserve authored content or report a conflict until explicit force.
+- The generated `.knowledge/ontology/*.json` files are marked
+  `linguist-generated` so pull requests collapse their diffs; quickstarts seed
+  the same `.gitattributes` lines.
 - `/devspark.discover-knowledge` is now a propose-only authoring aid: it reports
   knowledge gaps, mapping gaps and ambiguities, relationship and alias
   candidates, contradictions, historical leakage, and entity candidates, and

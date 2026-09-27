@@ -118,7 +118,13 @@ preserved.
 
 DevSpark v4 migration must be deliberate and inspectable. Migration tooling
 must support dry-run review, conflict reporting, and explicit force behavior
-before overwriting generated targets.
+before overwriting generated targets or repository-owned knowledge.
+
+Migrations of repository-owned knowledge must preserve authored content,
+including comments. When a rewrite would lose authored content or two sources
+disagree (for example, a decision's legacy `governs` and current
+`constrains`), the migration reports a conflict and leaves the file unchanged
+until the user passes explicit force.
 
 Historical lifecycle folders may be archived only after current truth has been
 created and verified. Archival is a working-tree safety operation; Git remains
@@ -150,4 +156,4 @@ This constitution supersedes other DevSpark development practices. Amendments
 must update the current constitution and any conflicting current decisions in
 place.
 
-**Version**: 4.3.0 | **Ratified**: 2026-08-30 | **Last Amended**: 2026-09-26
+**Version**: 4.3.0 | **Ratified**: 2026-08-30 | **Last Amended**: 2026-09-27
