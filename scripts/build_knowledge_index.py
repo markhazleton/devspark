@@ -62,7 +62,9 @@ GENERATOR_ID = "devspark.build_knowledge_index"
 INDEX_SCHEMA_VERSION = 1
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 SEQUENTIAL_NAME_RE = re.compile(r"^(adr[-_]?)?\d+[-_.]", re.IGNORECASE)
-URI_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
+# A URI scheme has at least two characters, so Windows drive paths (`C:/...`)
+# are treated as local paths and checked for existence.
+URI_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]+:")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 

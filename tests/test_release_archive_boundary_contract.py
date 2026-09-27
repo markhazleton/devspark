@@ -98,6 +98,16 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
         encoding="utf-8",
     )
 
+    drive = specs / "005-drive-path"
+    drive.mkdir(parents=True)
+    (drive / "tasks.md").write_text(
+        "- [X] T001 Change code\n"
+        "  - code_ref: Z:/missing/file.py\n"
+        "  - test_ref: tests/test_example.py\n"
+        "  - knowledge_ref: n/a — covered by existing knowledge\n",
+        encoding="utf-8",
+    )
+
     eligible = specs / "003-eligible"
     eligible.mkdir()
     (eligible / "tasks.md").write_text(
@@ -136,7 +146,7 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
     assert result.returncode == 0, result.stdout + result.stderr
     payload = json.loads(result.stdout)
     assert payload["RELEASE_ELIGIBLE_WORK_PACKAGES"] == ["003-eligible"]
-    assert sorted(payload["BLOCKED_WORK_PACKAGES"]) == ["001-missing", "002-unexplained", "004-unresolved"]
+    assert sorted(payload["BLOCKED_WORK_PACKAGES"]) == ["001-missing", "002-unexplained", "004-unresolved", "005-drive-path"]
     assert payload["RETENTION_CANDIDATES"] == [
         {"path": ".devspark.work/pr-reviews/pr-42.md", "kind": "pr-reviews", "pr_number": 42},
         {"path": ".devspark.work/audits/2026-09-01-audit.md", "kind": "audits", "pr_number": None},
@@ -145,4 +155,5 @@ def test_release_prescan_rejects_missing_or_unexplained_linkage(tmp_path: Path) 
     assert payload["UNRESOLVED_LINKAGE_REFS"] == [
         "002-unexplained: .knowledge/entities/docs/architecture.md",
         "004-unresolved: src/renamed.py",
+        "005-drive-path: Z:/missing/file.py",
     ]
