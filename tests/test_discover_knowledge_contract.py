@@ -189,3 +189,45 @@ def test_prompt_contract() -> None:
         assert phrase in command, phrase
     site_audit = (ROOT / "templates/commands/site-audit.md").read_text(encoding="utf-8")
     assert "/devspark.discover-knowledge" in site_audit
+
+
+def _large_repo(root: Path, entities: int, files: int) -> Path:
+    """Entities whose modules import the next entity's module of the same name."""
+    for index in range(entities):
+        name, following = f"domain{index:02d}", f"domain{(index + 1) % entities:02d}"
+        for number in range(files):
+            _write(
+                root / "src" / name / f"module_{number:03d}.py",
+                f"from src.{following}.module_{number:03d} import helper\n\n"
+                + "".join(f"def {name}_step_{step}(value):\n    return helper(value)\n\n" for step in range(15)),
+            )
+        _write(root / "tests" / f"test_{name}.py", f"from src.{name}.module_000 import helper\n")
+        _entity(root, name, f"Domain {index}", f"src/{name}", f"# Domain {index}\n", f"tests/test_{name}.py")
+    for name in SCRIPTS:
+        target = root / ".devspark" / "scripts" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(ROOT / "scripts" / name, target)
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+    subprocess.run([*GIT, "add", "-A"], cwd=root, check=True)
+    subprocess.run([*GIT, "commit", "-qm", "large"], cwd=root, check=True)
+    return root
+
+
+def test_large_repositories_stay_fast_deterministic_and_precise(tmp_path: Path) -> None:
+    import os
+    import time
+
+    repo = _large_repo(tmp_path / "large", entities=20, files=40)
+    command = [sys.executable, str(repo / ".devspark/scripts/discover-knowledge-context.py"), "--root", str(repo), "--all"]
+    outputs = []
+    for seed in ("1", "2"):
+        started = time.monotonic()
+        result = subprocess.run(command, text=True, capture_output=True, check=True, env={**os.environ, "PYTHONHASHSEED": seed})
+        # 800 files across 20 entities took over a minute with per-needle regex scans.
+        assert time.monotonic() - started < 15, "discovery must scale to large repositories"
+        outputs.append(result.stdout)
+    assert outputs[0] == outputs[1], "output must not depend on hash ordering"
+
+    pairs = {tuple(item["pair"]) for item in json.loads(outputs[0])["relationship_signals"]}
+    assert ("domain00", "domain01") in pairs, "a real import is a relationship signal"
+    assert ("domain00", "domain05") not in pairs, "a shared module name inside another package's dotted path is not"
