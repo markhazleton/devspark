@@ -1,7 +1,7 @@
 ---
 document: severity-registry
 constitution_version: "4.2.0"
-last_verified: "2026-08-30"
+last_verified: "2026-09-27"
 evidence:
   - type: code
     ref: scripts/build_knowledge_index.py
@@ -38,7 +38,7 @@ clear behavioral intent cue.
 | Ownership Boundary | SHOWSTOPPER | Install or upgrade overwrites repository-owned current truth or active work state |
 | Platform Parity | HIGH | Bash and PowerShell behavior diverge |
 | Genuine Fix Discipline | HIGH | A finding is marked fixed by metric movement without behavioral proof |
-| Backward-Compatible Migration | HIGH | Migration overwrites or deletes without dry-run/conflict visibility |
+| Backward-Compatible Migration | HIGH | Migration overwrites or deletes generated targets or repository-owned knowledge without dry-run/conflict visibility, or drops authored content without explicit force |
 
 ## Finding Codes
 
