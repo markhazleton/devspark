@@ -10,7 +10,7 @@ last_verified: '2026-09-09'
 
 [![Current Release](https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release)](https://github.com/markhazleton/devspark/releases/latest)
 
-**Current version:** [v4.3.0](https://github.com/markhazleton/devspark/releases/tag/v4.3.0)
+**Current version:** [v5.0.0](https://github.com/markhazleton/devspark/releases/tag/v5.0.0)
 
 DevSpark is an Adaptive System Life Cycle Development toolkit for AI coding
 assistants. It is prompt-first: the product is the command prompt collection,
