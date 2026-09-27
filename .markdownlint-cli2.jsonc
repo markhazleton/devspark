@@ -9,6 +9,10 @@
       "indent": 2
     },
     "MD013": false,
+    // Knowledge-node frontmatter `title` is metadata, not a heading; the body keeps its H1.
+    "MD025": {
+      "front_matter_title": ""
+    },
     "MD024": {
       "siblings_only": true
     },
