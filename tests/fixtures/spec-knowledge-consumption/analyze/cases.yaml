@@ -1,0 +1,190 @@
+# Seeded Analyze cases. Each case is a small spec excerpt plus plan excerpt and the outcome the
+# shipped Analyze prompt must reach. `expect: finding` cases name the recorded statement that must be
+# cited; `expect: none` cases are positive controls that must produce no finding. Every finding case
+# has a paired control. The prompt-driven verification runs these against the real prompt; the
+# contract test pins the wording that produces the outcomes and checks these cases stay well formed.
+cases:
+  - id: contraction-non-goal
+    kind: contraction
+    expect: finding
+    pair: contraction-non-goal-control
+    cites: "Non-goal: automatic reconciliation."
+    spec: |
+      ## Minimum Sufficient Change
+      - Non-goal: automatic reconciliation.
+    plan: |
+      - Add a scheduled job that reconciles records automatically.
+  - id: contraction-non-goal-control
+    kind: contraction
+    expect: none
+    spec: |
+      ## Minimum Sufficient Change
+      - Non-goal: automatic reconciliation.
+    plan: |
+      - Keep the copy operation manual and leave reconciliation out.
+
+  - id: regression-clarification
+    kind: regression
+    expect: finding
+    pair: regression-clarification-control
+    cites: "Q: Are old versions kept? -> A: Yes, keep all."
+    spec: |
+      ## Clarifications
+      - Q: Are old versions kept? -> A: Yes, keep all.
+    plan: |
+      - Delete versions older than 30 days.
+  - id: regression-clarification-control
+    kind: regression
+    expect: none
+    spec: |
+      ## Clarifications
+      - Q: Are old versions kept? -> A: Yes, keep all.
+    plan: |
+      - Retain every version in the store.
+
+  - id: regression-success-criterion
+    kind: regression
+    expect: finding
+    pair: regression-success-criterion-control
+    cites: "SC-001: Every source record has one versioned record."
+    spec: |
+      ## Success Criteria
+      - SC-001: Every source record has one versioned record.
+    plan: |
+      - Produce one versioned record per batch of source records.
+  - id: regression-success-criterion-control
+    kind: regression
+    expect: none
+    spec: |
+      ## Success Criteria
+      - SC-001: Every source record has one versioned record.
+    plan: |
+      - Produce one versioned record per source record.
+
+  - id: regression-disagreeing-decisions
+    kind: regression
+    expect: finding
+    pair: regression-disagreeing-decisions-control
+    cites: "Re-copying is never allowed."
+    spec: |
+      ## Clarifications
+      - Q: Is a re-copy allowed? -> A: Yes, repeating the same copy is acceptable.
+      ## Assumptions
+      - Re-copying is never allowed.
+    plan: |
+      - Operators repeat the copy when it fails.
+  - id: regression-disagreeing-decisions-control
+    kind: regression
+    expect: none
+    spec: |
+      ## Clarifications
+      - Q: Is a re-copy allowed? -> A: Yes, repeating the same copy is acceptable.
+      ## Assumptions
+      - Operators run the copy manually.
+    plan: |
+      - Operators repeat the copy when it fails.
+
+  - id: context-converted-to-work
+    kind: purpose
+    expect: finding
+    pair: context-design-compatible
+    cites: "Context: a later release may add reporting."
+    spec: |
+      ## Assumptions
+      - Context: a later release may add reporting.
+    plan: |
+      - Build the reporting module now.
+  - id: context-design-compatible
+    kind: purpose
+    expect: none
+    spec: |
+      ## Assumptions
+      - Context: a later release may add reporting.
+    plan: |
+      - Keep record identifiers stable so reporting can be added later; build nothing for it.
+
+  - id: constrain-treated-as-project
+    kind: purpose
+    expect: finding
+    pair: constrain-shaped-only
+    cites: "Architectural constraint: no new persisted store."
+    spec: |
+      ## Requirements
+      - Architectural constraint: no new persisted store.
+    plan: |
+      - Add a task to build a migration that proves no new store exists.
+  - id: constrain-shaped-only
+    kind: purpose
+    expect: none
+    spec: |
+      ## Requirements
+      - Architectural constraint: no new persisted store.
+    plan: |
+      - Keep the data in the existing store.
+
+  - id: invariant-aggregated
+    kind: fidelity
+    expect: finding
+    pair: invariant-preserved
+    cites: "Domain invariant: each source record has exactly one versioned record."
+    spec: |
+      ## Key Entities
+      - Domain invariant: each source record has exactly one versioned record.
+    plan: |
+      - Store all source records of a batch together in one aggregated object.
+  - id: invariant-preserved
+    kind: fidelity
+    expect: none
+    spec: |
+      ## Key Entities
+      - Domain invariant: each source record has exactly one versioned record.
+    plan: |
+      - Store one versioned record per source record.
+
+  - id: excluded-mechanism
+    kind: fidelity
+    expect: finding
+    pair: allowed-mechanism
+    cites: "Architectural constraint: no background workers."
+    spec: |
+      ## Requirements
+      - Architectural constraint: no background workers.
+    plan: |
+      - Add a background worker that processes the queue.
+  - id: allowed-mechanism
+    kind: fidelity
+    expect: none
+    spec: |
+      ## Requirements
+      - Architectural constraint: no background workers.
+    plan: |
+      - Process the queue inside the request.
+
+  - id: retry-fidelity
+    kind: fidelity
+    expect: finding
+    pair: retry-repeatable
+    cites: "Acceptable manual operation: repeat the same copy."
+    spec: |
+      ## Minimum Sufficient Change
+      - Acceptable manual operation: repeat the same copy.
+    plan: |
+      - Because the copy is not safe to repeat, add a new cleanup-and-recover operation to be run first.
+  - id: retry-repeatable
+    kind: fidelity
+    expect: none
+    spec: |
+      ## Minimum Sufficient Change
+      - Acceptable manual operation: repeat the same copy.
+    plan: |
+      - Make the copy idempotent so repeating the same copy is safe.
+
+  - id: unrelated-blocker
+    kind: control
+    expect: unrelated-blocker
+    cites: "FR-900"
+    spec: |
+      ## Requirements
+      - **FR-900**: The system MUST export records.
+    plan: |
+      - No task covers the export requirement.

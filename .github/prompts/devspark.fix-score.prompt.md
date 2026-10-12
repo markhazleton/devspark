@@ -1,3 +1,0 @@
----
-agent: devspark.fix-score
----

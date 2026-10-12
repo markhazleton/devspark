@@ -1,0 +1,5 @@
+id: knowledge-engine
+type: subsystem
+owner: DevSpark Maintainers
+constrained_by:
+  - advisory-findings-are-not-authoritative

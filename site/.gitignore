@@ -1,0 +1,12 @@
+# DocFX build output
+_site/
+obj/
+.docfx/
+
+# Temporary files
+*.tmp
+*.log
+
+# Per-developer DevSpark preferences (assistant name, shell, auto_push) - never commit
+devspark.user.json
+

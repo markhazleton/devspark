@@ -1,5 +1,7 @@
 # CLI Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Process Contract
 
 - [ ] **Documented exit codes** (0 success, distinct non-zero for user error vs internal error vs timeout)

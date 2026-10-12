@@ -1,180 +1,60 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://devspark.local/schemas/entity-node.schema.json",
-  "title": "DevSpark Entity Node (_entity.yaml)",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dev.makeboldspark.com/schemas/entity-node.schema.json",
+  "title": "DevSpark Knowledge Entity Node (_entity.yaml)",
+  "description": "Domain-entity node under .knowledge/entities/<id>/_entity.yaml. Declares the entity's identity, owner, relations to other entities, and any justified coverage overrides for missing layer documents.",
   "type": "object",
-  "additionalProperties": true,
-  "required": [
-    "id",
-    "name",
-    "kind",
-    "summary",
-    "evidence"
-  ],
+  "additionalProperties": false,
+  "required": ["id", "type", "owner"],
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$",
+      "description": "Must match the parent folder name under .knowledge/entities/."
     },
-    "name": {
-      "type": "string",
-      "minLength": 1
-    },
-    "kind": {
-      "type": "string",
-      "enum": [
-        "knowledge-model",
-        "framework-template-set",
-        "generated-integration-files",
-        "repository-configuration",
-        "ephemeral-state",
-        "knowledge-site",
-        "design-asset-set",
-        "integration-catalog",
-        "contributor-practice"
-      ]
-    },
-    "summary": {
-      "type": "string",
-      "minLength": 1
-    },
-    "relations": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": true,
-        "required": [
-          "type",
-          "object"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "describes",
-              "derives_from",
-              "extends",
-              "generated_for",
-              "scopes",
-              "supports",
-              "uses",
-              "validates",
-              "validated_by"
-            ]
-          },
-          "object": {
-            "type": "string",
-            "pattern": "^[a-z0-9][a-z0-9._-]*$"
-          }
-        }
-      },
-      "default": []
+    "type": {
+      "enum": ["subsystem", "domain", "integration", "tooling"],
+      "description": "Controlled semantic classification of the entity - distinct from doc-level `layer`. Advisory only: it never requires a layer to exist, because layer coverage is evidence-driven. subsystem = an internal capability of the system this repository builds; domain = a business/problem-space concept whose rules originate outside the code; integration = a boundary with an external system or third-party service; tooling = developer-facing automation that supports delivery rather than being shipped."
     },
     "owner": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Team or role accountable for keeping this entity's layer docs current."
     },
-    "root": {
-      "type": "string",
-      "minLength": 1
-    },
-    "managed_by": {
-      "type": "string",
-      "enum": [
-        "human",
-        "prompt",
-        "script",
-        "generated",
-        "mixed"
-      ]
-    },
-    "required_layers": {
+    "relations": {
       "type": "array",
+      "description": "Typed edges to other entities. Accepts either authored spelling: {object, predicate} or {to, rel}.",
       "items": {
-        "type": "string",
-        "pattern": "^[^/\\\\]+\\.md$"
-      },
-      "uniqueItems": true
-    },
-    "evidence": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "devspark-evidence.schema.json"
+        "type": "object",
+        "additionalProperties": false,
+        "anyOf": [{ "required": ["object"] }, { "required": ["to"] }],
+        "properties": {
+          "object": { "type": "string", "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$" },
+          "to": { "type": "string", "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$" },
+          "predicate": { "type": "string", "minLength": 1 },
+          "rel": { "type": "string", "minLength": 1 }
+        }
       }
     },
-    "aliases": {
+    "coverage_overrides": {
       "type": "array",
       "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true,
-      "description": "Concept names this entity is reachable by in discovery."
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["layer", "justification"],
+        "properties": {
+          "layer": {
+            "enum": ["architecture", "business", "integration", "operations", "pattern", "plan"]
+          },
+          "justification": { "type": "string", "minLength": 1 }
+        }
+      }
     },
     "constrained_by": {
       "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z0-9][a-z0-9._-]*$"
-      },
       "uniqueItems": true,
-      "description": "Governance decision ids that constrain this entity (hand-authored reciprocal of constrains)."
-    },
-    "links": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "references": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "uniqueItems": true,
-          "description": "Knowledge node ids (entity, decision, or flat node) or existing repository paths this node refers to. Never temporary work."
-        }
-      }
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "description": "Lightweight pointer to .knowledge/governance/decisions/<id>.md docs that constrain this entity. Each id must also list this entity in its `constrains` array — the decision owns the reasoning, this is only a pointer."
     }
-  },
-  "description": "Structural metadata for one entity. constrained_by is hand-authored and must reciprocate each governance decision's constrains list; the knowledge engine validates the pair.",
-  "not": {
-    "anyOf": [
-      {
-        "required": [
-          "status"
-        ]
-      },
-      {
-        "required": [
-          "lifecycle"
-        ]
-      },
-      {
-        "required": [
-          "supersedes"
-        ]
-      },
-      {
-        "required": [
-          "superseded-by"
-        ]
-      },
-      {
-        "required": [
-          "superseded_by"
-        ]
-      },
-      {
-        "required": [
-          "replaced"
-        ]
-      },
-      {
-        "required": [
-          "obsolete"
-        ]
-      }
-    ]
   }
 }

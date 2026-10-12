@@ -1,5 +1,7 @@
 # ML Training Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Reproducibility
 
 - [ ] **Deterministic seeds set across libraries** — Python, NumPy, framework, CUDA where supported

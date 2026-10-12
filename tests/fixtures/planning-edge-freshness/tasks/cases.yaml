@@ -1,0 +1,21 @@
+# Seeded Tasks cases. Start from plan.md and tasks.md in this folder, with the task list stamped
+# with the fingerprint of the baseline plan, then apply the plan edit. T001 is completed work.
+cases:
+  - id: coherent-plan-correction
+    edit: {replace: "the chosen path", with: "the path the user chose"}
+    tasks_plan_state: stale
+    outcome: "Plan -> Tasks: NO CONTENT CHANGE"
+    task_list_changes: none
+    stamp: updated
+  - id: material-plan-change
+    edit: {append: "- Stream rows to the file instead of building the CSV in memory."}
+    tasks_plan_state: stale
+    outcome: re-projection
+    task_list_changes: unchecked work only; T001 stays checked
+    stamp: updated
+  - id: material-change-invalidates-completed-task
+    edit: {replace: "Build the CSV in memory with the standard library", with: "Use a streaming writer from a third-party library"}
+    tasks_plan_state: stale
+    outcome: stop-ask-developer
+    task_list_changes: none
+    stamp: unchanged

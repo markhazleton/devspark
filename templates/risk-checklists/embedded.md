@@ -1,5 +1,7 @@
 # Embedded / Firmware Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Memory & Resources
 
 - [ ] **Static memory budget per subsystem** (no surprise heap growth); stack high-water mark tracked

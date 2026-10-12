@@ -1,11 +1,107 @@
 # DevSpark Quickstart — Claude Code
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
+> DevSpark is a Make Bold Solutions project. Install and update the framework from
+> `https://dev.makeboldspark.com/raw` using the canonical distribution manifest.
+
 You are bootstrapping **DevSpark**, a spec-driven development process, into this repository.
-You will pull prompt files from the DevSpark repo and place them in the correct directories.
+No CLI installation is required. You will pull prompt files from the DevSpark repo and place them in the correct directories.
+
+## Preview Prompt — See Exactly What Will Happen Before You Trust It (recommended)
+
+> **You should never run instructions you can't inspect.** "Why should I trust this?" is the right question to ask. DevSpark is designed to be *previewed before it is trusted* — every instruction the agent follows, and every `/devspark-*` skill it installs, is plain text you can read in full **before a single file is created**. Nothing below writes to your repository until you explicitly say so. Use either preview path — or both.
+
+### Path A — Preview the prompt yourself (no agent, no changes)
+
+Print the exact instructions, the full install list, and the stock prompt behind any individual `/devspark-*` skill to your terminal and read them for yourself:
+
+```powershell
+# 1. This guide, verbatim — the complete set of instructions the agent will follow
+Invoke-WebRequest -Uri "https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_claudecode.md?cb=$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())" -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' } | Select-Object -ExpandProperty Content
+
+# 2. The manifest — the authoritative list of every file that would be installed, and where
+$manifest = Invoke-RestMethod -Uri "https://dev.makeboldspark.com/dist/manifest.json?cb=$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())" -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' }
+$manifest.install | ForEach-Object { "{0,-12} {1}" -f $_.category, $_.dest }
+
+# 3. The stock prompt behind any individual skill, printed in full BEFORE you install it (example: /devspark-specify)
+$src = ($manifest.install | Where-Object { $_.category -eq 'command' -and $_.dest -like '*devspark.specify.md' }).source
+Invoke-WebRequest -Uri "$($manifest.raw_base)/$src?cb=$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())" -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' } | Select-Object -ExpandProperty Content
+```
+
+```bash
+# 1. This guide, verbatim
+curl -fsS -H 'Cache-Control: no-cache' "https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_claudecode.md?cb=$(date +%s%N)"
+
+# 2. The manifest — every file that would be installed, and where
+curl -fsS -H 'Cache-Control: no-cache' "https://dev.makeboldspark.com/dist/manifest.json?cb=$(date +%s%N)" -o /tmp/devspark-manifest.json
+jq -r '.install[] | "\(.category)\t\(.dest)"' /tmp/devspark-manifest.json
+
+# 3. The stock prompt behind any individual skill, printed in full BEFORE you install it (example: /devspark-specify)
+raw_base=$(jq -r .raw_base /tmp/devspark-manifest.json)
+src=$(jq -r '.install[] | select(.category=="command" and (.dest|endswith("devspark.specify.md"))) | .source' /tmp/devspark-manifest.json)
+curl -fsS -H 'Cache-Control: no-cache' "$raw_base/$src?cb=$(date +%s%N)"
+```
+
+### Path B — Ask the agent to preview (dry run, no writes)
+
+Paste this to your agent before anything else:
+
+> **Preview Prompt (dry run):** Before creating, modifying, or deleting anything, fetch this guide and the manifest, then show me (1) the mode you would run, (2) the full list of files you would create/modify/delete, and (3) the actual contents of the stock prompts behind the core `/devspark-*` skills you would install. Make **no changes**. Stop and wait for my explicit `proceed` before touching my repository.
+
+When operating in **Preview Prompt Mode**, the agent must:
+
+- Treat the run as **read-only** — no file writes, no directory creation, no deletions, no `.gitignore` edits.
+- Fetch (cache-busted, per Step 0) and **display** the manifest-driven install list and the raw text of the stock prompts behind the key skills it would install.
+- Present the mode banner and plan preview shown before any files are written **without executing** them.
+- End by asking for explicit confirmation — e.g., "Reply `proceed` to install, or `cancel` to stop" — and do nothing until the user confirms.
+
+Once you've reviewed the prompt and you're comfortable, continue with the steps below (or reply `proceed`).
+
+---
+
+## Step 0: Bypass All Caches (do this first — non-negotiable)
+
+> ⚠️ **Webpage-fetch tools serve stale, aggressively cached copies of every `dev.makeboldspark.com` URL** — including this guide, `manifest.json`, and every prompt/template/script. A cached read will install an **old version** and force the user to intervene. **Never** use a webpage-fetch tool for a DevSpark URL. Fetch **everything** with a terminal command that adds a unique cache-buster (`?cb=<timestamp>`) **and** no-cache headers.
+
+**0a. Re-fetch this guide uncached.** Even if you already loaded this quickstart, you may be reading a cached copy. Pull a fresh copy via terminal and follow *that* copy if it differs from what you have:
+
+```powershell
+Invoke-WebRequest -Uri "https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_claudecode.md?cb=$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())" -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' } | Select-Object -ExpandProperty Content
+```
+
+```bash
+curl -fsS -H 'Cache-Control: no-cache' "https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_claudecode.md?cb=$(date +%s%N)"
+```
+
+**0b. Define a reusable download helper.** Use this helper for **every** file fetch in Steps 4–7 and the version check in Step 2 — it guarantees a cache-busted, no-cache terminal download. Do not substitute a webpage-fetch tool.
+
+```powershell
+function Get-DevSparkFile {
+  param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][string]$Dest)
+  $cb  = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+  $uri = "https://dev.makeboldspark.com/raw/$Path`?cb=$cb"
+  $dir = Split-Path -Parent $Dest
+  if ($dir) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+  Invoke-WebRequest -Uri $uri -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' } -OutFile $Dest
+}
+# Example: Get-DevSparkFile 'templates/commands/specify.md' '.devspark/defaults/commands/devspark.specify.md'
+```
+
+```bash
+get_devspark_file() {  # usage: get_devspark_file <raw-path> <dest>
+  local path="$1" dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  curl -fsS -H 'Cache-Control: no-cache' "https://dev.makeboldspark.com/raw/$path?cb=$(date +%s%N)" -o "$dest"
+}
+# Example: get_devspark_file 'templates/commands/specify.md' '.devspark/defaults/commands/devspark.specify.md'
+```
+
+Throughout this guide, wherever a step says "Fetch … from `https://dev.makeboldspark.com/raw/…`", that means **call this helper in a terminal** — never a webpage-fetch tool.
 
 ## Step 1: Gather Project Context
 
-No install-critical questions are needed before proceeding — **both** shell script sets (PowerShell and Bash) plus Python utility scripts are always installed regardless of OS. Detect the current OS to display in the plan preview.
+No install-critical questions are needed before proceeding — **both** script sets (PowerShell and Bash) are always installed regardless of OS. Detect the current OS to display in the plan preview.
 
 **OS detection** (in priority order):
 
@@ -13,8 +109,8 @@ No install-critical questions are needed before proceeding — **both** shell sc
 2. If the shell environment is bash/zsh/sh → **macOS/Linux** (active runtime: Bash)
 
 State the detected OS before proceeding:
-> *"Detected: Windows — active runtime PowerShell. Installing PowerShell, Bash, and Python utility scripts."*
-> *"Detected: macOS/Linux — active runtime Bash. Installing PowerShell, Bash, and Python utility scripts."*
+> *"Detected: Windows — active runtime PowerShell. Installing both PowerShell and Bash scripts."*
+> *"Detected: macOS/Linux — active runtime Bash. Installing both PowerShell and Bash scripts."*
 
 ---
 
@@ -25,49 +121,53 @@ Before creating anything, check for prior legacy / DevSpark installations:
 | Check for | What it means |
 |---|---|
 | `.devspark/` exists | **DevSpark already installed.** See "Version Check" below. |
-| `.knowledge/` exists | **User artifacts exist.** Preserve authored files; initialize missing entity and ontology scaffolding. |
-| `.specify/` exists | **Legacy layout detected.** Needs migration. |
-| `.documentation/` or `.documenation/` exists | **Documentation intake detected.** Classify into `.knowledge/` or `.devspark.work/`; obsolete inputs wait under `.devspark.work/release-candidates/` for release. |
-| `.devspark/defaults/commands/` exists | **Pre-separation DevSpark.** Stock commands need to move to `.devspark/`. |
-| Root `memory/` (without `.knowledge/governance/`) | **Legacy structure.** Needs migration. |
-| Root `scripts/` or `templates/` (without `.devspark/scripts/`) | **Legacy structure.** Needs migration. |
-| `.claude/commands/specify.*.md` files | **Legacy shims detected.** Rename to `devspark.*` prefix. |
+| `.devspark.work/` exists | **Temporary work and overrides exist.** Preserve unless explicitly finalized. |
+| `.knowledge/` exists | **Current project truth exists.** Preserve everything — never overwrite. |
 
 **If nothing is found**, skip ahead to Step 3.
 
-### Migration: `.specify/` (legacy layout)
+### Upgrade cleanup
 
-Tell the user what you found and ask for confirmation before proceeding.
+After refreshing stock files, remove only framework-owned commands absent from the
+canonical manifest. Preserve `.devspark.work/`, `.knowledge/`, `.archive/`, and
+user overrides. Keep `.devspark/VERSION` as the canonical installed-version stamp.
 
-1. Copy `.specify/memory/*` → `.knowledge/governance/` (skip files that already exist at destination)
-2. Copy `.specify/specs/*` → `.devspark.work/specs/` (skip files that already exist)
-3. Copy any `.specify/` root-level `.md` files → `.knowledge/` (skip files that already exist)
-4. Rename `.specify/` → `.specify.old/` (preserve as backup)
-5. Report: "Migrated .specify/ → .knowledge/. Backup at .specify.old/"
+---
 
-### Migration: `.devspark/` (pre-separation DevSpark)
+## Step 2b: Announce Mode and Preview Plan
 
-1. Create `.devspark/` directory structure
-2. Move `.devspark/defaults/commands/*` → `.devspark/defaults/commands/`
-3. Move `.devspark/templates/*` → `.devspark/templates/` if present
-4. Move `.knowledge/overrides/scripts/*` → `.devspark/scripts/` (only stock DevSpark scripts with framework header comments — leave user-created scripts)
-5. Move `.knowledge/overrides/templates/*` → `.devspark/templates/` (only stock DevSpark templates)
-6. Delete empty `.devspark/` if nothing remains
-7. Report: "Migrated framework files from .knowledge/ → .devspark/"
+**Before writing any files**, output a mode banner so the user knows exactly what is about to happen.
 
-### Migration: Root-level directories (legacy layout)
+### Mode Banner
 
-1. Copy `memory/*` → `.knowledge/governance/` (skip existing)
-2. Copy `specs/*` → `.devspark.work/specs/` (skip existing)
-3. Rename migrated directories → `{name}.old/` (e.g., `memory.old/`)
+Choose the banner that matches the detected state from Step 2:
 
-### Migration: Old agent shims
+| Detected state | Banner to output |
+|---|---|
+| No `.devspark/` found, no legacy | `▶ Mode: FRESH INSTALL` |
+| `.devspark/` found, older version in the same major | `▶ Mode: UPDATE (vX.Y.Z → vX.Y.Y)` |
+| `.devspark/` found, version matches latest, all files present | `▶ Mode: ALREADY CURRENT (vX.Y.Z) — nothing to do. Skipping to Step 11.7, then Step 12.` |
+| `.devspark/` found, version matches latest, files missing | `▶ Mode: REPAIR (vX.Y.Z — re-fetching missing framework files)` |
 
-1. Rename `.claude/commands/specify.*.md` → `.claude/commands/devspark.*.md`
-2. In all shim files, replace `.devspark/defaults/commands/` → `.devspark/defaults/commands/`
-3. Check `.github/agents/specify.*` and `.cursor/commands/specify.*` — rename to `devspark.*` prefix if found
+Output the banner, then immediately output a brief **plan preview** — one line per action group:
 
-After migration, continue with Step 3.
+```text
+Plan:
+  • Create directories: .devspark/, .claude/commands/, .vscode/
+  • Install N canonical files from manifest.install → .devspark/ (commands, templates, skills, both script sets) + agents-registry.json  (category `skill` entries are skipped)
+  • Generate N command entry points → .claude/commands/devspark-<cmd>.md
+  • Retire 8.x entry points: delete unmodified, quarantine edited, remove orphans (one confirmation)  [Update/Repair; the 8.x classes only when the installed major version is below 9]
+  • Prune any non-canonical .devspark/ entries (manifest.devspark_root)  [Update/Repair]
+  • Seed constitution → .knowledge/governance/constitution.md  [if needed]
+  • Write VERSION stamp → .devspark/VERSION
+  • Update .gitignore
+```
+
+For Update and Repair modes, show only the steps that will actually run.
+
+Proceed immediately after outputting the banner and plan — no additional confirmation needed unless you are about to perform a migration that renames or deletes directories.
+
+---
 
 ### Constitution bootstrap questions (only if needed)
 
@@ -81,44 +181,62 @@ After detection and any migration work above, check whether `.knowledge/governan
 
 ### If `.devspark/` already exists — Version Check
 
-1. Read `.devspark/VERSION`. If the file is missing or `version:` is not semver (`X.Y.Z`), treat the installed version as `unknown`.
-2. Fetch `https://api.github.com/repos/markhazleton/devspark/releases/latest`, read `tag_name`, and strip the leading `v` to get `LATEST_VERSION`. Only if the Releases API is unreachable, fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/CHANGELOG.md` and extract the most recent `## [vX.Y.Z]` or `## [X.Y.Z]` heading as a fallback.
+1. Read `.devspark/VERSION`, the canonical DevSpark stamp. Parse `version:` as semver (`X.Y.Z`). If the stamp is missing or malformed, treat the installed version as `unknown` and refresh the framework files without changing project knowledge or user overrides.
+2. **Read the canonical manifest from a fresh, uncached fetch.** `manifest.json` is the **single source of truth** — it carries the latest version (`latest`), the exact list of files a canonical install must place (`install`, an array of `{source, dest, category}`), the `.devspark/` root allowlist (`devspark_root`), and the fetch base (`raw_base`). The agent never has to guess the file list. You MUST bypass every cache (see **Step 0**); do **not** use a webpage-fetch tool. Fetch the whole manifest **once** and reuse it in Step 4 and the prune step:
+
+   - PowerShell:
+
+     ```powershell
+     $manifest = Invoke-RestMethod -Uri "https://dev.makeboldspark.com/dist/manifest.json?cb=$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())" -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' }
+     $LATEST_VERSION = $manifest.latest
+     "Latest: $LATEST_VERSION  |  install entries: $($manifest.install.Count)"
+     ```
+
+   - bash:
+
+     ```bash
+     curl -fsS -H 'Cache-Control: no-cache' "https://dev.makeboldspark.com/dist/manifest.json?cb=$(date +%s%N)" -o /tmp/devspark-manifest.json
+     LATEST_VERSION=$(jq -r .latest /tmp/devspark-manifest.json)
+     echo "Latest: $LATEST_VERSION  |  install entries: $(jq '.install | length' /tmp/devspark-manifest.json)"
+     ```
+
+   Read the `latest` field as `LATEST_VERSION`. If the value looks older than a release that was just published, re-run with a new `cb` value — never trust a cached read. (If `manifest.install` is absent, you are reading a manifest published before manifest-driven installs — re-fetch with a new cache-buster; the current release always includes it.)
 3. Compare and act:
 
 | Installed version | Latest version | Action |
 |---|---|---|
-| Same as latest | — | Verify framework files. If any stock prompt, template, script, or command shim is missing, run **repair mode** below. Otherwise run **Step 6.5** to initialize or repair `.knowledge/`, then report: "DevSpark is already at vX.Y.Z — framework files are current; knowledge initialization checked." Skip to Step 12 (Verify & Report). |
-| Older than latest | Newer | Report the version gap, then run **update mode** below. |
+| Same as latest | — | Verify framework files. If any stock prompt, template, script, or command shim is missing, run **repair mode** below. Otherwise report: "DevSpark is already at vX.Y.Z — nothing to update." Skip to Step 11.7 (Initialize and Reconcile `.knowledge/`), then Step 12 (Verify & Report). |
+| Installed major is lower than latest major | Newer major | Report the version gap, then run **update mode** below. |
+| Older than latest within the same major | Newer | Report the version gap, then run **update mode** below. |
 | `unknown` (VERSION missing) | Any | Treat as outdated. Run **update mode**. |
 
 #### Update Mode
 
-Tell the user: "Updating DevSpark from vX.Y.Z → vY.Y.Y. Existing `.knowledge/` files will be preserved; missing or incomplete knowledge scaffolding will be initialized."
+Tell the user: "Updating DevSpark from vX.Y.Z → vY.Y.Y. Your `.devspark.work/` and `.knowledge/` files will not be touched."
 
-Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
+Execute **only** these steps in order, then skip to Step 11.7 (Initialize and Reconcile `.knowledge/`), then Step 12 (Verify & Report):
 
-- **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite)
-- **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite)
-- **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite)
-- **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite)
-- **Step 6.5** — Initialize or repair `.knowledge/entities/` and `.knowledge/ontology/`, and classify `.documentation/` intake if present
-- **Step 7** — Re-create all agent shim files (overwrite — shims are framework files)
+- **Step 4** — Re-install every file in the manifest `install` array (commands, templates, skills, scripts, registry; not the `skill` category) into its `dest`, overwriting in place
+- **Step 7** — Re-create all command entry point files (overwrite — they are framework files)
+- **Step 7.5** — Retire 8.x entry points (the 8.x classes only when the installed major version is below 9; orphans on every run)
+- **Step 9.5** — Prune any non-canonical `.devspark/` files (uses `manifest.devspark_root`)
 - **Step 10** — Update `.devspark/VERSION` with new version and today's date
+- **Step 11 (review, advisory — never modify `.devspark.work/`)** — Report three staleness signals so the team can act:
+  - **Orphaned overrides** — any file in `.devspark.work/commands/`, `.devspark.work/{git-user}/commands/`, `.devspark.work/scripts/bash/`, or `.devspark.work/scripts/powershell/` whose matching stock default no longer exists under `.devspark/` (only `devspark.*.md` command override files mirror stock). Recommend deleting or re-pointing.
+  - **Missing/stale entry points** — cross-check `.devspark/defaults/commands/devspark.*.md` against `.claude/commands/devspark-*.md`; report stock commands with no entry point (re-run Step 7) and entry points with no stock command (Step 7.5 orphan handling).
 
-**Preserve existing authored files** in `.knowledge/`, the constitution, `.gitignore`, and platform guide files (`CLAUDE.md`, etc.). Only create missing knowledge scaffolding, regenerate generated ontology files, or assimilate `.documentation/` content after review.
+**Never touch** `.devspark.work/`, `.knowledge/`, the constitution, `.gitignore`, or platform guide files (`CLAUDE.md`, etc.), except for the single confirmed action in Step 7.5.
 
 #### Repair Mode
 
-If the installed version matches `LATEST_VERSION` but framework files are missing, tell the user: "DevSpark is already at vX.Y.Z, but the framework install is incomplete. Re-fetching stock files and checking knowledge initialization. Existing `.knowledge/` files will be preserved."
+If the installed version matches `LATEST_VERSION` but framework files are missing, tell the user: "DevSpark is already at vX.Y.Z, but the framework install is incomplete. Re-fetching stock files to repair it. Your `.devspark.work/` and `.knowledge/` files will not be touched."
 
-Execute **only** these steps in order, then skip to Step 12 (Verify & Report):
+Execute **only** these steps in order, then skip to Step 11.7 (Initialize and Reconcile `.knowledge/`), then Step 12 (Verify & Report):
 
-- **Step 4** — Re-fetch all stock prompts into `.devspark/defaults/commands/` (overwrite missing or stale copies)
-- **Step 5** — Re-fetch all helper templates into `.devspark/templates/` (overwrite missing or stale copies)
-- **Step 5.5** — Re-fetch all Agent Skill packages into `.devspark/templates/skills/` (overwrite missing or stale copies)
-- **Step 6** — Re-fetch all scripts into `.devspark/scripts/` (overwrite missing or stale copies)
-- **Step 6.5** — Initialize or repair `.knowledge/entities/` and `.knowledge/ontology/`, and classify `.documentation/` intake if present
-- **Step 7** — Re-create all agent shim files (overwrite missing or stale copies)
+- **Step 4** — Re-install every file in the manifest `install` array whose `dest` is missing or stale, overwriting in place
+- **Step 7** — Re-create all command entry point files (overwrite missing or stale copies)
+- **Step 7.5** — Retire 8.x entry points (the 8.x classes only when the installed major version is below 9; orphans on every run)
+- **Step 9.5** — Prune any non-canonical `.devspark/` files (uses `manifest.devspark_root`)
 - **Step 10** — Re-write `.devspark/VERSION` using the current `LATEST_VERSION` and today's date
 
 ---
@@ -133,235 +251,74 @@ Create these directories (skip any that already exist):
 ├── scripts/
 └── templates/
 
-.knowledge/
-├── entities/
-├── governance/
-│   └── decisions/
-├── ontology/
-└── overrides/
-    └── commands/          ← team-level overrides (optional)
-
 .claude/
 └── commands/
 ```
 
 ---
 
-## Step 4: Pull Stock Prompts
+## Step 4: Install Canonical Framework Files (manifest-driven)
 
-Fetch each file from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/commands/` and save to `.devspark/defaults/commands/` with the `devspark.` prefix:
+> This single step replaces the former hardcoded "pull prompts / templates / skills / scripts" steps. The manifest's `install` array is the **authoritative** list of every file a canonical DevSpark install must place — stock command prompts, helper templates, the full `templates/` tree (skills, workflows, aliases, prompts, risk-checklists), **both** script sets, and `agents-registry.json`. You never maintain or guess this list; you replay it. It is generated by the release pipeline from the exact same mapping the CLI template package applies, so a prompt-first install is equivalent to the zip install.
 
-| Source file | Destination |
-|---|---|
-| `specify.md` | `.devspark/defaults/commands/devspark.specify.md` |
-| `plan.md` | `.devspark/defaults/commands/devspark.plan.md` |
-| `tasks.md` | `.devspark/defaults/commands/devspark.tasks.md` |
-| `implement.md` | `.devspark/defaults/commands/devspark.implement.md` |
-| `create-pr.md` | `.devspark/defaults/commands/devspark.create-pr.md` |
-| `constitution.md` | `.devspark/defaults/commands/devspark.constitution.md` |
-| `pr-review.md` | `.devspark/defaults/commands/devspark.pr-review.md` |
-| `address-pr-review.md` | `.devspark/defaults/commands/devspark.address-pr-review.md` |
-| `quickfix.md` | `.devspark/defaults/commands/devspark.quickfix.md` |
-| `release.md` | `.devspark/defaults/commands/devspark.release.md` |
-| `critic.md` | `.devspark/defaults/commands/devspark.critic.md` |
-| `clarify.md` | `.devspark/defaults/commands/devspark.clarify.md` |
-| `analyze.md` | `.devspark/defaults/commands/devspark.analyze.md` |
-| `checklist.md` | `.devspark/defaults/commands/devspark.checklist.md` |
-| `personalize.md` | `.devspark/defaults/commands/devspark.personalize.md` |
-| `site-audit.md` | `.devspark/defaults/commands/devspark.site-audit.md` |
-| `explain.md` | `.devspark/defaults/commands/devspark.explain.md` |
-| `next.md` | `.devspark/defaults/commands/devspark.next.md` |
-| `evolve-constitution.md` | `.devspark/defaults/commands/devspark.evolve-constitution.md` |
-| `discover-constitution.md` | `.devspark/defaults/commands/devspark.discover-constitution.md` |
-| `discover-knowledge.md` | `.devspark/defaults/commands/devspark.discover-knowledge.md` |
-| `repo-story.md` | `.devspark/defaults/commands/devspark.repo-story.md` |
-| `update-pr.md` | `.devspark/defaults/commands/devspark.update-pr.md` |
-| `taskstoissues.md` | `.devspark/defaults/commands/devspark.taskstoissues.md` |
-| `add-application.md` | `.devspark/defaults/commands/devspark.add-application.md` |
-| `list-applications.md` | `.devspark/defaults/commands/devspark.list-applications.md` |
-| `validate-registry.md` | `.devspark/defaults/commands/devspark.validate-registry.md` |
-| `commit-audit.md` | `.devspark/defaults/commands/devspark.commit-audit.md` |
-| `fix-score.md` | `.devspark/defaults/commands/devspark.fix-score.md` |
-| `verify.md` | `.devspark/defaults/commands/devspark.verify.md` |
+The `install` list includes the **Agent Skills** under `.devspark/templates/skills/` — notably `templates/skills/write-spec/SKILL.md`, required by `/devspark-specify` (a missing skill silently degrades it to pre-2.4 behaviour).
 
----
+The list also carries entries of category `skill` (the Copilot command skills, destined for `.github/skills/`). This agent does not use them: skip every `skill` entry in the replay and in the validation below.
 
-## Step 5: Pull Helper Templates
+Using the `$manifest` object (PowerShell) / `/tmp/devspark-manifest.json` (bash) captured in **Step 2**, download every other entry from `{raw_base}/{source}` (cache-busted) and write it to `{dest}`, creating parent directories as needed:
 
-Fetch from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/` and save to `.devspark/templates/`:
+- PowerShell:
 
-- `spec-template.md`
-- `plan-template.md`
-- `tasks-template.md`
-- `quick-spec-template.md`
-- `checklist-template.md`
-- `agent-file-template.md`
-- `command-preamble-contract.md`
-- `rationale-template.md`
-- `spec-validation-contract.md`
-- `README.md`
+  ```powershell
+  $rawBase = $manifest.raw_base
+  $items = @($manifest.install | Where-Object { $_.category -ne 'skill' })
+  foreach ($item in $items) {
+    $cb  = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    $dir = Split-Path -Parent $item.dest
+    if ($dir) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+    Invoke-WebRequest -Uri "$rawBase/$($item.source)?cb=$cb" `
+      -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' } -OutFile $item.dest
+  }
+  "Installed $($items.Count) canonical files."
+  ```
 
-Also fetch every file recursively under these template subdirectories, preserving the same relative paths under `.devspark/templates/`:
+- bash:
 
-- `knowledge/`
-- `prompts/`
-- `risk-checklists/`
-- `schemas/`
-- `skills/`
+  ```bash
+  raw_base=$(jq -r .raw_base /tmp/devspark-manifest.json)
+  jq -r '.install[] | select(.category != "skill") | [.source, .dest] | @tsv' /tmp/devspark-manifest.json |
+  while IFS=$'\t' read -r src dest; do
+    mkdir -p "$(dirname "$dest")"
+    curl -fsS -H 'Cache-Control: no-cache' "$raw_base/$src?cb=$(date +%s%N)" -o "$dest"
+  done
+  echo "Installed $(jq '[.install[] | select(.category != "skill")] | length' /tmp/devspark-manifest.json) canonical files."
+  ```
 
-Do not fetch `templates/commands/` in this step — Step 4 installs command prompts into `.devspark/defaults/commands/`. Do not fetch `templates/vscode-settings.json`.
+### Step 4 Validation (required)
 
-Also fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/agents-registry.json` and save it to `agents-registry.json` at the repository root.
-
----
-
-## Step 5.5: Pull Agent Skills
-
-Current DevSpark releases delegate some command reasoning to portable **Agent Skill** packages under `.devspark/templates/skills/`. `/devspark.specify` requires the `write-spec` skill — without it, the command silently degrades to legacy inline behaviour.
-
-Fetch each file below from `https://raw.githubusercontent.com/markhazleton/devspark/main/` and save it to the matching path under `.devspark/templates/skills/` (preserve the subdirectory structure):
-
-- `templates/skills/README.md`
-- `templates/skills/ADAPTER-contract.md`
-- `templates/skills/SKILL-validation-contract.md`
-- `templates/skills/references/devspark-skills-guide.md`
-- `templates/skills/write-spec/SKILL.md`
-- `templates/skills/write-spec/references/spec-template.md`
-- `templates/skills/write-spec/scripts/gather-context.ps1`
-- `templates/skills/write-spec/scripts/gather-context.sh`
-
-> Skills are framework-owned and safe to overwrite on every install or upgrade. They never touch `.knowledge/`.
-
-### Step 5.5 Validation (required)
-
-After fetching, verify the critical skill files landed:
+Confirm every installed `dest` in the manifest now exists on disk:
 
 ```powershell
-@(
-  'ADAPTER-contract.md',
-  'SKILL-validation-contract.md',
-  'write-spec/SKILL.md',
-  'write-spec/scripts/gather-context.ps1',
-  'write-spec/scripts/gather-context.sh',
-  'write-spec/references/spec-template.md'
-) | ForEach-Object {
-  if (-not (Test-Path ".devspark/templates/skills/$_")) { Write-Host "MISSING: skills/$_" }
-}
+$missing = $items | Where-Object { -not (Test-Path $_.dest) }
+if ($missing) { $missing | ForEach-Object { Write-Host "MISSING: $($_.dest)" } }
+else { Write-Host "All $($items.Count) canonical files present." }
 ```
 
 ```bash
-for f in ADAPTER-contract.md SKILL-validation-contract.md \
-         write-spec/SKILL.md write-spec/scripts/gather-context.ps1 \
-         write-spec/scripts/gather-context.sh write-spec/references/spec-template.md; do
-  [ -f ".devspark/templates/skills/$f" ] || echo "MISSING: skills/$f"
-done
+miss=0
+while IFS= read -r dest; do
+  [ -f "$dest" ] || { echo "MISSING: $dest"; miss=$((miss+1)); }
+done < <(jq -r '.install[] | select(.category != "skill") | .dest' /tmp/devspark-manifest.json)
+echo "Missing files: $miss"
 ```
 
-If any skill file is missing, re-fetch it before continuing. A missing `write-spec/SKILL.md` will cause `/devspark.specify` to silently fall back to legacy inline behaviour.
-
----
-
-## Step 6: Pull Scripts
-
-Fetch the script payload from `https://raw.githubusercontent.com/markhazleton/devspark/main/scripts/` — always install both PowerShell and Bash script sets plus Python utility scripts, regardless of the current OS. This ensures the repository works for developers on macOS, Linux, and Windows without requiring a reinstall when switching machines.
-
-Save to `.devspark/scripts/powershell/`:
-
-- `powershell/address-pr-review.ps1`
-- `powershell/check-prerequisites.ps1`
-- `powershell/common.ps1`
-- `powershell/create-new-feature.ps1`
-- `powershell/create-pr.ps1`
-- `powershell/delivery-status-smoke-test.ps1`
-- `powershell/evolution-context.ps1`
-- `powershell/fix-score-context.ps1`
-- `powershell/generate-atomic-shims.ps1`
-- `powershell/generate-codex-shims.ps1`
-- `powershell/generate-agent-shims.ps1`
-- `powershell/get-pr-context.ps1`
-- `powershell/platform.ps1`
-- `powershell/quickfix-context.ps1`
-- `powershell/release-context.ps1`
-- `powershell/release-history-context.ps1`
-- `powershell/repo-story-context.ps1`
-- `powershell/setup-plan.ps1`
-- `powershell/site-audit.ps1`
-- `powershell/explain-context.ps1`
-- `powershell/next-context.ps1`
-- `powershell/update-agent-context.ps1`
-
-Save to `.devspark/scripts/bash/`:
-
-- `bash/address-pr-review.sh`
-- `bash/check-prerequisites.sh`
-- `bash/common.sh`
-- `bash/create-new-feature.sh`
-- `bash/create-pr.sh`
-- `bash/delivery-status-smoke-test.sh`
-- `bash/evolution-context.sh`
-- `bash/fix-score-context.sh`
-- `bash/generate-atomic-shims.sh`
-- `bash/generate-codex-shims.sh`
-- `bash/generate-agent-shims.sh`
-- `bash/get-pr-context.sh`
-- `bash/platform.sh`
-- `bash/quickfix-context.sh`
-- `bash/release-context.sh`
-- `bash/release-history-context.sh`
-- `bash/repo-story-context.sh`
-- `bash/setup-plan.sh`
-- `bash/site-audit.sh`
-- `bash/explain-context.sh`
-- `bash/next-context.sh`
-- `bash/update-agent-context.sh`
-
-Save to `.devspark/scripts/` (the scripts root, not a subfolder):
-
-- `build_knowledge_index.py` (the single knowledge engine)
-- `explain-context.py`
-- `migrate-knowledge-to-entities.py`
-- `scan-ephemeral-refs.py`
-- `discover-knowledge-context.py`
-
-**Runtime OS selection:** Commands define both `sh` and `ps` script variants. The AI agent selects the appropriate variant at execution time based on the active OS — PowerShell on Windows, Bash on macOS/Linux. Python utility scripts are invoked directly by prompts that need deterministic ontology checks. Because the full script payload is always installed, switching between machines never requires a reinstall.
-
-**Script override layer:** If the team later needs to customize a script (e.g., for Azure DevOps instead of GitHub), they copy the script to `.knowledge/overrides/scripts/{bash|powershell}/` and edit it there. The team copy takes priority over the stock version in `.devspark/scripts/`. Upgrades only overwrite `.devspark/scripts/` and never touch `.knowledge/overrides/scripts/`. The Python knowledge scripts are never overridden: every entry point must resolve the same engine.
-
----
-
-## Step 6.5: Initialize Knowledge Current Truth
-
-Run this step on **every quickstart execution**: fresh install, migration, update, repair, and already-current verification. This step is repository-owned current-truth maintenance, not a framework overwrite.
-
-1. Create these directories if they are missing: `.knowledge/entities/`, `.knowledge/governance/decisions/`, `.knowledge/ontology/`, `.knowledge/guides/`, `.knowledge/overrides/commands/`, `.devspark.work/`, and `.devspark.work/release-candidates/`. Release creates `.archive/` only when it has validated work to archive.
-2. Seed missing knowledge scaffolding from the fetched templates without overwriting authored files:
-   - `.devspark/templates/knowledge/entities/README.md` -> `.knowledge/entities/README.md`
-   - `.devspark/templates/knowledge/ontology/schema.md` -> `.knowledge/ontology/schema.md`
-   - `.devspark/templates/knowledge/governance/decisions/README.md` -> `.knowledge/governance/decisions/README.md`
-   - `.devspark/templates/knowledge/knowledge.config.yaml` -> `.knowledge/knowledge.config.yaml`
-3. If those template files were not fetched yet, fetch the same paths from `https://raw.githubusercontent.com/markhazleton/devspark/main/templates/knowledge/` and save only when the destination is missing.
-4. Inspect `.knowledge/entities/` and `.knowledge/ontology/` for completeness. Treat knowledge as incomplete when no entity folder contains `_entity.yaml`, required entity layer documents are missing, generated ontology files are missing or stale, or `.documentation/` / `.documenation/` intake exists.
-5. If knowledge is incomplete, execute the installed `discover-knowledge` command in bootstrap mode by reading and following `.devspark/defaults/commands/devspark.discover-knowledge.md` with `--bootstrap`. If agent shims already exist, `/devspark.discover-knowledge --bootstrap` is equivalent. The command body is authoritative for source-code scanning, entity creation, documentation intake classification, evidence updates, and ontology refresh.
-6. Reconcile the knowledge engine and layout:
-   - The framework-managed engine is `.devspark/scripts/build_knowledge_index.py`. If a legacy copy remains at `.devspark/scripts/python/build_knowledge_index.py`, delete it (and the `python/` folder when empty) so no entry point can resolve a second engine.
-   - In a consumer repository (not the DevSpark source repository), if `scripts/build_knowledge_index.py` or `scripts/python/build_knowledge_index.py` exists and is an unmodified DevSpark copy, ask the user before removing it; otherwise report it as a lingering legacy copy.
-   - If `.knowledge/` uses the pre-contract layout (any `_derived.yaml`, decisions with `governs` or `status`, entities with `lifecycle`, or `.knowledge/ontology/*.generated.md`), run `python .devspark/scripts/migrate-knowledge-to-entities.py --dry-run`, show the planned changes and any `conflict` lines, and after confirmation run it without `--dry-run`. Conflicting files (YAML comments, or decisions whose `governs` and `constrains` disagree) are skipped; add `--force` only when the user confirms overwriting them.
-   - Refresh the index when it is stale or missing: `python .devspark/scripts/build_knowledge_index.py` (writes `.knowledge/ontology/index.json` and `coverage.json`), then `python .devspark/scripts/build_knowledge_index.py --check`.
-   - Fallback in the DevSpark source repository: `python scripts/build_knowledge_index.py`.
-   - If Python or dependencies are unavailable, report the exact command the user must run and continue without fabricating generated output.
-7. Do not delete documentation intake files. When `discover-knowledge` moves intake files, it must preserve relative paths and avoid overwriting by adding a numeric suffix if the target path already exists.
-8. Do not write to `.archive/`. Stage obsolete intake under `.devspark.work/release-candidates/`; `/devspark.release` is the only command that sweeps `.devspark.work/` into `.archive/`.
-9. If generated ontology output changed, include that in the final summary.
+If any file is missing, re-fetch that entry before continuing. Both the PowerShell and Bash script sets are always installed (the manifest includes both), so the repository works on Windows, macOS, and Linux with no reinstall when switching machines.
 
 ---
 
 ## Step 7: Create Claude Code Command Shims
 
-Run `bash .devspark/scripts/bash/generate-agent-shims.sh claude` or
-`pwsh .devspark/scripts/powershell/generate-agent-shims.ps1 -Agent claude`.
-This deterministic generator owns shim Markdown; do not copy the example below manually.
-
-For each command in `.devspark/defaults/commands/devspark.{name}.md`, create a file at `.claude/commands/devspark.{name}.md`:
+For each command in `.devspark/defaults/commands/devspark.{name}.md`, create a file at `.claude/commands/devspark-{name}.md` (the hyphenated name is what makes the command `/devspark-{name}`; the data paths inside stay dotted). If a file with that name already exists and is not one of the generated forms described in Step 7.5, leave it, and report it there as a conflict; otherwise overwrite it in place:
 
 ```markdown
 ## Prompt Resolution
@@ -370,8 +327,8 @@ Determine the current git user by running `git config user.name`.
 Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
 
 Read and execute the instructions from the **first file that exists**:
-1. `.knowledge/overrides/{git-user}/commands/devspark.{name}.md` (personalized override)
-2. `.knowledge/overrides/commands/devspark.{name}.md` (team customization)
+1. `.devspark.work/{git-user}/commands/devspark.{name}.md` (personalized override)
+2. `.devspark.work/commands/devspark.{name}.md` (team customization)
 3. `.devspark/defaults/commands/devspark.{name}.md` (stock default)
 
 ## User Input
@@ -385,9 +342,55 @@ Replace `{name}` in each file with the actual command name (e.g., `constitution`
 
 ---
 
+## Step 7.5: Retire 8.x Entry Points
+
+> Runs in **Update** and **Repair** modes. Skip it in a Fresh Install and when the mode is Already Current. The 8.x legacy classes below apply only when the installed version read in Step 2 has a major below 9; the orphan class applies on every Update and Repair run. The mode comes from the installed major version, never guessed. The procedure is stateless: it writes no marker and no flag, so the candidate rule alone decides. A second and third run list nothing and change nothing, and an interrupted run recomputes the list from what remains.
+
+Step 4 and Step 7 have already installed the 9.0 entry points (`.claude/commands/devspark-<cmd>.md`). This agent installs no native skills: the `skill` category belongs to Copilot only. A retirement problem never blocks that install: report it and continue.
+
+DevSpark 9.0 spells every command `/devspark-<cmd>`. The 8.x dotted entry points would list every command twice, so they are retired here.
+
+### Build the candidate list
+
+For each stock command `<cmd>` in `.devspark/defaults/commands/devspark.<cmd>.md`, examine only `.claude/commands/devspark.<cmd>.md`. Classify the file if it exists:
+
+| Class | Test | Action |
+|---|---|---|
+| Unmodified managed entry point | Frontmatter is absent, or has only keys from `description`, `handoffs`, `agent` and `name` (a `name` must equal `devspark.<cmd>` for the file's own command, quoted or not); and the body, after normalizing CRLF and trailing whitespace, is one of the two generated forms below | Delete |
+| Edited managed-name file | Anything else: another frontmatter key, a `name` for a different command, or any added, removed or reordered paragraph, path or section | Move to the quarantine; never delete |
+| Foreign file | No stock command name | Left untouched |
+
+The two generated body forms, with the command name substituted:
+
+- **Package form** — the Prompt Resolution section (the three resolution paths for the command and the `Where {git-user}` clarification) and a `User Input` section holding one fenced `$ARGUMENTS` or `{{args}}` placeholder.
+- **Quickstart form** — the same Prompt Resolution section (the `Where {git-user}` line may be absent) and a `User Input` section holding one `{{input}}`, `$ARGUMENTS` or `{{args}}` placeholder, bare or fenced, followed by `Pass the user input above to the resolved prompt.`
+
+`description` text is free: it varies across 8.x releases. Hashes are not used.
+
+Also build these lists:
+
+- **Conflicts** — every `devspark-<cmd>.md` that Step 7 left unwritten because it is not a generated form. Report them; never overwrite them. A `devspark-<cmd>` skill folder under `.github/skills/` belongs to a Copilot setup and is left untouched.
+- **Orphan entry points** — every `.claude/commands/devspark-<name>.md` that is a generated form but whose `<name>` has no stock command. List them for deletion.
+
+### Show the list and ask once
+
+If every list is empty, report "No 8.x entry points to retire." and continue. Otherwise show the lists and ask for **one confirmation** covering all of the actions: deletions, moves to the quarantine and orphan removals. Without a yes, change nothing and tell the user how to re-run. Act only on the listed files.
+
+### Act and verify
+
+- Delete each unmodified managed entry point and each orphan entry point.
+- Quarantine each edited file: move it byte-identical to `.devspark.work/migration/8.x-entry-points/<file name>`. If that name already exists, add a numeric suffix; never overwrite an existing file. Report each one with this remedy: to keep the edit, recreate it as a customization in `.devspark.work/commands/devspark.<cmd>.md` (team) or `.devspark.work/{git-user}/commands/devspark.<cmd>.md` (developer). The 9.0 entry point picks it up through the existing precedence.
+- Report conflicts so a human can rename or remove the file.
+
+The quarantine is the only write this procedure makes inside a repository-owned root, and it only adds new files. It never touches, modifies, deletes or overwrites existing files in `.devspark.work/`, `.knowledge/` or `.archive/`, customization files, or lifecycle artifacts.
+
+Then re-run the candidate list: every list must be empty except the reported items, and every stock command must have a `devspark-<cmd>.md` entry point.
+
+---
+
 ## Step 8: Seed the Constitution
 
-If `.knowledge/governance/constitution.md` does not already exist, fetch `https://raw.githubusercontent.com/markhazleton/devspark/main/.knowledge/governance/constitution.md` and save it there.
+If `.knowledge/governance/constitution.md` does not already exist, fetch `https://dev.makeboldspark.com/raw/.knowledge/governance/constitution.md` and save it there.
 
 If the file was migrated from `.specify/` or already existed, preserve it and do not overwrite it.
 
@@ -410,13 +413,13 @@ If `CLAUDE.md` does not exist in the project root, create one:
 
 This project uses DevSpark for spec-driven development. Available slash commands:
 
-- `/devspark.specify` — Define requirements and user stories
-- `/devspark.plan` — Create implementation plan
-- `/devspark.tasks` — Break plan into actionable tasks
-- `/devspark.implement` — Execute tasks
-- `/devspark.create-pr` — Draft or update a pull request
-- `/devspark.pr-review` — Constitution-based PR review
-- `/devspark.quickfix` — Lightweight bug fix workflow
+- `/devspark-specify` — Define requirements and user stories
+- `/devspark-plan` — Create implementation plan
+- `/devspark-tasks` — Break plan into actionable tasks
+- `/devspark-implement` — Execute tasks
+- `/devspark-create-pr` — Draft or update a pull request
+- `/devspark-pr-review` — Constitution-based PR review
+- `/devspark-quickfix` — Lightweight bug fix workflow
 
 See `.devspark/defaults/commands/` for the full list.
 
@@ -429,6 +432,50 @@ If `CLAUDE.md` already exists, append the DevSpark section.
 
 ---
 
+## Step 9.5: Prune Non-Canonical `.devspark/` Files
+
+> Runs in **Update** and **Repair** modes. A Fresh Install starts clean, so skip it there.
+
+The canonical DevSpark `.devspark/` layout has **exactly four** root entries:
+
+- `VERSION`
+- `defaults/`
+- `templates/`
+- `scripts/`
+
+Anything else at the `.devspark/` **root** is an obsolete framework entry and must be removed. Common offenders: root-level `aliases/`, `memory/`, `prompts/`, `risk-checklists/`, `skills/`, `workflows/`, a scratch `tmp/`, and stray root-level template `.md` files (`spec-template.md`, `plan-template.md`, etc.). The engine resolves atomic prompts, workflows, and aliases under `.devspark/templates/…` — **never** at the `.devspark/` root — so root-level copies are always stale.
+
+Prune with an **allowlist** so only the canonical root entries survive. The allowlist comes from `manifest.devspark_root` (captured in **Step 2**); the four-entry default below is the fallback if the manifest field is absent. This only touches the `.devspark/` root and **never** touches `.devspark.work/`, `.knowledge/`, or `.archive/`:
+
+```powershell
+$keep = if ($manifest.devspark_root) { @($manifest.devspark_root) + 'VERSION' | Select-Object -Unique }
+        else { @('VERSION','defaults','templates','scripts') }
+Get-ChildItem .devspark -Force |
+  Where-Object { $_.Name -notin $keep } |
+  ForEach-Object {
+    Write-Host "Removing non-canonical: .devspark/$($_.Name)"
+    Remove-Item $_.FullName -Recurse -Force
+  }
+```
+
+```bash
+root=$(jq -r '.devspark_root[]?' /tmp/devspark-manifest.json 2>/dev/null | tr '\n' ' ')
+[ -n "$root" ] || root="defaults templates scripts"
+keep=" VERSION $root "
+shopt -s dotglob nullglob
+for entry in .devspark/*; do
+  name=$(basename "$entry")
+  case "$keep" in *" $name "*) continue;; esac
+  echo "Removing non-canonical: .devspark/$name"
+  rm -rf "$entry"
+done
+shopt -u dotglob nullglob
+```
+
+> Canonical content **under** `.devspark/templates/` (including `templates/skills/`, `templates/prompts/`) is preserved — only the `.devspark/` root is pruned.
+
+---
+
 ## Step 10: Write VERSION Stamp
 
 Use the `LATEST_VERSION` you already fetched in Step 2.
@@ -436,10 +483,12 @@ Use the `LATEST_VERSION` you already fetched in Step 2.
 Create `.devspark/VERSION`:
 
 ```text
+product: DevSpark
+edition: Make-Bold
 version: {LATEST_VERSION}
 installed: {today's date YYYY-MM-DD}
 method: claude-code-quickstart
-migrated-from: {legacy-layout | documentation-defaults | fresh}
+migrated-from: {legacy-layout | documentation-defaults | public-devspark | fresh}
 ```
 
 ---
@@ -450,18 +499,43 @@ Append to `.gitignore` if not already present:
 
 ```text
 # DevSpark — personal overrides (never commit)
-.knowledge/overrides/*/commands/
+.documentation/*/commands/
 ```
 
-Also append to `.gitattributes` if not already present, so pull requests
-collapse the generated knowledge index (on a merge conflict, regenerate it with
-the knowledge engine instead of hand-merging):
+---
 
-```text
-# DevSpark — generated knowledge index
-.knowledge/ontology/index.json linguist-generated=true
-.knowledge/ontology/coverage.json linguist-generated=true
-```
+## Step 11.7: Verify `.knowledge/` Index Health
+
+**Always run this step, on every quickstart execution, regardless of mode** — Fresh Install,
+Update, Repair, or Already Current. It is never skipped and never gated behind the mode
+banner. It is cheap to re-run: if nothing has changed since the last run, it reports that and moves
+on.
+
+Run `python .devspark/scripts/build_knowledge_index.py --repo-root . --check`. If it passes with
+no drift, report "`.knowledge/` index is current" and continue to Step 12. Otherwise, run
+`python .devspark/scripts/build_knowledge_index.py --repo-root .` to regenerate
+`.knowledge/index.json` and `.knowledge/ontology/coverage.json`, resolve every reported gap
+(missing layer docs, unresolved `relations[].object` references, missing
+`constrains`/`constrained_by` reciprocity, a `source_of_truth` path that doesn't exist), and
+report a one-line summary of what was regenerated.
+
+`.devspark/scripts/build_knowledge_index.py` is the one authoritative implementation — every
+entry point (this step, CI, `/devspark-explain`, `site-audit`, `release`) resolves to it. If a
+repo-root `scripts/build_knowledge_index.py` also exists from an older install, see the
+reconciliation check below.
+
+**Reconcile a legacy repo-root index builder.** Check whether `scripts/build_knowledge_index.py`
+also exists at the repository root. If it does not, skip this. If it does, compare it byte-for-byte
+against `.devspark/scripts/build_knowledge_index.py`:
+
+- **Identical**: it is a redundant, framework-owned leftover from before scripts moved under
+  `.devspark/`. Delete it and report the removal in your summary.
+- **Different**: it may be a genuine project customization. Do not delete it automatically —
+  report the diff and ask the repository owner whether to retire it in favor of
+  `.devspark/scripts/build_knowledge_index.py` or keep it deliberately as a project override.
+
+Either way, confirm no CI workflow, quickstart-derived doc, or project script in this repository
+still invokes the root copy — point every caller at `.devspark/scripts/build_knowledge_index.py`.
 
 ---
 
@@ -469,30 +543,26 @@ the knowledge engine instead of hand-merging):
 
 Confirm the installation:
 
-- Check that every stock prompt from Step 4 exists in `.devspark/defaults/commands/`
-- Check that every helper template from Step 5 exists in `.devspark/templates/`
-- Check that both shell script sets and Python utility scripts from Step 6 exist under `.devspark/scripts/`
-- Check that `.knowledge/entities/` and `.knowledge/ontology/schema.md` exist, and report any `.documentation/` intake files classified
-- Check that the expected command shim files from Step 7 exist in `.claude/commands/`
+- Check that every file in the manifest `install` array exists at its `dest` (commands in `.devspark/defaults/commands/`, templates and skills in `.devspark/templates/`, both script sets in `.devspark/scripts/`, `agents-registry.json` at the repo root)
+- Check that the expected command entry point files from Step 7 exist in `.claude/commands/` as `devspark-<cmd>.md`, and that Step 7.5 left no unmodified `devspark.<cmd>.md` there
 - If any expected framework file is missing, stop and run **Repair Mode** before reporting success
 
-- **Migration summary**: What was migrated and where backups live (`.specify.old/`, etc.)
+- **Upgrade cleanup**: obsolete stock entries removed; `.devspark/VERSION`, project knowledge, temporary work, and user overrides preserved
 - Number of stock commands in `.devspark/defaults/commands/`
-- Number of command shims in `.claude/commands/`
-- Constitution status: seeded fresh, migrated, or already existed
-- Knowledge initialization status: scaffolded, repaired, already complete, or blocked with the exact command needed
-- Documentation intake summary: staged for release, moved to `.devspark.work/`, assimilated to `.knowledge/`, or not present
+- Number of command entry points in `.claude/commands/`
+- Retired 8.x entry points: deleted, quarantined, orphans, conflicts, or none
+- Constitution status: seeded fresh, or already existed
 - Repair status: not needed, or repaired missing framework files
-- Explain the 3-tier override system and that `/devspark.personalize {command}` creates personal overrides
-- If backup directories exist, remind the user they can stage them under `.devspark.work/release-candidates/` for the next `/devspark.release`
+- Explain the 3-tier override system and that `/devspark-personalize {command}` creates personal overrides
 
-Tell the user: type `/devspark.specify` (or any command) in Claude Code to start using DevSpark.
+Tell the user: type `/devspark-specify` (or any command) in Claude Code to start using DevSpark.
 
 Add maintenance guidance (prompt-first):
 
-- Basic (recommended): run the remote upgrade prompt in chat
-- Re-run this quickstart prompt in the target repository for install, upgrade, or repair.`r`n
-Quickstart-driven upgrades refresh `.devspark/` stock files, preserve authored `.knowledge/` customizations, and repair missing knowledge scaffolding.
+- Basic (recommended): re-run the canonical quickstart in chat (it detects the existing install and runs Update Mode)
+- `/devspark Follow the instructions at https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_claudecode.md`
+
+Upgrades refresh `.devspark/` stock files and preserve `.devspark.work/` and `.knowledge/` customizations.
 
 ---
 
@@ -510,14 +580,14 @@ For repositories containing **multiple applications** with different platforms, 
 
 ### Quick Setup
 
-1. Run `/devspark.add-application` to create a registry at `.knowledge/entities/application-registry/registry.json` interactively
-2. Each application gets its own `.knowledge/` directory at `{app-path}/.knowledge/`
+1. Run `/devspark-add-application` to create a registry at `.devspark.work/devspark.registry.json` interactively
+2. Each application gets its own `.knowledge/guides/` directory at `{app-path}/.knowledge/guides/`
 3. Use `--app <id>` with any DevSpark command to scope it to a specific application
 4. Use `--repo-scope` for repository-wide operations
 
 ### Key Concepts
 
-- **Registry**: `.knowledge/entities/application-registry/registry.json` defines all applications, profiles, and dependencies
+- **Registry**: `.devspark.work/devspark.registry.json` defines all applications, profiles, and dependencies
 - **Profiles**: Reusable rule bundles (e.g., `api-profile`, `web-profile`) that apps inherit
 - **App-local manifest**: Optional `{app-path}/app.json` for app-specific overrides
 - **Scope**: Every workflow runs in `repo`, `single-app`, or `cross-app` scope
@@ -526,8 +596,8 @@ For repositories containing **multiple applications** with different platforms, 
 
 | Command | Purpose |
 |---------|--------|
-| `/devspark.add-application` | Register a new application in the registry |
-| `/devspark.list-applications` | View all registered applications and profiles |
-| `/devspark.validate-registry` | Validate registry schema, references, and consistency |
+| `/devspark-add-application` | Register a new application in the registry |
+| `/devspark-list-applications` | View all registered applications and profiles |
+| `/devspark-validate-registry` | Validate registry schema, references, and consistency |
 
-For details, see the [Multi-App Specification](https://github.com/markhazleton/devspark/blob/main/.devspark.work/specs/001-multi-app-monorepo-support/spec.md).
+For details, see the [Multi-App Specification](https://github.com/MarkHazleton/DevSpark/blob/main/.devspark.work/specs/001-multi-app-monorepo-support/spec.md).

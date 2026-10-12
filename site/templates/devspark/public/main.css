@@ -1,0 +1,697 @@
+/*
+ * Make Bold Solutions brand theme for the DevSpark documentation site.
+ * Overrides the docfx "modern" (Bootstrap-based) template tokens with the
+ * Make Bold Solutions palette and typography, with the DevSpark route explorer.
+ */
+
+:root,
+[data-bs-theme="light"] {
+  --devspark-navy: #1e1e1e;
+  --devspark-blue: #982407;
+  --devspark-accent: #c6620c;
+
+  --bs-primary: #982407;
+  --bs-primary-rgb: 152, 36, 7;
+  --bs-link-color: #982407;
+  --bs-link-color-rgb: 152, 36, 7;
+  --bs-link-hover-color: #c6620c;
+  --bs-link-hover-color-rgb: 198, 98, 12;
+}
+
+[data-bs-theme="dark"] {
+  --devspark-navy: #001a47;
+  --devspark-blue: #4a90e2;
+  --devspark-accent: #6aa9ee;
+
+  --bs-primary: #4a90e2;
+  --bs-link-color: #6aa9ee;
+  --bs-link-hover-color: #9cc6f5;
+}
+
+/* Top navigation bar in DEVSPARK navy with an accent rule */
+.navbar {
+  background-color: var(--devspark-navy) !important;
+  border-bottom: 3px solid var(--devspark-accent);
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar .navbar-nav .nav-link.active,
+.navbar .navbar-brand:hover {
+  color: #ffffff !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+  color: #cfe0f7 !important;
+}
+
+/* The search box on the navy bar */
+.navbar form input {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.navbar form input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Links + headings in brand colors */
+a {
+  color: var(--bs-link-color);
+}
+
+a:hover {
+  color: var(--bs-link-hover-color);
+}
+
+article h1,
+article h2,
+article h3,
+article h4 {
+  color: var(--devspark-navy);
+}
+
+[data-bs-theme="dark"] article h1,
+[data-bs-theme="dark"] article h2,
+[data-bs-theme="dark"] article h3,
+[data-bs-theme="dark"] article h4 {
+  color: inherit;
+}
+
+/* Primary buttons / CTAs */
+.btn-primary {
+  --bs-btn-bg: var(--devspark-blue);
+  --bs-btn-border-color: var(--devspark-blue);
+  --bs-btn-hover-bg: var(--devspark-navy);
+  --bs-btn-hover-border-color: var(--devspark-navy);
+  --bs-btn-active-bg: var(--devspark-navy);
+  --bs-btn-active-border-color: var(--devspark-navy);
+}
+
+/* Active items in the left TOC and right affix rail */
+.toc .nav > li.active > a,
+.toc .nav > li > a.active {
+  color: var(--devspark-blue) !important;
+}
+
+.affix ul > li.active > a {
+  color: var(--devspark-blue);
+  border-left: 2px solid var(--devspark-blue);
+}
+
+/* Blockquote callouts pick up the brand accent */
+blockquote {
+  border-left: 4px solid var(--devspark-accent);
+  background: rgba(152, 36, 7, 0.045);
+  padding: 0.85rem 1.1rem;
+  border-radius: 0 10px 10px 0;
+}
+
+[data-bs-theme="dark"] blockquote {
+  background: rgba(106, 169, 238, 0.08);
+}
+
+/* Rendered mermaid diagrams sit on a clean card */
+.mermaid {
+  background: #ffffff;
+  border: 1px solid rgba(0, 32, 91, 0.12);
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+/* Live release details injected from the distribution manifest */
+.devspark-release-status {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  background: rgba(152, 36, 7, 0.08);
+  color: var(--devspark-navy);
+  border: 1px solid rgba(152, 36, 7, 0.25);
+  border-radius: 6px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 1rem;
+}
+
+.devspark-release-status strong {
+  color: var(--devspark-blue);
+  font-weight: 700;
+  margin-right: 0.25rem;
+}
+
+[data-devspark-version] {
+  font-weight: 800;
+}
+
+[data-bs-theme="dark"] .devspark-release-status {
+  color: #cfe0f7;
+  background: rgba(106, 169, 238, 0.12);
+}
+
+/* "Logged in" identity chip in the navbar (filled from /.auth/me) */
+.devspark-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffffff;
+  font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.devspark-user--nav {
+  margin-left: auto;
+  padding-left: 0.75rem;
+}
+
+.devspark-user--float {
+  position: fixed;
+  top: 0.6rem;
+  right: 1rem;
+  z-index: 1080;
+  color: var(--devspark-navy);
+  background: #ffffff;
+  border: 1px solid rgba(152, 36, 7, 0.25);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.devspark-user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--devspark-accent);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.devspark-user-name {
+  font-weight: 600;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Interactive route explorer (home page) */
+:root {
+  --devspark-route-quickfix: #0f9d6b;
+  --devspark-route-quickspec: #2563eb;
+  --devspark-route-fullspec: #7c3aed;
+}
+
+.devspark-flow {
+  --route-c: var(--devspark-route-fullspec);
+  --flow-card: #ffffff;
+  --flow-ink: #0f172a;
+  --flow-muted: #475569;
+  --flow-line: rgba(15, 23, 42, 0.14);
+  background: rgba(152, 36, 7, 0.04);
+  border: 1px solid var(--flow-line);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin: 1.25rem 0 2rem;
+  color: var(--flow-ink);
+}
+
+[data-bs-theme="dark"] .devspark-flow {
+  --flow-card: #1e2533;
+  --flow-ink: #e6edf7;
+  --flow-muted: #a9b6c9;
+  --flow-line: rgba(255, 255, 255, 0.16);
+  background: rgba(106, 169, 238, 0.06);
+}
+
+.devspark-flow__q {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin: 0 0 0.6rem;
+}
+
+.devspark-flow__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
+}
+
+.devspark-flow__choice {
+  --c: var(--devspark-route-fullspec);
+  text-align: left;
+  background: var(--flow-card);
+  color: var(--flow-ink);
+  border: 2px solid var(--flow-line);
+  border-left: 6px solid var(--c);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.devspark-flow__choice--quickfix { --c: var(--devspark-route-quickfix); }
+.devspark-flow__choice--quickspec { --c: var(--devspark-route-quickspec); }
+.devspark-flow__choice--fullspec { --c: var(--devspark-route-fullspec); }
+
+.devspark-flow__choice:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 32, 91, 0.16);
+}
+
+.devspark-flow__choice.is-on {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 12%, var(--flow-card));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--c) 30%, transparent);
+}
+
+.devspark-flow__ctitle { font-weight: 700; font-size: 0.95rem; }
+.devspark-flow__csub { font-size: 0.78rem; color: var(--flow-muted); }
+
+.devspark-flow__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 1rem 0 0.6rem;
+  font-size: 0.85rem;
+}
+
+.devspark-flow__play {
+  background: var(--route-c);
+  color: #ffffff;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.devspark-flow__play:hover { filter: brightness(1.1); }
+
+.devspark-flow__row {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 0.9rem;
+  margin: 0;
+  padding: 0;
+  counter-reset: devspark-s;
+}
+
+.devspark-step { position: relative; flex: 1 1 165px; max-width: 260px; counter-increment: devspark-s; }
+
+.devspark-step::before {
+  content: counter(devspark-s);
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  z-index: 1;
+  width: 1.35rem;
+  height: 1.35rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.devspark-step__btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  text-align: left;
+  background: var(--flow-card);
+  color: var(--flow-ink);
+  border: 2px solid var(--route-c);
+  border-radius: 10px;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.devspark-step__btn--req { background: var(--route-c); color: #ffffff; }
+.devspark-step__btn--rec { background: color-mix(in srgb, var(--route-c) 14%, var(--flow-card)); }
+.devspark-step__btn--opt { border-style: dashed; border-color: #94a3b8; }
+.devspark-step--tail .devspark-step__btn { border-color: #475569; }
+.devspark-step--tail .devspark-step__btn--req { background: #0f172a; color: #ffffff; }
+.devspark-step--tail .devspark-step__btn--dec { background: #f59e0b; color: #1c1917; border-color: #b45309; }
+.devspark-step--tail .devspark-step__btn--end { background: #22c55e; color: #052e16; border-color: #15803d; }
+.devspark-step--tail .devspark-step__btn--rec { background: #e0e7ff; color: #1e1b4b; border-color: #818cf8; }
+
+.devspark-step__btn:hover { transform: translateY(-2px); }
+
+.devspark-step__btn.is-active {
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px var(--route-c), 0 8px 18px rgba(0, 0, 0, 0.25);
+  transform: translateY(-3px);
+}
+
+[data-bs-theme="dark"] .devspark-step__btn.is-active {
+  box-shadow: 0 0 0 3px #0b1220, 0 0 0 6px #6aa9ee, 0 8px 18px rgba(0, 0, 0, 0.5);
+}
+
+.devspark-step__cmd { font-family: Consolas, "Cascadia Mono", monospace; font-size: 0.8rem; font-weight: 700; word-break: break-all; }
+
+.devspark-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+}
+
+.devspark-tag--rec { background: var(--route-c); color: #ffffff; }
+.devspark-tag--opt { background: #e2e8f0; color: #475569; }
+.devspark-tag--dec { background: #92400e; color: #ffffff; }
+.devspark-tag--end { background: #14532d; color: #ffffff; }
+
+.devspark-flow__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  margin: 0.8rem 0 0.2rem;
+  font-size: 0.82rem;
+  color: var(--flow-muted);
+}
+
+.devspark-flow__metaitem strong { color: var(--route-c); }
+
+.devspark-flow__tailhead {
+  margin: 0.9rem 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--flow-muted);
+}
+
+.devspark-flow__detail {
+  margin-top: 1rem;
+  background: var(--flow-card);
+  border: 1px solid var(--flow-line);
+  border-left: 6px solid var(--route-c);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  min-height: 7.5rem;
+}
+
+.devspark-flow__dhead { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
+.devspark-flow__dcmd { font-size: 1rem; font-weight: 800; background: transparent; color: var(--route-c); padding: 0; }
+.devspark-flow__dhead .devspark-tag { background: var(--route-c); color: #ffffff; }
+.devspark-flow__dwhy { font-weight: 700; margin: 0.15rem 0; }
+.devspark-flow__ddetail, .devspark-flow__empty { margin: 0.15rem 0; color: var(--flow-muted); font-size: 0.9rem; }
+
+.devspark-flow__extras { list-style: none; padding: 0; margin: 0.6rem 0 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.devspark-x { font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 8px; }
+.devspark-x--ok { background: #dcfce7; color: #166534; }
+.devspark-x--warn { background: #fef3c7; color: #92400e; }
+.devspark-x--bad { background: #fee2e2; color: #991b1b; }
+
+.devspark-flow__hint { margin: 0.8rem 0 0; font-size: 0.85rem; color: var(--flow-muted); }
+
+/* Spec-to-release lifecycle diagram */
+.devspark-delivery__stages {
+  --delivery-line: rgba(15, 23, 42, 0.2);
+  --delivery-ink: #172b3a;
+  --delivery-muted: #526574;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+  margin: 1.8rem 0 2.2rem;
+  padding: 0;
+  counter-reset: delivery;
+}
+
+.devspark-delivery__stage {
+  --delivery-color: #2563eb;
+  position: relative;
+  min-width: 0;
+  padding: 0.8rem 0.9rem 0.9rem;
+  border-top: 4px solid var(--delivery-color);
+  background: color-mix(in srgb, var(--delivery-color) 7%, transparent);
+  animation: devspark-delivery-in 0.45s ease both;
+}
+
+.devspark-delivery__stage:nth-child(2) { animation-delay: 0.07s; }
+.devspark-delivery__stage:nth-child(3) { animation-delay: 0.14s; }
+.devspark-delivery__stage:nth-child(4) { animation-delay: 0.21s; }
+.devspark-delivery__stage--plan { --delivery-color: #0f766e; }
+.devspark-delivery__stage--build { --delivery-color: #2563eb; }
+.devspark-delivery__stage--prove { --delivery-color: #b45309; }
+.devspark-delivery__stage--release { --delivery-color: #be4b49; }
+
+.devspark-delivery__stage:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 1.75rem;
+  right: -1.05rem;
+  width: 1rem;
+  border-top: 2px solid var(--delivery-line);
+}
+
+.devspark-delivery__number {
+  display: block;
+  color: var(--delivery-color);
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-bottom: 0.45rem;
+}
+
+.devspark-delivery__stage h2 {
+  color: var(--delivery-ink);
+  font-size: 1.05rem;
+  margin: 0 0 0.55rem;
+}
+
+.devspark-delivery__stage p,
+.devspark-delivery__output p { color: var(--delivery-muted); font-size: 0.88rem; }
+.devspark-delivery__stage p { min-height: 4.6em; }
+.devspark-delivery__stage code { color: var(--delivery-color); font-weight: 700; }
+.devspark-delivery__kind { display: block; margin-top: 0.35rem; font-size: 0.76rem; color: var(--delivery-muted); }
+
+.devspark-delivery__outputs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 1rem 0 1.3rem;
+  background: rgba(15, 23, 42, 0.16);
+  border-block: 1px solid rgba(15, 23, 42, 0.16);
+}
+
+.devspark-delivery__output {
+  --delivery-muted: #526574;
+  padding: 1rem 1.1rem;
+  background: #f4f7f8;
+}
+
+.devspark-delivery__output--knowledge {
+  background: #e4f3ed;
+  border-top: 4px solid #0f766e;
+}
+
+.devspark-delivery__output-label {
+  color: #0f766e;
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.devspark-delivery__output h3 { font-size: 1rem; margin: 0.4rem 0; }
+.devspark-delivery__output p { margin-bottom: 0; }
+
+.devspark-delivery__handoff {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 1rem 0 1.4rem;
+  padding: 1rem;
+  background: rgba(180, 83, 9, 0.07);
+  border-left: 4px solid #b45309;
+}
+
+.devspark-delivery__handoff-node { display: grid; gap: 0.2rem; }
+.devspark-delivery__handoff-node span { color: #7c4a15; font-size: 0.75rem; font-weight: 800; }
+.devspark-delivery__handoff-node code { font-size: 0.95rem; font-weight: 700; }
+.devspark-delivery__handoff-node small { color: #526574; }
+.devspark-delivery__handoff-node--archive code { color: #a34437; }
+.devspark-delivery__handoff-arrow { color: #7c4a15; font-size: 1.5rem; font-weight: 700; }
+
+[data-bs-theme="dark"] .devspark-delivery__stages { --delivery-line: rgba(255, 255, 255, 0.28); --delivery-ink: #e6edf7; --delivery-muted: #b2c1cf; }
+[data-bs-theme="dark"] .devspark-delivery__output { --delivery-muted: #b2c1cf; background: #202b34; }
+[data-bs-theme="dark"] .devspark-delivery__output--knowledge { background: #18382f; }
+[data-bs-theme="dark"] .devspark-delivery__outputs { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.2); }
+[data-bs-theme="dark"] .devspark-delivery__handoff { background: rgba(180, 83, 9, 0.14); }
+[data-bs-theme="dark"] .devspark-delivery__handoff-node span,
+[data-bs-theme="dark"] .devspark-delivery__handoff-node small { color: #d3c1a7; }
+
+@keyframes devspark-delivery-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 767px) {
+  .devspark-delivery__stages { grid-template-columns: 1fr; gap: 0.65rem; }
+  .devspark-delivery__stage { padding-left: 1rem; }
+  .devspark-delivery__stage p { min-height: 0; }
+  .devspark-delivery__stage:not(:last-child)::after {
+    top: auto;
+    right: auto;
+    bottom: -0.65rem;
+    left: 1.2rem;
+    height: 0.65rem;
+    border-top: 0;
+    border-left: 2px solid var(--delivery-line);
+  }
+  .devspark-delivery__outputs { grid-template-columns: 1fr; }
+  .devspark-delivery__handoff { align-items: flex-start; flex-direction: column; gap: 0.55rem; }
+  .devspark-delivery__handoff-arrow { transform: rotate(90deg); transform-origin: left center; height: 0.9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .devspark-delivery__stage { animation: none; }
+}
+
+.devspark-flow.is-fresh .devspark-step { animation: devspark-flow-in 0.35s ease both; }
+.devspark-flow.is-fresh .devspark-step:nth-child(2) { animation-delay: 0.05s; }
+.devspark-flow.is-fresh .devspark-step:nth-child(3) { animation-delay: 0.1s; }
+.devspark-flow.is-fresh .devspark-step:nth-child(4) { animation-delay: 0.15s; }
+.devspark-flow.is-fresh .devspark-step:nth-child(5) { animation-delay: 0.2s; }
+.devspark-flow.is-fresh .devspark-step:nth-child(6) { animation-delay: 0.25s; }
+.devspark-flow.is-fresh .devspark-step:nth-child(7) { animation-delay: 0.3s; }
+
+@keyframes devspark-flow-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .devspark-flow *, .devspark-flow *::before, .devspark-flow *::after { animation: none !important; transition: none !important; }
+}
+
+
+/* DevSpark — Make Bold Solutions brand overrides.
+   Loaded after docfx.min.css (see modern template _master.tmpl) so these
+   rules layer on top of the built-in theme without replacing it.
+   Palette and type pairing per ../../../branding/MakeBoldSolutions/. */
+
+@font-face {
+  font-display: swap;
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 100 900;
+  src: url("fonts/inter-tight.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Inter Tight";
+  font-style: italic;
+  font-weight: 100 900;
+  src: url("fonts/inter-tight-italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Be Vietnam Pro";
+  font-style: normal;
+  font-weight: 700;
+  src: url("fonts/be-vietnam-pro-bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Be Vietnam Pro";
+  font-style: normal;
+  font-weight: 800;
+  src: url("fonts/be-vietnam-pro-extrabold.ttf") format("truetype");
+}
+
+:root {
+  --bs-border-radius: 8px;
+  --bs-border-radius-sm: 6px;
+  --bs-border-radius-lg: 10px;
+  /* Be Vietnam Pro carries headlines (bold/extrabold); Inter Tight carries body copy. */
+  --bs-body-font-family: "Inter Tight", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mbs-heading-font-family: "Be Vietnam Pro", "Inter Tight", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html[data-bs-theme="light"] {
+  /* Brand Red — headlines, accents, primary mark peak. */
+  --bs-primary: #982407;
+  --bs-primary-rgb: 152, 36, 7;
+  --bs-link-color: #982407;
+  --bs-link-color-rgb: 152, 36, 7;
+  /* Accent Orange — sparingly, secondary highlights only. */
+  --bs-link-hover-color: #c6620c;
+  --bs-link-hover-color-rgb: 198, 98, 12;
+  --bs-body-color: #1e1e1e;
+  --bs-body-bg: #f8f6f2;
+}
+
+html[data-bs-theme="dark"] {
+  /* Brand Red is too dark for sufficient contrast on a dark surface;
+     Accent Orange carries the primary role here instead. */
+  --bs-primary: #c6620c;
+  --bs-primary-rgb: 198, 98, 12;
+  --bs-link-color: #c6620c;
+  --bs-link-color-rgb: 198, 98, 12;
+  --bs-link-hover-color: #a8530a;
+  --bs-link-hover-color-rgb: 168, 83, 10;
+}
+
+body {
+  font-family: var(--bs-body-font-family);
+}
+
+h1, h2, h3, h4, h5, h6,
+.navbar-brand {
+  font-family: var(--mbs-heading-font-family);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-brand img#logo {
+  height: 28px;
+  width: auto;
+  max-width: none;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: var(--bs-link-hover-color);
+  --bs-btn-hover-border-color: var(--bs-link-hover-color);
+  --bs-btn-active-bg: var(--bs-link-hover-color);
+  --bs-btn-active-border-color: var(--bs-link-hover-color);
+}
+
+:root { --devspark-navy: #1e1e1e; --devspark-blue: #982407; --devspark-accent: #c6620c; }
+[data-bs-theme="dark"] { --devspark-navy: #1e1e1e; --devspark-blue: #c6620c; --devspark-accent: #f0a76c; }

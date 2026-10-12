@@ -1,11 +1,12 @@
 ---
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
 description: Generate a custom checklist for the current feature based on user requirements.
 handoffs:
   - label: Implement Project
-    agent: devspark.implement
+    agent: devspark-implement
     prompt: Start the implementation in phases
   - label: Run Analysis
-    agent: devspark.analyze
+    agent: devspark-analyze
     prompt: Analyze spec consistency after checklist review
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json
@@ -43,9 +44,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
-
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers multi-app scope resolution and the 2-tier override check for scripts. Preamble modules: `convergence`.
 
 1. **Setup**: Run `{SCRIPT}` from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS list.
    - All file paths must be absolute.
@@ -109,7 +108,7 @@ You **MUST** consider the user input before proceeding (if not empty).
      - Format: `[domain].md`
      - If file exists, append to existing file
    - Number items sequentially starting from CHK001
-   - Each `/devspark.checklist` run creates a NEW file (never overwrites existing checklists)
+   - Each `/devspark-checklist` run creates a NEW file (never overwrites existing checklists)
 
    **CORE PRINCIPLE - Test the Requirements, Not the Implementation**:
    Every checklist item MUST evaluate the REQUIREMENTS THEMSELVES for:
@@ -239,7 +238,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
    Below the gate block, summarize all current checklist files under `FEATURE_DIR/checklists/` with total items, completed items, incomplete items, and the checklist purpose. Replace the prior gate summary instead of appending duplicates.
 
-**Important**: Each `/devspark.checklist` command invocation creates a checklist file using short, descriptive names unless file already exists. This allows:
+**Important**: Each `/devspark-checklist` command invocation creates a checklist file using short, descriptive names unless file already exists. This allows:
 
 - Multiple checklists of different types (e.g., `ux.md`, `test.md`, `security.md`)
 - Simple, memorable filenames that indicate checklist purpose

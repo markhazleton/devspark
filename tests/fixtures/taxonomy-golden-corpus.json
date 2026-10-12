@@ -1,0 +1,74 @@
+[
+  { "path": "CHANGELOG.md", "content": "", "taxon": "HISTORICAL_RECORD" },
+  {
+    "path": ".github/copilot-instructions.md",
+    "content": "",
+    "taxon": "AUTHORITATIVE_REFERENCE"
+  },
+  {
+    "path": ".knowledge/governance/constitution.md",
+    "content": "",
+    "taxon": "AUTHORITATIVE_REFERENCE"
+  },
+  {
+    "path": ".knowledge/architecture/example.md",
+    "content": "",
+    "taxon": "ENGINEERING_PATTERN"
+  },
+  {
+    "path": ".devspark.work/releases/v1/release.md",
+    "content": "",
+    "taxon": "RESEARCH_OR_CONTEXT"
+  },
+  {
+    "path": ".devspark.work/quickfixes/example.md",
+    "content": "",
+    "taxon": "RESEARCH_OR_CONTEXT"
+  },
+  {
+    "path": ".devspark.work/pr-review/pr-1.md",
+    "content": "",
+    "taxon": "RESEARCH_OR_CONTEXT"
+  },
+  {
+    "path": ".devspark.work/audit/report.md",
+    "content": "",
+    "taxon": "RESEARCH_OR_CONTEXT"
+  },
+  {
+    "path": ".devspark.work/improvement-loop/notes.md",
+    "content": "",
+    "taxon": "RESEARCH_OR_CONTEXT"
+  },
+  {
+    "path": ".knowledge/reference/codes.md",
+    "content": "",
+    "taxon": "REFERENCE_DATA"
+  },
+  {
+    "path": ".devspark.work/templates/example.md",
+    "content": "",
+    "taxon": "ENGINEERING_PATTERN"
+  },
+  {
+    "path": ".devspark.work/scripts/run.md",
+    "content": "",
+    "taxon": "OPERATIONS_RUNBOOK"
+  },
+  {
+    "path": ".documentation/guides/example.md",
+    "content": "",
+    "taxon": "AUTHORITATIVE_REFERENCE"
+  },
+  { "path": "docs/legacy.md", "content": "", "taxon": "STALE_REFERENCE" },
+  {
+    "path": ".documentation/legacy.md",
+    "content": "mentions pydantic_agent",
+    "taxon": "STALE_REFERENCE"
+  },
+  {
+    "path": "unknown/file.md",
+    "content": "",
+    "taxon": "AUTHORITATIVE_REFERENCE"
+  }
+]

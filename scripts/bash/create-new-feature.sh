@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 
 set -e
+script_start_epoch=$(date +%s)
 
 JSON_MODE=false
 SHORT_NAME=""
@@ -10,8 +12,8 @@ i=1
 while [ $i -le $# ]; do
     arg="${!i}"
     case "$arg" in
-        --json) 
-            JSON_MODE=true 
+        --json)
+            JSON_MODE=true
             ;;
         --short-name)
             if [ $((i + 1)) -gt $# ]; then
@@ -40,7 +42,7 @@ while [ $i -le $# ]; do
             fi
             BRANCH_NUMBER="$next_arg"
             ;;
-        --help|-h) 
+        --help|-h)
             echo "Usage: $0 [--json] [--short-name <name>] [--number N] <feature_description>"
             echo ""
             echo "Options:"
@@ -54,8 +56,8 @@ while [ $i -le $# ]; do
             echo "  $0 'Implement OAuth2 integration for API' --number 5"
             exit 0
             ;;
-        *) 
-            ARGS+=("$arg") 
+        *)
+            ARGS+=("$arg")
             ;;
     esac
     i=$((i + 1))
@@ -71,7 +73,7 @@ fi
 find_repo_root() {
     local dir="$1"
     while [ "$dir" != "/" ]; do
-        if [ -d "$dir/.git" ] || [ -d "$dir/.devspark" ] || [ -d "$dir/.knowledge" ]; then
+        if [ -d "$dir/.git" ] || [ -d "$dir/.devspark" ]; then
             echo "$dir"
             return 0
         fi
@@ -84,7 +86,7 @@ find_repo_root() {
 get_highest_from_specs() {
     local specs_dir="$1"
     local highest=0
-    
+
     if [ -d "$specs_dir" ]; then
         for dir in "$specs_dir"/*; do
             [ -d "$dir" ] || continue
@@ -96,22 +98,22 @@ get_highest_from_specs() {
             fi
         done
     fi
-    
+
     echo "$highest"
 }
 
 # Function to get highest number from git branches
 get_highest_from_branches() {
     local highest=0
-    
+
     # Get all branches (local and remote)
     branches=$(git branch -a 2>/dev/null || echo "")
-    
+
     if [ -n "$branches" ]; then
         while IFS= read -r branch; do
             # Clean branch name: remove leading markers and remote prefixes
             clean_branch=$(echo "$branch" | sed 's/^[* ]*//; s|^remotes/[^/]*/||')
-            
+
             # Extract feature number if branch matches pattern ###-*
             if echo "$clean_branch" | grep -q '^[0-9]\{3\}-'; then
                 number=$(echo "$clean_branch" | grep -o '^[0-9]\{3\}' || echo "0")
@@ -122,7 +124,7 @@ get_highest_from_branches() {
             fi
         done <<< "$branches"
     fi
-    
+
     echo "$highest"
 }
 
@@ -186,12 +188,11 @@ if [[ ${#DEVSPARK_REMAINING_ARGS[@]} -gt 0 ]]; then
 fi
 FEATURE_DESCRIPTION="${ARGS[*]}"
 
-# Determine v4 work-package directory based on app context
+# Determine specs directory based on app context
 if [[ -n "${DEVSPARK_APP_ID:-}" ]]; then
     APP_DOC_ROOT=$(resolve_app_doc_root "$REPO_ROOT" "$DEVSPARK_APP_ID" 2>/dev/null || true)
     if [[ -n "$APP_DOC_ROOT" && "$APP_DOC_ROOT" != ERROR* ]]; then
-        APP_WORK_ROOT="${APP_DOC_ROOT%/.knowledge}/.devspark.work"
-        SPECS_DIR="$APP_WORK_ROOT/specs"
+        SPECS_DIR="$APP_DOC_ROOT/specs"
     else
         SPECS_DIR="$REPO_ROOT/.devspark.work/specs"
     fi
@@ -200,23 +201,73 @@ else
 fi
 mkdir -p "$SPECS_DIR"
 
+# Delegate to the single branch-creation
+# choke point (new-branch.sh) for the common (non-multi-app-scoped) case.
+# new-branch.sh does not yet support an app-scoped specs directory, so a repo
+# using multi-app mode with an --app context keeps the legacy inline path below.
+if [[ -z "${DEVSPARK_APP_ID:-}" ]]; then
+    NEW_BRANCH_ARGS=(--type spec --json --yes)
+    [[ -n "$SHORT_NAME" ]] && NEW_BRANCH_ARGS+=(--short-name "$SHORT_NAME")
+    [[ -n "$BRANCH_NUMBER" ]] && NEW_BRANCH_ARGS+=(--number "$BRANCH_NUMBER")
+    NEW_BRANCH_ARGS+=("$FEATURE_DESCRIPTION")
+
+    NEW_BRANCH_OUTPUT="$("$SCRIPT_DIR/new-branch.sh" "${NEW_BRANCH_ARGS[@]}")"
+    NEW_BRANCH_EXIT=$?
+    if [[ $NEW_BRANCH_EXIT -ne 0 ]]; then
+        echo "$NEW_BRANCH_OUTPUT" >&2
+        exit $NEW_BRANCH_EXIT
+    fi
+
+    BRANCH_NAME=$(echo "$NEW_BRANCH_OUTPUT" | grep -o '"BRANCH_NAME":"[^"]*"' | sed 's/.*:"//; s/"$//')
+    FEATURE_NUM=$(echo "$NEW_BRANCH_OUTPUT" | grep -o '"NUMBER":"[^"]*"' | sed 's/.*:"//; s/"$//')
+    SPEC_FILE=$(echo "$NEW_BRANCH_OUTPUT" | grep -o '"ARTIFACT_PATH":"[^"]*"' | sed 's/.*:"//; s/"$//')
+
+    # Knowledge document:
+    # only the feature-overview doc is emitted here -- spec.md is still the empty
+    # template stub at this point (the agent drafts real content afterward), so
+    # Requirement-document emission is deferred to setup-plan (see plan.md Implementation Notes).
+    # Failure here must never affect this script's JSON contract or exit code.
+    if [[ -n "$SPEC_FILE" ]]; then
+        write_knowledge_document "$(dirname "$SPEC_FILE")" feature feature "$BRANCH_NAME" draft \
+            '{"requirements":[]}' create-new-feature || true
+    fi
+
+    # Preserve the original JSON contract (BRANCH_NAME, SPEC_FILE, FEATURE_NUM).
+    if $JSON_MODE; then
+        printf '{"contract":1,"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM"
+    else
+        echo "BRANCH_NAME: $BRANCH_NAME"
+        echo "SPEC_FILE: $SPEC_FILE"
+        echo "FEATURE_NUM: $FEATURE_NUM"
+        echo "DEVSPARK_FEATURE environment variable set to: $BRANCH_NAME"
+    fi
+
+    script_end_epoch=$(date +%s)
+    duration_ms=$(( (script_end_epoch - script_start_epoch) * 1000 ))
+    add_devspark_metric "create-new-feature" "success" "$duration_ms" '{"showstopper":0,"critical":0,"high":0,"medium":0,"low":0}'
+    exit 0
+fi
+
+# --- Legacy inline path (multi-app --app context only; new-branch.sh does not
+# support an app-scoped specs directory yet) ---
+
 # Function to generate branch name with stop word filtering and length filtering
 generate_branch_name() {
     local description="$1"
-    
+
     # Common stop words to filter out
     local stop_words="^(i|a|an|the|to|for|of|in|on|at|by|with|from|is|are|was|were|be|been|being|have|has|had|do|does|did|will|would|should|could|can|may|might|must|shall|this|that|these|those|my|your|our|their|want|need|add|get|set)$"
-    
+
     # Convert to lowercase and split into words
     local clean_name
     clean_name=$(echo "$description" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/ /g')
-    
+
     # Filter words: remove stop words and words shorter than 3 chars (unless they're uppercase acronyms in original)
     local meaningful_words=()
     for word in $clean_name; do
         # Skip empty words
         [ -z "$word" ] && continue
-        
+
         # Keep words that are NOT stop words AND (length >= 3 OR are potential acronyms)
         if ! echo "$word" | grep -qiE "$stop_words"; then
             if [ ${#word} -ge 3 ]; then
@@ -227,12 +278,12 @@ generate_branch_name() {
             fi
         fi
     done
-    
+
     # If we have meaningful words, use first 3-4 of them
     if [ ${#meaningful_words[@]} -gt 0 ]; then
         local max_words=3
         if [ ${#meaningful_words[@]} -eq 4 ]; then max_words=4; fi
-        
+
         local result=""
         local count=0
         for word in "${meaningful_words[@]}"; do
@@ -275,6 +326,39 @@ fi
 FEATURE_NUM=$(printf "%03d" "$((10#$BRANCH_NUMBER))")
 BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
 
+# Collision guard: numbering is a single repo-wide sequence, never scoped to a
+# short-name. Refuse to proceed if this exact number is already in use by any
+# branch (local/remote) or spec directory, regardless of short-name -- this
+# prevents the class of bug where two different features silently share a number.
+NUMERIC_PREFIX="${FEATURE_NUM}-"
+SPEC_COLLISION=false
+if [ -d "$SPECS_DIR" ]; then
+    for dir in "$SPECS_DIR"/${NUMERIC_PREFIX}*; do
+        [ -d "$dir" ] || continue
+        SPEC_COLLISION=true
+        break
+    done
+fi
+BRANCH_COLLISION=false
+if [ "$HAS_GIT" = true ]; then
+    EXISTING_BRANCHES=$(git branch -a 2>/dev/null || echo "")
+    if [ -n "$EXISTING_BRANCHES" ]; then
+        while IFS= read -r branch; do
+            clean_branch=$(echo "$branch" | sed 's/^[* ]*//; s|^remotes/[^/]*/||')
+            case "$clean_branch" in
+                "${NUMERIC_PREFIX}"*)
+                    BRANCH_COLLISION=true
+                    break
+                    ;;
+            esac
+        done <<< "$EXISTING_BRANCHES"
+    fi
+fi
+if [ "$SPEC_COLLISION" = true ] || [ "$BRANCH_COLLISION" = true ]; then
+    echo "Error: feature number $FEATURE_NUM is already in use by an existing branch or spec directory (collision guard). Re-run without --number so it can be recomputed, or choose a different number explicitly." >&2
+    exit 1
+fi
+
 # GitHub enforces a 244-byte limit on branch names
 # Validate and truncate if necessary
 MAX_BRANCH_LENGTH=244
@@ -282,22 +366,25 @@ if [ ${#BRANCH_NAME} -gt $MAX_BRANCH_LENGTH ]; then
     # Calculate how much we need to trim from suffix
     # Account for: feature number (3) + hyphen (1) = 4 chars
     MAX_SUFFIX_LENGTH=$((MAX_BRANCH_LENGTH - 4))
-    
+
     # Truncate suffix at word boundary if possible
     TRUNCATED_SUFFIX=$(echo "$BRANCH_SUFFIX" | cut -c1-$MAX_SUFFIX_LENGTH)
     # Remove trailing hyphen if truncation created one
     TRUNCATED_SUFFIX=$(echo "$TRUNCATED_SUFFIX" | sed 's/-$//')
-    
+
     ORIGINAL_BRANCH_NAME="$BRANCH_NAME"
     BRANCH_NAME="${FEATURE_NUM}-${TRUNCATED_SUFFIX}"
-    
+
     >&2 echo "[devspark] Warning: Branch name exceeded GitHub's 244-byte limit"
     >&2 echo "[devspark] Original: $ORIGINAL_BRANCH_NAME (${#ORIGINAL_BRANCH_NAME} bytes)"
     >&2 echo "[devspark] Truncated to: $BRANCH_NAME (${#BRANCH_NAME} bytes)"
 fi
 
 if [ "$HAS_GIT" = true ]; then
-    git checkout -b "$BRANCH_NAME"
+    git checkout -b "$BRANCH_NAME" 2>/dev/null || {
+        echo "[devspark] Error: Failed to create git branch '$BRANCH_NAME' (it may already exist). Aborting before writing spec." >&2
+        exit 1
+    }
 else
     >&2 echo "[devspark] Warning: Git repository not detected; skipped branch creation for $BRANCH_NAME"
 fi
@@ -305,19 +392,27 @@ fi
 FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
 mkdir -p "$FEATURE_DIR"
 
-TEMPLATE="$REPO_ROOT/templates/spec-template.md"
+TEMPLATE="$(resolve_template_path "$REPO_ROOT" "spec-template.md" || true)"
 SPEC_FILE="$FEATURE_DIR/spec.md"
-if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"; fi
-write_okf_knowledge_document "$FEATURE_DIR" "traceability-index" "traceability-index" "Traceability Index" "draft" "spec.md" 2>/dev/null || true
+if [ -n "$TEMPLATE" ] && [ -f "$TEMPLATE" ]; then
+    cp "$TEMPLATE" "$SPEC_FILE"
+else
+    echo "[devspark] Warning: No spec-template.md found in fallback chain; creating empty spec.md" >&2
+    touch "$SPEC_FILE"
+fi
 
 # Set the DEVSPARK_FEATURE environment variable for the current session
 export DEVSPARK_FEATURE="$BRANCH_NAME"
 
 if $JSON_MODE; then
-    printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM"
+    printf '{"contract":1,"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM"
 else
     echo "BRANCH_NAME: $BRANCH_NAME"
     echo "SPEC_FILE: $SPEC_FILE"
     echo "FEATURE_NUM: $FEATURE_NUM"
     echo "DEVSPARK_FEATURE environment variable set to: $BRANCH_NAME"
 fi
+
+script_end_epoch=$(date +%s)
+duration_ms=$(( (script_end_epoch - script_start_epoch) * 1000 ))
+add_devspark_metric "create-new-feature" "success" "$duration_ms" '{"showstopper":0,"critical":0,"high":0,"medium":0,"low":0}'

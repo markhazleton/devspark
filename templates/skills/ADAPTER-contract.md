@@ -1,5 +1,7 @@
 # Adapter Contract
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 This document defines how a DevSpark command invokes an Agent Skill. It covers
 skill discovery, input mapping, output mapping, responsibility split, and
 backward-compatibility rules.
@@ -28,7 +30,7 @@ Path resolution is relative to the repository root. The command is responsible
 for resolving the absolute path before invoking the skill. The skill does not
 know its own installation location.
 
-Skill inventory checks enumerate all sibling directories under
+`devspark skills list` enumerates all sibling directories under
 `templates/skills/` that contain a `SKILL.md`. Clients load only `name` and
 `description` for indexing; the full body is loaded only on activation.
 
@@ -91,7 +93,7 @@ DevSpark-governed path.
 | Skill output | Command action |
 | ------------ | -------------- |
 | Draft `spec.md` body | Written to `SPEC_FILE` resolved by the command |
-| `[NEEDS CLARIFICATION]` markers | Preserved; command may invoke `/devspark.clarify` |
+| `[NEEDS CLARIFICATION]` markers | Preserved; command may invoke `/devspark-clarify` |
 | `Assumptions` section | Preserved verbatim in the placed spec |
 
 The skill must not write directly to `SPEC_FILE` or any `.knowledge/` path.

@@ -1,5 +1,7 @@
 # Python + FastAPI / Django Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Async Runtime
 
 - [ ] **No blocking I/O on async paths** (sync DB drivers, sync HTTP clients, `time.sleep`) — e.g., asyncpg vs psycopg2, httpx-async vs requests, `asyncio.sleep`

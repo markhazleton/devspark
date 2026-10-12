@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+  "mimeTypes": {
+    ".zip": "application/zip",
+    ".json": "application/json",
+    ".md": "text/markdown",
+    ".yaml": "text/yaml",
+    ".yml": "text/yaml"
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/raw/*",
+      "/dist/*",
+      "/*.{zip,json,md,yaml,yml,css,js,map,svg,png,jpg,jpeg,gif,ico,woff,woff2,ttf}"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/evaluate-one-task.html",
+      "redirect": "/get-started/evaluate-one-task.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/how-it-works.html",
+      "redirect": "/get-started/how-it-works.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/quickstart.html",
+      "redirect": "/get-started/quickstart.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/implementation-lifecycle.html",
+      "redirect": "/get-started/how-it-works.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/devspark-and-codex.html",
+      "redirect": "/get-started/devspark-and-codex.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/devspark-and-antigravity.html",
+      "redirect": "/get-started/quickstart.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/installation.html",
+      "redirect": "/get-started/quickstart.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/upgrade.html",
+      "redirect": "/get-started/upgrade.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/advanced-capabilities.html",
+      "redirect": "/guides/prompt-lifecycle-mapping.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/harness-engineering.html",
+      "redirect": "/guides/prompt-lifecycle-mapping.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/monorepo-guide.html",
+      "redirect": "/guides/monorepo-guide.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/constitution-guide.html",
+      "redirect": "/guides/constitution-guide.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/pr-review-usage.html",
+      "redirect": "/guides/review-and-audit.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/site-audit-usage.html",
+      "redirect": "/guides/review-and-audit.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/critic-usage.html",
+      "redirect": "/guides/planning-review.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/harvest-usage.html",
+      "redirect": "/get-started/how-it-works.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/checklist-usage.html",
+      "redirect": "/guides/planning-review.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/repo-story-usage.html",
+      "redirect": "/guides/prompt-lifecycle-mapping.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/evidence.html",
+      "redirect": "/why/evidence.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/why/v4-philosophy.html",
+      "redirect": "/why/philosophy.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/enterprise.html",
+      "redirect": "/why/about.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/about.html",
+      "redirect": "/why/about.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/dogfooding.html",
+      "redirect": "/why/about.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/faq.html",
+      "redirect": "/why/faq.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/get-started/implementation-lifecycle.html",
+      "redirect": "/get-started/how-it-works.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/guides/repo-story-usage.html",
+      "redirect": "/guides/prompt-lifecycle-mapping.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/guides/pr-review-usage.html",
+      "redirect": "/guides/review-and-audit.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/guides/advanced-capabilities.html",
+      "redirect": "/guides/prompt-lifecycle-mapping.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/guides/critic-usage.html",
+      "redirect": "/guides/planning-review.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/why/dogfooding.html",
+      "redirect": "/why/about.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/get-started/spec-to-release.html",
+      "redirect": "/get-started/how-it-works.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/guides/checklist-usage.html",
+      "redirect": "/guides/planning-review.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/get-started/devspark-and-antigravity.html",
+      "redirect": "/get-started/quickstart.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/why/enterprise.html",
+      "redirect": "/why/about.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/guides/site-audit-usage.html",
+      "redirect": "/guides/review-and-audit.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/guides/explain-usage.html",
+      "redirect": "/guides/knowledge-management.html",
+      "statusCode": 301
+    },
+    {
+      "route": "/dist/manifest.json",
+      "headers": {
+        "cache-control": "no-store, no-cache, must-revalidate, max-age=0"
+      }
+    },
+    {
+      "route": "/dist/cli/*",
+      "headers": {
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "route": "/dist/v*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/dist/*",
+      "headers": {
+        "cache-control": "no-cache"
+      }
+    },
+    {
+      "route": "/raw/*",
+      "headers": {
+        "cache-control": "no-store, no-cache, must-revalidate, max-age=0"
+      }
+    }
+  ]
+}

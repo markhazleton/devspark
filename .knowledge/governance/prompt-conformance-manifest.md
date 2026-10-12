@@ -1,44 +1,167 @@
 ---
 document: prompt-conformance-manifest
-version: "4.2.0"
-last_verified: "2026-08-30"
-scope: templates/commands
-evidence:
-  - type: code
-    ref: templates/command-preamble-contract.md
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "Prompt conformance is reviewed by inspecting prompt text and generated shims"
+version: "1.0.0"
+created: "2026-06-03"
+scope: templates/commands/
 ---
 
 # Prompt Conformance Manifest
 
-Every stock command prompt must preserve the v4 current-truth model.
+This manifest defines the required governance elements that every command template in
+`templates/commands/` must contain. It is evaluated by an AI agent via `/devspark-checklist`
+— no new scripts or tool dependencies required.
 
-## Required Elements
+> **Contributor obligation**: Run `/devspark-checklist` against this manifest before any
+> PR that modifies files in `templates/commands/`. This is the re-run trigger for the
+> conformance baseline.
 
-Each command template must include or inherit these elements:
+## Required Elements — All Command Templates
 
-| Element | Requirement |
-|---|---|
-| Current-truth discipline | The command must avoid writing ephemeral references into permanent code, knowledge, or governance |
-| Governance authority | The command must treat the constitution as non-negotiable for its scope |
-| Evidence handling | The command must preserve or update evidence for durable claims it changes |
-| Work-package linkage | Planning and implementation commands must create or fill task linkage fields |
-| Output boundary | The command must clearly state whether it writes ephemeral work, current truth, PR text, or no files |
+For each file in `templates/commands/`, verify the following three elements:
 
-## Phase-Specific Expectations
+### Element 1 — Constitution Authority Block
 
-| Phase | Prompt Responsibility |
-|---|---|
-| Plan and build | Produce temporary work packages and resolved current-truth context |
-| Implementation | Apply code and knowledge deltas together, then verify before moving active work to `.archive/` |
-| Validation | Gate current-truth integrity, evidence, and permanent reference hygiene |
-| Governance | Edit constitution and decisions in place |
-| Framework operations | Preserve repository-owned current truth and active work state |
+**Check**: The file contains a block referencing `constitution.md` as non-negotiable authority.
 
-## Review Procedure
+**Deterministic anchor**: The file MUST contain the string `constitution.md` AND the word
+`non-negotiable` within 15 lines of each other.
 
-When command templates change, inspect the changed prompt plus generated shims.
-Reject changes that restore durable spec history, numbered successor decisions,
-archive-as-knowledge behavior, or permanent references to in-flight work.
+**Finding if missing**:
+
+```yaml
+finding_id: conformance-{command-name}-01
+severity: high
+description: "Command template is missing a Constitution Authority block. The template
+  does not reference constitution.md as non-negotiable within 15 lines. This allows
+  implementations to drift from constitution principles without a documented gate."
+recommended_action: "Add a '## Constitution Authority' section (or equivalent functional
+  block) that references constitution.md as non-negotiable for this command's scope."
+execution_mode: manual
+status: open
+outcome: ""
+```
+
+**Constitution reference**: `§IV.SHOWSTOPPER` (Governance Authority — all commands must
+enforce constitution non-negotiability).
+
+---
+
+### Element 2 — Frontmatter Handoffs Block
+
+**Check**: The YAML frontmatter block contains the key `handoffs:`.
+
+**Deterministic anchor**: The file's YAML frontmatter (between the opening `---` and
+closing `---`) MUST contain the key `handoffs:`.
+
+**Note**: GitHub Copilot Agent Skills render no handoff buttons. For Copilot, the
+handoff declarations remain the source of the routing data, and the command's final
+next-step text (which names a hyphenated `/devspark-<command>`) carries the guidance to
+the developer. The element therefore checks the template, not Copilot rendering.
+
+**Finding if missing**:
+
+```yaml
+finding_id: conformance-{command-name}-02
+severity: medium
+description: "Command template frontmatter is missing the 'handoffs:' key. Without
+  handoff declarations, downstream workflow routing is undefined and agents cannot
+  surface next-step options to users."
+recommended_action: "Add a 'handoffs:' block to the YAML frontmatter with at least
+  one downstream agent label and prompt."
+execution_mode: manual
+status: open
+outcome: ""
+```
+
+---
+
+### Element 3 — Artifact Output Statement
+
+**Check**: The file describes at least one artifact it produces or writes.
+
+**Deterministic anchor**: The file MUST contain at least one of the following phrases
+in a section describing what the command produces: `Write`, `Save`, `Create`, `Generate`,
+`Output`. The phrase must appear in a context describing a command output (not just as
+a verb in a general description).
+
+**Finding if missing**:
+
+```yaml
+finding_id: conformance-{command-name}-03
+severity: medium
+description: "Command template does not contain a clear artifact output statement.
+  Users and downstream tools cannot determine what artifact this command produces
+  or where it is saved."
+recommended_action: "Add an explicit statement describing the artifact this command
+  creates or updates, including the file path where it is written."
+execution_mode: manual
+status: open
+outcome: ""
+```
+
+---
+
+## Default Behavior for Unlisted Templates
+
+Any file in `templates/commands/` not explicitly mentioned in the Known Variant Headings
+section below is evaluated against all three universal required elements above.
+
+Findings for unlisted templates use the same `finding_id` pattern:
+`conformance-{command-name}-{01|02|03}`
+
+Failures for unlisted templates are flagged as **LOW** severity unless the missing element
+is Element 1 (Constitution Authority), which is always **HIGH** regardless of whether the
+template is listed or not.
+
+---
+
+## Known Variant Headings
+
+The following commands use non-standard headings or structures for constitution authority
+content. They are pre-documented to prevent false positives.
+
+### `evolve-constitution.md`
+
+**Variant**: Uses `## Lifecycle Position` instead of `## Constitution Authority`.
+
+**Qualifying text present**: The section contains the phrase `constitution.md` and
+references it as non-negotiable authority within the Lifecycle Position block.
+
+**Status**: Acceptable — passes Element 1 check.
+
+---
+
+### `specify.md`
+
+**Variant**: Has `## Constitution Authority` heading but uses "MUST align" rather than
+"non-negotiable" as the authority phrase; references `constitution.md` in the section.
+
+**Qualifying text present**: `## Constitution Authority` heading present; "MUST align with
+mandated principles" is functionally equivalent to non-negotiable enforcement.
+
+**Status**: Acceptable — passes Element 1 check via heading + constitution.md reference.
+
+---
+
+## Conformance Check Procedure
+
+When invoked via `/devspark-checklist`:
+
+1. List all files in `templates/commands/`
+2. For each file, evaluate the three required elements using the deterministic anchors above
+3. Check Known Variant Headings before flagging Element 1 failures
+4. For any missing element, emit a finding using the Shared Review Resolution Contract schema
+   (as defined in each element's "Finding if missing" block above)
+5. Manually verify 3 known-good templates (`specify.md`, `plan.md`, `pr-review.md`) pass
+   all three checks as a sanity test before accepting any full baseline
+
+**Pass**: All three elements present in all templates → no findings emitted.
+
+**Fail**: One finding per missing element per template.
+
+---
+
+## Baseline Results
+
+The automated prompt contract tests are the authoritative baseline. Run them whenever
+`templates/commands/` changes; do not retain dated baseline snapshots in current knowledge.

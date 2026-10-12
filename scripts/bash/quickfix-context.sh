@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Quickfix context gathering script
 # Supports rapid bug fixes and small features without full spec overhead
 
@@ -37,7 +38,7 @@ while [[ $# -gt 0 ]]; do
             ACTION="list"
             shift
             ;;
-        QF-*)
+        QF-*|[0-9][0-9][0-9]-fix-*)
             QUICKFIX_ID="$1"
             shift
             ;;
@@ -56,9 +57,6 @@ done
 # Get repository context
 REPO_ROOT=$(get_repo_root)
 CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
-if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.knowledge/governance/constitution.md" ]]; then
-    CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
-fi
 QUICKFIX_DIR="$REPO_ROOT/.devspark.work/quickfixes"
 CURRENT_BRANCH=$(get_current_branch)
 
@@ -68,21 +66,39 @@ if [[ -f "$CONSTITUTION_PATH" ]]; then
     CONSTITUTION_EXISTS="true"
 fi
 
-# Calculate next quickfix work-package ID
+# Quickfix branch and record naming flows
+# through the unified allocator + slug normalizer (same ones new-branch.sh
+# uses), producing NNN-fix-<slug> instead of the legacy QF-YYYY-NNN. The year
+# is retained only as metadata inside the record body. Legacy QF-YYYY-NNN records remain readable via the
+# unified allocator's scan of both formats.
 YEAR=$(date +%Y)
-NEXT_NUM=1
-if [[ -d "$QUICKFIX_DIR" ]]; then
-    LATEST=$(find "$QUICKFIX_DIR" -maxdepth 1 -type d -name "qf-${YEAR}-[0-9]*" -exec basename {} \; 2>/dev/null | grep -E "^qf-${YEAR}-[0-9]+$" | sort -r | head -1 || echo "")
-    if [[ -n "$LATEST" ]]; then
-        CURRENT_NUM=$(echo "$LATEST" | sed -E "s/qf-$YEAR-0*([0-9]+)/\1/")
-        NEXT_NUM=$((CURRENT_NUM + 1))
+SLUG_SOURCE="${DESCRIPTION:-quickfix}"
+SLUG=$(clean_branch_name "$SLUG_SOURCE")
+SLUG=$(printf '%s' "$SLUG" | tr '-' '\n' | grep -v '^$' | head -4 | tr '\n' '-' | sed 's/-$//')
+[[ -n "$SLUG" ]] || SLUG="quickfix"
+
+NEXT_NUMBER=$(get_next_unified_index)
+FEATURE_NUM=$(printf "%03d" "$((10#$NEXT_NUMBER))")
+BRANCH_NAME="${FEATURE_NUM}-fix-${SLUG}"
+NEXT_ID="$BRANCH_NAME"
+
+# Detect git availability (needed to create the branch and commit the record)
+HAS_GIT="false"
+if has_git; then
+    HAS_GIT="true"
+fi
+
+# Detect a push target so the branch can be published for team visibility
+HAS_REMOTE="false"
+if [[ "$HAS_GIT" == "true" ]]; then
+    if [[ -n "$(git remote 2>/dev/null)" ]]; then
+        HAS_REMOTE="true"
     fi
 fi
-NEXT_ID=$(printf "qf-%s-%03d" "$YEAR" "$NEXT_NUM")
 
 # Get git user for attribution
 GIT_USER="unknown"
-if has_git; then
+if [[ "$HAS_GIT" == "true" ]]; then
     GIT_USER=$(git config user.name 2>/dev/null || echo "unknown")
 fi
 
@@ -116,10 +132,12 @@ if [[ -n "$DESCRIPTION" ]]; then
     fi
 fi
 
-# List existing quickfix work packages for list action
+# List existing quickfixes for list action
 QUICKFIXES_JSON="[]"
 if [[ -d "$QUICKFIX_DIR" ]]; then
-    QUICKFIXES_JSON=$(find "$QUICKFIX_DIR" -maxdepth 1 -type d -exec basename {} \; 2>/dev/null | sort | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
+    QUICKFIXES_JSON=$(ls "$QUICKFIX_DIR"/*.md 2>/dev/null | while read -r f; do
+        basename "$f" .md
+    done | jq -R -s 'split("\n") | map(select(. != ""))' 2>/dev/null || echo '[]')
 fi
 
 # Output JSON if requested
@@ -129,10 +147,14 @@ if [[ "$JSON_MODE" == true ]]; then
   "REPO_ROOT": "$REPO_ROOT",
   "CONSTITUTION_PATH": "$CONSTITUTION_PATH",
   "CONSTITUTION_EXISTS": $CONSTITUTION_EXISTS,
-  "WORK_PACKAGE_DIR": "$QUICKFIX_DIR/$NEXT_ID",
   "QUICKFIX_DIR": "$QUICKFIX_DIR",
   "CURRENT_BRANCH": "$CURRENT_BRANCH",
   "NEXT_ID": "$NEXT_ID",
+  "BRANCH_NAME": "$BRANCH_NAME",
+  "NUMBER": "$FEATURE_NUM",
+  "SLUG": "$SLUG",
+  "HAS_GIT": $HAS_GIT,
+  "HAS_REMOTE": $HAS_REMOTE,
   "GIT_USER": "$GIT_USER",
   "TIMESTAMP": "$TIMESTAMP",
   "ACTION": "$ACTION",
@@ -150,10 +172,12 @@ else
     echo "================"
     echo "Repository: $REPO_ROOT"
     echo "Constitution: $CONSTITUTION_PATH (exists: $CONSTITUTION_EXISTS)"
-    echo "Quickfix Work Root: $QUICKFIX_DIR"
-    echo "Work Package: $QUICKFIX_DIR/$NEXT_ID"
+    echo "Quickfix Directory: $QUICKFIX_DIR"
     echo "Current Branch: $CURRENT_BRANCH"
     echo "Next ID: $NEXT_ID"
+    echo "Branch Name: $BRANCH_NAME"
+    echo "Number: $FEATURE_NUM"
+    echo "Slug: $SLUG"
     echo "Action: $ACTION"
     if [[ -n "$DESCRIPTION" ]]; then
         echo "Description: $DESCRIPTION"

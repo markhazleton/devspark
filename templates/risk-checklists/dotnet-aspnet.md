@@ -1,5 +1,7 @@
 # .NET + ASP.NET Core Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Async & Threading
 
 - [ ] **`async` all the way down** — no `.Result` / `.Wait()` on async calls; no `async void` outside event handlers

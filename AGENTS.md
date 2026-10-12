@@ -4,7 +4,8 @@
 
 DevSpark is a prompt-first lifecycle toolkit. The product is the markdown prompt
 set, helper scripts, templates, schemas, quickstart prompts, and generated agent
-shims.
+entry points and Agent Skills. In v9.0, slash invocations use `/devspark-<command>`.
+Copilot installs native skills; other platforms receive their registered entry format.
 
 There is no DevSpark command-line application in this repository. Do not add one.
 The only approved way to install, upgrade, or repair DevSpark in a consumer
@@ -15,7 +16,8 @@ repository is to run the appropriate quickstart prompt from `quickstart/`.
 ```text
 .devspark/       Framework version stamp and local installed stock assets
 .knowledge/      Current truth: entities, governance, decisions, ontology reports
-.knowledge/  Guides, media, and site content
+site/           Authored public documentation and Make Bold presentation
+eng/release/    Canonical release package builders
 quickstart/      Install, upgrade, and repair prompts
 templates/       Stock prompts, skills, schemas, and helper templates
 scripts/         Bash and PowerShell context helpers used by prompts
@@ -31,7 +33,7 @@ tests/           Prompt, script, documentation, and packaging contracts
 - Maintain Bash and PowerShell parity for helper scripts.
 - Update quickstart command/script inventories whenever templates or scripts
   change.
-- Preserve generated agent shims as thin prompt resolvers only.
+- Preserve generated source and consumer skills as thin prompt resolvers only.
 
 ## Validation
 

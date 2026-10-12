@@ -1,0 +1,18 @@
+id: workitem-integration
+type: integration
+owner: DevSpark Maintainers
+coverage_overrides:
+  - layer: architecture
+    justification: >-
+      The concept is a single dual-language boundary script with no internal structure to describe
+      separately. Its shape is stated in the integration layer, and a separate architecture
+      document would only restate it.
+  - layer: business
+    justification: >-
+      Work item field semantics, states, and validation rules are owned by the external tracking
+      system, not by this repository. Documenting them here would create a second source of truth
+      that decays without notice.
+  - layer: operations
+    justification: >-
+      Enablement, prerequisites, configuration, and day-to-day usage are owned by the flat
+      operations runbook for work tracking, which remains the operational authority.

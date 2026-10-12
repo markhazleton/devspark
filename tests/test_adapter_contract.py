@@ -1,17 +1,16 @@
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 """Adapter contract tests for the write-spec skill integration.
 
 Verifies:
   (a) templates/commands/specify.md references the write-spec skill.
   (b) The three named adapter input variables appear in both specify.md
       delegation block and ADAPTER-contract.md (machine-verifiable variable
-      contract per critic-004).
-  (c) Integration-test pass assertion (FR-012c) is a stub pointing to T027;
-      T019 alone does NOT satisfy FR-012(c).
-  (d) specify.md does not duplicate the drafting procedure inline
-      (xfail until T025 refactor completes — enabled in T026).
+      contract; variable names are part of the versioned contract surface).
+  (c) specify.md does not duplicate the drafting procedure inline.
 """
 from pathlib import Path
 
+import pytest
 
 REPO_ROOT = Path(__file__).parent.parent
 SPECIFY_MD = REPO_ROOT / "templates" / "commands" / "specify.md"
@@ -43,9 +42,9 @@ class TestAdapterContractFiles:
 class TestAdapterVariableContract:
     """Assert the three named adapter input variables appear in ADAPTER-contract.md.
 
-    critic-004: variable names are part of the versioned contract surface.
-    They must be machine-verifiable in the contract document.
-    After T025 refactor, they must also appear in specify.md's delegation block.
+    Variable names are part of the versioned contract surface and must be
+    machine-verifiable in both the contract document and specify.md's
+    delegation block.
     """
 
     def test_feature_description_in_adapter_contract(self):
@@ -84,12 +83,7 @@ class TestAdapterVariableContract:
 
 
 class TestSpecifyReferencesSkill:
-    """Assert specify.md references the write-spec skill.
-
-    Note: FR-012(c) integration-test pass assertion is a stub here.
-    It is not fully enforced until T027 runs the full integration suite
-    against the refactored command. T019 alone does not satisfy FR-012(c).
-    """
+    """Assert specify.md references the write-spec skill."""
 
     def test_specify_references_write_spec(self):
         content = SPECIFY_MD.read_text(encoding="utf-8")

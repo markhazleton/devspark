@@ -1,5 +1,7 @@
 # DevSpark Agent Skills
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 This directory contains DevSpark's portable Agent Skills — capability packages
 that comply with the open Agent Skills specification and can run in any
 skills-compatible client without DevSpark installed.
@@ -56,8 +58,9 @@ adapter contract defines the handoff.
 Run skill validation from the repository root:
 
 ```bash
-python tests/test_skills_install_contract.py
-python tests/test_adapter_contract.py
+devspark skills list
+devspark skills validate
+devspark skills validate templates/skills/write-spec
 ```
 
 See `SKILL-validation-contract.md` for the exit-code contract and diagnostic

@@ -1,40 +1,20 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://devspark.local/schemas/okf-knowledge-document.schema.json",
-  "title": "DevSpark OKF Knowledge Document",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dev.makeboldspark.com/schemas/okf-knowledge-document.schema.json",
+  "title": "OKF Knowledge Document",
+  "description": "Minimum frontmatter contract for DevSpark-generated OKF knowledge documents (spec 005-spec-okf-knowledge-docs).",
   "type": "object",
+  "required": ["id", "type", "title", "status", "links", "generated"],
   "additionalProperties": true,
-  "required": [
-    "okf_schema_version",
-    "document_id",
-    "document_type",
-    "feature_id",
-    "title",
-    "status",
-    "updated_at"
-  ],
   "properties": {
-    "okf_schema_version": {
+    "id": {
       "type": "string",
-      "pattern": "^1\\.0$"
+      "minLength": 1,
+      "description": "Stable identifier, unique within the feature's knowledge/ folder."
     },
-    "document_id": {
+    "type": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9._-]*$"
-    },
-    "document_type": {
-      "type": "string",
-      "enum": [
-        "requirement",
-        "task",
-        "gate-evidence",
-        "traceability-index",
-        "decision"
-      ]
-    },
-    "feature_id": {
-      "type": "string",
-      "pattern": "^[0-9]{3}-[a-z0-9][a-z0-9-]*$"
+      "enum": ["feature", "requirement", "task"]
     },
     "title": {
       "type": "string",
@@ -42,52 +22,67 @@
     },
     "status": {
       "type": "string",
-      "enum": [
-        "draft",
-        "active",
-        "superseded",
-        "complete"
-      ]
+      "enum": ["draft", "active", "done"]
     },
-    "requirement_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^FR-[0-9]{3}$"
+    "links": {
+      "type": "object",
+      "description": "Relationship map; required keys depend on type (see contracts/knowledge-document-schema.md)."
+    },
+    "generated": {
+      "type": "object",
+      "required": ["by", "at"],
+      "properties": {
+        "by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
       },
-      "uniqueItems": true,
-      "default": []
-    },
-    "task_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^T[0-9]{3}$"
-      },
-      "uniqueItems": true,
-      "default": []
-    },
-    "gate_evidence_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z0-9][a-z0-9._:-]*$"
-      },
-      "uniqueItems": true,
-      "default": []
-    },
-    "source_artifacts": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true,
-      "default": []
-    },
-    "updated_at": {
-      "type": "string",
-      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      "additionalProperties": false
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "feature" } } },
+      "then": {
+        "properties": {
+          "links": {
+            "required": ["requirements"],
+            "properties": { "requirements": { "type": "array", "items": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "requirement" } } },
+      "then": {
+        "properties": {
+          "links": {
+            "required": ["feature", "implemented_by"],
+            "properties": {
+              "feature": { "type": "string" },
+              "implemented_by": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "task" } } },
+      "then": {
+        "properties": {
+          "links": {
+            "required": ["feature", "implements"],
+            "properties": {
+              "feature": { "type": "string" },
+              "implements": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

@@ -1,0 +1,14 @@
+id: context-resolution
+type: subsystem
+owner: DevSpark Maintainers
+relations:
+  - to: knowledge-engine
+    rel: depends-on
+constrained_by:
+  - advisory-findings-are-not-authoritative
+coverage_overrides:
+  - layer: integration
+    justification: >-
+      Retrieval and projection run entirely in process over the model the Knowledge Engine already
+      built. Their only external reach is the repository read the engine performs on their behalf,
+      which is described by the Knowledge Engine's own integration layer.

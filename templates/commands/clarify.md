@@ -1,8 +1,9 @@
 ---
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
 description: Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.
 handoffs:
   - label: Build Technical Plan
-    agent: devspark.plan
+    agent: devspark-plan
     prompt: Create a plan for the spec. I am building with...
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json --paths-only
@@ -22,8 +23,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 **Step 2 of 4** in the authoring chain (`specify → clarify → plan → tasks`).
 
 - **Owns**: targeted ambiguity reduction in an existing spec via up to 5 interactive questions, each integrated into the appropriate spec section.
-- **Does NOT own**: drafting/replacing the spec (→ `/devspark.specify`); deciding stack/architecture/data-store choices (→ `/devspark.plan` — only ask here if the *absence* of the choice blocks functional clarity); generating tasks (→ `/devspark.tasks`); adversarial review (→ `/devspark.critic`, `/devspark.analyze`).
-- **Seed queue**: any `[NEEDS CLARIFICATION: …]` markers left by `/devspark.specify` are the first candidates; resolving them removes the marker in addition to the standard integration.
+- **Does NOT own**: drafting/replacing the spec (→ `/devspark-specify`); deciding stack/architecture/data-store choices (→ `/devspark-plan` — only ask here if the *absence* of the choice blocks functional clarity); generating tasks (→ `/devspark-tasks`); adversarial review (→ `/devspark-critic`, `/devspark-analyze`).
+- **Seed queue**: any `[NEEDS CLARIFICATION: …]` markers left by `/devspark-specify` are the first candidates; resolving them removes the marker in addition to the standard integration.
 
 ## Definition of Done
 
@@ -33,30 +34,51 @@ Done when: the questioning loop has ended (5 questions asked, full coverage reac
 
 If `/.knowledge/governance/constitution.md` exists, load it. The constitution is a **non-negotiable ambiguity-detection lens**: any mandated principle (privacy, accessibility, observability, testing, etc.) that the spec omits or leaves vague is a high-priority candidate question. Constitution conflicts cannot be resolved by answer choice — they must trigger a follow-up note in the spec recommending either spec amendment or an explicit constitution update.
 
+## Spec Knowledge Consumption
+
+This command consumes and maintains spec knowledge by purpose, as defined once in the consumption map in `spec-validation-contract.md` §8. Clarify reads and may write every element, because an accepted answer must be applied wherever it bears on the spec.
+
+```yaml
+spec_knowledge_consumption:
+  command: clarify
+  reads:
+    requirements: PROJECT
+    domain_invariants: CONSTRAIN
+    architectural_constraints: CONSTRAIN
+    accepted_limitations: CONSTRAIN
+    success_criteria: PROJECT
+    clarifications: [PROJECT, CONSTRAIN]
+    assumptions: [CONSTRAIN, CONTEXT]
+    boundaries: CONSTRAIN
+    non_goals: CONSTRAIN
+    context: CONTEXT
+  writes: [requirements, domain_invariants, architectural_constraints, accepted_limitations, success_criteria, clarifications, assumptions, boundaries, non_goals, context]
+```
+
+Clarify edits the spec only. It never repairs or rewrites a plan; a plan the answer invalidates is brought back through `/devspark-plan`. A correction that only restores a derived artifact to already-established meaning is a bounded consistency correction, while changing an invariant, constraint, accepted limitation, scope or approved behavior is a substantive revision that needs the developer's answer. Missing spec sections are never an error: skip them.
+
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers multi-app scope resolution and the 2-tier override check for scripts. Preamble modules: `provenance`.
 
 Goal: Detect and reduce ambiguity or missing decision points in the active feature specification and record the clarifications directly in the spec file.
 
-Note: This clarification workflow is expected to run (and be completed) BEFORE invoking `/devspark.plan`. If the user explicitly states they are skipping clarification (e.g., exploratory spike), you may proceed, but must warn that downstream rework risk increases.
+Note: This clarification workflow is expected to run (and be completed) BEFORE invoking `/devspark-plan`. If the user explicitly states they are skipping clarification (e.g., exploratory spike), you may proceed, but must warn that downstream rework risk increases.
 
 Execution steps:
-
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 1. Run `{SCRIPT}` from repo root **once** (combined `--json --paths-only` mode / `-Json -PathsOnly`). Parse minimal JSON payload fields:
    - `FEATURE_DIR`
    - `FEATURE_SPEC`
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
-   - If JSON parsing fails, abort and instruct user to re-run `/devspark.specify` or verify feature branch environment.
+   - If JSON parsing fails, abort and instruct user to re-run `/devspark-specify` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
    - If `/.knowledge/governance/constitution.md` exists, load it. Cross-reference constitution principles when scanning for underspecified areas — flag requirements that conflict with or omit mandated principles.
    - Load the shared validation contract from `/.devspark/templates/spec-validation-contract.md` in installed repos, or `templates/spec-validation-contract.md` in source repos.
 
 2. Load the current spec file and validate it against the shared specification validation contract before ambiguity scanning.
    - If the spec has minor structural drift that can be repaired safely from existing content or authoritative frontmatter, repair it first.
-   - If required route metadata or required top-level sections are missing and cannot be inferred safely, stop and instruct the user to rerun `/devspark.specify` or repair the spec manually before continuing.
+   - If required route metadata or required top-level sections are missing and cannot be inferred safely, stop and instruct the user to rerun `/devspark-specify` or repair the spec manually before continuing.
    - Then perform the structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do not output raw map unless no questions will be asked).
 
    Functional Scope & Behavior:
@@ -123,6 +145,7 @@ Execution steps:
    - Exclude questions already answered, trivial stylistic preferences, or plan-level execution details (unless blocking correctness).
    - Favor clarifications that reduce downstream rework risk or prevent misaligned acceptance tests.
    - If more than 5 categories remain unresolved, select the top 5 by (Impact \* Uncertainty) heuristic.
+   - Entity-and-invariant reasoning, within this same flow and with no extra phase, gate or mandatory questionnaire: when the feature introduces meaningful entities and the spec is silent, consider whether identity, addressability, fidelity, cardinality or relationships must stay invariant regardless of implementation. Ask only when the answer is not already recorded, and only for a property whose change would make the developer say "that is no longer the feature I asked for". When the spec is already clear, ask nothing extra.
 
 4. Sequential questioning loop (interactive, unless `--auto`):
 
@@ -176,8 +199,10 @@ Execution steps:
      - Data shape / entities → Update Data Model (add fields, types, relationships) preserving ordering; note added constraints succinctly.
      - Non-functional constraint → Add/modify measurable criteria in Non-Functional / Quality Attributes section (convert vague adjective to metric or explicit target).
      - Edge case / negative flow → Add a new bullet under Edge Cases / Error Handling (or create such subsection if template provides placeholder for it).
-     - Terminology conflict → Normalize the selected term throughout the spec; do not preserve superseded terminology.
+     - Terminology conflict → Normalize term across spec; retain original only if necessary by adding `(formerly referred to as "X")` once.
    - If the clarification invalidates an earlier ambiguous statement, replace that statement instead of duplicating; leave no obsolete contradictory text.
+   - Apply every accepted answer to each element it affects, not only the one it was asked about: also update Success Criteria, Assumptions and boundaries (Out of Scope, the Minimum Sufficient Change block) when the answer changes them. Replace the contradictory text instead of appending the answer beside it, and keep each success criterion measurable and technology-agnostic, or flag it for the developer when it cannot be.
+   - When the answer confirms an identity, addressability, fidelity, cardinality or relationship rule, record it as a statement labelled `Domain invariant:` or `Architectural constraint:` in Requirements or Key Entities; record an accepted limitation or acceptable manual operation in Requirements, Assumptions or the Minimum Sufficient Change block.
    - Save the spec file AFTER each integration to minimize risk of context loss (atomic overwrite).
    - Preserve formatting: do not reorder unrelated sections; keep heading hierarchy intact.
    - Keep each inserted clarification minimal and testable (avoid narrative drift).
@@ -198,13 +223,13 @@ Execution steps:
    - Path to updated spec.
    - Sections touched (list names).
    - Coverage summary table listing each taxonomy category with Status: Resolved (was Partial/Missing and addressed), Deferred (exceeds question quota or better suited for planning), Clear (already sufficient), Outstanding (still Partial/Missing but low impact).
-   - If any Outstanding or Deferred remain, recommend whether to proceed to `/devspark.plan` or run `/devspark.clarify` again later post-plan.
+   - If any Outstanding or Deferred remain, recommend whether to proceed to `/devspark-plan` or run `/devspark-clarify` again later post-plan.
    - Suggested next command.
 
 Behavior rules:
 
 - If no meaningful ambiguities found (or all potential questions would be low-impact), respond: "No critical ambiguities detected worth formal clarification." and suggest proceeding.
-- If spec file missing, instruct user to run `/devspark.specify` first (do not create a new spec here).
+- If spec file missing, instruct user to run `/devspark-specify` first (do not create a new spec here).
 - Never exceed 5 total asked questions (clarification retries for a single question do not count as new questions).
 - Avoid speculative tech stack questions unless the absence blocks functional clarity.
 - Respect user early termination signals ("stop", "done", "proceed").
@@ -215,7 +240,7 @@ Context for prioritization: {ARGS}
 
 ## Shared Review Resolution Contract Output
 
-When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark.address-pr-review and telemetry) can act on them deterministically:
+When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark-address-pr-review, telemetry, release) can act on them deterministically:
 
 ```yaml
 findings:
@@ -228,4 +253,4 @@ findings:
     outcome: "" # populated post-resolution by address-pr-review
 ```
 
-`finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
+`finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark-address-pr-review` (FR-028).

@@ -1,0 +1,14 @@
+id: knowledge-discovery
+type: subsystem
+owner: DevSpark Maintainers
+relations:
+  - to: knowledge-engine
+    rel: depends-on
+constrained_by:
+  - advisory-findings-are-not-authoritative
+coverage_overrides:
+  - layer: integration
+    justification: >-
+      Discovery inspects the repository only through the validated signals the Knowledge Engine has
+      already resolved. It owns no external boundary of its own, and the repository and version
+      history it reads are described by the Knowledge Engine's integration layer.

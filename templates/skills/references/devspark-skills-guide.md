@@ -1,5 +1,7 @@
 # DevSpark Skills Guide
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 Source standard: <https://agentskills.io/specification>  
 Last reviewed: 2026-05-19
 
@@ -46,7 +48,7 @@ Shared guidance belongs under `templates/skills/references/`. Skill-specific
 guidance belongs under `templates/skills/<skill-name>/references/`.
 
 The first pilot skill is `templates/skills/write-spec/`. It proves that
-`/devspark.specify` can keep the same user-facing command behavior while
+`/devspark-specify` can keep the same user-facing command behavior while
 delegating portable spec-drafting instructions to a standalone skill.
 
 ## Commands vs Skills
@@ -68,8 +70,8 @@ Use this split when designing or reviewing skill work:
 | Command-to-skill input and output mapping | Adapter contract |
 
 A skill must be useful outside DevSpark. It must not require branch creation,
-multi-app registry resolution or DevSpark gate execution to perform its core
-task.
+multi-app registry resolution, DevSpark gate execution, or any installed
+DevSpark CLI behavior to perform its core task.
 
 ## Skill Package Shape
 
@@ -247,8 +249,8 @@ DevSpark skills are validated at three layers:
 Expected validation surfaces:
 
 - `templates/skills/SKILL-validation-contract.md` documents the local rules.
-- Skill inventory checks enumerate skills under `templates/skills/`.
-- Skill validation checks validate all skills or one skill path.
+- `devspark skills list` enumerates skills under `templates/skills/`.
+- `devspark skills validate [path]` validates all skills or one skill path.
 - Tests under `tests/` gate skill and adapter contract behavior in CI.
 - Markdownlint gates all committed Markdown.
 

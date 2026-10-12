@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+# Note: pipefail is intentionally NOT set. This script uses many
+# `printf ... | awk '... exit'` first-match extractions; under pipefail the
+# producer can receive SIGPIPE (exit 141) when the reader exits early, causing
+# intermittent build failures. errexit + nounset still catch real errors.
+set -eu
 
 # create-release-packages.sh (workflow-local)
 # Build DevSpark template release archives for each supported AI assistant and script type.
-# Usage: .github/workflows/scripts/create-release-packages.sh <version>
-#   Version argument should include leading 'v' (e.g., v4.0.0).
+# Usage: eng/release/create-release-packages.sh <version>
+#   Version argument should include leading 'v' (e.g., v1.0.0).
 #   Optionally set AGENTS and/or SCRIPTS env vars to limit what gets built.
 #     AGENTS  : space or comma separated subset of: claude gemini copilot cursor-agent qwen opencode windsurf codex amp shai bob antigravity (default: all)
 #     SCRIPTS : space or comma separated subset of: sh ps (default: both)
 #   Examples:
-#     AGENTS=claude SCRIPTS=sh $0 v4.0.0
-#     AGENTS="copilot,gemini" $0 v4.0.0
-#     SCRIPTS=ps $0 v4.0.0
+#     AGENTS=claude SCRIPTS=sh $0 v1.0.0
+#     AGENTS="copilot,gemini" $0 v1.0.0
+#     SCRIPTS=ps $0 v1.0.0
 
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 <version-with-v-prefix>" >&2
@@ -19,7 +24,7 @@ if [[ $# -ne 1 ]]; then
 fi
 NEW_VERSION="$1"
 if [[ ! $NEW_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "Version must look like v4.0.0 (standard semantic versioning)" >&2
+  echo "Version must look like v1.0.0 (standard semantic versioning)" >&2
   exit 1
 fi
 
@@ -38,10 +43,9 @@ mkdir -p "$GENRELEASES_DIR"
 rm -rf "${GENRELEASES_DIR:?}"/* || true
 
 rewrite_paths() {
-  # DevSpark uses .devspark/ for framework files, .knowledge/ for current truth,
-  # and .devspark.work/ for in-flight work packages.
+  # DevSpark separates framework, temporary work, current truth (plus published guidance), and archive.
   sed -E \
-    -e 's@(/?)\.specify/@\1.knowledge/@g' \
+    -e 's@(/?)\.specify/@\1.knowledge/guides/@g' \
     -e 's@(^|[[:space:]]|`)/specs/@\1/.devspark.work/specs/@g' \
     -e 's@(^|[[:space:]]|`)/memory/@\1/.knowledge/governance/@g' \
     -e 's@(^|[[:space:]]|`)/scripts/@\1/.devspark/scripts/@g' \
@@ -60,18 +64,18 @@ copy_relative_files() {
 }
 
 get_registered_agents() {
-  jq -r '.agents[].key' "$AGENT_REGISTRY_FILE"
+  jq -r '.agents[].key' "$AGENT_REGISTRY_FILE" | tr -d '\r'
 }
 
 get_agent_release_field() {
   local agent_key=$1 field=$2
-  jq -r --arg key "$agent_key" --arg field "$field" '.agents[] | select(.key == $key) | .release[$field] // empty' "$AGENT_REGISTRY_FILE"
+  jq -r --arg key "$agent_key" --arg field "$field" '.agents[] | select(.key == $key) | .release[$field] // empty' "$AGENT_REGISTRY_FILE" | tr -d '\r'
 }
 
 copy_agent_support_files() {
   local agent_key=$1 base_dir=$2
   jq -r --arg key "$agent_key" '.agents[] | select(.key == $key) | .release.support_files[]? | [.source, .destination] | @tsv' "$AGENT_REGISTRY_FILE" |
-    while IFS=$'\t' read -r source_file destination_file; do
+    tr -d '\r' | while IFS=$'\t' read -r source_file destination_file; do
       [[ -n $source_file && -n $destination_file ]] || continue
       [[ -f $source_file ]] || continue
       mkdir -p "$base_dir/$(dirname "$destination_file")"
@@ -80,7 +84,7 @@ copy_agent_support_files() {
 }
 
 generate_canonical_commands() {
-  # Generate canonical command files in .knowledge/overrides/commands/ (agent-agnostic)
+  # Generate canonical command files in .devspark.work/commands/ (agent-agnostic)
   local output_dir=$1 script_variant=$2
   mkdir -p "$output_dir"
   for template in templates/commands/*.md; do
@@ -92,8 +96,8 @@ generate_canonical_commands() {
     file_content=$(tr -d '\r' < "$template")
     
     # Extract description and script command from YAML frontmatter
-    description=$(awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}' <<< "$file_content")
-    script_command=$(awk -v sv="$script_variant" '/^[[:space:]]*'"$script_variant"':[[:space:]]*/ {sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, ""); print; exit}' <<< "$file_content")
+    description=$(printf '%s\n' "$file_content" | awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}')
+    script_command=$(printf '%s\n' "$file_content" | awk -v sv="$script_variant" '/^[[:space:]]*'"$script_variant"':[[:space:]]*/ {sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, ""); print; exit}')
     
     if [[ -z $script_command ]]; then
       echo "Warning: no script command found for $script_variant in $template" >&2
@@ -101,7 +105,7 @@ generate_canonical_commands() {
     fi
     
     # Extract agent_script command from YAML frontmatter if present
-    agent_script_command=$(awk '
+    agent_script_command=$(printf '%s\n' "$file_content" | awk '
       /^agent_scripts:$/ { in_agent_scripts=1; next }
       in_agent_scripts && /^[[:space:]]*'"$script_variant"':[[:space:]]*/ {
         sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, "")
@@ -109,7 +113,7 @@ generate_canonical_commands() {
         exit
       }
       in_agent_scripts && /^[a-zA-Z]/ { in_agent_scripts=0 }
-    ' <<< "$file_content")
+    ')
     
     # Replace {SCRIPT} placeholder with the script command
     body=$(printf '%s\n' "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
@@ -137,7 +141,7 @@ generate_canonical_commands() {
 }
 
 generate_shims() {
-  # Generate thin platform shims that redirect to canonical commands in .knowledge/overrides/commands/
+  # Generate thin platform shims that redirect to canonical commands in .devspark.work/commands/
   local agent=$1 ext=$2 arg_format=$3 output_dir=$4
   mkdir -p "$output_dir"
   for template in templates/commands/*.md; do
@@ -160,7 +164,7 @@ generate_shims() {
     
     case $ext in
       toml)
-        cat > "$output_dir/devspark.$name.$ext" <<SHIMEOF
+        cat > "$output_dir/devspark-$name.$ext" <<SHIMEOF
 description = "$description"
 
 prompt = """
@@ -170,8 +174,8 @@ Determine the current git user by running \`git config user.name\`.
 Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
 
 Read and execute the instructions from the **first file that exists**:
-1. \`.knowledge/overrides/{git-user}/commands/devspark.$name.md\` (personalized override)
-2. \`.knowledge/overrides/commands/devspark.$name.md\` (team customization)
+1. \`.devspark.work/{git-user}/commands/devspark.$name.md\` (personalized override)
+2. \`.devspark.work/commands/devspark.$name.md\` (team customization)
 3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)
 
 Where \`{git-user}\` is the normalized slug from step above.
@@ -201,8 +205,8 @@ SHIMEOF
           echo "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars."
           echo ""
           echo "Read and execute the instructions from the **first file that exists**:"
-          echo "1. \`.knowledge/overrides/{git-user}/commands/devspark.$name.md\` (personalized override)"
-          echo "2. \`.knowledge/overrides/commands/devspark.$name.md\` (team customization)"
+          echo "1. \`.devspark.work/{git-user}/commands/devspark.$name.md\` (personalized override)"
+          echo "2. \`.devspark.work/commands/devspark.$name.md\` (team customization)"
           echo "3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)"
           echo ""
           echo "Where \`{git-user}\` is the normalized slug from step above."
@@ -214,7 +218,7 @@ SHIMEOF
           echo '```'
           echo ""
           echo "Pass the user input above to the resolved prompt."
-        } > "$output_dir/devspark.$name.$ext"
+        } > "$output_dir/devspark-$name.$ext"
         ;;
     esac
   done
@@ -284,27 +288,6 @@ generate_commands() {
   done
 }
 
-generate_copilot_prompts() {
-  local agents_dir=$1 prompts_dir=$2
-  mkdir -p "$prompts_dir"
-  
-  # Generate a .prompt.md file for each .agent.md file
-  for agent_file in "$agents_dir"/devspark.*.agent.md; do
-    [[ -f "$agent_file" ]] || continue
-    
-    local basename
-    basename=$(basename "$agent_file" .agent.md)
-    local prompt_file="$prompts_dir/${basename}.prompt.md"
-    
-    # Create prompt file with agent frontmatter
-    cat > "$prompt_file" <<EOF
----
-agent: ${basename}
----
-EOF
-  done
-}
-
 build_variant() {
   local agent=$1 script=$2
   local base_dir="$GENRELEASES_DIR/sdd-${agent}-package-${script}"
@@ -314,64 +297,60 @@ build_variant() {
   # Framework files go into .devspark/ (removable installation)
   DEVSPARK_DIR="$base_dir/.devspark"
   mkdir -p "$DEVSPARK_DIR"
-  RELEASE_DATE=$(date +%F)
-  {
-    echo "version: ${NEW_VERSION#v}"
-    echo "installed: $RELEASE_DATE"
-    echo "method: release-package"
-    echo "migrated-from: fresh"
-  } > "$DEVSPARK_DIR/VERSION"
 
-  # Current truth is user-owned and never included as repository content.
-  mkdir -p "$base_dir/.knowledge/entities" "$base_dir/.knowledge/governance/decisions" "$base_dir/.knowledge/ontology" "$base_dir/.devspark.work/specs"
+  # Constitution is user-owned and never included in release packages.
+  # Users create it via /devspark-constitution or /devspark-discover-constitution.
   
-  # Current decision: Always copy both script sets regardless of build variant.
+  # ADR-001: Always copy both script sets regardless of build variant.
   # The sh|ps variant only controls which {SCRIPT} path gets baked into command files.
   if [[ -d scripts ]]; then
     mkdir -p "$DEVSPARK_DIR/scripts"
     [[ -d scripts/bash ]] && { cp -r scripts/bash "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/bash -> .devspark/scripts"; }
     [[ -d scripts/powershell ]] && { cp -r scripts/powershell "$DEVSPARK_DIR/scripts/"; echo "Copied scripts/powershell -> .devspark/scripts"; }
-    # Root-level scripts include the single knowledge engine (build_knowledge_index.py),
-    # explain-context.py, and migrate-knowledge-to-entities.py.
     find scripts -maxdepth 1 -type f -exec cp {} "$DEVSPARK_DIR/scripts/" \; 2>/dev/null || true
   fi
   
   [[ -d templates ]] && {
-    copy_relative_files templates "$DEVSPARK_DIR" -type f -not -path "templates/commands/*" -not -name "vscode-settings.json"
+    copy_relative_files templates "$DEVSPARK_DIR" -type f -not -path "templates/commands/*" -not -path "templates/consumer-skills/*" -not -name "vscode-settings.json"
     echo "Copied templates -> .devspark/templates"
   }
   
   # Generate canonical command prompts in .devspark/defaults/commands/ (stock, upgrade-safe)
-  # Team customizations live in .knowledge/overrides/commands/ and are never overwritten.
+  # Team customizations live in .devspark.work/commands/ and are never overwritten.
   generate_canonical_commands "$DEVSPARK_DIR/defaults/commands" "$script"
   echo "Generated canonical commands -> .devspark/defaults/commands"
 
-  # Generate thin platform shims in agent-specific directories
-  # Shims redirect to .knowledge/overrides/commands/ with user-override resolution
-  local commands_dir extension arg_format prompt_dir
-  commands_dir=$(get_agent_release_field "$agent" commands_dir)
-  extension=$(get_agent_release_field "$agent" extension)
-  arg_format=$(get_agent_release_field "$agent" arg_format)
-  prompt_dir=$(get_agent_release_field "$agent" prompt_dir)
+  # Native Agent Skills (Copilot) are copied byte-identically from the committed consumer skills;
+  # every other agent gets thin hyphenated entry points that resolve developer > team > default.
+  local commands_dir extension arg_format skills_dir
+  skills_dir=$(get_agent_release_field "$agent" skills_dir)
 
-  if [[ -z $commands_dir || -z $extension || -z $arg_format ]]; then
-    echo "Incomplete release metadata for agent '$agent'" >&2
-    exit 1
+  if [[ -n $skills_dir ]]; then
+    copy_relative_files templates/consumer-skills "$base_dir/$skills_dir" -type f -name SKILL.md
+    echo "Copied consumer skills -> $skills_dir"
+  else
+    commands_dir=$(get_agent_release_field "$agent" commands_dir)
+    extension=$(get_agent_release_field "$agent" extension)
+    arg_format=$(get_agent_release_field "$agent" arg_format)
+
+    if [[ -z $commands_dir || -z $extension || -z $arg_format ]]; then
+      echo "Incomplete release metadata for agent '$agent' (commands_dir='${commands_dir:-}', extension='${extension:-}', arg_format='${arg_format:-}')" >&2
+      exit 1
+    fi
+
+    generate_shims "$agent" "$extension" "$arg_format" "$base_dir/$commands_dir"
   fi
-
-  generate_shims "$agent" "$extension" "$arg_format" "$base_dir/$commands_dir"
-
-  if [[ -n $prompt_dir ]]; then
-    generate_copilot_prompts "$base_dir/$commands_dir" "$base_dir/$prompt_dir"
-  fi
-
   copy_agent_support_files "$agent" "$base_dir"
   ( cd "$base_dir" && zip -r "../devspark-template-${agent}-${script}-${NEW_VERSION}.zip" . )
   echo "Created $GENRELEASES_DIR/devspark-template-${agent}-${script}-${NEW_VERSION}.zip"
 }
 
 # Determine agent list
-mapfile -t ALL_AGENTS < <(get_registered_agents)
+# bash 3.2 compatible (macOS system bash lacks mapfile/readarray).
+ALL_AGENTS=()
+while IFS= read -r line; do
+  [[ -n $line ]] && ALL_AGENTS+=("$line")
+done < <(get_registered_agents)
 ALL_SCRIPTS=(sh ps)
 
 norm_list() {
@@ -380,13 +359,14 @@ norm_list() {
 }
 
 validate_subset() {
-  local type=$1; shift; local -n allowed=$1; shift; local items=("$@")
+  # bash 3.2 compatible (macOS system bash lacks namerefs): pass allowed values as one space-separated string
+  local type=$1; shift; local allowed_list=$1; shift; local items=("$@")
   local invalid=0
   for it in "${items[@]}"; do
     local found=0
-    for a in "${allowed[@]}"; do [[ $it == "$a" ]] && { found=1; break; }; done
+    for a in $allowed_list; do [[ $it == "$a" ]] && { found=1; break; }; done
     if [[ $found -eq 0 ]]; then
-      echo "Error: unknown $type '$it' (allowed: ${allowed[*]})" >&2
+      echo "Error: unknown $type '$it' (allowed: $allowed_list)" >&2
       invalid=1
     fi
   done
@@ -394,15 +374,21 @@ validate_subset() {
 }
 
 if [[ -n ${AGENTS:-} ]]; then
-  mapfile -t AGENT_LIST < <(printf '%s' "$AGENTS" | norm_list)
-  validate_subset agent ALL_AGENTS "${AGENT_LIST[@]}" || exit 1
+  AGENT_LIST=()
+  while IFS= read -r line; do
+    [[ -n $line ]] && AGENT_LIST+=("$line")
+  done < <(printf '%s' "$AGENTS" | norm_list)
+  validate_subset agent "${ALL_AGENTS[*]}" "${AGENT_LIST[@]}" || exit 1
 else
   AGENT_LIST=("${ALL_AGENTS[@]}")
 fi
 
 if [[ -n ${SCRIPTS:-} ]]; then
-  mapfile -t SCRIPT_LIST < <(printf '%s' "$SCRIPTS" | norm_list)
-  validate_subset script ALL_SCRIPTS "${SCRIPT_LIST[@]}" || exit 1
+  SCRIPT_LIST=()
+  while IFS= read -r line; do
+    [[ -n $line ]] && SCRIPT_LIST+=("$line")
+  done < <(printf '%s' "$SCRIPTS" | norm_list)
+  validate_subset script "${ALL_SCRIPTS[*]}" "${SCRIPT_LIST[@]}" || exit 1
 else
   SCRIPT_LIST=("${ALL_SCRIPTS[@]}")
 fi
@@ -418,3 +404,4 @@ done
 
 echo "Archives in $GENRELEASES_DIR:"
 ls -1 "$GENRELEASES_DIR"/devspark-template-*-"${NEW_VERSION}".zip
+

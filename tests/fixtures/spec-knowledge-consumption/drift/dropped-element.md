@@ -1,0 +1,17 @@
+# Synthetic prompt
+
+```yaml
+spec_knowledge_consumption:
+  command: plan
+  reads:
+    requirements: PROJECT
+    domain_invariants: CONSTRAIN
+    architectural_constraints: CONSTRAIN
+    accepted_limitations: CONSTRAIN
+    clarifications: [PROJECT, CONSTRAIN]
+    assumptions: [CONSTRAIN, CONTEXT]
+    boundaries: CONSTRAIN
+    non_goals: CONSTRAIN
+    context: CONTEXT
+  writes: []
+```

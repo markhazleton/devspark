@@ -1,0 +1,11 @@
+# Get Started section — left-sidebar navigation
+- name: Evaluate One Task
+  href: evaluate-one-task.md
+- name: Quick Start Guide
+  href: quickstart.md
+- name: How It Works
+  href: how-it-works.md
+- name: DevSpark and Codex
+  href: devspark-and-codex.md
+- name: Upgrade
+  href: upgrade.md

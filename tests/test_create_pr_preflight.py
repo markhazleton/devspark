@@ -1,3 +1,4 @@
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 """Validation for create-pr preflight lifecycle context.
 
 Run with: python tests/test_create_pr_preflight.py
@@ -52,7 +53,7 @@ def _write(path: Path, content: str) -> None:
 
 
 def _build_spec_repo(repo_root: Path) -> None:
-    feature_dir = repo_root / ".knowledge" / "specs" / "001-feature-sample"
+    feature_dir = repo_root / ".devspark.work" / "specs" / "001-feature-sample"
     _write(
         feature_dir / "spec.md",
         """---
@@ -116,7 +117,7 @@ summary: Migration rollback plan is underspecified.
 
 
 def _build_full_spec_repo(repo_root: Path) -> None:
-    feature_dir = repo_root / ".knowledge" / "specs" / "002-full-feature"
+    feature_dir = repo_root / ".devspark.work" / "specs" / "002-full-feature"
     _write(
         feature_dir / "spec.md",
         """---
@@ -145,7 +146,7 @@ required_gates: checklist, analyze, critic
 
 def _build_quickfix_repo(repo_root: Path) -> None:
     _write(
-        repo_root / ".knowledge" / "quickfixes" / "QF-001.md",
+        repo_root / ".devspark.work" / "quickfixes" / "QF-001.md",
         """---
 classification: one-off-fix
 risk_level: medium

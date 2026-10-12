@@ -1,0 +1,23 @@
+description = "Trace "how is X done?" against current code and .knowledge/, verifying sync/accuracy/completeness and updating or drafting knowledge as needed"
+
+prompt = """
+## Prompt Resolution
+
+Determine the current git user by running `git config user.name`.
+Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
+
+Read and execute the instructions from the **first file that exists**:
+1. `.devspark.work/{git-user}/commands/devspark.explain.md` (personalized override)
+2. `.devspark.work/commands/devspark.explain.md` (team customization)
+3. `.devspark/defaults/commands/devspark.explain.md` (stock default)
+
+Where `{git-user}` is the normalized slug from step above.
+
+## User Input
+
+```text
+{{args}}
+```
+
+Pass the user input above to the resolved prompt.
+"""

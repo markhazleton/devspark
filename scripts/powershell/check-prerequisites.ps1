@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 
 # Consolidated prerequisite checking script (PowerShell)
 #
@@ -9,6 +10,7 @@
 #
 # OPTIONS:
 #   -Json               Output in JSON format
+#   -RequirePlan        Require plan.md to exist (full-spec routes only; quick-spec/quickfix have no plan.md)
 #   -RequireTasks       Require tasks.md to exist (for implementation phase)
 #   -IncludeTasks       Include tasks.md in AVAILABLE_DOCS list
 #   -PathsOnly          Only output path variables (no validation)
@@ -17,15 +19,16 @@
 [CmdletBinding()]
 param(
     [switch]$Json,
+    [switch]$RequirePlan,
     [switch]$RequireTasks,
     [switch]$IncludeTasks,
     [switch]$PathsOnly,
-    [switch]$RequireDeliveryStatus,
     [int]$TimeoutSeconds = 300,
     [switch]$Help
 )
 
 $ErrorActionPreference = 'Stop'
+$scriptStart = Get-Date
 
 # Show help if requested
 if ($Help) {
@@ -36,25 +39,25 @@ Consolidated prerequisite checking for Spec-Driven Development workflow.
 
 OPTIONS:
   -Json               Output in JSON format
+  -RequirePlan        Require plan.md to exist (full-spec routes only)
   -RequireTasks       Require tasks.md to exist (for implementation phase)
   -IncludeTasks       Include tasks.md in AVAILABLE_DOCS list
   -PathsOnly          Only output path variables (no prerequisite validation)
-    -RequireDeliveryStatus  Require latest delivery status to be create-pr ready
     -TimeoutSeconds     Timeout value reported in diagnostics (default: 300)
   -Help, -h           Show this help message
 
 EXAMPLES:
-  # Check task prerequisites (plan.md required)
-  .\check-prerequisites.ps1 -Json
+  # Check task prerequisites (plan.md required, full-spec route)
+  .\check-prerequisites.ps1 -Json -RequirePlan
   
   # Check implementation prerequisites (plan.md + tasks.md required)
-  .\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+  .\check-prerequisites.ps1 -Json -RequirePlan -RequireTasks -IncludeTasks
+  
+  # Degrade gracefully for quick-spec/quickfix routes (no plan.md/tasks.md required)
+  .\check-prerequisites.ps1 -Json -IncludeTasks
   
   # Get feature paths only (no validation)
   .\check-prerequisites.ps1 -PathsOnly
-
-    # Enforce delivery gate for create-pr/pr-review transitions
-    .\check-prerequisites.ps1 -Json -RequireDeliveryStatus -TimeoutSeconds 300
 
 "@
     exit 0
@@ -100,40 +103,22 @@ if ($PathsOnly) {
 # Validate required directories and files
 if (-not (Test-Path $paths.FEATURE_DIR -PathType Container)) {
     Write-Output "ERROR: Feature directory not found: $($paths.FEATURE_DIR)"
-    Write-Output "Run /devspark.specify first to create the feature structure."
+    Write-Output "Run /devspark-specify first to create the feature structure."
     exit 1
 }
 
-if (-not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
+# Check for plan.md if required (full-spec routes only; quick-spec/quickfix never produce plan.md)
+if ($RequirePlan -and -not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
     Write-Output "ERROR: plan.md not found in $($paths.FEATURE_DIR)"
-    Write-Output "Run /devspark.plan first to create the implementation plan."
+    Write-Output "Run /devspark-plan first to create the implementation plan."
     exit 1
 }
 
 # Check for tasks.md if required
 if ($RequireTasks -and -not (Test-Path $paths.TASKS -PathType Leaf)) {
     Write-Output "ERROR: tasks.md not found in $($paths.FEATURE_DIR)"
-    Write-Output "Run /devspark.tasks first to create the task list."
+    Write-Output "Run /devspark-tasks first to create the task list."
     exit 1
-}
-
-if ($RequireDeliveryStatus) {
-    $runsRoot = Join-Path $paths.REPO_ROOT ".devspark.work/runs"
-    if (Test-Path $runsRoot -PathType Container) {
-        $latest = Get-ChildItem -Path $runsRoot -Directory -ErrorAction SilentlyContinue |
-            Sort-Object LastWriteTime -Descending |
-            Select-Object -First 1
-        if ($latest) {
-            $resultPath = Join-Path $latest.FullName "result.json"
-            if (Test-Path $resultPath -PathType Leaf) {
-                $result = Get-Content $resultPath -Raw | ConvertFrom-Json
-                if (-not $result.create_pr_ready) {
-                    Write-Output "ERROR: delivery-status gate failed; latest delivery status is not create-pr ready"
-                    exit 1
-                }
-            }
-        }
-    }
 }
 
 # Build list of available documents
@@ -155,13 +140,35 @@ if ($IncludeTasks -and (Test-Path $paths.TASKS)) {
     $docs += 'tasks.md' 
 }
 
+# Checklist status (M-03: scripts compute, models judge -- exact counts, not LLM arithmetic)
+$checklistSummary = @()
+$checklistsDir = Join-Path $paths.FEATURE_DIR 'checklists'
+if (Test-Path $checklistsDir -PathType Container) {
+    Get-ChildItem -Path $checklistsDir -Filter '*.md' -File -ErrorAction SilentlyContinue | ForEach-Object {
+        $content = Get-Content $_.FullName -Raw
+        $total = ([regex]::Matches($content, '(?m)^\s*-\s*\[[xX ]\]')).Count
+        $completed = ([regex]::Matches($content, '(?m)^\s*-\s*\[[xX]\]')).Count
+        $checklistSummary += [PSCustomObject]@{
+            name       = $_.Name
+            total      = $total
+            completed  = $completed
+            incomplete = $total - $completed
+            status     = if (($total - $completed) -eq 0) { 'PASS' } else { 'FAIL' }
+        }
+    }
+}
+$checklistsOverall = if (($checklistSummary | Where-Object { $_.incomplete -gt 0 }).Count -gt 0) { 'FAIL' } else { 'PASS' }
+
 # Output results
 if ($Json) {
     # JSON output
     [PSCustomObject]@{ 
+        contract = 1
         FEATURE_DIR = $paths.FEATURE_DIR
         AVAILABLE_DOCS = $docs 
-    } | ConvertTo-Json
+        CHECKLISTS = $checklistSummary
+        CHECKLISTS_OVERALL = $checklistsOverall
+    } | ConvertTo-Json -Depth 5
 } else {
     # Text output
     Write-Output "FEATURE_DIR:$($paths.FEATURE_DIR)"
@@ -176,4 +183,18 @@ if ($Json) {
     if ($IncludeTasks) {
         Test-FileExists -Path $paths.TASKS -Description 'tasks.md' | Out-Null
     }
+
+    if ($checklistSummary.Count -gt 0) {
+        Write-Output "CHECKLISTS:"
+        foreach ($c in $checklistSummary) {
+            Write-Output "  $($c.name): total=$($c.total) completed=$($c.completed) incomplete=$($c.incomplete) status=$($c.status)"
+        }
+        Write-Output "CHECKLISTS_OVERALL: $checklistsOverall"
+    }
+}
+
+$durationMs = [int]((Get-Date) - $scriptStart).TotalMilliseconds
+Add-DevSparkMetric -Command 'check-prerequisites' -Status 'success' -DurationMs $durationMs -Extra @{
+    include_tasks = [bool]$IncludeTasks
+    require_tasks = [bool]$RequireTasks
 }

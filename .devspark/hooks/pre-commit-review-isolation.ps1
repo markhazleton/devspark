@@ -1,11 +1,13 @@
 #!/usr/bin/env pwsh
-# Optional pre-commit guard for v4 ephemeral work isolation.
+# Optional pre-commit guard for PR review artifact isolation.
 
 $staged = @(git diff --cached --name-only)
-$work = @($staged | Where-Object { $_ -like '.devspark.work/*' })
+$review = @($staged | Where-Object { $_ -like '.devspark.work/pr-review/pr-*.md' })
+$other = @($staged | Where-Object { $_ -notlike '.devspark.work/pr-review/pr-*.md' })
 
-if ($work.Count -gt 0) {
-    Write-Error "DevSpark: .devspark.work files must not be staged. Remove temporary work artifacts from this commit."
-    Write-Error "Work files staged:  $($work -join ', ')"
+if ($review.Count -gt 0 -and $other.Count -gt 0) {
+    Write-Error "DevSpark: PR review files must be committed in isolation. Split this commit."
+    Write-Error "Review files staged:  $($review -join ', ')"
+    Write-Error "Other files staged:   $($other -join ', ')"
     exit 1
 }

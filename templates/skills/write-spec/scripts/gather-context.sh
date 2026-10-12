@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # gather-context.sh — Gather repository context for the write-spec skill.
 # Always exits 0. Always emits valid JSON to stdout.
 # Records anything that could not be gathered in the skipped_context array.
@@ -82,7 +83,7 @@ if [ "$CONSTITUTION_FOUND" = false ]; then
     add_skipped "constitution-not-found"
 fi
 
-# Gather in-flight specs
+# Gather prior specs
 SPECS_DIR="$REPO_ROOT/.devspark.work/specs"
 if [ -d "$SPECS_DIR" ]; then
     SPECS_JSON=""
@@ -110,7 +111,7 @@ if [ -d "$SPECS_DIR" ]; then
         else
             SPECS_JSON="$SPECS_JSON,$entry"
         fi
-    done < <(find "$SPECS_DIR" -name "spec.md" -print0 2>/dev/null | sort -z)
+    done < <(find "$SPECS_DIR" -name "spec.md" -not -path "*/.archive/*" -print0 2>/dev/null | sort -z)
 
     if [ -n "$SPECS_JSON" ]; then
         PRIOR_SPECS="[$SPECS_JSON]"

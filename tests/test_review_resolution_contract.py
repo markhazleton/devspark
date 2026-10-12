@@ -1,4 +1,5 @@
-"""Review-resolution contract test (T050)."""
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+"""Review-resolution contract test."""
 
 from __future__ import annotations
 

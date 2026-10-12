@@ -2,12 +2,10 @@
 
 ## pre-commit-review-isolation.ps1
 
-Guards DevSpark v4 current-truth discipline by blocking commits that stage:
+Guards PR review artifact commit discipline by blocking commits that stage both:
 
-- `.devspark.work/*`
-
-`.devspark.work` contains temporary lifecycle state. Assimilate durable results
-into code, tests, and `.knowledge/` before committing.
+- `.devspark.work/pr-review/pr-*.md`
+- any other path
 
 ### Option 1: Native git hook
 
@@ -24,5 +22,7 @@ pwsh -File .devspark/hooks/pre-commit-review-isolation.ps1
 
 Invoke `pwsh -File .devspark/hooks/pre-commit-review-isolation.ps1` from your pre-commit framework config as a local hook.
 
-If the hook blocks a commit, unstage the `.devspark.work` paths and commit only
-the durable current-truth changes.
+If the hook blocks a commit, split staged changes into:
+
+1. code-fix commit(s)
+2. review-file-only commit

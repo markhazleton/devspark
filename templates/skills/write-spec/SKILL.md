@@ -1,4 +1,5 @@
 ---
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
 name: write-spec
 description: Draft feature specifications, requirements documents, user stories, acceptance criteria, and validation-ready specs from a feature request. Use this skill when you need to write a spec, define requirements, capture user stories, or produce a structured specification document.
 metadata:
@@ -49,18 +50,20 @@ Use the spec template in `references/spec-template.md`.
 1. Set `name` from the feature request. Generate a sequential number if prior
    specs are available (e.g., if the last spec was `004-...`, use `005-`).
 2. Set `status: Draft` always. Do not set any other lifecycle state.
-3. Write the **Rationale Summary** — core problem, decision summary, key
+3. Write the **Product Owner TLDR** — a short non-technical summary that
+   clearly states WHAT this spec changes and WHY it matters now.
+4. Write the **Rationale Summary** — core problem, decision summary, key
    drivers, tradeoffs considered.
-4. Write **User Stories** — at least one per priority tier in the request.
+5. Write **User Stories** — at least one per priority tier in the request.
    Each story must have: actor, capability, business value, and acceptance
    scenarios.
-5. Write **Requirements** — MUST-level functional requirements as the minimum
+6. Write **Requirements** — MUST-level functional requirements as the minimum
    viable set. Do not add requirements the user has not implied.
-6. Write **Success Criteria** — measurable outcomes. Each criterion must be
+7. Write **Success Criteria** — measurable outcomes. Each criterion must be
    verifiable without DevSpark installed.
-7. Add an **Assumptions** section listing anything the spec takes for granted,
+8. Add an **Assumptions** section listing anything the spec takes for granted,
    including any context items listed in `skipped_context`.
-8. Add an **Out of Scope** section. Capture anything explicitly not covered by
+9. Add an **Out of Scope** section. Capture anything explicitly not covered by
    this spec.
 
 Do NOT include implementation details (frameworks, library versions, file
@@ -93,8 +96,9 @@ provided by the host client). The file must:
 
 - Pass the shared spec validation contract (see `references/spec-template.md`)
 - Have valid YAML frontmatter with `status: Draft`
-- Contain the four mandatory sections: Rationale Summary, User Stories,
-  Requirements, and Success Criteria
+- Contain a `Product Owner TLDR` section that answers WHAT and WHY at a high level
+- Contain the four mandatory full-spec sections: Rationale Summary, User
+   Stories, Requirements, and Success Criteria
 - Contain no more than three `[NEEDS CLARIFICATION]` markers
 - Contain no implementation details (no language choices, no library versions)
 

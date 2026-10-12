@@ -1,12 +1,13 @@
 #!/usr/bin/env pwsh
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Create a new feature
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding = $false)]
 param(
     [switch]$Json,
     [string]$ShortName,
     [int]$Number = 0,
     [switch]$Help,
-    [Parameter(ValueFromRemainingArguments = $true)]
+    [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
     [string[]]$FeatureDescription
 )
 $ErrorActionPreference = 'Stop'
@@ -28,261 +29,64 @@ if ($Help) {
 }
 
 # Check if feature description provided
-if (-not $FeatureDescription -or $FeatureDescription.Count -eq 0) {
+if ((-not $FeatureDescription -or $FeatureDescription.Count -eq 0) -and -not $ShortName) {
     Write-Error "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] <feature description>"
     exit 1
 }
 
-$featureDesc = ($FeatureDescription -join ' ').Trim()
+$scriptStart = Get-Date
 
-# Resolve repository root. Prefer git information when available, but fall back
-# to searching for repository markers so the workflow still functions in repositories that
-# were initialized with --no-git.
-function Find-RepositoryRoot {
-    param(
-        [string]$StartDir,
-        [string[]]$Markers = @('.git', '.devspark', '.knowledge')
-    )
-    $current = Resolve-Path $StartDir
-    while ($true) {
-        foreach ($marker in $Markers) {
-            if (Test-Path (Join-Path $current $marker)) {
-                return $current
-            }
-        }
-        $parent = Split-Path $current -Parent
-        if ($parent -eq $current) {
-            # Reached filesystem root without finding markers
-            return $null
-        }
-        $current = $parent
-    }
+. "$PSScriptRoot/common.ps1"
+
+# Delegate to the single branch-creation choke point. Branch Safety is confirmed
+# by the caller (for example, /devspark-specify) before this script runs, so -Yes avoids a double-prompt
+# for a decision the developer already made.
+# Splat a hashtable, not an array: array splatting binds positionally, and
+# new-branch.ps1 sets PositionalBinding=$false, so every token would be
+# swallowed by its ValueFromRemainingArguments -Description parameter.
+$newBranchParams = @{ Type = 'spec'; Json = $true; Yes = $true }
+if ($ShortName) { $newBranchParams['ShortName'] = $ShortName }
+if ($Number -gt 0) { $newBranchParams['Number'] = $Number }
+if ($FeatureDescription) { $newBranchParams['Description'] = $FeatureDescription }
+
+$newBranchOutput = & "$PSScriptRoot/new-branch.ps1" @newBranchParams
+$exitCode = $LASTEXITCODE
+if ($exitCode -ne 0) {
+    Write-Error ($newBranchOutput -join "`n")
+    exit $exitCode
 }
 
-function Get-HighestNumberFromSpecs {
-    param([string]$SpecsDir)
-    
-    $highest = 0
-    if (Test-Path $SpecsDir) {
-        Get-ChildItem -Path $SpecsDir -Directory | ForEach-Object {
-            if ($_.Name -match '^(\d+)') {
-                $num = [int]$matches[1]
-                if ($num -gt $highest) { $highest = $num }
-            }
-        }
-    }
-    return $highest
+$result = $newBranchOutput | ConvertFrom-Json
+
+# Knowledge document:
+# only the feature-overview doc is emitted here -- spec.md is still the empty
+# template stub at this point (the agent drafts real content afterward), so
+# Requirement-document emission is deferred to setup-plan (see plan.md Implementation Notes).
+# Failure here must never affect this script's JSON contract or exit code.
+if ($result.ARTIFACT_PATH) {
+    New-KnowledgeDocument -FeatureDir (Split-Path $result.ARTIFACT_PATH -Parent) `
+        -Id 'feature' -Type 'feature' -Title $result.BRANCH_NAME -Status 'draft' `
+        -Links @{ requirements = @() } -GeneratedBy 'create-new-feature' | Out-Null
 }
 
-function Get-HighestNumberFromBranches {
-    param()
-    
-    $highest = 0
-    try {
-        $branches = git branch -a 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            foreach ($branch in $branches) {
-                # Clean branch name: remove leading markers and remote prefixes
-                $cleanBranch = $branch.Trim() -replace '^\*?\s+', '' -replace '^remotes/[^/]+/', ''
-                
-                # Extract feature number if branch matches pattern ###-*
-                if ($cleanBranch -match '^(\d+)-') {
-                    $num = [int]$matches[1]
-                    if ($num -gt $highest) { $highest = $num }
-                }
-            }
-        }
-    } catch {
-        # If git command fails, return 0
-        Write-Verbose "Could not check Git branches: $_"
-    }
-    return $highest
-}
-
-function Get-NextBranchNumber {
-    param(
-        [string]$SpecsDir
-    )
-
-    # Fetch all remotes to get latest branch info (suppress errors if no remotes)
-    try {
-        git fetch --all --prune 2>$null | Out-Null
-    } catch {
-        # Ignore fetch errors
-    }
-
-    # Get highest number from ALL branches (not just matching short name)
-    $highestBranch = Get-HighestNumberFromBranches
-
-    # Get highest number from ALL specs (not just matching short name)
-    $highestSpec = Get-HighestNumberFromSpecs -SpecsDir $SpecsDir
-
-    # Take the maximum of both
-    $maxNum = [Math]::Max($highestBranch, $highestSpec)
-
-    # Return next number
-    return $maxNum + 1
-}
-
-function ConvertTo-CleanBranchName {
-    param([string]$Name)
-    
-    return $Name.ToLower() -replace '[^a-z0-9]', '-' -replace '-{2,}', '-' -replace '^-', '' -replace '-$', ''
-}
-$fallbackRoot = (Find-RepositoryRoot -StartDir $PSScriptRoot)
-if (-not $fallbackRoot) {
-    Write-Error "Error: Could not determine repository root. Please run this script from within the repository."
-    exit 1
-}
-
-try {
-    $repoRoot = git rev-parse --show-toplevel 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        $hasGit = $true
-    } else {
-        throw "Git not available"
-    }
-} catch {
-    $repoRoot = $fallbackRoot
-    $hasGit = $false
-}
-
-Set-Location $repoRoot
-
-$specsDir = Join-Path (Join-Path $repoRoot '.devspark.work') 'specs'
-New-Item -ItemType Directory -Path $specsDir -Force | Out-Null
-
-# Multi-app support
-if (-not (Get-Command Detect-DevSparkMode -ErrorAction SilentlyContinue)) {
-    . "$PSScriptRoot/common.ps1"
-}
-
-# Function to generate branch name with stop word filtering and length filtering
-function Get-BranchName {
-    param([string]$Description)
-    
-    # Common stop words to filter out
-    $stopWords = @(
-        'i', 'a', 'an', 'the', 'to', 'for', 'of', 'in', 'on', 'at', 'by', 'with', 'from',
-        'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
-        'do', 'does', 'did', 'will', 'would', 'should', 'could', 'can', 'may', 'might', 'must', 'shall',
-        'this', 'that', 'these', 'those', 'my', 'your', 'our', 'their',
-        'want', 'need', 'add', 'get', 'set'
-    )
-    
-    # Convert to lowercase and extract words (alphanumeric only)
-    $cleanName = $Description.ToLower() -replace '[^a-z0-9\s]', ' '
-    $words = $cleanName -split '\s+' | Where-Object { $_ }
-    
-    # Filter words: remove stop words and words shorter than 3 chars (unless they're uppercase acronyms in original)
-    $meaningfulWords = @()
-    foreach ($word in $words) {
-        # Skip stop words
-        if ($stopWords -contains $word) { continue }
-        
-        # Keep words that are length >= 3 OR appear as uppercase in original (likely acronyms)
-        if ($word.Length -ge 3) {
-            $meaningfulWords += $word
-        } elseif ($Description -match "\b$($word.ToUpper())\b") {
-            # Keep short words if they appear as uppercase in original (likely acronyms)
-            $meaningfulWords += $word
-        }
-    }
-    
-    # If we have meaningful words, use first 3-4 of them
-    if ($meaningfulWords.Count -gt 0) {
-        $maxWords = if ($meaningfulWords.Count -eq 4) { 4 } else { 3 }
-        $result = ($meaningfulWords | Select-Object -First $maxWords) -join '-'
-        return $result
-    } else {
-        # Fallback to original logic if no meaningful words found
-        $result = ConvertTo-CleanBranchName -Name $Description
-        $fallbackWords = ($result -split '-') | Where-Object { $_ } | Select-Object -First 3
-        return [string]::Join('-', $fallbackWords)
-    }
-}
-
-# Generate branch name
-if ($ShortName) {
-    # Use provided short name, just clean it up
-    $branchSuffix = ConvertTo-CleanBranchName -Name $ShortName
-} else {
-    # Generate from description with smart filtering
-    $branchSuffix = Get-BranchName -Description $featureDesc
-}
-
-# Determine branch number
-if ($Number -eq 0) {
-    if ($hasGit) {
-        # Check existing branches on remotes
-        $Number = Get-NextBranchNumber -SpecsDir $specsDir
-    } else {
-        # Fall back to local directory check
-        $Number = (Get-HighestNumberFromSpecs -SpecsDir $specsDir) + 1
-    }
-}
-
-$featureNum = ('{0:000}' -f $Number)
-$branchName = "$featureNum-$branchSuffix"
-
-# GitHub enforces a 244-byte limit on branch names
-# Validate and truncate if necessary
-$maxBranchLength = 244
-if ($branchName.Length -gt $maxBranchLength) {
-    # Calculate how much we need to trim from suffix
-    # Account for: feature number (3) + hyphen (1) = 4 chars
-    $maxSuffixLength = $maxBranchLength - 4
-    
-    # Truncate suffix
-    $truncatedSuffix = $branchSuffix.Substring(0, [Math]::Min($branchSuffix.Length, $maxSuffixLength))
-    # Remove trailing hyphen if truncation created one
-    $truncatedSuffix = $truncatedSuffix -replace '-$', ''
-    
-    $originalBranchName = $branchName
-    $branchName = "$featureNum-$truncatedSuffix"
-    
-    Write-Warning "[devspark] Branch name exceeded GitHub's 244-byte limit"
-    Write-Warning "[devspark] Original: $originalBranchName ($($originalBranchName.Length) bytes)"
-    Write-Warning "[devspark] Truncated to: $branchName ($($branchName.Length) bytes)"
-}
-
-if ($hasGit) {
-    try {
-        git checkout -b $branchName | Out-Null
-    } catch {
-        Write-Warning "Failed to create git branch: $branchName"
-    }
-} else {
-    Write-Warning "[devspark] Warning: Git repository not detected; skipped branch creation for $branchName"
-}
-
-$featureDir = Join-Path $specsDir $branchName
-New-Item -ItemType Directory -Path $featureDir -Force | Out-Null
-
-$template = Join-Path $repoRoot 'templates/spec-template.md'
-$specFile = Join-Path $featureDir 'spec.md'
-if (Test-Path $template) { 
-    Copy-Item $template $specFile -Force 
-} else { 
-    New-Item -ItemType File -Path $specFile | Out-Null 
-}
-Write-OkfKnowledgeDocument -FeatureDir $featureDir -DocumentId 'traceability-index' -DocumentType 'traceability-index' -Title 'Traceability Index' -Status 'draft' -SourceArtifact 'spec.md'
-
-# Set the DEVSPARK_FEATURE environment variable for the current session
-$env:DEVSPARK_FEATURE = $branchName
-
+# Preserve the original JSON contract (BRANCH_NAME, SPEC_FILE, FEATURE_NUM, HAS_GIT).
 if ($Json) {
-    $obj = [PSCustomObject]@{ 
-        BRANCH_NAME = $branchName
-        SPEC_FILE = $specFile
-        FEATURE_NUM = $featureNum
-        HAS_GIT = $hasGit
+    $obj = [PSCustomObject]@{
+        contract    = 1
+        BRANCH_NAME = $result.BRANCH_NAME
+        SPEC_FILE   = $result.ARTIFACT_PATH
+        FEATURE_NUM = $result.NUMBER
+        HAS_GIT     = $result.HAS_GIT
     }
     $obj | ConvertTo-Json
 } else {
-    Write-Output "BRANCH_NAME: $branchName"
-    Write-Output "SPEC_FILE: $specFile"
-    Write-Output "FEATURE_NUM: $featureNum"
-    Write-Output "HAS_GIT: $hasGit"
-    Write-Output "DEVSPARK_FEATURE environment variable set to: $branchName"
+    Write-Output "BRANCH_NAME: $($result.BRANCH_NAME)"
+    Write-Output "SPEC_FILE: $($result.ARTIFACT_PATH)"
+    Write-Output "FEATURE_NUM: $($result.NUMBER)"
+    Write-Output "HAS_GIT: $($result.HAS_GIT)"
+    Write-Output "DEVSPARK_FEATURE environment variable set to: $($result.BRANCH_NAME)"
 }
+
+$durationMs = [int]((Get-Date) - $scriptStart).TotalMilliseconds
+Add-DevSparkMetric -Command 'create-new-feature' -Status 'success' -DurationMs $durationMs
+

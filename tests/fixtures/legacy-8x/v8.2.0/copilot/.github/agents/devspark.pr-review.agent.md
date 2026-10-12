@@ -1,0 +1,27 @@
+---
+description: Perform constitution-aware pull request review with actionable feedback for any PR in the repository
+handoffs:
+  - label: Address Current Findings
+    agent: devspark.pr-review
+    prompt: Address the current unresolved review findings.
+---
+
+## Prompt Resolution
+
+Determine the current git user by running `git config user.name`.
+Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
+
+Read and execute the instructions from the **first file that exists**:
+1. `.devspark.work/{git-user}/commands/devspark.pr-review.md` (personalized override)
+2. `.devspark.work/commands/devspark.pr-review.md` (team customization)
+3. `.devspark/defaults/commands/devspark.pr-review.md` (stock default)
+
+Where `{git-user}` is the normalized slug from step above.
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+Pass the user input above to the resolved prompt.

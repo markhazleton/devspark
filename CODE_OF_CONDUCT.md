@@ -1,5 +1,7 @@
 # Contributor Covenant Code of Conduct
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Our Pledge
 
 In the interest of fostering an open and welcoming environment, we as
@@ -55,7 +57,8 @@ further defined and clarified by project maintainers.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at <mark@markhazleton.com>. All
+reported by contacting the project team through the Make Bold Solutions
+internal support channel. All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.

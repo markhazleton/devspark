@@ -1,0 +1,16 @@
+{
+  // Captured generator output and quickstart shims are kept byte-for-byte; their list spacing is not ours to fix.
+  "config": {
+    "default": true,
+    "MD003": { "style": "atx" },
+    "MD007": { "indent": 2 },
+    "MD013": false,
+    "MD024": { "siblings_only": true },
+    "MD032": false,
+    "MD033": false,
+    "MD041": false,
+    "MD049": { "style": "asterisk" },
+    "MD050": { "style": "asterisk" },
+    "MD060": false
+  }
+}

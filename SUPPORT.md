@@ -1,17 +1,19 @@
 # Support
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## How to file issues and get help
 
 This project uses GitHub issues to track bugs and feature requests. Please search the existing issues before filing new issues to avoid duplicates. For new issues, file your bug or feature request as a new issue.
 
 For help or questions about using this project, please:
 
-- Open a [GitHub issue](https://github.com/MarkHazleton/devspark/issues/new) for bug reports, feature requests, or questions about the Spec-Driven Development methodology
+- Open a [GitHub issue](https://dev.azure.com/example-org/HealthSource/_workitems/create/Issue) for bug reports, feature requests, or questions about the Spec-Driven Development methodology
 - Review the [README](./README.md) for getting started instructions and troubleshooting tips
 
 ## Project Status
 
-**DevSpark** is under active development and maintained by [Mark Hazleton](https://github.com/markhazleton) and the community. We will do our best to respond to support, feature requests, and community questions in a timely manner.
+**DevSpark** is under active development and maintained by the Make Bold Solutions engineering community. We will do our best to respond to support, feature requests, and community questions in a timely manner.
 
 ## GitHub Support Policy
 

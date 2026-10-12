@@ -1,9 +1,10 @@
-"""Contract test: skills surface must be installed by quickstarts and release packaging.
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+"""Contract test: skills surface must be installed by quickstarts, upgrade prompt, and release packaging.
 
 Closes GitHub issues #42, #43, #44 — `templates/skills/` (and specifically the
 `write-spec` skill required by `/devspark.specify`) MUST be installed alongside
 helper templates and scripts. This test guards against regressions where the
-skills directory is omitted from any install, upgrade, or repair surface.
+skills directory is omitted from any install/upgrade surface.
 """
 
 from __future__ import annotations
@@ -14,7 +15,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 QUICKSTART_DIR = ROOT / "quickstart"
-RELEASE_PACKAGER = ROOT / ".github" / "workflows" / "scripts" / "create-release-packages.sh"
+UPGRADE_PROMPT = ROOT / "templates" / "commands" / "upgrade.md"
+RELEASE_PACKAGER = ROOT / "eng" / "release" / "create-release-packages.sh"
 SKILLS_ROOT = ROOT / "templates" / "skills"
 
 REQUIRED_SKILL_FILES = [
@@ -58,6 +60,59 @@ def test_quickstart_installs_skills(quickstart: Path) -> None:
     assert "Pull Agent Skills" in text or "Agent Skill" in text, (
         f"{quickstart.name} is missing a dedicated Agent Skills install step."
     )
+
+
+def test_upgrade_prompt_lists_skills_as_framework_owned() -> None:
+    """templates/commands/upgrade.md must declare .devspark/templates/skills/ as framework-owned and refresh it on upgrade."""
+    text = UPGRADE_PROMPT.read_text(encoding="utf-8")
+
+    assert ".devspark/templates/skills/" in text, (
+        "upgrade.md does not mention .devspark/templates/skills/ — "
+        "upgrades will not refresh skills (regression of #42/#43/#44)."
+    )
+    # The skills directory must appear in the Framework-owned bullet list.
+    framework_owned_idx = text.find("Framework-owned")
+    repository_owned_idx = text.find("Repository-owned")
+    assert 0 <= framework_owned_idx < repository_owned_idx, "upgrade.md ownership sections out of order"
+    framework_section = text[framework_owned_idx:repository_owned_idx]
+    assert ".devspark/templates/skills/" in framework_section, (
+        "skills directory must be listed under 'Framework-owned (safe to overwrite on upgrade)'"
+    )
+
+    assert "write-spec/SKILL.md" in text, (
+        "upgrade.md should reference write-spec/SKILL.md so the verify step catches a missing skill."
+    )
+
+
+OTHER_QUICKSTARTS = [q for q in QUICKSTART_FILES if q.name != "devspark_quickstart_copilot.md"] + [
+    QUICKSTART_DIR / "devspark_quickstart_antigravity.md"
+]
+
+
+def _skill_category_lines(text: str) -> list[str]:
+    return [line for line in text.splitlines() if "`skill`" in line]
+
+
+def test_copilot_quickstart_installs_the_skill_category_into_the_skills_directory() -> None:
+    text = (QUICKSTART_DIR / "devspark_quickstart_copilot.md").read_text(encoding="utf-8")
+    lines = _skill_category_lines(text)
+    assert any(".github/skills" in line for line in lines), "category `skill` must map to .github/skills"
+    assert not any("skip" in line.lower() for line in lines)
+
+
+@pytest.mark.parametrize("quickstart", OTHER_QUICKSTARTS, ids=lambda p: p.name)
+def test_other_quickstarts_skip_the_skill_category_explicitly(quickstart: Path) -> None:
+    text = quickstart.read_text(encoding="utf-8")
+    lines = _skill_category_lines(text)
+    assert any("skip" in line.lower() for line in lines), "category `skill` must be skipped explicitly"
+    assert not any(".github/skills" in line and "skip" not in line.lower() for line in lines)
+
+
+def test_upgrade_prompt_replays_the_skill_category_for_copilot_only() -> None:
+    text = UPGRADE_PROMPT.read_text(encoding="utf-8")
+    lines = _skill_category_lines(text)
+    assert any(".github/skills" in line for line in lines)
+    assert any("skip" in line.lower() for line in lines)
 
 
 def test_release_packager_copies_skills() -> None:

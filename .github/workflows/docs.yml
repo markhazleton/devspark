@@ -6,7 +6,16 @@ on:
   push:
     branches: ["main"]
     paths:
-      - '.knowledge/**'
+      - 'site/**'
+      - '.knowledge/governance/**'
+      - 'templates/**'
+      - 'scripts/**'
+      - 'quickstart/**'
+      - 'eng/**'
+      - 'agents-registry.json'
+      - 'pyproject.toml'
+      - '.devspark/VERSION'
+      - '.github/workflows/docs.yml'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -39,12 +48,23 @@ jobs:
           dotnet-version: '8.x'
 
       - name: Setup DocFX
-        run: dotnet tool install -g docfx
+        run: dotnet tool install -g docfx --version 2.78.3
 
       - name: Build with DocFX
         run: |
-          cd .knowledge/entities/product-documentation/site
+          cd site
           docfx docfx.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Assemble distribution
+        run: |
+          version=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          bash eng/release/create-release-packages.sh "v${version}"
+          python eng/site/build-distribution.py
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -52,7 +72,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.knowledge/entities/product-documentation/site/_site'
+          path: 'site/_site'
 
   # Deploy job
   deploy:

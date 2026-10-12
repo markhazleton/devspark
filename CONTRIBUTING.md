@@ -1,5 +1,7 @@
 # Contributing to DevSpark
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 Hi there! We're thrilled that you'd like to contribute to DevSpark. Contributions to this project are [released](https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license) to the public under the [project's open source license](LICENSE).
 
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
@@ -12,6 +14,8 @@ These are one time installations required to be able to test your changes locall
 1. Install [uv](https://docs.astral.sh/uv/) for package management
 1. Install [Git](https://git-scm.com/downloads)
 1. Have an [AI coding agent available](README.md#-supported-ai-agents)
+1. Install [`jq`](https://jqlang.org/download/) if you plan to run the bash-variant script tests locally (e.g. `tests/test_knowledge_document_contract.py`'s `*_bash` tests, and `add_devspark_metric` in `scripts/bash/common.sh`) — these tests skip cleanly without it, but won't exercise the bash code paths
+1. If you're editing `scripts/bash/*.sh` on a Mac, see [scripts/README.md](scripts/README.md#bash-version-constraint) — those scripts must stay compatible with macOS's bash 3.2, not just whatever `bash` is first on your `PATH`
 
 <details>
 <summary><b>💡 Hint if you are using <code>VSCode</code> or <code>GitHub Codespaces</code> as your IDE</b></summary>
@@ -33,17 +37,13 @@ On [GitHub Codespaces](https://github.com/features/codespaces) it's even simpler
 ## Submitting a pull request
 
 > [!NOTE]
-> If your pull request introduces a large change that materially impacts prompts,
-> scripts, quickstarts, templates, or other repository contracts, make sure that
-> it was **discussed and agreed upon** by the project maintainers. Pull requests
-> with large changes that did not have a prior conversation and agreement will be
-> closed.
+> If your pull request introduces a large change that materially impacts the repository (e.g., you're introducing new templates, arguments, or otherwise major changes), make sure that it was **discussed and agreed upon** by the project maintainers. Pull requests with large changes that did not have a prior conversation and agreement will be closed.
 
 1. Fork and clone the repository
-1. Configure local test dependencies for repository contracts
+1. Configure and install the dependencies: `uv sync`
 1. Create a new branch: `git checkout -b my-branch-name`
 1. Make your change, add tests, and make sure everything still works
-1. Test quickstart behavior with a sample project if relevant
+1. Test any template/command changes against a sample project if relevant (see "Testing template and command changes locally" below)
 1. Push to your fork and submit a pull request
 1. Wait for your pull request to be reviewed and merged.
 
@@ -51,28 +51,29 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 - Follow the project's coding conventions.
 - Write tests for new functionality.
-- Update documentation (`README.md`, `.knowledge/`) if your changes affect user-facing features.
+- Update documentation (`README.md`, `site/src/`) if your changes affect user-facing features.
 - Keep your change as focused as possible. If there are multiple changes you would like to make that are not dependent upon each other, consider submitting them as separate pull requests.
 - Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 - Test your changes with the Spec-Driven Development workflow to ensure compatibility.
-- **Agent-agnostic architecture**: Stock prompts live in `.devspark/defaults/commands/`, while repo-owned overrides live in `.knowledge/overrides/commands/`. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) should only contain thin shims. If you add or modify a command template, ensure it works for all agents.
-- **Multi-user safe**: Changes should respect the per-user override pattern (`.knowledge/overrides/{git-user}/commands/`). Shared prompts must not break when personalized overrides exist.
+- **Agent-agnostic architecture**: Stock prompts live in `.devspark/defaults/commands/`, while repo-owned overrides live in `.devspark.work/commands/`. Platform directories (`.claude/`, `.github/`, `.cursor/`, etc.) should only contain thin shims. If you add or modify a command template, ensure it works for all agents.
+- **Multi-user safe**: Changes should respect the per-user override pattern (`.devspark.work/{git-user}/commands/`). Shared prompts must not break when personalized overrides exist.
 
 ## Development workflow
 
 When working on devspark:
 
-1. Test changes with the DevSpark slash commands in your coding agent of choice:
-   - Core: `/devspark.specify`, `/devspark.plan`, `/devspark.tasks`, `/devspark.implement`
-   - Quality: `/devspark.pr-review`, `/devspark.site-audit`, `/devspark.critic`
+1. Test changes by running the affected `/devspark-*` skills in your coding agent of choice:
+   - Core: `/devspark-specify`, `/devspark-plan`, `/devspark-tasks`, `/devspark-implement`
+   - Quality: `/devspark-pr-review`, `/devspark-site-audit`, `/devspark-critic`
 2. Verify templates are working correctly in `templates/` directory
-3. Test script functionality in the `.devspark/scripts/` layout produced by quickstarts
-4. Ensure current-truth files under `.knowledge/` are updated if major process changes are made
+3. Test script functionality in the `scripts/` directory
+4. Update `.knowledge/governance/constitution.md` when major process changes affect project governance
 5. **Lint all markdown before pushing** (Constitution §VIII): run `npx markdownlint-cli2 "**/*.md"`
    and resolve all errors. CI will block the PR if any errors remain.
 
 ### Testing template and command changes locally
 
+Installing via the quickstart guides pulls released packages, which won’t include your local changes.  
 To test your templates, commands, and other changes locally, follow these steps:
 
 1. **Create release packages**
@@ -95,9 +96,7 @@ To test your templates, commands, and other changes locally, follow these steps:
 
 ## About DevSpark
 
-DevSpark is an independent, community-maintained project. It provides a
-structured, spec-driven development process for AI coding assistants through 29
-stock command prompts and helper scripts.
+DevSpark is an independent, community-maintained project. It provides a structured, spec-driven development process for AI coding assistants through 30 prompt templates and helper scripts.
 
 ## AI contributions in DevSpark
 

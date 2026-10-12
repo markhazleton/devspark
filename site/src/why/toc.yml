@@ -1,0 +1,9 @@
+# Why DevSpark section — left-sidebar navigation
+- name: Philosophy
+  href: philosophy.md
+- name: About, Architecture and Controls
+  href: about.md
+- name: How to Evaluate
+  href: evidence.md
+- name: FAQ
+  href: faq.md

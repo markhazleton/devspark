@@ -1,5 +1,8 @@
 ---
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
 description: "Task list template for feature implementation"
+devspark_version: "<version that authored this task list; omit if undeterminable>"
+plan_semantic_hash: null
 participants:
   owner: human
   planner: ai
@@ -12,9 +15,11 @@ participants:
 # Tasks: [FEATURE NAME]
 
 **Input**: Design documents from `/.devspark.work/specs/[###-feature-name]/`
-**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
+**Prerequisites**: plan.md (required), spec.md (required for user stories); research.md, data-model.md, contracts/ and quickstart.md only when the plan created them
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: The examples below include test tasks. Every behavior change considers its Tests impact; the delta is add, update, retire or none, so include test tasks for any delta that is not none, and never assume every change adds tests.
+
+**Pre-PR only**: in every derivation, with or without `qa-acceptance.md`, derive only work that can finish before the PR or merge. Never add a task that waits for deployment, runs QA after merge, needs post-deployment sign-off, belongs to a later sprint, or depends on defects not yet found. **Post-merge capture** applies to all derivations: a `stage: post-deploy` obligation is not a task; it is carried as a deferred requirement with an owner and an existing durable `captured_as` record.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -38,28 +43,13 @@ participants:
 
 [What should reviewers focus on?]
 
-## Format: task plus required linkage
-
-Every generated task uses this structure:
-
-```markdown
-- [ ] T001 [P] [US1] Description with an exact target path
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-  - governance_ref: n/a — no governance change expected
-```
-
-`/devspark.implement` replaces every `TODO` as the task lands. A completed task
-may use `n/a` only with a concrete reason. The completed package remains under
-`.devspark.work/` until `/devspark.release` validates the references and archives
-it.
+## Format: `[ID] [P?] [Story] Description (Implements: FR-###[, FR-###])`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **Implements**: Trailing `(Implements: FR-001, FR-003)` naming the functional requirement ID(s) from `spec.md` that this task satisfies. This makes spec↔task traceability explicit and deterministically checkable by `/devspark-analyze` (coverage gaps + traceability hallucinations). Omit only for pure setup/infrastructure tasks that implement no specific requirement.
+- **Linkage**: Every generated task ends with `(code_ref: pending | knowledge_ref: pending)`. After implementation, `code_ref` must list every affected production-code and test path, and `knowledge_ref` every affected current `.knowledge/` path. These references remain in the temporary task record; durable files must never reference `spec.md`, `plan.md`, `tasks.md`, quickfix records, or other temporary work products.
 - Include exact file paths in descriptions
-- Include `code_ref`, `test_ref`, and `knowledge_ref` under every task
-- Include `governance_ref` under every task that may affect governance
 
 ## Path Conventions
 
@@ -72,7 +62,7 @@ it.
   ============================================================================
   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
 
-  The /devspark.tasks command MUST replace these with actual tasks based on:
+  The /devspark-tasks command MUST replace these with actual tasks based on:
   - User stories from spec.md (with their priorities P1, P2, P3...)
   - Feature requirements from plan.md
   - Entities from data-model.md
@@ -92,17 +82,8 @@ it.
 **Purpose**: Project initialization and basic structure
 
 - [ ] T001 Create project structure per implementation plan
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T002 Initialize [language] project with [framework] dependencies
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T003 [P] Configure linting and formatting tools
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 
 ---
 
@@ -115,29 +96,11 @@ it.
 Examples of foundational tasks (adjust based on your project):
 
 - [ ] T004 Setup database schema and migrations framework
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T005 [P] Implement authentication/authorization framework
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T006 [P] Setup API routing and middleware structure
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T007 Create base models/entities that all stories depend on
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T008 Configure error handling and logging infrastructure
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T009 Setup environment configuration management
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -149,45 +112,21 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (when its Tests delta is not none) ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
 - [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-- [ ] T016 [US1] Add validation and error handling
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-- [ ] T017 [US1] Add logging for user story 1 operations
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
+- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py (Implements: FR-001)
+- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py (Implements: FR-004)
+- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013) (Implements: FR-001, FR-003)
+- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py (Implements: FR-003)
+- [ ] T016 [US1] Add validation and error handling (Implements: FR-002)
+- [ ] T017 [US1] Add logging for user story 1 operations (Implements: FR-005)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -199,35 +138,17 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 2 (when its Tests delta is not none) ⚠️
 
 - [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 
 ### Implementation for User Story 2
 
 - [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T021 [US2] Implement [Service] in src/services/[service].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T023 [US2] Integrate with User Story 1 components (if needed)
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -239,31 +160,16 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3 (when its Tests delta is not none) ⚠️
 
 - [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 
 ### Implementation for User Story 3
 
 - [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T027 [US3] Implement [Service] in src/services/[service].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -277,30 +183,12 @@ Examples of foundational tasks (adjust based on your project):
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Documentation updates in .knowledge/
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
+- [ ] TXXX [P] Documentation updates in .knowledge/guides/
 - [ ] TXXX Code cleanup and refactoring
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
 - [ ] TXXX Performance optimization across all stories
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
+- [ ] TXXX [P] Additional unit tests (when the Tests delta calls for them) in tests/unit/
 - [ ] TXXX Security hardening
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
-- [ ] TXXX Run quickstart.md validation
-  - code_ref: TODO
-  - test_ref: TODO
-  - knowledge_ref: TODO
+- [ ] TXXX Run quickstart.md validation (only if the plan created quickstart.md)
 
 ---
 
@@ -343,7 +231,7 @@ Examples of foundational tasks (adjust based on your project):
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all tests for User Story 1 together (if tests requested):
+# Launch all tests for User Story 1 together (when its Tests delta is not none):
 Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
 Task: "Integration test for [user journey] in tests/integration/test_[name].py"
 

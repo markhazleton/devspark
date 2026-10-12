@@ -1,0 +1,14 @@
+# Seeded Clarify case: an accepted answer that invalidates a success criterion. After applying the
+# answer the spec must hold zero contradictory criteria and exactly one clarification-log bullet.
+case: answer-invalidates-success-criterion
+spec_before: |
+  ## Success Criteria
+  - SC-001: Every export completes in under 5 minutes.
+  ## Clarifications
+answer:
+  question: "Is a long-running export acceptable?"
+  answer: "Yes, exports may take up to an hour."
+expect:
+  contradictory_criteria: 0
+  clarification_bullets: 1
+  applied_to: [Success Criteria]

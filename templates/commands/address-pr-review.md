@@ -1,9 +1,10 @@
 ---
-description: Address open PR review findings while keeping ephemeral review state out of commits
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
+description: Address open PR review findings with enforced commit isolation between code fixes and review-file updates
 handoffs:
   - label: Re-Review Updated PR
-    agent: devspark.pr-review
-    prompt: Run /devspark.pr-review UPDATE for this PR after fixes are committed
+    agent: devspark-pr-review
+    prompt: Run /devspark-pr-review UPDATE for this PR after fixes are committed
 scripts:
   sh: .devspark/scripts/bash/address-pr-review.sh --pr-id $ARGUMENTS --json
   ps: .devspark/scripts/powershell/address-pr-review.ps1 -PrId $ARGUMENTS -Json
@@ -17,67 +18,46 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## DevSpark v4 Override
-
-This command fixes review findings against current truth. When any later
-section conflicts with this section, the v4 section wins.
-
-- Resolve findings by changing code, `.knowledge`, or governance as needed.
-- Do not introduce permanent references to the review thread or ephemeral work
-  package.
-- Never commit `.devspark.work` review-thread updates.
-- Re-run current-truth validation before marking findings resolved.
-
 ## Overview
 
-This command is the **author-side companion** to `/devspark.pr-review`. It helps you address open findings in `/.devspark.work/pr-reviews/pr-{PR_ID}.md` while keeping the permanent commit history focused on real fixes:
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before Phase 0 — in particular §9 (Genuine Fix Discipline) during the Phase 2 fix loop. Preamble modules: `finding-fix`, `convergence`, `configuration`.
 
-1. Commit code, test, documentation, and `.knowledge` fixes.
-2. Update the local review work file only as ephemeral status.
-3. Run `/devspark.pr-review UPDATE` for a fresh review pass.
+This command is the **author-side companion** to `/devspark-pr-review`. It helps you address open findings in `/.devspark.work/pr-review/pr-{PR_ID}.md` while enforcing commit isolation:
 
-**IMPORTANT**: `.devspark.work` is temporary work state and must not be staged.
+1. Commit code fixes first.
+2. Commit review-file updates second.
 
-## Genuine Fix Discipline
-
-Apply `templates/command-preamble-contract.md` §9 while resolving each PR review
-finding. A finding is not resolved when the proof only moves a metric and leaves
-the behavior named by `intent_cue` unchanged.
+**IMPORTANT**: The staging gates are mechanical and mandatory. Do not bypass them.
 
 ## Prerequisites
 
-- Existing PR review file at `/.devspark.work/pr-reviews/pr-{PR_ID}.md`
+- Existing PR review file at `/.devspark.work/pr-review/pr-{PR_ID}.md`
 - Git repository with the PR source branch checked out
 - PowerShell 7+ (`pwsh`) on Windows, or Bash on macOS/Linux, for the gate helper script
 
 ## Definition of Done
 
-Done when: every selected finding is fixed and committed (Phase 4), the local review file is updated without staging it (Phase 5), and the handoff message is printed (Phase 6). If validation (Phase 3) can't be made to pass, stop and report which finding is blocking — don't keep retrying silently.
+Done when: every selected finding is fixed and committed (Phase 4), the review file is updated and committed separately (Phase 6), the two commits are verified disjoint, and the handoff message is printed (Phase 7). If validation (Phase 3) can't be made to pass, stop and report which finding is blocking — don't keep retrying silently.
 
 ## Outline
 
 ### Phase 0 — Load context
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/address-pr-review.ps1` (PowerShell) or `.knowledge/overrides/scripts/bash/address-pr-review.sh` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
+> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.devspark.work/scripts/powershell/address-pr-review.ps1` (PowerShell) or `.devspark.work/scripts/bash/address-pr-review.sh` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.devspark.work/scripts/` always take priority over `.devspark/scripts/`.
 
 1. Run `{SCRIPT}` with the PR id and JSON output enabled (`-PrId {PR_ID} -Json` on PowerShell, `--pr-id {PR_ID} --json` on Bash).
-2. Fail fast if `/.devspark.work/pr-reviews/pr-{PR_ID}.md` is missing.
-3. Parse open findings from checklist lines matching:
-   - `- [ ] **C-##**`
-   - `- [ ] **H-##**`
-   - `- [ ] **M-##**`
-   - `- [ ] **L-##**`
-   - `- [ ] **CON-##**`
+2. Fail fast if `/.devspark.work/pr-review/pr-{PR_ID}.md` is missing.
+3. Parse open findings from checklist lines for `C-##`, `H-##`, `M-##`, `L-##`, `CON-##` and `PRD{N}-##` ids (`- [ ] **ID**`). The helper reports each finding's `status`, `blocking`, `route`, `auto_eligible` and `reason`; use those values instead of inferring eligibility from an ID prefix.
 4. Confirm current branch equals the PR source branch. Refuse if mismatched.
 5. Capture `git status --short`.
-6. **Refuse to proceed** if any staged path matches `.devspark.work/pr-reviews/pr-*.md`.
+6. **Refuse to proceed** if any staged path matches `.devspark.work/pr-review/pr-*.md`.
 
 If no open findings remain, print: `Nothing to address.` and stop.
 
 ### Phase 1 — Plan
 
 1. Render open findings as a checklist with severity badges.
-2. Ask which findings to address this iteration (`all` allowed). **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and select `all` open findings except any `C-NN` (Critical) finding whose fix is ambiguous enough to need a human judgment call — flag those specifically and proceed with the rest.
+2. Ask which findings to address this iteration (`all` allowed). **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and select only findings with `auto_eligible: true` (open critical/high or blocking PR-delta findings with no accepted, deferred, resolved or withdrawn disposition). Report every other open finding with its `reason` and leave it untouched: ordinary Medium/Low and non-blocking `PRD` findings need a human decision, and `CON` findings route to `/devspark-evolve-constitution` rather than product code. A selected `C-NN` finding whose fix is ambiguous enough to need a human judgment call is flagged and skipped.
 3. Build an internal todo list with one item per selected finding.
 
 ### Phase 2 — Fix loop (per finding)
@@ -85,10 +65,12 @@ If no open findings remain, print: `Nothing to address.` and stop.
 For each selected finding:
 
 1. Read the cited file/lines and confirm the issue.
-2. Apply the recommended fix, or propose an alternative and show the diff.
-3. Stage **only** code paths touched by that fix.
-4. Never run `git add .`.
-5. Never stage `/.devspark.work/pr-reviews/pr-{PR_ID}.md` during this phase.
+2. If the finding cites a lint rule, complexity metric, or code smell, state in one sentence the behavioral intent behind it (command-preamble-contract.md §9) before writing the fix — do not react to the bare metric alone.
+3. A finding's suggested fix is evidence, not an architecture mandate. Choose the lightest sufficient remediation, in this order: clarify, remove, reuse something that exists, change an operational detail, make a small local change, and only then add machinery. If the fix needs something beyond the approved Plan's shape (a new state, endpoint, persisted record, cache, dependency, runtime setting, pattern or rollback design), stop and ask for explicit authority; `--auto` never grants it. Show the diff for any alternative to the suggested fix, and confirm the fix addresses that intent (e.g., genuinely lowers branching/responsibility, genuinely names and surfaces an error) rather than merely satisfying the check mechanically.
+4. **Rule 1 check**: the fix stays subject to the same one-way reference gate `/devspark-pr-review` §6 enforces — do not introduce a spec ID, task ID, plan reference, or PR-thread ID into code or `.knowledge/` to "explain" what review comment this addresses. A commit message or the review file itself is the right place for that context, never a durable comment.
+5. Stage **only** code paths touched by that fix.
+6. Never run `git add .`.
+7. Never stage `/.devspark.work/pr-review/pr-{PR_ID}.md` during this phase.
 
 ### Phase 3 — Validate
 
@@ -97,7 +79,7 @@ For each selected finding:
 3. If any validation fails, return to Phase 2.
 4. Do not continue until validations pass.
 
-### Phase 4 — Commit code fixes
+### Phase 4 — Commit code fixes (isolation gate #1)
 
 1. Run gate script with code-only mode before commit (`-Gate code-only` on PowerShell, `--gate code-only` on Bash).
 2. If the gate fails, **abort** and print offending staged paths.
@@ -122,29 +104,46 @@ Then update metadata:
 1. Bump revision in the header table (`Rev N -> Rev N+1`).
 2. Update `Stats` with current churn/test counts/commit snapshot.
 3. Append a new row to `Revision Log` for this iteration.
-4. Do not stage the review file. It remains local `.devspark.work` state.
+4. Stage only `/.devspark.work/pr-review/pr-{PR_ID}.md`.
 
-### Phase 6 — Handoff
+### Phase 6 — Commit review file (isolation gate #2)
 
-1. Print the new fix commit hash.
+1. Run gate script with review-only mode before commit (`-Gate review-only` on PowerShell, `--gate review-only` on Bash).
+2. If the gate fails, **abort** and print offending staged paths.
+3. Commit with:
+
+```text
+review(pr-{PR_ID}): rev {N} — {X} fixed, {Y} remaining
+```
+
+1. Verify commit disjointness:
+
+```bash
+git log HEAD~2..HEAD --name-only
+```
+
+Parse the two commits and assert they share zero file paths.
+
+### Phase 7 — Handoff
+
+1. Print both new commit hashes (`fix` and `review`).
 2. Suggest focused re-review:
 
 ```text
-Run `/devspark.pr-review UPDATE {PR_URL}` to trigger a focused re-review.
+Run `/devspark-pr-review UPDATE {PR_URL}` to trigger a focused re-review.
 ```
 
 ## Guidelines
 
 ### Commit Discipline (MUST)
 
-- No `.devspark.work` path may be staged or committed.
-- Review-file updates are local work state until superseded by GitHub PR
-  comments, refreshed review output, or deletion after assimilation.
-- Do not run `git add .`.
+- A commit touching `/.devspark.work/pr-review/pr-{PR_ID}.md` MUST NOT include any other path.
+- Code fixes and review-file updates MUST be separate commits.
+- Do not amend/squash these two commits together.
 
 ### Gate Execution (MUST)
 
-- Use the helper script as the source of truth for the code-only staging gate.
+- Use the helper script as the source of truth for staging gates.
 - If a gate exits non-zero, stop and resolve staging before retrying.
 
 ### Edit Scope (MUST)
@@ -163,18 +162,17 @@ $ARGUMENTS
 
 ## Shared Review Resolution Contract Output
 
-When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark.address-pr-review and telemetry) can act on them deterministically:
+When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark-address-pr-review, telemetry, release) can act on them deterministically:
 
 ```yaml
 findings:
   - finding_id: <stable-id-unique-within-this-command-output>   # e.g., analyze-001, clarify-002
     severity: critical | high | medium | low
     description: <1-3 sentence problem statement>
-    intent_cue: <behavioral intent that must be repaired or preserved>
     recommended_action: <machine-actionable next step>
     execution_mode: auto | selective | manual
     status: open                                                  # set to `resolved` after remediation
     outcome: ""                                                  # populated post-resolution by address-pr-review
 ```
 
-`finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `intent_cue` MUST name the behavior, contract, safety property, or user outcome the finding protects before metric-focused remediation. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
+inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark-address-pr-review` (FR-028).

@@ -1,9 +1,19 @@
 ---
-description: Explain existing functionality from code and verify the matching current-truth knowledge
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
+description: Trace "how is X done?" against current code and .knowledge/, verifying sync/accuracy/completeness and updating or drafting knowledge as needed
 handoffs:
-  - label: Specify Missing Behavior
-    agent: devspark.specify
-    prompt: Turn the missing behavior identified by explain into a new specification
+  - label: Repo-Wide Audit
+    agent: devspark-site-audit
+    prompt: Run a full audit now that this topic's knowledge is in sync
+  - label: Sweep Unrelated Stale Content
+    agent: devspark-release
+    prompt: Clean up unrelated stale work products or knowledge noticed during this trace
+  - label: Spec the Missing Behavior
+    agent: devspark-specify
+    prompt: This topic revealed genuinely unimplemented behavior, not just undocumented behavior
+  - label: Fix a Confirmed Code Defect
+    agent: devspark-quickfix
+    prompt: Explain confirmed a code defect while tracing this topic; fix it as a bounded quickfix
 scripts:
   sh: .devspark/scripts/bash/explain-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/explain-context.ps1 $ARGUMENTS -Json
@@ -15,218 +25,162 @@ scripts:
 $ARGUMENTS
 ```
 
-The input is a free-text question or topic about existing functionality, for
-example `how is authentication done`. The optional `--dry-run` flag guarantees
-read-only execution and suppresses every confirmation prompt.
+You **MUST** consider the user input before proceeding (if not empty). The input is a free-text
+topic or question, e.g. "how is authentication done" or "explain the release packaging flow".
 
-## Purpose and Lifecycle Position
+## Purpose
 
-`/devspark.explain` is an ad-hoc, read-mostly current-truth utility. It may run
-at any time and is not part of the `specify -> plan -> tasks -> implement` gate chain.
+Answer "how is X done?" grounded in current code, while verifying that the `.knowledge/` content
+covering that topic — an existing entity/flat doc, or the absence of one — stays in sync, accurate,
+and complete with the code. Reuses `/devspark-site-audit`'s DELTA/KNOW finding taxonomy, scoped to
+this one topic instead of the whole repository.
 
-- **Owns**: a code-grounded explanation, topic-scoped knowledge matching,
-  evidence verification, DELTA/KNOW findings, and proposed knowledge repairs.
-- **Does not own**: planning, implementing, changing application behavior, or
-  creating spec, plan, task, quickfix, release, or archive records.
-- If the requested behavior is genuinely absent, explain what exists today and
-  hand the missing-behavior request to `/devspark.specify`. Do not design the
-  missing feature inside this command.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md`
+(installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1. Preamble
+modules: `convergence`.
 
-## Non-Negotiable Rules
+## Lifecycle Position
 
-- Treat current code, tests, configuration, `.knowledge/entities`, and
-  `.knowledge/governance` as the evidence surface.
-- Never read, list, enumerate, or glob `.archive/` or `.devspark.work/`.
-- Never infer implementation from a filename, knowledge claim, or common
-  pattern alone. Trace the actual code path before explaining it.
-- Every material statement in `## Answer` must cite repository evidence as
-  `path:line` (or `path::symbol` plus a line citation when available).
-- Existing knowledge is a claim to verify, not authority over contradictory
-  code. Report disagreement; do not silently choose language that hides it.
-- If no knowledge matches, draft proposed knowledge only from cited code and
-  test evidence. Never fill gaps with plausible-sounding claims.
-- Do not modify any file until the user explicitly confirms the exact proposed
-  changes. Confirmation from an earlier, different run does not carry forward.
-- With `--dry-run`, make no writes, do not ask for confirmation, and mark every
-  proposal as preview-only.
+Ad-hoc utility, alongside `/devspark-release` and `/devspark-site-audit` — not a step in the
+`specify → plan → tasks → analyze → critic → implement → pr-review` gate chain. Usable any time a
+developer or an agent needs a grounded answer instead of guessing, and doubles as a lightweight,
+on-demand knowledge-sync check for one topic.
 
-## Procedure
+**Scope**: documents *existing* functionality only. Never creates a `.devspark.work/` planning
+record and never implements new code — if the trace reveals genuinely unimplemented behavior, hand
+off to `/devspark-specify` instead of drafting knowledge for code that doesn't exist.
 
-### 1. Parse and Validate the Question
+## Dual-Audience Contract
 
-Remove command flags from the topic. If no meaningful topic remains, stop and
-ask for one concise question. Detect `--dry-run` before doing any analysis.
+Every run produces exactly three sections, in this order, so the same run serves a human reader
+and a chaining agent without maintaining two representations that could drift apart:
 
-### 2. Gather Topic Context
+- **`## Answer`** — human prose explaining how the topic works today. Every nontrivial claim is
+  cited with a `path:line` reference. This is the direct answer to the question asked.
+- **`## Findings`** — the DELTA/KNOW-coded table (id, severity, evidence, remediation), scoped to
+  this topic, in the same format `/devspark-site-audit` uses. If resolution is `in-sync`, collapse
+  this to one line ("No findings — matched knowledge verified against code") instead of an empty
+  table with headers.
+- **`## Agent Summary`** — a fenced JSON block, generated last and derived only from what the
+  Answer/Findings already state (never an independent claim): `{topic, resolution, matched_ids[],
+finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `in-sync`,
+  `corrected`, `drafted-new`, `proposal-pending`, `no-match-found`.
 
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override
-> check. A matching file under
-> `.knowledge/overrides/scripts/{bash|powershell}/` takes priority over the
-> stock file under `.devspark/scripts/`.
+## Options
 
-Run `{SCRIPT}` and parse its JSON. Use its normalized terms and bounded
-`knowledge_matches`, `code_matches`, and `test_matches` as discovery leads, not
-as proof. The script is deterministic and read-only.
+| Flag        | Behavior                                                                                                                           |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| no flag     | Interactive: each optional write is a separate question (see Outline steps 7-9)                                                    |
+| `--dry-run` | Always propose-only; never ask to write, never write — for CI or agent-chained contexts with no interactive confirmation available |
 
-When `knowledge_ranking.source` is `engine`, `knowledge_matches` is ordered by
-the single knowledge engine's deterministic ranking (exact id/title, alias,
-heading, path metadata, then body prose searched at query time), and each
-`knowledge_ranking.results[].matched_on` entry explains why a document scored.
-Each evidence class counts once per query term, so a long document never
-outranks a terse one by volume alone. When the source is `fallback`, the list is
-an unranked text scan; say so in `## Agent Summary`.
+## Outline
 
-If the script fails, report the command and error inside `## Findings`. Do not
-replace missing evidence with an uncited answer.
+1. Run `{SCRIPT}`, parse JSON: `TOPIC`, `KEYWORDS`, `INDEX_FRESH`, `MATCHED_KNOWLEDGE[]`,
+   `MATCHED_ENTITIES[]`, `CANDIDATE_CODE_HITS[]`, `SUMMARY`.
+2. **KNOW1 gate**: if `INDEX_FRESH` is false, regenerate via
+   `python3 scripts/build_knowledge_index.py --repo-root .` and re-run step 1 once before
+   continuing — never trust a stale index for the findings below.
+3. Branch on `MATCHED_KNOWLEDGE` / `MATCHED_ENTITIES`:
+   - **Has matches** → for each matched node, verify against the code at its
+     `source_of_truth`/`appliesTo` paths (already resolved with existence + last-commit-date in
+     `source_status`), producing topic-scoped findings using site-audit's exact codes:
+     - `DELTA1`/`DELTA2` — code and knowledge contradict each other.
+     - `DELTA3` — the described behavior lacks proportionate test coverage. Check `tests/` (and
+       any test dirs) for coverage of the matched code itself, not only what the doc happens to
+       cite — this is broader than DELTA5 below.
+     - `DELTA5` — if the doc cites `verified_by: execution` or a `type: test` evidence entry,
+       re-run that test now; a failure or missing test is the finding.
+     - `KNOW2` — `last_verified` is older than the newest `source_status[].last_commit_date`.
+     - `KNOW3` — a `source_of_truth`/`appliesTo` path's `exists` is false.
+     - `KNOW4` — a matched `governance-decision`'s `constrains` has an entity whose
+       `constrained_by_reciprocal` is false, or a matched entity's `constrained_by` doesn't
+       resolve to a real decision.
+     - Retained-baseline claims — a matched node's `claim_states[]` (present whenever the node's
+       `source_of_truth` uses the object form with a pinned `digest`/`baseline`) reports each
+       claim's own `status`: `verified-current`, `drifted`, or `pinned-unverified`. Treat `drifted`
+       or `pinned-unverified` the same as `KNOW2`/`KNOW3` for finding purposes.
+   - **No match, or a matched entity has `missing_layers` covering this topic** → report it as a
+     KNOW6-equivalent observation. It is not a defect and creates no work. Only if the developer
+     asks for a draft, use `CANDIDATE_CODE_HITS` plus direct code reading to draft the missing
+     content — an entity/layer doc per `.knowledge/tooling/developer-guide.md`'s "Adding a new
+     entity" steps, or a flat doc per `.knowledge/tooling/content-lifecycle.md`'s "Where does my
+     new content go?" table. Draft only; never fabricate a claim, a `source_of_truth` path, or a
+     test citation without evidence in `CANDIDATE_CODE_HITS` or direct code reading.
+   - **Clarify before drafting when needed** → if the evidence does not establish the owning
+     knowledge node, the correct layer/type, the intended scope, or whether a code delta is
+     intentional, ask targeted clarification questions before proposing a durable update. Do not
+     guess between competing nodes or turn an unresolved question into current truth.
+   - **Classify every finding by the convergence rule** (preamble §10, `closeout-contract.md` §2/§4):
+     - A correctness defect (code and knowledge contradict, or a cited test fails) is a **Blocking
+       Defect**: report it with evidence. Explain does not fix it.
+     - A gap that hits no expansion trigger (stale `last_verified`, a missing node or layer) is
+       **Deferred Work** or a **Learning**: report it, and nothing more.
+     - The absence of a Knowledge node is only an observation unless an existing requirement
+       explicitly requires one.
+     - Discovery never authorizes promotion (`closeout-contract.md` §8).
+   - **Optional Knowledge update** → when the developer asks for a Knowledge correction or draft, the
+     proposal MUST include only evidence from durable code and tests, and MUST remove or correct
+     stale claims. Write it only after its own explicit confirmation (step 7) and rebuild the index;
+     never put a spec, plan, task, quickfix, `.devspark.work/`, or `.archive/` reference into
+     durable knowledge.
+4. **Retained-baseline confirmation**: for each matched node with a non-empty `claim_states[]`
+   (step 3's Retained-baseline claims bullet), handle every entry whose `status` is `drifted` or
+   `pinned-unverified` one claim at a time — never batch-confirm multiple claims with one prompt:
+   - Show the claim's `diff` exactly as returned (a `unified_diff` for text/token profiles, or the
+     `ranges` list for `binary-v1`) — this is the only evidence the human sees before confirming,
+     so never summarize or paraphrase it away.
+   - Ask one explicit confirmation per claim: "Rotate this claim's baseline to the current content
+     of `<path>`? [Y/n]" (or, for a never-before-verified `pinned-unverified` claim with no drift,
+     "Confirm the pinned content of `<path>` is correct as-is? [Y/n]").
+   - Yes → run
+     `python3 scripts/explain-context.py --rotate-claim <doc_path> --claim-path <path> --claim-profile <profile> [--claim-region <region>]`
+     (the doc path and every `--claim-*` value come verbatim from the matched node's `path` and the
+     confirmed claim entry — never guess or reconstruct them), then re-run step 1 once so the
+     Answer/Findings below reflect the newly verified state.
+   - No → leave the claim's status unresolved (`resolution: proposal-pending`); do not call
+     `--rotate-claim` and do not otherwise edit the document's `source_of_truth`/`verification`.
+   - Never call `--rotate-claim` without having just shown that exact claim's diff and received an
+     explicit yes in this same turn.
+5. Compose `## Answer` from steps 1–4's evidence — cite `path:line` for every nontrivial claim, do
+   not restate the Findings mechanics here.
+6. Compose `## Findings` (see Dual-Audience Contract above for the collapse-when-clean rule).
+7. Explain is read-only by default. Each optional action below needs its own explicit approval,
+   asked as a separate question; never combine two actions, or an action and a trace save, into one
+   yes/no. Under `--dry-run`, ask none of them.
+   - **Knowledge update** — only when the developer asked for one and a concrete remediation exists
+     (a corrected doc body, a bumped `last_verified`, or a new doc's full content). Show the full
+     proposed content/diff, then ask "Apply this Knowledge update? [y/N]".
+     - Yes → write the file(s), run `python3 scripts/build_knowledge_index.py --repo-root .`, and
+       re-verify the specific finding now resolves before reporting success.
+     - No → leave as a proposal only (`resolution: proposal-pending`); write nothing.
+   - **Code defect** — Explain reports confirmed code defects and offers the Quickfix handoff
+     (`/devspark-quickfix`). It does not modify application code itself.
+   - **Follow-up work** — never started or scheduled by Explain; name it in the next-step footer.
+8. Under `--dry-run`, never write anything: report `trace_saved: false` unconditionally and skip
+   step 9.
+9. Otherwise ask separately: "Save this trace to
+   `.devspark.work/explain/<topic-slug>-<date>.md`? [y/N]" (never under `.knowledge/` — this is a
+   work product, not durable truth). No answer means no. Write only on explicit confirmation; the
+   saved file contains the same Answer/Findings/Agent Summary shown inline. Saved traces are
+   ordinary `.devspark.work/` artifacts and are swept by `/devspark-release`'s normal retention
+   rules like any other work product.
+10. Emit `## Agent Summary` per the Dual-Audience Contract.
+11. Preamble §6 next-step footer, choosing among the handoffs declared above based on what this
+    run found (repo-wide follow-up, unrelated stale content noticed, or genuinely missing code).
 
-### 3. Resolve the Actual Implementation
+## Constraints
 
-Starting from the strongest code candidates:
-
-1. Locate the public entry point, caller, handler, configuration, or interface
-   relevant to the question.
-2. Trace only the code paths necessary to answer the topic. Follow imports and
-   callees when they materially change the behavior.
-3. Locate focused tests that exercise those paths. Run the smallest practical
-   test selection when execution is safe and available; distinguish passing,
-   failing, not run, and absent evidence.
-4. Capture precise citations. A search hit is not evidence until its surrounding
-   code has been inspected.
-
-Keep the investigation topic-scoped: at most 8 code/config reads, 6 knowledge
-reads, and 4 test reads unless the user explicitly requests a deeper pass.
-
-### 4. Match and Verify Current Knowledge
-
-Inspect semantically relevant matches under `.knowledge/entities/` and
-`.knowledge/governance/`; lexical matches from the script may be rejected.
-Follow only directly cited or graph-adjacent current-truth objects needed for
-this topic.
-
-For each matched object:
-
-- compare every relevant behavioral claim with the traced code;
-- resolve each cited code/test/document reference;
-- run cited execution evidence when practical;
-- check that important observed behavior, boundaries, failure modes, and
-  configuration are covered;
-- validate relative Markdown links and repository-path references;
-- identify unsupported or mutually inconsistent current-truth claims.
-
-Use the shared `/devspark.site-audit` current-truth finding codes exactly:
-
-| Code | Meaning |
-|---|---|
-| `DELTA1` | A documented current-truth claim contradicts current code, runtime configuration, or verified behavior. |
-| `DELTA2` | A cited code, test, configuration, or document evidence target is stale, missing, or unresolvable. |
-| `DELTA3` | A material documented behavior lacks adequate test evidence, or its focused test fails. |
-| `DELTA4` | A knowledge link or current-truth cross-reference is broken. |
-| `KNOW1` | Existing implemented behavior has no matching current-truth knowledge. |
-| `KNOW2` | Matching knowledge exists but is materially incomplete for the observed behavior or boundary. |
-| `KNOW3` | A knowledge claim is unsupported, or code-only evidence lacks the required test-attempt/fallback context. |
-| `KNOW4` | Current-truth objects for the topic are ambiguous, duplicated, or mutually inconsistent. |
-
-Do not emit a finding merely because wording differs. Every finding must name
-the specific claim, the conflicting or missing evidence, and a bounded proposed
-repair. Report a clean result only when relevant references resolve and focused
-tests pass, or when the absence of test evidence is explicitly justified by the
-knowledge evidence contract; otherwise use a finding or an inconclusive status.
-
-### 5. Handle Missing Knowledge or Behavior
-
-- **No knowledge match, implementation exists**: emit `KNOW1` and include a
-  proposed new or updated knowledge document grounded only in cited code/tests.
-- **Knowledge exists but is stale/incomplete**: propose the smallest in-place
-  correction. Do not create historical or superseding copies.
-- **Ownership, scope, layer, or intent is ambiguous**: ask targeted
-  clarification questions before proposing a write (which entity owns the
-  claim, which layer document, whether a decision or entity is the right home).
-- **No owner exists**: propose a new typed node (an entity folder with
-  `_entity.yaml` and a layer document, or a topic-keyed decision with
-  `constrains` and the reciprocal `constrained_by`). Every proposal cites
-  durable code and tests only, with `source_of_truth`, `last_verified`, and at
-  least one evidence entry.
-- **Pinned claim drifted**: run the knowledge engine with `--detect-drift
-  --base <ref>` (or `--full-inventory`) and show the retained-baseline diff for
-  the topic's claims. Only after the human explicitly confirms the claim still
-  holds (or confirms the corrected wording) may you re-pin with `--pin-claim`,
-  set `verification.state: verified`, and update `last_verified`. The engine
-  never records human verification on its own.
-- **Requested behavior does not exist**: say so plainly, cite the nearest
-  relevant current behavior, and set the handoff to `/devspark.specify`. Do not
-  create a spec or quickfix record.
-- **Evidence is inconclusive**: state what could and could not be established;
-  do not fabricate a complete answer.
-
-### 6. Confirmation and Writes
-
-The initial run is always read-only. When a knowledge or documentation repair
-is warranted, list the exact target files and intended edits in `## Findings`,
-including generated ontology paths when metadata would change, then ask this
-exact question there: `No files were changed. Apply the proposed knowledge
-changes above?` Do not write while awaiting the answer.
-
-After explicit confirmation, apply only those proposed knowledge/documentation
-edits to the owning knowledge document and its durable references, refresh
-`index.json` / `coverage.json` by running the knowledge engine without flags,
-re-check with `--check`, re-check the affected evidence and links, and return
-the same three-section output contract.
-This command never changes application code or tests.
-
-When `--dry-run` is present, show preview proposals but omit the confirmation
-question and keep `confirmation_required` false.
-
-## Required Output Contract
-
-Return exactly these three level-two sections, in this order, on every completed
-run. Do not add another level-two section.
-
-### `## Answer`
-
-Give a concise, human-readable answer grounded in the implementation. Cite every
-material claim using repository-relative `path:line` references. Clearly label
-anything not established by evidence.
-
-### `## Findings`
-
-When findings exist, use:
-
-| ID | Severity | Knowledge | Code/Test Evidence | Finding | Proposed Action |
-|---|---|---|---|---|---|
-
-Use stable topic-local IDs such as `DELTA1-01` and `KNOW2-01`. Follow the table
-with either the exact confirmation question (normal mode) or a note that the
-preview is dry-run only. When clean, collapse this section to exactly one line:
-
-```text
-No DELTA/KNOW findings for this topic.
-```
-
-### `## Agent Summary`
-
-Return one fenced `json` object with this minimum shape:
-
-```json
-{
-  "topic": "string",
-  "status": "clean|findings|inconclusive|missing-behavior|updated",
-  "answer_refs": ["path:line"],
-  "knowledge_matches": ["path"],
-  "findings": [
-    {"id": "KNOW1-01", "severity": "MEDIUM", "path": null}
-  ],
-  "proposals": [
-    {"path": "path", "action": "create|update", "summary": "string"}
-  ],
-  "dry_run": false,
-  "writes_performed": false,
-  "confirmation_required": true,
-  "handoff": null
-}
-```
-
-Use `"handoff": "/devspark.specify"` only for genuinely missing behavior.
-Set `confirmation_required` to true only when an unapplied write proposal is
-awaiting confirmation in normal mode; it is false for clean, dry-run,
-inconclusive, missing-behavior, and completed-update results.
-The JSON must agree with the prose and remain valid for downstream chaining.
+- Never invents a `source_of_truth` path or test citation without evidence from
+  `CANDIDATE_CODE_HITS` or direct code reading — same rule as site-audit's KNOW6.
+- Never writes a knowledge file or a trace report without the explicit confirmation in steps 7–9.
+- A finding discovered by Explain is reported and classified, but is not added to the current work
+  unless the developer explicitly promotes it.
+- Never rotates a retained-baseline claim (`--rotate-claim`) without first showing that exact
+  claim's diff and receiving an explicit confirmation in the same turn (step 4).
+- Always checks `last_verified`/path existence even when the matched content "looks right" —
+  confidence is not evidence.
+- Reuses `scripts/build_knowledge_index.py` for all frontmatter/git-log/index logic; never
+  duplicates it (constitution Principle VI: single source of truth across languages).
+- Never creates a `.devspark.work/specs/` or `.devspark.work/quickfixes/` planning record — a
+  genuinely missing behavior is a signal to hand off to `/devspark-specify`, not something this
+  command implements itself.

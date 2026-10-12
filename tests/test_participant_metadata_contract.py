@@ -1,3 +1,4 @@
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 """Contract tests for optional participant metadata and terminology.
 
 These tests protect the phase-one participant vocabulary decision:
@@ -17,8 +18,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 DOC_PATHS = [
     ROOT / "README.md",
-    ROOT / ".knowledge" / "entities" / "product-documentation" / "site" / "implementation-lifecycle.md",
-    ROOT / ".knowledge" / "entities" / "product-documentation" / "site" / "constitution-guide.md",
+    ROOT / "site" / "src" / "get-started" / "how-it-works.md",
+    ROOT / "site" / "src" / "guides" / "constitution-guide.md",
     ROOT / "templates" / "README.md",
 ]
 
@@ -120,11 +121,11 @@ def test_readme_defines_required_glossary_terms() -> None:
 def test_customization_resolution_layers_remain_documented() -> None:
     readme = read(ROOT / "README.md")
     assert "**3-tier prompt resolution**" in readme
-    assert ".knowledge/overrides/{git-user}/commands/" in readme
-    assert ".knowledge/overrides/commands/" in readme
+    assert ".devspark.work/{git-user}/commands/" in readme
+    assert ".devspark.work/commands/" in readme
     assert ".devspark/defaults/commands/" in readme
     assert "**2-tier script resolution**" in readme
-    assert ".knowledge/overrides/scripts/" in readme
+    assert ".devspark.work/scripts/" in readme
     assert ".devspark/scripts/" in readme
 
 

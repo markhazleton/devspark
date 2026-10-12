@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 [CmdletBinding()]
 param(
     [ValidateSet('Preflight','Create','Update')]
@@ -31,7 +32,7 @@ function Get-JsonError {
 }
 
 function Get-DefaultBaseBranch {
-    if (Get-Command gh -ErrorAction SilentlyContinue) {
+    if ($DevSparkPlatform.Name -eq 'github' -and (Get-Command gh -ErrorAction SilentlyContinue)) {
         try {
             if (& $DevSparkPlatform.AuthCheck) {
                 $branch = gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name' 2>$null
@@ -136,18 +137,11 @@ function Find-QuickfixRecordForBranch {
         return $null
     }
 
-    $quickfixFiles = Get-ChildItem -Path $quickfixDir -ErrorAction SilentlyContinue |
+    $quickfixFiles = Get-ChildItem -Path $quickfixDir -Filter *.md -File -ErrorAction SilentlyContinue |
         Where-Object {
-            $sourceFile = $_.FullName
-            if ($_.PSIsContainer -and (Test-Path (Join-Path $_.FullName 'work.yaml'))) {
-                $sourceFile = Join-Path $_.FullName 'work.yaml'
-            } elseif ($_.PSIsContainer -and (Test-Path (Join-Path $_.FullName 'quickfix.md'))) {
-                $sourceFile = Join-Path $_.FullName 'quickfix.md'
-            }
-            if (-not (Test-Path $sourceFile -PathType Leaf)) { return $false }
-            $content = Get-Content -LiteralPath $sourceFile -Encoding utf8
-            $branchLine = $content | Where-Object { $_ -match '^(branch:|- \*\*Branch\*\*:)\s*(.+)$' } | Select-Object -First 1
-            $branchLine -and (($branchLine -replace '^(branch:|- \*\*Branch\*\*:)\s*', '').Trim() -eq $BranchName)
+            $content = Get-Content -LiteralPath $_.FullName -Encoding utf8
+            $branchLine = $content | Where-Object { $_ -match '^- \*\*Branch\*\*:\s*(.+)$' } | Select-Object -First 1
+            $branchLine -and (($branchLine -replace '^- \*\*Branch\*\*:\s*', '').Trim() -eq $BranchName)
         } |
         Sort-Object Name
 
@@ -164,25 +158,18 @@ function Get-QuickfixRecordSummary {
         return $null
     }
 
-    $sourceFile = $QuickfixPath
-    if ((Test-Path $QuickfixPath -PathType Container) -and (Test-Path (Join-Path $QuickfixPath 'work.yaml'))) {
-        $sourceFile = Join-Path $QuickfixPath 'work.yaml'
-    } elseif ((Test-Path $QuickfixPath -PathType Container) -and (Test-Path (Join-Path $QuickfixPath 'quickfix.md'))) {
-        $sourceFile = Join-Path $QuickfixPath 'quickfix.md'
-    }
-
-    $heading = Get-Content -LiteralPath $sourceFile -Encoding utf8 | Where-Object { $_ -match '^# ' } | Select-Object -First 1
-    $idLine = Get-Content -LiteralPath $sourceFile -Encoding utf8 | Where-Object { $_ -match '^(id:|- \*\*ID\*\*:)\s*(.+)$' } | Select-Object -First 1
+    $heading = Get-Content -LiteralPath $QuickfixPath -Encoding utf8 | Where-Object { $_ -match '^# ' } | Select-Object -First 1
+    $idLine = Get-Content -LiteralPath $QuickfixPath -Encoding utf8 | Where-Object { $_ -match '^- \*\*ID\*\*:\s*(.+)$' } | Select-Object -First 1
     return [PSCustomObject]@{
         path = $QuickfixPath
-        id = if ($idLine) { ($idLine -replace '^(id:|- \*\*ID\*\*:)\s*', '').Trim() } else { [IO.Path]::GetFileNameWithoutExtension($QuickfixPath) }
+        id = if ($idLine) { ($idLine -replace '^- \*\*ID\*\*:\s*', '').Trim() } else { [IO.Path]::GetFileNameWithoutExtension($QuickfixPath) }
         title = if ($heading) { $heading -replace '^#\s*', '' } else { '' }
-        classification = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'classification'
-        risk_level = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'risk_level'
-        required_gates = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'required_gates'
-        recommended_next_step = Get-MarkdownFrontmatterValue -Path $sourceFile -Key 'recommended_next_step'
-        problem_statement = Get-MarkdownSectionText -Path $sourceFile -SectionName 'Problem Statement'
-        gate_acknowledgements = Get-MarkdownSectionText -Path $sourceFile -SectionName 'Gate Acknowledgements'
+        classification = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'classification'
+        risk_level = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'risk_level'
+        required_gates = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'required_gates'
+        recommended_next_step = Get-MarkdownFrontmatterValue -Path $QuickfixPath -Key 'recommended_next_step'
+        problem_statement = Get-MarkdownSectionText -Path $QuickfixPath -SectionName 'Problem Statement'
+        gate_acknowledgements = Get-MarkdownSectionText -Path $QuickfixPath -SectionName 'Gate Acknowledgements'
     }
 }
 
@@ -250,6 +237,183 @@ function Get-GateArtifacts {
     return $results
 }
 
+# The engine needs PyYAML and Python 3.11+, so an interpreter that cannot run it is "unavailable",
+# never a reason to report the Knowledge as broken.
+function Resolve-KnowledgePython {
+    foreach ($name in @('python3', 'python')) {
+        $command = Get-Command $name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $command) { continue }
+        & $command.Source -c 'import sys, yaml; sys.exit(0 if sys.version_info >= (3, 11) else 1)' 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { return $command.Source }
+    }
+    return $null
+}
+
+function New-KnowledgeBlocker {
+    param([string]$Kind, $Path, $Source, $SourceDate, $LastVerified, $Message)
+    [PSCustomObject]@{
+        kind = $Kind
+        path = $Path
+        source = $Source
+        source_date = $SourceDate
+        last_verified = $LastVerified
+        message = $Message
+    }
+}
+
+function New-KnowledgeResult {
+    param(
+        [string]$Readiness,
+        $IndexFresh,
+        [string]$Summary,
+        [string]$Head,
+        [object[]]$Blockers = @(),
+        [int]$StaleUntouchedCount = 0,
+        [string]$CheckOutput
+    )
+    [PSCustomObject]@{
+        index_fresh = $IndexFresh
+        gap_summary = if ($Summary) { $Summary } else { $null }
+        readiness = $Readiness
+        blockers = @($Blockers)
+        stale_untouched_count = $StaleUntouchedCount
+        checked_head = $Head
+        check_output = if ($CheckOutput) { $CheckOutput } else { $null }
+    }
+}
+
+# ConvertFrom-Json turns an ISO date string into [datetime]; blockers carry the original text.
+function ConvertTo-DateText {
+    param($Value)
+    if ($Value -is [datetime]) { return $Value.ToString('yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture) }
+    return [string]$Value
+}
+
+# Committed-state Knowledge readiness for the HEAD being submitted. Read-only: it never
+# regenerates, edits, or commits anything.
+function Get-KnowledgeConsistency {
+    param([string]$RepoRoot, [string]$Head, [string[]]$ChangedPaths = @())
+
+    $engine = Resolve-KnowledgeEngine -RepoRoot $RepoRoot
+    if (-not $engine) {
+        return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary 'build_knowledge_index.py not found' -Head $Head
+    }
+
+    $tracked = @(git -C $RepoRoot ls-tree -r --name-only HEAD -- .knowledge/index.json 2>$null | Where-Object { $_ })
+    if ($tracked.Count -eq 0) {
+        return New-KnowledgeResult -Readiness 'not-applicable' -IndexFresh $null -Summary '.knowledge/index.json is not tracked at HEAD' -Head $Head
+    }
+
+    $python = Resolve-KnowledgePython
+    if (-not $python) {
+        return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary 'no usable Python interpreter (python3 or python with PyYAML, 3.11+) found' -Head $Head
+    }
+
+    $output = & $python $engine --repo-root $RepoRoot --check 2>&1
+    $exitCode = $LASTEXITCODE
+    $lines = @($output | ForEach-Object { "$_".TrimEnd() } | Where-Object { $_ })
+    $text = $lines -join "`n"
+
+    if ($exitCode -eq 0) {
+        $index = Get-Content -LiteralPath (Join-Path $RepoRoot '.knowledge/index.json') -Raw -Encoding utf8 | ConvertFrom-Json
+        $stale = @($index.stale_entities | Where-Object { $_ })
+        $changed = [System.Collections.Generic.HashSet[string]]::new([string[]]@($ChangedPaths))
+        $blockers = @()
+        $untouched = 0
+        foreach ($entry in $stale) {
+            $path = [string]$entry.path
+            $source = ([string]$entry.source).TrimEnd('/')
+            $beneath = @($ChangedPaths | Where-Object { $source -and $_.StartsWith("$source/", [StringComparison]::Ordinal) }).Count -gt 0
+            if ($changed.Contains($path) -or ($source -and $changed.Contains($source)) -or $beneath) {
+                $blockers += New-KnowledgeBlocker -Kind 'stale-entity' -Path $path -Source ([string]$entry.source) `
+                    -SourceDate (ConvertTo-DateText $entry.source_date) -LastVerified (ConvertTo-DateText $entry.last_verified) -Message $null
+            } else {
+                $untouched++
+            }
+        }
+        if ($blockers.Count -gt 0) {
+            return New-KnowledgeResult -Readiness 'blocked' -IndexFresh $true -Summary "$($blockers.Count) touched Knowledge document(s) are stale" `
+                -Head $Head -Blockers $blockers -StaleUntouchedCount $untouched -CheckOutput $text
+        }
+        return New-KnowledgeResult -Readiness 'ready' -IndexFresh $true -Head $Head -StaleUntouchedCount $untouched -CheckOutput $text
+    }
+
+    if ($exitCode -eq 1) {
+        $summary = if ($lines.Count -gt 0) { $lines[0] } else { 'knowledge check failed' }
+        $drift = @($lines | Where-Object { $_.StartsWith('DRIFT:') })
+        if ($drift.Count -gt 0) {
+            $blockers = @($drift | ForEach-Object {
+                $artifact = if ($_ -match 'coverage\.json') { '.knowledge/ontology/coverage.json' } else { '.knowledge/index.json' }
+                New-KnowledgeBlocker -Kind 'drift' -Path $artifact -Source $null -SourceDate $null -LastVerified $null `
+                    -Message 'Generated Knowledge does not match a fresh build of the committed HEAD'
+            })
+        } else {
+            $blockers = @(New-KnowledgeBlocker -Kind 'build-error' -Path $null -Source $null -SourceDate $null -LastVerified $null -Message $lines[-1])
+        }
+        return New-KnowledgeResult -Readiness 'blocked' -IndexFresh $false -Summary $summary -Head $Head -Blockers $blockers -CheckOutput $text
+    }
+
+    return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary "knowledge engine returned an unsupported result (exit $exitCode)" -Head $Head -CheckOutput $text
+}
+
+function Get-KnowledgeBlockedError {
+    param($Preflight)
+
+    $knowledge = $Preflight.knowledge
+    $dash = [string][char]0x2014
+    $kinds = @($knowledge.blockers | ForEach-Object { $_.kind })
+    $engineRelative = if (Test-Path (Join-Path $Preflight.repo_root '.devspark/scripts/build_knowledge_index.py')) { '.devspark/scripts/build_knowledge_index.py' } else { 'scripts/build_knowledge_index.py' }
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("Committed HEAD: $($knowledge.checked_head)")
+
+    if ($kinds -contains 'build-error') {
+        $message = "CREATE PR BLOCKED $dash KNOWLEDGE INDEX CANNOT BE BUILT"
+        $lines.Add('Knowledge index: BUILD ERROR')
+        foreach ($blocker in @($knowledge.blockers | Where-Object { $_.kind -eq 'build-error' })) { $lines.Add("Error: $($blocker.message)") }
+        $lines.Add('Required action:')
+        $lines.Add('1. Fix the reported source or frontmatter problem.')
+        $lines.Add("2. Regenerate the Knowledge index: python $engineRelative --repo-root .")
+        $lines.Add('3. Commit the .knowledge/** changes.')
+        $lines.Add('4. Push.')
+        $lines.Add('5. Rerun /devspark.create-pr.')
+    } elseif ($kinds -contains 'drift') {
+        $message = "CREATE PR BLOCKED $dash COMMITTED KNOWLEDGE FINALIZATION REQUIRED"
+        $lines.Add('Knowledge index: DRIFT')
+        foreach ($line in @($knowledge.check_output -split "`n" | Where-Object { $_.StartsWith('STALE:') })) { $lines.Add($line) }
+        $lines.Add('Required action:')
+        $lines.Add('1. Re-verify any genuinely stale Knowledge before changing last_verified.')
+        $lines.Add("2. Regenerate the Knowledge index: python $engineRelative --repo-root .")
+        $lines.Add('3. Review the resulting derived files.')
+        $lines.Add('4. Commit the .knowledge/** changes.')
+        $lines.Add('5. Push.')
+        $lines.Add('6. Rerun /devspark.create-pr.')
+    } else {
+        $message = "CREATE PR BLOCKED $dash KNOWLEDGE RE-VERIFICATION REQUIRED"
+        $lines.Add('Stale Knowledge touched by this PR:')
+        foreach ($blocker in @($knowledge.blockers)) {
+            $lines.Add("- $($blocker.path)")
+            $lines.Add("  source: $($blocker.source)")
+            $lines.Add("  source date: $($blocker.source_date)")
+            $lines.Add("  last_verified: $($blocker.last_verified)")
+        }
+        $lines.Add('Required action:')
+        $lines.Add('1. Confirm current truth, using /devspark-explain <topic> where appropriate.')
+        $lines.Add('2. Change last_verified only after genuine verification.')
+        $lines.Add("3. Regenerate: python $engineRelative --repo-root .")
+        $lines.Add('4. Commit.')
+        $lines.Add('5. Push.')
+        $lines.Add('6. Rerun /devspark.create-pr.')
+    }
+
+    [PSCustomObject]@{
+        error = $true
+        message = $message
+        details = ($lines -join "`n")
+        checked_head = $knowledge.checked_head
+        blockers = @($knowledge.blockers)
+    } | ConvertTo-Json -Depth 10 -EscapeHandling EscapeNonAscii
+}
+
 function Get-CreatePrPreflight {
     $repoRoot = Get-RepoRoot
     $currentBranch = Get-CurrentBranch
@@ -294,12 +458,13 @@ function Get-CreatePrPreflight {
         $branchPushDetails = "Push the latest commits from '$currentBranch' to origin before creating a PR"
     }
 
-    $cliAvailable = [bool](Get-Command gh -ErrorAction SilentlyContinue)
+    $prCli = $DevSparkPlatform.PrCli
+    $cliAvailable = [bool](Get-Command $prCli -ErrorAction SilentlyContinue)
     $authOk = $false
     if ($cliAvailable) {
         try { $authOk = & $DevSparkPlatform.AuthCheck } catch { $authOk = $false }
     }
-    $creationSupported = $cliAvailable -and $DevSparkPlatform.Name -eq 'github'
+    $creationSupported = $cliAvailable -and ($DevSparkPlatform.Name -in @('github', 'azdo'))
 
     $featureDir = Find-FeatureDirByPrefix -RepoRoot $repoRoot -BranchName $currentBranch
     $specPath = Join-Path $featureDir 'spec.md'
@@ -383,19 +548,39 @@ function Get-CreatePrPreflight {
         } | Where-Object { $_ -ne $null }
     )
 
+    $changedPaths = @($fileChanges | ForEach-Object { $_.path; $_.from } | Where-Object { $_ })
+    $knowledge = Get-KnowledgeConsistency -RepoRoot $repoRoot -Head $localHead -ChangedPaths $changedPaths
+
     $existingPr = [PSCustomObject]@{ exists = $false; number = $null; url = ''; title = ''; state = ''; draft = $false }
     if ($cliAvailable -and $authOk) {
         try {
-            $existingRaw = gh pr list --head $currentBranch --json number,url,title,state,isDraft --limit 1 2>$null | ConvertFrom-Json
-            $pr = @($existingRaw)[0]
-            if ($pr) {
-                $existingPr = [PSCustomObject]@{
-                    exists = $true
-                    number = $pr.number
-                    url = $pr.url
-                    title = $pr.title
-                    state = $pr.state
-                    draft = [bool]$pr.isDraft
+            if ($DevSparkPlatform.Name -eq 'azdo') {
+                $azctx = Get-AzdoRepoContext
+                $orgUrl = "https://dev.azure.com/$($azctx.Org)"
+                $azList = az repos pr list --organization $orgUrl --project $azctx.Project --repository $azctx.Repo --source-branch $currentBranch --status active --top 1 --output json 2>$null | ConvertFrom-Json
+                $pr = @($azList)[0]
+                if ($pr -and $pr.pullRequestId) {
+                    $existingPr = [PSCustomObject]@{
+                        exists = $true
+                        number = $pr.pullRequestId
+                        url    = "https://dev.azure.com/$($azctx.Org)/$($azctx.Project)/_git/$($azctx.Repo)/pullrequest/$($pr.pullRequestId)"
+                        title  = $pr.title
+                        state  = $pr.status
+                        draft  = [bool]$pr.isDraft
+                    }
+                }
+            } else {
+                $existingRaw = gh pr list --head $currentBranch --json number,url,title,state,isDraft --limit 1 2>$null | ConvertFrom-Json
+                $pr = @($existingRaw)[0]
+                if ($pr) {
+                    $existingPr = [PSCustomObject]@{
+                        exists = $true
+                        number = $pr.number
+                        url = $pr.url
+                        title = $pr.title
+                        state = $pr.state
+                        draft = [bool]$pr.isDraft
+                    }
                 }
             }
         } catch { }
@@ -403,7 +588,6 @@ function Get-CreatePrPreflight {
 
     return [PSCustomObject]@{
         repo_root = $repoRoot
-        knowledge_engine = [PSCustomObject](Get-KnowledgeEngineInfo -RepoRoot $repoRoot)
         current_branch = $currentBranch
         target_branch = $targetBranch
         dirty_worktree = $dirty
@@ -451,6 +635,7 @@ function Get-CreatePrPreflight {
             file_changes        = $fileChanges
         }
         quickfix_record = $quickfixRecord
+        knowledge = $knowledge
         existing_pr = $existingPr
     }
 }
@@ -462,14 +647,18 @@ function Invoke-CreateOrUpdatePr {
     if (-not $preflight.prerequisites.clean_worktree) {
         return (Get-JsonError -Message 'Working tree has unmanaged changes' -Details 'Commit, stash, or discard all changes before creating or updating a PR')
     }
+    if ($preflight.knowledge.readiness -eq 'blocked') {
+        return (Get-KnowledgeBlockedError -Preflight $preflight)
+    }
     if (-not $preflight.prerequisites.branch_pushed_to_remote) {
         return (Get-JsonError -Message 'Current branch is not pushed to remote' -Details $preflight.remote.details)
     }
     if (-not $preflight.creation_supported) {
-        return (Get-JsonError -Message 'Automated PR creation is only supported for GitHub in this release' -Details "Platform: $($DevSparkPlatform.Name)")
+        return (Get-JsonError -Message "Automated PR creation is not supported for platform '$($DevSparkPlatform.Name)'" -Details 'Supported: github (gh), azdo (az). Install and authenticate the platform CLI.')
     }
     if (-not $preflight.auth_ok) {
-        return (Get-JsonError -Message 'GitHub CLI is not authenticated' -Details 'Run: gh auth login')
+        $authHint = switch ($DevSparkPlatform.Name) { 'github' { 'Run: gh auth login' } 'azdo' { 'Run: az login' } default { "Authenticate the $($DevSparkPlatform.PrCli) CLI" } }
+        return (Get-JsonError -Message "$($DevSparkPlatform.DisplayName) CLI is not authenticated" -Details $authHint)
     }
 
     $bodyValue = Resolve-PrBody
@@ -481,33 +670,62 @@ function Invoke-CreateOrUpdatePr {
         return (Get-JsonError -Message 'A PR already exists for this branch' -Details 'Use update mode or pass -PrNumber')
     }
 
-    if ($Action -eq 'Update') {
-        $targetPr = if ($PrNumber) { $PrNumber } else { $preflight.existing_pr.number }
-        if (-not $targetPr) {
-            return (Get-JsonError -Message 'No PR found to update' -Details 'Create a PR first or pass -PrNumber')
+    $baseBranch = if ($Base) { $Base } else { $preflight.target_branch }
+
+    if ($DevSparkPlatform.Name -eq 'azdo') {
+        $azctx = Get-AzdoRepoContext
+        $orgUrl = "https://dev.azure.com/$($azctx.Org)"
+        if ($Action -eq 'Update') {
+            $targetPr = if ($PrNumber) { $PrNumber } else { $preflight.existing_pr.number }
+            if (-not $targetPr) { return (Get-JsonError -Message 'No PR found to update' -Details 'Create a PR first or pass -PrNumber') }
+            az repos pr update --organization $orgUrl --id $targetPr --title $Title --description $bodyValue 2>$null | Out-Null
+            foreach ($item in $Reviewer) { az repos pr reviewer add --organization $orgUrl --id $targetPr --reviewers $item 2>$null | Out-Null }
+            $show = az repos pr show --organization $orgUrl --id $targetPr --output json 2>$null | ConvertFrom-Json
+        } else {
+            $azArgs = @('repos','pr','create','--organization',$orgUrl,'--project',$azctx.Project,'--repository',$azctx.Repo,'--source-branch',$preflight.current_branch,'--target-branch',$baseBranch,'--title',$Title,'--description',$bodyValue,'--output','json')
+            if ($Draft) { $azArgs += @('--draft','true') }
+            foreach ($item in $Reviewer) { $azArgs += @('--reviewers',$item) }
+            $show = & az @azArgs 2>$null | ConvertFrom-Json
+            if (-not $show -or -not $show.pullRequestId) { return (Get-JsonError -Message 'Failed to create pull request' -Details 'az repos pr create did not return a pull request id') }
         }
-        gh pr edit $targetPr --title $Title --body $bodyValue --base $(if ($Base) { $Base } else { $preflight.target_branch }) 2>$null | Out-Null
-        foreach ($item in $Reviewer) { gh pr edit $targetPr --add-reviewer $item 2>$null | Out-Null }
-        foreach ($item in $Label) { gh pr edit $targetPr --add-label $item 2>$null | Out-Null }
-        foreach ($item in $Assignee) { gh pr edit $targetPr --add-assignee $item 2>$null | Out-Null }
-        $view = gh pr view $targetPr --json number,url,title,state,isDraft 2>$null | ConvertFrom-Json
+        $prId = $show.pullRequestId
+        $view = [PSCustomObject]@{
+            number  = $prId
+            url     = "https://dev.azure.com/$($azctx.Org)/$($azctx.Project)/_git/$($azctx.Repo)/pullrequest/$prId"
+            title   = $show.title
+            state   = $show.status
+            isDraft = [bool]$show.isDraft
+        }
     } else {
-        $ghCreateCommand = @('pr','create','--title',$Title,'--body',$bodyValue,'--base',$(if ($Base) { $Base } else { $preflight.target_branch }))
-        if ($Draft) { $ghCreateCommand += '--draft' }
-        foreach ($item in $Reviewer) { $ghCreateCommand += @('--reviewer',$item) }
-        foreach ($item in $Label) { $ghCreateCommand += @('--label',$item) }
-        foreach ($item in $Assignee) { $ghCreateCommand += @('--assignee',$item) }
-        $created = & gh @ghCreateCommand 2>$null
-        $url = ($created | Select-Object -Last 1)
-        if (-not $url) {
-            return (Get-JsonError -Message 'Failed to create pull request' -Details 'gh pr create did not return a URL')
+        if ($Action -eq 'Update') {
+            $targetPr = if ($PrNumber) { $PrNumber } else { $preflight.existing_pr.number }
+            if (-not $targetPr) {
+                return (Get-JsonError -Message 'No PR found to update' -Details 'Create a PR first or pass -PrNumber')
+            }
+            gh pr edit $targetPr --title $Title --body $bodyValue --base $baseBranch 2>$null | Out-Null
+            foreach ($item in $Reviewer) { gh pr edit $targetPr --add-reviewer $item 2>$null | Out-Null }
+            foreach ($item in $Label) { gh pr edit $targetPr --add-label $item 2>$null | Out-Null }
+            foreach ($item in $Assignee) { gh pr edit $targetPr --add-assignee $item 2>$null | Out-Null }
+            $view = gh pr view $targetPr --json number,url,title,state,isDraft 2>$null | ConvertFrom-Json
+        } else {
+            $ghCreateCommand = @('pr','create','--title',$Title,'--body',$bodyValue,'--base',$baseBranch)
+            if ($Draft) { $ghCreateCommand += '--draft' }
+            foreach ($item in $Reviewer) { $ghCreateCommand += @('--reviewer',$item) }
+            foreach ($item in $Label) { $ghCreateCommand += @('--label',$item) }
+            foreach ($item in $Assignee) { $ghCreateCommand += @('--assignee',$item) }
+            $created = & gh @ghCreateCommand 2>$null
+            $url = ($created | Select-Object -Last 1)
+            if (-not $url) {
+                return (Get-JsonError -Message 'Failed to create pull request' -Details 'gh pr create did not return a URL')
+            }
+            $view = gh pr view $url --json number,url,title,state,isDraft 2>$null | ConvertFrom-Json
         }
-        $view = gh pr view $url --json number,url,title,state,isDraft 2>$null | ConvertFrom-Json
     }
 
     return ([PSCustomObject]@{
         status = 'ok'
         action = $Action.ToLower()
+        checked_head = $preflight.remote.local_head
         pr_number = $view.number
         url = $view.url
         title = $view.title

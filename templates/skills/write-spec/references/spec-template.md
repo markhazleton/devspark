@@ -1,5 +1,7 @@
 # Spec Template Reference
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 Use this template as the structural guide when drafting a `spec.md` with the
 `write-spec` skill.
 
@@ -9,6 +11,7 @@ Use this template as the structural guide when drafting a `spec.md` with the
 
 ```yaml
 ---
+devspark_version: "<installed DevSpark version, or omit if undeterminable>"
 classification: full-spec
 risk_level: low|medium|high
 status: Draft
@@ -16,6 +19,9 @@ status: Draft
 ```
 
 `status` must always be `Draft` when produced by this skill.
+
+`devspark_version` records the version that **authored** the spec. It is never
+updated by a later framework upgrade or by a later lifecycle command.
 
 ---
 
@@ -32,7 +38,14 @@ status: Draft
 **Input**: <one-sentence description of what the user asked for>
 ```
 
-### 2. Rationale Summary
+### 2. Product Owner TLDR
+
+Add a short non-technical summary (3-5 sentences) explicitly answering:
+
+- **What** this feature/spec is introducing or changing
+- **Why** this work matters now from a business/user outcome perspective
+
+### 3. Rationale Summary
 
 Sub-sections:
 
@@ -42,7 +55,7 @@ Sub-sections:
 - **Tradeoffs Considered** — Rejected options with reasons (Option A, Option B,
   Selected Option).
 
-### 3. User Stories
+### 4. User Stories
 
 Each story follows:
 
@@ -61,7 +74,7 @@ Each story follows:
 
 At least one P1 story is required.
 
-### 4. Requirements
+### 5. Requirements
 
 Sub-sections by phase or concern. Each requirement uses MUST or SHOULD:
 
@@ -73,7 +86,7 @@ Sub-sections by phase or concern. Each requirement uses MUST or SHOULD:
 Do not mix implementation decisions into requirements. Keep requirements
 technology-agnostic.
 
-### 5. Success Criteria
+### 6. Success Criteria
 
 Measurable outcomes keyed to user stories:
 
@@ -84,7 +97,7 @@ Measurable outcomes keyed to user stories:
 
 Each criterion must be verifiable without DevSpark.
 
-### 6. Assumptions
+### 7. Assumptions
 
 ```markdown
 ## Assumptions
@@ -93,7 +106,7 @@ Each criterion must be verifiable without DevSpark.
 - Skipped context: <list items from skipped_context, or "none">
 ```
 
-### 7. Out of Scope
+### 8. Out of Scope
 
 ```markdown
 ## Out of Scope
@@ -109,8 +122,9 @@ A `spec.md` passes the shared validation contract when:
 
 - YAML frontmatter is present and parseable.
 - `status: Draft` is present.
-- All four mandatory sections are present: Rationale Summary, User Stories,
-  Requirements, Success Criteria.
+- Product Owner TLDR section is present and clearly answers WHAT and WHY.
+- All four mandatory full-spec sections are present: Rationale Summary, User
+  Stories, Requirements, Success Criteria.
 - No more than three `[NEEDS CLARIFICATION]` markers.
 - No implementation details (no framework names, no library versions, no file
   paths in requirements).

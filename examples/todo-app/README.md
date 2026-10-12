@@ -11,25 +11,24 @@ examples/todo-app/
 │   │   ├── devspark.specify.md
 │   │   ├── devspark.plan.md
 │   │   └── devspark.implement.md
-│   └── VERSION
-├── .knowledge/                         ← Durable current truth
-│   └── governance/
-│       └── constitution.md             ← Customized for this project
-├── .devspark.work/                     ← Temporary lifecycle work (ignored)
-│   └── specs/                          ← In-flight feature packages
-├── .knowledge/                     ← Durable current truth
-│   └── commands/                       ← Team prompt overrides
+│   └── VERSION            ← Installed version stamp
+├── .devspark.work/                     ← Temporary work and overrides
+│   ├── commands/                       ← Team overrides (empty by default)
+│   └── specs/                          ← Temporary plans go here
+├── .knowledge/
+│   └── governance/constitution.md      ← Current project principles
+├── .knowledge/guides/                  ← Published user guidance
 ├── .github/
-│   └── agents/
-│       └── devspark.specify.agent.md   ← Copilot shim example
+│   └── skills/
+│       └── devspark-specify/SKILL.md   ← Copilot skill example
 └── README.md
 ```
 
 ## Key Concepts Demonstrated
 
-1. **`.devspark/` vs `.knowledge/` vs `.devspark.work/`** — framework files, durable current truth, and temporary work state stay separate
-2. **Constitution** — `.knowledge/governance/constitution.md` is customized with project-specific principles
-3. **Agent shim** — `.github/agents/devspark.specify.agent.md` shows the personal/team/stock resolution pattern
+1. **Four roots** — Framework, temporary work, current truth, and published guidance stay separate
+2. **Constitution** — `.knowledge/governance/constitution.md` contains current project principles
+3. **Agent skill** — `.github/skills/devspark-specify/SKILL.md` shows the personal/team/stock resolution pattern
 4. **VERSION stamp** — `.devspark/VERSION` records how and when DevSpark was installed
 
 ## Try It

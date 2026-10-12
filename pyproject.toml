@@ -1,7 +1,39 @@
+[project]
+name = "devspark-tooling"
+version = "9.0.0"
+description = "DevSpark repo tooling — dev/test/lint dependencies for the prompt-first lifecycle framework (no installable package; quickstart is the only install/upgrade path)."
+authors = [{ name = "Make Bold Solutions" }]
+keywords = ["devspark", "ai-agents", "sdd"]
+requires-python = ">=3.11"
+dependencies = [
+    "jsonschema>=4.0,<5.0",
+    "PyYAML>=6.0,<7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.3,<10.0",
+    "pytest-cov>=4.1,<6.0",
+    "ruff>=0.4,<1.0",
+    "mypy>=1.8,<2.0",
+    "bandit>=1.7,<2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/MarkHazleton/DevSpark"
+Repository = "https://github.com/MarkHazleton/DevSpark"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 
 [tool.ruff]
-line-length = 100
+target-version = "py311"
+
+# Pin the rule set explicitly. The CI lint gate installs ruff from a floating
+# range, and newer ruff releases expand their default selection — without this
+# the gate is non-deterministic and breaks on every stricter ruff version.
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+

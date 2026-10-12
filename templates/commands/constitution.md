@@ -1,8 +1,9 @@
 ---
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
 description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
 handoffs:
   - label: Build Specification
-    agent: devspark.specify
+    agent: devspark-specify
     prompt: Implement the feature specification based on the updated constitution. I want to build...
 ---
 
@@ -14,30 +15,18 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## DevSpark v4 Override
-
-This command writes current governance. When any later section conflicts with
-this section, the v4 section wins.
-
-- Write the constitution at `.knowledge/governance/constitution.md`.
-- Edit the constitution in place; do not append historical sync reports.
-- When an amendment conflicts with an existing current decision, update that
-  decision topic file in place.
-- Preserve legacy constitution files only as migration input, not as current
-  write targets.
-
 ## Lifecycle Position
 
 **Single writer of record** for `/.knowledge/governance/constitution.md`. Two siblings feed in but never edit the constitution themselves:
 
-- `/devspark.discover-constitution` (brownfield bootstrap) → produces `constitution-draft.md`
-- `/devspark.evolve-constitution` (continuous improvement) → produces APPROVED CAPs in `proposals/`
+- `/devspark-discover-constitution` (brownfield bootstrap) → produces `constitution-draft.md`
+- `/devspark-evolve-constitution` (continuous improvement) → produces APPROVED CAPs in `proposals/`
 - Direct human edits via this command
 
 All three paths converge here → this command writes `constitution.md` and bumps the version.
 
 - **Owns**: collecting placeholder values, semver decisions, writing the constitution file, propagating impact to dependent templates, emitting the Sync Impact Report.
-- **Does NOT own**: reverse-engineering principles (→ `/devspark.discover-constitution`); generating amendment proposals (→ `/devspark.evolve-constitution`); reviewing/voting on proposals (out-of-band; this command only *applies* approved ones).
+- **Does NOT own**: reverse-engineering principles (→ `/devspark-discover-constitution`); generating amendment proposals (→ `/devspark-evolve-constitution`); reviewing/voting on proposals (out-of-band; this command only *applies* approved ones).
 
 ## Upstream Inputs to Check
 
@@ -45,26 +34,36 @@ Before drafting, scan for upstream artifacts produced by the sibling commands an
 
 1. **Discovery draft** — if `/.devspark.work/governance/constitution-draft.md` exists:
    - Treat it as the starting point for placeholder values when no constitution exists yet.
-   - After successfully writing `constitution.md`, move the resolved draft to
-     `.archive/YYYY-MM-DD/governance/constitution-draft.md` with
-     `archive_devspark_work_path` (Bash `common.sh`) or
-     `Move-DevSparkWorkPathToArchive` (PowerShell `common.ps1`). Never read it
-     back from `.archive/`.
-2. **Approved amendment proposals** — if `/.devspark.work/governance/proposals/` contains files whose `Status: APPROVED`:
+   - After successfully writing `constitution.md`, archive the draft under
+     `.archive/{YYYY-MM-DD}/governance/` so it cannot be reapplied from `.devspark.work/`.
+2. **Approved amendment proposals** — if `/.devspark.work/governance/` contains files whose `Status: APPROVED`:
    - List them to the user; for each, ask whether to apply now in this version bump.
-   - For every applied CAP, update the current constitution and any affected decision topic files in place.
-   - After durable governance is updated, move each applied CAP file to
-     `.archive/YYYY-MM-DD/governance/proposals/` with the same archive helper.
-     This command writes only its own resolved proposals to `.archive/`; all
-     other `.devspark.work/` sweeping belongs to `/devspark.release`.
+   - For every applied CAP, update the constitution and then archive the proposal under
+     `.archive/{YYYY-MM-DD}/governance/`.
    - Reflect each applied CAP in the Sync Impact Report (§5) under a new "Applied Amendments" block (CAP ID → principle change).
-3. **Rejected or pending proposals**: leave untouched. Never silently roll a non-approved proposal into the constitution.
+3. **Rejected proposals**: record the rejection in the proposal commit, then archive the proposal
+   under `.archive/{YYYY-MM-DD}/governance/`.
+   Pending proposals remain under `.devspark.work/governance/` only while unresolved. Never silently
+   roll a non-approved proposal into the constitution.
+
+Git history for `.knowledge/governance/constitution.md` is the only amendment history for the
+constitution's own content. Do not create decision-history or rationale-archive folders for the
+constitution itself — the `.archive/{YYYY-MM-DD}/governance/` moves above are for retiring resolved
+`.devspark.work/` planning artifacts, not a parallel constitution history.
 
 If neither upstream artifact is present, proceed with user-supplied input as today.
 
 ## Outline
 
 You are updating the project constitution at `/.knowledge/governance/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
+
+The Constitution is one of three current-truth categories alongside `.knowledge/` entities and
+`.knowledge/governance/decisions/` — not "documentation." It answers "what are the rules of the
+game" (rarely changes, mutated in place, amended explicitly here); decisions answer "what did we
+choose and why not the alternatives" (mutated in place per topic, no chains); entities answer "what
+is true now." "Dependent templates staying in sync" (step 4 below) includes the decisions contract,
+not just prose templates — an amendment that contradicts an existing decision must correct that
+decision in place too (see `/devspark-evolve-constitution`).
 
 Follow this execution flow:
 
@@ -76,6 +75,8 @@ Follow this execution flow:
    - If user input (conversation) supplies a value, use it.
    - Otherwise infer from existing repo context (README, docs, prior constitution versions if embedded).
    - For governance dates: `RATIFICATION_DATE` is the original adoption date (if unknown ask or mark TODO), `LAST_AMENDED_DATE` is today if changes are made, otherwise keep previous.
+   - **Optional** `TEAM_EXPERIENCE` field in the Governance section (`**Team Experience**: expert | mixed | new-to-stack`): only set this if the user states it or it's already present from a prior version — never infer it. It calibrates `/devspark-critic`'s mindset paragraph (expert teams get less beginner-trap noise). Omitting it preserves `/devspark-critic`'s default pessimistic mindset.
+   - **Suggested principle** (offer, do not impose): if the project has none like it, propose a *genuine-fix / intent-over-metrics* principle — "Fixes MUST resolve the behavioral intent a check is a proxy for, not merely satisfy the metric." Declaring it lets gate commands cite its principle ID when flagging a gamed fix (see the genuine-fix escalation hook in the shared preamble's `finding-fix` module), escalating anti-gaming from process guidance to a constitution violation. Only add it with the user's agreement.
    - `CONSTITUTION_VERSION` must increment according to semantic versioning rules:
      - MAJOR: Backward incompatible governance/principle removals or redefinitions.
      - MINOR: New principle/section added or materially expanded guidance.
@@ -86,7 +87,6 @@ Follow this execution flow:
    - Replace every placeholder with concrete text (no bracketed tokens left except intentionally retained template slots that the project has chosen not to define yet—explicitly justify any left).
    - Preserve heading hierarchy and comments can be removed once replaced unless they still add clarifying guidance.
    - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non‑negotiable rules, explicit rationale if not obvious.
-   - When adding or preserving Genuine Fix Discipline, ensure the principle requires behavioral intent before metric movement, a citation hook for constitution-backed findings, and a verification failure mode for metric-only proof with unchanged behavior.
    - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.
 
 4. Consistency propagation checklist (convert prior checklist into active validations):
@@ -94,8 +94,10 @@ Follow this execution flow:
    - Read `/.devspark/templates/spec-template.md` (or `templates/spec-template.md` in source repos) for scope/requirements alignment—update if constitution adds/removes mandatory sections or constraints.
    - Read `/.devspark/templates/tasks-template.md` (or `templates/tasks-template.md` in source repos) and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
    - Read command prompt templates from `templates/commands/*.md` when available; otherwise inspect generated command files under active agent folders (for example `.github/agents/`, `.claude/commands/`, `.cursor/commands/`, `.gemini/commands/`). Verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
-   - If the update touches Genuine Fix Discipline, check `templates/command-preamble-contract.md` §9/§9.1/§9.2, `/devspark.verify`, and review/fix commands that emit or resolve findings.
-   - Read runtime guidance docs (for example `README.md`, `/.knowledge/entities/product-documentation/site/Guide.md`, and agent-specific guidance files if present). Update references to principles changed.
+   - Read runtime guidance docs (for example `README.md`, `/.knowledge/guides/Guide.md`, and agent-specific guidance files if present). Update references to principles changed.
+   - Scan `/.knowledge/governance/decisions/*.md` for `constrains` entries or prose that assumes the
+     principle being changed; a decision that contradicts the amended principle must be corrected in
+     place now, not left to drift until the next `/devspark-release` or `/devspark-site-audit` finds it.
 
 5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
    - Version change: old → new

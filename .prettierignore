@@ -1,0 +1,9 @@
+# DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#
+# Prettier's default Markdown printer normalizes emphasis to underscores
+# (*text* -> _text_), which directly conflicts with this repo's
+# .markdownlint-cli2.jsonc MD049 rule (asterisk required) and the CI lint
+# gate in azure-pipelines.yml. markdownlint-cli2, not Prettier, is this
+# repo's markdown quality tool (constitution §VIII) — never run
+# `prettier --write` on markdown here.
+*.md

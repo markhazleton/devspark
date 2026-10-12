@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 
 # Update agent context files with information from plan.md
 #
@@ -65,12 +66,12 @@ NEW_PLAN="$IMPL_PLAN"
 AGENT_TYPE="${1:-}"
 
 AGENT_REGISTRY_FILE="$REPO_ROOT/agents-registry.json"
-SHARED_AGENT_CONTEXT_FILE="$REPO_ROOT/.knowledge/AGENTS.md"
+SHARED_AGENT_CONTEXT_FILE="$REPO_ROOT/AGENTS.md"
 SHARED_CONTEXT_START="<!-- DEVSPARK SHARED CONTEXT:START -->"
 SHARED_CONTEXT_END="<!-- DEVSPARK SHARED CONTEXT:END -->"
 
 # Template file
-TEMPLATE_FILE="$REPO_ROOT/.knowledge/overrides/templates/agent-file-template.md"
+TEMPLATE_FILE="$REPO_ROOT/.devspark.work/templates/agent-file-template.md"
 
 # Global variables for parsed plan data
 NEW_LANG=""
@@ -204,13 +205,28 @@ validate_environment() {
 extract_plan_field() {
     local field_pattern="$1"
     local plan_file="$2"
-    
-    grep "^\*\*${field_pattern}\*\*: " "$plan_file" 2>/dev/null | \
-        head -1 | \
-        sed "s|^\*\*${field_pattern}\*\*: ||" | \
-        sed 's/^[ \t]*//;s/[ \t]*$//' | \
-        grep -v "NEEDS CLARIFICATION" | \
-        grep -v "^N/A$" || echo ""
+
+    [[ -f "$plan_file" ]] || { echo ""; return 0; }
+
+    # Values may be hard-wrapped onto following lines; join them back onto one line.
+    awk -v pat="$field_pattern" '
+        BEGIN { needle = "**" pat "**: " }
+        index($0, needle) == 1 {
+            value = substr($0, length(needle) + 1)
+            while ((getline nextline) > 0) {
+                if (nextline ~ /^[[:space:]]*$/) break
+                if (nextline ~ /^[[:space:]]*(\*\*|#|[-*+][[:space:]]|[0-9]+\.[[:space:]]|\||>)/) break
+                sub(/^[[:space:]]+/, "", nextline)
+                sub(/[[:space:]]+$/, "", nextline)
+                value = value " " nextline
+            }
+            sub(/^[[:space:]]+/, "", value)
+            sub(/[[:space:]]+$/, "", value)
+            if (value == "NEEDS CLARIFICATION" || value == "N/A") next
+            print value
+            exit
+        }
+    ' "$plan_file" 2>/dev/null || echo ""
 }
 
 parse_plan_data() {
@@ -302,7 +318,7 @@ get_commands_for_language() {
             echo "cargo test && cargo clippy"
             ;;
         *"JavaScript"*|*"TypeScript"*)
-            echo "npm test \\&\\& npm run lint"
+            echo "npm test && npm run lint"
             ;;
         *)
             echo "# Add commands for $lang"
@@ -313,6 +329,16 @@ get_commands_for_language() {
 get_language_conventions() {
     local lang="$1"
     echo "$lang: Follow standard conventions"
+}
+
+# Escape a value for safe use on the *replacement* side of a `sed s|...|...|`
+# expression. On that side `&` expands to the matched text and the `|` delimiter
+# terminates the expression, so an unescaped value like `cd src && pytest` would
+# turn every `&` into the matched placeholder (producing literal
+# "[ONLY COMMANDS FOR ACTIVE TECHNOLOGIES]" text in the output). Backslashes are
+# intentionally left untouched so the later "\n" -> newline conversion still works.
+_escape_sed_repl() {
+    printf '%s' "$1" | sed 's/[&|]/\\&/g'
 }
 
 create_new_agent_file() {
@@ -339,49 +365,50 @@ create_new_agent_file() {
     fi
     
     # Replace template placeholders
+    #
+    # All dynamic values below are used on the *replacement* side of `sed`, so
+    # they are passed through `_escape_sed_repl` to neutralize `&` and the `|`
+    # delimiter. See the helper for why (this fixes garbled "## Commands" output).
     local project_structure
-    project_structure=$(get_project_structure "$NEW_PROJECT_TYPE")
-    
+    project_structure=$(_escape_sed_repl "$(get_project_structure "$NEW_PROJECT_TYPE")")
+
     local commands
-    commands=$(get_commands_for_language "$NEW_LANG")
-    
+    commands=$(_escape_sed_repl "$(get_commands_for_language "$NEW_LANG")")
+
     local language_conventions
-    language_conventions=$(get_language_conventions "$NEW_LANG")
-    
-    # Perform substitutions with error checking using safer approach
-    # Escape special characters for sed by using a different delimiter or escaping
-    local escaped_lang
-    escaped_lang=$(printf '%s\n' "$NEW_LANG" | sed 's/[\[\.*^$()+{}|]/\\&/g')
-    local escaped_framework
-    escaped_framework=$(printf '%s\n' "$NEW_FRAMEWORK" | sed 's/[\[\.*^$()+{}|]/\\&/g')
-    local escaped_branch
-    escaped_branch=$(printf '%s\n' "$CURRENT_BRANCH" | sed 's/[\[\.*^$()+{}|]/\\&/g')
-    
-    # Build technology stack and recent change strings conditionally
+    language_conventions=$(_escape_sed_repl "$(get_language_conventions "$NEW_LANG")")
+
+    local project_name_esc
+    project_name_esc=$(_escape_sed_repl "$project_name")
+
+    # Build technology stack and recent change strings from raw values, then
+    # escape the finished strings for use as sed replacements.
     local tech_stack
-    if [[ -n "$escaped_lang" && -n "$escaped_framework" ]]; then
-        tech_stack="- $escaped_lang + $escaped_framework ($escaped_branch)"
-    elif [[ -n "$escaped_lang" ]]; then
-        tech_stack="- $escaped_lang ($escaped_branch)"
-    elif [[ -n "$escaped_framework" ]]; then
-        tech_stack="- $escaped_framework ($escaped_branch)"
+    if [[ -n "$NEW_LANG" && -n "$NEW_FRAMEWORK" ]]; then
+        tech_stack="- $NEW_LANG + $NEW_FRAMEWORK ($CURRENT_BRANCH)"
+    elif [[ -n "$NEW_LANG" ]]; then
+        tech_stack="- $NEW_LANG ($CURRENT_BRANCH)"
+    elif [[ -n "$NEW_FRAMEWORK" ]]; then
+        tech_stack="- $NEW_FRAMEWORK ($CURRENT_BRANCH)"
     else
-        tech_stack="- ($escaped_branch)"
+        tech_stack="- ($CURRENT_BRANCH)"
     fi
+    tech_stack=$(_escape_sed_repl "$tech_stack")
 
     local recent_change
-    if [[ -n "$escaped_lang" && -n "$escaped_framework" ]]; then
-        recent_change="- $escaped_branch: Added $escaped_lang + $escaped_framework"
-    elif [[ -n "$escaped_lang" ]]; then
-        recent_change="- $escaped_branch: Added $escaped_lang"
-    elif [[ -n "$escaped_framework" ]]; then
-        recent_change="- $escaped_branch: Added $escaped_framework"
+    if [[ -n "$NEW_LANG" && -n "$NEW_FRAMEWORK" ]]; then
+        recent_change="- $CURRENT_BRANCH: Added $NEW_LANG + $NEW_FRAMEWORK"
+    elif [[ -n "$NEW_LANG" ]]; then
+        recent_change="- $CURRENT_BRANCH: Added $NEW_LANG"
+    elif [[ -n "$NEW_FRAMEWORK" ]]; then
+        recent_change="- $CURRENT_BRANCH: Added $NEW_FRAMEWORK"
     else
-        recent_change="- $escaped_branch: Added"
+        recent_change="- $CURRENT_BRANCH: Added"
     fi
+    recent_change=$(_escape_sed_repl "$recent_change")
 
     local substitutions=(
-        "s|\[PROJECT NAME\]|$project_name|"
+        "s|\[PROJECT NAME\]|$project_name_esc|"
         "s|\[DATE\]|$current_date|"
         "s|\[EXTRACTED FROM ALL PLAN.MD FILES\]|$tech_stack|"
         "s|\[ACTUAL STRUCTURE FROM PLANS\]|$project_structure|g"
@@ -463,7 +490,14 @@ update_existing_agent_file() {
     local in_changes_section=false
     local tech_entries_added=false
     local existing_changes_count=0
-    
+
+    # Appends a blank line unless the buffer already ends with one.
+    append_blank_separator() {
+        if [[ -s "$temp_file" ]] && [[ -n "$(tail -n 1 "$temp_file")" ]]; then
+            echo "" >> "$temp_file"
+        fi
+    }
+
     while IFS= read -r line || [[ -n "$line" ]]; do
         # Handle Active Technologies section
         if [[ "$line" == "## Active Technologies" ]]; then
@@ -473,41 +507,60 @@ update_existing_agent_file() {
         elif [[ $in_tech_section == true ]] && [[ "$line" =~ ^##[[:space:]] ]]; then
             # Add new tech entries before closing the section
             if [[ $tech_entries_added == false ]] && [[ ${#new_tech_entries[@]} -gt 0 ]]; then
+                append_blank_separator
                 printf '%s\n' "${new_tech_entries[@]}" >> "$temp_file"
                 tech_entries_added=true
             fi
+            append_blank_separator
             echo "$line" >> "$temp_file"
             in_tech_section=false
             continue
         elif [[ $in_tech_section == true ]] && [[ -z "$line" ]]; then
-            # Add new tech entries before empty line in tech section
+            # Add new tech entries after the blank line that follows the heading
             if [[ $tech_entries_added == false ]] && [[ ${#new_tech_entries[@]} -gt 0 ]]; then
+                append_blank_separator
+                printf '%s\n' "${new_tech_entries[@]}" >> "$temp_file"
+                tech_entries_added=true
+                continue
+            fi
+            append_blank_separator
+            continue
+        elif [[ $in_tech_section == true ]] && [[ "$line" != "- "* ]]; then
+            if [[ $tech_entries_added == false ]] && [[ ${#new_tech_entries[@]} -gt 0 ]]; then
+                append_blank_separator
                 printf '%s\n' "${new_tech_entries[@]}" >> "$temp_file"
                 tech_entries_added=true
             fi
+            append_blank_separator
             echo "$line" >> "$temp_file"
+            in_tech_section=false
             continue
         fi
         
         # Handle Recent Changes section
         if [[ "$line" == "## Recent Changes" ]]; then
             echo "$line" >> "$temp_file"
-            # Add new change entry right after the heading
+            # Add new change entry after a blank line so the heading stays separated
             if [[ -n "$new_change_entry" ]]; then
+                echo "" >> "$temp_file"
                 echo "$new_change_entry" >> "$temp_file"
             fi
             in_changes_section=true
             continue
-        elif [[ $in_changes_section == true ]] && [[ "$line" =~ ^##[[:space:]] ]]; then
-            echo "$line" >> "$temp_file"
-            in_changes_section=false
+        elif [[ $in_changes_section == true ]] && [[ -z "$line" ]]; then
             continue
         elif [[ $in_changes_section == true ]] && [[ "$line" == "- "* ]]; then
             # Keep only first 2 existing changes
             if [[ $existing_changes_count -lt 2 ]]; then
+                append_blank_separator
                 echo "$line" >> "$temp_file"
                 ((existing_changes_count++))
             fi
+            continue
+        elif [[ $in_changes_section == true ]]; then
+            append_blank_separator
+            echo "$line" >> "$temp_file"
+            in_changes_section=false
             continue
         fi
         
@@ -521,6 +574,7 @@ update_existing_agent_file() {
     
     # Post-loop check: if we're still in the Active Technologies section and haven't added new entries
     if [[ $in_tech_section == true ]] && [[ $tech_entries_added == false ]] && [[ ${#new_tech_entries[@]} -gt 0 ]]; then
+        append_blank_separator
         printf '%s\n' "${new_tech_entries[@]}" >> "$temp_file"
         tech_entries_added=true
     fi

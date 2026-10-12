@@ -13,4 +13,4 @@ Given a specification, produce a technical implementation plan.
    - **Implementation Steps**: Ordered list of changes
    - **Dependencies**: What needs to exist first
    - **Risks**: What could go wrong
-4. Save temporary work to `.devspark.work/specs/{feature-branch}/plan.md`
+4. Save to `.devspark.work/specs/{feature-branch}/plan.md`

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Build repository history context for /devspark.repo-story
 # Usage:
 #   repo-story-context.sh [--output <path>] [--months <n>] [--scope <full|velocity|quality|business|team>] [--compare-baseline YYYY-MM] [--stdout]
@@ -13,7 +14,7 @@ if [[ -n "${DEVSPARK_APP_ID:-}" || "${DEVSPARK_REPO_SCOPE:-false}" == "true" ]];
     print_scope_summary >&2
 fi
 
-OUTPUT_PATH=".devspark.work/repo-story/history.json"
+OUTPUT_PATH=".knowledge/guides/repo-story/history.json"
 PRINT_STDOUT=false
 MONTHS=12
 SCOPE="full"
@@ -45,7 +46,7 @@ while [[ $# -gt 0 ]]; do
 	  cat <<'EOF'
 Usage: repo-story-context.sh [--output <path>] [--months <n>] [--scope <full|velocity|quality|business|team>] [--compare-baseline YYYY-MM] [--stdout]
 
-Generates an ephemeral history.json file with full-repository Git context:
+Generates a history.json file with full-repository historical context:
 - commit timeline
 - contributor trends
 - tag milestones
@@ -53,7 +54,7 @@ Generates an ephemeral history.json file with full-repository Git context:
 - file change hotspots
 
 Options:
-	--output <path>           Output JSON path (default: .devspark.work/repo-story/history.json)
+	--output <path>           Output JSON path (default: .documentation/repo-story/history.json)
 	--months <n>              Audit window in months from now (default: 12)
 	--scope <name>            full | velocity | quality | business | team
 	--compare-baseline YYYY-MM Optional baseline month override

@@ -1,315 +1,436 @@
 #!/usr/bin/env bash
-# Detect DevSpark lifecycle state and recommend one next action. Read-only.
-set -euo pipefail
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+# Next-step router context script.
+# Detects the current lifecycle state locally (git + filesystem, best-effort gh)
+# and recommends the single next DevSpark command to run.
+
+set -u
 
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
-source "$SCRIPT_DIR/platform.sh"
 
-# Fact-gathering only: this script reports state and a suggested next command.
-# It never runs, dispatches, or chains commands; judgment stays in the prompt.
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --json|-Json) ;;
+JSON_MODE=false
+for arg in "$@"; do
+    case "$arg" in
+        --json) JSON_MODE=true ;;
     esac
-    shift
 done
 
-if ! command -v jq >/dev/null 2>&1 || ! command -v rg >/dev/null 2>&1; then
-    echo "next-context requires jq and ripgrep (rg)." >&2
-    exit 2
-fi
+REPO_ROOT=$(get_repo_root)
+CURRENT_BRANCH=$(get_current_branch)
+ASSISTANT_NAME=$(get_assistant_name)
+GIT_USER=$(get_git_user)
 
-REPO_ROOT="$(get_repo_root)"
-cd "$REPO_ROOT"
-
-HAS_GIT=false
-BRANCH="none"
-GIT_DIRTY=false
-UPSTREAM=""
-AHEAD=0
-BEHIND=0
-if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    HAS_GIT=true
-    BRANCH="$(git branch --show-current 2>/dev/null || true)"
-    [[ -n "$BRANCH" ]] || BRANCH="detached"
-    [[ -z "$(git status --porcelain --untracked-files=normal 2>/dev/null)" ]] || GIT_DIRTY=true
-    UPSTREAM="$(git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null || true)"
-    if [[ -n "$UPSTREAM" ]]; then
-        COUNTS="$(git rev-list --left-right --count "$UPSTREAM...HEAD" 2>/dev/null || echo '0 0')"
-        BEHIND="$(printf '%s' "$COUNTS" | awk '{print $1}')"
-        AHEAD="$(printf '%s' "$COUNTS" | awk '{print $2}')"
+# Orientation facts ("where am I"): repo name + host platform, from config or remote.
+REPO_NAME=$(get_devspark_config_value '.repository')
+[[ -z "$REPO_NAME" ]] && REPO_NAME=$(basename "$REPO_ROOT")
+PLATFORM=$(get_devspark_config_value '.platform')
+if [[ -z "$PLATFORM" ]]; then
+    PLATFORM="unknown"
+    remote_url=$(git remote get-url origin 2>/dev/null || true)
+    if [[ "$remote_url" == *dev.azure.com* || "$remote_url" == *visualstudio.com* ]]; then PLATFORM="azdo"
+    elif [[ "$remote_url" == *github.com* ]]; then PLATFORM="github"
+    elif [[ "$remote_url" == *gitlab* ]]; then PLATFORM="gitlab"
     fi
 fi
 
-CONSTITUTION_EXISTS=false
-[[ -f .knowledge/governance/constitution.md ]] && CONSTITUTION_EXISTS=true
+HAS_GIT="false"
+if has_git; then HAS_GIT="true"; fi
 
-FEATURE_DIR=""
-SPEC_PATH=""
-PLAN_PATH=""
-TASKS_PATH=""
-WORK_KIND="none"
+CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
+CONSTITUTION_EXISTS="false"
+[[ -f "$CONSTITUTION_PATH" ]] && CONSTITUTION_EXISTS="true"
 
-if [[ "$BRANCH" != "none" && "$BRANCH" != "detached" && -d ".devspark.work/specs/$BRANCH" ]]; then
-    FEATURE_DIR=".devspark.work/specs/$BRANCH"
-    WORK_KIND="spec"
-    SPEC_PATH="$FEATURE_DIR/spec.md"
-    PLAN_PATH="$FEATURE_DIR/plan.md"
-    TASKS_PATH="$FEATURE_DIR/tasks.md"
-elif [[ "$BRANCH" != "none" && "$BRANCH" != "detached" && -d .devspark.work/quickfixes ]]; then
-    QUICKFIX_PATH="$(rg -l -F -- "- **Branch**: $BRANCH" .devspark.work/quickfixes --glob '*.md' 2>/dev/null | LC_ALL=C sort | tail -1 || true)"
-    if [[ -n "$QUICKFIX_PATH" ]]; then
-        FEATURE_DIR="$(dirname "$QUICKFIX_PATH")"
-        WORK_KIND="quickfix"
-        SPEC_PATH="$QUICKFIX_PATH"
-        TASKS_PATH="$QUICKFIX_PATH"
+# Default (target) branch detection
+DEFAULT_BRANCH="main"
+if [[ "$HAS_GIT" == "true" ]]; then
+    HEAD_REF=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || echo "")
+    if [[ -n "$HEAD_REF" ]]; then
+        DEFAULT_BRANCH="${HEAD_REF#origin/}"
+    elif git show-ref --verify --quiet refs/heads/master 2>/dev/null; then
+        DEFAULT_BRANCH="master"
     fi
 fi
 
-HAS_SPEC=false
-HAS_PLAN=false
-HAS_TASKS=false
-[[ -n "$SPEC_PATH" && -f "$SPEC_PATH" ]] && HAS_SPEC=true
-[[ -n "$PLAN_PATH" && -f "$PLAN_PATH" ]] && HAS_PLAN=true
-[[ -n "$TASKS_PATH" && -f "$TASKS_PATH" ]] && HAS_TASKS=true
-
-SPEC_STATUS="missing"
-REQUIRED_GATES=""
-if $HAS_SPEC; then
-    SPEC_STATUS="$(sed -nE 's/^\*\*Status\*\*:[[:space:]]*([^<]+).*/\1/p' "$SPEC_PATH" | head -1 | sed 's/[[:space:]]*$//' || true)"
-    [[ -n "$SPEC_STATUS" ]] || SPEC_STATUS="unknown"
-    REQUIRED_GATES="$(sed -nE 's/^required_gates:[[:space:]]*(.*)/\1/p' "$SPEC_PATH" | head -1 | tr '[:upper:]' '[:lower:]' || true)"
+IS_DEFAULT_BRANCH="false"
+if [[ "$CURRENT_BRANCH" == "$DEFAULT_BRANCH" || "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
+    IS_DEFAULT_BRANCH="true"
 fi
 
+# Git state
+DIRTY="false"
+HAS_REMOTE="false"
+BRANCH_PUSHED="false"
+BEHIND_TARGET="false"
+if [[ "$HAS_GIT" == "true" ]]; then
+    [[ -n "$(git status --porcelain 2>/dev/null)" ]] && DIRTY="true"
+    [[ -n "$(git remote 2>/dev/null)" ]] && HAS_REMOTE="true"
+    if [[ "$HAS_REMOTE" == "true" ]]; then
+        if git rev-parse --verify --quiet "refs/remotes/origin/$CURRENT_BRANCH" >/dev/null 2>&1; then
+            BRANCH_PUSHED="true"
+        fi
+        BEHIND_COUNT=$(git rev-list --count "HEAD..origin/$DEFAULT_BRANCH" 2>/dev/null || echo "0")
+        [[ "$BEHIND_COUNT" =~ ^[0-9]+$ && "$BEHIND_COUNT" -gt 0 ]] && BEHIND_TARGET="true"
+    fi
+fi
+
+# Spec / quickfix detection for the current branch. The branch name may differ from the spec
+# directory, so resolve by numeric prefix: an exact spec directory wins, a quickfix record for the
+# branch means a quickfix (not a spec), otherwise exactly one spec directory with that prefix is the
+# active spec. DEVSPARK_FEATURE overrides the branch. More than one match is reported, never guessed.
+SPEC_DIR="$REPO_ROOT/.devspark.work/specs/$CURRENT_BRANCH"
+SPEC_AMBIGUOUS="false"
+SPEC_AMBIGUOUS_MATCHES=""
+if [[ ! -f "$SPEC_DIR/spec.md" && "$CURRENT_BRANCH" =~ ^[0-9]{3}- && ! -f "$REPO_ROOT/.devspark.work/quickfixes/$CURRENT_BRANCH.md" ]]; then
+    _prefix="${CURRENT_BRANCH:0:3}"
+    _count=0
+    _found=""
+    for _d in "$REPO_ROOT/.devspark.work/specs/""$_prefix"-*; do
+        if [[ -f "$_d/spec.md" ]]; then
+            _count=$((_count + 1))
+            _found="$_d"
+            SPEC_AMBIGUOUS_MATCHES="${SPEC_AMBIGUOUS_MATCHES:+$SPEC_AMBIGUOUS_MATCHES, }$(basename "$_d")"
+        fi
+    done
+    if [[ "$_count" -eq 1 ]]; then
+        SPEC_DIR="${_found%/}"
+    elif [[ "$_count" -gt 1 ]]; then
+        SPEC_AMBIGUOUS="true"
+    fi
+fi
+SPEC_EXISTS="false"
+[[ "$SPEC_AMBIGUOUS" == "false" && -f "$SPEC_DIR/spec.md" ]] && SPEC_EXISTS="true"
+SPEC_FEATURE=""
+[[ "$SPEC_EXISTS" == "true" ]] && SPEC_FEATURE=$(basename "$SPEC_DIR")
+
+# Spec authoring sub-state (plan -> tasks -> analyze -> critic -> implement -> verify)
+PLAN_EXISTS="false"
+TASKS_EXISTS="false"
 TASKS_TOTAL=0
-TASKS_COMPLETE=0
-TASKS_INCOMPLETE=0
-if $HAS_TASKS; then
-    TASKS_COMPLETE="$(rg -c '^[[:space:]]*-[[:space:]]+\[[xX]\]' "$TASKS_PATH" 2>/dev/null || true)"
-    TASKS_INCOMPLETE="$(rg -c '^[[:space:]]*-[[:space:]]+\[ \]' "$TASKS_PATH" 2>/dev/null || true)"
-    TASKS_COMPLETE="${TASKS_COMPLETE:-0}"
-    TASKS_INCOMPLETE="${TASKS_INCOMPLETE:-0}"
-    TASKS_TOTAL=$((TASKS_COMPLETE + TASKS_INCOMPLETE))
-fi
-
-gate_state() {
-    local gate_file="$1"
-    if [[ ! -f "$gate_file" ]]; then printf 'missing'; return; fi
-    local status blocking
-    status="$(sed -nE 's/^status:[[:space:]]*([^[:space:]]+).*/\1/p' "$gate_file" | head -1 | tr '[:upper:]' '[:lower:]' || true)"
-    blocking="$(sed -nE 's/^blocking:[[:space:]]*([^[:space:]]+).*/\1/p' "$gate_file" | head -1 | tr '[:upper:]' '[:lower:]' || true)"
-    if [[ "$blocking" == "true" || "$status" == "fail" ]]; then printf 'fail'
-    elif [[ "$status" == "pass" || "$status" == "warn" ]]; then printf '%s' "$status"
-    else printf 'fail'
+TASKS_DONE=0
+TASKS_COMPLETE="false"
+CLASSIFICATION=""
+SPEC_STATUS=""
+IS_FULL_SPEC="false"
+REQUIRE_ANALYZE="false"
+REQUIRE_CRITIC="false"
+REQUIRE_CHECKLIST="false"
+ANALYZE_GATE="false"
+CRITIC_GATE="false"
+JUDGE_GATE="false"
+JUDGE_VERDICT=""
+JUDGE_NEEDS_RECHECK="false"
+JUDGE_PENDING_DECISIONS=0
+PLAN_REVISION_COUNT=0
+PLAN_CHANGED=null
+TASKS_CHANGED=false
+TASKS_STALE=true
+PLAN_SPEC_STATE="unknown"
+TASKS_PLAN_STATE="unknown"
+JUDGE_INVALIDATED=false
+REMEDIATION_APPENDED="false"
+CHECKLIST_GATE="false"
+VERIFY_REQUIRED="false"
+VERIFY_PASSED="false"
+CLOSEOUT_DECISION=""
+if [[ "$SPEC_EXISTS" == "true" ]]; then
+    [[ -f "$SPEC_DIR/plan.md" ]] && PLAN_EXISTS="true"
+    if [[ -f "$SPEC_DIR/tasks.md" ]]; then
+        TASKS_EXISTS="true"
+        TASKS_TOTAL=$(grep -cE '^[[:space:]]*[-*][[:space:]]*\[[ xX]\]' "$SPEC_DIR/tasks.md" 2>/dev/null)
+        TASKS_DONE=$(grep -cE '^[[:space:]]*[-*][[:space:]]*\[[xX]\]' "$SPEC_DIR/tasks.md" 2>/dev/null)
+        [[ -z "$TASKS_TOTAL" ]] && TASKS_TOTAL=0
+        [[ -z "$TASKS_DONE" ]] && TASKS_DONE=0
+        if [[ "$TASKS_TOTAL" -gt 0 && "$TASKS_DONE" -ge "$TASKS_TOTAL" ]]; then TASKS_COMPLETE="true"; fi
+        grep -qiE '^## Gate Remediation' "$SPEC_DIR/tasks.md" 2>/dev/null && REMEDIATION_APPENDED="true"
     fi
-}
-
-CHECKLIST_STATE="not-required"
-ANALYZE_STATE="not-required"
-CRITIC_STATE="not-required"
-if [[ "$WORK_KIND" == "spec" && -n "$FEATURE_DIR" ]]; then
-    if [[ "$REQUIRED_GATES" == *checklist* ]]; then CHECKLIST_STATE="$(gate_state "$FEATURE_DIR/gates/checklist.md")"; fi
-    if [[ "$REQUIRED_GATES" == *analyze* || -z "$REQUIRED_GATES" ]]; then ANALYZE_STATE="$(gate_state "$FEATURE_DIR/gates/analyze.md")"; fi
-    if [[ "$REQUIRED_GATES" == *critic* || -z "$REQUIRED_GATES" ]]; then CRITIC_STATE="$(gate_state "$FEATURE_DIR/gates/critic.md")"; fi
+    CLASSIFICATION=$(grep -m1 -E '^classification:' "$SPEC_DIR/spec.md" 2>/dev/null | sed -E 's/^classification:[[:space:]]*//; s/[[:space:]]*$//')
+    SPEC_STATUS=$(grep -m1 -E '^\*\*Status\*\*:' "$SPEC_DIR/spec.md" 2>/dev/null | sed -E 's/^\*\*Status\*\*:[[:space:]]*//; s/[[:space:]]*<!--.*//; s/[[:space:]]*$//')
+    REQ_GATES=$(grep -m1 -E '^required_gates:' "$SPEC_DIR/spec.md" 2>/dev/null || echo "")
+    [[ "$REQ_GATES" == *"verify:"* ]] && VERIFY_REQUIRED="true"
+    [[ "$REQ_GATES" == *"analyze"* ]] && REQUIRE_ANALYZE="true"
+    [[ "$REQ_GATES" == *"critic"* ]] && REQUIRE_CRITIC="true"
+    [[ "$REQ_GATES" == *"checklist"* ]] && REQUIRE_CHECKLIST="true"
+    if [[ "$CLASSIFICATION" == *"full-spec"* ]]; then
+        IS_FULL_SPEC="true"
+    elif [[ -z "$CLASSIFICATION" && ( "$PLAN_EXISTS" == "true" || "$TASKS_EXISTS" == "true" ) ]]; then
+        IS_FULL_SPEC="true"
+    fi
+    [[ -f "$SPEC_DIR/gates/analyze.md" ]] && ANALYZE_GATE="true"
+    [[ -f "$SPEC_DIR/gates/critic.md" ]] && CRITIC_GATE="true"
+    if [[ -f "$SPEC_DIR/gates/judge.md" ]]; then
+        JUDGE_GATE="true"
+        JUDGE_VERDICT=$(grep -m1 -E '^verdict:' "$SPEC_DIR/gates/judge.md" 2>/dev/null | sed -E 's/^verdict:[[:space:]]*//; s/[[:space:]]*$//')
+    fi
+    [[ -f "$SPEC_DIR/gates/checklist.md" ]] && CHECKLIST_GATE="true"
+    if [[ -f "$SPEC_DIR/gates/verify.md" ]] && grep -qE '^status:[[:space:]]*pass' "$SPEC_DIR/gates/verify.md" 2>/dev/null; then VERIFY_PASSED="true"; fi
+    if [[ -f "$SPEC_DIR/gates/closeout.md" ]]; then
+        CLOSEOUT_DECISION=$(grep -m1 -E '^decision:' "$SPEC_DIR/gates/closeout.md" 2>/dev/null | sed -E 's/^decision:[[:space:]]*//; s/[[:space:]]*$//')
+    fi
+    [[ "$VERIFY_REQUIRED" == "true" ]] && VERIFY_PASSED="false"
+    _judge_py="$SCRIPT_DIR/../judge.py"
+    if [[ -f "$_judge_py" ]] && command -v jq >/dev/null 2>&1; then
+        _review_state=""
+        for _py in python3 python; do
+            _review_state=$("$_py" "$_judge_py" review-state --feature-dir "$SPEC_DIR" 2>/dev/null) && [[ -n "$_review_state" ]] && break
+            _review_state=""
+        done
+        if [[ -n "$_review_state" ]] && jq -e 'type == "object"' <<<"$_review_state" >/dev/null 2>&1; then
+            JUDGE_NEEDS_RECHECK=$(jq -r '.needs_recheck // false' <<<"$_review_state")
+            JUDGE_PENDING_DECISIONS=$(jq -r '.pending_decisions // 0' <<<"$_review_state")
+            PLAN_REVISION_COUNT=$(jq -r '.plan_revision_count // 0' <<<"$_review_state")
+            PLAN_CHANGED=$(jq -r '.plan_changed' <<<"$_review_state")
+            TASKS_CHANGED=$(jq -r '.tasks_changed // false' <<<"$_review_state")
+            TASKS_STALE=$(jq -r '.tasks_stale' <<<"$_review_state")
+            PLAN_SPEC_STATE=$(jq -r '.plan_spec_state // "unknown"' <<<"$_review_state")
+            TASKS_PLAN_STATE=$(jq -r '.tasks_plan_state // "unknown"' <<<"$_review_state")
+            JUDGE_INVALIDATED=$(jq -r '(.judge_stale == true) or (.spec_changed == true)' <<<"$_review_state")
+            VERIFY_REQUIRED=$(jq -r '.verify_required // false' <<<"$_review_state")
+            VERIFY_PASSED=$(jq -r '.verify_passed // false' <<<"$_review_state")
+            CLOSEOUT_DECISION=$(jq -r '.closeout_decision // ""' <<<"$_review_state")
+        fi
+    fi
 fi
 
+# Edge routes yield to pending decisions, spec/Judge invalidation and STOP remediation.
+PLANNING_EDGES_ROUTABLE="false"
+if [[ "$JUDGE_GATE" == "false" || ( "$JUDGE_INVALIDATED" != "true" && "$JUDGE_VERDICT" != "STOP" ) ]]; then PLANNING_EDGES_ROUTABLE="true"; fi
+
+# Advisory gates that are required but whose artifact is missing/unmet (never block progress)
+PENDING_GATES=""
+if [[ "$SPEC_EXISTS" == "true" ]]; then
+    [[ "$REQUIRE_CHECKLIST" == "true" && "$CHECKLIST_GATE" == "false" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }checklist"
+    # Planning Review (judge.md) supersedes the separate analyze/critic artifacts: Critic may be not applicable.
+    if [[ "$JUDGE_GATE" == "false" ]]; then
+        [[ "$REQUIRE_ANALYZE" == "true" && "$ANALYZE_GATE" == "false" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }analyze"
+        [[ "$REQUIRE_CRITIC" == "true" && "$CRITIC_GATE" == "false" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }critic"
+    fi
+    [[ "$VERIFY_REQUIRED" == "true" && "$VERIFY_PASSED" == "false" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }verify"
+    [[ "$CLOSEOUT_DECISION" == "not-complete" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }closeout (blocking defects open)"
+fi
+
+QUICKFIX_EXISTS="false"
+QUICKFIX_COMPLETE="false"
+if [[ "$CURRENT_BRANCH" =~ ^QF- || "$CURRENT_BRANCH" =~ ^[0-9][0-9][0-9]-fix- ]]; then
+    QUICKFIX_RECORD="$REPO_ROOT/.devspark.work/quickfixes/$CURRENT_BRANCH.md"
+    if [[ -f "$QUICKFIX_RECORD" ]]; then
+        QUICKFIX_EXISTS="true"
+        if grep -qE '^[[:space:]]*-[[:space:]]*\*\*Completed\*\*:[[:space:]]*[^[:space:]]' "$QUICKFIX_RECORD" 2>/dev/null; then QUICKFIX_COMPLETE="true"; fi
+    fi
+fi
+
+# Best-effort PR + review detection (platform-aware)
+PR_EXISTS="false"
 PR_NUMBER=""
-PR_STATE="none"
-PR_URL=""
-PR_BASE=""
-PR_REVIEW_DECISION=""
-PR_MERGE_STATE=""
-PLATFORM_CLI_AVAILABLE=false
-PLATFORM_AUTHENTICATED=false
-if command -v "$DEVSPARK_PR_CLI" >/dev/null 2>&1; then
-    PLATFORM_CLI_AVAILABLE=true
-    if check_platform_auth; then
-        PLATFORM_AUTHENTICATED=true
-        case "$DEVSPARK_PLATFORM_NAME" in
-            github)
-                PR_JSON="$(gh pr view --json number,state,url,baseRefName,reviewDecision,mergeStateStatus 2>/dev/null || true)"
-                if [[ -n "$PR_JSON" ]] && printf '%s' "$PR_JSON" | jq -e . >/dev/null 2>&1; then
-                    PR_NUMBER="$(printf '%s' "$PR_JSON" | jq -r '.number // empty')"
-                    PR_STATE="$(printf '%s' "$PR_JSON" | jq -r '.state // "none"' | tr '[:upper:]' '[:lower:]')"
-                    PR_URL="$(printf '%s' "$PR_JSON" | jq -r '.url // empty')"
-                    PR_BASE="$(printf '%s' "$PR_JSON" | jq -r '.baseRefName // empty')"
-                    PR_REVIEW_DECISION="$(printf '%s' "$PR_JSON" | jq -r '.reviewDecision // empty' | tr '[:lower:]' '[:upper:]')"
-                    PR_MERGE_STATE="$(printf '%s' "$PR_JSON" | jq -r '.mergeStateStatus // empty' | tr '[:lower:]' '[:upper:]')"
-                fi
-                ;;
-            azdo)
-                PR_JSON="$(az repos pr list --source-branch "$BRANCH" --status all --top 1 --output json 2>/dev/null || true)"
-                if [[ -n "$PR_JSON" ]] && printf '%s' "$PR_JSON" | jq -e . >/dev/null 2>&1; then
-                    PR_NUMBER="$(printf '%s' "$PR_JSON" | jq -r '.[0].pullRequestId // empty')"
-                    PR_STATE="$(printf '%s' "$PR_JSON" | jq -r '.[0].status // "none"' | tr '[:upper:]' '[:lower:]')"
-                    PR_URL="$(printf '%s' "$PR_JSON" | jq -r '.[0].url // empty')"
-                    PR_BASE="$(printf '%s' "$PR_JSON" | jq -r '.[0].targetRefName // empty' | sed 's#^refs/heads/##')"
-                fi
-                ;;
-            gitlab)
-                PR_JSON="$(glab mr view --output json 2>/dev/null || true)"
-                if [[ -n "$PR_JSON" ]] && printf '%s' "$PR_JSON" | jq -e . >/dev/null 2>&1; then
-                    PR_NUMBER="$(printf '%s' "$PR_JSON" | jq -r '.iid // empty')"
-                    PR_STATE="$(printf '%s' "$PR_JSON" | jq -r '.state // "none"' | tr '[:upper:]' '[:lower:]')"
-                    PR_URL="$(printf '%s' "$PR_JSON" | jq -r '.web_url // empty')"
-                    PR_BASE="$(printf '%s' "$PR_JSON" | jq -r '.target_branch // empty')"
-                fi
-                ;;
-        esac
+PR_STATE=""
+if [[ "$HAS_GIT" == "true" ]]; then
+    if [[ "$PLATFORM" == "azdo" ]] && command -v az >/dev/null 2>&1; then
+        IFS=$'\t' read -r NAZ_ORG NAZ_PROJ NAZ_REPO < <(get_azdo_repo_context)
+        AZ_PR_JSON=$(az repos pr list --organization "https://dev.azure.com/$NAZ_ORG" --project "$NAZ_PROJ" --repository "$NAZ_REPO" --source-branch "$CURRENT_BRANCH" --status active --top 1 --output json 2>/dev/null | jq '.[0] // {}' 2>/dev/null || echo '{}')
+        PR_NUMBER=$(echo "$AZ_PR_JSON" | jq -r '.pullRequestId // empty')
+        PR_STATE=$(echo "$AZ_PR_JSON" | jq -r '.status // empty')
+        [[ -n "$PR_NUMBER" ]] && PR_EXISTS="true"
+    elif command -v gh >/dev/null 2>&1; then
+        PR_JSON=$(gh pr view --json number,state 2>/dev/null || echo "")
+        if [[ -n "$PR_JSON" ]]; then
+            PR_NUMBER=$(echo "$PR_JSON" | jq -r '.number // empty' 2>/dev/null || echo "")
+            PR_STATE=$(echo "$PR_JSON" | jq -r '.state // empty' 2>/dev/null || echo "")
+            [[ -n "$PR_NUMBER" ]] && PR_EXISTS="true"
+        fi
     fi
 fi
 
-REVIEW_PATH=""
-REVIEW_STATE="missing"
-REVIEW_OPEN_FINDINGS=0
-if [[ -n "$PR_NUMBER" && -f ".devspark.work/pr-reviews/pr-$PR_NUMBER.md" ]]; then
-    REVIEW_PATH=".devspark.work/pr-reviews/pr-$PR_NUMBER.md"
-    REVIEW_STATE="$(gate_state "$REVIEW_PATH")"
-    REVIEW_OPEN_FINDINGS="$(rg -c '^[[:space:]]*-[[:space:]]+\[ \][[:space:]]+\*\*(C|H|M|L|CON)-[0-9]+' "$REVIEW_PATH" 2>/dev/null || true)"
-    REVIEW_OPEN_FINDINGS="${REVIEW_OPEN_FINDINGS:-0}"
+REVIEW_FILE_EXISTS="false"
+REVIEW_OPEN="false"
+REVIEW_DIR="$REPO_ROOT/.devspark.work/pr-review"
+if [[ -d "$REVIEW_DIR" ]]; then
+    REVIEW_FILE=""
+    if [[ -n "$PR_NUMBER" && -f "$REVIEW_DIR/pr-$PR_NUMBER.md" ]]; then
+        REVIEW_FILE="$REVIEW_DIR/pr-$PR_NUMBER.md"
+    else
+        REVIEW_FILE=$(ls -t "$REVIEW_DIR"/pr-*.md 2>/dev/null | head -1 || echo "")
+    fi
+    if [[ -n "$REVIEW_FILE" && -f "$REVIEW_FILE" ]]; then
+        REVIEW_FILE_EXISTS="true"
+        grep -q "Open" "$REVIEW_FILE" 2>/dev/null && REVIEW_OPEN="true"
+    fi
 fi
 
-RECOMMENDED_COMMAND="none"
-RECOMMENDATION_REASON="The detected workflow is complete."
-ACTION_KIND="complete"
-HUMAN_BOUNDARY="none"
-MANUAL_COMMAND=""
-ORIENTATION_STATE="complete"
+# ---- Recommendation ladder ----
+RECOMMENDED="/devspark-specify"
+STATE="unknown"
+REASON="Describe the work to /devspark-specify and it will route you."
 
-recommend_devspark() {
-    RECOMMENDED_COMMAND="$1"; RECOMMENDATION_REASON="$2"; ORIENTATION_STATE="$3"
-    ACTION_KIND="devspark"; HUMAN_BOUNDARY="none"; MANUAL_COMMAND=""
-}
-recommend_manual() {
-    RECOMMENDED_COMMAND="$1"; RECOMMENDATION_REASON="$2"; ORIENTATION_STATE="$3"
-    ACTION_KIND="manual"; HUMAN_BOUNDARY="$4"; MANUAL_COMMAND="$5"
-}
+if [[ "$CONSTITUTION_EXISTS" == "false" ]]; then
+    RECOMMENDED="/devspark-constitution"
+    STATE="no-constitution"
+    REASON="No project constitution found. Create your principles first so every command has a validation baseline."
+elif [[ "$SPEC_AMBIGUOUS" == "true" ]]; then
+    RECOMMENDED="resolve"
+    STATE="ambiguous-spec"
+    REASON="Branch '$CURRENT_BRANCH' matches more than one spec directory ($SPEC_AMBIGUOUS_MATCHES). Set DEVSPARK_FEATURE to the intended directory name, or remove the duplicate, then re-run /devspark.next."
+elif [[ "$SPEC_EXISTS" == "true" && ( "$JUDGE_VERDICT" == "CONDITIONAL" || "$JUDGE_PENDING_DECISIONS" -gt 0 ) ]]; then
+    RECOMMENDED="/devspark-planning-review"
+    STATE="review-needs-decision"
+    REASON="A human planning decision is pending. Answer it before remediation or implementation, then use /devspark-planning-review --judge-only to record the disposition."
+elif [[ "$IS_DEFAULT_BRANCH" == "true" && "$SPEC_EXISTS" == "false" && "$QUICKFIX_EXISTS" == "false" ]]; then
+    RECOMMENDED="/devspark-specify"
+    STATE="no-active-work"
+    REASON="You're on '$CURRENT_BRANCH' with no active spec or quickfix. Start with /devspark-specify (unsure of size) or /devspark-quickfix (small, contained fix)."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$PLAN_EXISTS" == "false" ]]; then
+    RECOMMENDED="/devspark-plan"
+    STATE="spec-needs-plan"
+    REASON="Spec exists for '$CURRENT_BRANCH' but there's no plan yet. Run /devspark-plan to produce the technical design."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$PLAN_EXISTS" == "true" && "$PLAN_SPEC_STATE" == "stale" && "$PLANNING_EDGES_ROUTABLE" == "true" ]]; then
+    RECOMMENDED="/devspark-plan"
+    STATE="plan-stale-against-spec"
+    REASON="The spec changed in meaning since the plan was produced or last checked. Run /devspark-plan: it checks the existing plan against the current spec and changes only what the spec requires."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$PLAN_EXISTS" == "true" && "$TASKS_EXISTS" == "false" ]]; then
+    RECOMMENDED="/devspark-tasks"
+    STATE="plan-needs-tasks"
+    REASON="Plan exists but there's no task breakdown. Run /devspark-tasks to generate the ordered task list."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$TASKS_PLAN_STATE" == "stale" && "$PLANNING_EDGES_ROUTABLE" == "true" ]]; then
+    RECOMMENDED="/devspark-tasks"
+    STATE="tasks-stale-against-plan"
+    REASON="The plan changed in meaning since the task list was projected. Run /devspark-tasks: it checks the task list against the current plan and re-projects only unchecked work."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$JUDGE_GATE" == "false" && ( "$REQUIRE_ANALYZE" == "true" || "$REQUIRE_CRITIC" == "true" ) ]]; then
+    RECOMMENDED="/devspark-planning-review"
+    STATE="tasks-need-review"
+    REASON="Tasks are ready and this full-spec route requires planning assurance. Run /devspark-planning-review: it runs Analyze, Critic when applicable, and Judge, and returns one planning decision before implementing."
+# Unresolved Planning Review outranks task progress: a finished task list never overrides open assurance.
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$JUDGE_INVALIDATED" == "true" ]]; then
+    RECOMMENDED="/devspark-planning-review"
+    STATE="review-needs-recheck"
+    REASON="The specification or adjudicated child evidence changed. Re-establish planning authority before applying corrections."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$JUDGE_VERDICT" == "STOP" && "$PLAN_REVISION_COUNT" -gt 0 && "$PLAN_CHANGED" == "true" && "$TASKS_STALE" == "true" ]]; then
+    RECOMMENDED="/devspark-tasks"
+    STATE="plan-needs-reprojection"
+    REASON="Plan semantics changed. Re-project unchecked Tasks from the approved Plan and protect completed work before focused review."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$JUDGE_VERDICT" == "STOP" && "$PLAN_REVISION_COUNT" -gt 0 && "$PLAN_CHANGED" == "false" ]]; then
+    RECOMMENDED="/devspark-plan"
+    STATE="review-needs-plan"
+    REASON="Judge assigned an approved Plan correction. Run /devspark-plan in focused revise mode; preserve unrelated decisions and never reset automatically."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$JUDGE_VERDICT" == "STOP" && ( "$PLAN_CHANGED" == "true" || "$TASKS_CHANGED" == "true" || "$REMEDIATION_APPENDED" == "true" || ( "$PLAN_REVISION_COUNT" -gt 0 && "$PLAN_CHANGED" == "null" ) ) ]]; then
+    RECOMMENDED="/devspark-planning-review"
+    STATE="review-needs-recheck"
+    REASON="Correction inputs changed or their provenance is unknown. Re-run /devspark-planning-review for a focused check; changed content does not resolve STOP by itself."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$JUDGE_VERDICT" == "STOP" ]]; then
+    RECOMMENDED="/devspark-tasks"
+    STATE="review-blocked"
+    REASON="Planning review returned STOP. Run /devspark-tasks for validated task-owned corrections only; missing ownership or scope authority must stop for a decision."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$JUDGE_NEEDS_RECHECK" == "true" ]]; then
+    RECOMMENDED="/devspark-planning-review"
+    STATE="review-needs-recheck"
+    REASON="A reviewed artifact changed in a way that invalidates the Planning Review evidence. Re-run /devspark-planning-review: it reuses what is still fresh and rechecks only what changed."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_EXISTS" == "true" && "$TASKS_COMPLETE" == "false" ]]; then
+    RECOMMENDED="/devspark-implement"
+    STATE="tasks-incomplete"
+    REASON="Tasks are defined ($TASKS_DONE/$TASKS_TOTAL complete) but not finished. Run /devspark-implement to execute the remaining tasks."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_COMPLETE" == "true" && "$VERIFY_REQUIRED" == "true" && "$VERIFY_PASSED" == "false" ]]; then
+    RECOMMENDED="/devspark-verify"
+    STATE="implementation-needs-verification"
+    REASON="Implementation tasks are complete; declared Verify modes still need passing evidence. Run /devspark-verify, including its Closeout phase."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_COMPLETE" == "true" && "$CLOSEOUT_DECISION" == "not-complete" ]]; then
+    RECOMMENDED="/devspark-implement"
+    STATE="closeout-not-complete"
+    REASON="Closeout records blocking defects. Resume approved defect handling; any semantic planning change must stop for Plan and explicit authority."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$TASKS_COMPLETE" == "true" && "$VERIFY_REQUIRED" == "true" && "$CLOSEOUT_DECISION" != "complete" ]]; then
+    RECOMMENDED="/devspark-verify"
+    STATE="verification-needs-closeout"
+    REASON="Required proof has passed but Closeout is missing or unresolved. Run /devspark-verify to complete the convergence phase; retain the planning bundle."
+elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "false" && "$SPEC_STATUS" != "Complete" ]]; then
+    RECOMMENDED="/devspark-implement"
+    STATE="quickspec-needs-implement"
+    REASON="A temporary quick-spec exists for '$CURRENT_BRANCH' (Status: ${SPEC_STATUS:-Draft}). Run /devspark-implement to finish its action plan, verify the durable result, and retain the bundle."
+elif [[ "$QUICKFIX_EXISTS" == "true" && "$QUICKFIX_COMPLETE" == "false" && "$PR_EXISTS" == "false" ]]; then
+    RECOMMENDED="/devspark-implement"
+    STATE="quickfix-open"
+    REASON="A temporary quickfix record exists for '$CURRENT_BRANCH'. Run /devspark-implement to finish the change, verify code, tests, and current knowledge, and retain the record."
+elif [[ "$DIRTY" == "true" ]]; then
+    RECOMMENDED="commit"
+    STATE="uncommitted-changes"
+    REASON="You have uncommitted changes on '$CURRENT_BRANCH'. Commit your work (then re-run /devspark.next). If this is a spec route mid-implementation, continue with /devspark-implement."
+elif [[ "$PR_EXISTS" == "false" ]]; then
+    RECOMMENDED="/devspark-create-pr"
+    STATE="ready-for-pr"
+    REASON="Work is committed on '$CURRENT_BRANCH' and no PR exists yet. Open one with /devspark-create-pr (it will publish the branch and let you optionally run /devspark-verify)."
+elif [[ "$PR_EXISTS" == "true" && "$REVIEW_FILE_EXISTS" == "false" ]]; then
+    RECOMMENDED="/devspark-pr-review"
+    STATE="pr-needs-review"
+    REASON="PR #$PR_NUMBER is open but has no review yet. Run /devspark-pr-review to review it against the constitution."
+elif [[ "$REVIEW_FILE_EXISTS" == "true" && "$REVIEW_OPEN" == "true" ]]; then
+    RECOMMENDED="/devspark-address-pr-review"
+    STATE="review-has-open-findings"
+    REASON="PR #$PR_NUMBER has open review findings. Run /devspark-address-pr-review to fix them, then re-review with /devspark-pr-review #$PR_NUMBER re-review."
+elif [[ "$REVIEW_FILE_EXISTS" == "true" && "$BEHIND_TARGET" == "true" ]]; then
+    RECOMMENDED="sync"
+    STATE="behind-target"
+    REASON="Review looks clear but '$CURRENT_BRANCH' is behind '$DEFAULT_BRANCH'. Sync it (merge origin/$DEFAULT_BRANCH in) before merging the PR."
+elif [[ "$REVIEW_FILE_EXISTS" == "true" ]]; then
+    RECOMMENDED="merge"
+    STATE="ready-to-merge"
+    REASON="PR #$PR_NUMBER is reviewed and the branch is in sync. Approve and merge it in your Git portal (GitHub / Azure DevOps)."
+fi
 
-if ! $HAS_GIT; then
-    recommend_manual "none" "DevSpark workflow detection requires a Git repository." "git-required" "repository" "git init"
-elif ! $CONSTITUTION_EXISTS; then
-    recommend_devspark "/devspark.constitution" "No project constitution exists yet; lifecycle work needs current governance first." "constitution-missing"
-    HUMAN_BOUNDARY="governance"
-    MANUAL_COMMAND="/devspark.constitution"
-elif ! $HAS_SPEC; then
-    recommend_devspark "/devspark.specify" "No spec or branch-linked quickfix work package exists for '$BRANCH'." "work-not-started"
-    HUMAN_BOUNDARY="branch"
-    MANUAL_COMMAND="/devspark.specify <describe the requested change>"
-elif [[ "$WORK_KIND" == "spec" && "$HAS_PLAN" == false ]]; then
-    recommend_devspark "/devspark.plan" "The spec exists, but plan.md has not been created." "spec-ready"
-elif [[ "$WORK_KIND" == "spec" && "$HAS_TASKS" == false ]]; then
-    recommend_devspark "/devspark.tasks" "The implementation plan exists, but tasks.md has not been created." "plan-ready"
-elif [[ "$WORK_KIND" == "spec" && "$CHECKLIST_STATE" == "missing" ]]; then
-    recommend_devspark "/devspark.checklist" "The spec requires the checklist gate and no checklist gate result exists." "checklist-required"
-elif [[ "$WORK_KIND" == "spec" && "$CHECKLIST_STATE" == "fail" ]]; then
-    recommend_manual "/devspark.checklist" "The checklist gate is blocking and needs human-guided requirement repair." "checklist-blocked" "gate" "Review $FEATURE_DIR/gates/checklist.md, repair the requirements, then run /devspark.checklist"
-elif [[ "$WORK_KIND" == "spec" && "$ANALYZE_STATE" == "missing" ]]; then
-    recommend_devspark "/devspark.analyze" "Tasks exist, but the required cross-artifact analysis gate has not run." "analyze-required"
-elif [[ "$WORK_KIND" == "spec" && "$ANALYZE_STATE" == "fail" ]]; then
-    recommend_manual "/devspark.analyze" "The analyze gate is blocking and its findings need to be resolved." "analyze-blocked" "gate" "Review $FEATURE_DIR/gates/analyze.md, repair the cited artifacts, then run /devspark.analyze"
-elif [[ "$WORK_KIND" == "spec" && "$CRITIC_STATE" == "missing" ]]; then
-    recommend_devspark "/devspark.critic" "Analysis is complete, but the required adversarial risk gate has not run." "critic-required"
-elif [[ "$WORK_KIND" == "spec" && "$CRITIC_STATE" == "fail" ]]; then
-    recommend_manual "/devspark.critic" "The critic gate is blocking and its risks need a human decision or repair." "critic-blocked" "gate" "Review $FEATURE_DIR/gates/critic.md, repair or acknowledge the risks, then run /devspark.critic"
-elif [[ "$TASKS_INCOMPLETE" -gt 0 || "$TASKS_TOTAL" -eq 0 ]]; then
-    recommend_devspark "/devspark.implement" "$TASKS_INCOMPLETE implementation task(s) remain incomplete." "implementation-ready"
-elif [[ "$WORK_KIND" == "spec" && "$(printf '%s' "$SPEC_STATUS" | tr '[:upper:]' '[:lower:]')" != "complete" ]]; then
-    recommend_devspark "/devspark.implement" "All tasks are checked off, but the spec lifecycle status still needs completion validation." "implementation-finalization"
-elif $GIT_DIRTY; then
-    recommend_manual "git commit" "Implementation is complete, but code/test/knowledge changes are still uncommitted." "commit-required" "commit" "git status --short && git add <code-test-knowledge-files> && git commit -m \"<message>\""
-elif [[ "$BEHIND" -gt 0 ]]; then
-    recommend_manual "git rebase" "The branch is $BEHIND commit(s) behind its upstream and must be synchronized by a human." "sync-required" "sync" "git fetch origin && git rebase $UPSTREAM"
-elif [[ "$AHEAD" -gt 0 ]]; then
-    recommend_manual "git push" "The branch is $AHEAD commit(s) ahead of its upstream; pushing is a shared operation." "push-required" "sync" "git push"
-elif [[ -z "$PR_NUMBER" && -z "$UPSTREAM" ]]; then
-    recommend_manual "git push" "The completed branch has no upstream; publishing it is a shared operation." "push-required" "sync" "git push -u origin $BRANCH"
-elif [[ -z "$PR_NUMBER" && "$PLATFORM_CLI_AVAILABLE" == false ]]; then
-    recommend_manual "/devspark.create-pr" "The platform CLI is unavailable, so PR state cannot be verified or created safely." "platform-cli-required" "shared-service" "Install $DEVSPARK_PR_CLI from $DEVSPARK_PR_CLI_INSTALL_URL, then run /devspark.create-pr"
-elif [[ -z "$PR_NUMBER" && "$PLATFORM_AUTHENTICATED" == false ]]; then
-    recommend_manual "/devspark.create-pr" "The platform CLI is not authenticated, so PR state cannot be verified or created safely." "platform-auth-required" "shared-service" "$DEVSPARK_PR_CLI auth login"
-elif [[ -z "$PR_NUMBER" ]]; then
-    recommend_devspark "/devspark.create-pr" "Implementation is committed and synchronized, but no pull request exists." "pr-required"
-elif [[ "$PR_STATE" == "merged" || "$PR_STATE" == "completed" ]]; then
-    RECOMMENDED_COMMAND="none"; RECOMMENDATION_REASON="PR $PR_NUMBER is merged; this development flow is complete. Release remains a separate human-triggered event."; ORIENTATION_STATE="merged"; ACTION_KIND="complete"
-elif [[ "$PR_STATE" == "closed" || "$PR_STATE" == "abandoned" ]]; then
-    case "$DEVSPARK_PLATFORM_NAME" in
-        github) REOPEN_COMMAND="gh pr reopen $PR_NUMBER" ;;
-        gitlab) REOPEN_COMMAND="glab mr reopen $PR_NUMBER" ;;
-        azdo) REOPEN_COMMAND="Review PR $PR_NUMBER in Azure DevOps" ;;
-    esac
-    recommend_manual "/devspark.create-pr" "PR $PR_NUMBER is closed without merge; reopening or replacing it needs a human decision." "pr-closed" "pull-request" "$REOPEN_COMMAND"
-elif [[ "$PR_MERGE_STATE" == "BEHIND" ]]; then
-    recommend_manual "sync branch" "PR $PR_NUMBER is behind '$PR_BASE'; review cannot proceed until a human synchronizes it." "pr-sync-required" "sync" "gh pr update-branch $PR_NUMBER"
-elif [[ "$PR_REVIEW_DECISION" == "CHANGES_REQUESTED" || "$REVIEW_OPEN_FINDINGS" -gt 0 || "$REVIEW_STATE" == "fail" ]]; then
-    recommend_manual "/devspark.address-pr-review" "PR $PR_NUMBER has unresolved review findings; the repair flow may create commits." "review-findings" "commit" "/devspark.address-pr-review $PR_NUMBER"
-elif [[ "$REVIEW_STATE" == "missing" || "$REVIEW_STATE" == "unknown" ]]; then
-    recommend_devspark "/devspark.pr-review" "PR $PR_NUMBER exists, but no current local PR-review gate result is available." "review-required"
+# Surface still-open advisory gates without blocking the primary recommendation.
+if [[ -n "$PENDING_GATES" && ! "$RECOMMENDED" =~ (analyze|critic|checklist|verify|constitution|planning-review) ]]; then
+    REASON="$REASON Open advisory gates still recommended before merge: $PENDING_GATES."
+fi
+
+if [[ "$JSON_MODE" == true ]]; then
+    cat <<EOF
+{
+  "REPO_ROOT": "$REPO_ROOT",
+  "REPO_NAME": "$REPO_NAME",
+  "PLATFORM": "$PLATFORM",
+  "ASSISTANT_NAME": "$ASSISTANT_NAME",
+  "GIT_USER": "$GIT_USER",
+  "HAS_GIT": $HAS_GIT,
+  "CONSTITUTION_EXISTS": $CONSTITUTION_EXISTS,
+  "CURRENT_BRANCH": "$CURRENT_BRANCH",
+  "DEFAULT_BRANCH": "$DEFAULT_BRANCH",
+  "IS_DEFAULT_BRANCH": $IS_DEFAULT_BRANCH,
+  "DIRTY": $DIRTY,
+  "HAS_REMOTE": $HAS_REMOTE,
+  "BRANCH_PUSHED": $BRANCH_PUSHED,
+  "BEHIND_TARGET": $BEHIND_TARGET,
+  "SPEC_EXISTS": $SPEC_EXISTS,
+  "SPEC_FEATURE": "$SPEC_FEATURE",
+  "SPEC_AMBIGUOUS": $SPEC_AMBIGUOUS,
+  "IS_FULL_SPEC": $IS_FULL_SPEC,
+  "SPEC_STATUS": "$SPEC_STATUS",
+  "PLAN_EXISTS": $PLAN_EXISTS,
+  "TASKS_EXISTS": $TASKS_EXISTS,
+  "TASKS_TOTAL": $TASKS_TOTAL,
+  "TASKS_DONE": $TASKS_DONE,
+  "TASKS_COMPLETE": $TASKS_COMPLETE,
+  "VERIFY_REQUIRED": $VERIFY_REQUIRED,
+  "VERIFY_PASSED": $VERIFY_PASSED,
+  "CLOSEOUT_DECISION": "$CLOSEOUT_DECISION",
+  "JUDGE_VERDICT": "$JUDGE_VERDICT",
+  "JUDGE_NEEDS_RECHECK": $JUDGE_NEEDS_RECHECK,
+  "PLAN_SPEC_STATE": "$PLAN_SPEC_STATE",
+  "TASKS_PLAN_STATE": "$TASKS_PLAN_STATE",
+  "PENDING_GATES": $(echo "$PENDING_GATES" | jq -R -s '.' 2>/dev/null || echo '""'),
+  "QUICKFIX_EXISTS": $QUICKFIX_EXISTS,
+  "QUICKFIX_COMPLETE": $QUICKFIX_COMPLETE,
+  "PR_EXISTS": $PR_EXISTS,
+  "PR_NUMBER": "$PR_NUMBER",
+  "PR_STATE": "$PR_STATE",
+  "REVIEW_FILE_EXISTS": $REVIEW_FILE_EXISTS,
+  "REVIEW_OPEN": $REVIEW_OPEN,
+  "RECOMMENDED_COMMAND": "$RECOMMENDED",
+  "STATE": "$STATE",
+  "REASON": $(echo "$REASON" | jq -R -s '.')
+}
+EOF
 else
-    case "$DEVSPARK_PLATFORM_NAME" in
-        github) MERGE_COMMAND="gh pr merge $PR_NUMBER" ;;
-        azdo) MERGE_COMMAND="az repos pr update --id $PR_NUMBER --status completed" ;;
-        gitlab) MERGE_COMMAND="glab mr merge $PR_NUMBER" ;;
-    esac
-    recommend_manual "merge PR" "PR $PR_NUMBER has a non-blocking review result; merging is a human-owned shared operation." "merge-ready" "merge" "$MERGE_COMMAND"
+    echo "Next-Step Router"
+    echo "================"
+    echo "Assistant: $ASSISTANT_NAME"
+    echo "Repo: $REPO_NAME ($PLATFORM)"
+    echo "Branch: $CURRENT_BRANCH (default: $DEFAULT_BRANCH)"
+    echo "State: $STATE"
+    echo "Recommended: $RECOMMENDED"
+    echo "Reason: $REASON"
 fi
-
-jq -n \
-    --arg repo_root "$REPO_ROOT" \
-    --arg branch "$BRANCH" \
-    --arg platform "$DEVSPARK_PLATFORM_NAME" \
-    --arg work_kind "$WORK_KIND" \
-    --arg feature_dir "$FEATURE_DIR" \
-    --arg spec_status "$SPEC_STATUS" \
-    --arg checklist_state "$CHECKLIST_STATE" \
-    --arg analyze_state "$ANALYZE_STATE" \
-    --arg critic_state "$CRITIC_STATE" \
-    --arg upstream "$UPSTREAM" \
-    --arg pr_number "$PR_NUMBER" \
-    --arg pr_state "$PR_STATE" \
-    --arg pr_url "$PR_URL" \
-    --arg review_state "$REVIEW_STATE" \
-    --arg orientation_state "$ORIENTATION_STATE" \
-    --arg recommended_command "$RECOMMENDED_COMMAND" \
-    --arg recommendation_reason "$RECOMMENDATION_REASON" \
-    --arg action_kind "$ACTION_KIND" \
-    --arg human_boundary "$HUMAN_BOUNDARY" \
-    --arg manual_command "$MANUAL_COMMAND" \
-    --argjson has_git "$HAS_GIT" \
-    --argjson git_dirty "$GIT_DIRTY" \
-    --argjson has_spec "$HAS_SPEC" \
-    --argjson has_plan "$HAS_PLAN" \
-    --argjson has_tasks "$HAS_TASKS" \
-    --argjson tasks_total "$TASKS_TOTAL" \
-    --argjson tasks_complete "$TASKS_COMPLETE" \
-    --argjson tasks_incomplete "$TASKS_INCOMPLETE" \
-    --argjson ahead "$AHEAD" \
-    --argjson behind "$BEHIND" \
-    --argjson review_open_findings "$REVIEW_OPEN_FINDINGS" \
-    '{
-        REPO_ROOT: $repo_root,
-        BRANCH: $branch,
-        PLATFORM: $platform,
-        HAS_GIT: $has_git,
-        GIT_DIRTY: $git_dirty,
-        UPSTREAM: $upstream,
-        AHEAD: $ahead,
-        BEHIND: $behind,
-        WORK_KIND: $work_kind,
-        FEATURE_DIR: $feature_dir,
-        HAS_SPEC: $has_spec,
-        HAS_PLAN: $has_plan,
-        HAS_TASKS: $has_tasks,
-        SPEC_STATUS: $spec_status,
-        TASKS: {total: $tasks_total, complete: $tasks_complete, incomplete: $tasks_incomplete},
-        GATES: {checklist: $checklist_state, analyze: $analyze_state, critic: $critic_state},
-        PR: {number: $pr_number, state: $pr_state, url: $pr_url},
-        REVIEW: {state: $review_state, open_findings: $review_open_findings},
-        ORIENTATION_STATE: $orientation_state,
-        RECOMMENDED_COMMAND: $recommended_command,
-        RECOMMENDATION_REASON: $recommendation_reason,
-        ACTION_KIND: $action_kind,
-        HUMAN_BOUNDARY: $human_boundary,
-        MANUAL_COMMAND: $manual_command,
-        READ_ONLY: true
-    }'

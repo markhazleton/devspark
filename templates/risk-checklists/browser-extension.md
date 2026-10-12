@@ -1,5 +1,7 @@
 # Browser Extension Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Manifest & Permissions
 
 - [ ] **MV3-compliant manifest** (service worker, no remote code execution)

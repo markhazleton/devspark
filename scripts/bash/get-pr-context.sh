@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Extract PR context for review
 #
 # This script fetches Pull Request information from GitHub and provides it
@@ -26,7 +27,6 @@ fi
 
 # Load platform adapter (sets DEVSPARK_PLATFORM_NAME, DEVSPARK_PR_CLI, etc.)
 source "$SCRIPT_DIR/platform.sh"
-source "$SCRIPT_DIR/common.sh"
 
 # Multi-app support
 parse_app_context "$@" 2>/dev/null || true
@@ -145,18 +145,18 @@ main() {
     if [[ -z "$PR_NUMBER" ]]; then
         if ! PR_NUMBER=$(detect_pr_number); then
             log_error "Unable to detect PR number" \
-                "Please provide PR number explicitly: /devspark.pr-review #123"
+                "Please provide PR number explicitly: /devspark-pr-review #123"
             exit 1
         fi
     fi
-    
+
     # Validate PR number is numeric
     if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
         log_error "Invalid PR number: $PR_NUMBER" \
             "PR number must be a positive integer"
         exit 1
     fi
-    
+
     # Check if platform CLI is available
     local cli_cmd="$DEVSPARK_PR_CLI"
     if ! command -v "$cli_cmd" &>/dev/null; then
@@ -319,17 +319,51 @@ main() {
     # Apply file sampling
     local files_changed_total
     files_changed_total=$(echo "$files_changed_json" | jq 'length')
+    local all_files_json="$files_changed_json"
     local files_changed_truncated="false"
     if [[ "$files_changed_total" -gt "$file_sample_limit" ]]; then
         files_changed_json=$(echo "$files_changed_json" | jq -c ".[0:$file_sample_limit]")
         files_changed_truncated="true"
     fi
 
+    # Compute which changed files match no .knowledge/ appliesTo pattern (PRD5 hint, non-blocking)
+    local unmapped_files_json="[]"
+    local unmapped_files_available="false"
+    local knowledge_engine=""
+    knowledge_engine=$(resolve_knowledge_engine "$REPO_ROOT")
+    if [[ -n "$knowledge_engine" && "$files_changed_total" -gt 0 ]]; then
+        mapfile -t _changed_file_args < <(echo "$files_changed_json" | jq -r '.[]')
+        # An unresolved interpreter must be reported rather than silently reducing this signal
+        # to "nothing unmapped".
+        local python_bin
+        python_bin=$(command -v python3 || command -v python || true)
+        if [[ -n "$python_bin" ]]; then
+            if unmapped_files_json=$("$python_bin" "$knowledge_engine" --repo-root "$REPO_ROOT" --unmapped-files "${_changed_file_args[@]}" 2>/dev/null); then
+                unmapped_files_available="true"
+            else
+                unmapped_files_json="[]"
+            fi
+        fi
+    fi
+
+    # Deterministic risk digest (tiers, flags, score); null when the helper or Python is unavailable
+    local risk_json="null"
+    local risk_engine="$SCRIPT_DIR/../pr-risk.py"
+    if [[ -f "$risk_engine" && "$files_changed_total" -gt 0 ]]; then
+        local risk_python
+        risk_python=$(command -v python3 || command -v python || true)
+        if [[ -n "$risk_python" ]]; then
+            mapfile -t _risk_file_args < <(echo "$all_files_json" | jq -r '.[]')
+            local risk_out risk_range=()
+            if [[ -n "$source_branch" && -n "$target_branch" ]]; then risk_range=(--range "origin/$target_branch...origin/$source_branch"); fi
+            if risk_out=$("$risk_python" "$risk_engine" --repo-root "$REPO_ROOT" --lines-added "$lines_added" --lines-deleted "$lines_deleted" ${risk_range[@]+"${risk_range[@]}"} "${_risk_file_args[@]}" 2>/dev/null) && [[ -n "$risk_out" ]]; then
+                risk_json="$risk_out"
+            fi
+        fi
+    fi
+
     # Check for constitution
     local constitution_path="$REPO_ROOT/.knowledge/governance/constitution.md"
-    if [[ ! -f "$constitution_path" && -f "$REPO_ROOT/.knowledge/governance/constitution.md" ]]; then
-        constitution_path="$REPO_ROOT/.knowledge/governance/constitution.md"
-    fi
     local constitution_exists="false"
     if [[ -f "$constitution_path" ]]; then
         constitution_exists="true"
@@ -375,13 +409,14 @@ main() {
     fi
 
     # Prepare review directory
-    local review_dir="$REPO_ROOT/.devspark.work/pr-reviews"
+    local review_dir="$REPO_ROOT/.devspark.work/pr-review"
 
     # Build JSON output
     if [[ "$JSON_MODE" == true ]]; then
         cat <<EOF
 {
   "REPO_ROOT": "$REPO_ROOT",
+  "DEVSPARK_VERSION": $(get_devspark_version "$REPO_ROOT" | jq -R .),
   "PR_CONTEXT": {
     "enabled": true,
     "pr_number": $pr_number_int,
@@ -396,6 +431,8 @@ main() {
     "files_changed": $files_changed_json,
     "files_changed_total": $files_changed_total,
     "files_changed_truncated": $files_changed_truncated,
+    "unmapped_files": $unmapped_files_json,
+    "unmapped_files_available": $unmapped_files_available,
     "lines_added": $lines_added,
     "lines_deleted": $lines_deleted,
     "created_at": $(echo "$created_at" | jq -R .),
@@ -404,10 +441,10 @@ main() {
     "file_sample_limit": $file_sample_limit,
     "include_all_files": false,
     "merge_state_status": "$merge_state_status",
-    "is_behind_target": $is_behind_target
+    "is_behind_target": $is_behind_target,
+    "risk": $risk_json
   },
   "CONSTITUTION_PATH": "$constitution_path",
-  "KNOWLEDGE_ENGINE": $(knowledge_engine_json "$REPO_ROOT"),
   "CONSTITUTION_EXISTS": $constitution_exists,
   "REVIEW_DIR": "$review_dir",
   "SPEC_LIFECYCLE": {

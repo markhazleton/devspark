@@ -1,0 +1,18 @@
+# Top navigation — five entries. Each section folder carries its own toc.yml,
+# which the docfx modern template renders as the left-sidebar secondary
+# navigation for that section. The homepage doubles as the command reference.
+
+- name: Home
+  href: index.md
+
+- name: Get Started
+  href: get-started/
+
+- name: Guides
+  href: guides/
+
+- name: Release Notes
+  href: releases.md
+
+- name: Why DevSpark
+  href: why/

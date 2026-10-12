@@ -1,5 +1,7 @@
 # Web Service Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 Applies when archetype = `web-service`. Pair with the relevant stack file (`python-fastapi.md`, `node-express.md`, etc.).
 
 ## Transport & Edge

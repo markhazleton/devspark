@@ -1,0 +1,160 @@
+{
+  "corpus_version": 1,
+  "purpose": "Calibration set for the shared work-item review standard. The standard is correct when it reproduces every expected verdict vector below.",
+  "dimensions": [
+    "problem_statement",
+    "user_value",
+    "acceptance_criteria",
+    "scope",
+    "dependencies"
+  ],
+  "cases": [
+    {
+      "id": "WI-CAL-001",
+      "intent": "Passes every dimension. This is the baseline the failing cases are perturbed from, so a standard that fails this case is over-strict rather than the item being bad.",
+      "item": {
+        "work_item_type": "User Story",
+        "title": "Nightly export job fails silently when the upstream feed is unavailable",
+        "description": "Problem: The export job exits zero when the upstream feed returns no rows, so an unavailable feed is indistinguishable from an empty one. Operations discovers the missing export the next morning, after downstream reconciliation has already consumed the stale extract.\n\nValue: Operations stops spending the first hour of roughly one morning in ten reconstructing which downstream reports read stale data, and reconciliation stops producing figures nobody can trust.\n\nScope: Covers the nightly export job and the guard that reconciliation applies before it starts. Does not cover the upstream feed's own availability, the retry policy for transient network failures, or the weekly export, all of which are tracked separately.\n\nDependencies: Requires the feed-health endpoint delivered in the platform telemetry work to distinguish unavailable from empty. No other blocking dependency.",
+        "acceptance_criteria": "1. When the upstream feed is unavailable, the job exits non-zero and emits a failure event naming the feed and the run timestamp.\n2. When the upstream feed is available and legitimately returns zero rows, the job exits zero and emits a normal completion event.\n3. Downstream reconciliation refuses to start when the most recent export run ended in failure, and names that run in its refusal message.\n4. An operator can tell the two zero-row outcomes apart from the emitted events alone, without reading the job log.",
+        "tags": ["export", "reliability"]
+      },
+      "expected": {
+        "problem_statement": "pass",
+        "user_value": "pass",
+        "acceptance_criteria": "pass",
+        "scope": "pass",
+        "dependencies": "pass"
+      },
+      "expected_deficiencies": {}
+    },
+    {
+      "id": "WI-CAL-002",
+      "intent": "Fails problem_statement only. The item opens with a chosen solution and never says what goes wrong today, which is the most common real-world defect.",
+      "item": {
+        "work_item_type": "User Story",
+        "title": "Add a Redis cache in front of the provider directory lookup",
+        "description": "Problem: We should add Redis in front of the provider directory lookup.\n\nValue: Directory lookups stop dominating the page-render budget on the scheduling screen, which is the slowest screen in the application and the one staff use most.\n\nScope: Covers the directory lookup path and its cache invalidation. Does not cover the directory's write path, the search index, or any other consumer of the directory service.\n\nDependencies: Requires the shared Redis instance already provisioned for session state. No other blocking dependency.",
+        "acceptance_criteria": "1. A repeated directory lookup within the cache window is served without a call to the directory service.\n2. A directory record updated through the write path is no longer served from cache within thirty seconds.\n3. A cache outage degrades to direct lookups rather than failing the request.",
+        "tags": ["performance"]
+      },
+      "expected": {
+        "problem_statement": "fail",
+        "user_value": "pass",
+        "acceptance_criteria": "pass",
+        "scope": "pass",
+        "dependencies": "pass"
+      },
+      "expected_deficiencies": {
+        "problem_statement": "The named deficiency must identify that the item states a solution instead of the problem, and must reference the description's Problem section."
+      }
+    },
+    {
+      "id": "WI-CAL-003",
+      "intent": "Fails user_value only. The benefit is asserted in the abstract with no beneficiary, so nobody can decide whether the work is worth scheduling.",
+      "item": {
+        "work_item_type": "User Story",
+        "title": "Audit log entries are written without the acting user when a request arrives through the batch gateway",
+        "description": "Problem: Requests that arrive through the batch gateway carry a service principal rather than an end user, and the audit writer records the principal. Any review of who changed a record therefore stops at the gateway and cannot go further.\n\nValue: This is a good improvement and follows best practice.\n\nScope: Covers the batch gateway's request path and the audit writer's actor resolution. Does not cover the interactive gateway, which already records the end user, nor the audit retention policy.\n\nDependencies: Requires the batch gateway to forward the originating user, which the gateway team has confirmed is already present on the inbound envelope.",
+        "acceptance_criteria": "1. An audit entry written for a batch-gateway request names the originating end user, not the service principal.\n2. A batch request with no originating user is rejected at the gateway rather than written with a missing actor.\n3. Existing interactive-gateway audit entries are unchanged.",
+        "tags": ["audit", "compliance"]
+      },
+      "expected": {
+        "problem_statement": "pass",
+        "user_value": "fail",
+        "acceptance_criteria": "pass",
+        "scope": "pass",
+        "dependencies": "pass"
+      },
+      "expected_deficiencies": {
+        "user_value": "The named deficiency must identify that no beneficiary and no consequence of not doing the work are stated, and must reference the description's Value section."
+      }
+    },
+    {
+      "id": "WI-CAL-004",
+      "intent": "Fails acceptance_criteria only. The criteria are subjective, so two reviewers can disagree about whether the item is done.",
+      "item": {
+        "work_item_type": "User Story",
+        "title": "Scheduling screen becomes unresponsive when a clinic has more than two hundred open slots",
+        "description": "Problem: The scheduling screen renders every open slot on load. Clinics above roughly two hundred open slots take long enough to render that staff click through to a second screen before the first finishes, and the resulting double submission creates duplicate holds.\n\nValue: Front-desk staff at the eleven largest clinics stop creating duplicate holds, which today are cleaned up manually at the end of each day.\n\nScope: Covers the slot list rendering and the submit guard on the scheduling screen. Does not cover the slot-generation job, the clinic configuration screen, or the duplicate-hold cleanup process, which remains as a safety net.\n\nDependencies: None blocking.",
+        "acceptance_criteria": "1. The scheduling screen should feel fast.\n2. Duplicate holds should be rare.\n3. The page works well for large clinics.",
+        "tags": ["performance", "scheduling"]
+      },
+      "expected": {
+        "problem_statement": "pass",
+        "user_value": "pass",
+        "acceptance_criteria": "fail",
+        "scope": "pass",
+        "dependencies": "pass"
+      },
+      "expected_deficiencies": {
+        "acceptance_criteria": "The named deficiency must identify that the criteria cannot be objectively evaluated, and must reference the acceptance_criteria field."
+      }
+    },
+    {
+      "id": "WI-CAL-005",
+      "intent": "Fails scope only. The item is open-ended, so it can absorb unrelated work and never finish.",
+      "item": {
+        "work_item_type": "User Story",
+        "title": "Export job retries transient upstream failures instead of aborting the run",
+        "description": "Problem: A single transient upstream timeout aborts the whole nightly export, and the run is not retried until the following night. Operations reruns it by hand, typically losing half a business day of downstream freshness.\n\nValue: Operations stops hand-running the export after transient failures, which happened nine times last quarter and each time delayed downstream reporting into the afternoon.\n\nScope: Covers retries, and anything else related to making the export pipeline more robust as we find it.\n\nDependencies: None blocking.",
+        "acceptance_criteria": "1. A transient upstream failure is retried with backoff up to a configured attempt limit before the run is abandoned.\n2. A non-transient failure is not retried and fails the run immediately.\n3. Each retry attempt is visible as a distinct event naming the attempt number and the failure that triggered it.\n4. Exhausting the attempt limit produces the same failure outcome the run produces today.",
+        "tags": ["export", "reliability"]
+      },
+      "expected": {
+        "problem_statement": "pass",
+        "user_value": "pass",
+        "acceptance_criteria": "pass",
+        "scope": "fail",
+        "dependencies": "pass"
+      },
+      "expected_deficiencies": {
+        "scope": "The named deficiency must identify that the scope has no boundary and states no exclusions, and must reference the description's Scope section."
+      }
+    },
+    {
+      "id": "WI-CAL-006",
+      "intent": "Fails dependencies only. An unnamed blocking dependency cannot be sequenced, which is the defect that most often surfaces mid-sprint.",
+      "item": {
+        "work_item_type": "User Story",
+        "title": "Provider search returns retired providers alongside active ones",
+        "description": "Problem: Provider search matches on the directory record without filtering on status, so retired providers appear in results. Staff book against them and the appointment is rejected later at check-in, after the patient has already arrived.\n\nValue: Front-desk staff stop booking appointments that fail at check-in, which currently affects a small but steady number of patients each week and always surfaces at the worst moment.\n\nScope: Covers the provider search query and its result filter. Does not cover the directory's status field itself, the retirement workflow, or historical appointments already booked against retired providers.\n\nDependencies: Blocked on the upstream work that has to land first.",
+        "acceptance_criteria": "1. A provider whose directory status is retired does not appear in search results.\n2. A provider retired after an appointment was booked does not have that appointment altered.\n3. A provider returning from retired to active appears in search results again without a reindex.",
+        "tags": ["search", "directory"]
+      },
+      "expected": {
+        "problem_statement": "pass",
+        "user_value": "pass",
+        "acceptance_criteria": "pass",
+        "scope": "pass",
+        "dependencies": "fail"
+      },
+      "expected_deficiencies": {
+        "dependencies": "The named deficiency must identify that the blocking dependency is referred to without being named, and must reference the description's Dependencies section."
+      }
+    },
+    {
+      "id": "WI-CAL-007",
+      "intent": "Fails three dimensions at once. Proves the standard reports every failing dimension rather than stopping at the first.",
+      "item": {
+        "work_item_type": "User Story",
+        "title": "Improve the reporting module",
+        "description": "Problem: The reporting module needs work.\n\nValue: It would be better.\n\nScope: Covers the report list screen and the export button on it. Does not cover the scheduled-report mailer or the report definition editor.\n\nDependencies: None blocking.",
+        "acceptance_criteria": "1. Reporting is improved.",
+        "tags": ["reporting"]
+      },
+      "expected": {
+        "problem_statement": "fail",
+        "user_value": "fail",
+        "acceptance_criteria": "fail",
+        "scope": "pass",
+        "dependencies": "pass"
+      },
+      "expected_deficiencies": {
+        "problem_statement": "The named deficiency must identify that no concrete problem is described.",
+        "user_value": "The named deficiency must identify that no beneficiary and no consequence are stated.",
+        "acceptance_criteria": "The named deficiency must identify that the single criterion restates the title and cannot be objectively evaluated."
+      }
+    }
+  ]
+}

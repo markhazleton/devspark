@@ -1,15 +1,16 @@
 #!/usr/bin/env pwsh
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 #requires -Version 7.0
 # Helper script for /devspark.address-pr-review
 # -PrId: parse review file and emit open findings JSON
-# -Gate: enforce staged-path isolation for code commits
+# -Gate: enforce staged-path isolation for code-only or review-only commits
 
 param(
     [Parameter()]
     [string]$PrId,
 
     [Parameter()]
-    [ValidateSet('code-only')]
+    [ValidateSet('code-only', 'review-only')]
     [string]$Gate,
 
     [Parameter()]
@@ -34,7 +35,7 @@ function Get-StagedPaths {
 
 function Test-IsReviewPath {
     param([string]$Path)
-    return $Path -match '^\.devspark\.work/'
+    return $Path -match '^\.devspark.work/pr-review/pr-.*\.md$'
 }
 
 function Write-GateFailure {
@@ -59,7 +60,14 @@ if ($Gate) {
     if ($Gate -eq 'code-only') {
         $reviewStaged = @($staged | Where-Object { Test-IsReviewPath $_ })
         if ($reviewStaged.Count -gt 0) {
-            Write-GateFailure -Message 'Code commit gate failed. Ephemeral work files must not be staged.' -OffendingPaths $reviewStaged
+            Write-GateFailure -Message 'Code commit gate failed. Review files must not be staged for code-only commits.' -OffendingPaths $reviewStaged
+        }
+    }
+
+    if ($Gate -eq 'review-only') {
+        $nonReviewStaged = @($staged | Where-Object { -not (Test-IsReviewPath $_) })
+        if ($nonReviewStaged.Count -gt 0) {
+            Write-GateFailure -Message 'Review commit gate failed. Only PR review markdown files may be staged.' -OffendingPaths $nonReviewStaged
         }
     }
 
@@ -70,7 +78,7 @@ if ($Gate) {
 }
 
 if (-not $PrId) {
-    Write-Error 'DevSpark: Provide -PrId <N> or -Gate code-only.'
+    Write-Error 'DevSpark: Provide -PrId <N> or -Gate <code-only|review-only>.'
     exit 1
 }
 
@@ -81,7 +89,7 @@ if ($normalizedPrId -notmatch '^\d+$') {
 }
 
 $repoRoot = Get-RepoRoot
-$reviewFile = Join-Path $repoRoot ".devspark.work/pr-reviews/pr-$normalizedPrId.md"
+$reviewFile = Join-Path $repoRoot ".devspark.work/pr-review/pr-$normalizedPrId.md"
 
 if (-not (Test-Path -LiteralPath $reviewFile)) {
     Write-Error "DevSpark: Review file not found: $reviewFile"
@@ -90,27 +98,78 @@ if (-not (Test-Path -LiteralPath $reviewFile)) {
 
 $lines = Get-Content -LiteralPath $reviewFile -Encoding utf8
 $openFindings = New-Object System.Collections.Generic.List[object]
+$section = ''
+$contrary = "(accepted|deferred|waived|withdrawn|wontfix|won't fix)"
 
+# Auto eligibility comes from status, severity and blocking evidence; an ID prefix alone never grants it.
 for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
-    # Severity prefixes mirror /devspark.pr-review finding IDs: C, H, M, L, CON.
-    if ($line -match '^\s*-\s*\[\s\]\s+\*\*((C|H|M|L|CON)-\d{2})\*\*') {
+    if ($line -match '^#+\s+(.*)$') {
+        $section = $matches[1]
+        continue
+    }
+    if ($line -match '^\s*-\s*\[\s\]\s+\*\*((C|H|M|L|CON|PRD\d+)-\d{2,})\*\*') {
         $findingId = $matches[1]
-        $severity = $matches[2]
+        $severity = if ($matches[2] -like 'PRD*') { 'PRD' } else { $matches[2] }
+
+        $status = 'open'
+        $row = $lines | Where-Object { $_ -match ('^\|\s*' + [regex]::Escape($findingId) + '\s*\|') } | Select-Object -Last 1
+        if ($row) {
+            $statusCell = ($row -split '\|')[2].ToLowerInvariant()
+            if ($statusCell -match 'resolved|withdrawn') { $status = 'closed' }
+            elseif ($statusCell -match 'partial') { $status = 'partial' }
+        }
+
+        $sectionLc = $section.ToLowerInvariant()
+        $blocking = ($severity -eq 'C') -or ($sectionLc -match 'blocking' -and $sectionLc -notmatch 'non-blocking')
+
+        $route = 'report'
+        $eligible = $false
+        if ($severity -eq 'CON') {
+            $route = 'evolve-constitution'
+            $reason = 'Constitution findings route to /devspark-evolve-constitution, not to product code.'
+        }
+        elseif ($status -ne 'open') {
+            $reason = "Status is $status; a human decides whether it still needs work."
+        }
+        elseif ($line.ToLowerInvariant() -match $contrary) {
+            $reason = 'The finding records an accepted, deferred or withdrawn disposition.'
+        }
+        elseif ($severity -in @('C', 'H')) {
+            $route = 'auto'; $eligible = $true; $reason = "Open $severity finding."
+        }
+        elseif ($severity -eq 'PRD' -and $blocking) {
+            $route = 'auto'; $eligible = $true; $reason = 'Open blocking PR-delta finding.'
+        }
+        elseif ($severity -eq 'PRD') {
+            $reason = 'PR-delta finding without blocking evidence.'
+        }
+        else {
+            $reason = 'Ordinary Medium or Low findings are report-only.'
+        }
+
         $openFindings.Add([PSCustomObject]@{
             id = $findingId
             severity = $severity
             line_number = $i + 1
             line = $line.Trim()
+            section = $section
+            status = $status
+            blocking = [bool]$blocking
+            auto_eligible = $eligible
+            route = $route
+            reason = $reason
         })
     }
 }
 
+$autoCount = @($openFindings | Where-Object { $_.auto_eligible }).Count
 $result = [PSCustomObject]@{
     pr_id = [int]$normalizedPrId
     review_file = $reviewFile
     open_findings = $openFindings
     open_count = $openFindings.Count
+    auto_eligible_count = $autoCount
 }
 
 if ($Json) {
@@ -119,7 +178,8 @@ if ($Json) {
 else {
     Write-Output "Review file: $reviewFile"
     Write-Output "Open findings: $($openFindings.Count)"
+    Write-Output "Auto-eligible findings: $autoCount"
     foreach ($finding in $openFindings) {
-        Write-Output "- $($finding.id) (line $($finding.line_number))"
+        Write-Output "- $($finding.id) [$($finding.route)]"
     }
 }

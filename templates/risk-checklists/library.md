@@ -1,5 +1,7 @@
 # Library / SDK Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Public API Surface
 
 - [ ] **Public surface is documented and intentional** — internal symbols are non-exported / `internal` / `pub(crate)`

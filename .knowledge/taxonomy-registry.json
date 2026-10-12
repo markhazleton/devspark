@@ -1,0 +1,48 @@
+{
+  "$schema": "../templates/schemas/taxonomy-registry.schema.json",
+  "mappings": [
+    { "pathPattern": ".knowledge/architecture/**", "nodeType": "architecture" },
+    { "pathPattern": ".knowledge/governance/**", "nodeType": "governance" },
+    { "pathPattern": ".knowledge/guides/**", "nodeType": "authoritative-reference" },
+    { "pathPattern": ".knowledge/tooling/**", "nodeType": "authoritative-reference" },
+    { "pathPattern": ".knowledge/reference/**", "nodeType": "reference-data" },
+    {
+      "pathPattern": ".knowledge/patterns/**",
+      "nodeType": "engineering-pattern"
+    },
+    {
+      "pathPattern": ".knowledge/operations/**",
+      "nodeType": "operations-runbook"
+    },
+    {
+      "pathPattern": ".devspark.work/specs/**",
+      "workProductType": "planning",
+      "lifecycle": "delete-after-verification"
+    },
+    {
+      "pathPattern": ".devspark.work/quickfixes/**",
+      "workProductType": "planning",
+      "lifecycle": "delete-after-verification"
+    },
+    {
+      "pathPattern": ".devspark.work/pr-review/**",
+      "workProductType": "review",
+      "lifecycle": "archive-on-release"
+    },
+    {
+      "pathPattern": ".devspark.work/audit/**",
+      "workProductType": "audit",
+      "lifecycle": "archive-on-release"
+    },
+    {
+      "pathPattern": ".devspark.work/metrics/**",
+      "workProductType": "telemetry",
+      "lifecycle": "archive-on-release"
+    },
+    {
+      "pathPattern": ".devspark.work/telemetry/**",
+      "workProductType": "telemetry",
+      "lifecycle": "archive-on-release"
+    }
+  ]
+}

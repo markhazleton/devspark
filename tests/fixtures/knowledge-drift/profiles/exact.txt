@@ -1,0 +1,2 @@
+Reference fixture: exact-text-v1 compares this file byte-for-byte (line endings normalized).
+Any change to this line, including whitespace, is drift under exact-text-v1.

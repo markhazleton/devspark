@@ -1,10 +1,12 @@
-name: shim-drift
+name: skill-drift
 
 on:
   pull_request:
     paths:
       - "templates/commands/**"
-      - "templates/prompts/atomic/**"
+      - "templates/consumer-skills/**"
+      - ".github/skills/**"
+      - "eng/skills/**"
       - "scripts/powershell/generate-atomic-shims.ps1"
       - "scripts/bash/generate-atomic-shims.sh"
       - ".github/workflows/shim-drift.yml"
@@ -17,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify atomic-prompt shims are not stale
+      - name: Verify source and consumer skills are not stale
         shell: bash
         run: |
           chmod +x scripts/bash/generate-atomic-shims.sh

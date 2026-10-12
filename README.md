@@ -1,21 +1,14 @@
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 <div align="center">
-    <img src=".knowledge/entities/product-documentation/site/media/brand/logo/makeboldsolutions-mark.svg" alt="Make Bold Solutions" width="56" height="56" />
+    <img src="site/src/media/brand/logo/makeboldsolutions-mark.svg" alt="Make Bold Solutions" width="56" height="56" />
     <h1>DevSpark</h1>
     <h3><em>A structured development process for AI coding assistants.<br/>Just markdown files — no install required.</em></h3>
 </div>
 
-<p align="center">
-    <a href="https://github.com/markhazleton/devspark/releases/latest"><img src="https://img.shields.io/github/v/release/markhazleton/devspark?label=current%20release" alt="Current Release"/></a>
-    <a href="https://github.com/markhazleton/devspark/actions/workflows/release.yml"><img src="https://github.com/markhazleton/devspark/actions/workflows/release.yml/badge.svg" alt="Release"/></a>
-    <a href="https://github.com/markhazleton/devspark/stargazers"><img src="https://img.shields.io/github/stars/markhazleton/devspark?style=social" alt="GitHub stars"/></a>
-    <a href="https://github.com/markhazleton/devspark/blob/main/LICENSE"><img src="https://img.shields.io/github/license/markhazleton/devspark" alt="License"/></a>
-    <a href="https://markhazleton.github.io/devspark/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Documentation"/></a>
-</p>
+> **Not a program. Not a subscription.** Copy 38 active slash-command prompts and helper templates/scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
-**Live Site**: [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
-**Current version:** [v5.0.0](https://github.com/markhazleton/devspark/releases/tag/v5.0.0)
-
-> **Not a program. Not a subscription.** Copy 30 stock command prompts plus the helper templates and scripts into your project and your AI coding assistant gets a repeatable current-truth workflow. Works with the [18 supported agents listed below](#supported-ai-agents).
+**Docs & install (no repo access required):** [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 
 ---
 
@@ -24,10 +17,11 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 30 stock command prompt files (THE PRODUCT)
-├── scripts/              ← Context-gathering scripts (PowerShell + Bash) and the knowledge engine (Python)
-├── .knowledge/           ← Current truth: entities, governance, ontology index
-└── .devspark.work/       ← Temporary lifecycle work products
+├── templates/commands/   ← 38 prompt files (38 active commands)
+├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
+└── site/
+  ├── src/              ← Authored public-site pages and media
+  └── _site/            ← Generated DocFX output (ignored)
 ```
 
 ## DevSpark Vocabulary
@@ -55,6 +49,10 @@ DevSpark treats skills as portable capability packages within a governed lifecyc
 orchestration system. Commands invoke skills; DevSpark governs the lifecycle around
 them.
 
+In 9.0 every DevSpark command is itself installed as a GitHub Copilot Agent Skill, invoked as
+`/devspark-<command>`. The portable capability skills described here are a separate layer that
+commands can call.
+
 The dual-surface model:
 
 ```text
@@ -77,7 +75,19 @@ contributor walkthrough for adding new skills.
 
 ## Get Started
 
-DevSpark is installed, upgraded, and repaired only through quickstart prompts.
+DevSpark's core spec-driven flow runs entirely as slash commands — no install, no CLI:
+
+| Flow | Commands |
+|------|--------------|
+| Create a spec | `/devspark-specify` → `/devspark-plan` → `/devspark-tasks` → `/devspark-planning-review` (Analyze, Critic when applicable, and Judge as one decision before implementing) |
+| Execute a plan | `/devspark-implement` → `/devspark-create-pr` → `/devspark-pr-review` |
+
+See [.knowledge/tooling/developer-guide.md](.knowledge/tooling/developer-guide.md) and the command tables below for the full command set.
+
+For one-off work outside a workflow, use `/devspark-specify`. It classifies the request as a one-off fix, a quick spec, a full spec, or specialized intents (`refactor`, `prompt-change`), explains the recommendation, and lets the human confirm the route before proceeding.
+
+**Agent Quickstart** (the only supported install/upgrade path)
+
 Point your AI agent at the quickstart prompt for your platform:
 
 - [GitHub Copilot](quickstart/devspark_quickstart_copilot.md)
@@ -86,72 +96,93 @@ Point your AI agent at the quickstart prompt for your platform:
 - [Codex](quickstart/devspark_quickstart_codex.md)
 - [Any other agent](quickstart/devspark_quickstart_generic.md)
 
-For ongoing updates or repairs, run the same quickstart prompt again in the
-target repository. The quickstart compares the installed version, refreshes
-framework-owned files, repairs missing stock assets, initializes missing
-`.knowledge/entities/` and `.knowledge/ontology/` scaffolding, and preserves
-authored repository-owned `.knowledge/` content.
+The agent asks a few questions, then pulls and installs all DevSpark prompts.
 
-For the governing principles, see the [DevSpark Philosophy](.knowledge/entities/product-documentation/site/philosophy.md).
-For a full walkthrough see the [Implementation Lifecycle Guide](.knowledge/entities/product-documentation/site/implementation-lifecycle.md).
+> **Trust but verify.** Each quickstart opens with a **Preview Prompt** section — read the exact instructions and command prompts, or ask the agent for a read-only dry run, before anything is written to your repo. Nothing runs until you approve.
 
-Canonical delivery loop: `specify → clarify when needed → plan → tasks → required gates → implement → focused verify when needed → commit/push → create-pr → pr-review ↔ address-pr-review → merge`. Run `release` separately when the team is ready to validate and archive completed packages.
+For ongoing updates, use the same no-install approach:
 
----
+- Paste your agent's [quickstart guide URL](https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_copilot.md) into your agent chat
+- It detects the existing install and runs a manifest-driven upgrade in your current repository
+
+This keeps installs and upgrades prompt-first, with no CLI and no packages to download.
+
+Recommended review loop: `specify → implement → pr-review → address-pr-review → pr-review UPDATE → merge`.
+
+### What's new in 9.0
+
+- **One command convention: `/devspark-<command>`.** All 38 commands install as native GitHub Copilot Agent Skills (`.github/skills/devspark-<command>/SKILL.md`). The dotted `/devspark.<command>` form from 8.x is retired with no aliases, fallback, or compatibility mode.
+- **Safe upgrade from 8.x.** The upgrade shows the 8.x entry points it will retire and asks once. Unmodified managed files are deleted, edited ones are preserved byte-for-byte in `.devspark.work/migration/8.x-entry-points/`, and your team and personal customizations in `.devspark.work/` are never touched. Re-running the upgrade changes nothing.
+- **Same customization precedence.** Developer, then team, then distributed default, resolved by the same rule as before.
+- **Tested with.** VS Code Insiders 1.142.0 and its built-in Copilot Chat, local Windows. Typed text after `/devspark-<command>` is passed to the skill as the command's input. Older builds were not tested.
+- **Implementation complete means ready to merge and deploy.** Verification obligations that can only be proven in a deployed environment are recorded as post-deploy requirements with an owner and a real tracking record. They stay visible and unproven until deployment evidence exists, and they never block implementation or the pull request. Pre-merge safety and compliance requirements still block.
+
+This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrade.md#upgrading-from-8x), the [release notes](site/src/releases.md) and the [Command Catalog](site/src/guides/prompt-lifecycle-mapping.md).
 
 ## Slash Commands
+
+### Not sure which command to run?
+
+| Command | Purpose |
+|---------|---------|
+| `/devspark-next` | Detect where you are in the lifecycle and run the single next step (after one confirmation) |
 
 ### Core Workflow
 
 | Command | Purpose |
 |---------|---------|
-| `/devspark.constitution` | Establish project principles and guidelines |
-| `/devspark.specify` | Define what you want to build (requirements & user stories) |
-| `/devspark.plan` | Create a technical implementation plan |
-| `/devspark.tasks` | Break the plan into actionable task lists |
-| `/devspark.implement` | Execute tasks and build the feature |
-| `/devspark.verify` | Verify behavioral proof and reject metric-only fixes |
-| `/devspark.create-pr` | Draft or update a spec-aware pull request |
-| `/devspark.update-pr` | Refresh an existing pull request description from the current branch delta |
-| `/devspark.next` | Continue from detected repository, artifact, gate, and PR state |
+| `/devspark-constitution` | Establish project principles and guidelines |
+| `/devspark-specify` | Define what you want to build (requirements & user stories) |
+| `/devspark-plan` | Create a technical implementation plan |
+| `/devspark-tasks` | Break the plan into actionable task lists |
+| `/devspark-implement` | Update code, tests, and current knowledge; verify; populate code/knowledge linkage so the delta stays validate-able in `.devspark.work/` |
+| `/devspark-create-pr` | Draft or update a pull request from the durable delta |
+| `/devspark-update-pr` | Refresh an existing pull request description from the current branch delta |
 
-### Review, Release, and Repository Utilities
+### Constitution-Powered (no spec required)
 
 | Command | Purpose |
 |---------|---------|
-| `/devspark.pr-review` | [Constitution-based PR review](.knowledge/entities/product-documentation/site/pr-review-usage.md) |
-| `/devspark.address-pr-review` | Apply PR review fixes with mandatory commit isolation gates |
-| `/devspark.site-audit` | [Comprehensive codebase audit](.knowledge/entities/product-documentation/site/site-audit-usage.md) |
-| `/devspark.explain` | [Explain existing functionality and verify matching current truth](.knowledge/entities/product-documentation/site/explain-usage.md) |
-| `/devspark.quickfix` | Lightweight workflow for bug fixes |
-| `/devspark.fix-score` | Diagnose and remediate repository score blockers without weakening scoring rules |
-| `/devspark.critic` | [Adversarial risk analysis](.knowledge/entities/product-documentation/site/critic-usage.md) |
-| `/devspark.release` | [Validate current truth and archive completed work at release time](.knowledge/entities/product-documentation/site/release-usage.md) |
-| `/devspark.evolve-constitution` | Propose constitution amendments |
-| `/devspark.repo-story` | Generate narrative from commit history |
-| `/devspark.commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
-| `/devspark.taskstoissues` | Convert tasks.md into dependency-ordered GitHub issues |
+| `/devspark-pr-review` | [Constitution-based PR review](site/src/guides/review-and-audit.md) |
+| `/devspark-address-pr-review` | Apply PR review fixes with mandatory commit isolation gates |
+| `/devspark-site-audit` | [Comprehensive codebase audit](site/src/guides/review-and-audit.md) |
+| `/devspark-explain` | [Trace "how is X done?" against code and knowledge, fixing drift as it's found](site/src/guides/knowledge-management.md) |
+| `/devspark-quickfix` | Lightweight workflow for bug fixes |
+| `/devspark-critic` | [Adversarial risk analysis](site/src/guides/planning-review.md) |
+| `/devspark-planning-review` | Analyze + conditional Critic + Judge: one bounded planning decision |
+| `/devspark-verify` | Empirical proof gate for declared verification modes |
+| `/devspark-release` | Verify the durable Git delta, sweep `.devspark.work/` retention, and archive completed work into `.archive/{YYYY-MM-DD}/` |
+| `/devspark-evolve-constitution` | Propose constitution amendments |
+| `/devspark-repo-story` | Generate narrative from commit history |
+| `/devspark-commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
+| `/devspark-taskstoissues` | Explain why temporary tasks are not exported to durable issues |
+| `/devspark-merge-from-main` | Script-first merge of remote `main`; the agent only resolves conflicts |
+| `/devspark-workitem-review` | [Grade a named Azure DevOps work item against the shared standard](.knowledge/guides/azure-devops-work-tracking.md) (opt-in) |
+| `/devspark-workitem-create` | Draft and, after confirmation, create a new Azure DevOps work item (opt-in) |
 
 ### Quality & Personalization
 
 | Command | Purpose |
 |---------|---------|
-| `/devspark.clarify` | Ask structured questions to de-risk ambiguity |
-| `/devspark.analyze` | Cross-artifact consistency check |
-| `/devspark.checklist` | Generate quality validation checklists |
-| `/devspark.personalize` | Create per-user command overrides |
-| `/devspark.discover-constitution` | Generate a constitution from existing code |
-| `/devspark.discover-knowledge` | Propose evidence-backed fixes for knowledge gaps, mappings, relationships, and aliases |
+| `/devspark-clarify` | Ask structured questions to de-risk ambiguity |
+| `/devspark-analyze` | Cross-artifact consistency check |
+| `/devspark-checklist` | Generate quality validation checklists |
+| `/devspark-personalize` | Create per-user command overrides |
+| `/devspark-discover-constitution` | Generate a constitution from existing code |
+| `/devspark-upgrade` | Pull latest DevSpark prompts into your project |
+
+`/devspark-release` is the sole command that sweeps `.devspark.work/` retention and archives
+completed, linkage-verified work into `.archive/{YYYY-MM-DD}/`.
 
 ### Multi-App (Optional)
 
 | Command | Purpose |
 |---------|---------|
-| `/devspark.add-application` | Register a new application in the multi-app registry |
-| `/devspark.list-applications` | Display all registered applications |
-| `/devspark.validate-registry` | Validate registry schema, references, and consistency |
+| `/devspark-add-application` | Register a new application in the multi-app registry |
+| `/devspark-list-applications` | Display all registered applications |
+| `/devspark-validate-registry` | Validate registry schema, references, and consistency |
 
-See [.knowledge/entities/product-documentation/site/index.md](.knowledge/entities/product-documentation/site/index.md#command-categories) for full command details.
+See [site/src/index.md](site/src/index.md#command-categories) for full command details.
 
 ---
 
@@ -172,69 +203,68 @@ For repositories containing **multiple applications** with different platforms, 
 
 ### How It Works
 
-1. **Create a registry** at `.knowledge/entities/application-registry/registry.json` — or run `/devspark.add-application` to create one interactively
+1. **Create a registry** at `.devspark.work/devspark.registry.json` — or run `/devspark-add-application` to create one interactively
 2. **Assign profiles** — reusable rule bundles (e.g., `api-profile`, `web-profile`) that apps inherit
 3. **Scope commands** — use `--app <id>` to target a specific application, or `--repo-scope` for repo-wide operations
-4. **App-local overrides** — each app can have its own `.knowledge/` directory and optional `app.json` manifest
+4. **App-local roots** — each app can have its own `.devspark.work/` and `.knowledge/` (including `.knowledge/guides/` for app-specific published guidance) directories plus an optional `app.json` manifest
 
 ### Multi-App Commands
 
 | Command | Purpose |
 |---------|---------|
-| `/devspark.add-application` | Register a new application in the registry |
-| `/devspark.list-applications` | Display all registered applications and profiles |
-| `/devspark.validate-registry` | Validate registry schema, references, and consistency |
+| `/devspark-add-application` | Register a new application in the registry |
+| `/devspark-list-applications` | Display all registered applications and profiles |
+| `/devspark-validate-registry` | Validate registry schema, references, and consistency |
 
-For the full specification, see the [Monorepo Guide](.knowledge/entities/product-documentation/site/monorepo-guide.md).
+For the full specification, see the [Monorepo Guide](site/src/guides/monorepo-guide.md).
 
 ---
 
 ## Customization Without Risk
 
-DevSpark cleanly separates **your work** from **its installation**:
+DevSpark separates replaceable framework files, temporary work, current truth, and published guidance:
 
 ```text
 .devspark/                 ← Installation (removable, upgrade-safe)
 ├── defaults/commands/     ← Stock prompts
 ├── scripts/              ← Stock helper scripts
 ├── templates/            ← Spec/plan templates
-└── VERSION               ← Installed version stamp
+└── VERSION  ← Installed version stamp
 
-.knowledge/                ← Repository-owned current truth
-├── governance/constitution.md
-├── governance/decisions/
-├── entities/
-├── overrides/commands/             ← Team command overrides
-├── overrides/scripts/              ← Team script overrides (optional)
-└── overrides/{git-user}/commands/  ← Personal overrides
+.devspark.work/            ← Temporary plans and operational work
+├── specs/
+├── commands/             ← Team command overrides
+├── scripts/              ← Team script overrides (optional)
+├── devspark.json         ← Repository configuration (optional)
+├── devspark.registry.json ← Multi-app registry (optional)
+└── {git-user}/commands/  ← Personal overrides
 
-.devspark.work/            ← Ephemeral in-flight work packages
+.knowledge/               ← Current authoritative truth
+└── governance/constitution.md
+
+.archive/                  ← Landing place for old work products, grouped by release
 ```
 
-> **Multi-app layout** (optional): Each registered application may use
-> `{app-path}/.knowledge/` for app-local entities, decisions, ontology output,
-> and overrides, plus `{app-path}/.devspark.work/` for temporary work packages.
+> **Multi-app layout** (optional): Each application may also have app-local `.devspark.work/` and `.knowledge/` (including `.knowledge/guides/`) roots.
 
 **3-tier prompt resolution** (first match wins):
 
-1. `.knowledge/overrides/{git-user}/commands/` — Personal tweaks
-2. `.knowledge/overrides/commands/` — Team customizations
+1. `.devspark.work/{git-user}/commands/` — Personal tweaks
+2. `.devspark.work/commands/` — Team customizations
 3. `.devspark/defaults/commands/` — Stock prompts
 
 **2-tier script resolution** (first match wins):
 
-1. `.knowledge/overrides/scripts/` — Team script overrides (e.g., Azure DevOps adapter)
+1. `.devspark.work/scripts/` — Team script overrides (e.g., Azure DevOps adapter)
 2. `.devspark/scripts/` — Stock scripts
 
-There is no third ownership tier. If an organization wants a shared baseline in `.knowledge/`, it manages that through its own repo practices; DevSpark still only writes to `.devspark/`.
+There is no third ownership tier. If an organization wants a shared baseline in `.knowledge/guides/`, it manages that through its own repo practices; DevSpark still only writes to `.devspark/`.
 
 Participant metadata uses these existing repository-owned artifacts when present.
 It does not change how prompts or scripts are found; customization layers and
 precedence are unchanged.
 
-**Clean removal**: remove `.devspark/` and generated agent shims. Leave
-`.knowledge/` intact unless the user explicitly asks to remove repository-owned
-current truth.
+**Clean removal**: delete `.devspark/` and the agent skills (`.github/skills/devspark-*`, or your agent's equivalent); `.devspark.work/`, `.knowledge/`, and `.archive/` are left untouched.
 
 ---
 
@@ -244,12 +274,14 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 
 | Agent | | Agent | | Agent | |
 |-------|---|-------|---|-------|---|
-| [Claude Code](https://www.anthropic.com/claude-code) | ✅ | [Cursor](https://cursor.sh/) | ✅ | [Gemini CLI](https://github.com/google-gemini/gemini-cli) | ✅ |
-| [GitHub Copilot](https://code.visualstudio.com/) | ✅ | [Codex CLI](https://github.com/openai/codex) | ✅ | [Windsurf](https://windsurf.com/) | ✅ |
-| [Amp](https://ampcode.com/) | ✅ | [Roo Code](https://roocode.com/) | ✅ | [Kilo Code](https://github.com/Kilo-Org/kilocode) | ✅ |
-| [Auggie CLI](https://docs.augmentcode.com/cli/overview) | ✅ | [opencode](https://opencode.ai/) | ✅ | [Qwen Code](https://github.com/QwenLM/qwen-code) | ✅ |
-| [SHAI](https://github.com/ovh/shai) | ✅ | [Amazon Q](https://aws.amazon.com/developer/learning/q-developer-cli/) | ⚠️ | [IBM Bob](https://www.ibm.com/products/bob) | ✅ |
-| [CodeBuddy](https://www.codebuddy.ai/cli) | ✅ | [Qoder CLI](https://qoder.com/cli) | ✅ | [Antigravity](https://deepmind.google/technologies/gemini/) | ✅ |
+| Claude Code | ✅ | Cursor | ✅ | Gemini CLI | ✅ |
+| GitHub Copilot | ✅ | Codex CLI | ✅ | Windsurf | ✅ |
+| Amp | ✅ | Roo Code | ✅ | Kilo Code | ✅ |
+| Auggie CLI | ✅ | opencode | ✅ | Qwen Code | ✅ |
+| SHAI | ✅ | Amazon Q | ⚠️ | IBM Bob | ✅ |
+| CodeBuddy | ✅ | Qoder CLI | ✅ | Antigravity | ✅ |
+
+Install each agent from your organization-approved software channel; DevSpark intentionally links to no third-party sites.
 
 ---
 
@@ -257,15 +289,14 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 
 | Topic | Link |
 |-------|------|
-| Implementation lifecycle | [implementation-lifecycle.md](.knowledge/entities/product-documentation/site/implementation-lifecycle.md) |
-| Quickstart | [quickstart.md](.knowledge/entities/product-documentation/site/quickstart.md) |
-| Constitution guide | [constitution-guide.md](.knowledge/entities/product-documentation/site/constitution-guide.md) |
-| Installation | [installation.md](.knowledge/entities/product-documentation/site/installation.md) |
-| Upgrading | [upgrade.md](.knowledge/entities/product-documentation/site/upgrade.md) |
-| PR review guide | [pr-review-usage.md](.knowledge/entities/product-documentation/site/pr-review-usage.md) |
-| Site audit guide | [site-audit-usage.md](.knowledge/entities/product-documentation/site/site-audit-usage.md) |
-| Critic guide | [critic-usage.md](.knowledge/entities/product-documentation/site/critic-usage.md) |
-| Repo story | [repo-story-usage.md](.knowledge/entities/product-documentation/site/repo-story-usage.md) |
+| How it works | [how-it-works.md](site/src/get-started/how-it-works.md) |
+| Quickstart | [quickstart.md](site/src/get-started/quickstart.md) |
+| Constitution guide | [constitution-guide.md](site/src/guides/constitution-guide.md) |
+| Upgrading | [upgrade.md](site/src/get-started/upgrade.md) |
+| Planning review | [planning-review.md](site/src/guides/planning-review.md) |
+| PR review and site audit | [review-and-audit.md](site/src/guides/review-and-audit.md) |
+| Knowledge and explain | [knowledge-management.md](site/src/guides/knowledge-management.md) |
+| Command catalog | [prompt-lifecycle-mapping.md](site/src/guides/prompt-lifecycle-mapping.md) |
 
 ---
 
@@ -273,7 +304,7 @@ DevSpark is agent-agnostic. Every agent below gets thin shims that resolve perso
 
 - **Any OS** (Linux / macOS / Windows)
 - A [supported AI coding agent](#supported-ai-agents)
-- [Git](https://git-scm.com/downloads) (recommended)
+- Git (recommended)
 
 ## Contributing
 
@@ -281,10 +312,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.
 
 ## Acknowledgements
 
-DevSpark is maintained by [Mark Hazleton](https://github.com/markhazleton) and the open-source community.
-
-> Built by [Mark Hazleton](https://markhazleton.com) — Mark Hazleton, Solutions Architect
-> DevSpark is part of the [Make Bold Spark](https://makeboldspark.com) portfolio of technical demonstrations.
+DevSpark is maintained by the Make Bold Solutions engineering community.
 
 A [Make Bold Solutions](https://makeboldsolutions.com) project, part of the [Make Bold Spark](https://makeboldspark.com) family.
 

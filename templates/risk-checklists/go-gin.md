@@ -1,5 +1,7 @@
 # Go (Gin / Fiber / chi / Echo) Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Concurrency
 
 - [ ] **No goroutine leaks** — e.g., bounded with `errgroup`, lifecycle tied to `context.Context`

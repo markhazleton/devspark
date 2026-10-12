@@ -1,11 +1,12 @@
 #!/usr/bin/env pwsh
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Build repository history context for /devspark.repo-story
 # Usage:
 #   .\repo-story-context.ps1 [-Output <path>] [-Months 12] [-Scope full] [-CompareBaseline YYYY-MM] [-Stdout]
 
 [CmdletBinding()]
 param(
-    [string]$Output = ".devspark.work/repo-story/history.json",
+    [string]$Output = ".knowledge/guides/repo-story/history.json",
     [int]$Months = 12,
     [ValidateSet("full", "velocity", "quality", "business", "team")]
     [string]$Scope = "full",
@@ -18,7 +19,7 @@ if ($Help) {
     Write-Output @"
 Usage: repo-story-context.ps1 [-Output <path>] [-Months 12] [-Scope full] [-CompareBaseline YYYY-MM] [-Stdout]
 
-Generates an ephemeral history.json file with full-repository Git context:
+Generates a history.json file with full-repository historical context:
 - commit timeline
 - contributor trends
 - tag milestones
@@ -27,7 +28,7 @@ Generates an ephemeral history.json file with full-repository Git context:
 - commit-audit metrics (velocity, quality, governance)
 
 Options:
-    -Output <path>           Output JSON path (default: .devspark.work/repo-story/history.json)
+    -Output <path>           Output JSON path (default: .documentation/repo-story/history.json)
     -Months <N>              Audit window in months from now (default: 12)
     -Scope <name>            full | velocity | quality | business | team
     -CompareBaseline YYYY-MM Optional baseline month override
@@ -410,10 +411,6 @@ if ($governancePath) {
     $constitutionAmendmentCount = ([regex]::Matches($constitutionText, '(?im)^##\s+amendment\b|CAP-\d{4}-\d{3}')).Count
 }
 
-$specDirs = @(Get-ChildItem -Path (Join-Path $repoRoot ".devspark.work/specs") -Directory -ErrorAction SilentlyContinue)
-$governanceArtifactsCount = @(Get-ChildItem -Path (Join-Path $repoRoot ".knowledge") -Recurse -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match 'audit|release|pr-review|constitution-history' }).Count
-
 $recent = @()
 $recentRaw = Invoke-GitSafe @("log", "--all", "--since=$sinceDate", "-n", "40", "--date=iso-strict", "--pretty=format:%H%x09%ad%x09%ae%x09%s")
 if ($recentRaw) {
@@ -519,8 +516,6 @@ $history = [PSCustomObject]@{
         constitution_exists = [bool]$governancePath
         constitution_version = $constitutionVersion
         constitution_amendment_count = $constitutionAmendmentCount
-        active_spec_count = $specDirs.Count
-        governance_artifact_count = $governanceArtifactsCount
     }
     milestones = [PSCustomObject]@{
         tags = @($tags)

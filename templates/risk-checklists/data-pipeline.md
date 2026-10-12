@@ -1,5 +1,7 @@
 # Data Pipeline Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Delivery Semantics
 
 - [ ] **Idempotency strategy declared per task** (natural key, dedup window, upsert)

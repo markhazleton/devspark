@@ -1,7 +1,11 @@
 ---
+id: brand-system-architecture
+type: entity-layer
+title: Brand System - Architecture
+layer: architecture
 source_of_truth:
 - .knowledge/entities/brand-system/assets
-last_verified: '2026-08-30'
+last_verified: '2026-10-11'
 evidence:
 - type: code
   ref: .knowledge/entities/brand-system/assets

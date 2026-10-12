@@ -1,5 +1,7 @@
 # Mobile App Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Platform Compliance
 
 - [ ] **Store policies reviewed** — Apple App Review, Google Play Data Safety, permissions declarations

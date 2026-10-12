@@ -1,5 +1,7 @@
 # Security Policy
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 Thanks for helping keep DevSpark safe.
 
 The DevSpark maintainers take security seriously. If you discover a vulnerability in this project, we ask that you report it responsibly.
@@ -10,7 +12,7 @@ If you believe you have found a security vulnerability in DevSpark, please repor
 
 **Please do not report security vulnerabilities through public GitHub issues, discussions, or pull requests.**
 
-Instead, please [open a private security advisory](https://github.com/markhazleton/devspark/security/advisories/new) on the GitHub repository.
+Instead, please [open a private security advisory](https://github.com/MarkHazleton/DevSpark) on the GitHub repository.
 
 Please include as much of the information listed below as you can to help us better understand and resolve the issue:
 

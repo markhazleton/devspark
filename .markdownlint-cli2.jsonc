@@ -9,10 +9,6 @@
       "indent": 2
     },
     "MD013": false,
-    // Knowledge-node frontmatter `title` is metadata, not a heading; the body keeps its H1.
-    "MD025": {
-      "front_matter_title": ""
-    },
     "MD024": {
       "siblings_only": true
     },
@@ -29,9 +25,10 @@
   "ignores": [
     ".genreleases/",           // generated release notes — machine-authored, not hand-edited
     "incoming/**",             // staging area for external content before review
-    ".knowledge/drafts/**", // in-progress drafts not yet ready for lint enforcement
-    ".devspark.work/runs/**", // runtime artifacts — gitignored, not committed to repo
-    ".venv/**",                 // local virtualenv packages — third-party generated content
-    ".pytest_cache/**"         // pytest runtime cache — not markdown content
+    ".devspark.work/drafts/**", // in-progress drafts not yet ready for lint enforcement
+    ".devspark.work/metrics/**", // runtime telemetry — gitignored, not committed to repo
+    ".pytest_cache/**",        // pytest runtime cache — not markdown content
+    ".venv/**",                // Python virtual environment — third-party packages, not our content
+    "**/node_modules/**"       // third-party JS packages, if ever present
   ]
 }

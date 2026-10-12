@@ -1,3 +1,4 @@
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 """Contract tests for Agent Skills under templates/skills/.
 
 Discovers every directory under templates/skills/ that contains a SKILL.md,

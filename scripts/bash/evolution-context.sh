@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Constitution evolution context gathering script
 # Analyzes PR reviews and audits to propose constitution amendments
 
@@ -75,13 +76,9 @@ done
 # Get repository context
 REPO_ROOT=$(get_repo_root)
 CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
-if [[ ! -f "$CONSTITUTION_PATH" && -f "$REPO_ROOT/.knowledge/governance/constitution.md" ]]; then
-    CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
-fi
-PR_REVIEW_DIR="$REPO_ROOT/.devspark.work/pr-reviews"
-AUDIT_DIR="$REPO_ROOT/.devspark.work/audits"
-PROPOSALS_DIR="$REPO_ROOT/.devspark.work/governance-proposals"
-HISTORY_FILE="$REPO_ROOT/.knowledge/governance/constitution.md"
+PR_REVIEW_DIR="$REPO_ROOT/.devspark.work/pr-review"
+AUDIT_DIR="$REPO_ROOT/.devspark.work/audit"
+PROPOSALS_DIR="$REPO_ROOT/.devspark.work/governance"
 
 # Check constitution exists
 CONSTITUTION_EXISTS="false"
@@ -174,7 +171,6 @@ if [[ "$JSON_MODE" == true ]]; then
   "PR_REVIEW_DIR": "$PR_REVIEW_DIR",
   "AUDIT_DIR": "$AUDIT_DIR",
   "PROPOSALS_DIR": "$PROPOSALS_DIR",
-  "HISTORY_FILE": "$HISTORY_FILE",
   "PR_REVIEWS": $PR_REVIEWS,
   "PR_REVIEW_COUNT": $PR_REVIEW_COUNT,
   "AUDIT_REPORTS": $AUDIT_REPORTS,

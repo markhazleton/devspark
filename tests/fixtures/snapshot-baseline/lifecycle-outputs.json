@@ -1,0 +1,174 @@
+{
+  "deferred-missing-captured-as": {
+    "judge_lifecycle": {
+      "failures": [
+        {
+          "code": "closeout-not-complete",
+          "message": "closeout decided not-complete; blocking defects remain"
+        }
+      ],
+      "pending_later_phase": [],
+      "status": "fail",
+      "warnings": []
+    },
+    "next_context_bash": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.implement",
+      "STATE": "closeout-not-complete",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    },
+    "next_context_pwsh": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.implement",
+      "STATE": "closeout-not-complete",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    }
+  },
+  "deferred-post-deploy-captured": {
+    "judge_lifecycle": {
+      "failures": [],
+      "pending_later_phase": [],
+      "status": "pass",
+      "warnings": []
+    },
+    "next_context_bash": {
+      "CLOSEOUT_DECISION": "complete",
+      "RECOMMENDED_COMMAND": "/devspark.create-pr",
+      "STATE": "ready-for-pr",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    },
+    "next_context_pwsh": {
+      "CLOSEOUT_DECISION": "complete",
+      "RECOMMENDED_COMMAND": "/devspark.create-pr",
+      "STATE": "ready-for-pr",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    }
+  },
+  "high-risk-missing-accepted-by": {
+    "judge_lifecycle": {
+      "failures": [
+        {
+          "code": "closeout-not-complete",
+          "message": "closeout decided not-complete; blocking defects remain"
+        }
+      ],
+      "pending_later_phase": [],
+      "status": "fail",
+      "warnings": []
+    },
+    "next_context_bash": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.implement",
+      "STATE": "closeout-not-complete",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    },
+    "next_context_pwsh": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.implement",
+      "STATE": "closeout-not-complete",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    }
+  },
+  "legacy-no-stage": {
+    "judge_lifecycle": {
+      "failures": [],
+      "pending_later_phase": [],
+      "status": "pass",
+      "warnings": []
+    },
+    "next_context_bash": {
+      "CLOSEOUT_DECISION": "complete",
+      "RECOMMENDED_COMMAND": "/devspark.create-pr",
+      "STATE": "ready-for-pr",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    },
+    "next_context_pwsh": {
+      "CLOSEOUT_DECISION": "complete",
+      "RECOMMENDED_COMMAND": "/devspark.create-pr",
+      "STATE": "ready-for-pr",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": true,
+      "VERIFY_REQUIRED": true
+    }
+  },
+  "mandatory-failure-deferral-attempt": {
+    "judge_lifecycle": {
+      "failures": [
+        {
+          "code": "verify-not-passed",
+          "message": "a required verify proof mode has not passed"
+        },
+        {
+          "code": "closeout-not-complete",
+          "message": "closeout decided not-complete; blocking defects remain"
+        }
+      ],
+      "pending_later_phase": [],
+      "status": "fail",
+      "warnings": []
+    },
+    "next_context_bash": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.verify",
+      "STATE": "implementation-needs-verification",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": false,
+      "VERIFY_REQUIRED": true
+    },
+    "next_context_pwsh": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.verify",
+      "STATE": "implementation-needs-verification",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": false,
+      "VERIFY_REQUIRED": true
+    }
+  },
+  "pre-merge-needs-deployment": {
+    "judge_lifecycle": {
+      "failures": [
+        {
+          "code": "verify-not-passed",
+          "message": "a required verify proof mode has not passed"
+        },
+        {
+          "code": "closeout-not-complete",
+          "message": "closeout decided not-complete; blocking defects remain"
+        }
+      ],
+      "pending_later_phase": [],
+      "status": "fail",
+      "warnings": []
+    },
+    "next_context_bash": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.verify",
+      "STATE": "implementation-needs-verification",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": false,
+      "VERIFY_REQUIRED": true
+    },
+    "next_context_pwsh": {
+      "CLOSEOUT_DECISION": "not-complete",
+      "RECOMMENDED_COMMAND": "/devspark.verify",
+      "STATE": "implementation-needs-verification",
+      "TASKS_COMPLETE": true,
+      "VERIFY_PASSED": false,
+      "VERIFY_REQUIRED": true
+    }
+  }
+}

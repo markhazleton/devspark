@@ -1,0 +1,18 @@
+# Guides section — left-sidebar navigation
+
+- name: Skill Catalog
+  href: prompt-lifecycle-mapping.md
+- name: Troubleshooting Your App
+  href: troubleshooting-usage.md
+- name: Planning Review
+  href: planning-review.md
+- name: Review and Audit
+  href: review-and-audit.md
+- name: Knowledge
+  href: knowledge-management.md
+- name: Constitution Guide
+  href: constitution-guide.md
+- name: Monorepo Guide
+  href: monorepo-guide.md
+- name: Azure DevOps Work Tracking
+  href: azure-devops-work-tracking.md

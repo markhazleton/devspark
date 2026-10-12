@@ -1,0 +1,1030 @@
+{
+  "generated": {
+    "by": "build-knowledge-index",
+    "at": "2026-10-12T05:08:49Z"
+  },
+  "roots": [
+    {
+      "path": ".devspark/",
+      "owner": "framework",
+      "purpose": "framework payload"
+    },
+    {
+      "path": ".devspark.work/",
+      "owner": "repo",
+      "purpose": "work products"
+    },
+    {
+      "path": ".knowledge/",
+      "owner": "repo",
+      "purpose": "current authoritative knowledge and published user-facing guidance"
+    },
+    {
+      "path": ".archive/",
+      "owner": "repo",
+      "purpose": "landing place for old work products, grouped by release"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "autonomy-execution-model",
+      "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
+      "path": ".knowledge/architecture/autonomy-execution-model.md",
+      "title": "Autonomy Execution Model",
+      "appliesTo": [
+        "templates/commands/**"
+      ],
+      "headings": [
+        "Autonomy Execution Model",
+        "Levels and Overrides",
+        "Guardrails and Remediation",
+        "Full-Cycle Behavior"
+      ]
+    },
+    {
+      "id": "distribution-and-update-model",
+      "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
+      "path": ".knowledge/architecture/distribution-and-update-model.md",
+      "title": "Distribution and Update Model",
+      "appliesTo": [
+        "azure-pipelines.yml",
+        "eng/release/create-release-packages.sh",
+        "eng/release/create-release-packages.ps1",
+        "agents-registry.json",
+        "templates/agents-registry.schema.json  - quickstart/devspark_quickstart_copilot.md"
+      ],
+      "headings": [
+        "Distribution and Update Model",
+        "Publish pipeline (this repo → Static Web App)",
+        "Version resolution and \"is the zip release-gated?\"",
+        "Install/upgrade paths (Static Web App → target repo)",
+        "8.x entry point retirement (Update and Repair)"
+      ]
+    },
+    {
+      "id": "architecture-review-stage-divergence",
+      "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
+      "path": ".knowledge/architecture/review-stage-divergence.md",
+      "title": "Review-Stage Divergence",
+      "headings": [
+        "Review-Stage Divergence",
+        "Status",
+        "Thin-Skill Validation",
+        "Divergence Marker Convention"
+      ]
+    },
+    {
+      "id": "skills-framework",
+      "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
+      "path": ".knowledge/architecture/skills-framework.md",
+      "title": "Command and Skill Boundary",
+      "appliesTo": [
+        "templates/commands/**",
+        "templates/skills/**",
+        "templates/consumer-skills/**",
+        "scripts/bash/generate-atomic-shims.sh",
+        "scripts/powershell/generate-atomic-shims.ps1",
+        "eng/skills/source-stop/**",
+        ".github/skills/**",
+        "tests/test_skill_contract.py",
+        "tests/test_skill_entry_shims_contract.py",
+        "tests/test_consumer_skill_contract.py"
+      ],
+      "headings": [
+        "Command and Skill Boundary",
+        "Generated Command Skills"
+      ]
+    },
+    {
+      "id": "governance-constitution",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/constitution.md",
+      "title": "DevSpark Constitution",
+      "headings": [
+        "DevSpark Constitution",
+        "Core Principles",
+        "I. Backward Compatibility (NON-NEGOTIABLE)",
+        "II. Explicit Over Implied (NON-NEGOTIABLE)",
+        "III. Ownership Boundary (NON-NEGOTIABLE)",
+        "IV. Governance Authority",
+        "V. Simplicity",
+        "VI. Platform Parity (MUST)",
+        "VII. PR Review Artifact Commit Discipline (MUST)",
+        "VIII. Markdown Quality (MUST)",
+        "IX. Verification Command Discipline (MUST)",
+        "X. Knowledge Currency (MUST)",
+        "Additional Constraints",
+        "Development Workflow",
+        "Governance",
+        "Companion Documents"
+      ]
+    },
+    {
+      "id": "decisions-readme",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/decisions/README.md",
+      "title": "Governance Decisions",
+      "headings": [
+        "Governance Decisions",
+        "Frontmatter contract",
+        "Lifecycle"
+      ]
+    },
+    {
+      "id": "advisory-findings-are-not-authoritative",
+      "type": "governance-decision",
+      "form": "governance-decision",
+      "role": "governance",
+      "path": ".knowledge/governance/decisions/advisory-findings-are-not-authoritative.md",
+      "title": "Advisory findings are not authoritative Knowledge",
+      "headings": [
+        "Advisory findings are not authoritative Knowledge",
+        "What this constrains",
+        "Why",
+        "Alternatives considered",
+        "What is permitted"
+      ]
+    },
+    {
+      "id": "governance-devspark-philosophy",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/devspark-philosophy.md",
+      "title": "DevSpark Philosophy & Guide: Plan Temporarily, Review the Delta",
+      "headings": [
+        "DevSpark Philosophy & Guide: Plan Temporarily, Review the Delta",
+        "The core shift",
+        "The governing principle: current truth, not lifecycle history",
+        "Three categories of \"current truth,\" not one",
+        "Decisions (ADRs) are current governance, not history",
+        "Decisions live in governance, not inside entities",
+        "Evidence: every knowledge and governance claim must be checkable",
+        "What triggers assimilation",
+        "The minimum non-negotiable rules",
+        "In-flight linkage: how verify-before-archive actually gets checked",
+        "The ontology implementation: `.knowledge/ontology/`",
+        "Knowledge maintenance discovery: proposals, not automation",
+        "Discovery: reaching knowledge by concept, not only by id",
+        "Integrity is checkable, not assumed",
+        "Prompt inventory",
+        "Convergence: a spec finishes when its findings are classified, not eliminated",
+        "Assurance: four capabilities, four questions, one owner per finding",
+        "Empirical proof follows change shape, not route label",
+        "A lightweight route may admit it grew up",
+        "Leave enough evidence to evaluate the framework itself",
+        "Orchestration: rigor belongs inside the framework, not in the developer's head",
+        "Minimum Sufficient Change: the counterweight to completeness",
+        "The `.archive/` retention: preserving short-lived value without keeping it active",
+        "No CLI, no harness — scripts and prompts instead",
+        "Contradiction judgment is a human call, not a mechanized gate",
+        "Retrieval budgets: design time vs. runtime"
+      ]
+    },
+    {
+      "id": "devspark-prompt-mapping",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/devspark-prompt-mapping.md",
+      "title": "DevSpark: Prompt Inventory Mapped to Philosophy",
+      "appliesTo": [
+        "templates/commands/explain.md",
+        "templates/commands/merge-from-main.md",
+        "templates/commands/pr-review.md",
+        "scripts/bash/merge-from-main.sh",
+        "scripts/powershell/merge-from-main.ps1",
+        "scripts/bash/get-pr-context.sh",
+        "scripts/powershell/get-pr-context.ps1",
+        "scripts/pr-risk.py",
+        "scripts/pr-review-validate.py",
+        "scripts/pr-risk-calibrate.py",
+        "tests/test_explain_scope_contract.py",
+        "tests/test_merge_from_main_contract.py",
+        "tests/test_pr_risk_contract.py",
+        "tests/test_pr_risk_knowledge_contract.py",
+        "tests/test_pr_review_validate_contract.py",
+        "tests/test_pr_risk_calibrate_contract.py"
+      ],
+      "headings": [
+        "DevSpark: Prompt Inventory Mapped to Philosophy",
+        "Plan & build — produces the ephemeral spec package",
+        "Planning Review in one place",
+        "Acceptance planning and ownership",
+        "Implementation — applies the delta",
+        "Validation — carries assimilation forward, enforces the permanent record",
+        "Script-first merge and PR review helpers",
+        "Governance & framework — Constitution, framework lifecycle",
+        "App/framework operations — unaffected",
+        "External work tracking — optional, outside the repository",
+        "Shim gaps",
+        "Developer-experience classification"
+      ]
+    },
+    {
+      "id": "knowledge-framework-contract",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/knowledge-framework-contract.md",
+      "title": "Knowledge Framework Contract",
+      "appliesTo": [
+        "templates/schemas/knowledge-node.schema.json",
+        "templates/schemas/entity-node.schema.json",
+        "templates/schemas/knowledge-ontology.json",
+        "scripts/build_knowledge_index.py",
+        "scripts/context-projection.py",
+        "scripts/explain-context.py",
+        "scripts/discover-knowledge.py",
+        "scripts/knowledge-integrity.py"
+      ],
+      "headings": [
+        "Knowledge Framework Contract",
+        "1. Purpose",
+        "2. What Knowledge is",
+        "3. Reserved terminology",
+        "4. The canonical Knowledge Model",
+        "5. Two supply workflows",
+        "Baseline bootstrap",
+        "Continuous maintenance",
+        "6. Flat documents and entities",
+        "6.1 Classification: form and role",
+        "6.2 Entity type",
+        "7. Entity evidence",
+        "8. Layers",
+        "9. Source ownership",
+        "9.1 Ownership is not applicability",
+        "10. Relationships",
+        "11. Governance",
+        "12. Discovery",
+        "12.1 What a finding means",
+        "13. Baseline bootstrap",
+        "14. The consumption pipeline",
+        "15. Retrieval",
+        "16. Context Projection",
+        "17. `context_resolved`",
+        "18. Just-right context",
+        "19. The agent context package",
+        "20. What must not enter default agent context",
+        "21. Code and tests as evidence",
+        "21.1 Tests are a durable pillar",
+        "22. Context budget",
+        "23. Lifecycle responsibilities",
+        "24. Conformance and open follow-ups",
+        "Companion Documents"
+      ]
+    },
+    {
+      "id": "governance-known-limitations",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/known-limitations.md",
+      "title": "DevSpark — Known Governance Limitations",
+      "headings": [
+        "DevSpark — Known Governance Limitations",
+        "What DevSpark Governs",
+        "Known Limitations",
+        "L-001 — Runtime Agent Behavior",
+        "L-002 — Outcome Verification",
+        "L-003 — Cross-Session Workflow Sequences",
+        "L-004 — Technical Enforcement",
+        "L-005 — AI Context Provenance",
+        "L-006 — Direct Constitution Edit Bypass",
+        "L-007 — Legacy `last_verified` Staleness Granularity (Superseded by Opt-In Object Claims)",
+        "L-008 — Comparison Profile Suppression Scope"
+      ]
+    },
+    {
+      "id": "participant-vocabulary",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/participant-vocabulary.md",
+      "title": "Participant Vocabulary",
+      "appliesTo": [
+        "templates/**",
+        "site/src/**"
+      ],
+      "headings": [
+        "Participant Vocabulary"
+      ]
+    },
+    {
+      "id": "governance-prompt-conformance-manifest",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/prompt-conformance-manifest.md",
+      "title": "Prompt Conformance Manifest",
+      "headings": [
+        "Prompt Conformance Manifest",
+        "Required Elements — All Command Templates",
+        "Element 1 — Constitution Authority Block",
+        "Element 2 — Frontmatter Handoffs Block",
+        "Element 3 — Artifact Output Statement",
+        "Default Behavior for Unlisted Templates",
+        "Known Variant Headings",
+        "`evolve-constitution.md`",
+        "`specify.md`",
+        "Conformance Check Procedure",
+        "Baseline Results"
+      ]
+    },
+    {
+      "id": "governance-severity-registry",
+      "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
+      "path": ".knowledge/governance/severity-registry.md",
+      "title": "DevSpark Severity Registry",
+      "headings": [
+        "DevSpark Severity Registry",
+        "Purpose",
+        "Maintenance Note",
+        "Severity Levels",
+        "Registry Entries",
+        "Finding Code Format",
+        "Companion Documents"
+      ]
+    },
+    {
+      "id": "azure-devops-work-tracking",
+      "type": "operations-runbook",
+      "form": "flat-document",
+      "role": "operations-runbook",
+      "path": ".knowledge/guides/azure-devops-work-tracking.md",
+      "title": "Azure DevOps Work Tracking",
+      "appliesTo": [
+        "scripts/powershell/workitem.ps1",
+        "scripts/bash/workitem.sh",
+        "templates/commands/workitem-review.md",
+        "templates/commands/workitem-create.md"
+      ],
+      "headings": [
+        "Azure DevOps Work Tracking",
+        "What it can do",
+        "What it never does",
+        "Prerequisites",
+        "Configuration",
+        "Choosing an area path",
+        "The confirmation model",
+        "Writes are refused if the item moved",
+        "Every write is verified",
+        "Reading work-item text safely",
+        "Failure codes",
+        "Warning codes",
+        "Items this integration creates",
+        "Turning it off",
+        "Known limitation"
+      ]
+    },
+    {
+      "id": "content-lifecycle",
+      "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
+      "path": ".knowledge/tooling/content-lifecycle.md",
+      "title": "Knowledge Content Lifecycle",
+      "headings": [
+        "Knowledge Content Lifecycle",
+        "Content roots",
+        "Knowledge index",
+        "Where does my new content go?",
+        "Knowledge Content Rules"
+      ]
+    },
+    {
+      "id": "developer-guide",
+      "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
+      "path": ".knowledge/tooling/developer-guide.md",
+      "title": "Knowledge Authoring Developer Guide",
+      "headings": [
+        "Knowledge Authoring Developer Guide",
+        "Two coexisting models",
+        "Adding a new entity",
+        "Keeping `source_of_truth` honest",
+        "Choosing a comparison profile",
+        "Adding or updating a governance decision",
+        "Making a document discoverable",
+        "When to add aliases",
+        "Regenerating the index"
+      ]
+    },
+    {
+      "id": "brand-system-architecture",
+      "entity": "brand-system",
+      "layer": "architecture",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "architecture",
+      "path": ".knowledge/entities/brand-system/architecture.md",
+      "title": "Brand System - Architecture",
+      "source_of_truth": [
+        ".knowledge/entities/brand-system/assets"
+      ],
+      "last_verified": "2026-10-11",
+      "headings": [
+        "Brand System"
+      ]
+    },
+    {
+      "id": "context-resolution-architecture",
+      "entity": "context-resolution",
+      "layer": "architecture",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "architecture",
+      "path": ".knowledge/entities/context-resolution/architecture.md",
+      "title": "Context Resolution - Architecture",
+      "source_of_truth": [
+        "scripts/explain-context.py",
+        "scripts/context-projection.py"
+      ],
+      "last_verified": "2026-10-11",
+      "aliases": [
+        "context resolution",
+        "retrieval and projection",
+        "how plan finds knowledge"
+      ],
+      "headings": [
+        "Context Resolution - Architecture",
+        "Two roles, not a chain",
+        "One operation, one build",
+        "File owner lookup",
+        "What this subsystem must not do",
+        "Provenance",
+        "Reading a node's kind",
+        "Boundary with maintenance discovery"
+      ]
+    },
+    {
+      "id": "context-resolution-business",
+      "entity": "context-resolution",
+      "layer": "business",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "business",
+      "path": ".knowledge/entities/context-resolution/business.md",
+      "title": "Context Resolution - Bounding Rules",
+      "source_of_truth": [
+        "tests/test_explain_context_contract.py",
+        "tests/test_context_projection_contract.py"
+      ],
+      "last_verified": "2026-10-11",
+      "aliases": [
+        "hop budget",
+        "context bounding",
+        "just right context",
+        "ranking determinism"
+      ],
+      "headings": [
+        "Context Resolution - Bounding Rules",
+        "Smallest sufficient context",
+        "Hop budget",
+        "Bounded candidates",
+        "Determinism",
+        "Kinds of resolved context",
+        "What never enters context by default"
+      ]
+    },
+    {
+      "id": "context-resolution-operations",
+      "entity": "context-resolution",
+      "layer": "operations",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "operations",
+      "path": ".knowledge/entities/context-resolution/operations.md",
+      "title": "Context Resolution - Measurement and Diagnostics",
+      "source_of_truth": [
+        "scripts/knowledge-benchmark.py",
+        "tests/test_knowledge_benchmark_contract.py"
+      ],
+      "last_verified": "2026-10-11",
+      "aliases": [
+        "retrieval benchmark",
+        "recall measurement",
+        "fan-out audit"
+      ],
+      "headings": [
+        "Context Resolution - Measurement and Diagnostics",
+        "Measure the consumer's view",
+        "Auditing graph shape",
+        "Interpreting a clean run"
+      ]
+    },
+    {
+      "id": "knowledge-discovery-architecture",
+      "entity": "knowledge-discovery",
+      "layer": "architecture",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "architecture",
+      "path": ".knowledge/entities/knowledge-discovery/architecture.md",
+      "title": "Knowledge Maintenance Discovery - Architecture",
+      "source_of_truth": [
+        "scripts/discover-knowledge.py",
+        "tests/test_discover_knowledge_contract.py"
+      ],
+      "last_verified": "2026-10-11",
+      "aliases": [
+        "discover knowledge",
+        "knowledge gaps",
+        "maintenance discovery"
+      ],
+      "headings": [
+        "Knowledge Maintenance Discovery - Architecture",
+        "Two different jobs",
+        "What it inspects",
+        "Ownership is not applicability",
+        "Output shape",
+        "What it may not do"
+      ]
+    },
+    {
+      "id": "knowledge-discovery-business",
+      "entity": "knowledge-discovery",
+      "layer": "business",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "business",
+      "path": ".knowledge/entities/knowledge-discovery/business.md",
+      "title": "Knowledge Maintenance Discovery - Findings",
+      "source_of_truth": [
+        "scripts/knowledge_findings.py",
+        "tests/test_knowledge_findings_schema_contract.py"
+      ],
+      "last_verified": "2026-09-30",
+      "aliases": [
+        "finding categories",
+        "finding severity",
+        "overlapping ownership",
+        "broad mapping"
+      ],
+      "headings": [
+        "Knowledge Maintenance Discovery - Findings",
+        "The shared finding record",
+        "Categories and what they actually detect",
+        "Documented narrowness",
+        "Reading a clean report"
+      ]
+    },
+    {
+      "id": "knowledge-discovery-operations",
+      "entity": "knowledge-discovery",
+      "layer": "operations",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "operations",
+      "path": ".knowledge/entities/knowledge-discovery/operations.md",
+      "title": "Knowledge Maintenance Discovery - Operations",
+      "source_of_truth": [
+        "scripts/powershell/discover-knowledge.ps1",
+        "scripts/bash/discover-knowledge.sh",
+        "tests/test_knowledge_discovery_contract.py"
+      ],
+      "last_verified": "2026-09-30",
+      "aliases": [
+        "run discovery",
+        "discovery scope"
+      ],
+      "headings": [
+        "Knowledge Maintenance Discovery - Operations",
+        "Scoping",
+        "Read-only by default",
+        "Dual-language parity",
+        "Result posture"
+      ]
+    },
+    {
+      "id": "knowledge-engine-architecture",
+      "entity": "knowledge-engine",
+      "layer": "architecture",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "architecture",
+      "path": ".knowledge/entities/knowledge-engine/architecture.md",
+      "title": "Knowledge Engine - Architecture",
+      "source_of_truth": [
+        "scripts/build_knowledge_index.py",
+        "templates/schemas/entity-node.schema.json",
+        "tests/test_knowledge_engine_resolution_contract.py"
+      ],
+      "last_verified": "2026-10-11",
+      "aliases": [
+        "knowledge index",
+        "index builder",
+        "canonical knowledge model"
+      ],
+      "headings": [
+        "Knowledge Engine - Architecture",
+        "Responsibility",
+        "Boundaries",
+        "Invariants",
+        "Classification: two axes",
+        "Related concepts"
+      ]
+    },
+    {
+      "id": "knowledge-engine-business",
+      "entity": "knowledge-engine",
+      "layer": "business",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "business",
+      "path": ".knowledge/entities/knowledge-engine/business.md",
+      "title": "Knowledge Engine - Semantics",
+      "source_of_truth": [
+        "templates/schemas/knowledge-node.schema.json",
+        "tests/test_build_knowledge_index_contract.py",
+        "tests/test_taxonomy_registry_contract.py"
+      ],
+      "last_verified": "2026-10-01",
+      "aliases": [
+        "knowledge document rules",
+        "allowed knowledge types",
+        "artifact form",
+        "semantic role",
+        "entity layers",
+        "current truth rules"
+      ],
+      "headings": [
+        "Knowledge Engine - Semantics",
+        "Current truth, not history",
+        "Closed vocabularies: form and role",
+        "Layers",
+        "Relationship strength",
+        "Decisions are keyed by topic",
+        "Source currency"
+      ]
+    },
+    {
+      "id": "knowledge-engine-integration",
+      "entity": "knowledge-engine",
+      "layer": "integration",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "integration",
+      "path": ".knowledge/entities/knowledge-engine/integration.md",
+      "title": "Knowledge Engine - Source Evidence Boundary",
+      "source_of_truth": [
+        "templates/knowledge-drift/self-test/claims.yaml",
+        "tests/test_knowledge_drift_cli_contract.py",
+        "tests/test_knowledge_drift_migration_contract.py"
+      ],
+      "last_verified": "2026-09-30",
+      "aliases": [
+        "source baselines",
+        "drift detection",
+        "content addressed evidence"
+      ],
+      "headings": [
+        "Knowledge Engine - Source Evidence Boundary",
+        "What it touches",
+        "Claimed paths are constrained by meaning, not just existence",
+        "The baseline store",
+        "Version history is advisory here"
+      ]
+    },
+    {
+      "id": "knowledge-engine-operations",
+      "entity": "knowledge-engine",
+      "layer": "operations",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "operations",
+      "path": ".knowledge/entities/knowledge-engine/operations.md",
+      "title": "Knowledge Engine - Operations",
+      "source_of_truth": [
+        "scripts/knowledge-integrity.py",
+        "tests/test_knowledge_index_determinism_contract.py",
+        "tests/test_knowledge_integrity_contract.py",
+        "tests/test_knowledge_drift_performance.py"
+      ],
+      "last_verified": "2026-10-11",
+      "aliases": [
+        "index drift check",
+        "regenerate knowledge index",
+        "knowledge integrity",
+        "integrity finding"
+      ],
+      "headings": [
+        "Knowledge Engine - Operations",
+        "The drift gate",
+        "Determinism is a hard requirement",
+        "Build failures versus reported findings",
+        "What a finding means",
+        "Independent integrity checking",
+        "Cost"
+      ]
+    },
+    {
+      "id": "product-documentation-architecture",
+      "entity": "product-documentation",
+      "layer": "architecture",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "architecture",
+      "path": ".knowledge/entities/product-documentation/architecture.md",
+      "title": "Product Documentation - Architecture",
+      "source_of_truth": [
+        "site/docfx.json",
+        ".github/workflows/docs.yml",
+        "eng/site/build-distribution.py"
+      ],
+      "last_verified": "2026-10-12",
+      "headings": [
+        "Product Documentation"
+      ]
+    },
+    {
+      "id": "workitem-integration-integration",
+      "entity": "workitem-integration",
+      "layer": "integration",
+      "type": "entity-layer",
+      "form": "entity-layer",
+      "role": "integration",
+      "path": ".knowledge/entities/workitem-integration/integration.md",
+      "title": "Work Item Integration - Boundary",
+      "source_of_truth": [
+        "scripts/powershell/workitem.ps1",
+        "scripts/bash/workitem.sh",
+        "tests/test_workitem_contract.py"
+      ],
+      "last_verified": "2026-10-11",
+      "aliases": [
+        "work item boundary",
+        "work tracking integration",
+        "propose and apply"
+      ],
+      "headings": [
+        "Work Item Integration - Boundary",
+        "Result contract",
+        "Propose then apply",
+        "Concurrency is refused, not resolved",
+        "Creation is narrow and never incidental",
+        "Credentials",
+        "Dual-language parity",
+        "Offline verification"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "advisory-findings-are-not-authoritative",
+      "to": "context-resolution",
+      "rel": "constrains"
+    },
+    {
+      "from": "advisory-findings-are-not-authoritative",
+      "to": "knowledge-discovery",
+      "rel": "constrains"
+    },
+    {
+      "from": "advisory-findings-are-not-authoritative",
+      "to": "knowledge-engine",
+      "rel": "constrains"
+    },
+    {
+      "from": "brand-system",
+      "to": "brand-system-architecture",
+      "rel": "has-layer"
+    },
+    {
+      "from": "brand-system",
+      "to": "product-documentation",
+      "rel": "relates-to"
+    },
+    {
+      "from": "context-resolution",
+      "to": "context-resolution-architecture",
+      "rel": "has-layer"
+    },
+    {
+      "from": "context-resolution",
+      "to": "context-resolution-business",
+      "rel": "has-layer"
+    },
+    {
+      "from": "context-resolution",
+      "to": "context-resolution-operations",
+      "rel": "has-layer"
+    },
+    {
+      "from": "context-resolution",
+      "to": "knowledge-engine",
+      "rel": "depends-on"
+    },
+    {
+      "from": "knowledge-discovery",
+      "to": "knowledge-discovery-architecture",
+      "rel": "has-layer"
+    },
+    {
+      "from": "knowledge-discovery",
+      "to": "knowledge-discovery-business",
+      "rel": "has-layer"
+    },
+    {
+      "from": "knowledge-discovery",
+      "to": "knowledge-discovery-operations",
+      "rel": "has-layer"
+    },
+    {
+      "from": "knowledge-discovery",
+      "to": "knowledge-engine",
+      "rel": "depends-on"
+    },
+    {
+      "from": "knowledge-engine",
+      "to": "knowledge-engine-architecture",
+      "rel": "has-layer"
+    },
+    {
+      "from": "knowledge-engine",
+      "to": "knowledge-engine-business",
+      "rel": "has-layer"
+    },
+    {
+      "from": "knowledge-engine",
+      "to": "knowledge-engine-integration",
+      "rel": "has-layer"
+    },
+    {
+      "from": "knowledge-engine",
+      "to": "knowledge-engine-operations",
+      "rel": "has-layer"
+    },
+    {
+      "from": "knowledge-framework-contract",
+      "to": "content-lifecycle",
+      "rel": "references"
+    },
+    {
+      "from": "knowledge-framework-contract",
+      "to": "developer-guide",
+      "rel": "references"
+    },
+    {
+      "from": "knowledge-framework-contract",
+      "to": "governance-constitution",
+      "rel": "references"
+    },
+    {
+      "from": "knowledge-framework-contract",
+      "to": "governance-devspark-philosophy",
+      "rel": "references"
+    },
+    {
+      "from": "product-documentation",
+      "to": "product-documentation-architecture",
+      "rel": "has-layer"
+    },
+    {
+      "from": "workitem-integration",
+      "to": "workitem-integration-integration",
+      "rel": "has-layer"
+    }
+  ],
+  "dangling_references": [],
+  "entities": [
+    {
+      "id": "brand-system",
+      "type": "subsystem",
+      "owner": "DevSpark maintainers",
+      "path": ".knowledge/entities/brand-system",
+      "relations": [
+        {
+          "type": "supports",
+          "object": "product-documentation"
+        }
+      ],
+      "layers": [
+        "architecture"
+      ],
+      "missing_layers": [
+        "business",
+        "integration",
+        "operations"
+      ],
+      "coverage_overrides": [],
+      "constrained_by": []
+    },
+    {
+      "id": "context-resolution",
+      "type": "subsystem",
+      "owner": "DevSpark Maintainers",
+      "path": ".knowledge/entities/context-resolution",
+      "relations": [
+        {
+          "to": "knowledge-engine",
+          "rel": "depends-on"
+        }
+      ],
+      "layers": [
+        "architecture",
+        "business",
+        "operations"
+      ],
+      "missing_layers": [],
+      "coverage_overrides": [
+        "integration"
+      ],
+      "constrained_by": [
+        "advisory-findings-are-not-authoritative"
+      ]
+    },
+    {
+      "id": "knowledge-discovery",
+      "type": "subsystem",
+      "owner": "DevSpark Maintainers",
+      "path": ".knowledge/entities/knowledge-discovery",
+      "relations": [
+        {
+          "to": "knowledge-engine",
+          "rel": "depends-on"
+        }
+      ],
+      "layers": [
+        "architecture",
+        "business",
+        "operations"
+      ],
+      "missing_layers": [],
+      "coverage_overrides": [
+        "integration"
+      ],
+      "constrained_by": [
+        "advisory-findings-are-not-authoritative"
+      ]
+    },
+    {
+      "id": "knowledge-engine",
+      "type": "subsystem",
+      "owner": "DevSpark Maintainers",
+      "path": ".knowledge/entities/knowledge-engine",
+      "relations": [],
+      "layers": [
+        "architecture",
+        "business",
+        "integration",
+        "operations"
+      ],
+      "missing_layers": [],
+      "coverage_overrides": [],
+      "constrained_by": [
+        "advisory-findings-are-not-authoritative"
+      ]
+    },
+    {
+      "id": "product-documentation",
+      "type": "subsystem",
+      "owner": "DevSpark Maintainers",
+      "path": ".knowledge/entities/product-documentation",
+      "relations": [],
+      "layers": [
+        "architecture"
+      ],
+      "missing_layers": [
+        "business",
+        "integration",
+        "operations"
+      ],
+      "coverage_overrides": [],
+      "constrained_by": []
+    },
+    {
+      "id": "workitem-integration",
+      "type": "integration",
+      "owner": "DevSpark Maintainers",
+      "path": ".knowledge/entities/workitem-integration",
+      "relations": [],
+      "layers": [
+        "integration"
+      ],
+      "missing_layers": [],
+      "coverage_overrides": [
+        "architecture",
+        "business",
+        "operations"
+      ],
+      "constrained_by": []
+    }
+  ],
+  "stale_entities": []
+}

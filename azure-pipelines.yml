@@ -1,0 +1,261 @@
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+# Azure Pipeline — build the DevSpark documentation site, the per-agent template
+# packages, and the prompt-first /raw tree from THIS repository, and publish them
+# all to a single Azure Static Web App (the one enterprise control point):
+#   /            docfx documentation site
+#   /dist/...    per-agent template packages + manifest.json (quickstart install / upgrade)
+#   /raw/...     raw templates/scripts/quickstart for prompt-first onboarding
+#
+# Consumers only ever touch the Static Web App; they never access this repo.
+#
+# Pipeline variables:
+#   SWA_DEPLOYMENT_TOKEN   (secret) deployment token of the Static Web App
+#
+# The deploy step is skipped automatically until SWA_DEPLOYMENT_TOKEN is provided,
+# so the build can run (and publish a pipeline artifact) before infra is wired up.
+#
+# To lock the surface down later, switch the Static Web App to Entra ID auth (same
+# hostname).
+
+trigger:
+  branches:
+    include:
+      - main
+  tags:
+    include:
+      - 'v*'
+
+# Validate every PR against main with the same gates as a push build (pytest, ruff,
+# markdownlint, knowledge-index/skill drift, agents-registry validation) so
+# drift is caught before merge, not only after. The deploy step below never runs for
+# a PR build (Build.Reason guard) - PRs validate only, they never publish.
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+    displayName: 'Checkout (full history for git info + tags)'
+
+  - task: UsePythonVersion@0
+    displayName: 'Install Python 3.11'
+    inputs:
+      versionSpec: '3.11'
+
+  - script: |
+      set -euo pipefail
+      python3 -m pip install --upgrade pip
+      pip install jsonschema PyYAML pytest pytest-cov ruff mypy bandit
+    displayName: 'Install Python dependencies'
+
+  - script: pytest tests/ -v --tb=short
+    displayName: 'Run pytest (test gate — must pass before packaging/publishing)'
+
+  - script: |
+      set -euo pipefail
+      pip install "ruff==0.16.0"
+      ruff check scripts/
+    displayName: 'Run ruff (Python lint gate)'
+
+  - script: bash scripts/bash/generate-atomic-shims.sh --check
+    displayName: 'Verify generated skills are not stale (drift gate)'
+
+  - script: python3 scripts/build_knowledge_index.py --repo-root . --check
+    displayName: 'Verify .knowledge index/coverage are not stale (drift gate)'
+
+  - script: |
+      set -euo pipefail
+      pip install jsonschema
+      python3 eng/release/validate_agents_registry.py
+    displayName: 'Validate agents-registry.json against schema'
+
+  - script: npx --yes markdownlint-cli2 "**/*.md"
+    displayName: 'Run markdownlint-cli2 (markdown lint gate)'
+
+  - script: |
+      set -euo pipefail
+      # Hosted image currently includes setuptools 79.x, flagged by PYSEC-2026-3447.
+      # Upgrade before auditing so the vulnerability gate evaluates the remediated env.
+      pip install "setuptools>=83.0.0"
+      pip install pip-audit
+      pip-audit
+    displayName: 'Run pip-audit (fails build on known vulnerabilities)'
+
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK 8'
+    inputs:
+      packageType: sdk
+      version: '8.x'
+
+  - script: dotnet tool install -g docfx --version 2.78.3
+    displayName: 'Install DocFX (pinned version)'
+
+  - script: |
+      set -euo pipefail
+      export PATH="$PATH:$HOME/.dotnet/tools"
+      cd site
+      docfx docfx.json
+    displayName: 'Build documentation (DocFX)'
+
+  - script: |
+      set -euo pipefail
+      # Resolve the release version: prefer a vX.Y.Z tag build, else fall back to pyproject.
+      if [[ "${BUILD_SOURCEBRANCH:-}" == refs/tags/v* ]]; then
+        VERSION="${BUILD_SOURCEBRANCH#refs/tags/}"
+      else
+        VER="$(grep -m1 '^version' pyproject.toml | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')"
+        VERSION="v${VER}"
+      fi
+      echo "Resolved version: ${VERSION}"
+      # DevSpark is a clean break from the public DevSpark lineage and starts at
+      # v3.0.0. Never build or publish a v2.x (or older) package, even if a stray
+      # legacy tag triggers this pipeline.
+      MIN_VERSION="3.0.0"
+      if [ "$(printf '%s\n%s\n' "${MIN_VERSION}" "${VERSION#v}" | sort -V | head -n1)" != "${MIN_VERSION}" ]; then
+        echo "Refusing to publish ${VERSION}: DevSpark minimum release is v${MIN_VERSION}." >&2
+        exit 1
+      fi
+      bash eng/release/create-release-packages.sh "${VERSION}"
+      echo "##vso[task.setvariable variable=RELEASE_VERSION]${VERSION}"
+    displayName: 'Assemble per-agent template packages'
+
+  - script: |
+      set -euo pipefail
+      VERSION="$(RELEASE_VERSION)"
+      NUMERIC="${VERSION#v}"
+
+      # Single Static Web App payload: docs at the root, plus /dist and /raw.
+      # Assembled into a repo-relative folder so the SWA deploy task (which mounts
+      # the sources directory) can access it.
+      SITE="$(Build.SourcesDirectory)/_publish"
+      rm -rf "${SITE}"
+      mkdir -p "${SITE}/dist/${VERSION}" "${SITE}/raw"
+
+      # 1) Documentation site at the root.
+      cp -r site/_site/* "${SITE}/"
+      cp staticwebapp.config.json "${SITE}/" 2>/dev/null || true
+
+      # 2) Versioned per-agent template packages.
+      cp .genreleases/devspark-template-*-"${VERSION}".zip "${SITE}/dist/${VERSION}/"
+
+      # 3) Raw tree for prompt-first onboarding (agents fetch files over HTTPS).
+      cp -r templates scripts quickstart agents-registry.json "${SITE}/raw/"
+      # pytest runs earlier in this job and leaves bytecode behind; never publish it.
+      find "${SITE}/raw" -type d -name '__pycache__' -prune -exec rm -rf {} +
+      find "${SITE}/raw" -type f -name '*.pyc' -delete
+      if [[ -f .knowledge/governance/constitution.md ]]; then
+        mkdir -p "${SITE}/raw/.knowledge/governance"
+        cp .knowledge/governance/constitution.md "${SITE}/raw/.knowledge/governance/"
+      fi
+
+      # 4) Structured version manifest. Best-effort merge with the previously
+      #    published manifest so `versions` accumulates a release history.
+      RELEASED="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      ASSETS_JSON="$(cd "${SITE}/dist/${VERSION}" && ls *.zip | sed 's/.*/"&"/' | paste -sd, -)"
+
+      PREV_VERSIONS='[]'
+      if PREV="$(curl -fsS "https://dev.makeboldspark.com/dist/manifest.json" 2>/dev/null)"; then
+        PREV_VERSIONS="$(printf '%s' "${PREV}" | jq -c '.versions // []' 2>/dev/null || printf '[]')"
+      fi
+
+      printf '%s' "${PREV_VERSIONS}" | jq \
+        --arg v "${NUMERIC}" --arg tag "${VERSION}" --arg path "dist/${VERSION}" \
+        --arg released "${RELEASED}" --argjson assets "[${ASSETS_JSON}]" \
+        --arg min "3.0.0" '
+        ([{version: $v, tag: $tag, path: $path, released: $released, assets: $assets}]
+          + map(select(.version != $v)))
+        | map(select((.version | split(".") | map(tonumber))
+                     >= ($min | split(".") | map(tonumber))))
+        | sort_by(.version | split(".") | map(tonumber)) | reverse
+        ' > /tmp/versions.json
+
+      # 4a) Canonical install index. Single source of truth for what a prompt-first
+      #     (quickstart) install must place in the consumer's repo. Generated from the
+      #     same /raw tree we publish, using the identical mapping the per-agent template
+      #     zip applies in create-release-packages.sh:
+      #       templates/commands/<n>.md         -> .devspark/defaults/commands/devspark.<n>.md
+      #       templates/consumer-skills/devspark-<n>/SKILL.md
+      #                                          -> .github/skills/devspark-<n>/SKILL.md
+      #       templates/** (minus commands/,     -> .devspark/templates/**
+      #          consumer-skills/ & vscode-settings.json)
+      #       templates/vscode-settings.json     -> .devspark/templates/vscode-settings.json
+      #       scripts/**                         -> .devspark/scripts/**
+      #       agents-registry.json               -> agents-registry.json (repo root)
+      #     The agent fetches each {source} from <raw_base>/{source} and writes it to {dest}.
+      build_install_index() {
+        for f in templates/commands/*.md; do
+          [ -f "$f" ] || continue
+          n="$(basename "$f" .md)"
+          printf '%s\t%s\t%s\n' "templates/commands/$n.md" ".devspark/defaults/commands/devspark.$n.md" "command"
+        done
+        find templates/consumer-skills -type f -name SKILL.md 2>/dev/null | LC_ALL=C sort | while IFS= read -r f; do
+          n="$(basename "$(dirname "$f")")"
+          printf '%s\t%s\t%s\n' "$f" ".github/skills/$n/SKILL.md" "skill"
+        done
+        find templates -type f ! -path 'templates/commands/*' ! -path 'templates/consumer-skills/*' ! -name 'vscode-settings.json' | LC_ALL=C sort | while IFS= read -r f; do
+          printf '%s\t%s\t%s\n' "$f" ".devspark/$f" "template"
+        done
+        [ -f templates/vscode-settings.json ] && \
+          printf '%s\t%s\t%s\n' "templates/vscode-settings.json" ".devspark/templates/vscode-settings.json" "template"
+        find scripts -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | LC_ALL=C sort | while IFS= read -r f; do
+          printf '%s\t%s\t%s\n' "$f" ".devspark/$f" "script"
+        done
+        [ -f agents-registry.json ] && \
+          printf '%s\t%s\t%s\n' "agents-registry.json" "agents-registry.json" "registry"
+      }
+      INSTALL_JSON="$(build_install_index | jq -R -s -c '
+        split("\n") | map(select(length > 0)) | map(split("\t"))
+        | map({source: .[0], dest: .[1], category: .[2]})')"
+
+      jq -n \
+        --arg v "${NUMERIC}" --arg tag "${VERSION}" --arg path "dist/${VERSION}" \
+        --arg released "${RELEASED}" --argjson assets "[${ASSETS_JSON}]" \
+        --arg raw_base "https://dev.makeboldspark.com/raw" \
+        --argjson install "${INSTALL_JSON}" \
+        --argjson devspark_root '["VERSION","defaults","templates","scripts"]' \
+        --slurpfile versions /tmp/versions.json '
+        {
+          latest: $v,
+          tag: $tag,
+          path: $path,
+          released: $released,
+          assets: $assets,
+          raw_base: $raw_base,
+          devspark_root: $devspark_root,
+          install: $install,
+          versions: $versions[0]
+        }' > "${SITE}/dist/manifest.json"
+
+      echo "Manifest:"; cat "${SITE}/dist/manifest.json"
+      echo "Static Web App payload:"; find "${SITE}" -maxdepth 2 -mindepth 1 -type d | sort
+    displayName: 'Assemble Static Web App payload (docs + dist + raw)'
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Static Web App payload artifact'
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/_publish'
+      artifact: 'swa-site'
+
+  # --- Deploy everything (docs + dist + raw) to the Static Web App ---
+  # Skipped for tag-triggered runs: AzureStaticWebApp@0 cannot resolve a
+  # deployment environment for a refs/tags/* ref, and the same commit's
+  # `main` branch build already deployed this content. Also skipped for PR-triggered
+  # runs: a PR build validates only and must never publish.
+  - task: AzureStaticWebApp@0
+    displayName: 'Deploy to Azure Static Web App'
+    condition: and(succeeded(), ne(variables['SWA_DEPLOYMENT_TOKEN'], ''), not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')), ne(variables['Build.Reason'], 'PullRequest'))
+    inputs:
+      app_location: '_publish'
+      skip_app_build: true
+      skip_api_build: true
+      azure_static_web_apps_api_token: '$(SWA_DEPLOYMENT_TOKEN)'
+

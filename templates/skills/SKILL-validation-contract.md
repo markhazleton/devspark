@@ -1,5 +1,7 @@
 # SKILL Validation Contract
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 This document defines the rules that every `SKILL.md` and skill folder under
 `templates/skills/` must satisfy. Rules are layered: upstream Agent Skills rules
 first, then DevSpark addendum rules.
@@ -93,7 +95,7 @@ Document the fallback explicitly in the body context-loading section.
 
 ## Three-Tier Exit-Code Table
 
-CI validation tests use this
+The `devspark skills validate` command and CI validation tests use this
 exit-code contract:
 
 | Tier | Exit Code | Stdout | Stderr | Meaning |

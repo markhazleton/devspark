@@ -1,5 +1,7 @@
 # Java + Spring Boot Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Persistence
 
 - [ ] **Explicit `@Transactional` boundaries** on service methods; default propagation reviewed

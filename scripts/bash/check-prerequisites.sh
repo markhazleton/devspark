@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 
 # Consolidated prerequisite checking script
 #
@@ -9,10 +10,10 @@
 #
 # OPTIONS:
 #   --json              Output in JSON format
+#   --require-plan      Require plan.md to exist (full-spec routes only; quick-spec/quickfix have no plan.md)
 #   --require-tasks     Require tasks.md to exist (for implementation phase)
 #   --include-tasks     Include tasks.md in AVAILABLE_DOCS list
 #   --paths-only        Only output path variables (no validation)
-#   --require-delivery-status  Require latest delivery status to be create-pr ready
 #   --timeout-seconds=N  Timeout value reported in diagnostics
 #   --help, -h          Show help message
 #
@@ -22,6 +23,7 @@
 #   Paths only: REPO_ROOT: ... \n BRANCH: ... \n FEATURE_DIR: ... etc.
 
 set -e
+script_start_epoch=$(date +%s)
 
 # Verify minimum bash version (3.2+)
 if [[ "${BASH_VERSINFO[0]}" -lt 3 ]] || { [[ "${BASH_VERSINFO[0]}" -eq 3 ]] && [[ "${BASH_VERSINFO[1]}" -lt 2 ]]; }; then
@@ -32,16 +34,19 @@ fi
 
 # Parse command line arguments
 JSON_MODE=false
+REQUIRE_PLAN=false
 REQUIRE_TASKS=false
 INCLUDE_TASKS=false
 PATHS_ONLY=false
-REQUIRE_DELIVERY_STATUS=false
 TIMEOUT_SECONDS=300
 
 for arg in "$@"; do
     case "$arg" in
         --json)
             JSON_MODE=true
+            ;;
+        --require-plan)
+            REQUIRE_PLAN=true
             ;;
         --require-tasks)
             REQUIRE_TASKS=true
@@ -51,9 +56,6 @@ for arg in "$@"; do
             ;;
         --paths-only)
             PATHS_ONLY=true
-            ;;
-        --require-delivery-status)
-            REQUIRE_DELIVERY_STATUS=true
             ;;
         --timeout-seconds=*)
             TIMEOUT_SECONDS="${arg#*=}"
@@ -66,26 +68,26 @@ Consolidated prerequisite checking for Spec-Driven Development workflow.
 
 OPTIONS:
   --json              Output in JSON format
+  --require-plan      Require plan.md to exist (full-spec routes only)
   --require-tasks     Require tasks.md to exist (for implementation phase)
   --include-tasks     Include tasks.md in AVAILABLE_DOCS list
   --paths-only        Only output path variables (no prerequisite validation)
-    --require-delivery-status  Require latest delivery status to be create-pr ready
     --timeout-seconds=N  Timeout value reported in diagnostics (default: 300)
   --help, -h          Show this help message
 
 EXAMPLES:
-  # Check task prerequisites (plan.md required)
-  ./check-prerequisites.sh --json
+  # Check task prerequisites (plan.md required, full-spec route)
+  ./check-prerequisites.sh --json --require-plan
   
   # Check implementation prerequisites (plan.md + tasks.md required)
-  ./check-prerequisites.sh --json --require-tasks --include-tasks
+  ./check-prerequisites.sh --json --require-plan --require-tasks --include-tasks
+  
+  # Degrade gracefully for quick-spec/quickfix routes (no plan.md/tasks.md required)
+  ./check-prerequisites.sh --json --include-tasks
   
   # Get feature paths only (no validation)
   ./check-prerequisites.sh --paths-only
 
-    # Enforce delivery gate for create-pr/pr-review transitions
-    ./check-prerequisites.sh --json --require-delivery-status --timeout-seconds=300
-  
 EOF
             exit 0
             ;;
@@ -131,35 +133,22 @@ fi
 # Validate required directories and files
 if [[ ! -d "$FEATURE_DIR" ]]; then
     echo "ERROR: Feature directory not found: $FEATURE_DIR" >&2
-    echo "Run /devspark.specify first to create the feature structure." >&2
+    echo "Run /devspark-specify first to create the feature structure." >&2
     exit 1
 fi
 
-if [[ ! -f "$IMPL_PLAN" ]]; then
+# Check for plan.md if required (full-spec routes only; quick-spec/quickfix never produce plan.md)
+if $REQUIRE_PLAN && [[ ! -f "$IMPL_PLAN" ]]; then
     echo "ERROR: plan.md not found in $FEATURE_DIR" >&2
-    echo "Run /devspark.plan first to create the implementation plan." >&2
+    echo "Run /devspark-plan first to create the implementation plan." >&2
     exit 1
 fi
 
 # Check for tasks.md if required
 if $REQUIRE_TASKS && [[ ! -f "$TASKS" ]]; then
     echo "ERROR: tasks.md not found in $FEATURE_DIR" >&2
-    echo "Run /devspark.tasks first to create the task list." >&2
+    echo "Run /devspark-tasks first to create the task list." >&2
     exit 1
-fi
-
-if $REQUIRE_DELIVERY_STATUS; then
-    latest_result=""
-    if [[ -d ".devspark.work/runs" ]]; then
-        latest_result=$(ls -1dt .devspark.work/runs/*/result.json 2>/dev/null | head -n 1)
-    fi
-    if [[ -n "$latest_result" ]] && [[ -f "$latest_result" ]] && command -v jq >/dev/null 2>&1; then
-        create_pr_ready=$(jq -r '.create_pr_ready // false' "$latest_result")
-        if [[ "$create_pr_ready" != "true" ]]; then
-            echo "ERROR: delivery-status gate failed; latest delivery status is not create-pr ready (timeout-seconds=$TIMEOUT_SECONDS)" >&2
-            exit 1
-        fi
-    fi
 fi
 
 # Build list of available documents
@@ -181,6 +170,27 @@ if $INCLUDE_TASKS && [[ -f "$TASKS" ]]; then
     docs+=("tasks.md")
 fi
 
+# Checklist status (M-03: scripts compute, models judge -- exact counts, not LLM arithmetic)
+CHECKLISTS_DIR="$FEATURE_DIR/checklists"
+checklist_names=()
+checklist_totals=()
+checklist_completed=()
+checklists_overall="PASS"
+if [[ -d "$CHECKLISTS_DIR" ]]; then
+    for f in "$CHECKLISTS_DIR"/*.md; do
+        [[ -f "$f" ]] || continue
+        total=$(grep -cE '^\s*-\s*\[[xX ]\]' "$f" || true)
+        completed=$(grep -cE '^\s*-\s*\[[xX]\]' "$f" || true)
+        incomplete=$((total - completed))
+        checklist_names+=("$(basename "$f")")
+        checklist_totals+=("$total")
+        checklist_completed+=("$completed")
+        if [[ "$incomplete" -gt 0 ]]; then
+            checklists_overall="FAIL"
+        fi
+    done
+fi
+
 # Output results
 if $JSON_MODE; then
     # Build JSON array of documents
@@ -190,8 +200,27 @@ if $JSON_MODE; then
         json_docs=$(printf '"%s",' "${docs[@]}")
         json_docs="[${json_docs%,}]"
     fi
-    
-    printf '{"FEATURE_DIR":"%s","AVAILABLE_DOCS":%s}\n' "$FEATURE_DIR" "$json_docs"
+
+    # Build JSON array of checklist summaries
+    if [[ ${#checklist_names[@]} -eq 0 ]]; then
+        json_checklists="[]"
+    else
+        json_checklists="["
+        for i in "${!checklist_names[@]}"; do
+            name="${checklist_names[$i]}"
+            total="${checklist_totals[$i]}"
+            completed="${checklist_completed[$i]}"
+            incomplete=$((total - completed))
+            status="PASS"
+            [[ "$incomplete" -gt 0 ]] && status="FAIL"
+            json_checklists+=$(printf '{"name":"%s","total":%d,"completed":%d,"incomplete":%d,"status":"%s"},' \
+                "$name" "$total" "$completed" "$incomplete" "$status")
+        done
+        json_checklists="${json_checklists%,}]"
+    fi
+
+    printf '{"contract":1,"FEATURE_DIR":"%s","AVAILABLE_DOCS":%s,"CHECKLISTS":%s,"CHECKLISTS_OVERALL":"%s"}\n' \
+        "$FEATURE_DIR" "$json_docs" "$json_checklists" "$checklists_overall"
 else
     # Text output
     echo "FEATURE_DIR:$FEATURE_DIR"
@@ -206,4 +235,22 @@ else
     if $INCLUDE_TASKS; then
         check_file "$TASKS" "tasks.md"
     fi
+
+    if [[ ${#checklist_names[@]} -gt 0 ]]; then
+        echo "CHECKLISTS:"
+        for i in "${!checklist_names[@]}"; do
+            name="${checklist_names[$i]}"
+            total="${checklist_totals[$i]}"
+            completed="${checklist_completed[$i]}"
+            incomplete=$((total - completed))
+            status="PASS"
+            [[ "$incomplete" -gt 0 ]] && status="FAIL"
+            echo "  $name: total=$total completed=$completed incomplete=$incomplete status=$status"
+        done
+        echo "CHECKLISTS_OVERALL: $checklists_overall"
+    fi
 fi
+
+script_end_epoch=$(date +%s)
+duration_ms=$(( (script_end_epoch - script_start_epoch) * 1000 ))
+add_devspark_metric "check-prerequisites" "success" "$duration_ms" '{"showstopper":0,"critical":0,"high":0,"medium":0,"low":0}' "{\"include_tasks\":$INCLUDE_TASKS,\"require_tasks\":$REQUIRE_TASKS}"

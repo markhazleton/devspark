@@ -1,0 +1,49 @@
+# Seeded Plan reconciliation cases. Each case starts from spec.md and plan.md in this folder,
+# with the plan stamped with the fingerprint of the baseline spec, then applies the spec edit.
+# A model-driven run of the Plan prompt must reproduce `outcome`, `stamp` and `plan_changes`.
+cases:
+  - id: wording-only
+    judge: absent
+    edit: {replace: "export one report", with: "write one report"}
+    plan_spec_state: stale
+    outcome: NO CONTENT CHANGE
+    plan_changes: none
+    stamp: updated
+  - id: project-addition
+    judge: absent
+    edit: {append: "- The system MUST let the user choose the delimiter."}
+    after_heading: "## Requirements"
+    plan_spec_state: stale
+    outcome: SUBSTANTIVE REVISION
+    plan_changes: adds the delimiter choice only
+    stamp: updated
+  - id: constrain-invalidates-mechanism
+    judge: absent
+    edit: {replace: "MUST NOT call any network service", with: "MUST NOT hold the whole report in memory"}
+    plan_spec_state: stale
+    outcome: BOUNDED CORRECTION
+    plan_changes: replaces the in-memory build with streaming and keeps the rest
+    stamp: updated
+  - id: context-only
+    judge: absent
+    edit: {replace: "a few hundred rows at most", with: "a few hundred rows, occasionally thousands"}
+    plan_spec_state: stale
+    outcome: NO CONTENT CHANGE
+    plan_changes: none
+    stamp: updated
+  - id: conflicting-decisions
+    judge: absent
+    edit: {append: "- Exports MUST call a network service to sign the file."}
+    after_heading: "## Constraints"
+    plan_spec_state: stale
+    outcome: stop-3
+    plan_changes: none
+    stamp: unchanged
+  - id: judge-present-unreviewed-spec-change
+    judge: present
+    edit: {replace: "export one report", with: "write one report"}
+    plan_spec_state: stale
+    outcome: stop-9
+    plan_changes: none
+    stamp: unchanged
+    names: /devspark-planning-review

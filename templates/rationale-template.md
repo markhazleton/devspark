@@ -1,3 +1,5 @@
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Rationale Summary
 
 ### Core Problem

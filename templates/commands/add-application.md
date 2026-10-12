@@ -1,4 +1,5 @@
 ---
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
 description: Register a new application in the multi-app repository registry with guided metadata collection and automatic scaffolding.
 ---
 
@@ -12,13 +13,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-Register a new application in the DevSpark multi-app registry at `.knowledge/entities/application-registry/registry.json`.
+Register a new application in the DevSpark multi-app registry at `.devspark.work/devspark.registry.json`.
 
 1. **Collect application metadata** from the user input or interactively:
    - `id`: Unique, lowercase, path-safe identifier (e.g., `payments-api`)
    - `name`: Human-readable application name
    - `path`: Relative path from repo root (e.g., `apps/payments-api`)
-   - `kind`: Application type (e.g., `runtime-api`, `web-client`, `web-admin`, `library`, `qa-tool`)
+   - `kind`: Application type (e.g., `runtime-api`, `web-client`, `web-admin`, `library`, `qa-harness`)
    - `purpose`: One-line description of the application's role
    - `runtime`: Technology/framework (e.g., `dotnet`, `react`, `node`)
    - `owner`: Team or individual responsible
@@ -33,19 +34,14 @@ Register a new application in the DevSpark multi-app registry at `.knowledge/ent
    - Check that the `path` does not conflict with existing registered app paths
 
 3. **Update the registry**:
-   - Add the new application entry to the `apps` array in `.knowledge/entities/application-registry/registry.json`
+   - Add the new application entry to the `apps` array in `.devspark.work/devspark.registry.json`
    - Ensure the registry passes full validation after the addition
 
-4. **Scaffold the application documentation** (always performed):
-   - Create the app-local current-truth roots under `{path}/.knowledge/`:
-     - `entities/` — app-specific current-truth entities
-     - `governance/decisions/` — app-specific current decisions
-     - `ontology/` — app-scoped generated ontology reports
-     - `overrides/commands/` — app-specific command overrides
-     - `overrides/scripts/` — app-specific script overrides
-     - `overrides/templates/` — app-specific template overrides
-   - Create `{path}/.devspark.work/specs/` for app-scoped temporary work
-     packages. Never place specs, plans, or tasks under `.knowledge/`.
+4. **Scaffold the application roots** (always performed):
+   - Create `{path}/.devspark.work/` for temporary app-scoped plans and operational work products
+   - Create `{path}/.knowledge/` for app-scoped current truth
+   - Create `{path}/.knowledge/guides/` for published app documentation
+   - Do not create archive, decision-history, rationale-history, or completed-plan directories
    - Do NOT create or modify `.devspark/`
 
 5. **Report results**:
@@ -58,3 +54,11 @@ Register a new application in the DevSpark multi-app registry at `.knowledge/ent
 - If the registry file does not exist, create it with `version: 1`, `mode: "multi-app"`, empty `profiles`, and the new app as the first entry
 - If the `id` already exists, fail with a clear duplicate error and do not modify the registry
 - The command MUST NOT modify `.devspark/` (ownership boundary)
+
+## Removing an Application
+
+To reverse a registration, edit `.devspark.work/devspark.registry.json` directly and remove the app's entry (and any profile references that point only to it), or ask the agent to run `/devspark-add-application` in reverse ("remove app `<app-id>` from the registry").
+
+This removes only the registry entry. It reports, but never deletes, the app's `.devspark.work/`,
+`.knowledge/`, or `.knowledge/guides/` roots. It also refuses to remove an app that another registered
+app still lists in `dependsOn`.

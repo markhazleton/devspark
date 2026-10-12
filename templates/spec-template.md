@@ -1,10 +1,14 @@
 ---
+source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
+devspark_version: "<version that authored this spec; omit if undeterminable>"
 classification: full-spec
 risk_level: medium
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
 recommended_next_step: plan
-required_gates: checklist, analyze, critic
+required_gates: checklist, analyze, critic # optionally add verify:<mode> entries when empirical proof is required
+depends_on: [] # optional cross-repo references, e.g. ["devspark.category:054-shadow-events"]
+supersedes: [] # optional cross-repo supersession refs, e.g. ["triage:003-classify-intent-v1"]
 participants:
   owner: human
   planner: ai
@@ -20,6 +24,10 @@ participants:
 **Created**: [DATE]
 **Status**: Draft <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "$ARGUMENTS"
+
+## Product Owner TLDR
+
+[High-level summary for Product Owner: what this spec changes and why now. Keep this to 3-5 sentences, non-technical, outcome-focused.]
 
 ## Rationale Summary
 
@@ -43,6 +51,12 @@ participants:
 - [System constraints or prior patterns]
 - [Relevant data or telemetry insights]
 
+### External Contracts
+
+- [Owning repo]: [Contract name / version]
+  - Verbatim contract details consumed by this feature (copy exact field names/shapes where applicable)
+  - Drift policy: If this upstream contract changes, treat as breaking and re-run analyze + critic before merge
+
 ### Tradeoffs Considered
 
 - Option A: [why not chosen]
@@ -58,6 +72,22 @@ participants:
 ### Reviewer Guidance
 
 [What should reviewers focus on?]
+
+## Minimum Sufficient Change
+
+<!--
+  Keep this short. It makes non-scope explicit before planning begins (MVP).
+  Fill it from what is known; "none known" is a valid answer. Not a questionnaire.
+-->
+
+```yaml
+minimum_sufficient_change:
+  minimum_valuable_outcome: "[the smallest outcome that is worth shipping]"
+  explicitly_not_required:
+    - "[something a reader might assume is in scope but is not]"
+  acceptable_manual_operations:
+    - "[a manual or operator-driven step that is acceptable here, or none known]"
+```
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -137,6 +167,8 @@ participants:
 -->
 
 ### Functional Requirements
+
+> Each `FR-###` is a stable traceability anchor. Every functional requirement should be satisfied by at least one task in `tasks.md` (referenced there via `Implements: FR-###`). `/devspark-analyze` flags any requirement with zero implementing tasks and any task that references an `FR-###` not defined here.
 
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
 - **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]

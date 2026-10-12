@@ -1,6 +1,12 @@
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ````markdown
 ---
 description: Perform comprehensive codebase audit against project constitution/standards, producing structured compliance report
+handoffs:
+  - label: Re-run Current Audit
+    agent: devspark-site-audit
+    prompt: Re-run the audit against the current durable repository state.
 scripts:
   sh: .devspark/scripts/bash/site-audit.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/site-audit.ps1 $ARGUMENTS -Json
@@ -14,41 +20,13 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## DevSpark v4 Override
-
-This command audits the repository's current state. When any later section
-conflicts with this section, the v4 section wins.
-
-- Audit is synchronic: check whether the whole current state holds together,
-  never whether two past changes conflicted.
-- Run current-truth validation across `.knowledge`, governance, and source-code
-  comments. No comment may name a spec ID, task ID, or plan identifier; check it
-  with `python .devspark/scripts/scan-ephemeral-refs.py --full-inventory`.
-- Run the knowledge engine reported in `knowledge_engine.engine` (resolved by
-  `resolve_knowledge_engine`) with `--check` and gate on gap-report failures
-  for all entities. Report `knowledge_engine.legacy_copies` as upgrade work.
-- Existence and accuracy are separate reports: `coverage.json` answers
-  existence. This audit owns accuracy: re-run every `verified_by: execution`
-  test it cites, and judge `verified_by: inspection` evidence by reading the
-  cited code. Report missing evidence as a failure and code-only evidence
-  without `fallback_reason` as a warning.
-- When pinned claims exist, run `--detect-drift --full-inventory` and report
-  drifted claims.
-- When coverage shows structural knowledge gaps (unmapped code areas, weak or
-  over-broad mappings, missing relationships), recommend
-  `/devspark.discover-knowledge <area>` rather than drafting knowledge here.
-- Scope the contradiction scan to `index.json` `contradiction_scopes` (same
-  entity, entities sharing a `constrains` decision, objects citing the same
-  evidence); never compare all pairs. Judging whether a candidate is a genuine
-  contradiction or an acceptable nuance stays a warning for human review.
-- Do not create durable audit-history files unless the user explicitly asks for
-  an external report.
-
 ## Overview
 
 This command performs a comprehensive codebase audit against the project constitution/standards document. It scans the entire repository (or specified scope) for compliance violations, code quality issues, unused dependencies, and architectural concerns.
 
 **IMPORTANT**: This command **only provides analysis** - it does not make any code changes.
+
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — in particular §9 (Genuine Fix Discipline) and its §9.1 intent-cue table when phrasing code-quality findings. Preamble modules: `finding-fix`, `convergence`, `provenance`, `configuration`.
 
 ## Prerequisites
 
@@ -68,17 +46,17 @@ Parse `$ARGUMENTS` for scope flags:
 | `--scope=quality` | Code quality metrics only |
 | `--scope=unused` | Unused code/dependencies detection |
 | `--scope=duplicate` | Duplicate code detection |
-| `--scope=comments` | Stale comments and spec references only |
+| `--scope=comments` | Stale comments and escaped planning references only |
+| `--scope=evidence` | Evidence-accuracy re-run and graph-adjacent contradiction scan only |
+| `--scope=knowledge` | Knowledge completeness and knowledge/code mapping accuracy only |
 
 If no scope specified, default to `--scope=full`.
 
 ## Outline
 
-**Multi-app support**: If this repository uses multi-app mode (`.knowledge/entities/application-registry/registry.json` exists with `mode: "multi-app"`), check for `--app <id>` in the user input to scope this workflow to a specific application. When app context is provided, resolve artifacts from `{app.path}/.knowledge/` instead of the repository root `.knowledge/`. Print the resolved scope (app name, doc root) at the start of output.
+Multi-app scope and the 2-tier override check for scripts are defined by the shared preamble contract already loaded above.
 
 ### 1. Initialize Audit Context
-
-> **Script Resolution**: Before running `{SCRIPT}`, apply the 2-tier override check — if `.knowledge/overrides/scripts/powershell/<filename>` (PowerShell) or `.knowledge/overrides/scripts/bash/<filename>` (Bash) exists on disk, run that file instead, preserving all arguments. Team overrides in `.knowledge/overrides/scripts/` always take priority over `.devspark/scripts/`.
 
 Run `{SCRIPT}` to gather codebase data and parse JSON output for:
 - `REPO_ROOT`: Repository root path
@@ -101,7 +79,7 @@ Execution limits (required):
 
 **Error Handling**:
 If the script fails:
-- **Constitution missing**: Guide user to run `/devspark.constitution`
+- **Constitution missing**: Guide user to run `/devspark-constitution`
 - **Script execution failed**: Provide PowerShell troubleshooting
 
 For single quotes in args like "I'm auditing", use escape syntax: e.g 'I'\''m auditing' (or double-quote if possible: "I'm auditing").
@@ -117,7 +95,7 @@ Read and parse `/.knowledge/governance/constitution.md`:
 
 If constitution doesn't exist:
 - **STOP** and inform user that constitution is required
-- Provide guidance: "Run `/devspark.constitution` to create project principles first"
+- Provide guidance: "Run `/devspark-constitution` to create project principles first"
 - Do not proceed with audit
 
 ### 3. File Discovery and Categorization
@@ -146,18 +124,15 @@ current. Stale installations may have outdated command files or missing framewor
 
 #### A. Read Version Stamp
 
-Check for `.devspark/VERSION` first (fallback: legacy `.knowledge/DEVSPARK_VERSION`):
+Check for `.devspark/VERSION` first (fallback: legacy `.documentation/DEVSPARK_VERSION`):
 
 - **If both are missing**: Flag `VER1` — stamp absent, version unknown (HIGH)
 - **If present**: Parse `version`, `installed`, and `method` fields (legacy stamp may use `agent`)
 
 #### B. Detect Latest Version
 
-Fetch `https://api.github.com/repos/markhazleton/devspark/releases/latest`, read
-`tag_name`, and strip the leading `v` to get `LATEST_VERSION`. Fallback if the
-Releases API is unreachable: read the most recent `## [vX.Y.Z]` or
-`## [X.Y.Z]` entry in `CHANGELOG.md` (repo root). Final fallback: read
-`version = "..."` from `pyproject.toml`.
+Read the most recent `## [X.Y.Z]` entry in `CHANGELOG.md` (repo root) to get
+`LATEST_VERSION`. Fallback: read `version = "..."` from `pyproject.toml`.
 
 #### C. Compare and Flag
 
@@ -184,53 +159,83 @@ Include in the audit report under a **DevSpark Version** section:
 ```
 
 If VER1 or VER2 is present, add to the Recommendations section:
-> Re-run the matching quickstart prompt to update or repair DevSpark.
+> Re-run your agent's quickstart guide (or `/devspark-upgrade`) to update DevSpark.
 
-### 5. Spec Lifecycle Audit (Anti-Pattern Detection)
+### 5. Durable Delta Consistency Audit
 
-Scan `/.devspark.work/specs/` for spec directories and flag lifecycle violations. This is critical to prevent incomplete specs from being merged to main.
+Audit the repository's current durable state: source code, tests, durable configuration/scripts,
+and `.knowledge/`. Do not treat `.devspark.work/` workflow artifacts or `.archive/` contents as
+current truth, and do not require, recover, or judge temporary plans. Missing
+`.devspark.work/specs/` content is normal. `.devspark.work/devspark.json` may be read only when
+needed to resolve repository or application scope. Existing reports under
+`.devspark.work/audit/` may be read for historical comparison, and the current audit report is
+written there; neither is audit evidence.
 
-#### A. Scan All Spec Directories
-
-For each directory in `/.devspark.work/specs/` (excluding `pr-review/`):
-1. Check if `spec.md` exists
-2. Read the `**Status**:` field (valid values: `Draft`, `In Progress`, `Complete`)
-3. Check if `tasks.md` exists and count completed vs incomplete tasks
-
-#### B. Flag Anti-Patterns
-
-| Condition | Finding ID | Severity | Description |
-|-----------|-----------|----------|-------------|
-| Spec with `Status: Draft` on main branch | SPEC1 | **CRITICAL** | Draft spec merged to main — must be Complete before merge |
-| Spec with `Status: In Progress` on main branch | SPEC2 | **CRITICAL** | In-progress spec merged to main — implementation not finished |
-| Spec with incomplete tasks (`- [ ]`) on main branch | SPEC3 | **HIGH** | Tasks not all checked off but spec is on main |
-| Spec exists but `tasks.md` missing | SPEC4 | **MEDIUM** | Spec has no task breakdown — may be abandoned or pre-planning |
-| Spec marked `Complete` but has incomplete tasks | SPEC5 | **HIGH** | Status/task mismatch — spec says Complete but tasks disagree |
-
-#### C. Include in Report
-
-Add a **Spec Lifecycle** section to the audit report:
-
-```markdown
-## Spec Lifecycle
-
-### Spec Status Summary
-
-| Spec Directory | Status | Tasks | Complete | Incomplete | Finding |
-|----------------|--------|-------|----------|------------|---------|
-| 001-feature-x  | Complete | 12  | 12       | 0          | ✅ OK   |
-| 002-feature-y  | In Progress | 8 | 5     | 3          | ❌ SPEC2, SPEC3 |
-| 003-feature-z  | Draft   | 0   | 0        | 0          | ❌ SPEC1, SPEC4 |
-
-### Spec Lifecycle Findings
-
-| ID | Spec | Issue | Severity | Recommendation |
-|----|------|-------|----------|----------------|
-| SPEC1 | 003-feature-z | Draft spec on main branch | CRITICAL | Complete implementation or remove spec |
-| SPEC2 | 002-feature-y | In-progress spec on main branch | CRITICAL | Complete all tasks and mark spec Complete |
-```
-
-If no spec lifecycle issues found, note: "All specs on main branch have Complete status with all tasks checked off."
+1. Map changed or behavior-bearing code to affected tests and `.knowledge/` nodes using `appliesTo`.
+2. Flag code behavior that contradicts current knowledge (`DELTA1`, HIGH).
+3. Flag current knowledge that claims behavior unsupported by code or tests (`DELTA2`, HIGH).
+4. Flag changed behavior without proportionate executable coverage (`DELTA3`, severity by risk).
+5. Scan durable code, tests, and `.knowledge/` for planning identifiers or links
+  such as spec IDs, `FR-###`, `T###`, phase references, or paths into `.devspark.work/` or
+  `.archive/` (`DELTA4`, HIGH) — an archived path is just as forbidden as a live planning path,
+  since it still points at ephemeral state that may be pruned or renumbered. Do not scan the
+  temporary planning root or `.archive/` itself for this finding.
+6. Report consistency by durable output, with direct evidence and a concrete repair. Do not use a
+  plan's status or task completion as evidence.
+7. **Evidence-accuracy pass** (repo-wide, distinct from the existence check above): for every
+  `.knowledge/` node/decision citing `verified_by: execution` (or an evidence entry of `type: test`),
+  re-run the cited test now and confirm it still passes. The coverage/gap report only checks that a
+  document *exists* for a required layer — this pass catches documents that exist but whose claim no
+  longer holds. A test that no longer passes, or no longer exists, is `DELTA5` (HIGH — the node's
+  claim is unverifiable as written).
+8. **Contradiction scan**, scoped to graph-adjacent objects only — never brute-force pairwise
+  comparison across the whole repo: entities/decisions sharing the same entity id, entities named in
+  the same decision's `constrains`, or objects citing the same `source_of_truth`. Surface a
+  candidate contradiction as `DELTA6` (always a **warning**, never a gate — judging genuine
+  contradiction vs. acceptable nuance is a human call every time).
+9. **Knowledge completeness** (repo-wide structural check, `.knowledge/` in its entirety — this is
+   the repo-wide counterpart to `/devspark-pr-review`'s diff-scoped §6c gate): run
+   `scripts/build_knowledge_index.py --repo-root . --check` (or the installed-repo path). A non-zero
+   exit means `.knowledge/index.json` and/or `.knowledge/ontology/coverage.json` are stale relative
+   to the source docs — `KNOW1` (HIGH, regenerate before trusting any other knowledge finding in
+   this audit). Then read the regenerated `.knowledge/ontology/coverage.json` in full (every entity,
+   not just diff-touched ones) and flag every reported gap — missing required layer doc, invalid
+   `source_of_truth`, stale `last_verified` — as `KNOW2` (severity by entity criticality, floor
+   MEDIUM).
+10. **Knowledge/code mapping accuracy** — for every `appliesTo` and `source_of_truth` path cited
+    anywhere under `.knowledge/` (flat docs and entities alike), confirm the path still exists in
+    the repository **and** does not resolve into `.devspark.work/` or `.archive/`. A reference to a
+    moved, renamed, or deleted file, or one pointing into either ephemeral root (`build_knowledge_index.py`
+    already hard-fails this at generation time — this pass is the repo-wide backstop for a
+    hand-edited or pre-generation file), is `KNOW3` (HIGH — the mapping between knowledge and code
+    is exactly what the field exists to guarantee, and a dangling or ephemeral reference silently
+    breaks retrieval for every command that resolves context through it).
+11. **Relation/decision resolution** — for every `relations[].object` in an `_entity.yaml`, every
+    `constrains` entry in a governance decision, and its reciprocal `constrained_by` on the named
+    entity, confirm the cited id resolves to a real, currently-existing node. An unresolved or
+    one-directional reference is `KNOW4` (HIGH).
+12. **Taxonomy and coverage sweep** — cross-reference `.knowledge/taxonomy-registry.json`'s
+    `pathPattern` entries against the actual `.knowledge/` tree: a file matching no pattern is
+    unclassified content (`KNOW5`, MEDIUM). Separately, using the same repo-structure signals
+    `/devspark-discover-constitution` already gathers (directory layout, layer separation, natural
+    module boundaries), flag a central, behavior-bearing module with **no** corresponding flat doc
+    or entity anywhere under `.knowledge/` as a coverage gap (`KNOW6`, MEDIUM) — evidence this exists
+    is required, never a guess; do not fabricate an entity to close the gap, only report it.
+13. **Knowledge integrity validation** (DevSpark 7.6) — run
+    `scripts/knowledge-integrity.py --repo-root . --json` (installed-repo path:
+    `.devspark/scripts/knowledge-integrity.py`, or the corresponding
+    `scripts/{bash,powershell}/knowledge-integrity.{sh,ps1}` wrapper) rather than reimplementing
+    its checks inline. Fold its structured findings into this report by category:
+    `engine-divergence` and `generated-artifact-drift` are `KNOW7` (HIGH — two disagreeing
+    definitions of `.knowledge` truth, or a stale generated artifact, make every other knowledge
+    finding in this audit unreliable until resolved), `unreachable-knowledge-root` is `KNOW8`
+    (HIGH — a `.knowledge/` directory the canonical index never covers means content sitting
+    there is invisible to every command that resolves context through the index), and
+    `schema-tooling-contradiction` is `KNOW9` (MEDIUM — the taxonomy registry declares a
+    `nodeType` the engine does not recognize). A non-zero exit from `knowledge-integrity.py`
+    means at least one hard-failure finding was reported; surface its findings verbatim (subject,
+    summary, evidence) rather than re-deriving them, since the checks are already source-of-truth
+    for engine-divergence and root-reachability signals.
 
 ### 6. Constitution Compliance Audit
 
@@ -274,7 +279,7 @@ For each violation found:
 - **Principle**: Name of constitution principle violated
 - **File:Line**: Exact location
 - **Issue**: Specific description
-- **Intent**: Behavioral intent that must be repaired or preserved before metric movement is accepted
+- **Intent**: For code-quality/structural findings (function length, nesting, complexity, duplication, swallowed exceptions), one sentence naming the behavioral intent the metric is a proxy for, per `command-preamble-contract.md` §9.1 — so a downstream fix resolves the intent, not just the number. Phrase **Issue** and **Recommendation** around that intent rather than the bare metric: a published eval measured genuine-fix rates of ~5.6% for bare-metric phrasing vs. ~83% when intent was stated first.
 - **Recommendation**: Concrete fix
 
 ### 7. Package/Dependency Audit
@@ -321,13 +326,14 @@ Calculate and report:
 - Commented-out code blocks
 - Inconsistent formatting patterns
 
-### 9. Stale Comments and Spec References Audit
+### 9. Stale Comments and Escaped Planning References Audit
 
 Scan source files for code comments that have lost their value or reference completed work.
 
-#### A. Completed Spec References
+#### A. Planning References in Durable Outputs
 
-Search for comments that reference specs, phases, or tasks that are now complete:
+Search durable source, tests, current knowledge, and published documentation for planning-only
+identifiers:
 
 ```text
 # spec 026
@@ -338,10 +344,9 @@ Search for comments that reference specs, phases, or tasks that are now complete
 # See spec-032
 ```
 
-For each match:
-- Verify whether the referenced spec/task still exists in `/.devspark.work/specs/`
-- Flag as stale if the package is complete or no longer present
-- Include file:line and the matched comment in the finding
+Each match is stale regardless of planning status. Flag it, include file:line and the matched text,
+and recommend rewriting it as a self-contained statement of current behavior. Never inspect a plan
+to interpret the reference.
 
 #### B. Old-Behavior Comments
 
@@ -353,13 +358,11 @@ Detect comments that describe behavior that no longer matches the code:
 
 #### C. Commented-Out Code Blocks
 
-Flag commented-out code blocks exceeding 3 consecutive lines. These accumulate technical debt and should either be removed in a dedicated commit or restored as active code — use `git blame` to understand the original intent before removing.
+Flag commented-out code blocks exceeding 3 consecutive lines. These accumulate technical debt and should either be deleted in a dedicated commit or restored as active code — use `git blame` to understand the original intent before removing.
 
 #### D. Version Migration Comments
 
-Flag comments of the form "Added in vX.Y", "Deprecated since vX.Y", or
-"TODO: remove after upgrade" when the referenced version is already past. These
-provide no value over `git blame` and clutter the codebase.
+Flag comments of the form "Added in v2.8.0", "Deprecated since v3.0", "TODO: remove after upgrade" when the referenced version is already past. These provide no value over `git blame` and clutter the codebase.
 
 #### False-Positive Suppression Policy
 
@@ -378,11 +381,11 @@ Include findings from this phase in the audit report under **Stale Code Comments
 ```markdown
 ## Stale Code Comments
 
-### Completed Spec References
+### Escaped Planning References
 
-| ID | File:Line | Comment | Referenced Spec Status | Action |
-|----|-----------|---------|----------------------|--------|
-| CMT1 | src/handler.py:45 | `# spec 026` | Archived | Remove comment |
+| ID | File:Line | Reference | Action |
+|----|-----------|-----------|--------|
+| CMT1 | src/handler.py:45 | `# spec 026` | Rewrite as current behavior |
 
 ### Commented-Out Code Blocks
 
@@ -394,7 +397,7 @@ Include findings from this phase in the audit report under **Stale Code Comments
 
 | ID | File:Line | Comment | Action |
 |----|-----------|---------|--------|
-| CMT3 | src/api.py:12 | `# Added in vX.Y` | Remove — no value over git blame |
+| CMT3 | src/api.py:12 | `# Added in v2.0` | Remove — no value over git blame |
 ```
 
 ### 10. Unused Code Detection
@@ -444,32 +447,12 @@ Apply consistent severity across all findings:
 | **MEDIUM** | Code quality concern, maintainability issue, missing tests |
 | **LOW** | Style suggestion, minor improvement, optimization opportunity |
 
-#### Current-Truth Delta Finding Codes
-
-Use these shared codes whenever the audit compares current functionality with
-`.knowledge`. `/devspark.explain` reuses the same taxonomy for a single topic.
-
-| Code | Meaning |
-|---|---|
-| `DELTA1` | A documented current-truth claim contradicts current code, runtime configuration, or verified behavior. |
-| `DELTA2` | A cited code, test, configuration, or document evidence target is stale, missing, or unresolvable. |
-| `DELTA3` | A material documented behavior lacks adequate test evidence, or its focused test fails. |
-| `DELTA4` | A knowledge link or current-truth cross-reference is broken. |
-| `KNOW1` | Existing implemented behavior has no matching current-truth knowledge. |
-| `KNOW2` | Matching knowledge exists but is materially incomplete for the observed behavior or boundary. |
-| `KNOW3` | A knowledge claim is unsupported, or code-only evidence lacks the required test-attempt/fallback context. |
-| `KNOW4` | Current-truth objects for the topic are ambiguous, duplicated, or mutually inconsistent. |
-
-Assign a topic-local suffix when reporting multiple instances, for example
-`DELTA2-01`. These codes supplement, rather than replace, the audit's security,
-quality, lifecycle, and version finding codes.
-
 ### 13. Generate Audit Report
 
-Create comprehensive report at `/.devspark.work/audits/YYYY-MM-DD_results.md`:
+Create comprehensive report at `/.devspark.work/audit/YYYY-MM-DD_results.md`:
 
 #### Ensure Directory Exists
-- Check if `/.devspark.work/audits/` exists
+- Check if `/.devspark.work/audit/` exists
 - Create directory structure if missing
 
 #### Report Structure
@@ -483,7 +466,7 @@ Use this format:
 
 - **Audit Date**: [YYYY-MM-DD HH:MM:SS UTC]
 - **Scope**: [full|constitution|packages|quality|unused|duplicate]
-- **Auditor**: devspark.site-audit
+- **Auditor**: devspark-site-audit
 - **Constitution Version**: [VERSION from constitution]
 - **Repository**: [REPO_NAME]
 
@@ -494,7 +477,8 @@ Use this format:
 | Category | Score | Status |
 |----------|-------|--------|
 | DevSpark Version | [UP TO DATE / UPGRADE AVAILABLE / UNKNOWN] | [Status] |
-| Spec Lifecycle | [X] specs on main | [✅ All Complete / ❌ Incomplete specs found] |
+| Durable Delta Consistency | [CONSISTENT / FINDINGS] | [Status] |
+| Knowledge Completeness & Mapping Accuracy | [COMPLETE / GAPS] | [Status] |
 | Constitution Compliance | [X]% | [✅ PASS / ⚠️ PARTIAL / ❌ FAIL] |
 | Security | [X]% | [Status] |
 | Code Quality | [X]% | [Status] |
@@ -525,9 +509,9 @@ Use this format:
 
 ### Detailed Violations
 
-| ID | Principle | File:Line | Issue | Intent | Severity | Recommendation |
-|----|-----------|-----------|-------|--------|----------|----------------|
-| SEC1 | Security | src/config.py:45 | Hardcoded API key | Prevent credential disclosure at runtime | CRITICAL | Use environment variable |
+| ID | Principle | File:Line | Issue | Severity | Recommendation |
+|----|-----------|-----------|-------|----------|----------------|
+| SEC1 | Security | src/config.py:45 | Hardcoded API key | CRITICAL | Use environment variable |
 
 ## DevSpark Version
 
@@ -541,10 +525,10 @@ Use this format:
 
 ### Version Findings
 
-| ID | Issue | Intent | Severity | Recommendation |
-|----|-------|--------|----------|----------------|
-| VER1 | VERSION stamp absent | Keep installed framework provenance auditable | HIGH | Run the remote upgrade prompt to install or refresh the version stamp |
-| VER2 | Version X.Y.Z installed, X.Y.Z available | Keep framework behavior aligned with current release contracts | MEDIUM | Re-run the matching quickstart prompt |
+| ID | Issue | Severity | Recommendation |
+|----|-------|----------|----------------|
+| VER1 | VERSION stamp absent | HIGH | Re-run your agent's quickstart guide to install or refresh the version stamp |
+| VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/devspark-upgrade` to update |
 
 ## Security Findings
 
@@ -617,15 +601,15 @@ Use this format:
 
 ### Files Requiring Attention
 
-| File | Issue | Intent | Metric | Recommendation |
-|------|-------|--------|--------|----------------|
-| src/large_module.py | Excessive length | Preserve maintainable review and test boundaries | 850 lines | Split into smaller modules |
+| File | Issue | Metric | Recommendation |
+|------|-------|--------|----------------|
+| src/large_module.py | Excessive length | 850 lines | Split into smaller modules |
 
 ### Quality Issues
 
-| ID | Category | File:Line | Issue | Intent | Severity |
-|----|----------|-----------|-------|--------|----------|
-| QUAL1 | Complexity | src/handler.py:120 | Function exceeds 50 lines | Preserve understandable control flow without changing behavior | MEDIUM |
+| ID | Category | File:Line | Issue | Severity |
+|----|----------|-----------|-------|----------|
+| QUAL1 | Complexity | src/handler.py:120 | Function exceeds 50 lines | MEDIUM |
 
 ## Test Coverage Analysis
 
@@ -638,9 +622,9 @@ Use this format:
 
 ### Untested Files
 
-| File | Importance | Intent | Recommendation |
-|------|------------|--------|----------------|
-| src/auth.py | HIGH | Prove authentication accepts and rejects the intended cases | Add unit tests for authentication logic |
+| File | Importance | Recommendation |
+|------|------------|----------------|
+| src/auth.py | HIGH | Add unit tests for authentication logic |
 
 ## Documentation Status
 
@@ -673,9 +657,9 @@ Use this format:
 
 ### Duplicate Blocks Found
 
-| ID | Locations | Lines | Similarity | Intent | Recommendation |
-|----|-----------|-------|------------|--------|----------------|
-| DUP1 | src/a.py:10-25, src/b.py:45-60 | 15 | 100% | Preserve equivalent behavior while removing duplicate maintenance paths | Extract to shared function |
+| ID | Locations | Lines | Similarity | Recommendation |
+|----|-----------|-------|------------|----------------|
+| DUP1 | src/a.py:10-25, src/b.py:45-60 | 15 | 100% | Extract to shared function |
 
 ## Recommendations
 
@@ -696,6 +680,15 @@ Use this format:
 
 1. **[Issue ID]**: [Description]
 
+## Comparative Analysis
+
+[If previous audit exists, show trends]
+
+| Metric | Previous | Current | Trend |
+|--------|----------|---------|-------|
+| Critical Issues | [X] | [Y] | [↑/↓/→] |
+| Code Quality Score | [X]% | [Y]% | [Trend] |
+
 ## Next Steps
 
 1. Address all CRITICAL issues before next deployment
@@ -705,10 +698,10 @@ Use this format:
 
 ---
 
-*Audit generated by `/devspark.site-audit`*
+*Audit generated by devspark-site-audit v1.0*
 *Constitution-driven codebase audit for [PROJECT_NAME]*
 *Next audit recommended: [DATE + 7 days]*
-*To re-run: `/devspark.site-audit` or `/devspark.site-audit --scope=constitution`*
+*To re-run: `/devspark-site-audit` or `/devspark-site-audit --scope=constitution`*
 ```
 
 ### 13. Output Summary to User
@@ -718,7 +711,7 @@ Display concise summary:
 ```
 ✅ Site Audit Complete!
 
-📄 Report saved: /.devspark.work/audits/YYYY-MM-DD_results.md
+📄 Report saved: /.devspark.work/audit/YYYY-MM-DD_results.md
 📅 Audit date: {DATETIME}
 🎯 Scope: {SCOPE}
 
@@ -735,7 +728,7 @@ Overall Health: {HEALTHY/NEEDS ATTENTION/CRITICAL}
 ⚠️ Critical issues require immediate attention:
 - {ID}: {Brief description}
 
-View full report: /.devspark.work/audits/YYYY-MM-DD_results.md
+View full report: /.devspark.work/audit/YYYY-MM-DD_results.md
 ```
 
 ## Guidelines
@@ -773,11 +766,11 @@ Every issue must include:
 
 The project constitution defines audit criteria. Create one first:
 
-1. Run: /devspark.constitution
+1. Run: /devspark-constitution
 2. Define your project's core principles
-3. Then retry: /devspark.site-audit
+3. Then retry: /devspark-site-audit
 
-Learn more: https://github.com/MarkHazleton/devspark
+Learn more: https://github.com/MarkHazleton/DevSpark
 ```
 
 **If no issues found**:
@@ -791,14 +784,16 @@ Overall Health: HEALTHY
 
 Keep up the great work! 🎉
 
-Report saved: /.devspark.work/audits/YYYY-MM-DD_results.md
+Report saved: /.devspark.work/audit/YYYY-MM-DD_results.md
 ```
 
-### Temporary Report Boundary
+### Historical Comparison
 
-Audit only the current repository state. Reports under
-`/.devspark.work/audits/` are temporary evidence for active remediation; do not
-promote comparisons, trend narratives, or audit chronology into `.knowledge/`.
+When previous audits exist:
+- Load most recent audit from `/.devspark.work/audit/`
+- Compare issue counts by severity
+- Show improvement/regression trends
+- Highlight newly introduced vs. fixed issues
 
 ## Context
 

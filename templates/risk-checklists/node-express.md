@@ -1,5 +1,7 @@
 # Node.js + Express / Next.js / NestJS Risk Checklist
 
+<!-- DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com -->
+
 ## Promise & Error Handling
 
 - [ ] **No unhandled promise rejections** — e.g., async error middleware, `express-async-errors`, NestJS exception filters

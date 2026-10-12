@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Site Audit Pre-Scan Script
 # Gathers codebase data as JSON for LLM context efficiency
 
@@ -42,18 +43,18 @@ done
 
 # Validate scope
 case $SCOPE in
-    full|constitution|packages|quality|unused|duplicate)
+    full|constitution|packages|quality|unused|duplicate|comments|evidence|knowledge)
         ;;
     *)
         echo "Invalid scope: $SCOPE" >&2
-        echo "Valid options: full, constitution, packages, quality, unused, duplicate" >&2
+        echo "Valid options: full, constitution, packages, quality, unused, duplicate, comments, evidence, knowledge" >&2
         exit 1
         ;;
 esac
 
 REPO_ROOT=$(get_repo_root)
 CONSTITUTION_PATH="$REPO_ROOT/.knowledge/governance/constitution.md"
-AUDIT_DIR=".devspark.work/audits"
+AUDIT_DIR=".devspark.work/audit"
 
 # Check constitution
 CONSTITUTION_EXISTS="false"
@@ -69,7 +70,7 @@ if [[ -f "$CONSTITUTION_PATH" ]]; then
 fi
 
 # Exclusion predicates for find (bash array for reliable word-splitting)
-EXCLUDE_DIRS=(-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*')
+EXCLUDE_DIRS=(-path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/venv/*' -o -path '*/.venv/*' -o -path '*/__pycache__/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' -o -path '*/coverage/*' -o -path '*/.devspark.work/*' -o -path '*/.archive/*')
 
 # Count files by category
 count_files() {
@@ -134,12 +135,57 @@ fi
 SECRET_COUNT=0
 TODO_COUNT=0
 
-if [[ "$SCOPE" == "full" || "$SCOPE" == "constitution" || "$SCOPE" == "quality" ]]; then
+if [[ "$SCOPE" == "full" || "$SCOPE" == "constitution" || "$SCOPE" == "quality" || "$SCOPE" == "comments" ]]; then
     # Check for potential secrets (limited to 50 files)
     SECRET_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.json" \) -print 2>/dev/null | head -50 | xargs grep -l -E '(api[_-]?key|password|secret|token)\s*[=:]\s*['"'"'"][^'"'"'"]{8,}['"'"'"]' 2>/dev/null | wc -l | tr -d ' ' || echo 0)
-    
+
     # Count TODO/FIXME comments
     TODO_COUNT=$(find "$REPO_ROOT" -type f \( "${EXCLUDE_DIRS[@]}" \) -prune -o \( -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.md" \) -print 2>/dev/null | head -100 | xargs grep -c -E '(TODO|FIXME|HACK|XXX):' 2>/dev/null | awk -F: '{sum+=$1} END {print sum}' || echo 0)
+fi
+
+# Knowledge pre-scan (index currency, entity coverage)
+KNOWLEDGE_JSON="null"
+KNOWLEDGE_DOCS=0
+KNOWLEDGE_ENTITIES=0
+KNOWLEDGE_INDEX_CURRENT=null
+KNOWLEDGE_DANGLING=null
+KNOWLEDGE_COVERAGE_GAPS="[]"
+KNOWLEDGE_GAP_COUNT=0
+if [[ "$SCOPE" == "full" || "$SCOPE" == "knowledge" || "$SCOPE" == "evidence" ]]; then
+    KNOWLEDGE_ROOT="$REPO_ROOT/.knowledge"
+    if [[ -d "$KNOWLEDGE_ROOT" ]]; then
+        KNOWLEDGE_DOCS=$(find "$KNOWLEDGE_ROOT" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+        if [[ -d "$KNOWLEDGE_ROOT/entities" ]]; then
+            KNOWLEDGE_ENTITIES=$(find "$KNOWLEDGE_ROOT/entities" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+        fi
+        KNOWLEDGE_INDEX_PRESENT=false
+        [[ -f "$KNOWLEDGE_ROOT/index.json" ]] && KNOWLEDGE_INDEX_PRESENT=true
+        KNOWLEDGE_COVERAGE_PRESENT=false
+        [[ -f "$KNOWLEDGE_ROOT/ontology/coverage.json" ]] && KNOWLEDGE_COVERAGE_PRESENT=true
+
+        KNOWLEDGE_ENGINE=$(resolve_knowledge_engine "$REPO_ROOT")
+        PYTHON_BIN=$(command -v python3 || command -v python || true)
+        if [[ -f "$KNOWLEDGE_ENGINE" && -n "$PYTHON_BIN" ]]; then
+            if "$PYTHON_BIN" "$KNOWLEDGE_ENGINE" --repo-root "$REPO_ROOT" --check >/dev/null 2>&1; then
+                KNOWLEDGE_INDEX_CURRENT=true
+            else
+                KNOWLEDGE_INDEX_CURRENT=false
+            fi
+        fi
+
+        if [[ -n "$PYTHON_BIN" && "$KNOWLEDGE_INDEX_PRESENT" == "true" ]]; then
+            KNOWLEDGE_DANGLING=$("$PYTHON_BIN" -c 'import json,sys; print(len(json.load(open(sys.argv[1], encoding="utf-8")).get("dangling_references", [])))' "$KNOWLEDGE_ROOT/index.json" 2>/dev/null || echo null)
+        fi
+
+        if [[ -n "$PYTHON_BIN" && "$KNOWLEDGE_COVERAGE_PRESENT" == "true" ]]; then
+            KNOWLEDGE_COVERAGE_GAPS=$("$PYTHON_BIN" -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1], encoding="utf-8")).get("gaps", [])))' "$KNOWLEDGE_ROOT/ontology/coverage.json" 2>/dev/null || echo "[]")
+            KNOWLEDGE_GAP_COUNT=$("$PYTHON_BIN" -c 'import json,sys; print(len(json.load(open(sys.argv[1], encoding="utf-8")).get("gaps", [])))' "$KNOWLEDGE_ROOT/ontology/coverage.json" 2>/dev/null || echo 0)
+        fi
+
+        KNOWLEDGE_JSON="{ \"present\": true, \"index_present\": $KNOWLEDGE_INDEX_PRESENT, \"index_current\": $KNOWLEDGE_INDEX_CURRENT, \"coverage_present\": $KNOWLEDGE_COVERAGE_PRESENT, \"coverage_gaps\": $KNOWLEDGE_COVERAGE_GAPS, \"dangling_references\": $KNOWLEDGE_DANGLING, \"counts\": { \"documents\": $KNOWLEDGE_DOCS, \"entities\": $KNOWLEDGE_ENTITIES } }"
+    else
+        KNOWLEDGE_JSON="{ \"present\": false, \"index_present\": false, \"index_current\": null, \"coverage_present\": false, \"coverage_gaps\": [], \"dangling_references\": null, \"counts\": { \"documents\": 0, \"entities\": 0 } }"
+    fi
 fi
 
 # Output
@@ -150,7 +196,6 @@ if [[ "$OUTPUT_FORMAT" == "json" ]]; then
   "scope": "$SCOPE",
   "repo_root": "$REPO_ROOT",
   "audit_dir": "$AUDIT_DIR",
-  "knowledge_engine": $(knowledge_engine_json "$REPO_ROOT"),
   "constitution": {
     "exists": $CONSTITUTION_EXISTS,
     "path": ".knowledge/governance/constitution.md",
@@ -183,7 +228,8 @@ if [[ "$OUTPUT_FORMAT" == "json" ]]; then
     "quality": {
       "todo_count": $TODO_COUNT
     }
-  }
+  },
+  "knowledge": $KNOWLEDGE_JSON
 }
 EOF
 else
@@ -208,9 +254,18 @@ else
         echo "  Total lines (sample): $TOTAL_LINES"
         echo ""
     fi
-    if [[ "$SCOPE" == "full" || "$SCOPE" == "constitution" || "$SCOPE" == "quality" ]]; then
+    if [[ "$SCOPE" == "full" || "$SCOPE" == "constitution" || "$SCOPE" == "quality" || "$SCOPE" == "comments" ]]; then
         echo "Pattern Detection:"
         echo "  Files with potential secrets: $SECRET_COUNT"
         echo "  TODO/FIXME comments: $TODO_COUNT"
+    fi
+    if [[ "$SCOPE" == "full" || "$SCOPE" == "knowledge" || "$SCOPE" == "evidence" ]]; then
+        echo ""
+        echo "Knowledge:"
+        echo "  Documents: $KNOWLEDGE_DOCS"
+        echo "  Entities: $KNOWLEDGE_ENTITIES"
+        echo "  Index current: $KNOWLEDGE_INDEX_CURRENT"
+        echo "  Coverage gaps: $KNOWLEDGE_GAP_COUNT"
+        echo "  Dangling references: $KNOWLEDGE_DANGLING"
     fi
 fi
