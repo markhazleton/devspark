@@ -22,7 +22,6 @@ from tests.consumer_skill_helpers import (
     bash_path,
     commands,
     consumer_skill,
-    copy_generation_repo,
     expected_resolution,
     resolution_paths,
     run_generator,
@@ -36,15 +35,9 @@ FORBIDDEN_TEXT = ("templates/", ".github/agents", "STOP", "source repository")
 
 
 @pytest.fixture(scope="module")
-def generated(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Path]:
-    """Run each generator twin once on its own copy of the generator inputs."""
-    repos: dict[str, Path] = {}
-    for shell in ("bash", "pwsh"):
-        repo = copy_generation_repo(tmp_path_factory.mktemp(f"consumer-{shell}") / "repo")
-        result = run_generator(shell, repo)
-        assert result.returncode == 0, result.stdout + result.stderr
-        repos[shell] = repo
-    return repos
+def generated(generated_repos) -> dict[str, Path]:
+    """Each generator twin's output tree, shared with every other generator contract."""
+    return {shell: run.repo for shell, run in generated_repos.items()}
 
 
 def test_one_skill_folder_per_stock_command() -> None:
@@ -111,7 +104,7 @@ def test_check_fails_on_a_mutated_consumer_skill(shell: str, generated: dict[str
     shutil.copytree(generated[shell], repo)
     skill = consumer_skill("specify", repo / "templates" / "consumer-skills")
     assert skill.is_file(), "generator did not emit the specify consumer skill"
-    assert run_generator(shell, repo, check=True).returncode == 0
+    # An unmodified tree passing the check is proven by the repository drift test.
     original = skill.read_bytes()
     skill.write_bytes(original + b"hand edit\n")
     result = run_generator(shell, repo, check=True)

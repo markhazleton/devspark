@@ -11,6 +11,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.2.0] - 2026-10-15
+
+### Added
+
+- **PR review finding closeout**: PR reviews keep one canonical state per finding, with guarded transitions and derived review views. `/devspark-address-pr-review` updates a review in place with bounded changes instead of re-reviewing from scratch. Severity and blocking are separate: a finding's severity does not decide whether it blocks. Known limitation: the end-to-end check by a distinct reviewer has not been run, so independent-reviewer assurance is not claimed.
+- **Architectural Fitness review**: `/devspark-pr-review` weighs coupling, responsibilities, fragile state, duplication, and the consequences of a reasonably foreseeable next change. A finding needs code evidence and a concrete consequence, and speculative refactoring is excluded.
+- **Knowledge Strength review**: `/devspark-pr-review` names the Knowledge owners for the change, cites the applicable invariants and sources concisely, and flags stale, missing or contradictory authoritative Knowledge.
+- **Code First quickfix**: `/devspark-quickfix` accepts a change that already exists, reconciles the actual diff, and finalizes it through the same quickfix record and assurance, with no prior spec, plan or tasks.
+- **Release archival script**: `/devspark-release` now archives completed work with a script (`scripts/release-archive.py`, with PowerShell and Bash wrappers) instead of leaving the moves to the model. `plan` previews, `apply` journals every move in `.archive/{YYYY-MM-DD}/release/archive-manifest-{version}.json` before moving, and `validate` re-checks the archive against the recorded hashes. It never overwrites archived files, is safe to rerun after an interruption, stages moves so Git keeps history, and reports orphaned bundles, untracked files, uncategorized work areas and stale references to moved paths for a decision. Operational files, `.knowledge/` and in-flight specs stay.
+
+### Fixed
+
+- **Archive eligibility false positives**: The release classifier read the `code_ref: pending | knowledge_ref: pending` legend text in a spec's prose as unpopulated linkage, so completed specs were reported as not archive-eligible. Only task and checklist items and standalone linkage fields are checked now.
+- **Knowledge integrity scope**: `scripts/knowledge-integrity.py` no longer expects a Knowledge node under `examples/`.
+- **Linux CI test failures**: The legacy-interpretation tests in `test_address_pr_review_contract.py` removed `/usr/bin` from `PATH` on Linux, which also removed `git` and `dirname`. They now hide only the Python executables. Four stale contract tests were updated to match current command text.
+
+### Changed
+
+- **Faster test suite and release packager**: The test suite runs in parallel with shared fixtures, and the release packager and Bash helpers start far fewer processes. Behavior is unchanged.
+- **Philosophy and getting-started documents**: The philosophy page is split into a vision and a manifesto, and the getting-started guidance matches.
+- **Command invocation guidance**: The quickstart guides, quickstart README and skills architecture doc now state that DevSpark command skills start only when typed as a slash command with the leading `/`. The agent does not start them on its own, and the bare name is sent as plain text. Invocation behavior is unchanged.
+
+## [9.1.0] - 2026-10-12
+
+### Added
+
+- **Lean Shift-Left Constitutional Validation**: Early constitutional conflict detection during Specify and Clarify stages to catch contradictions before planning and task generation.
+- **Delta-Oriented Development Guidance**: Embedded bounded-delta authoring philosophy across Specify and Plan workflows, defining specifications as bounded hypotheses about the next valuable change to working software.
+- **Specification/Release Lifecycle Separation**: Decoupled specification completion from product release, packaging, and deployment obligations. A specification delivers a releasable change without depending on version publication or distribution.
+- **Engineering-Judgment Hardening**: Integration boundary seam evaluation in Plan (evaluating existing orchestration and enrichment seams before widespread wiring), safe contract-preserving simplification in Implement, and accidental complexity review in PR Review.
+
+### Changed
+
+- **Lean Specification & Planning Templates**: Reduced boilerplate, streamlined Rationale Summary consolidation, and eliminated duplicated requirements across planning artifacts.
+- **Lifecycle Freshness Alignment**: Harmonized planning-edge freshness, stage evidence classification, and judge approvals.
+
+### Fixed
+
+- Fixed PowerShell automatic pipeline variable `$Input` collision in `create-release-packages.ps1`.
+- Excluded trunk branch names from literal planning reference checks in `check-planning-references.*`.
+- Ensured POSIX path and Git Bash compatibility in `test_devspark_config_contract.py`.
+
 ## [9.0.0] - 2026-10-11
 
 DevSpark 9.0 is a **breaking** release: one version, one command convention, one installation format.
@@ -1451,14 +1493,11 @@ until it is rebuilt. `explain` regenerates it automatically.
 
 ### Changed
 
-- **DevSpark v3.0.0 — a clean break from the public DevSpark lineage.** This is the
-  first Make Bold Solutions internal major release. The version was reset to **3.0.0**
-  deliberately to make clear that DevSpark is a **new, internal DEVSPARK tool**, not a
-  continuation or newer version of the public DevSpark 2.x. Installs are self-identifying
-  via a `product: DevSpark` marker in `.devspark/VERSION`.
-- Distribution is entirely within the Make Bold Solutions ecosystem: built in Make Bold Solutions Azure DevOps and
-  served from `https://dev.makeboldspark.com` (docs, `/dist` packages + manifest,
-  `/raw` prompt-first files). No public package, external CDN, or outside vendor.
+- **DevSpark v3.0.0 — first Make Bold Solutions release.** The version reset marked a major
+  transition in the supported workflow and distribution. Installs identify the product through a
+  `product: DevSpark` marker in `.devspark/VERSION`.
+- The original distribution used a Make Bold Solutions build pipeline and the
+  `https://dev.makeboldspark.com` site for documentation, release packages, and `/raw` files.
 
 ### Added
 

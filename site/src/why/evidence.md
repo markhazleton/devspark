@@ -1,40 +1,69 @@
 # How to Evaluate
 
-Evaluate DevSpark by observable delivery outcomes, not by the number of planning files it retains. Counts of specs, tasks, or review files do not measure adoption, quality, or traceability; they can rise while the implementation is wrong. The real question is whether code, tests, current knowledge, and published documentation agree at review and release.
+Evaluate DevSpark by the **quality and changeability of the software it helps deliver**, not
+by the number of specifications, tasks, reports, or gates completed.
 
-## What can be verified
+The essential question is whether a Delta achieves its intended purpose without introducing
+regressions in its credible blast radius—and whether code, tests, and durable Knowledge make the
+**next** Delta easier to understand and verify.
 
-| Question | Evidence source |
+## Evaluate the Delta, not the ceremony
+
+| Question | Evidence to inspect |
 |---|---|
-| Did the change pass required checks? | CI results and recorded command output |
-| What behavior shipped? | Git diff, release tag, current code, and tests |
-| Is technical guidance current? | `.knowledge/` nodes and the generated index |
-| Is user guidance current? | `site/src/` and the published site build |
-| Were review findings resolved? | Hosting-platform review state and the final diff |
-| How did the system change? | Git log, blame, tags, and release history |
+| What changed, and why? | Intended outcome, actual Git diff, relevant contracts, accountable scope decisions |
+| What could it affect? | Callers, consumers, dependencies, data flow, failure paths, and reasons for the chosen validation boundary |
+| Does the affected software still work? | Relevant test executions, CI, contract checks, environment or device results, and known untested cases |
+| Is durable Knowledge current? | Owning `.knowledge/` content, links to code and tests, and updates or retirement of obsolete guidance |
+| Is the Delta ready to advance? | Remaining blockers, accepted limitations, named authorized decisions, PR diff, and required repository checks |
 
-Temporary specs, task lists, and gate reports help implementation but are not durable evidence.
+A test **not run** is not a passing test. A separate model's assessment is a reasoning cross-check,
+not evidence of execution. A simulated user is not a real human tester. Acceptance of a limitation
+requires an explicit, recorded decision from a named person with authority; silence is not
+acceptance.
 
-## Recommended measures
+## Validate the credible blast radius
 
-Establish a baseline and compare:
+A small diff can affect many callers; a large diff may leave externally observable behavior
+unchanged. Scope assurance from demonstrated impact, not file count or the desire to revisit every
+nearby subsystem.
 
-- lead time from accepted work to verified merge;
-- escaped defects and rollback frequency;
-- review findings by severity and recurrence;
-- percentage of behavior changes with proportionate tests;
-- stale-knowledge findings from site audit or release;
-- failed verification repaired before PR creation;
-- deployment frequency and change-failure rate.
+Inspect affected contracts, behavior, integrations, error handling, and relevant regression tests.
+Mandatory repository-wide CI and security checks still apply, even when focused local tests are
+sufficient for day-to-day investigation. Do not quietly treat unrelated pre-existing failures as
+new Delta defects—or dismiss an introduced regression as unrelated.
 
-Report the collection window, repository scope, exact query, exclusions, and limitations. Avoid claims that cannot be reproduced from accessible durable systems.
+## Useful outcome measures
 
-## Evaluation pattern
+Establish baselines and compare like-for-like changes where possible:
 
-1. Select one representative task and record the normal delivery baseline.
-2. Use the lightest appropriate DevSpark route.
-3. Require the same build, test, security, and review gates.
-4. Compare elapsed effort, findings, rework, and clarity of the final delta.
-5. Repeat across different risk levels before drawing conclusions.
+- **Correctness:** failed required tests, escaped regressions, rollbacks, and change-failure rate.
+- **Assurance:** applicable tests and contracts exercised, unexplained validation gaps, and findings
+  repaired before merge.
+- **Continuity:** whether a later Delta actually located and reused current Knowledge and tests,
+  rather than rediscovering the same constraints.
+- **Changeability:** rework caused by stale Knowledge, unclear contracts, or avoidable complexity.
+- **Efficiency:** time to verified merge, repeated review cycles, and work added solely to satisfy
+  an artifact or workflow requirement.
 
-See [Evaluate One Task](../get-started/evaluate-one-task.md) for a practical start and [About, Architecture and Controls](about.md) for operating boundaries.
+Raw counts are context, not conclusions. Report the collection window, repository scope, baseline,
+query or measurement method, exclusions, and limitations. Never call a measure observed if it was
+only estimated or inferred.
+
+## A practical evaluation
+
+1. Choose a representative small Delta with understandable intent and observable risk.
+2. Record a baseline for normal delivery or select a comparable prior change.
+3. Use an appropriate DevSpark journey available in the **installed version**; do not assume an
+   aspirational Code First entry point is already supported end to end.
+4. Inspect the actual blast radius and apply the same mandatory build, security, test, and human
+   approval requirements that would otherwise apply.
+5. Compare review clarity, actual test evidence, elapsed effort, rework, and Knowledge quality.
+6. On a later Delta, check whether the previous work's Knowledge and tests were useful in practice.
+
+Repeat with different kinds of changes before drawing broad conclusions. A successful demo does
+not by itself prove maintained software quality or production outcomes.
+
+See [Evaluate One Task](../get-started/evaluate-one-task.md) for a starting point,
+[Vision and Manifesto](philosophy.md) for the governing ideas, and
+[About, Architecture and Controls](about.md) for operating boundaries.

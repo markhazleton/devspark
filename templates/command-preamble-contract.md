@@ -10,6 +10,20 @@ Commands that reference this contract MUST load and obey this core before step 1
 
 Planning is an implementation aid, not a permanent compliance record.
 
+- **A DevSpark specification is not a blueprint for software.** It is a bounded hypothesis about the
+  next valuable change to working software. The repository defines the current state; the spec
+  defines the intended delta; implementation and verification create the next state. Before taking
+  the next delta, make sure the new state remains a good place from which to change again.
+- **A specification delivers a releasable change. A product release packages and distributes completed
+  changes.** A DevSpark specification must not include tasks requiring the product release itself,
+  version publication, package distribution, or product deployment. Spec completion requires
+  appropriate implementation, verification, PR Review, merge, and closeout work—but does not depend
+  on version publication, package distribution, or product deployment. A completed specification does
+  not remain open solely because its product release has not occurred; release preparation can
+  consume multiple independently completed specifications. Release-specific integration or
+  deployment validation remains a release responsibility; feature acceptance testing is preserved
+  and never silently waived.
+
 - Authoring routes write temporary specs, plans, tasks, checklists, and gates under
   `.devspark.work/`. Route-specific traceability stays inside that active bundle.
 - Implementation updates behavior, affected tests, and the current `.knowledge/` nodes that

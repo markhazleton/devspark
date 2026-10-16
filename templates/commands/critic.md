@@ -549,6 +549,13 @@ For each supported planning artifact, also call `scripts/judge.py semantic-hash 
 input. Missing helper/interpreter support or an unavailable fingerprint omits this optional field;
 it never justifies invented metadata or a review failure. Stamp only the newly produced gate.
 
+These raw input hashes preserve what Critic inspected; implementation does not refresh them.
+Judge distinguishes planning freshness from execution evidence: a changed source/test file within
+the approved Plan surface, after unchanged planning semantics and a recorded `PROCEED`, is visible
+as an execution change and does not by itself require Critic to rerun. Verify and PR Review retain
+execution correctness and diff-acceptance responsibility. An out-of-surface or governance change
+continues through the existing applicable recheck.
+
 After producing the report:
 
 - Ensure `FEATURE_DIR/gates/` exists.

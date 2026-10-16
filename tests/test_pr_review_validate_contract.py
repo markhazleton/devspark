@@ -11,6 +11,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = ROOT / "scripts" / "pr-review-validate.py"
+STATE_ENGINE = ROOT / "scripts" / "pr-review-state.py"
+MODERN_FIXTURE = ROOT / "tests" / "fixtures" / "pr-review-state" / "modern-valid.md"
 _spec = importlib.util.spec_from_file_location("pr_review_validate", ENGINE)
 validator = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(validator)
@@ -127,3 +129,112 @@ def test_cli_exit_code_and_json(tmp_path):
 def test_review_template_runs_the_validator_after_writing():
     text = (ROOT / "templates/commands/pr-review.md").read_text(encoding="utf-8")
     assert "pr-review-validate.py" in text
+
+
+def test_validator_checks_all_derived_views_for_modern_records(tmp_path):
+    review = tmp_path / "pr-7.md"
+    review.write_bytes(MODERN_FIXTURE.read_bytes())
+    inspect = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "inspect", str(review), "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    digest = json.loads(inspect.stdout)["digest"]
+    rendered = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "render", str(review), "--expected-digest", digest, "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert rendered.returncode == 0, rendered.stderr
+    text = review.read_text(encoding="utf-8")
+    assert validator.validate(text) == []
+
+    changed = text.replace("unresolved_blockers: 1", "unresolved_blockers: 0", 1)
+    assert "unresolved-blockers" in _codes(changed)
+
+    inconsistent = text.replace("**Recommendation**: REQUEST CHANGES", "**Recommendation**: APPROVE")
+    assert "derived-view-mismatch" in _codes(inconsistent)
+
+
+def test_validator_keeps_risk_checks_for_modern_records(tmp_path):
+    review = tmp_path / "pr-7.md"
+    review.write_bytes(MODERN_FIXTURE.read_bytes())
+    inspect = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "inspect", str(review), "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    digest = json.loads(inspect.stdout)["digest"]
+    subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "render", str(review), "--expected-digest", digest, "--json"],
+        check=True, capture_output=True, text=True, timeout=30,
+    )
+    text = review.read_text(encoding="utf-8").replace("risk_rating: medium", "risk_rating: low")
+    risk_digest = {"rating": "high", "report_form": "full", "tables": {"changed_files": "| File | Tier |"}}
+    assert "risk-lowered" in _codes(text, risk_digest)
+
+
+def test_validator_uses_the_shared_model_after_revision_one(tmp_path):
+    review = tmp_path / "pr-7.md"
+    review.write_bytes(MODERN_FIXTURE.read_bytes())
+    inspect = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "inspect", str(review), "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    digest = json.loads(inspect.stdout)["digest"]
+    rendered = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "render", str(review), "--expected-digest", digest, "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert rendered.returncode == 0, rendered.stderr
+
+    text = review.read_text(encoding="utf-8").replace("revision: 2", "revision: 4", 1)
+
+    assert validator.validate(text) == []
+
+
+def test_validator_does_not_treat_nonblocking_prd_category_as_a_blocker(tmp_path):
+    review = tmp_path / "pr-7.md"
+    review.write_bytes(MODERN_FIXTURE.read_bytes())
+    review.write_text(
+        review.read_text(encoding="utf-8").replace("blocking: true", "blocking: false", 1),
+        encoding="utf-8",
+    )
+    inspect = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "inspect", str(review), "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    digest = json.loads(inspect.stdout)["digest"]
+    rendered = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "render", str(review), "--expected-digest", digest, "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+
+    assert rendered.returncode == 0, rendered.stderr
+    output = json.loads(rendered.stdout)
+    assert output["historical_count"] == 1
+    assert output["unresolved_blockers"] == 0
+    assert output["recommendation"] == "approve"
+    assert validator.validate(review.read_text(encoding="utf-8")) == []
+
+
+def test_validator_preserves_explicit_legacy_closure_provenance(tmp_path):
+    review = tmp_path / "pr-7.md"
+    text = MODERN_FIXTURE.read_text(encoding="utf-8")
+    text = text.replace("      status: open", "      status: resolved", 1)
+    text = text.replace('      outcome: ""', '      outcome: Legacy resolved', 1)
+    text = text.replace("      provenance: native", "      provenance: {kind: legacy}", 1)
+    review.write_text(text, encoding="utf-8")
+    inspect = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "inspect", str(review), "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    digest = json.loads(inspect.stdout)["digest"]
+    rendered = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "render", str(review), "--expected-digest", digest, "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+
+    assert rendered.returncode == 0, rendered.stderr
+    finding = json.loads(rendered.stdout)["findings"][0]
+    assert finding["status"] == "resolved"
+    assert finding["verification"] is None
+    assert finding["provenance"]["kind"] == "legacy"
+    assert validator.validate(review.read_text(encoding="utf-8")) == []

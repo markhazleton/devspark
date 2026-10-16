@@ -40,6 +40,7 @@ This command runs **two phases in one invocation**, and they answer different qu
 The phases are separate on purpose (`closeout-contract.md` §6) — evidence optimizes for finding things, closeout optimizes for converging — but the developer pays for one interaction, not two. Do **not** end a run by telling the user to go run `/devspark-closeout`; that command is an advanced reassessment entry point, not a step on this path.
 
 - **Owns**: executing the proof mode(s) declared in `spec.md`'s `required_gates` (see `/.devspark/templates/verification-contract.md` or `templates/verification-contract.md` in source repos), recording actual commands + actual output as evidence, writing `FEATURE_DIR/gates/verify.md`, then classifying every open finding and writing the completion decision to `FEATURE_DIR/gates/closeout.md`.
+- **Delta verification**: preserve existing behavior and compatibility where required; validate the intended delta and relevant regression risks. Verification evaluates the releasable change delivered by the specification, without requiring product release publication or deployment. Do not introduce a new future-changeability score, checklist, or gate.
 - **Does NOT own**: re-litigating spec/plan/tasks consistency (`/devspark-analyze`), adversarial risk hypotheses (`/devspark-critic`), writing new tests or code (`/devspark-implement`), the PR itself (`/devspark-create-pr`).
 
 ## Definition of Done

@@ -33,7 +33,7 @@ DevSpark separates thinking aids from durable truth. A plan helps produce a chan
   </li>
 </ol>
 
-Type the full hyphenated slash command, for example `/devspark-plan`. Short names and the retired 8.x dotted form are not aliases. Only the invocation format changes; the specification-driven delivery lifecycle and outcomes shown here remain the same. See the [invocation-format note](../guides/prompt-lifecycle-mapping.md#invocation-format).
+Type the full hyphenated slash command, for example `/devspark-plan`. Short names and the retired 8.x dotted form are not aliases. Development journeys vary with the change: some benefit from specifications and plans, while others may begin from an existing diff or defect. In every route, the engineering obligation remains to understand the Delta, validate its credible impact, and report the evidence. See the [invocation-format note](../guides/prompt-lifecycle-mapping.md#invocation-format).
 
 A **skill** defines the workflow, a **slash command** invokes it, the **agent** performs the work,
 and the **prompt** supplies its instructions. See [Terminology](../guides/prompt-lifecycle-mapping.md#terminology).
@@ -66,7 +66,7 @@ Checked boxes do not make a plan complete; a consistent durable repository and p
 
 **After implementation.** `/devspark-verify` produces proof and closes out the work. PR creation, PR review, and site audit then judge the Git diff, current code, test evidence, current knowledge, and the constitution, not prose written earlier. See [Review and Audit](../guides/review-and-audit.md).
 
-**At release.** `/devspark-release` derives the release from the previous tag through HEAD, verifies the durable delta, writes notes, and is the sole skill that archives completed, linkage-verified bundles under `.archive/{YYYY-MM-DD}/`. A bundle can stay live across more than one release.
+**At release.** `/devspark-release` derives the release from the previous tag through HEAD, verifies the durable delta, writes notes, and is the sole skill that archives completed, linkage-verified bundles under `.archive/{YYYY-MM-DD}/` with a journaled, non-overwriting archive step, and reports anything ambiguous for a decision. A bundle can stay live across more than one release.
 
 Knowledge is mutated in place, never archived; Git keeps earlier versions. For what counts as knowledge and how it stays current, see [Knowledge](../guides/knowledge-management.md) and [Philosophy](../why/philosophy.md).
 

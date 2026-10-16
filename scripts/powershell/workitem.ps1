@@ -122,6 +122,7 @@ function ConvertTo-JsonArray {
 }
 
 # Build an object from an ordered map whose values are already-encoded JSON fragments.
+# Provides the reference in-memory JSON generation model mirrored by workitem.sh.
 function ConvertTo-JsonObjectFromFragments {
     param([System.Collections.Specialized.OrderedDictionary]$Fragments)
     if ($Fragments.Count -eq 0) { return '{}' }

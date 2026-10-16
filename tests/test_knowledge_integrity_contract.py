@@ -172,6 +172,16 @@ def test_unreachable_knowledge_root_detected(tmp_path: Path) -> None:
     assert any(f["subject"] == "app-a/.knowledge" for f in unreachable)
 
 
+def test_example_project_knowledge_root_is_not_unreachable(tmp_path: Path) -> None:
+    _write_doc(tmp_path, ".knowledge/architecture/one.md")
+    example = tmp_path / "examples" / "sample-app" / ".knowledge" / "governance"
+    example.mkdir(parents=True)
+    (example / "constitution.md").write_text("# Sample constitution\n", encoding="utf-8")
+
+    _code, payload = _run(tmp_path)
+    assert not _findings_by_category(payload, "unreachable-knowledge-root")
+
+
 def test_schema_tooling_contradiction_detected(tmp_path: Path) -> None:
     _write_doc(tmp_path, ".knowledge/architecture/one.md")
     registry = tmp_path / ".knowledge/taxonomy-registry.json"

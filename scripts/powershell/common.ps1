@@ -694,6 +694,8 @@ function Get-DevSparkProperty {
 # work_tracking block, top-level config, then the origin remote for repository identity only.
 # Area, iteration, type and tags are never inferred from the remote. Each resolved value
 # carries the step that produced it so a write can display where its inputs came from.
+# Uses a single-pass in-memory parse of devspark.json via Get-DevSparkConfig, keeping
+# parity with the single-pass JSON extraction in common.sh.
 function Get-WorkTrackingContext {
     param(
         [string]$Organization = '',

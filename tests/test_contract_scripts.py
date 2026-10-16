@@ -36,6 +36,7 @@ def test_contract_script(script: Path) -> None:
         capture_output=True,
         text=True,
         cwd=str(ROOT),
+        timeout=300,
     )
     assert result.returncode == 0, (
         f"{script.name} failed (exit {result.returncode})\n"

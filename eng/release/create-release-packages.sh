@@ -56,9 +56,12 @@ copy_relative_files() {
   local source_root=$1 destination_root=$2
   shift 2
 
+  local relative_dir
   while IFS= read -r relative_path; do
     [[ -n $relative_path ]] || continue
-    mkdir -p "$destination_root/$(dirname "$relative_path")"
+    relative_dir=.
+    [[ $relative_path == */* ]] && relative_dir=${relative_path%/*}
+    [[ -d "$destination_root/$relative_dir" ]] || mkdir -p "$destination_root/$relative_dir"
     cp "$source_root/$relative_path" "$destination_root/$relative_path"
   done < <(find "$source_root" "$@" -print | sed "s#^$source_root/##")
 }
@@ -89,53 +92,51 @@ generate_canonical_commands() {
   mkdir -p "$output_dir"
   for template in templates/commands/*.md; do
     [[ -f "$template" ]] || continue
-    local name description script_command agent_script_command body
-    name=$(basename "$template" .md)
-    
-    # Normalize line endings
-    file_content=$(tr -d '\r' < "$template")
-    
-    # Extract description and script command from YAML frontmatter
-    description=$(printf '%s\n' "$file_content" | awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}')
-    script_command=$(printf '%s\n' "$file_content" | awk -v sv="$script_variant" '/^[[:space:]]*'"$script_variant"':[[:space:]]*/ {sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, ""); print; exit}')
-    
+    local name script_command agent_script_command body commands sed_args
+    name=${template##*/}
+    name=${name%.md}
+
+    # Extract the script command (first matching line anywhere) and the agent_script command
+    # (within the agent_scripts: block) from YAML frontmatter in one pass, one per line.
+    # Line endings are normalized here and by tr below; each fork is costly on Windows.
+    commands=$(awk -v re="^[[:space:]]*${script_variant}:[[:space:]]*" '
+      { gsub(/\r/, "") }
+      !script_done && $0 ~ re { script=$0; sub(re, "", script); script_done=1 }
+      !agent_done {
+        if ($0 ~ /^agent_scripts:$/) in_agent_scripts=1
+        else if (in_agent_scripts && $0 ~ re) { agent=$0; sub(re, "", agent); agent_done=1 }
+        else if (in_agent_scripts && $0 ~ /^[a-zA-Z]/) in_agent_scripts=0
+      }
+      script_done && agent_done { exit }
+      END { printf "%s\n%s\n", script, agent }
+    ' "$template")
+    script_command=${commands%%$'\n'*}
+    agent_script_command=${commands#*$'\n'}
+    [[ $commands == *$'\n'* ]] || agent_script_command=
+
     if [[ -z $script_command ]]; then
       echo "Warning: no script command found for $script_variant in $template" >&2
       script_command="(Missing script command for $script_variant)"
     fi
-    
-    # Extract agent_script command from YAML frontmatter if present
-    agent_script_command=$(printf '%s\n' "$file_content" | awk '
-      /^agent_scripts:$/ { in_agent_scripts=1; next }
-      in_agent_scripts && /^[[:space:]]*'"$script_variant"':[[:space:]]*/ {
-        sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, "")
-        print
-        exit
-      }
-      in_agent_scripts && /^[a-zA-Z]/ { in_agent_scripts=0 }
-    ')
-    
-    # Replace {SCRIPT} placeholder with the script command
-    body=$(printf '%s\n' "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
-    
-    # Replace {AGENT_SCRIPT} placeholder with the agent script command if found
-    if [[ -n $agent_script_command ]]; then
-      body=$(printf '%s\n' "$body" | sed "s|{AGENT_SCRIPT}|${agent_script_command}|g")
-    fi
-    
-    # Remove the scripts: and agent_scripts: sections from frontmatter while preserving YAML structure
-    body=$(printf '%s\n' "$body" | awk '
-      /^---$/ { print; if (++dash_count == 1) in_frontmatter=1; else in_frontmatter=0; next }
-      in_frontmatter && /^scripts:$/ { skip_scripts=1; next }
-      in_frontmatter && /^agent_scripts:$/ { skip_scripts=1; next }
-      in_frontmatter && /^[a-zA-Z].*:/ && skip_scripts { skip_scripts=0 }
-      in_frontmatter && skip_scripts && /^[[:space:]]/ { next }
-      { print }
-    ')
-    
-    # Apply argument substitution (canonical uses $ARGUMENTS as default) and path rewriting
-    body=$(printf '%s\n' "$body" | sed 's/{ARGS}/$ARGUMENTS/g' | rewrite_paths)
-    
+
+    # Replace {SCRIPT}, {AGENT_SCRIPT} and {ARGS} (canonical uses $ARGUMENTS as default), remove
+    # the scripts: and agent_scripts: sections from frontmatter while preserving YAML structure,
+    # then rewrite paths. Frontmatter removal never depends on the substituted text.
+    sed_args=(-e "s|{SCRIPT}|${script_command}|g")
+    [[ -n $agent_script_command ]] && sed_args+=(-e "s|{AGENT_SCRIPT}|${agent_script_command}|g")
+    sed_args+=(-e 's/{ARGS}/$ARGUMENTS/g')
+    body=$(
+      tr -d '\r' < "$template" | sed "${sed_args[@]}" |
+        awk '
+          /^---$/ { print; if (++dash_count == 1) in_frontmatter=1; else in_frontmatter=0; next }
+          in_frontmatter && /^scripts:$/ { skip_scripts=1; next }
+          in_frontmatter && /^agent_scripts:$/ { skip_scripts=1; next }
+          in_frontmatter && /^[a-zA-Z].*:/ && skip_scripts { skip_scripts=0 }
+          in_frontmatter && skip_scripts && /^[[:space:]]/ { next }
+          { print }
+        ' | rewrite_paths
+    )
+
     echo "$body" > "$output_dir/devspark.$name.md"
   done
 }
@@ -144,84 +145,54 @@ generate_shims() {
   # Generate thin platform shims that redirect to canonical commands in .devspark.work/commands/
   local agent=$1 ext=$2 arg_format=$3 output_dir=$4
   mkdir -p "$output_dir"
-  for template in templates/commands/*.md; do
-    [[ -f "$template" ]] || continue
-    local name description handoffs_block
-    name=$(basename "$template" .md)
-    
-    # Normalize line endings
-    file_content=$(tr -d '\r' < "$template")
-    
-    # Extract description from YAML frontmatter
-    description=$(printf '%s\n' "$file_content" | awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}')
-    
-    # Extract handoffs block from YAML frontmatter (for Copilot)
-    handoffs_block=$(printf '%s\n' "$file_content" | awk '
-      /^handoffs:/ { in_handoffs=1; print; next }
-      in_handoffs && /^  / { print; next }
-      in_handoffs && /^[a-zA-Z]/ { in_handoffs=0 }
-    ')
-    
-    case $ext in
-      toml)
-        cat > "$output_dir/devspark-$name.$ext" <<SHIMEOF
-description = "$description"
-
-prompt = """
-## Prompt Resolution
-
-Determine the current git user by running \`git config user.name\`.
-Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.
-
-Read and execute the instructions from the **first file that exists**:
-1. \`.devspark.work/{git-user}/commands/devspark.$name.md\` (personalized override)
-2. \`.devspark.work/commands/devspark.$name.md\` (team customization)
-3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)
-
-Where \`{git-user}\` is the normalized slug from step above.
-
-## User Input
-
-\`\`\`text
-${arg_format}
-\`\`\`
-
-Pass the user input above to the resolved prompt.
-"""
-SHIMEOF
-        ;;
-      md|agent.md)
-        {
-          echo "---"
-          echo "description: $description"
-          if [[ -n $handoffs_block ]]; then
-            echo "$handoffs_block"
-          fi
-          echo "---"
-          echo ""
-          echo "## Prompt Resolution"
-          echo ""
-          echo "Determine the current git user by running \`git config user.name\`."
-          echo "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars."
-          echo ""
-          echo "Read and execute the instructions from the **first file that exists**:"
-          echo "1. \`.devspark.work/{git-user}/commands/devspark.$name.md\` (personalized override)"
-          echo "2. \`.devspark.work/commands/devspark.$name.md\` (team customization)"
-          echo "3. \`.devspark/defaults/commands/devspark.$name.md\` (stock default)"
-          echo ""
-          echo "Where \`{git-user}\` is the normalized slug from step above."
-          echo ""
-          echo "## User Input"
-          echo ""
-          echo '```text'
-          echo "$arg_format"
-          echo '```'
-          echo ""
-          echo "Pass the user input above to the resolved prompt."
-        } > "$output_dir/devspark-$name.$ext"
-        ;;
-    esac
-  done
+  awk -v ext="$ext" -v arg_format="$arg_format" -v outdir="$output_dir" '
+    FNR == 1 {
+      name = FILENAME
+      sub(/.*\//, "", name)
+      sub(/\.md$/, "", name)
+      desc = ""
+      handoffs = ""
+      in_handoffs = 0
+      desc_done = 0
+    }
+    { sub(/\r$/, "") }
+    !desc_done && /^description:/ {
+      desc = $0
+      sub(/^description:[[:space:]]*/, "", desc)
+      desc_done = 1
+    }
+    /^handoffs:/ { in_handoffs = 1; handoffs = handoffs $0 "\n"; next }
+    in_handoffs && /^  / { handoffs = handoffs $0 "\n"; next }
+    in_handoffs && /^[a-zA-Z]/ { in_handoffs = 0 }
+    FNR > 1 && /^---/ {
+      outfile = outdir "/devspark-" name "." ext
+      if (ext == "toml") {
+        print "description = \"" desc "\"\n\nprompt = \"\"\"" > outfile
+        print "## Prompt Resolution\n" > outfile
+        print "Determine the current git user by running `git config user.name`." > outfile
+        print "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.\n" > outfile
+        print "Read and execute the instructions from the **first file that exists**:" > outfile
+        print "1. `.devspark.work/{git-user}/commands/devspark." name ".md` (personalized override)" > outfile
+        print "2. `.devspark.work/commands/devspark." name ".md` (team customization)" > outfile
+        print "3. `.devspark/defaults/commands/devspark." name ".md` (stock default)\n" > outfile
+        print "Where `{git-user}` is the normalized slug from step above.\n" > outfile
+        print "## User Input\n\n```text\n" arg_format "\n```\n\nPass the user input above to the resolved prompt.\n\"\"\"" > outfile
+      } else {
+        print "---\ndescription: " desc > outfile
+        if (handoffs != "") printf "%s", handoffs > outfile
+        print "---\n\n## Prompt Resolution\n" > outfile
+        print "Determine the current git user by running `git config user.name`." > outfile
+        print "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.\n" > outfile
+        print "Read and execute the instructions from the **first file that exists**:" > outfile
+        print "1. `.devspark.work/{git-user}/commands/devspark." name ".md` (personalized override)" > outfile
+        print "2. `.devspark.work/commands/devspark." name ".md` (team customization)" > outfile
+        print "3. `.devspark/defaults/commands/devspark." name ".md` (stock default)\n" > outfile
+        print "Where `{git-user}` is the normalized slug from step above.\n" > outfile
+        print "## User Input\n\n```text\n" arg_format "\n```\n\nPass the user input above to the resolved prompt." > outfile
+      }
+      close(outfile)
+    }
+  ' templates/commands/*.md
 }
 
 generate_commands() {
@@ -317,7 +288,13 @@ build_variant() {
   
   # Generate canonical command prompts in .devspark/defaults/commands/ (stock, upgrade-safe)
   # Team customizations live in .devspark.work/commands/ and are never overwritten.
-  generate_canonical_commands "$DEVSPARK_DIR/defaults/commands" "$script"
+  # Cached per script variant so multiple agents share one canonical generation run.
+  local canonical_cache="$GENRELEASES_DIR/.canonical-cache-$script"
+  if [[ ! -d "$canonical_cache" ]]; then
+    generate_canonical_commands "$canonical_cache" "$script"
+  fi
+  mkdir -p "$DEVSPARK_DIR/defaults/commands"
+  cp "$canonical_cache"/* "$DEVSPARK_DIR/defaults/commands/"
   echo "Generated canonical commands -> .devspark/defaults/commands"
 
   # Native Agent Skills (Copilot) are copied byte-identically from the committed consumer skills;
@@ -401,6 +378,8 @@ for agent in "${AGENT_LIST[@]}"; do
     build_variant "$agent" "$script"
   done
 done
+
+rm -rf "${GENRELEASES_DIR:?}"/.canonical-cache-*
 
 echo "Archives in $GENRELEASES_DIR:"
 ls -1 "$GENRELEASES_DIR"/devspark-template-*-"${NEW_VERSION}".zip

@@ -255,16 +255,30 @@ def semantic_projection(path: Path) -> str | None:
                     if status_count > 1:
                         return None
                     continue
-                line = re.sub(r"^(### User Story \d+ - .+) \u2705 Complete$", r"\1", line)
+                line = re.sub(r"^(### User Story \d+ (?:-|\u2014) .+) \u2705 Complete$", r"\1", line)
             elif role == "tasks":
                 if re.match(r"^[-*] \[[ xX]\] T\d+\b", line):
                     line = re.sub(r"^([-*] \[)[xX](\])", r"\1 \2", line)
                     line = re.sub(r" <!-- WIP: [^\r\n]* -->$", "", line)
-                    line = re.sub(r" \(code_ref: [^|\r\n]*\| knowledge_ref: [^)\r\n]*\)$", "", line)
+                    line = re.sub(r" \(code_ref: [^|\r\n]*\| knowledge_ref: .*\)$", "", line)
+                else:
+                    # Preserve the legacy projection of standalone linkage lines while
+                    # making their implementation-only values irrelevant to freshness.
+                    line = re.sub(
+                        r" \(code_ref: [^|\r\n]*\| knowledge_ref: .*\)$",
+                        " (code_ref: pending | knowledge_ref: pending)",
+                        line,
+                    )
                 if re.fullmatch(r"<!-- WIP: [^\r\n]* -->", line) and kept and re.match(r"^[-*] \[ \] T\d+\b", kept[-1]):
                     continue
-                if re.fullmatch(r"\*\*Checkpoint\*\*: Phase complete (?:-|\u2014) \d{4}-\d{2}-\d{2}\.?", line):
-                    continue
+                if re.match(r"^\*\*Checkpoint\*\*:", line):
+                    line = re.sub(
+                        r"[ \t]+Phase complete (?:-|\u2014) \d{4}-\d{2}-\d{2}\.?$",
+                        "",
+                        line,
+                    )
+                    if re.fullmatch(r"\*\*Checkpoint\*\*:\s*", line):
+                        continue
             kept.append(line)
         if fence is not None:
             return None
@@ -544,6 +558,12 @@ def _planned_execution_path(path: Path | None, feature_dir: Path, repo_root: Pat
         parts = relative.lower().split("/")
         if "governance" in parts or path.name.lower() in ("constitution.md", "agents.md", "copilot-instructions.md"):
             return False
+        if parts[0] == "templates" or relative.lower() in {
+            "scripts/judge.py",
+            "scripts/bash/judge.sh",
+            "scripts/powershell/judge.ps1",
+        }:
+            return False
         if ".knowledge" in parts:
             front = FRONTMATTER.match(path.read_text(encoding="utf-8-sig"))
             metadata = yaml.load(front.group(1), Loader=_SemanticLoader) if front else {}
@@ -617,7 +637,7 @@ def child_freshness(
             planning_evidence[role] = bool(re.fullmatch(r"sem1:[0-9a-f]{64}", recorded)) and semantic_hash(located) == recorded
     execution_changes = []
     if set(planning_evidence) == {"spec.md", "plan.md", "tasks.md"} and all(planning_evidence.values()):
-        approved = (ctx["implementation_started"] and ctx["judge_header"].get("verdict") == "PROCEED"
+        approved = (ctx["judge_header"].get("verdict") == "PROCEED"
                     and _compatible_child_evidence(gate_path, current_hash, declared, ctx["judge_header"]))
         for rel in changed.copy():
             if _role(rel) == "other":

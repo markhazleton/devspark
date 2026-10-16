@@ -7,7 +7,7 @@ source_of_truth:
   - scripts/powershell/workitem.ps1
   - scripts/bash/workitem.sh
   - tests/test_workitem_contract.py
-last_verified: 2026-10-11
+last_verified: 2026-10-13
 aliases:
   - work item boundary
   - work tracking integration

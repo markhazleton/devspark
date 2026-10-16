@@ -8,7 +8,7 @@ source_of_truth:
   - tests/test_knowledge_index_determinism_contract.py
   - tests/test_knowledge_integrity_contract.py
   - tests/test_knowledge_drift_performance.py
-last_verified: 2026-10-11
+last_verified: 2026-10-15
 aliases:
   - index drift check
   - regenerate knowledge index

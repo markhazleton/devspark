@@ -27,6 +27,8 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 
 After installation, start new work with `/devspark-specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
 
+DevSpark commands start only when you type them as slash commands, with the leading `/` (for example `/devspark-create-pr`). The agent does not start them on its own, so typing the bare name or asking the agent to "run devspark-create-pr" sends plain text and the command skill never loads.
+
 The quickstart guides can handle fresh installs, version-based upgrades, and repair of incomplete framework installs when expected stock files are missing.
 
 ## Upgrade Paths

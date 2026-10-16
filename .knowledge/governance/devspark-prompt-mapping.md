@@ -18,16 +18,34 @@ appliesTo:
 - tests/test_pr_risk_knowledge_contract.py
 - tests/test_pr_review_validate_contract.py
 - tests/test_pr_risk_calibrate_contract.py
+- scripts/pr-review-state.py
+- scripts/pr-review-validate.py
+- tests/test_pr_review_state_contract.py
+- tests/test_pr_review_validate_contract.py
+- tests/test_review_resolution_contract.py
+source_of_truth:
+- templates/commands/pr-review.md
+- templates/commands/address-pr-review.md
+- templates/pr-review-state-contract.md
+- scripts/pr-review-state.py
+- scripts/pr-review-validate.py
+- tests/test_pr_review_state_contract.py
+- tests/test_pr_review_validate_contract.py
+- tests/test_review_resolution_contract.py
+last_verified: 2026-10-14
 ---
 
 # DevSpark: Prompt Inventory Mapped to Philosophy
 
-Companion to `devspark-philosophy.md`. Each `/devspark-*` skill grouped by
-lifecycle phase, with what it actually does today against this philosophy's
-disciplines — verified against the command's own template in
-`templates/commands/`, not a proposal for what it should do.
+Companion to [the DevSpark Manifesto](devspark-philosophy.md). This is a **descriptive inventory
+of currently implemented commands**, not a required developer journey and not a substitute for
+actual command templates. Model First, Code First, a bounded experiment, and defect-driven work
+may start at different points and must converge on applicable Delta and blast-radius assurance.
+Entries below describing mandatory spec artifacts apply only to routes that actually use a spec.
+Any unsupported entry point is identified as a capability gap, not treated as a governance
+violation by the developer.
 
-## Plan & build — produces the ephemeral spec package
+## Model First — plan and build an ephemeral spec package
 
 | Command | Current behavior |
 |---|---|
@@ -43,7 +61,15 @@ disciplines — verified against the command's own template in
 
 ### Planning Review in one place
 
-The developer path is *specify → planning → planning review → implement → verify → closeout → create-pr → pr-review*. Internally, planning review is analyze + conditional critic + Judge. Four terms stay separate:
+On the **Model First route**, the illustrative developer path is *specify → planning → planning
+review → implement → verify → closeout → create-pr → pr-review*. This sequence is not a universal
+precondition for reviewing a change. Code First can arrive at Quickfix with an already-implemented
+diff, once that existing command supports the entry point. The same review obligations apply to
+the Delta's credible blast radius, but no synthetic Plan, spec, tasks, or historical approvals
+should be created solely to reconstruct a journey. At this snapshot the Quickfix implementation's
+actual support for post-implementation entry must still be verified before treating it as shipped.
+Internally, Model First planning review is analyze + conditional critic + Judge. Four terms stay
+separate:
 
 | Term | Meaning |
 |---|---|
@@ -153,8 +179,8 @@ Ownership split: the spec owns defining and preparing acceptance; QA operations 
 
 | Command | Current behavior |
 |---|---|
-| **pr-review** | The primary assimilation trigger — nothing merges without it. §6 tracks durable-delta consistency as ID-tracked blocking findings (`PRD1` code/knowledge contradiction, `PRD2` unsupported knowledge claim, `PRD3` insufficient test depth, `PRD4` planning-identifier leak — rule 1 enforced here, `PRD5` knowledge completeness for architecturally significant behavior). §6c runs `build_knowledge_index.py` against the diff's touched entities, gates on gap-report failures (blocking, same tier as a constitution violation), and surfaces two non-blocking warnings: a code-only evidence entry missing `fallback_reason`, and contradiction candidates scoped to graph-adjacent objects (same entity, entities sharing a `constrains` decision, objects citing the same `source_of_truth`) — never brute-force pairwise comparison. §6d consumes the route's closeout decision rather than restarting discovery: an unclassified finding, an unresolved blocking defect, a laundered requirement/invariant, or counts that contradict the findings list are `PRD6` (blocking); a documented accepted limitation, deferred item, or learning is converged and must not be reopened. A genuine new defect still reopens the work; the mere availability of a better approach never does. A missing closeout artifact is a note, not a finding. |
-| **address-pr-review** | Commit isolation between fixes and review-file updates, unchanged in mechanism. Explicitly enforces rule 1 on its own fixes: a fix that patches code must not introduce a spec/task/plan/PR-thread reference to "explain" what review comment it addresses — that context belongs in the commit message or the review file. Its helper derives eligibility per finding from status, severity and blocking evidence (ids `C`, `H`, `M`, `L`, `CON` and `PRD{N}`): `--auto` selects only open critical/high or blocking PR-delta findings with no accepted, deferred or withdrawn disposition, reports ordinary Medium/Low and non-blocking PRD findings, and routes `CON` findings to `evolve-constitution`. A suggested fix is evidence, so a remediation beyond the approved Plan's shape stops for explicit authority. |
+| **pr-review** | The primary assimilation trigger — nothing merges without it. §6 tracks durable-delta consistency as ID-tracked blocking findings (`PRD1` code/knowledge contradiction, `PRD2` unsupported knowledge claim, `PRD3` insufficient test depth, `PRD4` planning-identifier leak — rule 1 enforced here, `PRD5` knowledge completeness for architecturally significant behavior). §6c runs `build_knowledge_index.py` against the diff's touched entities, gates on gap-report failures (blocking, same tier as a constitution violation), and surfaces two non-blocking warnings: a code-only evidence entry missing `fallback_reason`, and contradiction candidates scoped to graph-adjacent objects (same entity, entities sharing a `constrains` decision, objects citing the same `source_of_truth`) — never brute-force pairwise comparison. §6d consumes the route's closeout decision rather than restarting discovery: an unclassified finding, an unresolved blocking defect, a laundered requirement/invariant, or counts that contradict the findings list are `PRD6` (blocking); a documented accepted limitation, deferred item, or learning is converged and must not be reopened. A genuine new defect still reopens the work; the mere availability of a better approach never does. A missing closeout artifact is a note, not a finding. PR-specific state is authoritative in the existing review file; the review-state engine derives report views, and UPDATE evaluates the original concern and correction in one bounded pass before writing the outcome. This is local recommendation state, not hosted approval. |
+| **address-pr-review** | Commit isolation between fixes and review-file updates, unchanged in mechanism. Explicitly enforces rule 1 on its own fixes: a fix that patches code must not introduce a spec/task/plan/PR-thread reference to "explain" what review comment it addresses — that context belongs in the commit message or the review file. Its helper derives eligibility per finding from status, severity and blocking evidence (ids `C`, `H`, `M`, `L`, `CON` and `PRD{N}`): `--auto` selects only open critical/high or blocking PR-delta findings with no accepted, deferred or withdrawn disposition, reports ordinary Medium/Low and non-blocking PRD findings, and routes `CON` findings to `evolve-constitution`. A single already-authorized finding is selected deterministically; pending reviewer verification remains blocking and is never author-auto-eligible. Remediation beyond the approved Plan's shape stops for explicit authority. |
 | **create-pr / update-pr** | Both surface evidence and linkage status directly in the PR description/delta: whether each touched `.knowledge/` node cites a test-verified (`verified_by: execution`) or code-only claim, and flag a code-only entry with no `fallback_reason` as a reviewer note (non-blocking) — the same signal `pr-review` §6c checks mechanically, visible here without digging. |
 | **verify** | The evidence mechanism's engine, installed as a skill. Runs in two phases in one invocation. **Evidence phase**: runs the declared proof mode(s) from `spec.md`'s `required_gates`, writes `gates/verify.md`, and records a `test_ref` pointer for any mode that passed via a named, committed test — the citable evidence `implement` needs to record `verified_by: execution` on a knowledge object or decision. Observations surfaced during the run that are not proof results go to a `discovered:` list and never change a mode's status. **Closeout phase**: classifies every open finding against `templates/closeout-contract.md`, evaluates each acceptance criterion by its declared kind, and writes the completion decision to `gates/closeout.md` with `produced_by: verify`. It never tells the developer to go run a closeout command — the decision was just made. A route with no declared proof mode skips the evidence phase and still converges. |
 | **closeout** | **Optional / advanced — not on the normal path.** Re-runs verify's closeout phase alone, against the identical contract, producing the identical artifact with `produced_by: closeout`. Exists for reassessment: work continued after verify ran, a limitation was accepted later, a human wants to re-decide completion without paying for re-verification, or an experimental result needs a fresh decision. Explicitly accounts for the evidence it did **not** refresh — stale evidence is reported as stale and routes back to `/devspark-verify` rather than producing a `complete` decision about a previous version of the work. No command recommends it as a routine next step. |
@@ -244,9 +270,11 @@ generated into `templates/consumer-skills/` and keep the three-tier resolution.
 ## Developer-experience classification
 
 A command existing is not the same as a developer needing to know it exists.
-This table answers one question per command: **could a developer complete
-ordinary work successfully without knowing this command exists?** Only the
-CORE HAPPY-PATH rows answer "no".
+The table below describes **the current shipped route classification**, not a prescription for
+all Deltas. In particular, a `CORE HAPPY-PATH` classification must not be interpreted as a
+constitutionally mandatory phase of Code First or direct changes. Improving existing Quickfix
+for an already-implemented Delta is the next concrete feature opportunity, not a capability
+this mapping claims to have verified.
 
 | Class | Meaning |
 |---|---|
@@ -258,18 +286,18 @@ CORE HAPPY-PATH rows answer "no".
 | Command | Current role | Required on the normal path? | UX classification |
 |---|---|---|---|
 | **next** | Detects lifecycle state and dispatches the single next step | No — but it makes every other row optional to memorize | CORE HAPPY-PATH (the zero-knowledge entry point) |
-| **specify** | Creates the temporary route record | Yes | CORE HAPPY-PATH |
-| **plan** | Design artifacts + bounded `.knowledge/` traversal | Yes, on the full-spec route | CORE HAPPY-PATH |
-| **implement** | Applies the delta; carries the heaviest discipline | Yes | CORE HAPPY-PATH |
+| **specify** | Creates the temporary Model First route record | Only on specification-led routes | CORE HAPPY-PATH (Model First) |
+| **plan** | Design artifacts + bounded `.knowledge/` traversal | On the full-spec route only | CORE HAPPY-PATH (Model First) |
+| **implement** | Applies a planned Delta | When using the existing planned route | CORE HAPPY-PATH (Model First) |
 | **verify** | Evidence phase + closeout phase, one invocation | Yes, where a proof mode is declared | CORE HAPPY-PATH |
 | **create-pr** | Opens the PR and surfaces evidence/linkage status | Yes | CORE HAPPY-PATH |
 | **pr-review** | Primary assimilation trigger; nothing merges without it | Yes | CORE HAPPY-PATH |
-| **quickfix** | Lightweight route for small contained changes | No — alternative to specify, not an addition | CORE HAPPY-PATH (alternate route) |
+| **quickfix** | Lightweight contained-change route; post-implementation entry needs validation | Alternative to specification-led work | CORE HAPPY-PATH (alternate route) |
 | **tasks** | Dependency-ordered task list | Full-spec route only | OPTIONAL ADVANCED |
 | **clarify** | Targeted questions encoded back into the spec | No | OPTIONAL ADVANCED |
 | **analyze** | Closed-world planning assurance: are the artifacts internally sound? | No — `planning-review` runs it | OPTIONAL ADVANCED (expert drill-down) |
 | **critic** | Open-world planning assurance: is the sound plan wrong about the real system? | No — `planning-review` runs it when applicable | OPTIONAL ADVANCED (expert drill-down) |
-| **planning-review** | Analyze + conditional Critic + Judge → one planning decision | Yes, when `required_gates` declares analyze or critic | CORE HAPPY-PATH |
+| **planning-review** | Analyze + conditional Critic + Judge → one planning decision | When the specification route declares those gates | CORE HAPPY-PATH (Model First) |
 | **checklist** | Custom checklist for a feature | No | OPTIONAL ADVANCED |
 | **closeout** | Re-runs verify's closeout phase alone | **No — verify already does it** | INTERNAL CAPABILITY (advanced recovery entry point) |
 | **address-pr-review** | Works open review findings with commit isolation | Only when a review has open findings | OPTIONAL ADVANCED |

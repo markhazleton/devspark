@@ -7,7 +7,7 @@ source_of_truth:
   - templates/schemas/knowledge-node.schema.json
   - tests/test_build_knowledge_index_contract.py
   - tests/test_taxonomy_registry_contract.py
-last_verified: 2026-10-01
+last_verified: 2026-10-13
 aliases:
   - knowledge document rules
   - allowed knowledge types

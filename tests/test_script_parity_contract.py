@@ -50,6 +50,8 @@ def main() -> None:
 
     assert '../release-context.py' in bash_release_context
     assert "'release-context.py'" in ps_release_context
+    assert '../release-archive.py' in _read('scripts/bash/release-archive.sh')
+    assert "'release-archive.py'" in _read('scripts/powershell/release-archive.ps1')
     for token in ('RELEASE_FROM', 'CHANGED_FILES', 'KNOWLEDGE_CHANGED', 'PLANNING_LEAKS'):
         assert token in release_engine
     for removed in ('RECOVERED_SPECS', 'RECOVERED_QUICKFIXES', 'ARCHIVE_RECOVERY_USED'):

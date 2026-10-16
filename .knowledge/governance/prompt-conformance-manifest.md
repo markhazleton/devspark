@@ -7,9 +7,13 @@ scope: templates/commands/
 
 # Prompt Conformance Manifest
 
-This manifest defines the required governance elements that every command template in
-`templates/commands/` must contain. It is evaluated by an AI agent via `/devspark-checklist`
-— no new scripts or tool dependencies required.
+This manifest defines **template conformance**, not proof of software quality. Its current
+mechanical checks apply to command templates in `templates/commands/` and are evaluated by
+`/devspark-checklist`; existing automated tests remain the authoritative implementation baseline.
+Their presence does not make a full spec or a particular workflow order mandatory for a Delta.
+A template's actual output may be evidence about an existing change, not necessarily a newly
+planned feature. The checks below remain as implemented until separately updated with tests;
+this replacement does not claim to alter command behavior.
 
 > **Contributor obligation**: Run `/devspark-checklist` against this manifest before any
 > PR that modifies files in `templates/commands/`. This is the re-run trigger for the
@@ -75,7 +79,7 @@ outcome: ""
 
 ---
 
-### Element 3 — Artifact Output Statement
+### Element 3 — Artifact Output Statement (existing template contract)
 
 **Check**: The file describes at least one artifact it produces or writes.
 

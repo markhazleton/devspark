@@ -1,0 +1,16 @@
+{
+  "findings": [
+    {
+      "finding_id": "H-01",
+      "aliases": [
+        "PRD3-01"
+      ],
+      "severity": "high",
+      "category": "PRD3",
+      "blocking": true,
+      "status": "open"
+    }
+  ],
+  "historical_count": 1,
+  "unresolved_blockers": 1
+}

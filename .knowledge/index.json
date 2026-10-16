@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-12T05:08:49Z"
+    "at": "2026-10-16T02:08:46Z"
   },
   "roots": [
     {
@@ -34,7 +34,12 @@
       "path": ".knowledge/architecture/autonomy-execution-model.md",
       "title": "Autonomy Execution Model",
       "appliesTo": [
-        "templates/commands/**"
+        "templates/commands/address-pr-review.md",
+        "scripts/pr-review-state.py",
+        "scripts/powershell/address-pr-review.ps1",
+        "scripts/bash/address-pr-review.sh",
+        "tests/test_pr_review_state_contract.py",
+        "tests/test_address_pr_review_contract.py"
       ],
       "headings": [
         "Autonomy Execution Model",
@@ -72,9 +77,27 @@
       "role": "architecture",
       "path": ".knowledge/architecture/review-stage-divergence.md",
       "title": "Review-Stage Divergence",
+      "appliesTo": [
+        "templates/commands/clarify.md",
+        "templates/commands/analyze.md",
+        "templates/commands/critic.md",
+        "templates/commands/pr-review.md",
+        "templates/commands/address-pr-review.md",
+        "scripts/pr-review-state.py",
+        "scripts/pr-review-validate.py",
+        "scripts/bash/address-pr-review.sh",
+        "scripts/powershell/address-pr-review.ps1",
+        "templates/pr-review-state-contract.md",
+        "tests/test_review_resolution_contract.py",
+        "tests/test_review_stage_divergence_contract.py",
+        "tests/test_address_pr_review_contract.py",
+        "tests/test_pr_review_state_contract.py",
+        "tests/test_pr_review_validate_contract.py"
+      ],
       "headings": [
         "Review-Stage Divergence",
         "Status",
+        "PR finding lifecycle",
         "Thin-Skill Validation",
         "Divergence Marker Convention"
       ]
@@ -163,34 +186,20 @@
       "form": "flat-document",
       "role": "governance",
       "path": ".knowledge/governance/devspark-philosophy.md",
-      "title": "DevSpark Philosophy & Guide: Plan Temporarily, Review the Delta",
+      "title": "DevSpark — Vision and Engineering Manifesto",
       "headings": [
-        "DevSpark Philosophy & Guide: Plan Temporarily, Review the Delta",
-        "The core shift",
-        "The governing principle: current truth, not lifecycle history",
-        "Three categories of \"current truth,\" not one",
-        "Decisions (ADRs) are current governance, not history",
-        "Decisions live in governance, not inside entities",
-        "Evidence: every knowledge and governance claim must be checkable",
-        "What triggers assimilation",
-        "The minimum non-negotiable rules",
-        "In-flight linkage: how verify-before-archive actually gets checked",
-        "The ontology implementation: `.knowledge/ontology/`",
-        "Knowledge maintenance discovery: proposals, not automation",
-        "Discovery: reaching knowledge by concept, not only by id",
-        "Integrity is checkable, not assumed",
-        "Prompt inventory",
-        "Convergence: a spec finishes when its findings are classified, not eliminated",
-        "Assurance: four capabilities, four questions, one owner per finding",
-        "Empirical proof follows change shape, not route label",
-        "A lightweight route may admit it grew up",
-        "Leave enough evidence to evaluate the framework itself",
-        "Orchestration: rigor belongs inside the framework, not in the developer's head",
-        "Minimum Sufficient Change: the counterweight to completeness",
-        "The `.archive/` retention: preserving short-lived value without keeping it active",
-        "No CLI, no harness — scripts and prompts instead",
-        "Contradiction judgment is a human call, not a mechanized gate",
-        "Retrieval budgets: design time vs. runtime"
+        "DevSpark — Vision and Engineering Manifesto",
+        "Our Vision",
+        "Our Manifesto",
+        "Stop measuring process compliance as a proxy for software quality",
+        "1. What changed, and why?",
+        "2. What could this change affect?",
+        "3. How do we know the affected software still works?",
+        "4. What enduring Knowledge must we preserve?",
+        "5. Is the Delta ready to advance?",
+        "How We Measure Success",
+        "How the Manifesto Fits Governance",
+        "In One Sentence"
       ]
     },
     {
@@ -216,11 +225,16 @@
         "tests/test_pr_risk_contract.py",
         "tests/test_pr_risk_knowledge_contract.py",
         "tests/test_pr_review_validate_contract.py",
-        "tests/test_pr_risk_calibrate_contract.py"
+        "tests/test_pr_risk_calibrate_contract.py",
+        "scripts/pr-review-state.py",
+        "scripts/pr-review-validate.py",
+        "tests/test_pr_review_state_contract.py",
+        "tests/test_pr_review_validate_contract.py",
+        "tests/test_review_resolution_contract.py"
       ],
       "headings": [
         "DevSpark: Prompt Inventory Mapped to Philosophy",
-        "Plan & build — produces the ephemeral spec package",
+        "Model First — plan and build an ephemeral spec package",
         "Planning Review in one place",
         "Acceptance planning and ownership",
         "Implementation — applies the delta",
@@ -248,7 +262,8 @@
         "scripts/context-projection.py",
         "scripts/explain-context.py",
         "scripts/discover-knowledge.py",
-        "scripts/knowledge-integrity.py"
+        "scripts/knowledge-integrity.py",
+        "templates/commands/pr-review.md"
       ],
       "headings": [
         "Knowledge Framework Contract",
@@ -334,7 +349,7 @@
         "Required Elements — All Command Templates",
         "Element 1 — Constitution Authority Block",
         "Element 2 — Frontmatter Handoffs Block",
-        "Element 3 — Artifact Output Statement",
+        "Element 3 — Artifact Output Statement (existing template contract)",
         "Default Behavior for Unlisted Templates",
         "Known Variant Headings",
         "`evolve-constitution.md`",
@@ -423,23 +438,6 @@
         "Making a document discoverable",
         "When to add aliases",
         "Regenerating the index"
-      ]
-    },
-    {
-      "id": "brand-system-architecture",
-      "entity": "brand-system",
-      "layer": "architecture",
-      "type": "entity-layer",
-      "form": "entity-layer",
-      "role": "architecture",
-      "path": ".knowledge/entities/brand-system/architecture.md",
-      "title": "Brand System - Architecture",
-      "source_of_truth": [
-        ".knowledge/entities/brand-system/assets"
-      ],
-      "last_verified": "2026-10-11",
-      "headings": [
-        "Brand System"
       ]
     },
     {
@@ -541,7 +539,7 @@
         "scripts/discover-knowledge.py",
         "tests/test_discover_knowledge_contract.py"
       ],
-      "last_verified": "2026-10-11",
+      "last_verified": "2026-10-13",
       "aliases": [
         "discover knowledge",
         "knowledge gaps",
@@ -654,7 +652,7 @@
         "tests/test_build_knowledge_index_contract.py",
         "tests/test_taxonomy_registry_contract.py"
       ],
-      "last_verified": "2026-10-01",
+      "last_verified": "2026-10-13",
       "aliases": [
         "knowledge document rules",
         "allowed knowledge types",
@@ -716,7 +714,7 @@
         "tests/test_knowledge_integrity_contract.py",
         "tests/test_knowledge_drift_performance.py"
       ],
-      "last_verified": "2026-10-11",
+      "last_verified": "2026-10-15",
       "aliases": [
         "index drift check",
         "regenerate knowledge index",
@@ -734,25 +732,6 @@
       ]
     },
     {
-      "id": "product-documentation-architecture",
-      "entity": "product-documentation",
-      "layer": "architecture",
-      "type": "entity-layer",
-      "form": "entity-layer",
-      "role": "architecture",
-      "path": ".knowledge/entities/product-documentation/architecture.md",
-      "title": "Product Documentation - Architecture",
-      "source_of_truth": [
-        "site/docfx.json",
-        ".github/workflows/docs.yml",
-        "eng/site/build-distribution.py"
-      ],
-      "last_verified": "2026-10-12",
-      "headings": [
-        "Product Documentation"
-      ]
-    },
-    {
       "id": "workitem-integration-integration",
       "entity": "workitem-integration",
       "layer": "integration",
@@ -766,7 +745,7 @@
         "scripts/bash/workitem.sh",
         "tests/test_workitem_contract.py"
       ],
-      "last_verified": "2026-10-11",
+      "last_verified": "2026-10-13",
       "aliases": [
         "work item boundary",
         "work tracking integration",
@@ -799,16 +778,6 @@
       "from": "advisory-findings-are-not-authoritative",
       "to": "knowledge-engine",
       "rel": "constrains"
-    },
-    {
-      "from": "brand-system",
-      "to": "brand-system-architecture",
-      "rel": "has-layer"
-    },
-    {
-      "from": "brand-system",
-      "to": "product-documentation",
-      "rel": "relates-to"
     },
     {
       "from": "context-resolution",
@@ -891,11 +860,6 @@
       "rel": "references"
     },
     {
-      "from": "product-documentation",
-      "to": "product-documentation-architecture",
-      "rel": "has-layer"
-    },
-    {
       "from": "workitem-integration",
       "to": "workitem-integration-integration",
       "rel": "has-layer"
@@ -903,28 +867,6 @@
   ],
   "dangling_references": [],
   "entities": [
-    {
-      "id": "brand-system",
-      "type": "subsystem",
-      "owner": "DevSpark maintainers",
-      "path": ".knowledge/entities/brand-system",
-      "relations": [
-        {
-          "type": "supports",
-          "object": "product-documentation"
-        }
-      ],
-      "layers": [
-        "architecture"
-      ],
-      "missing_layers": [
-        "business",
-        "integration",
-        "operations"
-      ],
-      "coverage_overrides": [],
-      "constrained_by": []
-    },
     {
       "id": "context-resolution",
       "type": "subsystem",
@@ -990,23 +932,6 @@
       "constrained_by": [
         "advisory-findings-are-not-authoritative"
       ]
-    },
-    {
-      "id": "product-documentation",
-      "type": "subsystem",
-      "owner": "DevSpark Maintainers",
-      "path": ".knowledge/entities/product-documentation",
-      "relations": [],
-      "layers": [
-        "architecture"
-      ],
-      "missing_layers": [
-        "business",
-        "integration",
-        "operations"
-      ],
-      "coverage_overrides": [],
-      "constrained_by": []
     },
     {
       "id": "workitem-integration",

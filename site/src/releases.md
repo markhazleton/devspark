@@ -2,6 +2,24 @@
 
 Full per-version detail is in the [CHANGELOG](https://github.com/MarkHazleton/DevSpark/blob/main/CHANGELOG.md). This page summarizes the current line. To adopt a release, run your agent's [quickstart](get-started/quickstart.md) in Update Mode; see [Upgrade](get-started/upgrade.md).
 
+## 9.2.0: 2026-10-15
+
+Strengthens PR review and makes release archival dependable.
+
+- **PR review finding closeout.** Each finding has one canonical state, and reviews are updated in place by `/devspark-address-pr-review`. Severity and blocking are separate. Independent-reviewer verification of this flow has not yet been run.
+- **Architectural Fitness and Knowledge Strength.** `/devspark-pr-review` weighs coupling, responsibilities, fragile state and the next foreseeable change, and cites the Knowledge owners and invariants that apply, flagging stale or missing Knowledge.
+- **Code First quickfix.** `/devspark-quickfix` can finalize a change that already exists without a prior spec.
+- **Reliable release archival.** `/devspark-release` archives completed specs, quickfixes and work products with a journaled script that never overwrites archived files and reports anything ambiguous for a decision. A classifier bug that hid completed specs from archiving is fixed.
+
+## 9.1.0: 2026-10-12
+
+Builds on DevSpark 9.0 by introducing lean specification shift-left validation, delta-oriented development guidance, lifecycle separation of specification from product release, and engineering-judgment hardening.
+
+- **Lean Shift-Left Constitutional Validation.** Specification and Clarify stages incorporate early constitutional conflict detection to identify contradictions before planning and task decomposition.
+- **Delta-Oriented Development Guidance.** Specifications are treated as bounded hypotheses about the next valuable change to working software rather than exhaustive system blueprints. Authoring focuses on the intended delta and leaves software easy to change again.
+- **Specification and Release Separation.** Clear lifecycle boundary separating feature completion from product release and distribution. A spec delivers a releasable change through implementation, PR review, and verification closeout, without depending on version tags or package deployment.
+- **Engineering-Judgment Hardening.** Planning evaluates existing ownership and integration boundaries before widespread call-site wiring; Implementation permits safe contract-preserving simplification without redefining the feature contract; PR Review challenges accidental complexity while enforcing that dropping validation or altering exception behavior is not an acceptable shortcut.
+
 ## 9.0.0: 2026-10-11
 
 A breaking release: one slash-command convention and one Copilot installation format. Every skill is invoked with a `/devspark-<command>` slash command, and GitHub Copilot receives all 38 skills as native Agent Skills. The dotted 8.x form is retired with no aliases or compatibility mode.

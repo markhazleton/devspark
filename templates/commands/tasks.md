@@ -117,8 +117,6 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    - If research.md exists: Extract decisions for setup tasks
    - Generate tasks organized by user story (see Task Generation Rules below)
    - **Enforce constitution-mandated tasks**: for every loaded principle that requires runtime behavior, ensure a concrete task exists in the appropriate phase (Foundational for cross-cutting concerns like logging/auth-baseline; story phase for story-specific obligations). If a Constitution Waiver was recorded in `plan.md`, add a single annotation task referencing it rather than silently omitting the principle.
-   - Generate dependency graph showing user story completion order
-   - Create parallel execution examples per user story
    - Validate task completeness (each user story has all needed tasks, independently testable)
 
 5. **Generate tasks.md**: Use `/.devspark/templates/tasks-template.md` in installed repos, or `templates/tasks-template.md` in source repos, as the structure. Fill with:
@@ -131,9 +129,7 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    and retention of the complete `FEATURE_DIR` with populated linkage after every required check passes
    - All tasks must follow the strict checklist format (see Task Generation Rules below)
    - Clear file paths for each task
-   - Dependencies section showing story completion order
-   - Parallel execution examples per story
-   - Implementation strategy section (MVP first, incremental delivery)
+   - Dependencies only where an edge is not already implied by phase order; `[P]` marks parallel tasks
    - `## Gate Acknowledgements` section when the user proceeds with unresolved findings
 
    **Current knowledge tasks**: for each behavior-bearing change, add a task to update the matching
@@ -146,13 +142,12 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    traceability map from spec/plan/tasks to the durable delta; neither durable output may point back
    to this task or its plan/spec.
 
-6. **Report**: Output path to generated tasks.md and summary:
-   - Total task count
-   - Task count per user story
-   - Parallel opportunities identified
-   - Independent test criteria for each story
-   - Suggested MVP scope (typically just User Story 1)
-   - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
+   Keep task descriptions to the implementation or verification delta, exact path, and forcing
+   requirement/design/acceptance id. Do not paraphrase requirements, acceptance scenarios, rationale,
+   research, or Plan decisions. Story goals and independent tests should be one line and cite Spec ids;
+   include extra detail only when a real task dependency or test procedure needs it.
+
+6. **Report**: Output the tasks.md path and a concise readiness summary; do not restate the task list.
 
 Context for task generation: {ARGS}
 
@@ -164,7 +159,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 **Tests are a durable pillar, not an option**: every behavior change considers its Tests impact, and the resulting delta is `add`, `update`, `retire` or `none`. Generate test tasks for a delta that is not `none`; never assume every change adds tests. When `qa-acceptance.md` exists, derive the Tests tasks from its scenarios and their regression dispositions.
 
-**Pre-PR tasks only**: derive only work that can finish before the PR or merge, in every derivation (with or without an acceptance artifact). When an acceptance artifact exists, that is: automated acceptance coverage, regression add/update/retire, a durable manual-regression reference, and source-controlled QA material. Never derive a task that waits for deployment, executes QA after merge, needs post-deployment sign-off, belongs to a later sprint, or depends on defects not yet discovered. **Post-merge capture** applies to every derivation: a `stage: post-deploy` obligation is not a task. It stays visible as a deferred requirement with its owner and an existing durable `captured_as` record (closeout contract §4.1), and is verified after deployment.
+**Pre-PR tasks only**: derive only work that can finish before the PR or merge, in every derivation (with or without an acceptance artifact). When an acceptance artifact exists, that is: automated acceptance coverage, regression add/update/retire, a durable manual-regression reference, and source-controlled QA material. Never derive a task that waits for deployment, executes QA after merge, needs post-deployment sign-off, belongs to a later sprint, or depends on defects not yet discovered. **Specification delivers a releasable change; product release packages and distributes completed changes.** Tasks MUST NOT include publishing or deploying a release, version bumping/publishing, or package distribution. A completed specification does not remain open solely because its product release has not occurred. **Post-merge capture** applies to every derivation: a `stage: post-deploy` obligation is not a task. It stays visible as a deferred requirement with its owner and an existing durable `captured_as` record (closeout contract §4.1), and is verified after deployment.
 
 ### Checklist Format (REQUIRED)
 

@@ -32,7 +32,7 @@ Done when: the questioning loop has ended (5 questions asked, full coverage reac
 
 ## Constitution Authority
 
-If `/.knowledge/governance/constitution.md` exists, load it. The constitution is a **non-negotiable ambiguity-detection lens**: any mandated principle (privacy, accessibility, observability, testing, etc.) that the spec omits or leaves vague is a high-priority candidate question. Constitution conflicts cannot be resolved by answer choice — they must trigger a follow-up note in the spec recommending either spec amendment or an explicit constitution update.
+If `/.knowledge/governance/constitution.md` exists, load it. The constitution is a **non-negotiable ambiguity-detection lens**: any mandated principle (privacy, accessibility, observability, testing, etc.) that the spec omits or leaves vague is a high-priority candidate question. When an accepted answer materially changes a requirement, compare only that changed requirement with the complete applicable MUST/SHOULD text, including embedded scope and exceptions. Cite both sides of any conflict; do not record the answer as resolved or report the spec ready while it remains. A conflict requires the owner's requirement revision or an explicit constitution update, never an implied waiver.
 
 ## Spec Knowledge Consumption
 
@@ -201,6 +201,7 @@ Execution steps:
      - Edge case / negative flow → Add a new bullet under Edge Cases / Error Handling (or create such subsection if template provides placeholder for it).
      - Terminology conflict → Normalize term across spec; retain original only if necessary by adding `(formerly referred to as "X")` once.
    - If the clarification invalidates an earlier ambiguous statement, replace that statement instead of duplicating; leave no obsolete contradictory text.
+   - Before closing the clarification, recheck each requirement changed by an accepted answer against the applicable constitutional text and its exceptions. Do not repeat the check for unchanged requirements.
    - Apply every accepted answer to each element it affects, not only the one it was asked about: also update Success Criteria, Assumptions and boundaries (Out of Scope, the Minimum Sufficient Change block) when the answer changes them. Replace the contradictory text instead of appending the answer beside it, and keep each success criterion measurable and technology-agnostic, or flag it for the developer when it cannot be.
    - When the answer confirms an identity, addressability, fidelity, cardinality or relationship rule, record it as a statement labelled `Domain invariant:` or `Architectural constraint:` in Requirements or Key Entities; record an accepted limitation or acceptable manual operation in Requirements, Assumptions or the Minimum Sufficient Change block.
    - Save the spec file AFTER each integration to minimize risk of context loss (atomic overwrite).

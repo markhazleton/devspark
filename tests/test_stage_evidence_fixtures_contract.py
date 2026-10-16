@@ -26,11 +26,13 @@ the checks that need that text are strict expected failures until it is written.
 
 from __future__ import annotations
 
+import atexit
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -73,6 +75,9 @@ SHELLS = [
     pytest.param("pwsh", marks=pytest.mark.skipif(shutil.which("pwsh") is None, reason="pwsh not available")),
     pytest.param("bash", marks=pytest.mark.skipif(_bash() is None, reason="bash with jq not available")),
 ]
+
+# Verdicts are cached per process; one worker keeps each bundle evaluated once.
+pytestmark = pytest.mark.xdist_group("stage-evidence")
 
 
 def _git(repo: Path, *args: str) -> None:
@@ -121,9 +126,29 @@ def _next(shell: str, repo: Path) -> dict:
     return json.loads(proc.stdout)
 
 
-def _both_twins(tmp_path: Path, bundle: str) -> tuple[dict, dict, dict]:
-    repo = _repo(tmp_path, bundle)
-    return _lifecycle(repo), _next("pwsh", repo), _next("bash", repo)
+def _both_twins(bundle: str) -> tuple[dict, dict, dict]:
+    return _outcome(bundle, "lifecycle"), _outcome(bundle, "pwsh"), _outcome(bundle, "bash")
+
+
+_OUTCOMES: dict[tuple[str, str], dict] = {}
+_BUNDLE_REPOS: dict[str, Path] = {}
+
+
+def _outcome(bundle: str, reader: str) -> dict:
+    """The lifecycle or one next-context twin's verdict on a bundle, computed once per run.
+
+    Each verdict is a pure function of the committed bundle, so several contracts that read
+    the same verdict share one repository and one invocation.
+    """
+    key = (bundle, reader)
+    if key not in _OUTCOMES:
+        if bundle not in _BUNDLE_REPOS:
+            base = Path(tempfile.mkdtemp(prefix="stage-evidence-"))
+            atexit.register(shutil.rmtree, base, ignore_errors=True)
+            _BUNDLE_REPOS[bundle] = _repo(base, bundle)
+        repo = _BUNDLE_REPOS[bundle]
+        _OUTCOMES[key] = _lifecycle(repo) if reader == "lifecycle" else _next(reader, repo)
+    return _OUTCOMES[key]
 
 
 needs_both = pytest.mark.skipif(
@@ -145,28 +170,27 @@ def test_every_bundle_has_an_expected_outcome():
 
 @pytest.mark.parametrize("bundle", sorted(EXPECTED))
 @pytest.mark.parametrize("shell", SHELLS)
-def test_next_context_and_lifecycle_report_the_recorded_outcome(tmp_path, bundle, shell):
+def test_next_context_and_lifecycle_report_the_recorded_outcome(bundle, shell):
     status, codes, state, command = EXPECTED[bundle]
-    repo = _repo(tmp_path, bundle)
-    lifecycle = _lifecycle(repo)
+    lifecycle = _outcome(bundle, "lifecycle")
     assert lifecycle["status"] == status
     assert _failure_codes(lifecycle) == sorted(codes)
-    result = _next(shell, repo)
+    result = _outcome(bundle, shell)
     assert result["STATE"] == state
     assert result["RECOMMENDED_COMMAND"] == command
 
 
 @needs_both
 @pytest.mark.parametrize("bundle", sorted(EXPECTED))
-def test_powershell_and_bash_agree_on_every_bundle(tmp_path, bundle):
-    _, ps, sh = _both_twins(tmp_path, bundle)
+def test_powershell_and_bash_agree_on_every_bundle(bundle):
+    _, ps, sh = _both_twins(bundle)
     for key in ("STATE", "RECOMMENDED_COMMAND", "VERIFY_REQUIRED", "VERIFY_PASSED", "CLOSEOUT_DECISION", "TASKS_COMPLETE"):
         assert ps[key] == sh[key], key
 
 
 @needs_both
-def test_a_deferred_post_deploy_item_with_a_durable_record_does_not_block_delivery(tmp_path):
-    lifecycle, ps, sh = _both_twins(tmp_path / "deferred", "deferred-post-deploy-captured")
+def test_a_deferred_post_deploy_item_with_a_durable_record_does_not_block_delivery():
+    lifecycle, ps, sh = _both_twins("deferred-post-deploy-captured")
     record = BUNDLES / "deferred-post-deploy-captured" / "tracker-records" / "WI-4821.md"
     assert record.is_file() and "Status: open" in record.read_text(encoding="utf-8")
     assert lifecycle["status"] == "pass"
@@ -179,16 +203,16 @@ def test_a_deferred_post_deploy_item_with_a_durable_record_does_not_block_delive
         "deferred-missing-captured-as",
         "high-risk-missing-accepted-by",
     ):
-        blocked, ps_b, sh_b = _both_twins(tmp_path / name, name)
+        blocked, ps_b, sh_b = _both_twins(name)
         assert blocked["status"] == "fail", name
         assert ps_b["STATE"] == sh_b["STATE"] != "ready-for-pr", name
 
 
-def test_a_bundle_without_stage_or_evidence_class_keeps_the_old_behavior(tmp_path):
+def test_a_bundle_without_stage_or_evidence_class_keeps_the_old_behavior():
     bundle = BUNDLES / "legacy-no-stage"
     text = "".join(p.read_text(encoding="utf-8") for p in bundle.rglob("*.md"))
     assert "stage:" not in text and "evidence_class" not in text
-    assert _lifecycle(_repo(tmp_path, "legacy-no-stage"))["status"] == "pass"
+    assert _outcome("legacy-no-stage", "lifecycle")["status"] == "pass"
 
 
 def _read(rel: str) -> str:

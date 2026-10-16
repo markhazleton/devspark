@@ -1,0 +1,33 @@
+{
+  "finding_id": "H-01",
+  "aliases": [
+    "PRD3-01"
+  ],
+  "status": "resolved",
+  "historical_count": 1,
+  "current_counts": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0
+  },
+  "current_state_counts": {
+    "open": 0,
+    "remediated": 0,
+    "awaiting-verification": 0,
+    "reopened": 0,
+    "resolved": 1
+  },
+  "unresolved_blockers": 0,
+  "pending_verification_count": 0,
+  "gate_status": "pass",
+  "recommendation": "approve",
+  "workflow_counts": {
+    "initial_intakes": 1,
+    "author_submissions": 1,
+    "independent_evaluations": 1,
+    "reconciliation_only_operations": 0,
+    "host_writes": 0,
+    "application_test_runs": 0
+  }
+}

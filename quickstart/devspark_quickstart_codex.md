@@ -556,6 +556,7 @@ Confirm the installation:
 - `AGENTS.md` status: created, updated, or already existed
 - Repair status: not needed, or repaired missing framework files
 - Explain the 3-tier override system and that the personalize command creates per-user overrides
+- Explain that commands start only when typed as slash commands with the leading `/` (for example `/devspark-create-pr`); the agent does not start them on its own, and the bare name without `/` is sent as plain text
 
 Tell the user: type `/devspark-specify` in Codex to start using DevSpark.
 
@@ -619,5 +620,3 @@ For repositories containing **multiple applications** with different platforms, 
 | `/devspark-add-application` | Register a new application in the registry |
 | `/devspark-list-applications` | View all registered applications and profiles |
 | `/devspark-validate-registry` | Validate registry schema, references, and consistency |
-
-For details, see the [Multi-App Specification](https://github.com/MarkHazleton/DevSpark/blob/main/.devspark.work/specs/001-multi-app-monorepo-support/spec.md).

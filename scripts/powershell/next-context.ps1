@@ -19,6 +19,7 @@ $assistantName = Get-AssistantName
 $gitUser = Get-GitUser
 
 # Orientation facts ("where am I"): repo name + host platform, from config or remote.
+# Read in a single in-memory pass via Get-DevSparkConfig, matching next-context.sh.
 $devsparkConfig = Get-DevSparkConfig
 if ($devsparkConfig -and $devsparkConfig.repository) { $repoName = "$($devsparkConfig.repository)" } else { $repoName = Split-Path $repoRoot -Leaf }
 if ($devsparkConfig -and $devsparkConfig.platform) {

@@ -1,81 +1,146 @@
 # About, Architecture and Controls
 
-DevSpark is a Make Bold Solutions toolkit for AI-assisted software delivery. Its versioned markdown prompts, templates, and helper scripts provide a repeatable workflow from requirements through release. Adoption is voluntary per repository.
+DevSpark is an internally developed, optional engineering toolkit maintained in the DevSpark
+development environment. It combines reusable skills, versioned Markdown instructions, templates,
+and helper scripts used with an AI coding assistant. Its purpose is to help developers create and
+assess trustworthy software changes—not to require one prescribed specification-first sequence.
+
+DevSpark is not a program, subscription, or mandated DevSpark-wide standard. Adoption is voluntary per
+repository; repositories that do not adopt it are unaffected.
 
 ## Current status
 
-- **Maintainer:** [Mark Hazleton](https://markhazleton.com), through the [DevSpark GitHub repository](https://github.com/MarkHazleton/DevSpark). The toolkit began from Spec Kit and has been substantially rebuilt.
-- **Lifecycle stage:** maintained as an open-source, prompt-first engineering toolkit.
-- **Feedback:** open an issue or pull request against the repository (see [Contributing](https://github.com/MarkHazleton/DevSpark/blob/main/CONTRIBUTING.md)). Git, release notes, and work-item systems retain history.
-- **Audiences:** developers should start with [Evaluate One Task](../get-started/evaluate-one-task.md); managers with [How to Evaluate](evidence.md); architecture and security reviewers with the sections below.
+- **Maintainer:** [DevSpark on GitHub](https://github.com/MarkHazleton/DevSpark) is maintained by Make Bold Solutions. It began from Spec Kit, an open-source specification-driven development starter, and has been substantially rebuilt.
+- **Use:** adopted voluntarily by teams in Make Bold Solutions. Formal enterprise security or architecture approval is not documented here; see [Review status](#review-status).
+- **Feedback:** use repository issues or pull requests; see
+  [Contributing](https://github.com/MarkHazleton/DevSpark/blob/main/CONTRIBUTING.md).
+  Git, releases, and existing work-management systems retain delivery history.
+- **Start here:** developers can try [Evaluate One Task](../get-started/evaluate-one-task.md);
+  managers can use [How to Evaluate](evidence.md); architecture and security reviewers can use
+  the operating boundaries below.
+
+## What DevSpark is trying to improve
+
+A **Delta** is an intentional software change. Developers may discover it through formal
+requirements, exploratory code, a production defect, or an experiment. DevSpark provides
+engineering assistance appropriate to the journey, then seeks credible evidence about the Delta
+and its **blast radius**—the behavior, contracts, dependencies, data, and failure paths it can
+actually affect.
+
+The enduring assets are **code, tests, and current durable Knowledge**. Specs, plans, task lists,
+and review records may help create those assets, but completing paperwork is not proof of software
+quality. The goal is to validate the change, preserve relevant understanding, and stop once the
+required confidence and decisions exist.
+
+This is the [Vision and Manifesto](philosophy.md). It is also a direction for the tool's evolution:
+existing skills do not all implement modality-independent Delta assurance today. The exact
+capabilities depend on the installed version and commands.
 
 ## Ownership and hosting
 
-- **Build:** a CI pipeline in the repository builds the documentation site, per-agent template packages, and the prompt-first `/raw` distribution tree as one artifact.
-- **Hosting:** the public documentation and distribution site is [dev.makeboldspark.com](https://dev.makeboldspark.com), built for GitHub Pages.
-- **Versioning:** releases are tagged `vX.Y.Z` ([Semantic Versioning](https://semver.org/)). `dist/manifest.json` exposes the current `latest`, and each consuming repository records its installed version in `.devspark/VERSION`.
-- **Change approval:** normal GitHub pull requests, subject to the repository's branch policies.
-- **Access:** public documentation and framework distribution; consumer repositories retain their own access controls.
+- **Build:** repository CI builds the documentation site, per-agent template packages, and
+  prompt-first `/raw` distribution tree together.
+- **Hosting:** the public site is published through GitHub Pages at
+  [dev.makeboldspark.com](https://dev.makeboldspark.com) by Make Bold Solutions.
+- **Versioning:** releases use `vX.Y.Z` tags ([Semantic Versioning](https://semver.org/)).
+  `dist/manifest.json` exposes `latest`, and consuming repositories record their installed version
+  in `.devspark/VERSION`.
+- **Approval:** changes to the framework follow GitHub pull requests and repository branch
+  protection rules.
+- **Access today:** the published site is publicly reachable during the current validation period.
+  Microsoft Entra ID and network restrictions are not currently implemented for the site; it must
+  not be described as private or internal-network-only.
 
 ## What it adds to a repository
 
-The core workflow is versioned markdown and scripts that a developer uses through an AI coding assistant they already have (GitHub Copilot, Claude Code, Cursor, and others). It adds no runtime dependency, service, binary, or package reference, and makes no network call of its own.
+Developers invoke `/devspark-*` skills through an AI coding assistant they already use, such as
+GitHub Copilot, Claude Code, or Cursor. The installed framework is prompt instructions, templates,
+and scripts—not an application runtime, subscription service, or agent-hosting dependency.
 
-Four folders define ownership, all plain files under normal repository controls:
-
-| Folder | Holds |
+| Folder | Ownership and purpose |
 |---|---|
-| `.devspark/` | Static snapshot of prompt defaults, templates, and scripts. Replaceable framework files |
-| `.devspark.work/` | Temporary plans, gates, configuration, registries, and skill prompt or script overrides |
-| `.knowledge/` | Current authoritative technical and governance truth, plus published guidance under `.knowledge/guides/` |
-| `.archive/` | Old work products, grouped by release |
+| `.devspark/` | Installed framework instructions, templates, and scripts; replaceable on upgrade |
+| `.devspark.work/` | Repository-owned temporary plans, review records, configuration, and overrides |
+| `.knowledge/` | Repository-owned authoritative current software and governance Knowledge, plus published guides |
+| `.archive/` | Repository-owned inactive historical work products |
 
-Once copied, there is no runtime link back to the canonical repository. Updating is a deliberate, developer-initiated action, and uninstalling removes only `.devspark/`. Skill prompt instructions resolve through a three-tier chain: personal overrides in `.devspark.work/{git-user}/commands/`, then team overrides in `.devspark.work/commands/`, then stock defaults. The agent performs the work; a `/devspark-*` slash command invokes the skill. See [Terminology](../guides/prompt-lifecycle-mapping.md#terminology).
+Once installed, the framework works from its local files; there is no runtime connection back to
+the canonical DevSpark repository. Updates are developer-initiated. Skills resolve personal prompt
+overrides under `.devspark.work/{git-user}/commands/`, then team overrides under
+`.devspark.work/commands/`, then stock defaults in `.devspark/`. See
+[Terminology](../guides/prompt-lifecycle-mapping.md#terminology).
+
+Framework upgrades own `.devspark/`, not the repository's Knowledge, work products, or archives.
 
 ## Data handling
 
-- The site hosts methodology documentation and distribution artifacts only: quickstart guides, prompt text, templates, scripts, and release packages. It does not host consumer application source or business data.
-- DevSpark does not transmit repository content. The AI assistant a developer uses processes repository context under its own approved enterprise configuration, exactly as it would without DevSpark present.
-- Follow your organization's guidance on what may be shared with an AI assistant. Write specs and plans like any other repository documentation: no secrets, credentials, or protected data.
+The website distributes methodology documentation and framework artifacts; it does not host DevSpark
+application source or business data. DevSpark itself does not transmit repository content.
+The AI assistant selected by the developer processes context according to its own enterprise
+configuration and approved usage.
 
-## Existing controls
+Existing DevSpark restrictions still govern what may be submitted to an AI assistant. Do not place
+secrets, credentials, or protected data in specifications, Knowledge, or prompts.
 
-DevSpark operates within existing engineering controls and does not replace or bypass them: identity and access management, repository permissions and branch protections, pull-request review, secure coding requirements, dependency scanning, test requirements and CI gates, release pipelines, and production access controls.
+## Assurance and existing controls
 
-Durable changes are reviewed and merged through the same pull-request process as any other change. Temporary plans stay under `.devspark.work/` until `/devspark-release` archives them under `.archive/{YYYY-MM-DD}/`. Nothing auto-commits, auto-approves, or auto-deploys.
+DevSpark does not replace identity management, repository permissions, branch protection,
+independent human review where required, secure coding, dependency scanning, build and test
+checks, release pipelines, or production access controls.
+
+Accountable humans set the standing expectations for acceptable risk and evidence. Agents may
+recommend scope and run checks but cannot waive mandatory obligations or claim unrecorded human
+approval. A second AI model can offer independent reasoning, but it does not replace tests or
+real-world observations when those are required.
+
+Some controls are expressed as prompt instructions and are not automatically enforced by the
+hosting platform. A contributor may bypass optional DevSpark commands; applicable repository CI
+and branch policies are what technically prevent a merge. DevSpark does not auto-approve,
+auto-merge, or auto-deploy.
+
+Temporary work products are retained or archived under the repository's current lifecycle rules;
+durable Knowledge is maintained as current truth, not as a record of every historical workflow.
 
 ## Review status
 
-The design minimizes added runtime and supply-chain risk, but that intent is not a completed formal review. No security or architecture approval is currently documented or linked here, and none should be inferred. Teams that require one before adopting should treat it as an open item and route it through their normal review process.
+The design aims to minimize additional runtime and supply-chain dependencies, but that intent is
+not a completed formal review. No enterprise-wide security or architecture approval is linked or
+documented here; none should be inferred. Teams requiring such approval should route it through
+their established process before adoption.
 
 ## Common questions
 
 <details>
-<summary>Is there a cost or vendor relationship?</summary>
+<summary>Is there a cost or external vendor relationship?</summary>
 
-No. It is free to use under the MIT license, with no license fee, subscription, contract, or external vendor.
+No fee, subscription, or external DevSpark vendor is required. The framework is maintained
+internally; developers use AI coding assistants under their existing approved arrangements.
 </details>
 
 <details>
-<summary>What if the maintainer stops maintaining DevSpark?</summary>
+<summary>What if the maintainer leaves DevSpark?</summary>
 
-The canonical repository is available on GitHub. Files already in a consuming repository are static text with no external dependency, so they keep working even if the source were no longer maintained.
+The source repository is DevSpark-owned. Installed files remain local to their consuming repositories
+and do not depend on the maintainer's continued availability.
 </details>
 
 <details>
-<summary>Does adopting it create a dependency my team does not control?</summary>
+<summary>Does adoption create a service dependency DevSpark does not control?</summary>
 
-No. The files are copied into the repository, and there is no connection back to the distribution site afterward.
+No DevSpark service must remain available for the installed instructions and scripts to run.
+The chosen AI assistant and existing toolchain retain their own dependencies and controls.
 </details>
 
 <details>
-<summary>Can the constitution enforce standards more broadly?</summary>
+<summary>Does the Constitution enforce enterprise-wide standards?</summary>
 
-A repository's constitution (`.knowledge/governance/constitution.md`) is read by the agent when running skills for specification, implementation, and PR review in that repository. Enforcement beyond a single repository is a question for Dev Infrastructure, not a capability operated at that scale today.
+No. Repository governance applies through the installed skills and the repository's existing
+technical controls. Enterprise-wide enforcement is not a capability DevSpark operates today.
 </details>
 
 ## Related pages
 
+- [Vision and Manifesto](philosophy.md) and [FAQ](faq.md)
+- [How to Evaluate](evidence.md)
 - [How It Works](../get-started/how-it-works.md)
-- [Philosophy](philosophy.md) and [FAQ](faq.md)
 - [Repository](https://github.com/MarkHazleton/DevSpark)

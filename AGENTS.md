@@ -4,7 +4,7 @@
 
 DevSpark is a prompt-first lifecycle toolkit. The product is the markdown prompt
 set, helper scripts, templates, schemas, quickstart prompts, and generated agent
-entry points and Agent Skills. In v9.0, slash invocations use `/devspark-<command>`.
+entry points and Agent Skills. In v9.2, slash invocations use `/devspark-<command>`.
 Copilot installs native skills; other platforms receive their registered entry format.
 
 There is no DevSpark command-line application in this repository. Do not add one.

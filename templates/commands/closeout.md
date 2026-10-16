@@ -43,6 +43,7 @@ Replaces only the closeout phase of `/devspark-verify`, leaving the evidence pha
 - **Closeout** (here, or verify step 6) — "Given that evidence, is this work finished?"
 
 - **Owns**: resolving the stated objective, evaluating each acceptance criterion by its declared kind, classifying every open finding into exactly one of the four classifications, deciding `complete` / `not-complete`, and writing `FEATURE_DIR/gates/closeout.md`.
+- **Specification/Release Separation**: a specification delivers a releasable change; product release packages and distributes completed changes. Closeout decides whether the specification's releasable change is finished. A completed specification does not remain open solely because its product release has not occurred. Release preparation can consume multiple independently completed specifications.
 - **Does NOT own**: producing evidence (`/devspark-verify`), document consistency (`/devspark-analyze`), adversarial risk hypotheses (`/devspark-critic`), writing code (`/devspark-implement`), the PR (`/devspark-create-pr`), or archiving (`/devspark-release`).
 
 ## Constitution Authority

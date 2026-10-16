@@ -47,17 +47,27 @@ Done when: every selected finding is fixed and committed (Phase 4), the review f
 
 1. Run `{SCRIPT}` with the PR id and JSON output enabled (`-PrId {PR_ID} -Json` on PowerShell, `--pr-id {PR_ID} --json` on Bash).
 2. Fail fast if `/.devspark.work/pr-review/pr-{PR_ID}.md` is missing.
-3. Parse open findings from checklist lines for `C-##`, `H-##`, `M-##`, `L-##`, `CON-##` and `PRD{N}-##` ids (`- [ ] **ID**`). The helper reports each finding's `status`, `blocking`, `route`, `auto_eligible` and `reason`; use those values instead of inferring eligibility from an ID prefix.
+3. Consume the helper's authoritative projections. Preserve canonical IDs and aliases; distinguish
+   actionable findings from `pending_verification`, and use its `blocking`, `route`,
+   `auto_eligible`, and `reason` values rather than inferring from an ID prefix.
 4. Confirm current branch equals the PR source branch. Refuse if mismatched.
 5. Capture `git status --short`.
 6. **Refuse to proceed** if any staged path matches `.devspark.work/pr-review/pr-*.md`.
 
-If no open findings remain, print: `Nothing to address.` and stop.
+If no actionable findings remain but `pending_verification` is non-empty, report that reviewer
+verification is pending and identify the missing permitted reviewer/proof; do not say the review is
+complete. Print `Nothing to address.` only when the report is truly empty or has no unresolved
+actionable or pending work.
 
 ### Phase 1 — Plan
 
 1. Render open findings as a checklist with severity badges.
-2. Ask which findings to address this iteration (`all` allowed). **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and select only findings with `auto_eligible: true` (open critical/high or blocking PR-delta findings with no accepted, deferred, resolved or withdrawn disposition). Report every other open finding with its `reason` and leave it untouched: ordinary Medium/Low and non-blocking `PRD` findings need a human decision, and `CON` findings route to `/devspark-evolve-constitution` rather than product code. A selected `C-NN` finding whose fix is ambiguous enough to need a human judgment call is flagged and skipped.
+2. Honor an explicit finding ID or `all` in the user's input. If exactly one finding is already
+   `auto_eligible`, select it without a redundant selection question; if several are eligible,
+   request the smallest necessary selection unless `--auto` applies. Under `--auto`, select only
+   `auto_eligible: true`. Report other findings with their supplied `reason` and leave them
+   untouched; optional/nonblocking findings, risk acceptance, ambiguous recovery, and constitution
+   routing retain their existing authorization requirements.
 3. Build an internal todo list with one item per selected finding.
 
 ### Phase 2 — Fix loop (per finding)
@@ -91,20 +101,26 @@ fix(pr-{PR_ID}): address {M-02,M-04,M-05}
 
 1. Capture the resulting short hash as `{FIX_SHA}`.
 
-### Phase 5 — Update the review file
+### Phase 5 — Record remediation and submit for independent verification
 
-For each fixed finding:
+After the code-only commit and required author validation:
 
-1. Flip `- [ ]` to `- [x]`.
-2. Append `— *Fixed in {FIX_SHA}: {one-line how}*` to the finding heading line.
-3. Do **not** change finding IDs, descriptions, or broken/fix code blocks.
+1. Inspect the latest record and capture its digest.
+2. Create one temporary event input outside tracked source paths with
+   `operation: remediate-and-submit`, the canonical finding ID, correction commit SHA, author
+   execution context, explanation tied to the original expectation, actual author validation (or
+   explicit absence and reason), and the remaining independent proof obligation.
+3. Apply it with `scripts/pr-review-state.py apply ... --expected-digest ... --repo-root .`.
+   Never set `status: resolved`, edit derived checkboxes/tables/counters directly, or claim that
+   author proof is independent confirmation.
+4. The engine writes `remediated`/`awaiting-verification`, rendered views, counts, and local
+   recommendation together. Verify that the blocker remains until a distinct reviewer confirms it.
+5. Run `scripts/pr-review-validate.py` against the resulting revision. Remove the temporary event
+   input after use, then stage only the review file.
 
-Then update metadata:
-
-1. Bump revision in the header table (`Rev N -> Rev N+1`).
-2. Update `Stats` with current churn/test counts/commit snapshot.
-3. Append a new row to `Revision Log` for this iteration.
-4. Stage only `/.devspark.work/pr-review/pr-{PR_ID}.md`.
+If the finding is already pending verification, do not reapply remediation. Hand off to the existing
+`/devspark-pr-review UPDATE` for bounded independent evaluation. A missing distinct evaluator or
+required proof leaves it pending; it does not start another address/review reconciliation cycle.
 
 ### Phase 6 — Commit review file (isolation gate #2)
 
@@ -130,7 +146,7 @@ Parse the two commits and assert they share zero file paths.
 2. Suggest focused re-review:
 
 ```text
-Run `/devspark-pr-review UPDATE {PR_URL}` to trigger a focused re-review.
+Run `/devspark-pr-review UPDATE {PR_URL}` for bounded independent evaluation of the pending correction.
 ```
 
 ## Guidelines
@@ -148,31 +164,47 @@ Run `/devspark-pr-review UPDATE {PR_URL}` to trigger a focused re-review.
 
 ### Edit Scope (MUST)
 
-In review files, limit edits to:
-
-- finding checkbox state
-- heading-line fixed-in suffix
-- revision metadata (`Revision`, `Stats`, `Revision Log`)
-
-Everything else is immutable during addressing.
+Do not hand-edit finding statuses, derived tables, counts, gate summaries, or recommendation.
+The state engine updates the structured record and its marked derived regions in one digest-guarded
+operation. Preserve report narrative and source evidence outside those regions.
 
 ## Context
 
 $ARGUMENTS
 
+<!-- DIVERGENT: pr-review-state -->
 ## Shared Review Resolution Contract Output
 
-When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark-address-pr-review, telemetry, release) can act on them deterministically:
+Use `templates/pr-review-state-contract.md` and `scripts/pr-review-state.py` as the PR-only
+authority. Preserve the shared base finding fields for all other review stages.
+The shared `execution_mode` values remain `auto`, `selective`, and `manual`; this PR workflow adds
+no new execution mode.
 
 ```yaml
-findings:
-  - finding_id: <stable-id-unique-within-this-command-output>   # e.g., analyze-001, clarify-002
-    severity: critical | high | medium | low
-    description: <1-3 sentence problem statement>
-    recommended_action: <machine-actionable next step>
-    execution_mode: auto | selective | manual
-    status: open                                                  # set to `resolved` after remediation
-    outcome: ""                                                  # populated post-resolution by address-pr-review
+review_state:
+  format_version: 1
+  findings:
+    - finding_id: H-01
+      aliases: []
+      severity: high
+      category: general
+      blocking: true
+      description: "[Original concern]"
+      expected_outcome: "[Observable expected correction]"
+      evidence: ["[Original evidence]"]
+      recommended_action: "[Actionable step]"
+      execution_mode: manual
+      status: open
+      outcome: ""
+      provenance: {kind: native}
+      remediation: null
+      verification: null
+      disposition: null
+      reopen_reason: null
+  conditions: []
+  last_change: {}
 ```
 
-inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark-address-pr-review` (FR-028).
+Only independent reviewer confirmation can resolve a new correction. Keep author remediation pending,
+preserve dispositions and prior outcomes, and never treat a local recommendation as hosted approval
+or merge authorization.

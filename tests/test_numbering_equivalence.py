@@ -62,19 +62,32 @@ def _git(args: list[str], cwd: Path) -> None:
     subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True)
 
 
+_BASE_TEMPLATE: Path | None = None
+_TEMP_ROOT: tempfile.TemporaryDirectory | None = None
+
+
+def _get_base_template() -> Path:
+    global _BASE_TEMPLATE, _TEMP_ROOT
+    if _BASE_TEMPLATE is None:
+        _TEMP_ROOT = tempfile.TemporaryDirectory()
+        _BASE_TEMPLATE = Path(_TEMP_ROOT.name) / "base"
+        _BASE_TEMPLATE.mkdir(parents=True, exist_ok=True)
+        _copy_script_set(_BASE_TEMPLATE)
+        _git(["init"], _BASE_TEMPLATE)
+        _git(["config", "user.name", "DevSpark Test"], _BASE_TEMPLATE)
+        _git(["config", "user.email", "devspark@example.com"], _BASE_TEMPLATE)
+        _git(["checkout", "-b", "main"], _BASE_TEMPLATE)
+        (_BASE_TEMPLATE / "README.md").write_text("# test\n", encoding="utf-8")
+        _git(["add", "."], _BASE_TEMPLATE)
+        _git(["commit", "-m", "init"], _BASE_TEMPLATE)
+    return _BASE_TEMPLATE
+
+
 def _build_repo(branches: list[str], spec_dirs: list[str], quickfix_files: list[str]) -> Path:
     temp_dir = Path(tempfile.mkdtemp())
     repo_root = temp_dir / "numbering-fixture"
-    repo_root.mkdir(parents=True, exist_ok=True)
-    _copy_script_set(repo_root)
-
-    _git(["init"], repo_root)
-    _git(["config", "user.name", "DevSpark Test"], repo_root)
-    _git(["config", "user.email", "devspark@example.com"], repo_root)
-    _git(["checkout", "-b", "main"], repo_root)
-    (repo_root / "README.md").write_text("# test\n", encoding="utf-8")
-    _git(["add", "."], repo_root)
-    _git(["commit", "-m", "init"], repo_root)
+    base = _get_base_template()
+    shutil.copytree(base, repo_root)
 
     for spec_dir in spec_dirs:
         spec_path = repo_root / ".devspark.work" / "specs" / spec_dir

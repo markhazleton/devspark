@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -51,22 +52,40 @@ def _commit(repo: Path, name: str, content: str, message: str) -> None:
     _git(repo, "commit", "-q", "-m", message)
 
 
-@pytest.fixture
-def clone(tmp_path: Path) -> tuple[Path, Path]:
-    origin = tmp_path / "origin.git"
-    seed = tmp_path / "seed"
-    work = tmp_path / "work"
-    _git(tmp_path, "init", "-q", "--bare", "-b", "main", str(origin))
-    _git(tmp_path, "clone", "-q", str(origin), str(seed))
+_TEMPLATE_CLONE: Path | None = None
+_TEMP_ROOT: tempfile.TemporaryDirectory | None = None
+
+
+def _init_template_clone(target: Path) -> None:
+    origin = target / "origin.git"
+    seed = target / "seed"
+    work = target / "work"
+    _git(target, "init", "-q", "--bare", "-b", "main", str(origin))
+    _git(target, "clone", "-q", str(origin), str(seed))
     _git(seed, "config", "user.email", "test@example.com")
     _git(seed, "config", "user.name", "Test User")
     _commit(seed, "a.txt", "one\ntwo\nthree\n", "base")
     _git(seed, "push", "-q", "origin", "HEAD:main")
-    _git(tmp_path, "clone", "-q", str(origin), str(work))
+    _git(target, "clone", "-q", str(origin), str(work))
     _git(work, "config", "user.email", "test@example.com")
     _git(work, "config", "user.name", "Test User")
     _git(work, "checkout", "-q", "-b", "feature")
-    return seed, work
+
+
+@pytest.fixture
+def clone(tmp_path: Path) -> tuple[Path, Path]:
+    global _TEMPLATE_CLONE, _TEMP_ROOT
+    if _TEMPLATE_CLONE is None:
+        _TEMP_ROOT = tempfile.TemporaryDirectory()
+        _TEMPLATE_CLONE = Path(_TEMP_ROOT.name) / "tpl"
+        _TEMPLATE_CLONE.mkdir()
+        _init_template_clone(_TEMPLATE_CLONE)
+    shutil.copytree(_TEMPLATE_CLONE / "origin.git", tmp_path / "origin.git")
+    shutil.copytree(_TEMPLATE_CLONE / "seed", tmp_path / "seed")
+    shutil.copytree(_TEMPLATE_CLONE / "work", tmp_path / "work")
+    _git(tmp_path / "seed", "remote", "set-url", "origin", str(tmp_path / "origin.git"))
+    _git(tmp_path / "work", "remote", "set-url", "origin", str(tmp_path / "origin.git"))
+    return tmp_path / "seed", tmp_path / "work"
 
 
 def test_command_is_wired() -> None:

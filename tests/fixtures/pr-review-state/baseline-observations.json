@@ -1,0 +1,13 @@
+{
+  "observations": [
+    {
+      "id": "baseline-001",
+      "classification": "preclassified-failure",
+      "suite": "synthetic-unrelated-suite",
+      "result": "failed",
+      "policy": "retain as supplied; do not rerun, reattribute, or convert to pass"
+    }
+  ],
+  "host_writes": 0,
+  "application_suite_executions": 0
+}

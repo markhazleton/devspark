@@ -11,6 +11,7 @@ appliesTo:
   - scripts/explain-context.py
   - scripts/discover-knowledge.py
   - scripts/knowledge-integrity.py
+  - templates/commands/pr-review.md
 links:
   references:
     - governance-constitution
@@ -46,7 +47,9 @@ maximum context volume.
 
 The measure of a healthy Knowledge corpus is not how much of the system it describes. It is whether
 an agent can start a task without rediscovering the architecture, and finish it without reading
-material unrelated to the change.
+material unrelated to the change. It must remain accurate after both planned and Code First Deltas.
+When a Delta makes Knowledge obsolete or redundant, update or retire that current truth in the same
+change; do not preserve a misleading node for the sake of historical coverage.
 
 ## 2. What Knowledge is
 
@@ -160,11 +163,11 @@ across sessions until the baseline is trustworthy.
 ### Continuous maintenance
 
 ```text
-feature change
+intentional Delta (planned or already implemented)
       ▼
 Code changes · Tests change · Knowledge changes when durable truth changed
       ▼
-   PR review
+   Delta-scoped verification / PR review
 ```
 
 For a repository already operating under DevSpark. It asks nothing; it is an obligation that
@@ -643,9 +646,12 @@ traverse an advisory discovery finding.
 **Canonical hop policy.** One policy, stated once:
 
 - Plan performs projection to a maximum of **2 hops** from its lexical seeds.
-- Implementation consumes `context_resolved` and MAY take **at most 1 additional hop**, which MUST
-  be explicitly logged.
-- Any other surface performing projection uses at most 2 hops, and its output is diagnostic.
+- Planned implementation consumes `context_resolved` and MAY take **at most 1 additional hop**,
+  which MUST be explicitly logged.
+- A Code First or direct-change command without Plan may establish its initial task-specific
+  context through the same canonical retrieval and projection, with at most **2 hops**, recording
+  the retained context and its provenance in its existing evidence surface.
+- Other diagnostic projection surfaces use at most 2 hops.
 
 No document states a different budget. A range is not a budget.
 
@@ -654,8 +660,13 @@ is a signal about the graph, not a normal outcome to be ignored.
 
 ## 17. `context_resolved`
 
-`context_resolved` is the **authoritative bounded Knowledge working set for a task**. It is
-produced by plan judgment over projected candidates, and it is what downstream stages consume.
+`context_resolved` is the **authoritative bounded Knowledge working set for a task when that
+artifact is present**. On a specification-led route, Plan judgment produces it from projected
+candidates and downstream stages consume it. On a Code First or direct-change route without Plan,
+the owning command MUST derive bounded, provenanced context through the same canonical retrieval
+and projection pipeline, starting from the actual Delta/diff and its credible blast radius.
+It MUST NOT fabricate a Plan or use an incompatible private context resolver. A route-specific
+minimal context record is sufficient; the four kinds and provenance rules below still apply.
 
 It MUST support four kinds:
 
@@ -674,7 +685,8 @@ is non-conforming.
 Each resolved item preserves provenance sufficient to audit it: its `id`, its `kind`, the `via`
 relation or match that reached it, its `hop` count, and a short reason it was retained.
 
-Adjacency is not relevance. Plan decides what is retained; projection only says what is reachable.
+Adjacency is not relevance. The accountable route's context-selection judgment decides what is
+retained; projection only says what is reachable. For Model First, Plan owns that judgment.
 
 ## 18. Just-right context
 
@@ -708,14 +720,15 @@ The target context for an implementation agent, as a logical model:
 │  - owned and relevant production code│
 │  - relevant tests                    │
 ├──────────────────────────────────────┤
-│ Current work                         │
-│  - spec / plan / tasks               │
+│ Current Delta                        │
+│  - spec / plan / tasks, or actual diff│
 └──────────────────────────────────────┘
 ```
 
-This is a logical model, not necessarily one payload. An agent MAY retrieve the underlying source
-on demand; what matters is that the set is bounded, provenanced, and assembled the same way every
-time.
+This is a logical model, not necessarily one payload. On a Code First route, the actual diff,
+intent evidence, and existing tests replace missing planning artifacts; no fictional spec or Plan
+is needed. An agent MAY retrieve the underlying source on demand; what matters is that the set is
+bounded, provenanced, and assembled through the canonical context pipeline.
 
 ## 20. What must not enter default agent context
 
@@ -783,13 +796,14 @@ job safely. Prefer **small and sufficient** over **large and possibly useful**.
 |---|---|
 | Specify | Canonical retrieval for early conflict and current-behavior grounding. A reduced method is acceptable and is declared; a private search is not. |
 | Clarify | Consult selected Knowledge where an ambiguity turns on current behavior or architecture. |
-| Plan | Authoritative Context Resolution: retrieval → projection → judgment → `context_resolved`. |
-| Tasks | Carry `knowledge_ref` from resolved context, and create Knowledge-maintenance tasks when durable truth will change. |
+| Plan (when used) | Authoritative Context Resolution for a specification route: retrieval → projection → judgment → `context_resolved`. |
+| Tasks (when used) | Carry `knowledge_ref` from resolved context, and create Knowledge-maintenance tasks when durable truth will change. |
 | Analyze | Validate that referenced Knowledge exists and that context provenance is legitimate. A nonexistent or unreachable reference is a hard stop. |
 | Critic | Judge sufficiency of the working set. Not graph completeness. |
-| Implement | Consume `context_resolved`; take at most one logged additional hop; update Code, Tests, and Knowledge together when durable truth changes. |
+| Implement (planned route) | Consume Plan's `context_resolved`; take at most one logged additional hop; update Code, Tests, and Knowledge together when durable truth changes. |
+| Code First / Quickfix (when supported by the actual command) | Derive a minimal provenanced context from the existing Delta/diff through canonical retrieval and projection; update Code, Tests, and Knowledge together when durable truth changes. Never synthesize absent planning history. |
 | Verify | Produce test evidence that supports Knowledge claims where relevant. |
-| PR review | Validate synchronization across **flat Knowledge, entities, entity layers, and governance** — not entities only. |
+| PR review | Resolve minimal, provenanced context from changed-path ownership and canonical topic retrieval; use bounded projection of accepted relationships only when relevant. Judge candidates before retaining them, validate current claims across flat Knowledge, entities, layers, and governance, and cite the applicable invariants in the review. Identify durable truths established or corrected by the Delta and reconcile their existing owner in the same change. Missing or stale sources and unsupported claims are not current truth; do not preserve ephemeral history or speculative predictions as Knowledge. |
 | Release | Confirm derived artifacts are current and that no longer-current Knowledge has been left behind. |
 
 ## 24. Conformance and open follow-ups

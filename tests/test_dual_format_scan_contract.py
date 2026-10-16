@@ -22,9 +22,6 @@ import pytest
 
 import tests.legacy_retirement_oracle as oracle
 from tests.consumer_skill_helpers import (
-    bash_path,
-    copy_generation_repo,
-    run_generator,
     tree_bytes,
 )
 
@@ -99,13 +96,10 @@ def test_packages_carry_no_legacy_mode_switch_or_migration_marker(agent: str, pa
 
 
 @pytest.mark.parametrize("shell", ["bash", "pwsh"])
-def test_generator_output_is_only_consumer_skills_and_source_skills(shell: str, tmp_path: Path) -> None:
-    if shell == "bash" and bash_path() is None or shell == "pwsh" and shutil.which("pwsh") is None:
+def test_generator_output_is_only_consumer_skills_and_source_skills(shell: str, generated_repos) -> None:
+    if shell not in generated_repos:
         pytest.skip(f"{shell} not available")
-    repo = copy_generation_repo(tmp_path / "repo")
-    before = tree_bytes(repo)
-    result = run_generator(shell, repo)
-    assert result.returncode == 0, result.stdout + result.stderr
+    repo, before = generated_repos[shell].repo, generated_repos[shell].before
     after = tree_bytes(repo)
     produced = sorted(rel for rel, data in after.items() if before.get(rel) != data)
     assert produced, "generator produced nothing"

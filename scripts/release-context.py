@@ -20,6 +20,9 @@ TEXT_EXTENSIONS = {".md", ".txt", ".py", ".ps1", ".sh", ".js", ".jsx", ".ts", ".
 STRAY_RELEASE_ARTIFACT_NAME = re.compile(r"(?i)^release-(?:context|history)-.*\.json$")
 STATUS_COMPLETE = re.compile(r"(?im)^[^\S\n]*(?:[-*]\s*)?(?:\*\*)?status(?:\*\*)?[^\S\n]*:[^\S\n]*(?:\*\*)?[^\S\n]*complete\b")
 LINKAGE_FIELD = re.compile(r"(?i)\b(code_ref|knowledge_ref)[^\S\n]*:[^\S\n]*([^|\n\r]*)")
+# Linkage is only meaningful on a task/checklist item or a standalone field line. Prose that merely
+# documents the format (for example "every task ends with `(code_ref: pending | ...)`") is not linkage.
+LINKAGE_CARRIER = re.compile(r"(?i)^\s*(?:[-*]\s+\[[ x]\]|(?:[-*]\s*)?(?:\*\*)?(?:code_ref|knowledge_ref)\b)")
 # An explained `n/a` counts as populated per the release contract; only an absent or placeholder
 # value is treated as unpopulated linkage.
 UNPOPULATED_LINKAGE = {"", "pending", "tbd", "todo", "-", "none"}
@@ -111,7 +114,9 @@ def unpopulated_linkage(text: str) -> list[str]:
     return sorted(
         {
             field.lower()
-            for field, value in LINKAGE_FIELD.findall(text)
+            for line in text.splitlines()
+            if LINKAGE_CARRIER.match(line)
+            for field, value in LINKAGE_FIELD.findall(line)
             if value.strip().strip("*`").lower() in UNPOPULATED_LINKAGE
         }
     )

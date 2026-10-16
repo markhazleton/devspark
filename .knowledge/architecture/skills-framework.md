@@ -42,7 +42,9 @@ fixed generated marker, resolves the command through the existing developer, tea
 `.devspark/defaults/commands/devspark.<command>.md`, first existing file wins), and passes the text
 typed after the skill name to the resolved prompt as the command input. The skill carries no
 `handoffs`; its frontmatter is exactly `name`, `description`, `user-invocable` and
-`disable-model-invocation`.
+`disable-model-invocation`. Every command skill sets `user-invocable: true` and
+`disable-model-invocation: true`, so it starts only when the user types `/devspark-<command>`. The
+agent cannot start it on its own, and typing the bare name without `/` sends plain text.
 
 The Bash and PowerShell generators (`generate-atomic-shims`) emit these skills and are the only
 writers; the two outputs are byte-identical and `--check` / `-Check` fails on any drift or orphaned

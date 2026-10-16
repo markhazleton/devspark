@@ -9,14 +9,18 @@ Bash Create PR scripts against them.
 
 from __future__ import annotations
 
+import atexit
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
+
+pytestmark = pytest.mark.xdist_group("readiness_template")
 
 ROOT = Path(__file__).resolve().parent.parent
 PWSH = shutil.which("pwsh")
@@ -107,6 +111,9 @@ def _entity(repo: Path, entity_id: str, source: str, last_verified: str) -> None
     _write(repo / source, "value = 1\n")
 
 
+_TEMPLATES: dict[tuple[str, bool, bool], Path] = {}
+
+
 def build_repo(
     tmp_path: Path,
     *,
@@ -114,7 +121,33 @@ def build_repo(
     track_index: bool = True,
     with_unrelated_stale: bool = False,
 ) -> Path:
-    """A pushed `main` plus a pushed feature branch with no feature commits yet."""
+    """A pushed `main` plus a pushed feature branch with no feature commits yet.
+
+    Each distinct shape is built once and copied per test; the copy gets its own origin.
+    """
+    key = (engine_mode, track_index, with_unrelated_stale)
+    if key not in _TEMPLATES:
+        template = Path(tempfile.mkdtemp(prefix="readiness-template-"))
+        atexit.register(shutil.rmtree, template, ignore_errors=True)
+        _build_repo_at(
+            template, engine_mode=engine_mode, track_index=track_index, with_unrelated_stale=with_unrelated_stale
+        )
+        _TEMPLATES[key] = template
+    template = _TEMPLATES[key]
+    shutil.copytree(template / "origin.git", tmp_path / "origin.git")
+    shutil.copytree(template / "repo", tmp_path / "repo")
+    repo = tmp_path / "repo"
+    git(repo, "remote", "set-url", "origin", str(tmp_path / "origin.git"))
+    return repo
+
+
+def _build_repo_at(
+    tmp_path: Path,
+    *,
+    engine_mode: str,
+    track_index: bool,
+    with_unrelated_stale: bool,
+) -> Path:
     repo = tmp_path / "repo"
     repo.mkdir()
     origin = tmp_path / "origin.git"

@@ -316,14 +316,13 @@ def test_consumer_skills_never_carry_source_stop_text(command: str) -> None:
 
 
 @pytest.mark.parametrize("shell", GENERATORS)
-def test_generator_no_longer_emits_atomic_prompts_or_prompt_shims(shell: str, tmp_path: Path) -> None:
-    repo = tmp_path / "repo"
-    for rel in ("scripts", "templates/commands", "eng/skills"):
-        if (ROOT / rel).is_dir():
-            shutil.copytree(ROOT / rel, repo / rel, ignore=shutil.ignore_patterns("__pycache__"))
-    result = _run(shell, repo)
-    assert result.returncode == 0, result.stdout + result.stderr
+def test_generator_no_longer_emits_atomic_prompts_or_prompt_shims(shell: str, generated_repos) -> None:
+    if shell not in generated_repos:
+        pytest.skip(f"{shell} not available")
+    repo, before = generated_repos[shell].repo, generated_repos[shell].before
     assert not (repo / "templates" / "prompts").exists()
     assert not (repo / ".github" / "prompts").exists()
-    assert not (repo / ".github" / "agents").exists()
+    agents = sorted(p.relative_to(repo).as_posix() for p in (repo / ".github" / "agents").rglob("*") if p.is_file())
+    assert all(before.get(rel) == (repo / rel).read_bytes() for rel in agents), "generator wrote agent shims"
+    assert [rel for rel in agents if rel not in before] == []
     assert (repo / ".github" / "skills" / "devspark-specify" / "SKILL.md").is_file()

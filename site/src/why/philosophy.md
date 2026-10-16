@@ -1,179 +1,132 @@
-# Philosophy: Plan Temporarily, Review the Delta
+# Vision and Engineering Manifesto
 
-## The core shift
+**Better software. Multiple journeys. One engineering commitment.**
 
-A spec is not a record. A spec is a **temporary definition of a delta** — the change intended for
-code and for knowledge. It exists only to produce that delta correctly. Once the delta has landed —
-code changed, knowledge updated, governance updated if affected — the spec has completed its purpose
-and is archived out of `.devspark.work/` into `.archive/{YYYY-MM-DD}/`. It is never
-referenced again by code, by knowledge, or by an agent, and nothing about it influences current
-behavior once archived — its content is retained only as an inert historical copy, not as active
-planning state.
+## Our vision
 
-This is a stronger claim than "we choose not to keep spec history in active view." The spec was
-never meant to be *active* history in the first place — once archived, it is inert. There is no
-spec-vs-code drift to manage, because nothing in the active repository state persists that could
-drift — and there is no such thing as cross-spec drift either, because archived specs don't have
-enough identity to have interacted with one another. What's left to check is always synchronic:
-does the current state hold together, never "did these two past changes conflict."
+DevSpark helps developers use intelligent tools to create trustworthy, maintainable software,
+regardless of how their development journey begins.
 
-## Current truth, not lifecycle history
+AI amplifies engineering judgment; it does not replace software engineering. Code First, Model First,
+exploratory development, defect investigation, and formal specification can all be appropriate.
+The journey depends on the problem. The obligation to deliver a well-understood, appropriately
+verified change does not.
 
-The repository reflects **what is true now** — current code, current knowledge, current governance.
-Historical content ("how we used to do this") does not live in the repo. It doesn't help an agent
-execute today's task; at best it's noise, at worst it actively misleads an agent into thinking a
-rejected approach is still valid.
+**DevSpark is methodology-independent, but engineering-discipline-dependent.**
 
-History isn't deleted from existence — it lives in Git. Version control is the *only* place "what we
-used to do" is recoverable. Nothing in the day-to-day repo structure exists to serve that need.
+## Our central principle
 
-## Three categories of current truth, not one
+> **Stop measuring process compliance as a proxy for software quality.**
 
-Everything durable in the system answers one of three different questions. Confusing these
-categories is what produces the ADR/spec/knowledge muddle this model removes:
+A complete specification does not prove that code works. A signed-off plan does not prove the
+architecture is appropriate. Conversely, a change discovered through coding is not inferior
+because no specification preceded it.
 
-| Category | Question it answers | Who mainly needs it | Change model |
-|---|---|---|---|
-| `.knowledge/` (entities) | What is true now? | Agent, to act correctly today | Mutated in place |
-| Governance: Constitution | What are the rules of the game? | Agent and human, rarely changes | Mutated in place, amended explicitly |
-| Governance: Decisions | What did we choose, and why not the alternatives? | Human, revisiting a choice; agent, checking a constraint | Mutated in place |
+Process earns its place by improving engineering outcomes. **The Delta is the unit of engineering
+value, not the workflow used to produce it.**
 
-Governance — the constitution and decisions — lives *inside* `.knowledge/governance/`, not as a
-fourth, separate root. All three categories are current-state documents. None is an archive. They
-differ in content, not in lifecycle discipline.
+A **Delta** is an intentional change to the software: a feature, bug fix, simplification, reliability
+improvement, or removal of unnecessary complexity. Every journey converges on five questions.
 
-## Decisions are current governance, not history
+## Five questions for every Delta
 
-A decision doc is not "here's everything we tried." It is "here is what we do, and here is why we
-don't do the alternatives" — a present-tense claim.
+### 1. What changed, and why?
 
-- When the reasoning behind a decision changes, **the decision file is edited in place.** A new file
-  never takes over for it. There is no chain of "decision 1, revisited in decision 2" — exactly one
-  current file may exist per topic at any time.
-- Decisions are keyed by **domain/topic** (`governance/decisions/auth-strategy.md`), never by
-  sequential creation order. Sequential numbering (`0001-`, `ADR-003-`) is a historical-tracking
-  device baked directly into the naming convention, and it is rejected outright.
-- If a decision becomes moot entirely, it is deleted — not archived. Git still has it.
+Establish the intended result and what must remain true. Work may begin with a requirement, an
+existing code diff, an experiment, or an observed failure. Do not invent a prior specification,
+planning decision, or approval to legitimize a Code First change.
 
-Decisions are cross-cutting by nature — they constrain multiple entities, or the framework itself —
-so they live in governance rather than inside any single entity's folder. The mechanism that keeps
-entities complete without duplicating governance content into them: a decision declares which
-entities it `constrains`, and each constrained entity carries a lightweight pointer back
-(`constrained_by`) in its own metadata, generated rather than hand-written. The existence of a
-constraint is always visible from the entity itself, without the entity owning the reasoning behind
-it — that stays singular in governance.
+An accountable participant owns the intended outcome and any material scope decision. The AI
+assistant may investigate and recommend but cannot manufacture human acceptance.
 
-## Evidence: every claim must be checkable
+### 2. What could this change affect?
 
-Every knowledge object and every decision must cite at least one piece of evidence — something that
-lets an agent verify the claim is still true rather than taking it on faith:
+The **Delta** defines what we intend to change. Its **blast radius** defines what we must
+investigate and validate: affected callers, consumers, dependencies, contracts, data, and credible
+failure paths.
 
-- **Test evidence** (`verified_by: execution`) — the claim holds if and only if the cited test
-  currently passes. Mechanical, cheap, no interpretation required.
-- **Code evidence** (`verified_by: inspection`) — the claim requires a human or agent to read the
-  code and judge whether it still matches. Slower, and still needs human oversight.
+The blast radius can extend beyond edited files, but it must follow evidence of actual impact.
+Discovering unrelated work is not permission to expand the Delta. Surface it separately when
+appropriate.
 
-A test reference is preferred over a bare code reference wherever practical, because it converts a
-judgment call into a mechanical check — encouraged, not enforced. A code-only entry must record
-whether a test was attempted and, if not used, why:
+**Validate the blast radius, not the entire universe.**
 
-```yaml
-evidence:
-  - type: test
-    ref: tests/Auth/TokenRefreshTests.cs::RefreshesBeforeExpiry
-    verified_by: execution
-  - type: code
-    ref: src/Auth/TokenService.cs::RefreshToken
-    verified_by: inspection
-    test_attempted: true
-    fallback_reason: "requires live token expiry timing, not practical in unit test"
-```
+### 3. How do we know the affected software still works?
 
-A code-only entry **missing** `fallback_reason` is a warning, surfaced independently by both site
-audit and PR review — never a gate. *Which* evidence type is a quality question; *that* evidence
-exists at all is not.
+All Deltas have a minimum assurance obligation: understand intended behavior, assess credible
+impact, perform relevant checks, report actual results and unknowns, reconcile findings, and honor
+applicable security, contractual, organizational, and review controls.
 
-When a topic is missing from knowledge or has drifted from code, `/devspark-explain` asks for
-clarification if ownership, scope, or intent is unclear. Once the finding is understood and the
-human confirms the proposal, it updates the owning knowledge document and its durable references,
-or creates a typed node when no owner exists. Durable knowledge cites durable code and tests only;
-the temporary spec, plan, task, or quickfix record carries the inverse traceability through its
-linkage fields.
+Accountable humans establish standing assurance expectations. Routine changes operate within
+those expectations without requiring new approvals at every step. Agents may propose verification
+scope, but cannot lower required assurance, waive evidence, or quietly classify uncertain risks as
+inconsequential. Material exceptions and uncertainty return to an authorized participant.
 
-## What triggers assimilation
+An accepted limitation requires an explicit, recorded decision by a named, authorized person.
+Silence is not acceptance.
 
-Assimilation — merging a completed delta's knowledge into the permanent record — is not a periodic
-sweep decoupled from any individual unit of work:
+A second model reviewing independently supplied context can provide a useful reasoning cross-check.
+Executed tests, different environments, real devices, and human observations offer different forms
+of evidence. None should be presented as something it is not. A test not run is not a passing test.
 
-- **Plan & build** (specify, plan, tasks, analyze, critic) produces the ephemeral spec package.
-- **Implementation** (implement) applies the delta to code and knowledge together, in one
-  disciplined pass. It never tracks specs, requirements, or tasks as comments in code.
-- **Validation** (PR review, site audit, explain) pivots to validate and enforce
-  knowledge/code linkage and consistency, rather than checking spec completion. Explain is the one
-  skill in this phase that also remediates a drift it finds, topic-scoped, after confirmation —
-  the others only report it.
+**Confidence comes from credible evidence, not declarations of compliance.**
 
-PR review is the natural trigger point because nothing merges without one — the PR diff itself (not
-the spec, which may already be gone) is what proves a delta's code and knowledge changes actually
-landed together. Site audit's job is different in kind: not per-diff consistency, but scanning
-current knowledge for internal contradiction and for claims whose cited evidence no longer holds.
+### 4. What enduring Knowledge must we preserve?
 
-## The five non-negotiable rules
+DevSpark protects three enduring engineering assets:
 
-A rule belongs on this list only if violating it falsifies the core guarantee — that the permanent
-record is current-truth-only, checkable, and contains no trace of the ephemeral scaffolding that
-produced it. Everything else is quality, and belongs in "encourage," not "gate."
+- **Code:** the implemented behavior of the software.
+- **Tests:** executable evidence of intended behavior, contracts, and regressions.
+- **Durable Knowledge:** current architecture, domain constraints, important decisions, and
+  relationships not sufficiently apparent from code and tests.
 
-1. **Closed reference graph, one direction only.** The permanent record — code and
-   knowledge/governance documents — may only reference each other, never a spec, task, plan, PR
-   thread, or any other repo-internal ephemeral artifact. The inverse direction is encouraged: an
-   ephemeral artifact referencing the permanent record is safe by construction, because the
-   reference goes inert with it once it's archived out of `.devspark.work/`. References to anything
-   *outside* the repository are unrestricted in either direction.
-2. **Verify before archive.** A spec cannot be archived until its delta is verified as landed in
-   code, knowledge, and governance (if touched). Recovery after archiving is a human action: manually
-   copying the file back out of `.archive/{YYYY-MM-DD}/` (no DevSpark skill reads `.archive/`),
-   not reconstructing it from nothing.
-3. **Evidence required, always.** Every knowledge object and every decision cites at least one piece
-   of evidence.
-4. **One current file per decision topic.** Never a chain, never two files both claiming to govern
-   the same topic at once.
-5. **No ephemeral-artifact references in code.** No code comment references a spec ID, task ID, or
-   plan identifier.
+Specifications, plans, tasks, and quickfix records are working artifacts. Their lasting value should
+be reflected in the enduring assets, not duplicated as competing versions of current truth.
+Completed working records follow the repository's retention and archive rules; they are not active
+engineering instructions.
 
-## Verify-before-archive, in practice
+If a Delta makes Knowledge obsolete or misleading, update or retire it. If no enduring truth
+changed, do not invent Knowledge just to populate a field.
 
-Every task tracked during implementation carries a live pointer to where it landed:
+**Preserve understanding, not paperwork.**
 
-```yaml
-- id: task_003
-  description: "Add token refresh retry logic"
-  status: complete
-  code_ref: src/Auth/TokenService.cs::RefreshToken
-  knowledge_ref: entities/token_service/architecture.md
-```
+### 5. Is the Delta ready to advance?
 
-No spec is archived while any task lacks a populated `code_ref` and `knowledge_ref` (or an explicit
-`n/a` with a reason). The task list itself *is* the tracked state, and its pointers are what
-verification checks before the whole package is moved to `.archive/{YYYY-MM-DD}/`.
+DevSpark should present a concise, inspectable account of intent, changed behavior, blast radius,
+checks performed, outstanding uncertainty, Knowledge reconciliation, and any decisions needing
+human authorization.
 
-## Retrieval budget: resolved at design time, consumed at implement time
+Unresolved blocking defects and mandatory obligations stop advancement. Unrelated enhancement ideas
+do not. Human attention is scarce: investigate first, present the evidence, and elevate only decisions
+that require the accountable participant's judgment.
 
-Complexity is worked out before code is written, not discovered while writing it:
+Once the Delta is supported by sufficient evidence, applicable controls are met, and required
+human decisions are recorded: **recommend proceeding, and stop.**
 
-- **Design time** (specify → plan → tasks) projects to a maximum of two hops from its lexical seeds
-  and pins the result down as an explicit `context_resolved` list in the ephemeral spec package.
-  Flat documents, entities, entity layers, and decisions are all first-class entries.
-- **Analyze** gates on resolution *validity* — every id and relation named in `context_resolved`
-  must actually resolve against the current knowledge corpus, whatever its kind. A stale or
-  hallucinated reference fails outright.
-- **Critic** gates on resolution *sufficiency* — does `context_resolved` look complete for the delta
-  being planned. Judgment-based, not a hard stop.
-- **Implement** takes at most one additional hop past `context_resolved`. An escalation past that
-  hop is logged as an attributable signal, not a silent failure.
+## How we know this is working
 
-## See also
+We do not substitute counts of specs, tasks, gates, or reports for engineering outcomes. Useful
+signals include demonstrably correct changes, reproducible checks, fewer escaped regressions,
+less repeated investigation, and less process-generated rework.
 
-- [Skill Catalog](../guides/prompt-lifecycle-mapping.md) for how each `/devspark-*` skill
-  carries this philosophy forward.
-- [Evidence and Evaluation](evidence.md) for how to evaluate a repository under this model.
+The strongest practical test comes later:
+
+> **When the next Delta begins, does the software—and the Knowledge surrounding it—make that
+> change easier to understand, implement, and verify?**
+
+See [How to Evaluate](evidence.md) for observable ways to test that claim.
+
+## Philosophy, governance, and implementation
+
+This is the guiding vision, not an additional approval gate. The repository's
+`.knowledge/governance/devspark-philosophy.md` holds the complete governing manifesto.
+The repository Constitution remains authoritative for enforceable controls; individual contracts
+and skills define their mechanics.
+
+DevSpark already offers lighter and fuller development routes. Converging those routes on the same
+blast-radius-driven assurance—particularly accepting an existing Code First Delta without
+reconstructing a fictional plan—is an **evolution goal**. Do not assume every installed skill or
+version implements that model today.
+
+For the operational boundaries and current controls, see
+[About, Architecture and Controls](about.md) and the [FAQ](faq.md).

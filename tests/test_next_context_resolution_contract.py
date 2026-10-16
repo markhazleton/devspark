@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -36,23 +37,36 @@ SHELLS = [
 ]
 
 
+_TEMPLATE_CACHE: dict[tuple, Path] = {}
+_TEMP_ROOT: tempfile.TemporaryDirectory | None = None
+
+
 def _repo(tmp_path: Path, branch: str, specs=(), quickfixes=()) -> Path:
+    global _TEMPLATE_CACHE, _TEMP_ROOT
+    key = (branch, tuple(sorted(specs)), tuple(sorted(quickfixes)))
+    if key not in _TEMPLATE_CACHE:
+        if _TEMP_ROOT is None:
+            _TEMP_ROOT = tempfile.TemporaryDirectory()
+        template = Path(_TEMP_ROOT.name) / f"tmpl_{len(_TEMPLATE_CACHE)}"
+        (template / ".knowledge" / "governance").mkdir(parents=True)
+        (template / ".knowledge" / "governance" / "constitution.md").write_text("# C\n", encoding="utf-8")
+        for name in specs:
+            spec = template / ".devspark.work" / "specs" / name
+            spec.mkdir(parents=True)
+            (spec / "spec.md").write_text("---\nclassification: full-spec\n---\n# S\n", encoding="utf-8")
+        for name in quickfixes:
+            record = template / ".devspark.work" / "quickfixes" / f"{name}.md"
+            record.parent.mkdir(parents=True, exist_ok=True)
+            record.write_text("# QF\n", encoding="utf-8")
+        _git(template, "init", "-q", "-b", branch)
+        _git(template, "config", "user.email", "t@example.com")
+        _git(template, "config", "user.name", "T")
+        _git(template, "add", "-A")
+        _git(template, "commit", "-q", "-m", "x")
+        _TEMPLATE_CACHE[key] = template
+
     repo = tmp_path / "r"
-    (repo / ".knowledge" / "governance").mkdir(parents=True)
-    (repo / ".knowledge" / "governance" / "constitution.md").write_text("# C\n", encoding="utf-8")
-    for name in specs:
-        spec = repo / ".devspark.work" / "specs" / name
-        spec.mkdir(parents=True)
-        (spec / "spec.md").write_text("---\nclassification: full-spec\n---\n# S\n", encoding="utf-8")
-    for name in quickfixes:
-        record = repo / ".devspark.work" / "quickfixes" / f"{name}.md"
-        record.parent.mkdir(parents=True, exist_ok=True)
-        record.write_text("# QF\n", encoding="utf-8")
-    _git(repo, "init", "-q", "-b", branch)
-    _git(repo, "config", "user.email", "t@example.com")
-    _git(repo, "config", "user.name", "T")
-    _git(repo, "add", "-A")
-    _git(repo, "commit", "-q", "-m", "x")
+    shutil.copytree(_TEMPLATE_CACHE[key], repo)
     return repo
 
 

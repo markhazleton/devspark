@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 HAS_PWSH = shutil.which("pwsh") is not None
 HAS_BASH = shutil.which("bash") is not None
 HAS_JQ = HAS_BASH and subprocess.run(
-    ["bash", "-c", "command -v jq"], capture_output=True
+    ["bash", "-c", "command -v jq"], capture_output=True, timeout=60
 ).returncode == 0
 NPX_PATH = shutil.which("npx")
 HAS_MARKDOWNLINT = NPX_PATH is not None
@@ -33,6 +33,7 @@ def _run_ps(command: str, cwd: Path) -> subprocess.CompletedProcess[str]:
         cwd=str(cwd),
         text=True,
         capture_output=True,
+        timeout=120,
     )
 
 
@@ -42,6 +43,7 @@ def _run_bash(command: str, cwd: Path) -> subprocess.CompletedProcess[str]:
         cwd=str(cwd),
         text=True,
         capture_output=True,
+        timeout=120,
     )
 
 
@@ -169,6 +171,7 @@ def test_generated_markdown_passes_lint(tmp_path: Path) -> None:
         cwd=str(ROOT),
         text=True,
         capture_output=True,
+        timeout=300,
     )
     assert lint.returncode == 0, f"{lint.stdout}\n{lint.stderr}"
 

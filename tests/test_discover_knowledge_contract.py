@@ -17,6 +17,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -88,13 +89,23 @@ def _write_doc(repo: Path, relpath: str, *, node_type: str = "architecture", ext
     return doc
 
 
+_GAP_TEMPLATE: Path | None = None
+_GAP_TEMP_ROOT: tempfile.TemporaryDirectory | None = None
+
+
 @pytest.fixture()
 def gap_repo(tmp_path: Path) -> Path:
+    global _GAP_TEMPLATE, _GAP_TEMP_ROOT
+    if _GAP_TEMPLATE is None:
+        _GAP_TEMP_ROOT = tempfile.TemporaryDirectory()
+        _GAP_TEMPLATE = Path(_GAP_TEMP_ROOT.name) / "gap_repo"
+        (_GAP_TEMPLATE / "src" / "billing").mkdir(parents=True)
+        for name in ("invoice", "ledger", "reconcile"):
+            (_GAP_TEMPLATE / "src" / "billing" / f"{name}.py").write_text("def run():\n    pass\n", encoding="utf-8")
+        _init_git_repo(_GAP_TEMPLATE)
+
     repo = tmp_path / "repo"
-    (repo / "src" / "billing").mkdir(parents=True)
-    for name in ("invoice", "ledger", "reconcile"):
-        (repo / "src" / "billing" / f"{name}.py").write_text("def run():\n    pass\n", encoding="utf-8")
-    _init_git_repo(repo)
+    shutil.copytree(_GAP_TEMPLATE, repo)
     return repo
 
 

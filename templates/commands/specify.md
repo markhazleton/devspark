@@ -39,6 +39,22 @@ outputs. The completed bundle remains in `.devspark.work/` for linkage validatio
 `/devspark-release` archives it. Durable outputs and downstream records must not link back to this
 spec.
 
+### Delta-Oriented Specification
+
+A DevSpark specification is not a blueprint for software. It is a bounded hypothesis about the
+next valuable change to working software. The repository defines the current state; the spec defines
+the intended delta; implementation and verification create the next state.
+
+- **Start from the existing working software**: inspect the current repository state before drafting.
+- **Describe the bounded delta**: identify the core problem, desired behavioral change, relevant
+  constraints, and acceptance criteria. Describe the bounded delta rather than restating the entire
+  system.
+- **Avoid redundant duplication**: avoid unnecessary duplication of repository facts, existing code
+  architecture, or previously established decisions.
+- **Specification vs. release**: a specification delivers a releasable change, not the product release
+  itself. Do not include tasks or requirements for release publication, version bumping, package
+  distribution, or product deployment.
+
 ## Definition of Done
 
 Done when: the route is confirmed by the user, SPEC_FILE is written under `.devspark.work/specs/`
@@ -48,7 +64,7 @@ release archival and cannot be referenced by durable code or knowledge.
 
 ## Constitution Authority
 
-If `/.knowledge/governance/constitution.md` exists, load it before drafting. The spec MUST align with mandated principles (privacy, accessibility, observability, testing, etc.). If a principle conflicts with what the user asked for, surface it under `## Open Questions` or `## Constitution Conflicts` — do not silently dilute the principle. Changing a principle is an explicit constitution update, not a spec workaround.
+If `/.knowledge/governance/constitution.md` exists, load it before drafting. When introducing or materially changing a requirement, compare that requirement with the complete applicable MUST/SHOULD text, including scope and embedded exceptions; do not infer alignment from a principle title or a default rule alone. Recheck changed requirements only, not settled unchanged content. If a conflict remains, cite both texts and surface it for owner resolution before marking the spec ready or handing off to Plan; never silently weaken the principle. Changing a principle requires an explicit constitution update, not a spec workaround.
 
 ## Early Knowledge Grounding
 

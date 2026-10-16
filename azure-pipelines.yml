@@ -54,11 +54,21 @@ steps:
   - script: |
       set -euo pipefail
       python3 -m pip install --upgrade pip
-      pip install jsonschema PyYAML pytest pytest-cov ruff mypy bandit
+      pip install jsonschema PyYAML pytest pytest-cov pytest-xdist ruff mypy bandit
     displayName: 'Install Python dependencies'
 
-  - script: pytest tests/ -v --tb=short
+  # Tests run in parallel; tests sharing an expensive fixture are kept on one worker
+  # (see tests/conftest.py). The JUnit file stays outside the source tree so it is never packaged.
+  - script: pytest tests/ -v --tb=short -n auto --dist loadgroup --durations=25 --durations-min=2 --junitxml="$(Agent.TempDirectory)/pytest-results.xml"
     displayName: 'Run pytest (test gate — must pass before packaging/publishing)'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish pytest results'
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '$(Agent.TempDirectory)/pytest-results.xml'
+      testRunTitle: 'pytest'
 
   - script: |
       set -euo pipefail
@@ -116,9 +126,8 @@ steps:
         VERSION="v${VER}"
       fi
       echo "Resolved version: ${VERSION}"
-      # DevSpark is a clean break from the public DevSpark lineage and starts at
-      # v3.0.0. Never build or publish a v2.x (or older) package, even if a stray
-      # legacy tag triggers this pipeline.
+      # DevSpark releases start at v3.0.0. Never build or publish a v2.x (or older)
+      # package, even if a legacy tag triggers this pipeline.
       MIN_VERSION="3.0.0"
       if [ "$(printf '%s\n%s\n' "${MIN_VERSION}" "${VERSION#v}" | sort -V | head -n1)" != "${MIN_VERSION}" ]; then
         echo "Refusing to publish ${VERSION}: DevSpark minimum release is v${MIN_VERSION}." >&2
@@ -258,4 +267,3 @@ steps:
       skip_app_build: true
       skip_api_build: true
       azure_static_web_apps_api_token: '$(SWA_DEPLOYMENT_TOKEN)'
-

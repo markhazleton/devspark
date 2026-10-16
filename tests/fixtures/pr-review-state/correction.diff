@@ -1,0 +1,15 @@
+diff --git a/handler.py b/handler.py
+index 1111111..2222222 100644
+--- a/handler.py
++++ b/handler.py
+@@ -1 +1 @@
+-return adapter.search(created_after=lower)
++return adapter.search(created_after=lower, created_before=upper)
+diff --git a/tests/test_window.py b/tests/test_window.py
+index 3333333..4444444 100644
+--- a/tests/test_window.py
++++ b/tests/test_window.py
+@@ -1,2 +1,3 @@
+ def test_window_forwards_bounds(adapter):
+     search_window(adapter, lower=LOWER, upper=UPPER)
++    assert adapter.call_args.kwargs["created_before"] == UPPER

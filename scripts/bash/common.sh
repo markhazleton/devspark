@@ -4,8 +4,9 @@
 
 # Get repository root, with fallback for non-git repositories
 get_repo_root() {
-    if git rev-parse --show-toplevel >/dev/null 2>&1; then
-        git rev-parse --show-toplevel
+    local top
+    if top="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+        printf '%s\n' "$top"
     else
         # Fall back to script location for non-git repos
         local script_dir
@@ -650,20 +651,46 @@ get_work_tracking_context() {
     repo_root=$(get_repo_root)
     config="$repo_root/.devspark.work/devspark.json"
 
-    configured="false"
-    if [[ -f "$config" ]] && jq -e 'has("work_tracking")' "$config" >/dev/null 2>&1; then
-        configured="true"
+    # One jq pass reads every configured value; each is extracted exactly as
+    # get_devspark_config_value would (`<path> // empty`, raw) and NUL-terminated so an
+    # embedded newline cannot shift the values after it.
+    local values=() value warn=""
+    if [[ -f "$config" ]]; then
+        while IFS= read -r -d '' value; do
+            # Command substitution used to strip trailing line endings, which jq writes as
+            # CRLF on Windows.
+            value="${value%"${value##*[!$'\r\n']}"}"
+            # A path that cannot be evaluated yields an empty value and the parse warning.
+            [[ "$value" == $'\x01' ]] && { value=""; warn=1; }
+            values+=("$value")
+        done < <(jq -j '
+            def raw(f): [try (f // empty) catch "\u0001"]
+                | if length == 0 then "" else (.[0] | if type == "string" then . else tojson end) end;
+            (try has("work_tracking") catch false | tostring),
+            raw(.platform), raw(.organization), raw(.project), raw(.repository),
+            raw(.work_tracking.default_area_path), raw(.work_tracking.default_iteration_path),
+            raw(.work_tracking.default_work_item_type),
+            (try ((.work_tracking.tags // []) | join(",")) catch ""),
+            (try ((.work_tracking.review_on_specify // true) | if type == "string" then . else tojson end) catch "")
+            | ., "\u0000"' "$config" 2>/dev/null)
+        (( ${#values[@]} == 10 )) || { values=(); warn=1; }
+        [[ -n "$warn" ]] && echo "DevSpark: failed to parse $config" >&2
     fi
+    local cfg_platform="${values[1]:-}" cfg_org="${values[2]:-}" cfg_project="${values[3]:-}"
+    local cfg_repo="${values[4]:-}" cfg_area="${values[5]:-}" cfg_iteration="${values[6]:-}"
+    local cfg_type="${values[7]:-}" cfg_tags="${values[8]:-}" cfg_review="${values[9]:-}"
 
-    platform=$(get_devspark_config_value '.platform')
+    configured="${values[0]:-false}"
+
+    platform="$cfg_platform"
 
     if [[ -n "$arg_org" ]]; then org="$arg_org"; org_src="argument"
-    else org=$(get_devspark_config_value '.organization'); [[ -n "$org" ]] && org_src="config"; fi
+    else org="$cfg_org"; [[ -n "$org" ]] && org_src="config"; fi
 
     if [[ -n "$arg_project" ]]; then project="$arg_project"; project_src="argument"
-    else project=$(get_devspark_config_value '.project'); [[ -n "$project" ]] && project_src="config"; fi
+    else project="$cfg_project"; [[ -n "$project" ]] && project_src="config"; fi
 
-    repo=$(get_devspark_config_value '.repository')
+    repo="$cfg_repo"
     [[ -n "$repo" ]] && repo_src="config"
 
     # Step 4 applies to repository identity only.
@@ -677,22 +704,14 @@ get_work_tracking_context() {
     fi
 
     if [[ -n "$arg_area" ]]; then area="$arg_area"; area_src="argument"
-    else area=$(get_devspark_config_value '.work_tracking.default_area_path'); [[ -n "$area" ]] && area_src="work_tracking"; fi
+    else area="$cfg_area"; [[ -n "$area" ]] && area_src="work_tracking"; fi
 
-    iteration=$(get_devspark_config_value '.work_tracking.default_iteration_path')
-    item_type=$(get_devspark_config_value '.work_tracking.default_work_item_type')
-
-    tags=""
-    if [[ -f "$config" ]]; then
-        tags=$(jq -r '(.work_tracking.tags // []) | join(",")' "$config" 2>/dev/null || echo "")
-    fi
+    iteration="$cfg_iteration"
+    item_type="$cfg_type"
+    tags="$cfg_tags"
 
     review_on_specify="true"
-    if [[ -f "$config" ]]; then
-        if [[ "$(jq -r '.work_tracking.review_on_specify // true' "$config" 2>/dev/null)" == "false" ]]; then
-            review_on_specify="false"
-        fi
-    fi
+    [[ "$cfg_review" == "false" ]] && review_on_specify="false"
 
     printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
         "$configured" "$platform" "$org" "$project" "$repo" \

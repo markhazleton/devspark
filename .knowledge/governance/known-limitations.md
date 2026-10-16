@@ -13,10 +13,13 @@ discovering a gap in production.
 
 ## What DevSpark Governs
 
-DevSpark governs the **development process** that produces AI-assisted software: it provides
-spec-driven workflows, constitution-based quality gates, and right-sized execution paths.
-A human developer is always in the loop. DevSpark reviews artifacts (specs, plans, tasks,
-PRs) — it does not enforce runtime behavior of the systems those artifacts describe.
+DevSpark supports software engineering Deltas through multiple legitimate entry points,
+including specification-led planning and lightweight change workflows. Its purpose is to establish
+confidence in an intentional change and its credible blast radius through code, tests, current
+Knowledge, and review evidence—not to certify that a preferred sequence of artifacts was followed.
+Accountable human participants define standing assurance expectations and authorize exceptions
+within their remit. DevSpark evaluates development evidence; it does not enforce the runtime
+behavior of applications built with it or independently observe production outcomes.
 
 ## Known Limitations
 
@@ -39,10 +42,11 @@ for production-grade runtime enforcement of AI agent behavior.
 **Scope**: DevSpark records compliance attempts, not whether implementations actually
 achieved their stated goals in production.
 
-**Rationale**: DevSpark verifies that the correct process was followed (spec present, plan
-complete, review done) and that artifacts are internally consistent. It cannot verify that
-the shipped feature works correctly in production — that is the domain of testing, monitoring,
-and observability tooling.
+**Rationale**: DevSpark can inspect the Delta, run or assess tests, challenge credible
+regression risks, and record what verification actually established. That is stronger than
+checking whether planning documents are complete, but it is not an independent observation of a
+released system in production. Deployment outcomes require authorized operational telemetry,
+monitoring, and post-release validation owned by the corresponding teams.
 
 **Complementary tooling**: Feature flagging systems, A/B testing platforms, production
 monitoring (Datadog, Grafana, etc.), and post-deployment validation runbooks.
@@ -59,10 +63,10 @@ observe the deployed result, and it never creates an external work item to hold 
 **Scope**: DevSpark validates individual PR compliance, not sequences of PRs or whether
 a multi-PR epic was delivered in the correct order.
 
-**Rationale**: Each `/devspark-pr-review` run is stateless — it evaluates the PR in
-isolation against the constitution and the current spec lifecycle. Tracking whether PR #3
-should not have merged before PR #1 was complete requires project-management tooling,
-not a development-process governance framework.
+**Rationale**: Each `/devspark-pr-review` run evaluates the PR and its credible impact boundary
+against current governance and available evidence. It does not assert the correctness of an
+entire multi-PR initiative or substitute for release-dependency management. Cross-PR sequencing
+belongs to the team and its existing planning/release tools.
 
 **Complementary tooling**: GitHub Projects, Linear, Jira, or similar project tracking
 tools for epic-level sequencing and dependency management.
@@ -74,11 +78,11 @@ tools for epic-level sequencing and dependency management.
 **Scope**: DevSpark's quality gates are advisory (AI-evaluated), not technically enforced.
 A contributor can merge a PR without running any DevSpark command.
 
-**Rationale**: DevSpark is designed to work with any AI coding assistant and any team
-culture. Mandatory CI gates would require framework-specific CI configuration and would
-conflict with §I Backward Compatibility for repositories that already have CI pipelines.
-Enforcement relies on team culture, optional CI hooks, and the positive incentive
-created by trust-tiered review depth.
+**Rationale**: DevSpark's local review evidence does not automatically become an enforceable
+Azure DevOps or GitHub merge policy. Required CI, branch protection, independent human review,
+and deployment-source restrictions must be configured in their owning services. The developer's
+chosen modality does not waive any such existing controls; the framework must not claim to have
+enforced a hosted policy it only recommended.
 
 **Complementary tooling**: GitHub branch protection rules, required status checks, and
 optional DevSpark CI hooks (documented in `quickstart/`) for teams that want harder gates.

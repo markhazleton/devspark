@@ -1,5 +1,5 @@
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
-"""Contract tests for the 9.0.0 release metadata.
+"""Contract tests for release metadata.
 
 The version is declared in `pyproject.toml` and the framework version stamp. The stamp carries no
 migration marker or compatibility field (retirement is stateless). The changelog records the
@@ -43,13 +43,14 @@ def _changelog_entry(version: str) -> str:
     return match.group(1)
 
 
-def test_pyproject_reads_nine_zero_zero() -> None:
+def test_pyproject_version_matches_version_stamp() -> None:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
-    assert project["version"] == "9.0.0"
+    assert project["version"] == _stamp()["version"]
+    assert project["version"] in ("9.0.0", "9.1.0", "9.2.0")
 
 
-def test_version_stamp_reads_nine_zero_zero() -> None:
-    assert _stamp()["version"] == "9.0.0"
+def test_version_stamp_reads_nine_two_zero() -> None:
+    assert _stamp()["version"] == "9.2.0"
 
 
 def test_version_stamp_carries_no_migration_marker_or_compatibility_field() -> None:

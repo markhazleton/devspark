@@ -1,7 +1,7 @@
 ---
 document: severity-registry
 constitution_version: "1.8.0"
-last_updated: "2026-09-30"
+last_updated: "2026-10-15"
 authoritative_source: .knowledge/governance/constitution.md
 ---
 
@@ -27,10 +27,20 @@ This makes findings machine-trackable, audit-ready, and consistent across amendm
 
 | Level | Description | Effect on PR |
 |---|---|---|
-| `SHOWSTOPPER` | Violates a NON-NEGOTIABLE principle — blocks merge | Hard block |
-| `HIGH` | Violates a MUST requirement significantly | Should block merge |
-| `MEDIUM` | Partial compliance or process finding | Should be addressed before merge |
-| `LOW` | Minor improvement opportunity | Advisory only |
+| `SHOWSTOPPER` | Violates a NON-NEGOTIABLE principle | Blocking when the violation is established |
+| `HIGH` | Substantial MUST violation or material risk | Depends on demonstrated obligation and actual blocking consequence |
+| `MEDIUM` | Partial compliance or process finding | Address or disposition according to impact and governing policy |
+| `LOW` | Minor improvement opportunity | Advisory unless independently tied to a binding requirement |
+
+**Severity is not blocking authority.** A finding's category/domain, severity, demonstrated
+consequence, and blocking disposition are distinct. An existing non-negotiable obligation remains
+binding; a high-severity label alone does not establish a material defect. Acceptance of a waivable
+limitation requires a named, authorized human and a reason. Ambiguous or legacy findings require
+explicit classification and cannot be silently treated as approved.
+
+Legacy PR-review processing now requires explicit blocking classification and does not infer
+blocking from `HIGH`/`CRITICAL` labels. Hosted branch protections remain a separate control and
+are not changed by this rule.
 
 ## Registry Entries
 

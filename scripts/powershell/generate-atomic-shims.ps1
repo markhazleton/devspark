@@ -45,6 +45,8 @@ function Read-NormalizedLines([string]$Path) {
     [IO.File]::ReadAllText($Path).Replace("`r`n", "`n") -split "`n"
 }
 
+# Reads the template description directly in-memory via .NET IO without external process
+# invocations, keeping functional and performance parity with the batch extraction in generate-atomic-shims.sh.
 function Get-TemplateDescription([string]$Path) {
     foreach ($line in Read-NormalizedLines $Path) {
         if ($line -match '^description:[ \t]*(.*?)[ \t]*$') { return $Matches[1] }

@@ -28,7 +28,6 @@ PREAMBLE = "templates/command-preamble-contract.md"
 CONVERGENCE_MODULE = "templates/preamble/convergence.md"
 ORCHESTRATION_MODULE = "templates/preamble/orchestration.md"
 VERIFICATION_CONTRACT = "templates/verification-contract.md"
-PHILOSOPHY = ".knowledge/governance/devspark-philosophy.md"
 MAPPING = ".knowledge/governance/devspark-prompt-mapping.md"
 
 CLASSIFICATIONS = ("blocking-defect", "accepted-limitation", "deferred-work", "learning")
@@ -173,6 +172,15 @@ def test_pr_review_respects_classified_non_blocking_findings() -> None:
     )
 
 
+def test_pr_review_closeout_does_not_add_a_reconciliation_command() -> None:
+    pr_review = _read(PR_REVIEW)
+    address = _read("templates/commands/address-pr-review.md")
+
+    assert "do not require an additional reconciliation command" in pr_review.lower()
+    assert "does not start another address/review reconciliation cycle" in address
+    assert "/devspark-pr-review UPDATE" in address
+
+
 # --- 10. One contract, two entry points --------------------------------------
 
 
@@ -234,14 +242,14 @@ def test_closeout_is_never_a_routine_next_step() -> None:
 
 
 def test_orchestration_principle_has_a_durable_home() -> None:
-    # The philosophy doc is hard-wrapped prose; compare against unwrapped text.
-    philosophy = " ".join(_read(PHILOSOPHY).replace(">", " ").split())
-    preamble = _read(ORCHESTRATION_MODULE)
+    # The principle is canonical in the orchestration preamble module (the philosophy page is a
+    # vision and manifesto and no longer restates it); compare against unwrapped text.
+    preamble = " ".join(_read(ORCHESTRATION_MODULE).replace(">", " ").split())
     mapping = _read(MAPPING)
 
-    assert "Minimize required developer orchestration" in philosophy
-    assert "does not automatically justify a new mandatory command" in philosophy
-    assert "Automate mechanical transitions; expose consequential decisions" in philosophy
+    assert "Minimize required developer orchestration" in preamble
+    assert "does not automatically justify a new mandatory command" in preamble
+    assert "automate mechanical transitions; expose consequential decisions" in preamble
     assert "## 11. Orchestration Discipline" in preamble
     assert "## Developer-experience classification" in mapping
     for cls in ("CORE HAPPY-PATH", "OPTIONAL ADVANCED", "INTERNAL CAPABILITY", "DIAGNOSTIC / MAINTENANCE"):

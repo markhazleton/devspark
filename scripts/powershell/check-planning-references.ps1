@@ -60,6 +60,9 @@ try {
     if (-not $Branch) {
         $Branch = (git branch --show-current 2>$null)
     }
+    if ($Branch -in @('main', 'master', 'trunk', 'develop', 'HEAD')) {
+        $Branch = ''
+    }
 
     $files = git ls-files
     $branchFindings = [System.Collections.Generic.List[object]]::new()

@@ -573,6 +573,9 @@ To upgrade later (no CLI required):
 Also explain the 3-tier override system in one sentence:
 > Personal overrides in `.devspark.work/{git-user}/commands/` take priority over team overrides in `.devspark.work/commands/`, which take priority over stock prompts in `.devspark/defaults/commands/`. Run `/devspark-personalize {command}` to create a personal override.
 
+Also tell the user how commands start:
+> DevSpark commands start only when you type them as slash commands, with the leading `/` (for example `/devspark-create-pr`). The agent does not start them on its own. Typing the bare name or asking the agent to "run devspark-create-pr" sends plain text, so the command skill never loads.
+
 ---
 
 ## Multi-App Monorepo Support (Optional)
@@ -608,5 +611,3 @@ For repositories containing **multiple applications** with different platforms, 
 | `/devspark-add-application` | Register a new application in the registry |
 | `/devspark-list-applications` | View all registered applications and profiles |
 | `/devspark-validate-registry` | Validate registry schema, references, and consistency |
-
-For details, see the [Multi-App Specification](https://github.com/MarkHazleton/DevSpark/blob/main/.devspark.work/specs/001-multi-app-monorepo-support/spec.md).

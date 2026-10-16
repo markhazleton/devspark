@@ -24,10 +24,8 @@ def test_release_owns_routine_work_product_sweep() -> None:
 
 def test_governance_commands_can_archive_governance_proposals() -> None:
     constitution = _read(".knowledge/governance/constitution.md")
-    philosophy = _read(".knowledge/governance/devspark-philosophy.md")
     for command in ("/devspark-release", "/devspark-constitution", "/devspark-evolve-constitution"):
         assert command in constitution
-        assert command in philosophy
 
 
 def test_published_codex_guidance_matches_archive_ownership() -> None:

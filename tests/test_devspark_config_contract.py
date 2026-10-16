@@ -10,11 +10,14 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from tests.consumer_skill_helpers import bash_path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMMON_PS1 = REPO_ROOT / "scripts" / "powershell" / "common.ps1"
-COMMON_SH = (REPO_ROOT / "scripts" / "bash" / "common.sh").as_posix()
+COMMON_SH = REPO_ROOT / "scripts" / "bash" / "common.sh"
+
+
+_GIT_BASH = r"C:\Program Files\Git\bin\bash.exe"
+_BASH = _GIT_BASH if Path(_GIT_BASH).exists() else shutil.which("bash")
 
 
 def _init_repo(tmp_path: Path) -> Path:
@@ -65,14 +68,15 @@ def test_powershell_json_mode_stays_clean_on_malformed_config(tmp_path: Path):
     assert proc.stdout.strip() == '{"ok":true}', proc.stdout + proc.stderr
 
 
-@pytest.mark.skipif(shutil.which("bash") is None or shutil.which("jq") is None, reason="bash/jq not available")
+@pytest.mark.skipif(_BASH is None or shutil.which("jq") is None, reason="bash/jq not available")
 def test_bash_warns_on_malformed_devspark_json(tmp_path: Path):
     doc_dir = _init_repo(tmp_path)
     (doc_dir / "devspark.json").write_text("{ not valid json", encoding="utf-8")
 
-    script = f"source '{COMMON_SH}'; out=$(get_devspark_config_value '.platform' 2>/tmp/devspark_test_stderr.$$); echo \"OUT=[$out]\"; cat /tmp/devspark_test_stderr.$$; rm -f /tmp/devspark_test_stderr.$$"
+    common_sh_str = COMMON_SH.as_posix()
+    script = f"source '{common_sh_str}'; out=$(get_devspark_config_value '.platform' 2>/tmp/devspark_test_stderr.$$); echo \"OUT=[$out]\"; cat /tmp/devspark_test_stderr.$$; rm -f /tmp/devspark_test_stderr.$$"
     proc = subprocess.run(
-        [bash_path(), "-c", script],
+        [_BASH, "-c", script],
         capture_output=True, text=True, input="", cwd=tmp_path,
     )
     assert "OUT=[]" in proc.stdout, proc.stdout + proc.stderr

@@ -25,6 +25,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Alternative entry point to authoring: `[user request] → route decision → { specify → clarify → plan → tasks | quickfix } → implement`. Use **instead of** `/devspark-specify` for bug fixes, config tweaks, docs updates, hotfixes, or minor features under ~4 hours. `/devspark-specify` recommends this command automatically for `one-off-fix` classification.
 
+Also accepts **Code First** work: `[existing diff] → quickfix review and reconciliation → existing
+implementation finalization`. A completed or partially completed change needs no prior spec,
+plan, or tasks. Both entries use the same quickfix record and existing assurance mechanisms.
+
 - **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches — flat documents, entities, entity layers, or decisions — if any), and complete `code_ref`/`knowledge_ref` linkage on the Validation Checklist. Before checking an item complete, record every affected production-code, test, and current `.knowledge/` path there; never reference the temporary quickfix record from a durable file.
 - **Does NOT own**: multi-file architectural changes, new user-facing features, or API/schema changes (→ `/devspark-specify`); interactive ambiguity resolution (→ `/devspark-clarify`); design artifacts (→ `/devspark-plan`); story-organized task lists (→ `/devspark-tasks`); adversarial risk review (→ `/devspark-critic`, `/devspark-analyze`) — quickfix's lightweight contract deliberately skips both gates entirely rather than running a lighter version of either; escalate to `/devspark-specify` if the change turns out to need them.
 - **If scope expands during implementation**: halt and recommend `/devspark-specify {original problem}` rather than stretching the quickfix.
@@ -54,7 +58,10 @@ once it's Complete and linkage-verified.
 
 **IMPORTANT**: This command creates minimal documentation and still performs constitution-aware gate checks.
 
-Gate results from this workflow are advisory. The agent must surface blocking concerns and recommend a next action, but the user decides whether to fix first, escalate, or accept the risk.
+Lightweight route advice is advisory, not permission to waive a mandatory requirement. Surface
+blocking concerns; failed verification, constitution violations, missing required independent
+assurance, and missing authorization cannot be reported as passing or Complete. A recorded risk
+acknowledgement is not a test result or an approval from the required authority.
 
 ## Prerequisites
 
@@ -76,7 +83,10 @@ Parse `$ARGUMENTS` for action type:
 Done when (for `create`): the quickfix branch `BRANCH_NAME` is checked out when approved, the
 temporary record exists at `QUICKFIX_DIR/NEXT_ID.md` with WHAT/WHY/HOW and constitution compliance,
 and the final summary routes to `/devspark-implement`. `list` is read-only. `complete` must not retain
-a completed record; route to implementation finalization and deletion.
+a completion claim here; route to implementation finalization. Release alone owns archiving.
+For Code First, reconcile the existing diff, then use the existing Quickfix Route and Finalize Every
+Route instructions in `/devspark-implement` with the explicit record path. Complete means the
+actual delta and all required evidence pass, not merely that code or a record exists.
 
 ## Outline
 
@@ -146,7 +156,50 @@ If ACTION is "complete" and QUICKFIX_ID is provided:
 
 #### Action: `create` (Default)
 
-Continue to step 3 for creating new quickfix record.
+Continue to step 3. When code already exists, apply the Code First entry below before assessing
+scope or creating the same quickfix record.
+
+### Code First Entry: Inspect and Reconcile an Existing Diff
+
+1. **Establish the actual change boundary.** Inspect `git status --short`,
+   `git diff --no-ext-diff`, and `git diff --cached --no-ext-diff`; read relevant changed code,
+   callers, and tests, including relevant untracked files. For committed work, establish the
+   intended base and inspect `git diff --no-ext-diff <base>...HEAD`. Ask only when the base or
+   ownership is ambiguous; do not silently treat all dirty files as this change or alter unrelated
+   work. Do not create or switch a branch merely to inspect the diff.
+2. **Establish intent from evidence.** Use the conversation, diff, surrounding code, existing
+   tests, and current Knowledge. Distinguish observed behavior from inferred intent and unknown
+   root cause. Ask the developer only when an important intent, required guarantee, or authorization
+   cannot be established. Do not invent a requirement to justify the code.
+3. **Review scope and correctness before completion.** Apply steps 3-5 and the existing Route
+   Escalation guidance to the actual delta, not just description keywords. Check boundary cases,
+   caller compatibility, regressions, and relevant existing tests. Material risk requires the
+   applicable independent assurance, organizational requirements, and authorization even if code
+   is already written. Use existing review/verification mechanisms; halt completion or escalate
+   when required assurance is missing. If promotion is needed, document remaining work and current
+   decisions prospectively, never fabricate an earlier specification or approval.
+4. **Close validation gaps.** Run the smallest relevant existing tests, add or update appropriate
+   regression/edge-case coverage, and rerun after corrections. Use the existing verification
+   contract and `/devspark-verify` when applicable. Record exact commands, observed results,
+   failures, and limitations in the record's Implementation Notes; not-run and blocked checks
+   remain unproven. A failing required check prevents a passing result and finalization.
+5. **Reconcile lasting Knowledge only when needed.** Inspect applicable `.knowledge/` owners and
+   determine whether the diff changes a durable claim, contract, or operational guidance. Update
+   the owning document when necessary; create Knowledge only for lasting engineering value, never
+   to satisfy a documentation checkbox. If no update is needed, explain why in Context Resolution
+   and use `knowledge_ref: n/a` on the relevant checklist items.
+6. **Preserve chronology in the existing record.** Create or update the quickfix record now,
+   stating that implementation preceded this review, what was already done, and what remains.
+   Describe HOW as the observed implementation plus any prospective corrections. Use actual
+   timestamps, test results, and approvals; never backdate a planning decision or human approval.
+   Populate `code_ref`/`knowledge_ref` with inspected paths, and check items only after evidence
+   supports them. Reuse a matching existing record rather than generating another for the same work.
+7. **Finalize through the existing route.** Apply steps 7-9 with branch confirmation and staging
+   safety below, then load `/devspark-implement`'s Quickfix Route and Finalize Every Route using
+   this record's explicit path, including when staying on the current branch. Validate already-done
+   items instead of reimplementing them; finish authorized remaining work. Produce the step-10
+   summary from actual evidence, distinguishing Quickfix's own review from any independent review
+   performed or still required. Do not request fictional `spec.md`, `plan.md`, or `tasks.md`.
 
 ### 3. Validate Scope
 
@@ -191,17 +244,20 @@ Build a targeted validation checklist from these principles only.
 
 For each relevant principle:
 
-- **PASS**: Proposed solution complies or principle not applicable
+- **PASS**: Proposed solution (or inspected existing change) complies or principle not applicable
 - **CONDITIONAL**: Needs specific action to comply (document the action)
 - **FAIL**: Cannot proceed without violating principle
 
 **Compliance Decision:**
 
-- If any FAIL: Surface the blocking concern, explain why it matters, recommend `/devspark-specify` or escalation, and ask whether to continue anyway, switch workflows, or stop. **Never auto-bypassed** — a FAIL here is a constitution violation by definition, so this always waits for a human regardless of `--auto`.
+- If any FAIL: Surface the blocking concern, explain why it matters, and ask whether to correct,
+  switch workflows, or stop. **Never auto-bypassed**, even under `--auto`; continuing investigation
+  does not authorize a violation, a passing result, or completion.
 - If CONDITIONAL: Document required actions in the quickfix record. Under `--auto` (or a standing autonomy instruction), this is auto-documented and the run proceeds without asking — CONDITIONAL is not a blocker, it's a recorded follow-up.
 - If all PASS: Proceed with quickfix creation.
 
-If the user chooses to continue despite FAIL or CONDITIONAL findings, record that explicit override in the quickfix record under `## Gate Acknowledgements`.
+Record explicit decisions about FAIL or CONDITIONAL findings under `## Gate Acknowledgements`.
+An acknowledgement does not satisfy an unmet mandatory requirement.
 
 ### 6. Extract Quickfix Details (Product Owner TLDR — WHAT / WHY / HOW)
 
@@ -211,6 +267,9 @@ Use the **entire conversation thread** as input — not just the `$ARGUMENTS` st
 - **WHY (the root cause)**: Why is this happening in the code — the underlying technical cause identified during troubleshooting (1-2 sentences). If the trigger was an automated finding (lint rule, test failure, code-smell metric), state the behavioral intent it is a proxy for, not just the raw message — see command-preamble-contract.md §9 (Genuine Fix Discipline).
 - **HOW (the fix)**: How are we going to fix it — the concrete change plan agreed on in the thread (1-2 sentences). The plan must address the root cause above, not merely satisfy the check mechanically.
 - **Affected Components**: Files/modules likely impacted (infer from the conversation and code already inspected).
+
+For Code First, use the inspected delta: HOW describes what was implemented and any remaining
+correction, not a fictional earlier plan. Record uncertain root cause as unknown rather than fact.
 
 Keep each entry plain-language and reviewable by a non-engineer product owner. If any of WHAT/WHY/HOW cannot be determined from the thread, state the open question explicitly rather than inventing an answer.
 
@@ -223,6 +282,7 @@ If `HAS_GIT` is false, skip branching entirely, note it in the summary, and writ
 Otherwise:
 
 1. If the working tree is already on a `NNN-fix-*` (or legacy `QF-*`) branch from a prior run, **stay on it** (no new branch, no switch) and continue.
+   Reuse its matching quickfix record and ID if present instead of the newly allocated NEXT_ID.
 2. If the working tree has **uncommitted changes**, warn the developer first — switching would carry those changes onto the new branch. Let them commit, stash, or decide before proceeding.
 3. Show exactly what will happen and ask: **"Create and switch to branch `{BRANCH_NAME}` from `{CURRENT_BRANCH}`? (yes / stay on current branch)"**
    - **Wait for an explicit yes.** This confirmation is **required even under `--auto`** — creating/switching a branch is a working-context change that must be a human decision.
@@ -236,6 +296,10 @@ Do **not** create the branch before the constitution compliance check (§5) reso
 Ensure directory exists: Create `/.devspark.work/quickfixes/` if missing.
 
 Create record at `QUICKFIX_DIR/NEXT_ID.md`:
+
+For Code First, fill Implementation Notes with the actual chronology and observed review/test
+evidence rather than leaving it blank. Adapt the HOW and checklist wording to already-done work;
+leave unresolved items unchecked and Completion blank until existing finalization succeeds.
 
 ```markdown
 ---
@@ -284,7 +348,7 @@ required_gates: { Leave blank for low risk; otherwise checklist }
 ## Validation Checklist
 
 - [ ] Change addresses stated problem (code_ref: pending | knowledge_ref: pending)
-- [ ] No unintended side effects identified
+- [ ] No unintended side effects identified (code_ref: pending | knowledge_ref: n/a)
 - [ ] Relevant tests updated/added (if applicable) (code_ref: pending | knowledge_ref: n/a)
 - [ ] Documentation updated (if applicable) (code_ref: n/a | knowledge_ref: pending)
 
@@ -311,6 +375,10 @@ Generated by /devspark-quickfix v1.0.
 
 If `HAS_GIT` is true, stage and commit the new record on the quickfix branch so the fix starts from a clean, traceable checkpoint. Compose the commit message from the WHAT/WHY/HOW summary captured in §6 (not a generic message):
 
+For Code First this is a reconciliation checkpoint, not a pre-implementation checkpoint. Before
+committing, inspect the index. If unrelated changes are already staged, leave the index untouched
+and report the record as uncommitted; do not commit, unstage, or overwrite the developer's work.
+
 1. Stage only the record: `git add {QUICKFIX_DIR}/{NEXT_ID}.md`.
 2. Commit with a message of the form:
 
@@ -328,6 +396,11 @@ Do not stage unrelated working-tree changes — commit the record only. The actu
 ### 10. Output Summary
 
 Display to user:
+
+For Code First, adapt the summary and next steps to what actually happened: report inspected
+scope, remaining work, Knowledge update or justified no-update, executed verification and review,
+and unresolved failures/assurance. Never print the sample PASS or a completed claim by default.
+For traditional entry, creation is not verification: keep the implementation handoff below.
 
 ````markdown
 Quickfix Record Created: {NEXT_ID}
@@ -426,6 +499,9 @@ Continue as quickfix, or promote to a full spec?
 ```
 
 The developer owns that decision. Record the outcome in the record's Implementation Notes so a later reader can see the route was examined and chosen, not merely inherited.
+
+For either entry, choosing to continue does not waive material-risk assurance or authorization.
+Record missing obligations as unresolved and do not finalize until applicable requirements pass.
 
 ### Quickfix vs Full Spec Decision Guide
 

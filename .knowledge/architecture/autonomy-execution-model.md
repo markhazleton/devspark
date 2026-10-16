@@ -3,7 +3,20 @@ id: autonomy-execution-model
 type: architecture
 title: "Autonomy Execution Model"
 appliesTo:
-  - templates/commands/**
+  - templates/commands/address-pr-review.md
+  - scripts/pr-review-state.py
+  - scripts/powershell/address-pr-review.ps1
+  - scripts/bash/address-pr-review.sh
+  - tests/test_pr_review_state_contract.py
+  - tests/test_address_pr_review_contract.py
+source_of_truth:
+  - templates/commands/address-pr-review.md
+  - scripts/pr-review-state.py
+  - scripts/powershell/address-pr-review.ps1
+  - scripts/bash/address-pr-review.sh
+  - tests/test_pr_review_state_contract.py
+  - tests/test_address_pr_review_contract.py
+last_verified: 2026-10-14
 ---
 
 <!-- markdownlint-disable MD025 -->
@@ -28,6 +41,12 @@ genuinely blocking compatibility work under autonomy (never Medium or Low), and 
 selects only open blocking findings. Remediation beyond the approved Plan's shape needs Judge or
 explicit human authority. Implementation resolves findings only when the associated change and
 verification complete.
+
+PR remediation records committed corrections as awaiting independent verification; author validation
+does not resolve the finding. Existing PR review UPDATE evaluates the original concern and correction
+once, then commits the evaluation and derived disposition together. It does not require a second
+report-reconciliation invocation. A single already-authorized finding is selected deterministically;
+optional or genuinely ambiguous work remains a human decision.
 
 ## Full-Cycle Behavior
 

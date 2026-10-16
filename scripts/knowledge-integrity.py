@@ -272,8 +272,8 @@ def check_root_reachability(repo: Path, index: dict[str, Any]) -> list[dict[str,
         if not candidate.is_dir() or any(part in excluded for part in candidate.relative_to(repo).parts):
             continue
         rel = candidate.relative_to(repo).as_posix()
-        if rel == ".knowledge" or rel.startswith("tests/fixtures/"):
-            continue  # the canonical root is always reachable by definition; test fixtures are data, not roots
+        if rel == ".knowledge" or rel.startswith(("tests/fixtures/", "examples/")):
+            continue  # the canonical root is always reachable by definition; fixtures and example consumer projects are data, not roots
         if not any(p.startswith(rel) for p in indexed_prefixes) and not any(str(n.get("path", "")).startswith(rel + "/") for n in index.get("nodes", [])):
             findings.append(
                 make_finding(

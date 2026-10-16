@@ -52,6 +52,12 @@ CLASSIFICATIONS = (
     "learning",
 )
 
+SPEC145_EXTERNAL_DEPENDENCY_EXCEPTION = """External Dependency Exception (MANDATORY):
+- For outbound remote API calls (external dependencies), the caller MUST log each call attempt to Kusto regardless of outcome.
+- Both success and failure outcomes MUST be logged for each attempt (including retries).
+- Dependency-call logging MAY emit multiple entries within a single inbound transaction by design.
+"""
+
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
@@ -412,6 +418,52 @@ def validate_scope_authority() -> None:
     assert "select `all` open findings" not in address
 
 
+def validate_shift_left_constitution_contract() -> None:
+    specify = _read(ROOT / "templates" / "commands" / "specify.md")
+    clarify = _read(ROOT / "templates" / "commands" / "clarify.md")
+    plan = _read(ROOT / "templates" / "commands" / "plan.md")
+    analyze = _read(ANALYZE)
+    exception = SPEC145_EXTERNAL_DEPENDENCY_EXCEPTION
+    contradictory = (
+        "Build an API that calls Azure OpenAI. To reduce logging volume, prohibit per-attempt "
+        "Kusto telemetry, including retries. Record only a single aggregate event per conversation."
+    )
+    negative_control = "Limit unrelated internal debug logging without prohibiting required dependency-attempt telemetry."
+
+    assert "MUST log each call attempt to Kusto regardless of outcome" in exception
+    assert "including retries" in exception and "prohibit per-attempt Kusto telemetry" in contradictory
+    assert "prohibit per-attempt Kusto telemetry" not in negative_control
+    for prompt in (specify, clarify):
+        assert "complete applicable MUST/SHOULD text" in prompt or "complete applicable MUST/SHOULD" in prompt
+        assert "embedded exceptions" in prompt or "exceptions" in prompt
+        assert "Do not repeat the check for unchanged requirements" in prompt or "Recheck changed requirements only" in prompt
+    assert "before marking the spec ready" in specify
+    assert "Before closing the clarification" in clarify
+    assert "In the existing pre-design Constitution Check" in plan
+    assert "complete applicable principle text, including embedded exceptions and scope" in plan
+    assert "repeat the same focused check after design changes" in plan
+    assert "This is part of the existing check, not another gate" in plan
+    assert "Independently compare the authored requirements with the full applicable MUST/SHOULD text" in analyze
+    assert "do not rely on Specify, Clarify, or Plan having passed" in analyze
+    assert "Constitution conflicts are automatically CRITICAL" in analyze
+
+
+def test_authoring_prompts_compare_changed_requirements_to_full_constitution_clause() -> None:
+    validate_shift_left_constitution_contract()
+
+
+def test_critic_preserves_raw_execution_evidence_without_reopening_planning() -> None:
+    critic = " ".join(_read(ROOT / "templates" / "commands" / "critic.md").split())
+    for phrase in (
+        "implementation does not refresh them",
+        "within the approved Plan surface",
+        "does not by itself require Critic to rerun",
+        "Verify and PR Review retain",
+        "An out-of-surface or governance change",
+    ):
+        assert phrase in critic
+
+
 def main() -> None:
     validate_canonical_contract_exists()
     validate_single_owner_invariant()
@@ -432,6 +484,7 @@ def main() -> None:
     validate_risk_checklist_resolution_path()
     validate_fixtures()
     validate_scope_authority()
+    validate_shift_left_constitution_contract()
 
     print("Assurance contract validated.")
 

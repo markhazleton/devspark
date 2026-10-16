@@ -33,6 +33,26 @@ You **MUST** consider the user input before proceeding (if not empty).
 - **Does NOT own**: re-litigating WHAT/WHY (spec is authoritative); resolving open functional ambiguities (→ `/devspark-clarify`); the executable task list (→ `/devspark-tasks`); adversarial review (→ `/devspark-critic`, `/devspark-analyze`).
 - **Pre-flight**: if the loaded spec still contains `[NEEDS CLARIFICATION: …]` markers, halt and route to `/devspark-clarify`. Do not silently default open questions into planning decisions.
 
+### Delta-Oriented Planning
+
+A plan designs the smallest responsible delta against the current implementation. Before taking the
+next delta, make sure the new state remains a good place from which to change again.
+
+- **Smallest responsible change**: design against the current implementation, respecting existing
+  architecture, interfaces, compatibility, and governance.
+- **Keep software changeable**: consider whether the resulting software remains understandable,
+  testable, maintainable, and reasonably easy to change again.
+- **Avoid speculative abstractions**: avoid speculative abstractions, premature generalization, and
+  unnecessary extensibility.
+- **Choose the right integration boundary**: before prescribing widespread wiring across numerous
+  constructors, handlers, adapters, or call sites for one behavior, first examine existing
+  ownership, orchestration, and finalization boundaries. Prefer reusing an appropriate existing
+  seam over distributing equivalent logic across many call sites. A centralized hook is not always
+  better: evaluate lifecycle boundaries, error propagation, ordering, data availability, and
+  existing architectural constraints. When the chosen design requires repeated integration across
+  multiple call sites, briefly justify that placement in the plan's decisions or complexity
+  discussion (formal alternative-design analysis is not required for routine local changes).
+
 ## Definition of Done
 
 Done when: every material planning question is resolved (recorded in `research.md` only when research was needed, with zero `NEEDS CLARIFICATION` markers remaining), every requirement maps to a design element, the mechanism shape, expected change surface and verification strategy are known, the justified support artifacts exist, the agent-context script has run, `plan.md`'s `## Context Resolution` section is populated with the traversal's `context_resolved` entries, and the Constitution Check is re-evaluated post-design with no unresolved violations. This command stops after Phase 1 (step 4) — it does not generate tasks or write code. Chat output: report only the branch, IMPL_PLAN path, and generated artifact list — full design detail lives in the files.
@@ -80,6 +100,7 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    - If the body text appears to conflict with the frontmatter, flag the inconsistency to the user instead of overriding the metadata.
    - **Preserve the stage split.** Where the spec declares a `stage: post-deploy` obligation (or a deployment-dependent shape), the plan keeps both halves: the pre-merge `verify:<mode>` proof and the post-deploy obligation with its owner, required `deployed` or `rollout` evidence, and the existing `captured_as` record. Do not plan a pre-merge mode that needs a deployed environment; that is a spec authoring defect to return to the spec (verification contract §2.3).
    - Compute the spec fingerprint once with `judge.py semantic-hash --path <FEATURE_SPEC>` (`.devspark/scripts/judge.py` in installed repos) at the moment you read the spec, and keep that value as the only one you may stamp: it identifies the spec content you actually read and validated, never a value recomputed afterward.
+   - In the existing pre-design Constitution Check, compare relevant requirements and design obligations against the complete applicable principle text, including embedded exceptions and scope. Resolve a contradiction before proceeding; repeat the same focused check after design changes. This is part of the existing check, not another gate.
 
    **Existing Plan / focused revise**: `PLAN_EXISTS` reports prior existence; `PLAN_MODE: revise`
    means preserve the existing Plan, including unrelated decisions and sections. Do not infer

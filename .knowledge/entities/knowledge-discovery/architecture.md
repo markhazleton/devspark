@@ -6,7 +6,7 @@ layer: architecture
 source_of_truth:
   - scripts/discover-knowledge.py
   - tests/test_discover_knowledge_contract.py
-last_verified: 2026-10-11
+last_verified: 2026-10-13
 aliases:
   - discover knowledge
   - knowledge gaps

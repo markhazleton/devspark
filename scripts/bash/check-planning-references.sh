@@ -32,6 +32,9 @@ cd "$REPO_ROOT"
 if [[ -z "$BRANCH" ]]; then
     BRANCH="$(git branch --show-current 2>/dev/null || true)"
 fi
+if [[ "$BRANCH" =~ ^(main|master|trunk|develop|HEAD)$ ]]; then
+    BRANCH=""
+fi
 
 # Roots this rule never applies to: the ephemeral planning roots themselves, the installed
 # framework payload, vendor/build output, and two meta-documents whose entire purpose is to

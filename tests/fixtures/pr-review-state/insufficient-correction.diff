@@ -1,0 +1,8 @@
+diff --git a/tests/test_window.py b/tests/test_window.py
+index 3333333..5555555 100644
+--- a/tests/test_window.py
++++ b/tests/test_window.py
+@@ -1,2 +1,3 @@
+ def test_window_forwards_bounds(adapter):
+     search_window(adapter, lower=LOWER, upper=UPPER)
++    assert adapter.call_args.kwargs["created_after"] == LOWER

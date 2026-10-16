@@ -8,6 +8,7 @@ corpus, and the dual-language work-item helper pair.
 from __future__ import annotations
 
 import collections
+import hashlib
 import json
 import os
 import re
@@ -17,6 +18,8 @@ from pathlib import Path
 
 import jsonschema
 import pytest
+
+pytestmark = pytest.mark.xdist_group("workitem_contract")
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -359,7 +362,35 @@ def _run(
         if confirmed:
             argv.append("--confirmed")
         argv.append("--json")
-    return subprocess.run(argv, capture_output=True, cwd=cwd or ROOT, timeout=60)
+    return _invoke(tuple(argv), cwd, _fixture_digest(supplied.get("fixture")))
+
+
+def _fixture_digest(fixture: object) -> str | None:
+    if fixture is None:
+        return None
+    path = Path(str(fixture))
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+
+
+_RESULTS: dict[tuple, subprocess.CompletedProcess[bytes]] = {}
+
+
+def _invoke(
+    argv: tuple[str, ...], cwd: Path | None, fixture_digest: str | None
+) -> subprocess.CompletedProcess[bytes]:
+    """Run a helper once per distinct input.
+
+    Many tests assert different properties of the same response. The helpers run against
+    recorded fixtures, so identical arguments, working directory and fixture bytes always
+    produce identical output; spawning the shell again would only re-measure that.
+    Calls with a custom working directory are never shared.
+    """
+    if cwd is not None:
+        return subprocess.run(argv, capture_output=True, cwd=cwd, timeout=60)
+    key = (argv, fixture_digest)
+    if key not in _RESULTS:
+        _RESULTS[key] = subprocess.run(argv, capture_output=True, cwd=ROOT, timeout=60)
+    return _RESULTS[key]
 
 
 def _read(

@@ -58,6 +58,37 @@ def _run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
+_TEMPLATE_SCRIPT_REPO: Path | None = None
+_TEMPLATE_SHIM_REPO: Path | None = None
+_TEMP_ROOT: tempfile.TemporaryDirectory | None = None
+
+
+def _get_template_repo(*, with_shims: bool) -> Path:
+    global _TEMPLATE_SCRIPT_REPO, _TEMPLATE_SHIM_REPO, _TEMP_ROOT
+    if _TEMP_ROOT is None:
+        _TEMP_ROOT = tempfile.TemporaryDirectory()
+    temp_path = Path(_TEMP_ROOT.name)
+    if with_shims:
+        if _TEMPLATE_SHIM_REPO is None:
+            _TEMPLATE_SHIM_REPO = temp_path / "tpl-shim"
+            _TEMPLATE_SHIM_REPO.mkdir()
+            _copy_shim_set(_TEMPLATE_SHIM_REPO)
+            _init_git_repo(_TEMPLATE_SHIM_REPO)
+        return _TEMPLATE_SHIM_REPO
+    else:
+        if _TEMPLATE_SCRIPT_REPO is None:
+            _TEMPLATE_SCRIPT_REPO = temp_path / "tpl-script"
+            _TEMPLATE_SCRIPT_REPO.mkdir()
+            _copy_script_set(_TEMPLATE_SCRIPT_REPO)
+            _init_git_repo(_TEMPLATE_SCRIPT_REPO)
+        return _TEMPLATE_SCRIPT_REPO
+
+
+def _setup_repo(repo_root: Path, *, with_shims: bool = False) -> None:
+    tpl = _get_template_repo(with_shims=with_shims)
+    shutil.copytree(tpl, repo_root, dirs_exist_ok=True)
+
+
 def _init_git_repo(repo_root: Path) -> None:
     subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
     subprocess.run(["git", "config", "user.name", "DevSpark Test"], cwd=repo_root, check=True, capture_output=True, text=True)
@@ -147,8 +178,7 @@ def check(condition: bool, message: str) -> None:
 def _test_type_tagged_naming_and_padding(runner) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_root = Path(temp_dir)
-        _copy_script_set(repo_root)
-        _init_git_repo(repo_root)
+        _setup_repo(repo_root)
 
         result = runner(repo_root, type_="spec", json_mode=True, dry_run=True,
                          short_name="user-auth", description="Add user auth")
@@ -172,8 +202,7 @@ def _test_type_tagged_naming_and_padding(runner) -> None:
 def _test_invalid_type_errors(runner) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_root = Path(temp_dir)
-        _copy_script_set(repo_root)
-        _init_git_repo(repo_root)
+        _setup_repo(repo_root)
 
         result = runner(repo_root, type_="bogus", json_mode=True, dry_run=True, description="Some description")
         check(result.returncode == 1, f"expected exit 1 for invalid type, got {result.returncode}")
@@ -182,8 +211,7 @@ def _test_invalid_type_errors(runner) -> None:
 def _test_dry_run_no_switch(runner) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_root = Path(temp_dir)
-        _copy_script_set(repo_root)
-        _init_git_repo(repo_root)
+        _setup_repo(repo_root)
 
         before = subprocess.run(["git", "branch", "--show-current"], cwd=repo_root, capture_output=True, text=True).stdout.strip()
         result = runner(repo_root, type_="quick", json_mode=True, dry_run=True, yes=True, description="Quick idea")
@@ -198,8 +226,7 @@ def _test_legacy_backward_compat_counted(runner) -> None:
     # collision error is raised for an unrelated new branch.
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_root = Path(temp_dir)
-        _copy_script_set(repo_root)
-        _init_git_repo(repo_root)
+        _setup_repo(repo_root)
 
         (repo_root / ".devspark.work" / "specs" / "007-foo").mkdir(parents=True)
         (repo_root / ".devspark.work" / "specs" / "007-foo" / "spec.md").write_text("# spec\n", encoding="utf-8")
@@ -221,8 +248,7 @@ def _test_branch_safety_no_switch_without_confirmation(runner) -> None:
     # MUST fail closed rather than silently switching.
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_root = Path(temp_dir)
-        _copy_script_set(repo_root)
-        _init_git_repo(repo_root)
+        _setup_repo(repo_root)
 
         before = subprocess.run(["git", "branch", "--show-current"], cwd=repo_root, capture_output=True, text=True).stdout.strip()
         result = runner(repo_root, type_="fix", json_mode=True, description="Some fix, no confirmation")
@@ -235,8 +261,7 @@ def _test_hostile_shortname_produces_valid_ref(runner) -> None:
     # Pathological short-name input must not produce an invalid git ref.
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_root = Path(temp_dir)
-        _copy_script_set(repo_root)
-        _init_git_repo(repo_root)
+        _setup_repo(repo_root)
 
         hostile = "--evil ../../etc .lock * ? [x] ~ ^ :"
         result = runner(repo_root, type_="fix", json_mode=True, dry_run=True, short_name=hostile)
@@ -260,8 +285,7 @@ def _test_shim_delegates_named_arguments(shim_runner) -> None:
     # then fails the type guard.
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_root = Path(temp_dir)
-        _copy_shim_set(repo_root)
-        _init_git_repo(repo_root)
+        _setup_repo(repo_root, with_shims=True)
 
         result = shim_runner(repo_root, short_name="user-auth", description="Add user auth")
         check(result.returncode == 0, f"shim delegation failed ({result.returncode}): {result.stderr}")

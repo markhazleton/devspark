@@ -44,6 +44,16 @@ def _load_risk_engine():
     return module
 
 
+def _load_review_state_engine():
+    path = Path(__file__).resolve().with_name("pr-review-state.py")
+    spec = importlib.util.spec_from_file_location("pr_review_state", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Unable to load shared PR review-state engine.")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def split_frontmatter(text: str) -> tuple[dict, str]:
     if not text.startswith("---"):
         return {}, text
@@ -115,9 +125,51 @@ def validate(text: str, digest: dict | None = None) -> list[dict]:
         add("frontmatter-missing", f"frontmatter lacks: {', '.join(missing)}")
         return issues
 
+    state_engine = None
+    state = None
+    if "review_state" in fm:
+        state_engine = _load_review_state_engine()
+        try:
+            state = state_engine._validate_record(fm["review_state"])
+        except state_engine.StateError as exc:
+            add(exc.issue["code"], exc.issue["message"])
+        else:
+            derived = state_engine._derive(state)
+            try:
+                rendered = state_engine._render_views(body, state)
+            except state_engine.StateError as exc:
+                add(exc.issue["code"], exc.issue["message"])
+            else:
+                if rendered != body:
+                    add("derived-view-mismatch", "Generated review sections do not match the authoritative review_state.")
+            declared_historical = fm.get("historical_findings")
+            if declared_historical != fm.get("findings"):
+                add("historical-counts", "findings must remain the labeled unique historical totals.")
+            if fm.get("current_findings") != derived["current_counts"]:
+                add("current-counts", "current_findings do not match the active authoritative findings.")
+            if fm.get("current_state_counts") != derived["current_state_counts"]:
+                add("current-state-counts", "current_state_counts do not match the authoritative lifecycle states.")
+            if fm.get("unresolved_blockers") != derived["unresolved_blockers"]:
+                add("unresolved-blockers", "unresolved_blockers does not match review_state.")
+            if fm.get("recommendation") != derived["recommendation"]:
+                add("recommendation", "recommendation does not match current blockers and review conditions.")
+            if fm.get("gate_status") != derived["gate_status"]:
+                add("gate-status", "gate_status does not match applicable review conditions.")
+            expected_counts = {
+                severity: sum(finding["severity"] == severity for finding in state["findings"])
+                for severity in ("critical", "high", "medium", "low")
+            }
+            expected_counts["con"] = sum(finding.get("category") == "constitution" for finding in state["findings"])
+            if fm.get("findings") != expected_counts:
+                add("historical-counts", "Historical severity counts do not match unique canonical findings.")
+            expected_max = next((severity for severity in ("critical", "high", "medium", "low")
+                                 if expected_counts[severity]), "none")
+            if fm.get("max_severity") != expected_max:
+                add("max-severity", f"max_severity is {fm.get('max_severity')} but review_state implies {expected_max}")
+
     rows = finding_rows(body)
     counts = fm.get("findings") or {}
-    if fm.get("revision") == 1:
+    if state is None and fm.get("revision") == 1:
         raised = {k: len({fid for kind, fid, _ in rows if kind == label}) for k, label in
                   (("critical", "C"), ("high", "H"), ("medium", "M"), ("low", "L"), ("con", "CON"))}
         for key, value in raised.items():
@@ -129,9 +181,15 @@ def validate(text: str, digest: dict | None = None) -> list[dict]:
     if fm.get("max_severity") != expected_max:
         add("max-severity", f"max_severity is {fm.get('max_severity')} but counts imply {expected_max}")
 
-    blocking_open = [
-        fid for kind, fid, status in rows if kind in ("C", "H", "PRD") and not CLOSED.search(status)
-    ]
+    if state is not None:
+        blocking_open = [
+            finding["finding_id"] for finding in state["findings"]
+            if finding["blocking"] and finding["status"] != "resolved" and not finding.get("disposition")
+        ]
+    else:
+        blocking_open = [
+            fid for kind, fid, status in rows if kind in ("C", "H", "PRD") and not CLOSED.search(status)
+        ]
     rec = recommendation(body)
     if rec in ("request-changes", "reject") and not blocking_open:
         add("rec-without-blocker", "REQUEST CHANGES/REJECT needs at least one open blocking finding (C, H or PRD)")

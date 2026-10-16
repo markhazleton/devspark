@@ -31,7 +31,7 @@ Load and obey the shared assurance contract at `/.devspark/templates/assurance-c
 
 Analyze is the **closed-world** half of planning assurance. Its test is mechanical: if something can be shown wrong solely because the planning artifacts contradict themselves or fail their declared structural contract, Analyze owns it. If establishing it requires knowing how the running system actually behaves, Analyze does not.
 
-Analyze **owns** (assurance-contract.md §2): spec↔plan↔tasks consistency; requirement coverage and requirement↔task traceability; duplicate, contradictory, or unanchored requirements; terminology drift and wording precision; task dependency and ordering validity; missing task anchors; tasks citing requirement ids that do not exist; completed tasks with no supporting linkage; identifier and field names contradicting a declared contract or schema; Rationale Summary completeness and spec→plan Core-Problem drift; `context_resolved` **validity**; artifact and schema conformance; planning bookkeeping correctness.
+Analyze **owns** (assurance-contract.md §2): spec↔plan↔tasks consistency; requirement coverage and requirement↔task traceability; duplicate, contradictory, or unanchored requirements; terminology drift and wording precision; task dependency and ordering validity; missing task anchors; tasks citing requirement ids that do not exist; completed tasks with no supporting linkage; identifier and field names contradicting a declared contract or schema; Spec/Plan Rationale Summary completeness and spec→plan Core-Problem alignment; `context_resolved` **validity**; artifact and schema conformance; planning bookkeeping correctness. Tasks are a derivative action list and must not duplicate rationale.
 
 Analyze does **NOT** own, and MUST NOT emit findings for (assurance-contract.md §4.1):
 
@@ -53,7 +53,7 @@ The analysis itself is non-destructive. Do **not** edit `spec.md`, `plan.md`, `t
 
 Read the YAML frontmatter in `spec.md` (or the quickfix record when `FEATURE_SPEC` resolves to `.devspark.work/quickfixes/<branch>.md`) before analyzing. Treat `classification`, `risk_level`, `required_gates`, `depends_on`, and `supersedes` as authoritative metadata.
 
-**Constitution Authority**: The project constitution (`/.knowledge/governance/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/devspark-analyze`.
+**Constitution Authority**: The project constitution (`/.knowledge/governance/constitution.md`) is **non-negotiable** within this analysis scope. Independently compare the authored requirements with the full applicable MUST/SHOULD text, including embedded exceptions and scope; do not rely on Specify, Clarify, or Plan having passed their checks. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/devspark-analyze`.
 
 ## Spec Knowledge Consumption
 
@@ -198,7 +198,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 
 #### G. Rationale & Traceability
 
-- Missing or incomplete **Rationale Summary** in any artifact (HIGH)
+- Missing or incomplete Spec/Plan **Rationale Summary** that omits the problem or consequential decisions (HIGH); do not require Tasks to repeat it
 - **Core-Problem drift** between spec and plan — the plan solves a meaningfully different problem than the spec describes (CRITICAL)
 - Major architectural / stack decisions in plan with no recorded tradeoff or alternatives considered (HIGH)
 - Decisions in plan that contradict an explicitly stated tradeoff in spec (CRITICAL)

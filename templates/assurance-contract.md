@@ -40,7 +40,8 @@ Analyze owns, exclusively:
 - missing task anchors; tasks citing requirement ids that do not exist
 - completed tasks with no supporting linkage
 - identifier and field names contradicting a declared contract or schema
-- Rationale Summary completeness and spec→plan Core-Problem drift
+- Spec/Plan Rationale Summary completeness and spec→plan Core-Problem alignment; Tasks remain a
+  derivative action list and do not repeat rationale
 - `context_resolved` **validity** — every cited id and relation actually resolves
 - artifact and schema conformance, and planning bookkeeping correctness
 - whether affected current-knowledge updates and tests *exist as tasks* (presence of coverage, not its adequacy)

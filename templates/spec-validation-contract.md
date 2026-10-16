@@ -108,6 +108,10 @@ All specs MUST satisfy these content requirements:
 - Success criteria must be measurable and technology-agnostic.
 - Scope boundaries must be explicit enough to distinguish in-scope vs out-of-scope behavior.
 - Edge cases, assumptions, or constraints must be documented in the route-appropriate sections.
+- The Spec's Rationale Summary is a concise decision record: retain consequential rationale and
+  traceable source/contract references, but do not require repeated requirements, research notes,
+  superseded alternatives, roadmap ideas, or architecture prose. External contract details are
+  limited to the fields or behavior this feature actually relies on.
 
 ### Full Spec Required Content
 

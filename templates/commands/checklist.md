@@ -101,6 +101,9 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    - If source docs are large, generate interim summary items instead of embedding raw text
 
 5. **Generate checklist** - Create "Unit Tests for Requirements":
+   - Assess requirement coverage and consistency, not document length or repeated rationale.
+   - Reference the authoritative Spec/Plan statements instead of copying their prose into checklist
+     items. Ask only about a concrete gap, ambiguity, conflict, or untestable criterion.
    - Create `FEATURE_DIR/checklists/` directory if it doesn't exist
    - Create or update `FEATURE_DIR/gates/checklist.md` with a concise checklist gate summary after writing the checklist file
    - Generate unique checklist filename:
@@ -198,9 +201,8 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    - Missing definitions: "Is 'visual hierarchy' defined with measurable criteria? [Gap]"
 
    **Content Consolidation**:
-   - Soft cap: If raw candidate items > 40, prioritize by risk/impact
-   - Merge near-duplicates checking the same requirement aspect
-   - If >5 low-impact edge cases, create one item: "Are edge cases X, Y, Z addressed in requirements? [Coverage]"
+   - Merge duplicate items that check the same requirement aspect; keep distinct acceptance behaviors
+     and risks separate. Item count follows the actual gaps, not a target size.
 
    **🚫 ABSOLUTELY PROHIBITED** - These make it an implementation test, not a requirements test:
    - ❌ Any item starting with "Verify", "Test", "Confirm", "Check" + implementation behavior

@@ -215,9 +215,24 @@ an advisory finding is treated as authoritative; MEDIUM for bounding and provena
 
 - All PRs and reviews must verify compliance with this constitution
 - Complexity additions require documented justification and a rejected-simpler-alternative rationale
-- Planning depth must match the change: use a full spec, quick spec, quickfix, or direct change as
-  warranted. Planning records are temporary implementation inputs. After implementation, review and
-  approval evaluate the resulting code, current knowledge, tests, and verification evidence.
+- **Delta-centered, methodology-independent assurance:** Code First, Model First, experiments,
+  defect investigations, quickfixes, and direct changes are valid entry points. Planning depth must
+  match demonstrated uncertainty; no optional development route is a prerequisite for another.
+  Planning records are temporary implementation inputs, not evidence of software quality by their
+  mere existence. Review evaluates the intended Delta, its credible blast radius, current code,
+  relevant tests, current Knowledge, verification evidence, and applicable obligations. Do not
+  require a retroactive spec or plan to legitimize code that was implemented first.
+- **Bounded impact:** Investigate and verify affected behavior, dependencies, data, contracts,
+  consumers, and credible failure modes. Unrelated findings do not automatically expand the current
+  Delta. Mandatory repository-wide CI requirements still apply; a failure unrelated to the Delta
+  is reported honestly and handled under the applicable policy, not silently called a pass.
+- **Accountable assurance:** Authorized human participants define standing verification and risk
+  expectations. Agents may propose a scope and classification but may not waive required evidence,
+  infer acceptance from silence, or unilaterally lower assurance. A routine change within standing
+  expectations needs no extra approval solely because of its route. Uncertain risk classification,
+  material exceptions, and accepted limitations requiring authorization return to an accountable
+  human. Acceptance records name the authorized participant and reason. An independent reasoning
+  review is not a substitute for required execution or human/device evidence.
 - Cross-cutting changes require leadership approval before implementation begins
 
 ## Governance
@@ -233,5 +248,11 @@ affected workflows or repositories.
 - [Prompt Conformance Manifest](prompt-conformance-manifest.md)
 - [Governance Decisions](decisions/README.md)
 - [Knowledge Framework Contract](knowledge-framework-contract.md)
+- [Engineering Manifesto and Philosophy](devspark-philosophy.md)
+- [Prompt Mapping](devspark-prompt-mapping.md)
 
 **Version**: 1.8.0 | **Ratified**: 2026-04-06 | **Last Amended**: 2026-10-11
+
+> **Proposed alignment, pending the approval required by Governance:** the Delta-centered
+> assurance wording above is supplied for ratification; replacing a repository file alone does
+> not establish leadership approval or amend the recorded Constitution version.

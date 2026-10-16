@@ -22,9 +22,23 @@ ASSISTANT_NAME=$(get_assistant_name)
 GIT_USER=$(get_git_user)
 
 # Orientation facts ("where am I"): repo name + host platform, from config or remote.
-REPO_NAME=$(get_devspark_config_value '.repository')
+DEVSPARK_CONFIG="$REPO_ROOT/.devspark.work/devspark.json"
+REPO_NAME=""
+PLATFORM=""
+if [[ -f "$DEVSPARK_CONFIG" ]]; then
+    _cfg_vals=()
+    while IFS= read -r -d '' val; do
+        _cfg_vals+=("${val%$'\r'}")
+    done < <(jq -j '
+        (.repository // "" | tostring), "\u0000",
+        (.platform // "" | tostring), "\u0000"
+    ' "$DEVSPARK_CONFIG" 2>/dev/null)
+    if [[ ${#_cfg_vals[@]} -ge 2 ]]; then
+        REPO_NAME="${_cfg_vals[0]}"
+        PLATFORM="${_cfg_vals[1]}"
+    fi
+fi
 [[ -z "$REPO_NAME" ]] && REPO_NAME=$(basename "$REPO_ROOT")
-PLATFORM=$(get_devspark_config_value '.platform')
 if [[ -z "$PLATFORM" ]]; then
     PLATFORM="unknown"
     remote_url=$(git remote get-url origin 2>/dev/null || true)
@@ -122,12 +136,12 @@ JUDGE_VERDICT=""
 JUDGE_NEEDS_RECHECK="false"
 JUDGE_PENDING_DECISIONS=0
 PLAN_REVISION_COUNT=0
-PLAN_CHANGED=null
-TASKS_CHANGED=false
-TASKS_STALE=true
+PLAN_CHANGED="null"
+TASKS_CHANGED="false"
+TASKS_STALE="true"
 PLAN_SPEC_STATE="unknown"
 TASKS_PLAN_STATE="unknown"
-JUDGE_INVALIDATED=false
+JUDGE_INVALIDATED="false"
 REMEDIATION_APPENDED="false"
 CHECKLIST_GATE="false"
 VERIFY_REQUIRED="false"
@@ -176,18 +190,37 @@ if [[ "$SPEC_EXISTS" == "true" ]]; then
             _review_state=""
         done
         if [[ -n "$_review_state" ]] && jq -e 'type == "object"' <<<"$_review_state" >/dev/null 2>&1; then
-            JUDGE_NEEDS_RECHECK=$(jq -r '.needs_recheck // false' <<<"$_review_state")
-            JUDGE_PENDING_DECISIONS=$(jq -r '.pending_decisions // 0' <<<"$_review_state")
-            PLAN_REVISION_COUNT=$(jq -r '.plan_revision_count // 0' <<<"$_review_state")
-            PLAN_CHANGED=$(jq -r '.plan_changed' <<<"$_review_state")
-            TASKS_CHANGED=$(jq -r '.tasks_changed // false' <<<"$_review_state")
-            TASKS_STALE=$(jq -r '.tasks_stale' <<<"$_review_state")
-            PLAN_SPEC_STATE=$(jq -r '.plan_spec_state // "unknown"' <<<"$_review_state")
-            TASKS_PLAN_STATE=$(jq -r '.tasks_plan_state // "unknown"' <<<"$_review_state")
-            JUDGE_INVALIDATED=$(jq -r '(.judge_stale == true) or (.spec_changed == true)' <<<"$_review_state")
-            VERIFY_REQUIRED=$(jq -r '.verify_required // false' <<<"$_review_state")
-            VERIFY_PASSED=$(jq -r '.verify_passed // false' <<<"$_review_state")
-            CLOSEOUT_DECISION=$(jq -r '.closeout_decision // ""' <<<"$_review_state")
+            _rs_vals=()
+            while IFS= read -r -d '' val; do
+                _rs_vals+=("${val%$'\r'}")
+            done < <(jq -j '
+                (.needs_recheck // false | tostring), "\u0000",
+                ((.pending_decisions // 0) | tostring), "\u0000",
+                ((.plan_revision_count // 0) | tostring), "\u0000",
+                (if .plan_changed == null then "null" else (.plan_changed | tostring) end), "\u0000",
+                ((.tasks_changed // false) | tostring), "\u0000",
+                (if .tasks_stale == null then "null" else (.tasks_stale | tostring) end), "\u0000",
+                (.plan_spec_state // "unknown" | tostring), "\u0000",
+                (.tasks_plan_state // "unknown" | tostring), "\u0000",
+                (((.judge_stale == true) or (.spec_changed == true)) | tostring), "\u0000",
+                ((.verify_required // false) | tostring), "\u0000",
+                ((.verify_passed // false) | tostring), "\u0000",
+                ((.closeout_decision // "") | tostring), "\u0000"
+            ' <<<"$_review_state" 2>/dev/null)
+            if [[ ${#_rs_vals[@]} -ge 12 ]]; then
+                JUDGE_NEEDS_RECHECK="${_rs_vals[0]}"
+                JUDGE_PENDING_DECISIONS="${_rs_vals[1]}"
+                PLAN_REVISION_COUNT="${_rs_vals[2]}"
+                PLAN_CHANGED="${_rs_vals[3]}"
+                TASKS_CHANGED="${_rs_vals[4]}"
+                TASKS_STALE="${_rs_vals[5]}"
+                PLAN_SPEC_STATE="${_rs_vals[6]}"
+                TASKS_PLAN_STATE="${_rs_vals[7]}"
+                JUDGE_INVALIDATED="${_rs_vals[8]}"
+                VERIFY_REQUIRED="${_rs_vals[9]}"
+                VERIFY_PASSED="${_rs_vals[10]}"
+                CLOSEOUT_DECISION="${_rs_vals[11]}"
+            fi
         fi
     fi
 fi

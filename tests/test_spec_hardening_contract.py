@@ -9,8 +9,10 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import os
+import re
 import shutil
 import subprocess
+import tempfile
 
 import pytest
 
@@ -20,6 +22,10 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def _read(rel_path: str) -> str:
     return (ROOT / rel_path).read_text(encoding="utf-8")
+
+
+def _flat(text: str) -> str:
+    return re.sub(r"\s+", " ", text)
 
 
 def _assert_ordered(body: str, headings: list[str], label: str) -> None:
@@ -149,6 +155,65 @@ def _validate_metric_accuracy() -> None:
     )
 
 
+def test_rationale_and_task_artifacts_do_not_copy_upstream_prose() -> None:
+    spec = _read("templates/spec-template.md")
+    plan = " ".join(_read("templates/plan-template.md").split())
+    tasks = _read("templates/tasks-template.md")
+    task_command = _read("templates/commands/tasks.md")
+    checklist = _read("templates/commands/checklist.md")
+    validation = _read("templates/spec-validation-contract.md")
+    assurance = _read("templates/assurance-contract.md")
+
+    assert "Consequential scope or behavior decisions and why" in spec
+    assert "concise decision record" in spec
+    assert "Do not accumulate research notes" in spec
+    assert "Point to `research.md`" in plan
+    assert "Plan-owned decisions" in plan
+    assert "do not copy a generic repository tree" in plan
+    assert "## Rationale Summary" not in tasks
+    assert "Describe only the implementation or verification delta" in tasks
+    assert "Cite requirement and acceptance IDs instead of paraphrasing their text" in tasks
+    assert "Do not paraphrase requirements, acceptance scenarios, rationale" in task_command
+    assert "do not restate the task list" in task_command
+    assert "not document length or repeated rationale" in checklist
+    assert "Item count follows the actual gaps, not a target size" in checklist
+    assert "superseded alternatives, roadmap ideas" in validation
+    assert "Tasks remain a" in assurance and "do not repeat rationale" in assurance
+
+
+def test_authoring_rechecks_changed_requirements_against_complete_constitution_clauses() -> None:
+    specify = _read("templates/commands/specify.md")
+    clarify = _read("templates/commands/clarify.md")
+
+    assert "When introducing or materially changing a requirement" in specify
+    assert "complete applicable MUST/SHOULD text, including scope and embedded exceptions" in specify
+    assert "Recheck changed requirements only, not settled unchanged content" in specify
+    assert "surface it for owner resolution before marking the spec ready or handing off to Plan" in specify
+
+    assert "When an accepted answer materially changes a requirement" in clarify
+    assert "complete applicable MUST/SHOULD text, including embedded scope and exceptions" in clarify
+    assert "Do not repeat the check for unchanged requirements" in clarify
+    assert "Cite both sides of any conflict" in clarify
+
+
+_TEMPLATE_BASE: Path | None = None
+_TEMP_ROOT: tempfile.TemporaryDirectory | None = None
+
+
+def _get_template_base() -> Path:
+    global _TEMPLATE_BASE, _TEMP_ROOT
+    if _TEMPLATE_BASE is None:
+        _TEMP_ROOT = tempfile.TemporaryDirectory()
+        _TEMPLATE_BASE = Path(_TEMP_ROOT.name) / "repo"
+        feature = _TEMPLATE_BASE / ".devspark.work/specs/001-synthetic"
+        feature.mkdir(parents=True)
+        template = _TEMPLATE_BASE / "templates/plan-template.md"
+        template.parent.mkdir()
+        template.write_bytes(b"# Template\n")
+        subprocess.run(["git", "init", "-q", "-b", "001-synthetic", str(_TEMPLATE_BASE)], check=True, timeout=15, stdin=subprocess.DEVNULL)
+    return _TEMPLATE_BASE
+
+
 @pytest.mark.parametrize("shell", ["pwsh", "bash"])
 @pytest.mark.parametrize("existing", [None, b"", b"# Template\n", b"# Authored\r\nKeep this.\r\n", b"\xef\xbb\xbf# Authored\r\n"])
 def test_setup_plan_preserves_bytes_until_explicit_reset(tmp_path, shell, existing):
@@ -158,15 +223,11 @@ def test_setup_plan_preserves_bytes_until_explicit_reset(tmp_path, shell, existi
     if not executable or not Path(executable).exists():
         pytest.skip(f"{shell} unavailable")
     repo = tmp_path / "repo"
-    feature = repo / ".devspark.work/specs/001-synthetic"
-    feature.mkdir(parents=True)
+    shutil.copytree(_get_template_base(), repo)
+    plan = repo / ".devspark.work/specs/001-synthetic/plan.md"
     template = repo / "templates/plan-template.md"
-    template.parent.mkdir()
-    template.write_bytes(b"# Template\n")
-    plan = feature / "plan.md"
     if existing is not None:
         plan.write_bytes(existing)
-    subprocess.run(["git", "init", "-q", "-b", "001-synthetic", str(repo)], check=True, timeout=15, stdin=subprocess.DEVNULL)
     env = {**os.environ, "DEVSPARK_FEATURE": "001-synthetic"}
     script = ROOT / "scripts" / ("powershell/setup-plan.ps1" if shell == "pwsh" else "bash/setup-plan.sh")
     command = [executable, "-NoProfile", "-File", str(script), "-Json"] if shell == "pwsh" else [executable, str(script), "--json"]
@@ -189,11 +250,70 @@ def test_setup_plan_preserves_bytes_until_explicit_reset(tmp_path, shell, existi
     assert plan.read_bytes() == template.read_bytes()
 
 
+def test_delta_oriented_guidance_and_release_separation() -> None:
+    specify = _read("templates/commands/specify.md")
+    plan = _read("templates/commands/plan.md")
+    verify = _read("templates/commands/verify.md")
+    closeout = _read("templates/commands/closeout.md")
+    tasks = _read("templates/commands/tasks.md")
+    tasks_template = _read("templates/tasks-template.md")
+    preamble = _read("templates/command-preamble-contract.md")
+
+    # Delta-oriented guidance
+    assert "A DevSpark specification is not a blueprint for software" in preamble
+    assert "bounded hypothesis about the" in preamble
+    assert "next valuable change to working software" in preamble
+    assert "make sure the new state remains a good place from which to change again" in preamble
+    assert "A DevSpark specification is not a blueprint for software" in specify
+    assert "Describe the bounded delta" in specify
+    assert "Smallest responsible change" in plan
+    assert "Keep software changeable" in plan or "easy to change again" in plan
+    assert "Avoid speculative abstractions" in plan
+    assert "Delta verification" in verify or "validate the intended delta" in verify
+
+    # Specification/Release separation
+    assert "A specification delivers a releasable change" in preamble
+    assert "packages and distributes completed" in preamble
+    assert "Tasks MUST NOT include publishing or deploying a release" in tasks
+    assert "specification delivers a releasable change, not the product release itself" in tasks_template
+    assert "Specification/Release Separation" in closeout
+
+
+def test_engineering_judgment_hardening() -> None:
+    plan = _flat(_read("templates/commands/plan.md"))
+    plan_template = _flat(_read("templates/plan-template.md"))
+    implement = _flat(_read("templates/commands/implement.md"))
+    pr_review = _flat(_read("templates/commands/pr-review.md"))
+
+    # Plan seam selection
+    assert "Choose the right integration boundary" in plan
+    assert "ownership, orchestration, and finalization boundaries" in plan
+    assert "Prefer reusing an appropriate existing seam" in plan
+    assert "A centralized hook is not always better" in plan
+    assert "When a behavior could be integrated at an existing seam" in plan_template
+    assert "repeated integration across call sites is chosen" in plan_template
+
+    # Implement simplification without weakening contract
+    assert "Simplifying implementation without weakening the contract" in implement
+    assert "approved behavioral intent from incidental implementation mechanics" in implement
+    assert "simplification MUST NOT silently weaken guarantees in pursuit of fewer lines" in implement
+    assert "remove an approved validation rule, change failure propagation or exception behavior" in implement
+
+    # PR Review accidental complexity
+    assert "Accidental Complexity & Duplication Review" in pr_review
+    assert "Repeated wiring" in pr_review
+    assert "Redundant processing" in pr_review
+    assert "A smaller implementation that drops validation guarantees or changes exception behavior is NOT equivalent" in pr_review
+    assert "Line count, file count, or abstraction count are NEVER automatic failure conditions" in pr_review
+
+
 def main() -> None:
     _validate_tldr()
     _validate_template_fallback()
     _validate_branch_failfast()
     _validate_metric_accuracy()
+    test_delta_oriented_guidance_and_release_separation()
+    test_engineering_judgment_hardening()
     print("Spec hardening contract validated.")
 
 

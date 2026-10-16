@@ -18,6 +18,10 @@ import tests.snapshot_baseline_helpers as snap
 
 # command name (or "lifecycle:<bundle>") -> reason the difference is intended
 NAMED_DELTAS: dict[str, str] = {
+    "analyze": "independent constitutional backstop checks complete clauses and exceptions; rationale belongs in Spec/Plan, not Tasks",
+    "checklist": "lean artifact ownership: assess concrete gaps without copying authoritative prose or imposing a target item count",
+    "clarify": "shift-left: recheck materially changed requirements against complete constitutional text and surface unresolved conflicts",
+    "release": "archival runs through the journaled release-archive script (plan, apply, validate) after the version is settled, and ambiguous artifacts are reported for a decision",
     "upgrade": "9.0 install and upgrade guidance: command entry points, skill category, and 8.x entry point retirement",
     "verify": "stage and evidence class: records the evidence class obtained, routes a pre-merge mode that needs deployment to the spec, and carries post-deploy items",
     "closeout": "stage and evidence class: post-deploy requirements are deferred with an existing durable record, never a created work item, and never block merge",
@@ -31,6 +35,9 @@ NAMED_DELTAS: dict[str, str] = {
     "workitem-review": "permanent rule: no handoff to the creating command",
     "next": "terminology: the /devspark-* wildcard names skills, not commands; routing is unchanged",
     "personalize": "terminology: the override-resolution sentence names the skill; resolution is unchanged",
+    "pr-review": "engineering judgment: challenge accidental complexity and distinguish repeated integration from justified complexity",
+    "address-pr-review": "bounded finding closeout and severity/blocking separation: closure follows the recorded review state, and blocking is an explicit field rather than inferred from severity",
+    "quickfix": "Code First entry: reconcile an existing diff into the same quickfix record, route to implementation finalization, and keep advisory route guidance from waiving mandatory requirements",
 }
 
 BASELINE_BODIES = json.loads((snap.BASELINE / "command-bodies.json").read_text(encoding="utf-8"))
@@ -73,10 +80,21 @@ def test_baseline_bundles_match_the_fixture_bundles():
 
 
 @pytest.mark.skipif(shutil.which("pwsh") is None or snap._bash() is None, reason="both next-context twins are required")
-def test_lifecycle_outputs_match_the_baseline(tmp_path):
-    current = snap.lifecycle_outputs(tmp_path)
-    changed = sorted(b for b in set(current) | set(BASELINE_LIFECYCLE) if current.get(b) != BASELINE_LIFECYCLE.get(b))
-    unexplained = [b for b in changed if f"lifecycle:{b}" not in NAMED_DELTAS]
-    assert not unexplained, f"lifecycle outputs changed without a named delta: {unexplained}"
-    for bundle, outputs in current.items():
-        assert outputs["next_context_pwsh"] == outputs["next_context_bash"], bundle
+@pytest.mark.parametrize("bundle", snap.bundles())
+def test_lifecycle_outputs_match_the_baseline(bundle, tmp_path):
+    repo = snap.make_repo(tmp_path, bundle)
+    outputs = {
+        "judge_lifecycle": snap.judge_lifecycle(repo),
+        "next_context_pwsh": snap.next_context("pwsh", repo),
+        "next_context_bash": snap.next_context("bash", repo),
+    }
+    assert outputs["next_context_pwsh"] == outputs["next_context_bash"], bundle
+    baseline = BASELINE_LIFECYCLE.get(bundle)
+    if outputs != baseline:
+        delta_key = f"lifecycle:{bundle}"
+        assert delta_key in NAMED_DELTAS, f"lifecycle output for {bundle} changed without a named delta: {outputs}"
+
+
+def test_no_stale_lifecycle_deltas():
+    stale = [name for name in NAMED_DELTAS if name.startswith("lifecycle:") and name.split(":", 1)[1] not in BASELINE_LIFECYCLE]
+    assert not stale, f"stale lifecycle deltas: {stale}"

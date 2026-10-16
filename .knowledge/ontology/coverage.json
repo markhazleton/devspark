@@ -1,26 +1,9 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-12T05:08:49Z"
+    "at": "2026-10-16T02:08:46Z"
   },
-  "entity_count": 6,
+  "entity_count": 4,
   "fully_covered": 4,
-  "gaps": [
-    {
-      "entity": "brand-system",
-      "missing_layers": [
-        "business",
-        "integration",
-        "operations"
-      ]
-    },
-    {
-      "entity": "product-documentation",
-      "missing_layers": [
-        "business",
-        "integration",
-        "operations"
-      ]
-    }
-  ]
+  "gaps": []
 }

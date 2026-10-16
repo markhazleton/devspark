@@ -7,7 +7,10 @@ fixtures prove the declaration checker fails closed and names the command and el
 
 from __future__ import annotations
 
+import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -191,6 +194,96 @@ def test_plan_adds_no_auto_repair_or_lifecycle_routing() -> None:
     section = _text("plan").split("## Spec Knowledge Consumption")[1].split("## Outline")[0].lower()
     assert "auto-repair" not in section and "execution_mode" not in section
     assert "adds no automatic repair" in section
+
+
+@pytest.mark.parametrize("shell", ["pwsh", "bash"])
+def test_generated_requirement_stubs_and_populated_records_remain_compatible(
+    tmp_path: Path, shell: str
+) -> None:
+    repo = tmp_path / "repo"
+    feature = repo / ".devspark.work" / "specs" / "001-synthetic"
+    feature.mkdir(parents=True)
+    (repo / "templates").mkdir()
+    (repo / "templates" / "plan-template.md").write_text("# Synthetic plan\n", encoding="utf-8")
+    (feature / "spec.md").write_text(
+        "---\nclassification: full-spec\n---\n\n"
+        "# Feature Specification: Synthetic compatibility\n\n"
+        "## Requirements\n\n"
+        "- **FR-001**: System MUST retain a generated empty requirement record.\n"
+        "- **FR-002**: System MUST preserve a populated requirement record.\n",
+        encoding="utf-8",
+    )
+    subprocess.run(
+        ["git", "init", "-q", "-b", "001-synthetic", str(repo)],
+        check=True,
+        timeout=15,
+        stdin=subprocess.DEVNULL,
+    )
+
+    env = {**os.environ, "DEVSPARK_FEATURE": "001-synthetic", "DEVSPARK_METRICS_ENABLED": "false"}
+    if shell == "pwsh":
+        executable = shutil.which("pwsh")
+        if not executable:
+            pytest.skip("pwsh unavailable")
+        command = [
+            executable,
+            "-NoProfile",
+            "-File",
+            str(ROOT / "scripts" / "powershell" / "setup-plan.ps1"),
+            "-Json",
+        ]
+    else:
+        executable = Path(r"C:\Program Files\Git\bin\bash.exe")
+        if not executable.exists():
+            pytest.skip("Git Bash unavailable")
+        jq_check = subprocess.run(
+            [str(executable), "-c", "command -v jq"],
+            cwd=repo,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+            stdin=subprocess.DEVNULL,
+        )
+        if jq_check.returncode:
+            pytest.skip("jq unavailable in Git Bash")
+        command = [str(executable), str(ROOT / "scripts" / "bash" / "setup-plan.sh"), "--json"]
+
+    def run_setup_plan() -> None:
+        result = subprocess.run(
+            command,
+            cwd=repo,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=30,
+            stdin=subprocess.DEVNULL,
+        )
+        assert result.returncode == 0, f"{result.stdout}\n{result.stderr}"
+
+    run_setup_plan()
+
+    knowledge = feature / "knowledge"
+    generated = knowledge / "fr-001.md"
+    empty_stub = knowledge / "fr-002.md"
+    assert generated.exists() and empty_stub.exists()
+    generated_doc = yaml.safe_load(generated.read_text(encoding="utf-8").split("---", 2)[1])
+    empty_doc = yaml.safe_load(empty_stub.read_text(encoding="utf-8").split("---", 2)[1])
+    for doc, requirement_id in ((generated_doc, "fr-001"), (empty_doc, "fr-002")):
+        assert doc["id"] == requirement_id
+        assert doc["type"] == "requirement"
+        assert doc["status"] == "draft"
+        assert doc["links"]["feature"] == "feature"
+        assert doc["links"]["implemented_by"] == []
+
+    authored_content = generated.read_text(encoding="utf-8") + "\nExisting populated record content.\n"
+    generated.write_text(authored_content, encoding="utf-8")
+    run_setup_plan()
+
+    assert generated.read_text(encoding="utf-8") == authored_content
+    assert empty_stub.exists()
 
 
 # ---------------------------------------------------------------- seeded Analyze and Clarify cases

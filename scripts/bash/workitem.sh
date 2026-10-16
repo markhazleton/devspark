@@ -35,6 +35,9 @@ WORKITEM_AGENT_TAG='devspark-generated'
 # Declared order matters: it is the order every emitted object uses.
 WORKITEM_FIELD_NAMES=(title state area_path iteration_path tags description acceptance_criteria story_points assigned_to)
 
+# Separates a key from its encoded fragment in json_object_of arguments.
+WORKITEM_TAB=$'\t'
+
 workitem_field_reference() {
     case "$1" in
         title)               echo 'System.Title' ;;
@@ -77,11 +80,31 @@ jq_encoded() {
     jq -c "$@" | tr -d '\r'
 }
 
-json_str() {
+# True when $1 is printable ASCII without a quote or backslash: the only text whose JSON
+# encoding is the text itself. The C locale makes the class bytewise, so any multi-byte
+# character fails the test and still goes through jq.
+json_is_plain_ascii() {
+    local LC_ALL=C
+    [[ "$1" != *[![:print:]]* && "$1" != *[\"\\]* ]]
+}
+
+# Encodes $1 into REPLY. Plain text is encoded in-process: on Windows each jq call costs
+# tens of milliseconds, and most strings emitted here are fixed key names.
+json_str_reply() {
     # An absent value is null. The contract admits no empty string, so the distinction between
     # "not set" and "set to nothing" is collapsed here rather than at every call site.
-    if [[ -z "${1:-}" ]]; then echo 'null'; return; fi
-    jq_encoded -n --arg v "$1" '$v'
+    if [[ -z "${1:-}" ]]; then
+        REPLY='null'
+    elif json_is_plain_ascii "$1"; then
+        REPLY="\"$1\""
+    else
+        REPLY="$(jq_encoded -n --arg v "$1" '$v')"
+    fi
+}
+
+json_str() {
+    json_str_reply "${1:-}"
+    printf '%s\n' "$REPLY"
 }
 
 json_num() {
@@ -110,7 +133,8 @@ json_object_of() {
         key="${pair%%$'\t'*}"
         frag="${pair#*$'\t'}"
         [[ -n "$out" ]] && out+=", "
-        out+="$(json_str "$key"): $frag"
+        json_str_reply "$key"
+        out+="$REPLY: $frag"
     done
     printf '{%s}' "$out"
 }
@@ -131,16 +155,17 @@ emit_result() {
     local warnings_fragment=()
     local w
     for w in ${WARNINGS[@]+"${WARNINGS[@]}"}; do
-        warnings_fragment+=("$(json_str "$w")")
+        json_str_reply "$w"
+        warnings_fragment+=("$REPLY")
     done
 
     printf '%s\n' "$(json_object_of \
-        "contract$(printf '\t')$WORKITEM_CONTRACT_VERSION" \
-        "operation$(printf '\t')$(json_str "$OPERATION")" \
-        "ok$(printf '\t')$ok" \
-        "error$(printf '\t')$error_fragment" \
-        "warnings$(printf '\t')$(json_array_of ${warnings_fragment[@]+"${warnings_fragment[@]}"})" \
-        "data$(printf '\t')$data_fragment")"
+        "contract${WORKITEM_TAB}$WORKITEM_CONTRACT_VERSION" \
+        "operation${WORKITEM_TAB}$(json_str "$OPERATION")" \
+        "ok${WORKITEM_TAB}$ok" \
+        "error${WORKITEM_TAB}$error_fragment" \
+        "warnings${WORKITEM_TAB}$(json_array_of ${warnings_fragment[@]+"${warnings_fragment[@]}"})" \
+        "data${WORKITEM_TAB}$data_fragment")"
     exit 0
 }
 
@@ -150,9 +175,9 @@ emit_failure() {
     local code="$1" cause="$2" action="$3" data_fragment="${4:-$JSON_EMPTY_OBJECT}"
     local err
     err="$(json_object_of \
-        "code$(printf '\t')$(json_str "$code")" \
-        "cause$(printf '\t')$(json_str "$cause")" \
-        "action$(printf '\t')$(json_str "$action")")"
+        "code${WORKITEM_TAB}$(json_str "$code")" \
+        "cause${WORKITEM_TAB}$(json_str "$cause")" \
+        "action${WORKITEM_TAB}$(json_str "$action")")"
     emit_result "$data_fragment" "$err"
 }
 
@@ -199,8 +224,15 @@ item_field_protected() {
 # caller-facing name of what was cut. Must be called from the caller's own shell, never from
 # inside a command substitution.
 note_truncation() {
-    local json="$1" reference="$2" name="$3" length existing
+    local json="$1" reference="$2" name="$3" length
     length="$(jq -r --arg f "$reference" '((.fields[$f] // "") | tostring | length)' <<< "$json" 2>/dev/null | tr -d '\r')"
+    record_truncation "$length" "$name"
+}
+
+# Raises content_truncated when a field's character length exceeds the cap. Same shell rule as
+# note_truncation.
+record_truncation() {
+    local length="$1" name="$2" existing
     if [[ -n "$length" ]] && (( length > WORKITEM_MAX_FIELD_CHARS )); then
         add_warning 'content_truncated'
         for existing in ${TRUNCATED_FIELDS[@]+"${TRUNCATED_FIELDS[@]}"}; do
@@ -463,36 +495,63 @@ SNAPSHOT_JSON='{}'
 snapshot_fragment() {
     local wrap="${1:-wrap}"
     local id rev type title state area iteration tags description acceptance story assigned url
-    local area_raw id_raw
+    local area_raw id_raw description_length acceptance_length
+    local parts=() part
 
-    id="$(jq_encoded '.id // null' <<< "$ITEM_JSON")"
-    id_raw="$(jq -r '.id // empty' <<< "$ITEM_JSON" | tr -d '\r')"
-    rev="$(item_field_encoded "$ITEM_JSON" 'System.Rev')"
-    [[ "$rev" == "null" ]] && rev="$(jq_encoded '.rev // null' <<< "$ITEM_JSON")"
-    type="$(item_field_encoded "$ITEM_JSON" 'System.WorkItemType')"
-    title="$(item_field_encoded "$ITEM_JSON" 'System.Title')"
-    state="$(item_field_encoded "$ITEM_JSON" 'System.State')"
-    area="$(item_field_encoded "$ITEM_JSON" 'System.AreaPath')"
-    iteration="$(item_field_encoded "$ITEM_JSON" 'System.IterationPath')"
-    tags="$(item_field_encoded "$ITEM_JSON" 'System.Tags')"
-    story="$(item_field_encoded "$ITEM_JSON" 'Microsoft.VSTS.Scheduling.StoryPoints')"
-    assigned="$(jq_encoded '.fields["System.AssignedTo"].displayName // .fields["System.AssignedTo"] // null' <<< "$ITEM_JSON" 2>/dev/null)"
-    [[ -z "$assigned" ]] && assigned='null'
+    # One jq pass yields every value, NUL-terminated: JSON-encoded scalars, plus the raw id and
+    # area path and the two free-text lengths as plain text. Each value is computed exactly as
+    # its own jq call used to compute it; a separate process per field costs tens of
+    # milliseconds on Windows.
+    while IFS= read -r -d '' part; do
+        # Plain text loses CRs and trailing newlines, as the former tr and command substitution did.
+        part="${part//$'\r'/}"
+        parts+=("${part%"${part##*[!$'\n']}"}")
+    done < <(jq -j --arg wrap "$wrap" \
+        --arg open "$UNTRUSTED_OPEN_MARKER" \
+        --arg close "$UNTRUSTED_CLOSE_MARKER" \
+        --arg neut "$UNTRUSTED_NEUTRALISED" \
+        --argjson max "$WORKITEM_MAX_FIELD_CHARS" '
+        def enc(f): [try (f // null) catch null][0] | tojson;
+        def raw(f): [try (f // empty) catch empty]
+            | if length == 0 then "" else (.[0] | if type == "string" then . else tojson end) end;
+        def len(f): [try ((f // "") | tostring | length | tostring) catch ""][0] // "";
+        def protected(f): [try (f // null) catch null][0]
+            | if . == null or . == "" then null
+              else (tostring | gsub($close; $neut))
+                   | (if (length > $max) then .[0:$max] else . end)
+                   | ($open + "\n" + . + "\n" + $close)
+              end
+            | tojson;
+        def free(f): if $wrap == "wrap" then protected(f) else enc(f) end;
+        enc(.id), raw(.id), enc(.fields["System.Rev"] // .rev),
+        enc(.fields["System.WorkItemType"]), enc(.fields["System.Title"]),
+        enc(.fields["System.State"]), enc(.fields["System.AreaPath"]),
+        enc(.fields["System.IterationPath"]), enc(.fields["System.Tags"]),
+        enc(.fields["Microsoft.VSTS.Scheduling.StoryPoints"]),
+        enc(.fields["System.AssignedTo"].displayName // .fields["System.AssignedTo"]),
+        raw(.fields["System.AreaPath"]),
+        len(.fields["System.Description"]),
+        len(.fields["Microsoft.VSTS.Common.AcceptanceCriteria"]),
+        free(.fields["System.Description"]),
+        free(.fields["Microsoft.VSTS.Common.AcceptanceCriteria"])
+        | ., "\u0000"' <<< "$ITEM_JSON" 2>/dev/null)
+    (( ${#parts[@]} == 16 )) || parts=(null '' null null null null null null null null null '' '' '' null null)
 
-    area_raw="$(item_field 'System.AreaPath')"
+    id="${parts[0]}" id_raw="${parts[1]}" rev="${parts[2]}" type="${parts[3]}" title="${parts[4]}"
+    state="${parts[5]}" area="${parts[6]}" iteration="${parts[7]}" tags="${parts[8]}"
+    story="${parts[9]}" assigned="${parts[10]}" area_raw="${parts[11]}"
+    description_length="${parts[12]}" acceptance_length="${parts[13]}"
+
     if [[ -n "$CTX_AREA" && -n "$area_raw" && "$area_raw" != "$CTX_AREA"* ]]; then add_warning 'area_mismatch'; fi
     [[ "$iteration" == "null" ]] && add_warning 'iteration_missing'
     [[ "$story" == "null" ]] && add_warning 'story_points_unsupported'
 
     if [[ "$wrap" == "wrap" ]]; then
-        note_truncation "$ITEM_JSON" 'System.Description' 'description'
-        note_truncation "$ITEM_JSON" 'Microsoft.VSTS.Common.AcceptanceCriteria' 'acceptance_criteria'
-        description="$(item_field_protected "$ITEM_JSON" 'System.Description')"
-        acceptance="$(item_field_protected "$ITEM_JSON" 'Microsoft.VSTS.Common.AcceptanceCriteria')"
-    else
-        description="$(item_field_encoded "$ITEM_JSON" 'System.Description')"
-        acceptance="$(item_field_encoded "$ITEM_JSON" 'Microsoft.VSTS.Common.AcceptanceCriteria')"
+        record_truncation "$description_length" 'description'
+        record_truncation "$acceptance_length" 'acceptance_criteria'
     fi
+    description="${parts[14]}"
+    acceptance="${parts[15]}"
 
     url='null'
     if [[ -n "$CTX_ORG" && -n "$id_raw" ]]; then
@@ -500,20 +559,20 @@ snapshot_fragment() {
     fi
 
     SNAPSHOT_JSON="$(json_object_of \
-        "id$(printf '\t')$id" \
-        "rev$(printf '\t')$rev" \
-        "type$(printf '\t')$type" \
-        "title$(printf '\t')$title" \
-        "state$(printf '\t')$state" \
-        "area_path$(printf '\t')$area" \
-        "iteration_path$(printf '\t')$iteration" \
-        "tags$(printf '\t')$tags" \
-        "description$(printf '\t')$description" \
-        "acceptance_criteria$(printf '\t')$acceptance" \
-        "story_points$(printf '\t')$story" \
-        "assigned_to$(printf '\t')$assigned" \
-        "url$(printf '\t')$url" \
-        "truncated$(printf '\t')$(truncated_fragment)")"
+        "id${WORKITEM_TAB}$id" \
+        "rev${WORKITEM_TAB}$rev" \
+        "type${WORKITEM_TAB}$type" \
+        "title${WORKITEM_TAB}$title" \
+        "state${WORKITEM_TAB}$state" \
+        "area_path${WORKITEM_TAB}$area" \
+        "iteration_path${WORKITEM_TAB}$iteration" \
+        "tags${WORKITEM_TAB}$tags" \
+        "description${WORKITEM_TAB}$description" \
+        "acceptance_criteria${WORKITEM_TAB}$acceptance" \
+        "story_points${WORKITEM_TAB}$story" \
+        "assigned_to${WORKITEM_TAB}$assigned" \
+        "url${WORKITEM_TAB}$url" \
+        "truncated${WORKITEM_TAB}$(truncated_fragment)")"
 }
 
 # ---------------------------------------------------------------------------
@@ -595,9 +654,9 @@ invoke_patch_write() {
         value="${PATCH_VALUES[i]}"
         reference="$(workitem_field_reference "$name")"
         ops+=("$(json_object_of \
-            "op$(printf '\t')$(json_str 'add')" \
-            "path$(printf '\t')$(json_str "/fields/$reference")" \
-            "value$(printf '\t')$(json_str "$value")")")
+            "op${WORKITEM_TAB}$(json_str 'add')" \
+            "path${WORKITEM_TAB}$(json_str "/fields/$reference")" \
+            "value${WORKITEM_TAB}$(json_str "$value")")")
     done
     payload="$(json_array_of ${ops[@]+"${ops[@]}"})"
 
@@ -645,11 +704,11 @@ audit_fragment() {
     local names=() n
     for n in "$@"; do names+=("$(json_str "$n")"); done
     json_object_of \
-        "operation$(printf '\t')$(json_str "$op")" \
-        "id$(printf '\t')$(json_str "$id")" \
-        "fields$(printf '\t')$(json_array_of ${names[@]+"${names[@]}"})" \
-        "rev_before$(printf '\t')$(json_num "$rev_before")" \
-        "rev_after$(printf '\t')$(json_num "$rev_after")"
+        "operation${WORKITEM_TAB}$(json_str "$op")" \
+        "id${WORKITEM_TAB}$(json_str "$id")" \
+        "fields${WORKITEM_TAB}$(json_array_of ${names[@]+"${names[@]}"})" \
+        "rev_before${WORKITEM_TAB}$(json_num "$rev_before")" \
+        "rev_after${WORKITEM_TAB}$(json_num "$rev_after")"
 }
 
 # ---------------------------------------------------------------------------
@@ -668,13 +727,13 @@ op_check() {
     [[ "$CAP_EXT" == "true" && "$CAP_MEETS" == "true" ]] && ext="true"
 
     emit_result "$(json_object_of \
-        "cli_present$(printf '\t')$(json_bool "$CAP_CLI")" \
-        "extension_present$(printf '\t')$(json_bool "$ext")" \
-        "authenticated$(printf '\t')$(json_bool "$authenticated")" \
-        "organization$(printf '\t')$(json_str "$CTX_ORG")" \
-        "project$(printf '\t')$(json_str "$CTX_PROJECT")" \
-        "work_tracking_configured$(printf '\t')$(json_bool "$CTX_CONFIGURED")" \
-        "default_area_path$(printf '\t')$(json_str "$CTX_AREA")")"
+        "cli_present${WORKITEM_TAB}$(json_bool "$CAP_CLI")" \
+        "extension_present${WORKITEM_TAB}$(json_bool "$ext")" \
+        "authenticated${WORKITEM_TAB}$(json_bool "$authenticated")" \
+        "organization${WORKITEM_TAB}$(json_str "$CTX_ORG")" \
+        "project${WORKITEM_TAB}$(json_str "$CTX_PROJECT")" \
+        "work_tracking_configured${WORKITEM_TAB}$(json_bool "$CTX_CONFIGURED")" \
+        "default_area_path${WORKITEM_TAB}$(json_str "$CTX_AREA")")"
 }
 
 op_read() {
@@ -706,15 +765,15 @@ op_propose_update() {
         note_truncation "$ITEM_JSON" "$(workitem_field_reference "$name")" "$name"
         current="$(item_field_protected "$ITEM_JSON" "$(workitem_field_reference "$name")")"
         entries+=("$(json_object_of \
-            "field$(printf '\t')$(json_str "$name")" \
-            "current$(printf '\t')$current" \
-            "proposed$(printf '\t')$(json_str "${SET_VALUES[i]}")")")
+            "field${WORKITEM_TAB}$(json_str "$name")" \
+            "current${WORKITEM_TAB}$current" \
+            "proposed${WORKITEM_TAB}$(json_str "${SET_VALUES[i]}")")")
     done
 
     emit_result "$(json_object_of \
-        "proposed$(printf '\t')$(json_array_of ${entries[@]+"${entries[@]}"})" \
-        "rev$(printf '\t')$rev" \
-        "truncated$(printf '\t')$(truncated_fragment)")"
+        "proposed${WORKITEM_TAB}$(json_array_of ${entries[@]+"${entries[@]}"})" \
+        "rev${WORKITEM_TAB}$rev" \
+        "truncated${WORKITEM_TAB}$(truncated_fragment)")"
 }
 
 PATCH_NAMES=()
@@ -734,11 +793,11 @@ op_apply_update() {
 
     if ! revision_is_current "$ID"; then
         emit_result "$(json_object_of \
-            "written$(printf '\t')false" \
-            "verified$(printf '\t')null" \
-            "divergence$(printf '\t')[]" \
-            "refused$(printf '\t')$(json_str 'stale_revision')" \
-            "audit$(printf '\t')null")"
+            "written${WORKITEM_TAB}false" \
+            "verified${WORKITEM_TAB}null" \
+            "divergence${WORKITEM_TAB}[]" \
+            "refused${WORKITEM_TAB}$(json_str 'stale_revision')" \
+            "audit${WORKITEM_TAB}null")"
     fi
 
     PATCH_NAMES=("${SET_NAMES[@]}")
@@ -764,11 +823,11 @@ op_apply_update() {
     verified="$SNAPSHOT_JSON"
 
     emit_result "$(json_object_of \
-        "written$(printf '\t')true" \
-        "verified$(printf '\t')$verified" \
-        "divergence$(printf '\t')$(json_array_of ${divergent[@]+"${divergent[@]}"})" \
-        "refused$(printf '\t')null" \
-        "audit$(printf '\t')$(audit_fragment 'apply-update' "$ID" "$REV" "$after_rev" "${SET_NAMES[@]}")")"
+        "written${WORKITEM_TAB}true" \
+        "verified${WORKITEM_TAB}$verified" \
+        "divergence${WORKITEM_TAB}$(json_array_of ${divergent[@]+"${divergent[@]}"})" \
+        "refused${WORKITEM_TAB}null" \
+        "audit${WORKITEM_TAB}$(audit_fragment 'apply-update' "$ID" "$REV" "$after_rev" "${SET_NAMES[@]}")")"
 }
 
 op_comment() {
@@ -784,16 +843,16 @@ op_comment() {
 
     if ! revision_is_current "$ID"; then
         emit_result "$(json_object_of \
-            "comment_id$(printf '\t')null" \
-            "verified$(printf '\t')null" \
-            "divergence$(printf '\t')[]" \
-            "refused$(printf '\t')$(json_str 'stale_revision')" \
-            "audit$(printf '\t')null")"
+            "comment_id${WORKITEM_TAB}null" \
+            "verified${WORKITEM_TAB}null" \
+            "divergence${WORKITEM_TAB}[]" \
+            "refused${WORKITEM_TAB}$(json_str 'stale_revision')" \
+            "audit${WORKITEM_TAB}null")"
     fi
 
     get_work_item_snapshot "$ID"
     local before_json="$ITEM_JSON" payload_file comment_id=""
-    payload_file="$(new_payload_file "$(json_object_of "text$(printf '\t')$(json_str "$TEXT")")")"
+    payload_file="$(new_payload_file "$(json_object_of "text${WORKITEM_TAB}$(json_str "$TEXT")")")"
 
     if [[ -n "$FIXTURE_PATH" ]]; then
         AZ_EXIT=0; AZ_STDOUT='{"id": 0}'; AZ_STDERR=""
@@ -829,11 +888,11 @@ op_comment() {
     verified="$SNAPSHOT_JSON"
 
     emit_result "$(json_object_of \
-        "comment_id$(printf '\t')$(json_num "$comment_id")" \
-        "verified$(printf '\t')$verified" \
-        "divergence$(printf '\t')$(json_array_of ${divergent[@]+"${divergent[@]}"})" \
-        "refused$(printf '\t')null" \
-        "audit$(printf '\t')$(audit_fragment 'comment' "$ID" "$REV" "$after_rev")")"
+        "comment_id${WORKITEM_TAB}$(json_num "$comment_id")" \
+        "verified${WORKITEM_TAB}$verified" \
+        "divergence${WORKITEM_TAB}$(json_array_of ${divergent[@]+"${divergent[@]}"})" \
+        "refused${WORKITEM_TAB}null" \
+        "audit${WORKITEM_TAB}$(audit_fragment 'comment' "$ID" "$REV" "$after_rev")")"
 }
 
 resolve_create_type() {
@@ -875,17 +934,17 @@ op_propose_create() {
 
     local draft
     draft="$(json_object_of \
-        "work_item_type$(printf '\t')$(json_str "$type")" \
-        "title$(printf '\t')$(json_str "$TITLE")" \
-        "description$(printf '\t')$(json_str "$DESCRIPTION_HTML")" \
-        "acceptance_criteria$(printf '\t')$(json_str "$ACCEPTANCE_HTML")" \
-        "area_path$(printf '\t')$(json_str "$CTX_AREA")" \
-        "iteration_path$(printf '\t')$(json_str "$CTX_ITERATION")" \
-        "tags$(printf '\t')$(json_str "$(create_tags)")")"
+        "work_item_type${WORKITEM_TAB}$(json_str "$type")" \
+        "title${WORKITEM_TAB}$(json_str "$TITLE")" \
+        "description${WORKITEM_TAB}$(json_str "$DESCRIPTION_HTML")" \
+        "acceptance_criteria${WORKITEM_TAB}$(json_str "$ACCEPTANCE_HTML")" \
+        "area_path${WORKITEM_TAB}$(json_str "$CTX_AREA")" \
+        "iteration_path${WORKITEM_TAB}$(json_str "$CTX_ITERATION")" \
+        "tags${WORKITEM_TAB}$(json_str "$(create_tags)")")"
 
     emit_result "$(json_object_of \
-        "draft$(printf '\t')$draft" \
-        "story_points_supported$(printf '\t')$(json_bool "$story_supported")")"
+        "draft${WORKITEM_TAB}$draft" \
+        "story_points_supported${WORKITEM_TAB}$(json_bool "$story_supported")")"
 }
 
 op_apply_create() {
@@ -946,11 +1005,11 @@ op_apply_create() {
     verified="$SNAPSHOT_JSON"
 
     emit_result "$(json_object_of \
-        "id$(printf '\t')$(json_num "$new_id")" \
-        "url$(printf '\t')$(json_str "$(organization_url "$CTX_ORG")/$CTX_PROJECT/_workitems/edit/$new_id")" \
-        "verified$(printf '\t')$verified" \
-        "divergence$(printf '\t')$(json_array_of ${divergent[@]+"${divergent[@]}"})" \
-        "audit$(printf '\t')$(audit_fragment 'apply-create' "$new_id" "" "$after_rev" "${PATCH_NAMES[@]}")")"
+        "id${WORKITEM_TAB}$(json_num "$new_id")" \
+        "url${WORKITEM_TAB}$(json_str "$(organization_url "$CTX_ORG")/$CTX_PROJECT/_workitems/edit/$new_id")" \
+        "verified${WORKITEM_TAB}$verified" \
+        "divergence${WORKITEM_TAB}$(json_array_of ${divergent[@]+"${divergent[@]}"})" \
+        "audit${WORKITEM_TAB}$(audit_fragment 'apply-create' "$new_id" "" "$after_rev" "${PATCH_NAMES[@]}")")"
 }
 
 op_verify_link() {
@@ -987,14 +1046,14 @@ op_verify_link() {
         fi
 
         entries+=("$(json_object_of \
-            "raw$(printf '\t')$(json_str "$raw")" \
-            "id$(printf '\t')$(json_num "$number")" \
-            "resolves$(printf '\t')$(json_bool "$resolves")" \
-            "in_configured_area$(printf '\t')$(json_bool "$in_area")" \
-            "url$(printf '\t')$(json_str "$url")")")
+            "raw${WORKITEM_TAB}$(json_str "$raw")" \
+            "id${WORKITEM_TAB}$(json_num "$number")" \
+            "resolves${WORKITEM_TAB}$(json_bool "$resolves")" \
+            "in_configured_area${WORKITEM_TAB}$(json_bool "$in_area")" \
+            "url${WORKITEM_TAB}$(json_str "$url")")")
     done
 
-    emit_result "$(json_object_of "references$(printf '\t')$(json_array_of ${entries[@]+"${entries[@]}"})")"
+    emit_result "$(json_object_of "references${WORKITEM_TAB}$(json_array_of ${entries[@]+"${entries[@]}"})")"
 }
 
 # ---------------------------------------------------------------------------

@@ -9,10 +9,15 @@ does not remediate. These tests pin the deterministic half of that contract
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
+import os
+import re
 import shutil
 import subprocess
 import sys
+import tempfile
+from difflib import unified_diff
 from pathlib import Path
 from time import perf_counter
 
@@ -45,9 +50,191 @@ def _git(repo: Path, *args: str) -> None:
     subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True, timeout=60, stdin=subprocess.DEVNULL)
 
 
-@pytest.fixture
-def repo(tmp_path: Path) -> Path:
-    root = tmp_path / "repo"
+SPEC145_REPO = Path(os.environ.get("DEVSPARK_SPEC145_REPO", r"C:\FCNFULL\Triage"))
+SPEC145_FEATURE = ".devspark.work/specs/145-spec-consolidate-scope-clarifiers"
+SPEC145_APPROVED = "f941e34c"
+SPEC145_IMPLEMENTED = "cf8d8407"
+SPEC145_EXECUTION_PATHS = {"app/clarifier/_telemetry.py", "app/tests/clarifier/test_telemetry.py"}
+TASK_START = re.compile(r"^\s*[-*]\s+\[[ xX]\]\s+(T\d{2,4})\b")
+BOOKKEEPING_CHECKPOINT = re.compile(r"Phase complete\s+(?:-|\u2014)\s+\d{4}-\d{2}-\d{2}\.?$")
+
+
+def _spec145_blob(commit: str, relative_path: str) -> bytes:
+    result = subprocess.run(
+        ["git", "show", f"{commit}:{relative_path}"],
+        cwd=SPEC145_REPO,
+        capture_output=True,
+        timeout=60,
+        stdin=subprocess.DEVNULL,
+        check=False,
+    )
+    assert result.returncode == 0, f"missing Spec 145 fixture blob: {commit}:{relative_path}"
+    return result.stdout
+
+
+def _spec145_ready() -> bool:
+    return SPEC145_REPO.is_dir() and all(
+        subprocess.run(
+            ["git", "cat-file", "-e", f"{commit}^{{commit}}"],
+            cwd=SPEC145_REPO,
+            capture_output=True,
+            timeout=30,
+            stdin=subprocess.DEVNULL,
+            check=False,
+        ).returncode == 0
+        for commit in (SPEC145_APPROVED, SPEC145_IMPLEMENTED)
+    )
+
+
+def _git_blob_digest(content: bytes) -> str:
+    return hashlib.sha1(b"blob %d\0" % len(content) + content).hexdigest()
+
+
+def _spec145_reviewed_blob(relative: str, digest: str) -> bytes:
+    try:
+        return _spec145_blob(SPEC145_APPROVED, relative)
+    except AssertionError:
+        object_blob = subprocess.run(
+            ["git", "cat-file", "blob", digest],
+            cwd=SPEC145_REPO,
+            capture_output=True,
+            timeout=30,
+            stdin=subprocess.DEVNULL,
+            check=False,
+        )
+        if object_blob.returncode == 0 and _git_blob_digest(object_blob.stdout) == digest:
+            return object_blob.stdout
+        worktree_file = SPEC145_REPO / relative
+        if worktree_file.is_file():
+            content = worktree_file.read_bytes()
+            if _git_blob_digest(content) == digest:
+                return content
+        pytest.skip(f"approved bytes for Spec 145 reviewed artifact are unavailable: {relative}")
+
+
+def _install_spec145_approved(repo: Path) -> Path:
+    if not _spec145_ready():
+        pytest.skip("offline Spec 145 commit evidence is unavailable; set DEVSPARK_SPEC145_REPO")
+
+    feature = repo / SPEC145_FEATURE
+    for relative in (
+        "spec.md",
+        "plan.md",
+        "tasks.md",
+        "research.md",
+        "gates/analyze.md",
+        "gates/critic.md",
+        "gates/judge.md",
+    ):
+        destination = feature / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(_spec145_blob(SPEC145_APPROVED, f"{SPEC145_FEATURE}/{relative}"))
+
+    for gate_name in ("analyze", "critic"):
+        gate = judge.load_gate(feature / "gates" / f"{gate_name}.md")
+        for entry in gate["reviewed_artifacts"]:
+            relative = str(entry.get("path") or "")
+            path = Path(relative)
+            if not relative or path.is_absolute() or ".." in path.parts:
+                continue
+            if relative in {"spec.md", "plan.md", "tasks.md", "research.md"}:
+                continue
+            destination = repo / path
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(_spec145_reviewed_blob(relative, str(entry.get("hash") or "")))
+    return feature
+
+
+@pytest.fixture(scope="session")
+def spec145_snapshot(tmp_path_factory) -> Path:
+    if not _spec145_ready():
+        pytest.skip("offline Spec 145 commit evidence is unavailable; set DEVSPARK_SPEC145_REPO")
+    return _install_spec145_approved(tmp_path_factory.mktemp("spec145-approved"))
+
+
+def _copy_spec145_approved(snapshot_feature: Path, repo: Path) -> Path:
+    snapshot_root = snapshot_feature.parents[2]
+    feature = repo / SPEC145_FEATURE
+    shutil.copytree(snapshot_feature, feature)
+    for source in snapshot_root.rglob("*"):
+        if not source.is_file() or snapshot_feature in source.parents:
+            continue
+        relative = source.relative_to(snapshot_root).as_posix()
+        destination = repo / Path(relative)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if relative in SPEC145_EXECUTION_PATHS:
+            shutil.copyfile(source, destination)
+        else:
+            try:
+                destination.hardlink_to(source)
+            except OSError:
+                shutil.copyfile(source, destination)
+    return feature
+
+
+def _task_blocks(text: str) -> dict[str, tuple[int, int, str]]:
+    lines = text.splitlines(keepends=True)
+    starts = [(index, match.group(1)) for index, line in enumerate(lines) if (match := TASK_START.match(line))]
+    blocks = {}
+    for position, (start, task_id) in enumerate(starts):
+        end = starts[position + 1][0] if position + 1 < len(starts) else len(lines)
+        blocks[task_id] = (start, end, "".join(lines[start:end]))
+    return blocks
+
+
+def _implementation_bookkeeping_projection(block: str) -> str:
+    lines = []
+    for line in block.splitlines(keepends=True):
+        line = re.sub(r"^(\s*[-*]\s+\[)[xX](\])", r"\1 \2", line)
+        line = re.sub(r" <!-- WIP: [^\r\n]* -->(?=\r?\n?$)", "", line)
+        if "(code_ref:" in line:
+            line = line[:line.index("(code_ref:")].rstrip() + ("\n" if line.endswith("\n") else "")
+        if BOOKKEEPING_CHECKPOINT.search(line.rstrip("\r\n")):
+            continue
+        lines.append(line)
+    return "".join(lines)
+
+
+def _replay_spec145_bookkeeping(approved: str, implemented: str) -> tuple[str, set[str]]:
+    approved_blocks = _task_blocks(approved)
+    implemented_blocks = _task_blocks(implemented)
+    replacements = {}
+    for task_id in approved_blocks.keys() & implemented_blocks.keys():
+        old = approved_blocks[task_id][2]
+        new = implemented_blocks[task_id][2]
+        if old != new and _implementation_bookkeeping_projection(old) == _implementation_bookkeeping_projection(new):
+            replacements[task_id] = new
+
+    lines = approved.splitlines(keepends=True)
+    for task_id, (start, end, _) in sorted(approved_blocks.items(), key=lambda item: item[1][0], reverse=True):
+        if task_id in replacements:
+            lines[start:end] = replacements[task_id].splitlines(keepends=True)
+
+    checkpoint = next(
+        (line for line in implemented.splitlines(keepends=True) if BOOKKEEPING_CHECKPOINT.search(line.rstrip("\r\n"))),
+        None,
+    )
+    if checkpoint:
+        original_checkpoint = re.sub(
+            r"[ \t]+Phase complete (?:-|\u2014) \d{4}-\d{2}-\d{2}\.?$",
+            "",
+            checkpoint.rstrip("\r\n"),
+        )
+        for index, line in enumerate(lines):
+            if line.strip() == original_checkpoint.strip():
+                lines[index] = checkpoint
+                break
+        else:
+            lines.append("\n" if lines and not lines[-1].endswith("\n") else "")
+            lines.append(checkpoint)
+    return "".join(lines), set(replacements)
+
+
+_TEMPLATE_REPO: Path | None = None
+_TEMP_ROOT: tempfile.TemporaryDirectory | None = None
+
+
+def _init_template_repo(root: Path) -> Path:
     feature = root / ".devspark.work" / "specs" / "132-clearstep-catalog-sync"
     feature.mkdir(parents=True)
     (feature / "spec.md").write_text("---\nrequired_gates: checklist, analyze, critic\n---\n# Spec\n", encoding="utf-8")
@@ -58,6 +245,19 @@ def repo(tmp_path: Path) -> Path:
     _git(root, "config", "user.name", "Test User")
     _git(root, "add", "-A")
     _git(root, "commit", "-q", "-m", "init")
+    return root
+
+
+@pytest.fixture
+def repo(tmp_path: Path) -> Path:
+    global _TEMPLATE_REPO, _TEMP_ROOT
+    if _TEMPLATE_REPO is None:
+        _TEMP_ROOT = tempfile.TemporaryDirectory()
+        _TEMPLATE_REPO = Path(_TEMP_ROOT.name) / "repo"
+        _TEMPLATE_REPO.mkdir(parents=True, exist_ok=True)
+        _init_template_repo(_TEMPLATE_REPO)
+    root = tmp_path / "repo"
+    shutil.copytree(_TEMPLATE_REPO, root)
     return root
 
 
@@ -662,13 +862,175 @@ def test_recorded_semantics_reject_scope_changes_during_execution(feature, repo,
     assert all(child["state"] == "stale-recheck-required" for child in report["children"].values())
 
 
-@pytest.mark.parametrize("case", ["planned", "unexplained", "governance", "missing", "legacy"])
+def test_spec145_approved_implementation_bookkeeping_preserves_judge_approval(repo, spec145_snapshot):
+    feature = _copy_spec145_approved(spec145_snapshot, repo)
+    approved_tasks = (feature / "tasks.md").read_text(encoding="utf-8")
+    implemented_tasks = _spec145_blob(
+        SPEC145_IMPLEMENTED, f"{SPEC145_FEATURE}/tasks.md"
+    ).decode("utf-8")
+    replayed_tasks, replayed_ids = _replay_spec145_bookkeeping(approved_tasks, implemented_tasks)
+    assert replayed_ids
+    assert any(len(_task_blocks(implemented_tasks)[task_id][2].splitlines()) > 2 for task_id in replayed_ids)
+    assert any(
+        re.search(r"knowledge_ref:[^\r\n]*\([^)]*\)", _task_blocks(implemented_tasks)[task_id][2])
+        for task_id in replayed_ids
+    )
+
+    critic_tasks = next(
+        entry for entry in judge.load_gate(feature / "gates/critic.md")["reviewed_artifacts"]
+        if entry.get("path") == "tasks.md"
+    )
+    assert judge.semantic_hash(feature / "tasks.md") == critic_tasks["semantic_hash"]
+    approved_projection = judge.semantic_projection(feature / "tasks.md")
+    judge_path = feature / "gates/judge.md"
+    judge_evidence = judge_path.read_bytes()
+    (feature / "tasks.md").write_text(replayed_tasks, encoding="utf-8")
+    assert judge.semantic_hash(feature / "tasks.md") == critic_tasks["semantic_hash"], "\n".join(
+        list(unified_diff(
+            approved_projection.splitlines(),
+            judge.semantic_projection(feature / "tasks.md").splitlines(),
+        ))[:40]
+    )
+
+    report = judge.build_children_report(feature, repo)
+
+    assert all(child["state"] == "bookkeeping-changed" for child in report["children"].values()), report["children"]
+    assert judge.review_state(feature, repo)["needs_recheck"] is False
+    assert judge_path.read_bytes() == judge_evidence
+
+
+@pytest.mark.parametrize(
+    "artifact,change",
+    [
+        ("spec.md", "\n## Requirements\nAdd a new externally visible behavior.\n"),
+        ("spec.md", "\n## Acceptance Criteria\nThe new behavior completes within a stricter target.\n"),
+        ("plan.md", "\n## Architecture Change\nReplace the approved boundary with asynchronous fan-out.\n"),
+        ("tasks.md", None),
+    ],
+    ids=("requirement-change", "acceptance-change", "architecture-change", "task-intent-change"),
+)
+def test_spec145_genuine_planning_changes_still_require_recheck(repo, spec145_snapshot, artifact, change):
+    feature = _copy_spec145_approved(spec145_snapshot, repo)
+    path = feature / artifact
+    content = path.read_text(encoding="utf-8")
+    if change is None:
+        assert "- [ ] T001 Run " in content
+        content = content.replace("- [ ] T001 Run ", "- [ ] T001 Repeat ", 1)
+    else:
+        content += change
+    path.write_text(content, encoding="utf-8")
+
+    report = judge.build_children_report(feature, repo)
+
+    assert all(child["state"] == "stale-recheck-required" for child in report["children"].values())
+    assert judge.review_state(feature, repo)["needs_recheck"] is True
+
+
+def test_spec145_approved_source_and_test_changes_remain_execution_evidence(repo, spec145_snapshot):
+    feature = _copy_spec145_approved(spec145_snapshot, repo)
+    changed_paths = tuple(sorted(SPEC145_EXECUTION_PATHS))
+    critic = judge.load_gate(feature / "gates/critic.md")
+    reviewed_paths = {str(entry.get("path")) for entry in critic["reviewed_artifacts"]}
+    assert set(changed_paths) <= reviewed_paths
+
+    implemented_tasks = _spec145_blob(
+        SPEC145_IMPLEMENTED, f"{SPEC145_FEATURE}/tasks.md"
+    ).decode("utf-8")
+    replayed_tasks, _ = _replay_spec145_bookkeeping(
+        (feature / "tasks.md").read_text(encoding="utf-8"), implemented_tasks
+    )
+    (feature / "tasks.md").write_text(replayed_tasks, encoding="utf-8")
+    for relative in changed_paths:
+        original = repo / relative
+        implemented = _spec145_blob(SPEC145_IMPLEMENTED, relative)
+        assert original.read_bytes() != implemented
+        original.write_bytes(implemented)
+
+    judge_path = feature / "gates/judge.md"
+    judge_evidence = judge_path.read_bytes()
+    gate_bytes = {name: (feature / f"gates/{name}.md").read_bytes() for name in ("analyze", "critic")}
+
+    report = judge.build_children_report(feature, repo)
+
+    analyze = report["children"]["analyze"]
+    assert analyze["state"] in {"bookkeeping-changed", "stale-nonblocking"}
+    assert analyze["action"] == "none" and analyze["blocking"] is False
+    critic = report["children"]["critic"]
+    assert critic["state"] == "stale-nonblocking"
+    assert critic["action"] == "none" and critic["blocking"] is False
+    assert set(critic["execution_changes"]) == set(changed_paths)
+    assert "Verify and PR Review" in " ".join(critic["reasons"])
+    assert all(
+        item["state"] == "SEMANTICALLY_STALE"
+        for item in critic["artifacts"]
+        if item["path"] in changed_paths
+    )
+    assert judge.review_state(feature, repo)["needs_recheck"] is False
+    assert judge_path.read_bytes() == judge_evidence
+    assert gate_bytes == {
+        name: (feature / f"gates/{name}.md").read_bytes() for name in ("analyze", "critic")
+    }
+
+
+def test_spec145_approved_source_and_test_changes_before_first_task_remain_execution_evidence(
+    repo, spec145_snapshot
+):
+    feature = _copy_spec145_approved(spec145_snapshot, repo)
+    tasks_before = (feature / "tasks.md").read_bytes()
+    assert not re.search(rb"(?m)^-\s*\[[xX]\]", tasks_before)
+
+    changed_paths = tuple(sorted(SPEC145_EXECUTION_PATHS))
+    critic = judge.load_gate(feature / "gates/critic.md")
+    reviewed_paths = {str(entry.get("path")) for entry in critic["reviewed_artifacts"]}
+    assert set(changed_paths) <= reviewed_paths
+    for relative in changed_paths:
+        source = repo / relative
+        original = source.read_bytes()
+        implemented = _spec145_blob(SPEC145_IMPLEMENTED, relative)
+        assert original != implemented
+        source.write_bytes(implemented)
+
+    judge_path = feature / "gates/judge.md"
+    judge_evidence = judge_path.read_bytes()
+    report = judge.build_children_report(feature, repo)
+
+    critic_result = report["children"]["critic"]
+    assert critic_result["state"] == "stale-nonblocking"
+    assert critic_result["action"] == "none" and critic_result["blocking"] is False
+    assert set(critic_result["execution_changes"]) == set(changed_paths)
+    assert "Verify and PR Review" in " ".join(critic_result["reasons"])
+    assert (feature / "tasks.md").read_bytes() == tasks_before
+    assert judge_path.read_bytes() == judge_evidence
+    assert judge.review_state(feature, repo)["needs_recheck"] is False
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "planned",
+        "planned-before-first-task",
+        "unexplained",
+        "unexplained-before-first-task",
+        "governance",
+        "governance-before-first-task",
+        "assurance-template-before-first-task",
+        "assurance-engine-before-first-task",
+        "missing",
+        "legacy",
+    ],
+)
 def test_execution_evidence_retains_planning_boundaries(feature, repo, case):
-    relative = ".knowledge/governance/rules.md" if case == "governance" else "scripts/runtime.py"
+    before_first_task = case.endswith("-before-first-task")
+    base_case = case.removesuffix("-before-first-task")
+    relative = {
+        "governance": ".knowledge/governance/rules.md",
+        "assurance-template": "templates/commands/critic.md",
+        "assurance-engine": "scripts/judge.py",
+    }.get(base_case, "scripts/runtime.py")
     source = repo / relative
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text("original behavior\n", encoding="utf-8")
-    planned = "scripts/different.py" if case == "unexplained" else relative
+    planned = "scripts/different.py" if base_case == "unexplained" else relative
     (feature / "plan.md").write_text(
         "# Plan\n\n```yaml\nexpected_change_surface:\n"
         f"  - path: {planned}\n    change: modify\n    why: approved behavior\n```\n",
@@ -682,7 +1044,8 @@ def test_execution_evidence_retains_planning_boundaries(feature, repo, case):
         _write_yaml_gate(gate, data)
     write_judge(feature, repo, semantic_hashes=case != "legacy")
     tasks = feature / "tasks.md"
-    tasks.write_text(tasks.read_text(encoding="utf-8").replace("[ ]", "[X]"), encoding="utf-8")
+    if not before_first_task:
+        tasks.write_text(tasks.read_text(encoding="utf-8").replace("[ ]", "[X]"), encoding="utf-8")
     if case == "missing":
         source.unlink()
     else:
@@ -691,7 +1054,7 @@ def test_execution_evidence_retains_planning_boundaries(feature, repo, case):
     report = judge.build_children_report(feature, repo)
 
     for child in report["children"].values():
-        if case == "planned":
+        if base_case == "planned":
             assert child["state"] == "stale-nonblocking"
             assert child["action"] == "none"
             assert child["execution_changes"] == [relative]
@@ -778,10 +1141,12 @@ def test_completion_bookkeeping_preserves_review_and_lifecycle(feature, repo):
     ("spec.md", "# Spec\n## Rule\n**Status**: Draft\n", "# Spec\n## Rule\n**Status**: Complete\n", False),
     ("spec.md", "# Spec\n### User Story 1 - Work (Priority: P1)\n", "# Spec\n### User Story 1 - Work (Priority: P1)\u2705 Complete\n", False),
     ("spec.md", "# Spec\n### User Story 1 - Work (Priority: P1)\n", "# Spec\n### User Story 1 - Work (Priority: P1) \u2705 Complete\n", True),
+    ("spec.md", "# Spec\n### User Story 1 — Work (Priority: P1)\n", "# Spec\n### User Story 1 — Work (Priority: P1) \u2705 Complete\n", True),
     ("plan.md", "# Plan\n\n## Design\nKeep one writer.\n", "# Plan\n\n## Design\nKeep one writer.\n\n## Implementation Notes\nTests passed.\n", True),
     ("plan.md", "# Plan\n\n## Design\nKeep one writer.\n", "# Plan\n\n## Design\nAdd a second writer.\n", False),
     ("tasks.md", "# Tasks\n- [ ] T001 Preserve behavior (code_ref: pending | knowledge_ref: pending)\n", "# Tasks\n- [X] T001 Preserve behavior (code_ref: scripts/judge.py | knowledge_ref: n/a)\n", True),
     ("tasks.md", "# Tasks\n- [ ] T001 Preserve behavior\n", "# Tasks\n- [X] T001 Add a worker\n", False),
+    ("tasks.md", "# Tasks\n- [ ] T001 Preserve behavior\n", "# Tasks\n- [ ] T001 Preserve behavior Phase complete - 2026-10-04.\n", False),
     ("tasks.md", "# Tasks\n- [ ] T001 Preserve behavior\n", "# Tasks\n- [ ] T001 Preserve behavior\n\n**Checkpoint**: Phase complete - 2026-10-04.\n", True),
     ("spec.md", "---\ndevspark_version: old\nunknown: keep\n---\n# Spec\n", "---\ndevspark_version: new\nunknown: keep\n---\n# Spec\n", True),
     ("spec.md", "---\nunknown: keep\n---\n# Spec\n", "---\nunknown: changed\n---\n# Spec\n", False),

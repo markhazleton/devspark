@@ -1,6 +1,6 @@
 [project]
 name = "devspark-tooling"
-version = "9.0.0"
+version = "9.2.0"
 description = "DevSpark repo tooling — dev/test/lint dependencies for the prompt-first lifecycle framework (no installable package; quickstart is the only install/upgrade path)."
 authors = [{ name = "Make Bold Solutions" }]
 keywords = ["devspark", "ai-agents", "sdd"]
@@ -14,6 +14,7 @@ dependencies = [
 dev = [
     "pytest>=9.0.3,<10.0",
     "pytest-cov>=4.1,<6.0",
+    "pytest-xdist>=3.6,<4.0",
     "ruff>=0.4,<1.0",
     "mypy>=1.8,<2.0",
     "bandit>=1.7,<2.0",

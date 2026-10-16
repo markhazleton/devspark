@@ -114,7 +114,7 @@ def test_both_context_twins_emit_risk_from_shared_helper():
 
 def test_review_template_declares_machine_readable_frontmatter():
     text = (ROOT / "templates/commands/pr-review.md").read_text(encoding="utf-8")
-    block = text.split("Use this exact format:", 1)[1].split("# Pull Request Review:", 1)[0]
+    block = text.split("#### Report Structure", 1)[1].split("# Pull Request Review:", 1)[0]
     for key in ("pr:", "devspark_version:", "reviewed_commit:", "revision:", "findings:", "max_severity:", "risk_rating:", "risk_score:", "risk_escalated:"):
         assert key in block, key
 

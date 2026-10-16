@@ -75,6 +75,11 @@ contributor walkthrough for adding new skills.
 
 ## Get Started
 
+See the [engineering philosophy](site/src/why/philosophy.md#our-vision): Code First and
+Model First are equally legitimate ways to build excellent software with AI tools. For a small
+already-implemented or partially implemented change, use `/devspark-quickfix` to inspect the diff,
+validate it, and reconcile any lasting Knowledge without inventing earlier planning artifacts.
+
 DevSpark's core spec-driven flow runs entirely as slash commands — no install, no CLI:
 
 | Flow | Commands |
@@ -172,7 +177,9 @@ This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrad
 | `/devspark-upgrade` | Pull latest DevSpark prompts into your project |
 
 `/devspark-release` is the sole command that sweeps `.devspark.work/` retention and archives
-completed, linkage-verified work into `.archive/{YYYY-MM-DD}/`.
+completed, linkage-verified work into `.archive/{YYYY-MM-DD}/`. It runs the `release-archive` script
+(`plan`, `apply`, `validate`): moves are journaled in a manifest, never overwrite archived files,
+stay resumable, and anything ambiguous is reported for a decision instead of moved.
 
 ### Multi-App (Optional)
 

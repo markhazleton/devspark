@@ -34,6 +34,7 @@ def _powershell_taxon(repo: Path, path: str, content: str = "") -> str:
         text=True,
         capture_output=True,
         cwd=ROOT,
+        timeout=60,
     )
     assert result.returncode == 0, result.stderr
     return result.stdout.strip()
@@ -46,7 +47,7 @@ def _bash_taxon(repo: Path, path: str, content: str = "") -> str:
         f"'{path}' '{content}'"
     )
     result = subprocess.run(
-        ["bash", "-lc", command], text=True, capture_output=True, cwd=ROOT
+        ["bash", "-lc", command], text=True, capture_output=True, cwd=ROOT, timeout=60
     )
     assert result.returncode == 0, result.stderr
     return result.stdout.strip()

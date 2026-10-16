@@ -71,6 +71,17 @@ When working on devspark:
 5. **Lint all markdown before pushing** (Constitution §VIII): run `npx markdownlint-cli2 "**/*.md"`
    and resolve all errors. CI will block the PR if any errors remain.
 
+### Git test fixtures
+
+Pytest disables automatic Git maintenance and garbage collection for its subprocesses
+using session-scoped environment configuration. This prevents background Git housekeeping
+from changing cached fixture repositories while tests copy them, including disappearing
+`maintenance.lock` files. Existing environment configuration is preserved and restored
+after the session; no user or repository Git configuration is changed.
+
+Run standalone contract scripts through pytest's `test_contract_scripts.py` wrapper to
+inherit the same isolation.
+
 ### Testing template and command changes locally
 
 Installing via the quickstart guides pulls released packages, which won’t include your local changes.  

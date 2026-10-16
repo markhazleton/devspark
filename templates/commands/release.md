@@ -56,7 +56,9 @@ scans all run here.
    never reached step 10's version bump/tag. Treat it as stray, remove it, and do not treat its
    presence as evidence that prior release work exists.
 2. Establish the release window from the previous version tag to HEAD. Use commits and merged PR
-   metadata to classify the semantic version bump.
+   metadata to classify the semantic version bump, and fix the release version now (the explicit
+   `{version}` argument, else the calculated one). Archival in steps 4–5 is recorded against that
+   version, so it must be settled first.
 3. Verify the delta:
    - required tests, lint, builds, and declared release gates pass;
    - changed behavior and current `.knowledge/` are complete and mutually consistent;
@@ -67,32 +69,57 @@ scans all run here.
      now if the most recent result predates the window; release does not duplicate that check
      itself, only confirms it has run and passed;
    - shipped code, tests, and `.knowledge/` contain no planning identifiers.
-4. **Sweep `.devspark.work/specs/` and `.devspark.work/quickfixes/` for archive-eligible work** — this
-   is the only place in DevSpark this happens. The release context computes this classification for
-   you: `ARCHIVE_ELIGIBLE` lists the bundles that qualify, `ARCHIVE_BLOCKED` lists each remaining
-   bundle with its `blockers`, and `ORPHAN_CANDIDATES` lists bundles whose branch no longer exists.
-   Treat those fields as the decision, and spot-check rather than re-derive them:
+4. **Archive completed work with the release-archive script** — never move files by hand. This is
+   the only place in DevSpark archiving happens, and it covers steps 4 and 5 in one operation:
+   - Preview: `.devspark/scripts/bash/release-archive.sh plan --version {version} --json`
+     (PowerShell: `.devspark/scripts/powershell/release-archive.ps1 plan --version {version} -Json`).
+     `plan` writes nothing. It reports `TO_ARCHIVE`, `IN_FLIGHT`, `NEEDS_DECISION` (orphaned
+     bundles, untracked files, uncategorized work areas), `COLLISIONS`, and `STALE_REFERENCES`.
+   - Show the plan and put every `NEEDS_DECISION` entry to the user. Never archive, delete, or
+     reclassify one of them on your own, and never edit a bundle's status or linkage to make it
+     eligible: eligibility rests on completion evidence that already exists.
+   - After the user confirms the plan, run the same command with `apply` instead
+     of `plan` (`--dry-run` still never writes). It journals every move in
+     `.archive/{YYYY-MM-DD}/release/archive-manifest-{version}.json`
+     (original path, archived path, sha256, last commit) before moving anything, never overwrites
+     an existing archived file (a collision stops the run, exit 2, with nothing moved), stages the
+     moves so Git records them as renames, and is safe to rerun after an interruption.
+   - Then run `validate --version {version}`. It must report `OK` before the release commit: every
+     journaled file is in the archive with its recorded hash and none remains under `.devspark.work/`.
+   - Resolve every `STALE_REFERENCES` entry (a tracked file outside `.archive/` that still names a
+     moved path) by updating it to the archived path or removing it.
+   - The script reads `.archive/` only to refuse an overwrite and to resume this release's own
+     manifest; no command, release included, scans or lists archived history for any other purpose.
+
+   The classification behind `plan` is the release context's: `ARCHIVE_ELIGIBLE` lists the bundles
+   that qualify, `ARCHIVE_BLOCKED` lists each remaining bundle with its `blockers`, and
+   `ORPHAN_CANDIDATES` lists bundles whose branch no longer exists. Treat those as the decision, and
+   spot-check rather than re-derive them:
    - A bundle is **archive-eligible** when its own completion marker reads `Complete` (`spec.md`
      `**Status**`, or the quickfix record's completion marker) and every task/action-plan/checklist
      item's `code_ref`/`knowledge_ref` is populated (real path(s), or an explained `n/a`) — the same
-     linkage `/devspark-implement` populated and left in place. Confirm the linkage is still populated
-     now; do not re-derive it.
-   - Move every archive-eligible bundle into `.archive/{YYYY-MM-DD}/` (preserving its relative path
+     linkage `/devspark-implement` populated and left in place. The `code_ref`/`knowledge_ref` legend
+     text in a spec's prose does not count as unpopulated linkage; only checklist/task items and
+     standalone linkage fields do.
+   - Every archive-eligible bundle moves into `.archive/{YYYY-MM-DD}/` (preserving its relative path
      minus the `.devspark.work/` prefix, e.g. `.devspark.work/specs/042-foo/` →
-     `.archive/{YYYY-MM-DD}/specs/042-foo/`), whole and intact — plan, tasks, checklists, gates,
-     `context_resolved`. Never leave a copy behind under `.devspark.work/`, and never move it to
-     `.knowledge/`.
+     `.archive/{YYYY-MM-DD}/specs/042-foo/`), whole and intact — plan, tasks, research, checklists,
+     gates, contracts, `context_resolved`, and any other file in the bundle. No copy is left under
+     `.devspark.work/`, and nothing moves to `.knowledge/`.
    - A bundle that is **not yet** `Complete`, or is `Complete` but still has an unpopulated
      `code_ref`/`knowledge_ref` marker, stays exactly where it is — spanning more than one release
      window is normal, not an error. Report it as still in flight; never archive it.
    - Separately, flag a bundle whose branch is stale, merged, or deleted but that never reached
      `Complete` — this is orphaned, abandoned in-flight state, not a normal rollover. Surface it for
      human disposition; never archive it automatically.
-5. Move every other categorized `.devspark.work/` artifact — `pr-review/`, `audit/`, `metrics/`,
-   `telemetry/` per `.knowledge/taxonomy-registry.json` — into `.archive/{YYYY-MM-DD}/` the same way.
-   Every release sweeps all of them unconditionally: there is no age, count, or eligibility check for
-   these categories, unlike specs/quickfixes in step 4. Never delete outright, so nothing committed
-   only moments ago is lost if it wasn't yet captured elsewhere in Git history. (`.devspark.work/runs/`
+5. The same `apply` moves every other categorized `.devspark.work/` artifact — `pr-review/`,
+   `audit/`, `metrics/`, `telemetry/` per `.knowledge/taxonomy-registry.json` — into
+   `.archive/{YYYY-MM-DD}/` the same way. Every release sweeps all of them unconditionally: there is
+   no age, count, or eligibility check for these categories, unlike specs/quickfixes in step 4. A file
+   that is not tracked by Git is reported in `NEEDS_DECISION` instead of moved, and nothing is ever
+   deleted outright. Operational files stay: `devspark.json`, `devspark.user.json`, `README.md`,
+   `commands/`, `scripts/`, `extensions/`, `intake/`, and dotfiles. A top-level work area with no
+   taxonomy lifecycle is reported for a decision, never guessed at. (`.devspark.work/runs/`
    no longer exists — it was tied to the now-removed CLI; ignore any leftover copy as stray, not a
    category to sweep.)
 6. Check `.knowledge/` for obsolete, duplicate, historical, decision-log, rationale-archive,
@@ -105,21 +132,25 @@ scans all run here.
    identifiers. Remove the reference; do not rewrite it into another planning reference.
 8. Generate user-facing CHANGELOG and release notes from the release delta. Do not mention archived
    spec, task, quickfix, feature, or requirement identifiers.
-9. Write operational release output — including a summary of what was archived and what retention
-   swept — directly to `.archive/{YYYY-MM-DD}/release/`. Release output is never staged under
+9. Write operational release output — including a summary of what was archived (cite the manifest),
+   what retention swept, and every artifact left for a decision — directly to `.archive/{YYYY-MM-DD}/release/`. Release output is never staged under
    `.devspark.work/`, even temporarily: `.archive/` is the only place any of this release's output
    lives once the run completes.
 10. Bump source version files and the `.devspark/VERSION` stamp where applicable.
-11. Show the exact file, archive, and tag plan. Require explicit confirmation before commits,
-    archiving, tags, pushes, or publication; `--dry-run` never writes.
-12. Re-run release gates, create the release commit/tag only after success, and report publication
-    status from the host.
+11. Show the exact commit, version, and tag plan, including the archive already applied in step 4.
+    Require explicit confirmation before the release commit, tags, pushes, or publication;
+    `--dry-run` never writes.
+12. Re-run `release-archive validate` and the release gates (Knowledge index and integrity, package
+    checks) against the post-archive workspace. Create the release commit — archive moves, release
+    note, version metadata — only after success, create the tag only when authorized, and report
+    publication status from the host.
 
 Git is the sole history for `.knowledge/`: release never archives it, only corrects it in place or
-deletes it. `.devspark.work/` retained work products, archive-eligible specs/quickfixes, and orphaned
-planning bundles are the one exception — those move to `.archive/{YYYY-MM-DD}/` per steps 4–5 above,
-never deleted outright. No DevSpark command, release included, reads, lists, or globs `.archive/`
-afterward; a human decides when an entry there is safe to remove, outside any DevSpark command.
+deletes it. `.devspark.work/` retained work products and archive-eligible specs/quickfixes are the
+one exception — those move to `.archive/{YYYY-MM-DD}/` per steps 4–5 above, never deleted
+outright; orphaned planning bundles wait for an explicit owner decision. No DevSpark command,
+release included, reads, lists, or globs `.archive/` afterward beyond the script's own scoped
+reads in step 4; a human decides when an entry there is safe to remove, outside any DevSpark command.
 
 Where you are: release sealed, `.devspark.work/` swept
 Next: monitor for the next release window
