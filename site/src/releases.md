@@ -2,6 +2,14 @@
 
 Full per-version detail is in the [CHANGELOG](https://github.com/MarkHazleton/DevSpark/blob/main/CHANGELOG.md). This page summarizes the current line. To adopt a release, run your agent's [quickstart](get-started/quickstart.md) in Update Mode; see [Upgrade](get-started/upgrade.md).
 
+## 9.4.1: 2026-11-01
+
+An upgraded install now matches a fresh one.
+
+- **`.devspark/` matches the manifest.** Update and Repair now remove any file under `.devspark/defaults/`, `.devspark/templates/` and `.devspark/scripts/` that the release manifest does not list, so files a release dropped or renamed no longer linger. Customizations in `.devspark.work/`, and everything in `.knowledge/` and `.archive/`, are never touched.
+- **Bash quickstart on Windows.** With a native Windows `jq`, the Bash steps could delete the installed framework, write misnamed files and report every file missing. They now work. The PowerShell steps were not affected.
+- **Install and upgrade.** Run your agent's [quickstart](get-started/quickstart.md) in Update Mode. See [Upgrading to 9.4.1](get-started/upgrade.md#upgrading-to-941).
+
 ## 9.4.0: 2026-10-31
 
 **One Flow. Assurance as Needed. Deliver Software.** Every change now follows one path: understand, implement and verify, deliver. There is no quickfix, quick-spec or full-spec route to choose.
