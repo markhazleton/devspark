@@ -144,6 +144,7 @@ The closeout phase writes `FEATURE_DIR/gates/closeout.md` — from inside `/devs
 gate: closeout
 devspark_version: "<installed version, or `unknown`>"
 generated: "<ISO-8601 timestamp of this run>"
+evaluated_commit: "<HEAD this decision was made against; optional — absent in older artifacts (§7.1)>"
 status: pass | fail
 blocking: true | false
 produced_by: verify | closeout
@@ -202,6 +203,30 @@ Regression gates:       GREEN
 CLOSEOUT: READY
 Next: /devspark-create-pr
 ```
+
+## 7.1 Prior Decisions — Read, Carry Forward, Invalidate
+
+A route is closed out more than once: an optional `/devspark-verify`, a reassessment, a return trip after a blocking defect. Each run starts by **reading the prior `closeout.md` before anything replaces it**. Writing a fresh artifact from the evidence alone throws away decisions a human already made and manufactures a `not-complete` for evidence that was never contradicted — the loop this contract exists to stop. No new artifact, gate, or state file is involved: the prior `closeout.md`, the route record, the existing gates, and git are the whole input.
+
+**Carry forward.** A prior finding keeps its id, classification, and classification record (`accepted_by`, `captured_as`, `original_expectation`/`revised_understanding`, `promoted_by`) **verbatim and within its original scope** — the finding and criterion it named, no others. An acceptance never stretches to a different, new, or materially changed finding, and a missing `accepted_by` is never filled in by the agent, a standing instruction, or inference. A criterion outcome backed by evidence that still applies keeps that outcome; its evidence is cited, not re-derived.
+
+**A prior decision still applies** unless, since it was written (`evaluated_commit` when present; otherwise the `generated` timestamp), one of these is true:
+
+1. **Inputs changed materially** — the acceptance criteria, `required_gates`, or objective in the route record changed in substance.
+2. **The work changed** — the implementation changed in a way that touches what the prior outcome rested on (`git diff <evaluated_commit>..HEAD` over non-gate paths, or `git log --after=<generated>` when no commit was recorded).
+3. **The evidence it rested on is no longer valid** — a cited `gates/verify.md` mode or test now fails, was replaced, or no longer exists.
+4. **A real defect appeared** — a new open finding in `gates/analyze.md`, `gates/critic.md`, `gates/checklist.md`, or an open `pr-review` thread, or a failed `requirement`/`invariant`.
+5. **A mandatory obligation is unmet** — a declared `verify:<mode>` has not passed, a required criterion has no evidence, or a `post-deploy` deferral lost its `captured_as` record.
+
+If none holds, **the prior decision stands**. An entry point that supplied no new evidence (an optional Verify with no declared `verify:<mode>`, or a reassessment that found nothing changed) says so in its report and leaves `closeout.md` **untouched** — rewriting it would stamp a fresh `generated` on a decision nobody re-examined, and rewriting it from nothing would erase what the prior one recorded. It does not create a closeout artifact merely to represent a check that supplied no evidence.
+
+If any holds, re-run the phase **only for what it touches**: re-evaluate the affected criteria and findings against current evidence, carry everything else forward, and write the result with the current `evaluated_commit`. Stale evidence is never silently current: an affected outcome that cannot be re-evidenced is `not-satisfied` (or the finding unclassified), named in the `summary`, and the honest route is `/devspark-verify` — not a `complete` resting on a previous version of the work. A real `blocking-defect` still yields `not-complete`; nothing here preserves a prior `complete` as such. It preserves only decisions whose evidence still applies.
+
+**Specs and closeouts from before this contract.** An older route may have no `kind` annotations, no `stage`, no `evaluated_commit`, no `produced_by`, or no prior closeout at all. That is a fact about its age, not a defect and not a license:
+
+- An unannotated criterion is still read as a `requirement` (§3). An old security, privacy, or compliance requirement is **never** relabeled `target`, `hypothesis`, or `accepted` to make an old spec close; a current mandatory obligation is never waived because the spec predates it.
+- An older closeout is read as written: its `decision`, classifications, and `accepted_by` carry forward under the rules above. A missing `evaluated_commit` falls back to `generated`; if both are missing, applicability cannot be established and the affected outcomes are reassessed, not assumed current.
+- Evidence or planning artifacts the route never produced (an analyze, critic, or verify gate it predates) are recorded as **missing**. They are not fabricated, back-dated, or reconstructed to fill the shape.
 
 ## 8. Scope Expansion Requires Developer Intent
 

@@ -388,18 +388,35 @@ def test_specify_defines_the_mvp_boundary():
     assert "Minimum Sufficient Change" in _read("templates/commands/specify.md")
 
 
-def test_plan_captures_operating_context_and_expected_mechanism_shape():
+def test_plan_records_the_closest_existing_pattern_instead_of_counting_mechanisms():
     plan = _read("templates/plan-template.md")
-    block = next(
-        yaml.safe_load(chunk.split("```", 1)[0])
-        for chunk in plan.split("```yaml\n")[1:]
-        if "operating_context" in chunk
-    )
-    assert {"expected_scale", "expected_frequency", "execution", "human_review_acceptable"} <= set(block["operating_context"])
-    assert {"states", "runtime_settings", "endpoints", "persistent_stores", "caches", "background_workers"} <= set(
-        block["expected_new_mechanisms"]
-    )
-    assert "not limits" in plan.lower() or "NOT limits" in plan
+    assert "**Closest existing pattern**" in plan
+    assert "**New mechanism**" in plan
+    assert "expected_new_mechanisms" not in plan
+    assert "operating_context" not in plan
+    assert "Deviations" not in plan
+
+
+def test_plan_command_discovers_the_closest_implementation_before_designing():
+    command = _read("templates/commands/plan.md")
+    assert "Discover First, Then Design" in command
+    assert "closest existing implementation by behavior" in command
+    assert command.index("Discover first") < command.index("Fill Technical Context")
+    assert "expected_new_mechanisms" not in command
+    assert "merely existing is not a question" not in command
+
+
+def test_tasks_derive_from_the_change_surface_without_forced_phases():
+    command = _read("templates/commands/tasks.md")
+    assert "derived from the Plan's `expected_change_surface`" in command
+    assert "Never create an empty phase" in command
+    assert "only when the changed behavior triggers them" in command
+    assert "Phase 1**: Setup" not in command
+    assert "Phase 2**: Foundational" not in command
+    template = _read("templates/tasks-template.md")
+    assert "## Phase 1: Setup" not in template
+    assert "## Phase 2: Foundational" not in template
+    assert "Omit any section that would be empty" in template
 
 
 def test_critic_leads_with_the_least_complex_mitigation_and_does_not_prescribe_architecture():
@@ -410,22 +427,21 @@ def test_critic_leads_with_the_least_complex_mitigation_and_does_not_prescribe_a
         assert field in critic
 
 
-def test_judge_asks_the_subtraction_question_and_the_expected_shape_question():
+def test_judge_asks_the_subtraction_question_and_the_new_mechanism_question():
     contract = _read("templates/judge-contract.md")
     assert "What can be removed or simplified while still satisfying every forcing requirement and invariant?" in contract
-    assert "expected_new_mechanisms" in contract
-    assert "what current requirement or demonstrated constraint forced this deviation?" in contract.lower()
+    assert "expected_new_mechanisms" not in contract
+    assert "what current requirement or demonstrated constraint forced this?" in contract.lower()
 
 
 def test_the_doctrine_is_stated_once_in_the_shared_preamble_with_its_safety_boundary():
     preamble = _read("templates/command-preamble-contract.md")
     for phrase in (
         "Minimum Sufficient Change",
-        "MVP",
-        "KISS",
-        "YAGNI",
-        "Complexity is a cost that requires justification.",
-        "Correctness, security, safety, data integrity, and explicit contracts are not optional simplifications.",
+        "Discover before you design",
+        "closest existing implementation by behavior",
+        "Complexity is a cost that requires justification",
+        "Correctness, security, safety, data integrity and explicit contracts are never optional simplifications.",
     ):
         assert phrase in preamble, phrase
 

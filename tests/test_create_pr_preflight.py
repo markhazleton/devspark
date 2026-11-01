@@ -7,13 +7,24 @@ Run with: python tests/test_create_pr_preflight.py
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
+import pytest
+
+
 
 ROOT = Path(__file__).resolve().parent.parent
+GIT_BASH = Path(r"C:\Program Files\Git\bin\bash.exe")
+
+
+def _bash_path() -> str | None:
+    if os.name == "nt":
+        return str(GIT_BASH) if GIT_BASH.exists() else None
+    return shutil.which("bash") if shutil.which("jq") else None
 
 
 def _copy_script_set(destination: Path) -> None:
@@ -31,7 +42,7 @@ def _copy_script_set(destination: Path) -> None:
 
 
 def _run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=cwd, text=True, capture_output=True, check=True)
+    return subprocess.run(command, cwd=cwd, text=True, capture_output=True, check=True, timeout=120)
 
 
 def _init_git_repo(repo_root: Path, branch_name: str) -> None:
@@ -42,7 +53,7 @@ def _init_git_repo(repo_root: Path, branch_name: str) -> None:
     _run(["git", "add", "."], repo_root)
     _run(["git", "commit", "-m", "Initialize test fixture"], repo_root)
     remote_root = repo_root.parent / f"{repo_root.name}-origin.git"
-    subprocess.run(["git", "init", "--bare", remote_root.as_posix()], cwd=repo_root, text=True, capture_output=True, check=True)
+    subprocess.run(["git", "init", "--bare", remote_root.as_posix()], cwd=repo_root, text=True, capture_output=True, check=True, timeout=120)
     _run(["git", "remote", "add", "origin", remote_root.as_posix()], repo_root)
     _run(["git", "push", "-u", "origin", branch_name], repo_root)
 
@@ -178,6 +189,11 @@ Fix the broken fallback handler.
     _write(repo_root / "README.md", "quickfix repo\n")
 
 
+def _build_work_repo(repo_root: Path) -> None:
+    _write(repo_root / "README.md", "bundle-free work repo\n")
+    _write(repo_root / "src" / "app.py", "def behavior():\n    return 'working'\n")
+
+
 def _run_powershell_preflight(repo_root: Path) -> dict:
     result = _run(
         [
@@ -195,10 +211,36 @@ def _run_powershell_preflight(repo_root: Path) -> dict:
     return json.loads(result.stdout)
 
 
+@pytest.mark.skipif(shutil.which("pwsh") is None, reason="pwsh not available")
+def test_bundle_free_work_branch_reaches_existing_pr_preflight(tmp_path: Path) -> None:
+    work_repo = tmp_path / "work-repo"
+    work_repo.mkdir()
+    _copy_script_set(work_repo)
+    _build_work_repo(work_repo)
+    _init_git_repo(work_repo, "003-work-sample")
+
+    result = _run_powershell_preflight(work_repo)
+
+    assert result["feature"]["spec_exists"] is False
+    assert result["feature"]["classification"] == ""
+    assert Path(result["feature"]["dir"]).as_posix().endswith(".devspark.work/specs/003-work-sample")
+    assert result["prerequisites"]["clean_worktree"] is True
+    assert result["prerequisites"]["branch_pushed_to_remote"] is True
+
+
 def _run_bash_preflight(repo_root: Path) -> dict | None:
-    if not shutil.which("bash") or not shutil.which("jq"):
+    bash = _bash_path()
+    if not bash:
         return None
-    result = _run(["bash", "scripts/bash/create-pr.sh", "--mode", "preflight", "--json"], repo_root)
+    result = subprocess.run(
+        [bash, "scripts/bash/create-pr.sh", "--mode", "preflight", "--json"],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        timeout=120,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
     return json.loads(result.stdout)
 
 
@@ -251,6 +293,23 @@ def main() -> None:
         assert quickfix_preflight["prerequisites"]["branch_pushed_to_remote"] is True
         assert quickfix_preflight["feature"]["gate_acknowledgements"]
 
+        work_repo = Path(temp_dir) / "work-repo"
+        work_repo.mkdir()
+        _copy_script_set(work_repo)
+        _build_work_repo(work_repo)
+        _init_git_repo(work_repo, "003-work-sample")
+
+        work_preflight = _run_powershell_preflight(work_repo)
+        assert work_preflight["feature"]["spec_exists"] is False
+        assert work_preflight["feature"]["classification"] == ""
+        assert Path(work_preflight["feature"]["dir"]).as_posix().endswith(".devspark.work/specs/003-work-sample")
+        assert work_preflight["prerequisites"]["branch_pushed_to_remote"] is True
+
+        work_bash_preflight = _run_bash_preflight(work_repo)
+        if work_bash_preflight is not None:
+            assert work_bash_preflight["feature"]["spec_exists"] is False
+            assert work_bash_preflight["feature"]["dir"].endswith(".devspark.work/specs/003-work-sample")
+            assert work_bash_preflight["prerequisites"]["branch_pushed_to_remote"] is True
         dirty_repo = Path(temp_dir) / "dirty-repo"
         dirty_repo.mkdir()
         _copy_script_set(dirty_repo)

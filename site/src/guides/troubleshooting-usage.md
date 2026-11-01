@@ -1,26 +1,21 @@
 # Troubleshooting Your App
 
-Diagnose first, then let the diagnosis choose the route. You do not need any DevSpark skill to investigate a bug: reproduce it, read the code, and find the root cause in your agent conversation. The size of the fix is a conclusion of that diagnosis.
+Diagnose first, then fix. You do not need any DevSpark skill to investigate a bug: reproduce it, read the code, and find the root cause in your agent conversation. The diagnosis tells you how much assurance the fix needs; it does not choose a workflow.
 
 Prerequisites: DevSpark installed (`.devspark/` present), a constitution at `.knowledge/governance/constitution.md`, and a git working tree you can branch from.
 
-## Choose the fix size
+## Start the fix
 
-| Signal from diagnosis | Route | Skill |
-|---|---|---|
-| Few files, clear root cause, about 4 hours or less, no API, schema, or architecture change | Quickfix | `/devspark-quickfix` |
-| A little design or several files, but self-contained | Quick spec | `/devspark-specify` |
-| Architectural, schema, or API-contract change, or scope you cannot judge | Full spec | `/devspark-specify` |
+Every fix starts the same way. There is no size to choose.
 
-When unsure after diagnosis, start with `/devspark-specify`. It recommends a route and asks you to confirm before creating anything. If it classifies the request as a one-off fix, it points you to quickfix.
-
-| Scenario | Start here |
+| Situation | Start here |
 |---|---|
-| Null reference or obvious single-file bug | `/devspark-quickfix` |
-| Production emergency | `/devspark-quickfix` (hotfix classification) |
-| Config, flag, or environment tweak | `/devspark-quickfix` |
-| Several files, no design change | `/devspark-specify` (quick spec) |
-| Rooted in an architecture, schema, or API problem | `/devspark-specify` (full spec) |
+| Any fix, from a single-file bug to an architectural, schema, or API problem | `/devspark-specify` |
+| You already diagnosed it and want a WHAT/WHY/HOW record for a product owner | `/devspark-quickfix` (optional) |
+| Production emergency | `/devspark-quickfix` (hotfix classification) or `/devspark-specify` |
+| Work already under way on this branch | `/devspark-next` |
+
+`/devspark-specify` creates a work branch, checks whether a material risk or mandatory obligation needs assurance, and goes straight to implementation. A schema, API, or security change does not switch routes; it adds only the specific assurance it justifies, such as a focused `/devspark-critic`.
 
 ## The quickfix flow
 
@@ -38,7 +33,7 @@ It classifies the change, runs only the constitution checks that apply, creates 
 
 Then apply the fix, run `/devspark-implement` (code, tests, and current knowledge together), and run `/devspark-verify`. Open the PR with `/devspark-create-pr`. The record stays live until `/devspark-release` archives it.
 
-Quickfix runs a targeted check, not the full-spec gates, so it under-gates a bug that turns out to be architectural. If the change starts spanning modules or needs a schema or API change, stop and run `/devspark-specify` with the larger problem. Escalation is the supported path, and your WHAT/WHY/HOW record gives you a head start.
+Quickfix runs a targeted check rather than a default review, so if the fix turns out to need a schema, API, or security change, it surfaces that decision to you. The quickfix keeps its route and gains only the assurance the concern justifies; a genuinely separate change starts with `/devspark-specify`.
 
 ## Let `/devspark-next` drive
 
@@ -46,10 +41,13 @@ Quickfix runs a targeted check, not the full-spec gates, so it under-gates a bug
 
 ```mermaid
 flowchart TD
-    A[no active work] -->|/devspark-specify| B{route}
-    B -->|/devspark-quickfix| Q[quickfix-open]
-    B -->|quick-spec| QS[quickspec-needs-implement]
-    B -->|full-spec| P[spec-needs-plan]
+    A[no-active-work] -->|/devspark-specify| W[work-in-progress]
+    A -->|/devspark-quickfix| Q[quickfix-open]
+    W -->|/devspark-implement| W
+    W -->|work finished and committed| RP
+    Q -->|/devspark-implement| VF
+    L[existing v9.3 spec] -->|full spec| P[spec-needs-plan]
+    L -->|quick spec| QS[quickspec-needs-implement]
     P -->|/devspark-plan| T[plan-needs-tasks]
     T -->|/devspark-tasks| RV[tasks-need-review]
     RV -->|/devspark-planning-review| RB{decision}
@@ -58,7 +56,6 @@ flowchart TD
     RB -->|proceed| IM[tasks-incomplete]
     IM -->|/devspark-implement| VF[implementation-needs-verification]
     QS -->|/devspark-implement| VF
-    Q -->|/devspark-implement| VF
     VF -->|/devspark-verify| CO{closeout}
     CO -->|not-complete| IM
     CO -->|complete| RP[ready-for-pr]
@@ -70,7 +67,18 @@ flowchart TD
     MG -->|approve and merge in your Git portal| DONE([done])
 ```
 
+New work stays in `work-in-progress` while you implement and verify; `/devspark-verify` there answers delivered, verified, and eligible without writing a gate document. When `work.md` declares a required obligation that is still open, `/devspark-next` reports `delivery-blocked` instead of `ready-for-pr`. The lower half applies only to an existing v9.3 specification, which keeps its recorded route.
+
 Closeout is a phase of `/devspark-verify`, not a separate step. A `not-complete` decision sends you back to `/devspark-implement` for the open defects only. Obligations that can only be proven in a deployed environment are recorded as post-deploy requirements; they stay visible and unproven but do not block closeout or the pull request.
+
+## Delivery is blocked
+
+When committed work fails the lifecycle check, `/devspark-next` reports `delivery-blocked`. Read the reason it names:
+
+- **`required-obligation-unresolved`**: an entry under `## Required Obligations` in `work.md` is unchecked, or is checked without its `Authority:` or a traceable evidence or decision reference. `/devspark-create-pr` also refuses with `CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED`. Obtain the evidence or decision from that authority, then check the entry and add the reference. More implementation does not resolve it. See [Assurance as needed](../get-started/how-it-works.md#assurance-as-needed).
+- **Any other lifecycle failure**: `/devspark-next` recommends `/devspark-implement` to resolve it.
+
+When the check cannot run (`judge-missing`, `python-unavailable`, or `invalid-output`) and `work.md` declares obligations, `/devspark-create-pr` refuses with `CREATE PR BLOCKED — LIFECYCLE CHECK UNAVAILABLE`, and `/devspark-next` says so in its reason. Restore the framework files with the quickstart in Repair Mode, or install Python, and try again. DevSpark has no override.
 
 ## A skill is not found or listed twice
 
@@ -79,5 +87,5 @@ Type the full hyphenated slash command, for example `/devspark-specify`. In GitH
 ## Related
 
 - [Review and Audit](review-and-audit.md): `/devspark-create-pr`, `/devspark-pr-review`, and `/devspark-address-pr-review`.
-- [Planning Review](planning-review.md): the checks that run before implementation on full specs.
+- [Planning Review](planning-review.md): the checks that run before implementation on an existing v9.3 full specification.
 - [Skill Catalog](prompt-lifecycle-mapping.md): every skill and its role.

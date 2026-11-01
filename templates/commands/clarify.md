@@ -1,10 +1,13 @@
 ---
 source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
-description: Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.
+description: For an existing specification, ask up to 5 targeted clarification questions and encode the answers into the spec. On a work branch, asks in conversation and writes no spec.
 handoffs:
-  - label: Build Technical Plan
+  - label: Return to Implementation
+    agent: devspark-implement
+    prompt: Continue implementation with the clarified decisions
+  - label: Build Technical Plan (existing specification)
     agent: devspark-plan
-    prompt: Create a plan for the spec. I am building with...
+    prompt: Create a plan for the existing spec. I am building with...
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json --paths-only
   ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
@@ -20,7 +23,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Workflow Position
 
-**Step 2 of 4** in the authoring chain (`specify → clarify → plan → tasks`).
+**Step 2 of 4** in the v9.3 authoring chain (`specify → clarify → plan → tasks`) for an existing specification.
+
+**Work branch.** A `NNN-work-*` branch has no specification, and the script's `FEATURE_SPEC` resolves to its optional `work.md` resume note, which is not a spec. Do not run the Outline there: do not create `spec.md`, do not write `## Clarifications` into `work.md`, and do not send the developer to `/devspark-specify`. Ask up to 5 questions whose answers materially change the work, in conversation. Record an accepted answer under `work.md` `## Material Decisions` only when it must survive the session, then return to `/devspark-implement`.
 
 - **Owns**: targeted ambiguity reduction in an existing spec via up to 5 interactive questions, each integrated into the appropriate spec section.
 - **Does NOT own**: drafting/replacing the spec (→ `/devspark-specify`); deciding stack/architecture/data-store choices (→ `/devspark-plan` — only ask here if the *absence* of the choice blocks functional clarity); generating tasks (→ `/devspark-tasks`); adversarial review (→ `/devspark-critic`, `/devspark-analyze`).

@@ -1,6 +1,6 @@
 ---
 name: devspark-planning-review
-description: "Run Analyze, Critic when applicable, and Judge as one bounded planning review that returns a single planning decision before implementation."
+description: "For an existing specification bundle, run Analyze, Critic when applicable, and Judge as one bounded planning decision before implementation. On a work branch, Judge only adjudicates a genuine conflict on demand."
 user-invocable: true
 disable-model-invocation: true
 ---

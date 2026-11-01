@@ -8,12 +8,9 @@ handoffs:
   - label: Sweep Unrelated Stale Content
     agent: devspark-release
     prompt: Clean up unrelated stale work products or knowledge noticed during this trace
-  - label: Spec the Missing Behavior
+  - label: Start Work on a Gap or Defect
     agent: devspark-specify
-    prompt: This topic revealed genuinely unimplemented behavior, not just undocumented behavior
-  - label: Fix a Confirmed Code Defect
-    agent: devspark-quickfix
-    prompt: Explain confirmed a code defect while tracing this topic; fix it as a bounded quickfix
+    prompt: This topic revealed genuinely unimplemented behavior or a confirmed code defect; start work to address it
 scripts:
   sh: .devspark/scripts/bash/explain-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/explain-context.ps1 $ARGUMENTS -Json
@@ -42,7 +39,7 @@ modules: `convergence`.
 ## Lifecycle Position
 
 Ad-hoc utility, alongside `/devspark-release` and `/devspark-site-audit` — not a step in the
-`specify → plan → tasks → analyze → critic → implement → pr-review` gate chain. Usable any time a
+Understand → Implement ↔ Verify → Deliver flow. Usable any time a
 developer or an agent needs a grounded answer instead of guessing, and doubles as a lightweight,
 on-demand knowledge-sync check for one topic.
 
@@ -75,11 +72,11 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
 
 ## Outline
 
-1. Run `{SCRIPT}`, parse JSON: `TOPIC`, `KEYWORDS`, `INDEX_FRESH`, `MATCHED_KNOWLEDGE[]`,
+1. Run `{SCRIPT}`, parse JSON: `TOPIC`, `KEYWORDS`, `MATCHED_KNOWLEDGE[]`,
    `MATCHED_ENTITIES[]`, `CANDIDATE_CODE_HITS[]`, `SUMMARY`.
-2. **KNOW1 gate**: if `INDEX_FRESH` is false, regenerate via
-   `python3 scripts/build_knowledge_index.py --repo-root .` and re-run step 1 once before
-   continuing — never trust a stale index for the findings below.
+2. The script builds the index in memory from current Knowledge on every run; there is no derived-file
+   freshness to check. If it reports an `ERROR`, report that the Knowledge does not build, with the
+   message, before going further.
 3. Branch on `MATCHED_KNOWLEDGE` / `MATCHED_ENTITIES`:
    - **Has matches** → for each matched node, verify against the code at its
      `source_of_truth`/`appliesTo` paths (already resolved with existence + last-commit-date in
@@ -90,7 +87,9 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
        cite — this is broader than DELTA5 below.
      - `DELTA5` — if the doc cites `verified_by: execution` or a `type: test` evidence entry,
        re-run that test now; a failure or missing test is the finding.
-     - `KNOW2` — `last_verified` is older than the newest `source_status[].last_commit_date`.
+     - `KNOW2` — a matched node's content contradicts or no longer covers the code at its
+       `source_of_truth` paths (`source_status[].last_commit_date` is a hint to read the code, not a
+       finding by itself).
      - `KNOW3` — a `source_of_truth`/`appliesTo` path's `exists` is false.
      - `KNOW4` — a matched `governance-decision`'s `constrains` has an entity whose
        `constrained_by_reciprocal` is false, or a matched entity's `constrained_by` doesn't
@@ -113,7 +112,7 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
    - **Classify every finding by the convergence rule** (preamble §10, `closeout-contract.md` §2/§4):
      - A correctness defect (code and knowledge contradict, or a cited test fails) is a **Blocking
        Defect**: report it with evidence. Explain does not fix it.
-     - A gap that hits no expansion trigger (stale `last_verified`, a missing node or layer) is
+     - A gap that hits no expansion trigger (a missing node or layer) is
        **Deferred Work** or a **Learning**: report it, and nothing more.
      - The absence of a Knowledge node is only an observation unless an existing requirement
        explicitly requires one.
@@ -148,13 +147,13 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
    asked as a separate question; never combine two actions, or an action and a trace save, into one
    yes/no. Under `--dry-run`, ask none of them.
    - **Knowledge update** — only when the developer asked for one and a concrete remediation exists
-     (a corrected doc body, a bumped `last_verified`, or a new doc's full content). Show the full
+     (a corrected doc body or a new doc's full content). Show the full
      proposed content/diff, then ask "Apply this Knowledge update? [y/N]".
      - Yes → write the file(s), run `python3 scripts/build_knowledge_index.py --repo-root .`, and
        re-verify the specific finding now resolves before reporting success.
      - No → leave as a proposal only (`resolution: proposal-pending`); write nothing.
-   - **Code defect** — Explain reports confirmed code defects and offers the Quickfix handoff
-     (`/devspark-quickfix`). It does not modify application code itself.
+   - **Code defect** — Explain reports confirmed code defects and offers the Start Work handoff
+     (`/devspark-specify`). It does not modify application code itself.
    - **Follow-up work** — never started or scheduled by Explain; name it in the next-step footer.
 8. Under `--dry-run`, never write anything: report `trace_saved: false` unconditionally and skip
    step 9.
@@ -177,7 +176,7 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
   unless the developer explicitly promotes it.
 - Never rotates a retained-baseline claim (`--rotate-claim`) without first showing that exact
   claim's diff and receiving an explicit confirmation in the same turn (step 4).
-- Always checks `last_verified`/path existence even when the matched content "looks right" —
+- Always checks path existence and the cited code even when the matched content "looks right" —
   confidence is not evidence.
 - Reuses `scripts/build_knowledge_index.py` for all frontmatter/git-log/index logic; never
   duplicates it (constitution Principle VI: single source of truth across languages).

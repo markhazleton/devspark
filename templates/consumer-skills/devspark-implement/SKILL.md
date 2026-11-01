@@ -1,6 +1,6 @@
 ---
 name: devspark-implement
-description: "Implement the active route, update current knowledge and tests, verify the delta, and populate code/knowledge linkage for in-sprint validation."
+description: "Start or resume work, implement a useful increment, and verify the affected delta."
 user-invocable: true
 disable-model-invocation: true
 ---

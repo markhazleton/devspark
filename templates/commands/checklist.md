@@ -1,13 +1,10 @@
 ---
 source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
-description: Generate a custom checklist for the current feature based on user requirements.
+description: For an existing specification, generate a requirements-quality checklist (unit tests for the written requirements). Not used on a work branch.
 handoffs:
-  - label: Implement Project
+  - label: Continue Implementation
     agent: devspark-implement
-    prompt: Start the implementation in phases
-  - label: Run Analysis
-    agent: devspark-analyze
-    prompt: Analyze spec consistency after checklist review
+    prompt: Continue implementation with the checklist findings in mind
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json
   ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json
@@ -41,6 +38,10 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## Work Branch
+
+A checklist tests the writing of an existing specification. On a `NNN-work-*` branch there is no specification, and a checklist is not part of that route: write no `checklists/` file and no `gates/checklist.md`. If the developer names a specific requirements-quality concern, answer it in conversation against `work.md`, the optional `plan.md`, and the current code and tests, then return to `/devspark-implement`.
 
 ## Outline
 

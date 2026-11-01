@@ -23,7 +23,7 @@ This change has outgrown the assumptions of the quickfix route.
 Signal: new architectural contract — the fix introduces an interface that a
         second subsystem must now depend on
 
-Continue as quickfix, or promote to a full spec?
+Add the needed assurance and continue, or split out separate work?
 ```
 
 ## Escalation surfaced — trust boundary
@@ -35,6 +35,6 @@ the case effort-based warnings miss.
 ## Who decides
 
 The framework surfaces; the developer chooses. Either answer is legitimate —
-a deliberate "continue as quickfix" is a different fact from an unexamined
-one, and recording which it was is the point. The route is chosen rather
-than inherited.
+a deliberate "continue with the needed assurance" is a different fact from an
+unexamined one, and recording which it was is the point. The route is chosen
+rather than inherited, and it is never silently converted.

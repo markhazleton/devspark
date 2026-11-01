@@ -4,10 +4,7 @@ description: Detect where you are in the delivery lifecycle and run the single n
 handoffs:
   - label: Start New Work
     agent: devspark-specify
-    prompt: Classify and route a new piece of work
-  - label: Quick Fix
-    agent: devspark-quickfix
-    prompt: Start a lightweight fix for a small, contained change
+    prompt: Understand and start a new piece of work
 scripts:
   sh: .devspark/scripts/bash/next-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/next-context.ps1 $ARGUMENTS -Json
@@ -31,7 +28,7 @@ A developer should be able to run `/devspark-next` at any point in a change and 
 
 ## Workflow Position
 
-This command sits *above* the lifecycle, not inside it. It does not author specs, write code, or open PRs itself — it detects state and dispatches to the right command (`/devspark-specify`, `/devspark-quickfix`, `/devspark-create-pr`, `/devspark-pr-review`, `/devspark-address-pr-review`, etc.).
+This command sits *above* the lifecycle, not inside it. It does not author specs, write code, or open PRs itself — it detects state and dispatches to the right command (`/devspark-specify`, `/devspark-implement`, `/devspark-create-pr`, `/devspark-pr-review`, `/devspark-address-pr-review`, etc.).
 
 - **Owns**: state detection, a plain-language recommendation, a single confirmation, and dispatch to the recommended command.
 - **Does NOT own**: any of the underlying work (that stays with the specialized commands). It never merges code or bypasses a command's own gates.
@@ -52,21 +49,23 @@ Run `{SCRIPT}` from the repository root and parse the JSON. The script does the 
 - `REPO_NAME`, `PLATFORM` — orientation facts for “where am I”: the repository name and its host (`github` | `azdo` | `gitlab`).
 - `CURRENT_BRANCH`, `DEFAULT_BRANCH`, `IS_DEFAULT_BRANCH`
 - `CONSTITUTION_EXISTS`, `DIRTY`, `HAS_REMOTE`, `BRANCH_PUSHED`, `BEHIND_TARGET`
-- `SPEC_EXISTS`, `PLAN_EXISTS`, `TASKS_EXISTS`, `TASKS_DONE`/`TASKS_TOTAL`, `TASKS_COMPLETE`
-- `SPEC_FEATURE`, `SPEC_AMBIGUOUS` — the active spec is resolved by identity, not by exact branch name: an exact spec directory wins, a quickfix record for the branch means a quickfix, otherwise the one spec directory sharing the branch's numeric prefix is the spec (so `132-fix-enhance-endpoint` resolves to `132-spec-complaint-catalog`). `DEVSPARK_FEATURE` overrides the branch. More than one match is never guessed: `STATE: ambiguous-spec`.
+- `SPEC_EXISTS`, `PLAN_EXISTS`, `TASKS_EXISTS`, `TASKS_DONE`/`TASKS_TOTAL`, `TASKS_COMPLETE` — legacy spec-bundle state. An optional `plan.md` on a work branch is advisory: it does not set these fields, change the work route, or require Tasks or Planning Review.
+- `SPEC_FEATURE`, `SPEC_AMBIGUOUS` — legacy specs resolve by identity, not only exact branch name. An exact spec directory wins; a quickfix record identifies a legacy fix; otherwise one spec directory sharing the numeric prefix is used. Work branches (`NNN-work-*`) resolve only to their own optional `work.md`, never to another spec sharing the prefix. `DEVSPARK_FEATURE` overrides legacy resolution. Ambiguous legacy matches are never guessed.
+- `WORK_BRANCH`, `WORK_RECORD_EXISTS`, `WORK_STATUS`, `WORK_COMPLETE`, `WORK_HAS_CHANGES` — whether the current branch is a bundle-free work branch, whether its optional resume note exists, its recorded status, whether that status reads `Complete` (case-insensitive), and whether Git shows local changes or commits ahead of the target.
+- `LIFECYCLE_STATUS`, `LIFECYCLE_BLOCKERS` — on a work branch with a work directory, the result of DevSpark's own lifecycle check (`judge.py lifecycle`), the same check `/devspark-create-pr` runs before publishing: `pass`, `fail` (with the failure codes in `LIFECYCLE_BLOCKERS`, e.g. `required-obligation-unresolved`, `work-incomplete`), `unavailable` (the check could not run here — unconfirmed, never a pass; when `work.md` declares Required Obligations, `/devspark-create-pr` refuses until it can run, and `REASON` says how to restore it), or empty when it does not apply. The script already routes on it; do not re-parse `work.md` to second-guess it.
 - `VERIFY_REQUIRED`, `VERIFY_PASSED` — passing evidence must cover every declared `verify:<mode>`; a top-level pass or a different passing mode is insufficient.
 - `CLOSEOUT_DECISION` — `complete`, `not-complete`, or empty when the route has no closeout gate yet. `/devspark-verify` writes this gate itself as its second phase, so this is normally settled by the same command that produced the evidence. A `not-complete` decision means blocking defects are open: the next step is `/devspark-implement` **for those defects only**, never a re-run of everything, and never a separate closeout command.
 - `QUICKFIX_EXISTS`, `QUICKFIX_COMPLETE`
 - `PR_EXISTS`, `PR_NUMBER`, `PR_STATE`, `REVIEW_FILE_EXISTS`, `REVIEW_OPEN`
-- `PENDING_GATES` — required-but-unmet advisory gates (checklist / analyze / critic / verify) surfaced for awareness; these never block forward progress. Note the gate order this implies: `plan` (produces `context_resolved`) → `tasks` (adds `code_ref`/`knowledge_ref` placeholders) → **planning review** (`/devspark-planning-review`: `analyze` validates that `context_resolved` resolves, `critic` judges whether it's sufficient, and `judge` adjudicates both into one planning decision) → `implement` (consumes it, never re-traverses more than one hop). The developer sees one step, not three. A `tasks-need-review` state with an empty `## Context Resolution` in `plan.md` is worth a plain-language nudge back to `/devspark-plan`, not just forward to planning review.
+- `PENDING_GATES` — required-but-unmet advisory gates (checklist / analyze / critic / verify) surfaced for awareness; these never block forward progress. Note the gate order this implies: `plan` (produces `context_resolved`) → `tasks` → **planning review** (`/devspark-planning-review`: `analyze` validates that `context_resolved` resolves, `critic` judges whether it's sufficient, and `judge` adjudicates both into one planning decision) → `implement` (consumes it, never re-traverses more than one hop). The developer sees one step, not three. A `tasks-need-review` state with an empty `## Context Resolution` in `plan.md` is worth a plain-language nudge back to `/devspark-plan`, not just forward to planning review.
 - `JUDGE_VERDICT` — the Planning Review verdict from `gates/judge.md` (`PROCEED`, `CONDITIONAL`, `STOP`), empty when no Judge artifact exists.
 - `JUDGE_NEEDS_RECHECK` — `true` when a child gate needs a rerun or recheck, or the Judge artifact is stale (computed by `judge.py review-state`). **An unresolved Planning Review (missing where required, `STOP`, `CONDITIONAL`/pending decision, or needing a recheck) outranks task progress**: a finished task list never routes to implementation finalization until it is resolved.
 - `PLAN_SPEC_STATE`, `TASKS_PLAN_STATE` — whether the plan still matches the spec it recorded (`spec_semantic_hash`) and whether the task list still matches the plan it recorded (`plan_semantic_hash`): `current`, `stale` (meaning changed since the recorded fingerprint) or `unknown` (no usable stamp or fingerprint). Both are present with or without a Judge artifact. Only `stale` routes: `plan-stale-against-spec` recommends `/devspark-plan` and `tasks-stale-against-plan` recommends `/devspark-tasks`. `unknown` never routes and never changes the recommendation. An unresolved Planning Review keeps precedence, so a spec change after Planning Review still goes to `review-needs-recheck` first, and a pending decision or `STOP` is resolved before either edge route.
 - `RECOMMENDED_COMMAND` — the single next step the script computed
-- `STATE` — a short state label (e.g. `no-active-work`, `spec-needs-plan`, `plan-stale-against-spec`, `plan-needs-tasks`, `tasks-stale-against-plan`, `tasks-need-review`, `review-blocked`, `review-needs-recheck`, `review-needs-decision`, `tasks-incomplete`, `implementation-needs-verification`, `verification-needs-closeout`, `closeout-not-complete`, `quickspec-needs-implement`, `quickfix-open`, `ready-for-pr`, `pr-needs-review`, `review-has-open-findings`, `behind-target`, `ready-to-merge`)
+- `STATE` — a short state label (e.g. `no-active-work`, `work-in-progress`, `spec-needs-plan`, `plan-stale-against-spec`, `plan-needs-tasks`, `tasks-stale-against-plan`, `tasks-need-review`, `review-blocked`, `review-needs-recheck`, `review-needs-decision`, `tasks-incomplete`, `implementation-needs-verification`, `verification-needs-closeout`, `closeout-not-complete`, `quickspec-needs-implement`, `quickfix-open`, `uncommitted-changes`, `delivery-blocked`, `ready-for-pr`, `pr-needs-review`, `review-has-open-findings`, `behind-target`, `ready-to-merge`)
 - `REASON` — a plain-language explanation to show the user (already includes any `PENDING_GATES` note)
 
-The script's `RECOMMENDED_COMMAND` is authoritative for the common path. Only override it if the user's input in `$ARGUMENTS` explicitly asks for something different (e.g. "I want a full spec, not a quickfix") — in that case, explain the divergence.
+The script's `RECOMMENDED_COMMAND` is authoritative for the common path. Honor explicit user intent, but do not ask new work to choose a Light/Full or quickfix/spec route. Existing v9.3 bundles continue on their recorded route.
 
 Compatible `bookkeeping-changed` evidence does not request another planning review. Pending human
 authority precedes automatic remediation; required Judge evidence cannot be replaced by child files.
@@ -106,6 +105,7 @@ Interpret `RECOMMENDED_COMMAND` values:
 | `/devspark-*` | Run that DevSpark skill | Hand off to that skill |
 | `commit` | Uncommitted work exists | Instruct the user to commit (or, mid-spec, hand off to `/devspark-implement`); do not auto-commit their code |
 | `resolve` | More than one spec directory matches the branch's numeric prefix | Tell the user to set `DEVSPARK_FEATURE` to the intended directory name or remove the duplicate; never pick one |
+| `resolve-obligation` | Committed work on a work branch has a mandatory obligation in `work.md` without satisfying evidence (`delivery-blocked`) | Name the obligation and its authority from `REASON`. The developer obtains the evidence or the authority's decision, then checks the entry with a reference to it. If the evidence is code or tests, hand off to `/devspark-implement`. Never check the entry without evidence and never route to `/devspark-create-pr` while it is open |
 | `sync` | Branch is behind target | Instruct the user to merge `origin/{DEFAULT_BRANCH}` in (per repo preference, merge — do not rebase — unless they ask) |
 | `merge` | Ready to merge | Tell the user to approve and merge the PR in their Git portal (GitHub / Azure DevOps) — DevSpark does not merge for them |
 
@@ -113,8 +113,8 @@ Interpret `RECOMMENDED_COMMAND` values:
 
 Ask a single yes/no question: **"Run {RECOMMENDED_COMMAND} now?"**
 
-- If **yes** and the recommendation is a `/devspark-*` skill → invoke that skill (pass through any relevant arguments the user supplied, e.g. a bug description for `/devspark-quickfix`).
-- If **yes** and the recommendation is `commit` / `sync` / `merge` → these are actions DevSpark should not silently perform on the user's behalf. Give the exact command(s) to run and stop; do not fabricate a commit or a merge.
+- If **yes** and the recommendation is a `/devspark-*` skill → invoke that skill (pass through any relevant arguments the user supplied, e.g. a bug or feature description for `/devspark-specify`).
+- If **yes** and the recommendation is `commit` / `sync` / `merge` / `resolve-obligation` → these are actions DevSpark should not silently perform on the user's behalf. Give the exact command(s) or evidence needed and stop; do not fabricate a commit, a merge, or an obligation's evidence.
 - If **no** → take no action. Optionally show the runner-up so the user can choose.
 
 **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the confirmation and dispatch the recommended `/devspark-*` skill directly. For `commit` / `sync` / `merge`, still do not perform the destructive/shared action automatically — report the exact command and stop, since those touch shared history or require human approval.
@@ -125,10 +125,11 @@ When `--auto` is in effect, `/devspark-next` does not stop after one step — it
 
 The loop MUST halt and hand back to the human at the first of these **stop conditions**:
 
-- The recommendation becomes `commit`, `sync`, or `merge` (shared history / portal approval — never automated).
-- The next command would **create or switch a branch** (e.g. dispatching `/devspark-specify` or `/devspark-quickfix` from the default branch). Branch changes are never automated — stop, name the branch that would be created, and let the human confirm (Branch Safety, non-negotiable).
+- The recommendation becomes `commit`, `sync`, `merge`, or `resolve-obligation` (shared history, portal approval, or a mandatory obligation only evidence or its authority can satisfy — never automated).
+- The next command would **create or switch a branch** (e.g. dispatching `/devspark-specify` from the default branch). Branch changes are never automated — stop, name the branch that would be created, and let the human confirm (Branch Safety, non-negotiable).
+- `ready-for-pr` is reached on a work branch (`WORK_BRANCH` true) whose `WORK_COMPLETE` is false. Git cleanliness and commits do not prove the requested change is complete; stop and ask the developer to confirm the acceptance criteria, applicable verification, and any unresolved obligations before `/devspark-create-pr`.
 - A dispatched command surfaces a blocking gate FAIL or an unresolved constitution violation.
-- A command legitimately needs human input the autonomy instruction can't answer (e.g. an ambiguous route decision, a `one-off-fix` vs full-spec choice, missing credentials).
+- A command legitimately needs human input the autonomy instruction can't answer (e.g. an ambiguous route decision for existing v9.3 work, a material decision only the developer can make, missing credentials).
 - The `STATE` stops advancing (the same recommendation repeats), to avoid an infinite loop.
 - `ready-to-merge` is reached — the terminal success state for automation.
 

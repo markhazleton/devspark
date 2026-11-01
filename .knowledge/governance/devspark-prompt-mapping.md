@@ -45,31 +45,29 @@ Entries below describing mandatory spec artifacts apply only to routes that actu
 Any unsupported entry point is identified as a capability gap, not treated as a governance
 violation by the developer.
 
-## Model First — plan and build an ephemeral spec package
+## New work — universal start and resume
 
 | Command | Current behavior |
 |---|---|
-| **specify** | Spec content is unchanged, but the artifact it creates is explicitly ephemeral from creation — nothing it writes assumes it will exist after `implement` completes. Also runs an "Early Knowledge Grounding" check: if an existing `.knowledge/` node or decision appears to contradict the request, it's surfaced under `## Open Questions`/`## Constitution Conflicts` before drafting continues, instead of being caught later by `analyze`. |
-| **clarify** | Answers get encoded into the spec; the spec still dies with everything else in the package. Beyond the question flow, an answer is applied to every spec element it affects (success criteria, assumptions, boundaries, non-goals), contradictory text is replaced, and confirmed domain invariants, architectural constraints and accepted limitations are recorded in the existing sections. Clarify reasons about the entities and invariants behind each answer within the existing flow; it adds no phase, gate or questionnaire. |
-| **plan** | Consumes the spec through a declared map of its ten knowledge elements (requirements, domain invariants, architectural constraints, accepted limitations, success criteria, clarifications, assumptions, boundaries, non-goals, context) and the semantic purposes in `spec-validation-contract.md`: only `PROJECT` knowledge authorizes work, `CONSTRAIN` shapes the design, `CONTEXT` informs it. Optimization is free only inside declared behavior. Owns the bounded `.knowledge/` traversal for the delta, pinned down in `plan.md`'s `## Context Resolution` section as `context_resolved` entries (id, `kind`, the `via` relation or match that reached it, `hop`, and why it was retained) — projection runs to a maximum of **2 hops** from the lexical seeds, stopping earlier when nothing further can materially affect the delta, so `implement` never has to traverse. All four kinds are first-class: a flat document, an entity, an entity layer, or a decision. Research is question-driven: `research.md` is the question ledger and exists only when a material planning question needed it, and `data-model.md`, `contracts/` and `quickstart.md` exist only when the change justifies them; every downstream command tolerates their absence. Planning is finished when the material questions are resolved, requirements map to design, the mechanism shape and change surface are known and verification is sufficient, with no token, search or time quota. The Plan records `expected_change_surface` (path, change, why; no stored counts and no Knowledge list) as orientation, not an allow-list: Tasks, Analyze and Implement derive Knowledge owners from it with `explain-context --files`, explain justified support files, and return new architecture or scope to Plan. |
-| **tasks** | Every generated task carries a `(code_ref: pending \| knowledge_ref: pending)` placeholder from creation, including Setup/Foundational/Polish tasks — `implement` overwrites `pending` with real paths (or an explained `n/a`) as each task completes; verify-before-archive later checks every one is populated. Tasks is derivative: each task cites one forcing source (requirement, Plan decision, verification obligation, constitution obligation, Knowledge ownership update or approved Judge remediation), and a task that would add a mechanism the Plan lacks stops as a `PLANNING GAP` routed to Plan revise. Its handoff goes through Planning Review, not straight to Implement. |
-| **analyze** | The **closed-world** half of planning assurance: proves the planning artifacts are internally sound. Owns artifact consistency, requirement↔task coverage and traceability, requirement anchors, task sequencing validity, task mechanisms the Plan does not support (justified support files are fine; new architecture is not), completion bookkeeping, declared-contract conformance, and `context_resolved` **validity** — a stale or hallucinated reference is CRITICAL, the same severity class as traceability hallucination. It also reports a Plan whose mechanism contradicts a recorded spec decision or changes declared behavior (semantic fidelity), report-only and without proposing a redesign. Everything it owns is provable from the artifacts alone. Open-world concerns are routed to `critic` under `routed_findings:`, never emitted. |
-| **critic** | The **open-world** half of planning assurance: challenges whether that internally sound plan is wrong about the real system it will run in. Applies on observable change shape — persistent-data shape, cross-boundary interaction, state/lifecycle, nondeterministic behavior, new entry point — not on authored `risk_level`, which only scales severity. Must inspect the relevant existing code, tests, and `.knowledge/` before claiming anything about current behavior. Judges `context_resolved` *sufficiency* (`analyze` already confirmed it *resolves*), and emits a sufficiency finding only when the omission is demonstrably material. Emits no finding for its own missing metadata, and never reviews the work that resolved its earlier findings. |
-| **checklist** | Unchanged — still an ephemeral planning aid, same lifecycle as the rest of the package. |
-| **planning-review** | The normal developer-facing assurance step: resolves the feature **once** and hands that identity to every child, runs `analyze` (always), `critic` (when a change-shape signal applies), then **Judge**, and returns one planning decision (`PROCEED` / `CONDITIONAL` / `STOP`) from the reconciled concerns instead of two reports. Judge does not discover (every concern cites an existing child finding) and does not remediate (it writes only `gates/judge.md`, enforced by a read-only guard in `scripts/judge.py`). Reuses fresh child artifacts, and treats staleness as blocking only when it invalidates the evidence for a blocking decision. See `templates/judge-contract.md`. |
-| **quickfix** | Populates a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches, flat documents included) and `code_ref`/`knowledge_ref` linkage on its Validation Checklist — same linkage discipline as the full spec route, just lighter-weight. Deliberately skips `analyze` and `critic` entirely rather than running a lighter version of either; scope creep during implementation routes back to `/devspark-specify` instead of stretching the quickfix. |
+| **specify** | The single start point for new work: establishes the intended outcome and first useful increment, inspects relevant code/tests/Knowledge, and checks whether material assurance is needed. It offers work-item grounding only when tracking is configured and the developer names an item, keeps tracker text untrusted, and carries verification expectations into implementation. It creates a `NNN-work-*` branch without a specification or other file. A minimal `work.md` is written only when intent, decisions, blockers, status or next action would otherwise be lost across sessions. It does not classify work by size or generate planning gates; DevSpark no longer creates new full-spec or quick-spec bundles, and existing ones continue. |
+| **clarify** | Retained for active v9.3 specification bundles. New work asks only for a material decision that blocks the affected implementation; it does not create a question ledger or route through a clarification stage. On a `NNN-work-*` branch the prerequisite check resolves `FEATURE_SPEC` to the optional `work.md`, which clarify must not treat as a spec: it creates no `spec.md`, writes no `## Clarifications`, asks at most five questions in conversation, records an answer under `## Material Decisions` only when it must survive the session, and returns to implementation. |
+| **plan** | Retained for active v9.3 bundles and available on request when a material design or contract decision needs a durable record. It is not a prerequisite for new work. On a `NNN-work-*` branch it needs no specification and writes, only when requested or justified by a material uncertainty, a concise advisory `plan.md` that implementation may follow but never requires; it adds no tasks, gates or reviews and does not change the work route. |
+| **tasks** | Retained for active v9.3 bundles and optional coordination where dependencies or parallel ownership justify a task list. New work does not generate tasks merely to route to Implement. On a `NNN-work-*` branch it needs no specification or plan. It identifies a few dependency-ordered deliverables (or states that none are needed) and tracks them with the agent's built-in task tracking. Only when the list must survive a session, spans substantial dependencies, or coordinates several developers does it record a `## Remaining Deliverables` checklist in the optional `work.md`; it never writes `tasks.md` there. Open deliverables are not a completion gate, and the command triggers no Analyze, Critic, Judge or Planning Review. |
+| **analyze** | The **closed-world** half of planning assurance: proves the planning artifacts are internally sound. Owns artifact consistency, requirement↔task coverage and traceability, requirement anchors, task sequencing validity, task mechanisms the Plan does not support (justified support files are fine; new architecture is not), completion bookkeeping, declared-contract conformance, and `context_resolved` **validity** — a stale or hallucinated reference is CRITICAL, the same severity class as traceability hallucination. It also reports a Plan whose mechanism contradicts a recorded spec decision or changes declared behavior (semantic fidelity), report-only and without proposing a redesign. Everything it owns is provable from the artifacts alone. Open-world concerns are routed to `critic` under `routed_findings:`, never emitted. On a `NNN-work-*` branch it runs on demand for one stated concern (`WORK` tier): whether the recorded intent, plan decisions, declared contracts and tests contradict one another on it. It reports one compact result, writes no gate file, and returns to implementation. |
+| **critic** | The **open-world** half of planning assurance: challenges whether that internally sound plan is wrong about the real system it will run in. Applies on observable change shape — persistent-data shape, cross-boundary interaction, state/lifecycle, nondeterministic behavior, new entry point — not on authored `risk_level`, which only scales severity. Must inspect the relevant existing code, tests, and `.knowledge/` before claiming anything about current behavior. Judges `context_resolved` *sufficiency* (`analyze` already confirmed it *resolves*), and emits a sufficiency finding only when the omission is demonstrably material. Emits no finding for its own missing metadata, and never reviews the work that resolved its earlier findings. On a `NNN-work-*` branch it runs on demand for one stated concern (`WORK` tier) against the current code, tests, contracts and `.knowledge/`. It reports one compact result, writes no gate file, and returns to implementation. Its handoffs are offered, never auto-sent. |
+| **checklist** | An ephemeral planning aid for existing v9.3 specifications, same lifecycle as the rest of the package. On a `NNN-work-*` branch it writes no `checklists/` file and no `gates/checklist.md`, answers one named requirements-quality concern in conversation, and returns to implementation; its only handoff is back to implementation. |
+| **planning-review** | Retained for active v9.3 bundles or invoked for a specific planning concern. It is not a default pre-implementation sequence for new work. Its existing Analyze/Critic/Judge semantics and freshness behavior are unchanged for bundles. On a `NNN-work-*` branch, `judge.py resolve` reports `work-branch`. Judge then adjudicates only genuinely conflicting findings or a consequential trade-off, in chat, with no gate file. A decision needing someone else's authority goes to that person. Analyze or Critic never obliges a Judge run. |
+| **quickfix** | Retained as a direct legacy entry point. `/devspark-next` no longer asks developers to choose it over Specify; new work starts through the same `work` branch path. Scope discovered mid-fix never converts the route: a material signal adds only the assurance its concern needs (Critic, record-level Analyze, or a human decision) to the same quickfix, and the developer decides whether genuinely separate work starts with Specify. |
 
 ### Planning Review in one place
 
-On the **Model First route**, the illustrative developer path is *specify → planning → planning
-review → implement → verify → closeout → create-pr → pr-review*. This sequence is not a universal
-precondition for reviewing a change. Code First can arrive at Quickfix with an already-implemented
-diff, once that existing command supports the entry point. The same review obligations apply to
-the Delta's credible blast radius, but no synthetic Plan, spec, tasks, or historical approvals
-should be created solely to reconstruct a journey. At this snapshot the Quickfix implementation's
-actual support for post-implementation entry must still be verified before treating it as shipped.
-Internally, Model First planning review is analyze + conditional critic + Judge. Four terms stay
-separate:
+For new work, the default path is *specify → implement ↔ verify → create-pr → pr-review*.
+Implementation and verification may iterate. Existing v9.3 specification bundles keep their
+current *plan → tasks → planning-review → implement* behavior and are not migrated. No synthetic
+planning bundle or historical approval is created solely to reconstruct a new-work journey.
+Analyze, Critic and Judge retain their existing responsibilities and may still be invoked for
+specific concerns. Judge does not discover or remediate; each adjudicated concern still cites its
+existing child finding, and existing seal/freshness checks remain unchanged. Four finding terms stay separate:
 
 | Term | Meaning |
 |---|---|
@@ -129,6 +127,55 @@ files remain byte-identical; `PLAN_EXISTS` reports prior existence and `PLAN_MOD
 `revise` or `reset`. Only explicit `--reset` / `-Reset` replaces the Plan with the resolved template.
 Existing output keys and Knowledge refresh behavior are retained. Both shells are exercised by
 `test_setup_plan_preserves_bytes_until_explicit_reset` in `tests/test_spec_hardening_contract.py`.
+On a `NNN-work-*` branch, setup reports `WORK_BRANCH` true, an empty `FEATURE_SPEC` and the optional
+`WORK_NOTE`, and creates nothing: it neither copies the full-spec template (even with reset) nor
+refreshes the spec knowledge document. `check-prerequisites` lists an existing work-branch
+`plan.md` in `AVAILABLE_DOCS`; `next-context` ignores it for routing, and Judge lifecycle adds no
+gate for it. Both shells are exercised by `test_setup_plan_on_a_work_branch_needs_no_specification`,
+`test_work_branch_prerequisites_expose_an_optional_plan` and
+`test_an_optional_plan_keeps_work_on_the_universal_route`.
+
+On a `NNN-work-*` branch whose work directory exists, both `next-context` shells run `judge.py
+lifecycle` against it and report `LIFECYCLE_STATUS` and `LIFECYCLE_BLOCKERS`; they do not parse
+`work.md` obligations themselves. A committed branch whose lifecycle check fails routes to
+`delivery-blocked` instead of `ready-for-pr`: an unchecked `## Required Obligations` entry, or one
+checked without its authority or an evidence reference (a repository path, commit, review or
+approval id, or link; prose and placeholders do not count), recommends `resolve-obligation` and
+names the obligation and its authority, and any other failure
+returns to `/devspark-implement`. An open obligation on work that is still in progress or
+uncommitted keeps that route and adds a "Delivery stays blocked" note. Advisory findings and
+material decisions never block. If Python cannot run the check, the route is unchanged and the PR
+recommendation says readiness is unconfirmed; `/devspark-create-pr` still runs the same check. Spec
+and quickfix bundles keep their existing ladder. Both shells are exercised by
+`test_work_that_passes_lifecycle_reaches_the_pr_path`,
+`test_an_unresolved_obligation_blocks_the_pr_recommendation`,
+`test_a_checked_obligation_without_an_evidence_reference_still_blocks_delivery` and
+`test_an_open_obligation_is_named_before_delivery_without_changing_the_route`. The reference rule
+itself lives only in `judge.py lifecycle` and is exercised by
+`test_a_checked_obligation_needs_an_evidence_reference_and_its_authority`; it confirms a reference
+is recorded, not that the approval behind it is authentic.
+
+The `create-pr` preflight in both shells reports the same check as `lifecycle` (`status` of `pass`,
+`fail`, `unavailable` or `not-applicable`, with `failures` and `pending_later_phase`) for any route
+whose work directory or planning bundle exists. Create and update mode refuse
+`required-obligation-unresolved`, with `CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED`, the
+committed HEAD, and each obligation's authority. The refusal clears when the `work.md` entry is
+checked with a reference to the evidence or the authority's decision, then committed and pushed;
+no flag bypasses it. An `unavailable` check is never a pass: it carries a `reason`
+(`judge-missing`, `python-unavailable` or `invalid-output`) and `obligations_declared`, and when
+`work.md` declares `## Required Obligations` create and update mode refuse with
+`CREATE PR BLOCKED — LIFECYCLE CHECK UNAVAILABLE` and the recovery step for that reason. Without
+declared obligations an unavailable check is reported as unconfirmed and does not refuse, and
+`/devspark-next` says the same in its `REASON`. Other lifecycle failures stay a prompt-level stop
+the developer may override. Create and update mode exit `1` on every refusal or failure and `0`
+only on `status: ok`, in both shells. On a work branch `/devspark-verify` answers delivered,
+verified and eligible from proportional proof and writes no gate document; `/devspark-closeout`
+reassesses the same questions without one. Both shells are exercised by
+`test_an_unresolved_obligation_refuses_creation_and_names_its_authority`,
+`test_an_unevaluated_obligation_refuses_creation_and_says_why`,
+`test_create_and_update_exit_codes_separate_success_from_refusal` and
+`test_both_shells_report_the_same_lifecycle` in
+`tests/test_create_pr_knowledge_readiness_contract.py`.
 
 Revision state compares reviewed Plan/Tasks inputs and Tasks' recorded `plan_semantic_hash`.
 Changed inputs do not resolve a concern or rewrite Judge. An owned STOP routes to Plan revise,
@@ -173,7 +220,7 @@ Ownership split: the spec owns defining and preparing acceptance; QA operations 
 
 | Command | Current behavior |
 |---|---|
-| **implement** | Carries the heaviest discipline in the lifecycle: (1) consumes `context_resolved` as already-resolved context — takes at most **one additional hop** itself, and an escalation past that hop is logged and attributable, not silent; (2) updates code and knowledge together in one pass, preferring test evidence over code-only evidence, recording `test_attempted`/`fallback_reason` when it falls back; (3) populates `code_ref`/`knowledge_ref` on every task as it completes it; (4) never writes a spec, task, or plan identifier into code, tests, or `.knowledge/` (rule 1/5); (5) never archives anything — the spec or quickfix record stays live in `.devspark.work/` with its linkage populated, so it remains validate-able against code, tests, and knowledge for as long as the sprint needs it. `/devspark-release` is the sole command that later archives it. |
+| **implement** | Carries the heaviest discipline in the lifecycle: (1) consumes `context_resolved` as already-resolved context — takes at most **one additional hop** itself, and an escalation past that hop is logged and attributable, not silent; (2) updates code and knowledge together in one pass, preferring test evidence over code-only evidence, recording `test_attempted`/`fallback_reason` when it falls back; (3) records the test run as evidence for later reuse; (4) never writes a spec, task, or plan identifier into code, tests, or `.knowledge/` (rule 1/5); (5) never archives anything — the spec or quickfix record stays live in `.devspark.work/`, so it remains validate-able against code, tests, and knowledge for as long as the sprint needs it. `/devspark-release` is the sole command that later archives it. On a `NNN-work-*` branch it runs at most one assurance capability on demand for a stated concern, applies the disposition, and continues. An unchecked `## Required Obligations` entry in `work.md` blocks completion and delivery, and the developer cannot waive it. |
 
 ## Validation — carries assimilation forward, enforces the permanent record
 
@@ -185,8 +232,8 @@ Ownership split: the spec owns defining and preparing acceptance; QA operations 
 | **verify** | The evidence mechanism's engine, installed as a skill. Runs in two phases in one invocation. **Evidence phase**: runs the declared proof mode(s) from `spec.md`'s `required_gates`, writes `gates/verify.md`, and records a `test_ref` pointer for any mode that passed via a named, committed test — the citable evidence `implement` needs to record `verified_by: execution` on a knowledge object or decision. Observations surfaced during the run that are not proof results go to a `discovered:` list and never change a mode's status. **Closeout phase**: classifies every open finding against `templates/closeout-contract.md`, evaluates each acceptance criterion by its declared kind, and writes the completion decision to `gates/closeout.md` with `produced_by: verify`. It never tells the developer to go run a closeout command — the decision was just made. A route with no declared proof mode skips the evidence phase and still converges. |
 | **closeout** | **Optional / advanced — not on the normal path.** Re-runs verify's closeout phase alone, against the identical contract, producing the identical artifact with `produced_by: closeout`. Exists for reassessment: work continued after verify ran, a limitation was accepted later, a human wants to re-decide completion without paying for re-verification, or an experimental result needs a fresh decision. Explicitly accounts for the evidence it did **not** refresh — stale evidence is reported as stale and routes back to `/devspark-verify` rather than producing a `complete` decision about a previous version of the work. No command recommends it as a routine next step. |
 | **site-audit** | The one repo-wide, non-diff-scoped audit command — there is no separate `audit` command. Resolves `execution`-type evidence entries by re-running their cited tests (a separate accuracy pass from the existence-only coverage matrix), and runs the same graph-adjacent contradiction scan as `pr-review` §6c (same entity, same `constrains` decision, same `source_of_truth`) repo-wide instead of diff-scoped. Contradiction findings are always non-blocking warnings for human review. |
-| **explain** | Topic-scoped, read-only by default: grounds its answer and DELTA/KNOW findings in current code and tests. Discovery does not create work. Only a developer-requested Knowledge correction or draft may be written, after its own explicit approval, followed by index regeneration and focused re-verification. Saving a trace requires a separate approval; neither action is bundled with the other. Confirmed code defects route to Quickfix, genuinely missing behavior to Specify. Explain never implements code or creates a planning record. |
-| **release** | Is the **sole** command that ever moves anything from `.devspark.work/` into `.archive/{YYYY-MM-DD}/`: it sweeps `.devspark.work/specs/` and `.devspark.work/quickfixes/` for bundles that are `Complete` with fully populated `code_ref`/`knowledge_ref` linkage and archives them, unconditionally moves every other categorized `.devspark.work/` artifact (`pr-review/`, `audit/`, `metrics/`, `telemetry/`) into the same release archive folder — no age, count, or eligibility check for these, unlike specs/quickfixes — flags (but never auto-archives) orphaned in-flight state whose branch is stale/merged/deleted but never reached `Complete`, runs a lighter non-blocking backstop check of `.knowledge/` for obsolete/duplicate/historical content and decision docs whose `constrains`/`constrained_by` pointers have drifted, and is a second, window-wide checkpoint for the same guarantee `pr-review` checks per-diff (current `.knowledge/index.json`, a current `site-audit` knowledge-scope result with no open `KNOW1`–`KNOW6` findings for the window). |
+| **explain** | Topic-scoped, read-only by default: grounds its answer and DELTA/KNOW findings in current code and tests. Discovery does not create work. Only a developer-requested Knowledge correction or draft may be written, after its own explicit approval, followed by a Knowledge build check and focused re-verification. Saving a trace requires a separate approval; neither action is bundled with the other. Confirmed code defects route to Quickfix, genuinely missing behavior to Specify. Explain never implements code or creates a planning record. |
+| **release** | Is the **sole** command that ever moves anything from `.devspark.work/` into `.archive/{YYYY-MM-DD}/`: it sweeps `.devspark.work/specs/` and `.devspark.work/quickfixes/` for bundles that are `Complete` and archives them, unconditionally moves every other categorized `.devspark.work/` artifact (`pr-review/`, `audit/`, `metrics/`, `telemetry/`) into the same release archive folder — no age, count, or eligibility check for these, unlike specs/quickfixes — flags (but never auto-archives) orphaned in-flight state whose branch is stale/merged/deleted but never reached `Complete`, runs a lighter non-blocking backstop check of `.knowledge/` for obsolete/duplicate/historical content and decision docs whose `constrains`/`constrained_by` pointers have drifted, and is a second, window-wide checkpoint for the same guarantee `pr-review` checks per-diff (the Knowledge builds, a current `site-audit` knowledge-scope result with no open `KNOW1`–`KNOW6` findings for the window). |
 | **taskstoissues** | Already fully aligned without any change needed — its entire purpose is explaining why ephemeral tasks don't get exported as durable records, which is rule 1 stated as a user-facing explanation rather than an enforcement mechanism. |
 
 ## Script-first merge and PR review helpers
@@ -221,7 +268,7 @@ proof of review quality. `tests/test_pr_risk_calibrate_contract.py` covers the c
 | **constitution** | Already explicit that the Constitution is one of three current-truth categories alongside `.knowledge/` entities and `.knowledge/governance/decisions/` — not "documentation." "Dependent templates staying in sync" includes the decisions contract, and its own step 4 scans `.knowledge/governance/decisions/*.md` for `constrains` entries or prose that assumes the prior rule set. |
 | **discover-constitution** | Unchanged in mechanism — discovering implicit patterns is a different activity than maintaining the current-truth categories, and needs no revision. |
 | **evolve-constitution** | Already connects amendments to the decision-editing discipline: applying an approved amendment includes checking `.knowledge/governance/decisions/*.md` for a decision that contradicts it (a rationale, rejected alternative, or `constrains` entry that no longer holds), and correcting that decision in place — never a second, competing decision file for the same topic. |
-| **release** | A second, window-wide checkpoint for the same guarantee `pr-review` checks per-diff: confirms `.knowledge/index.json` is current, confirms a current `site-audit` knowledge-scope result with no open `KNOW1`–`KNOW6` findings for the release window, and is the sole command that archives every `Complete`, linkage-verified spec or quickfix from `.devspark.work/` into `.archive/{YYYY-MM-DD}/` — see the Validation section above for its full scope. |
+| **release** | A second, window-wide checkpoint for the same guarantee `pr-review` checks per-diff: confirms the Knowledge builds, confirms a current `site-audit` knowledge-scope result with no open `KNOW1`–`KNOW6` findings for the release window, and is the sole command that archives every `Complete` spec or quickfix from `.devspark.work/` into `.archive/{YYYY-MM-DD}/` — see the Validation section above for its full scope. |
 | **commit-audit / repo-story** | Read Git history, not the repo's current-truth layer — naturally exempt from current-truth-only, since Git is explicitly *where* history is supposed to live under this model. |
 | **upgrade** | Framework-version concern, orthogonal to the knowledge model. No change. |
 
@@ -270,11 +317,8 @@ generated into `templates/consumer-skills/` and keep the three-tier resolution.
 ## Developer-experience classification
 
 A command existing is not the same as a developer needing to know it exists.
-The table below describes **the current shipped route classification**, not a prescription for
-all Deltas. In particular, a `CORE HAPPY-PATH` classification must not be interpreted as a
-constitutionally mandatory phase of Code First or direct changes. Improving existing Quickfix
-for an already-implemented Delta is the next concrete feature opportunity, not a capability
-this mapping claims to have verified.
+The table below distinguishes the new-work happy path from capabilities retained for existing
+bundles. A core-path entry is guidance, not a new constitutional obligation.
 
 | Class | Meaning |
 |---|---|
@@ -286,18 +330,18 @@ this mapping claims to have verified.
 | Command | Current role | Required on the normal path? | UX classification |
 |---|---|---|---|
 | **next** | Detects lifecycle state and dispatches the single next step | No — but it makes every other row optional to memorize | CORE HAPPY-PATH (the zero-knowledge entry point) |
-| **specify** | Creates the temporary Model First route record | Only on specification-led routes | CORE HAPPY-PATH (Model First) |
-| **plan** | Design artifacts + bounded `.knowledge/` traversal | On the full-spec route only | CORE HAPPY-PATH (Model First) |
-| **implement** | Applies a planned Delta | When using the existing planned route | CORE HAPPY-PATH (Model First) |
+| **specify** | Understands new work and starts a bundle-free `work` branch | Yes, for new work | CORE HAPPY-PATH |
+| **plan** | Design artifacts + bounded `.knowledge/` traversal | Existing v9.3 bundles; otherwise on request | OPTIONAL ADVANCED |
+| **implement** | Starts or resumes work; also executes legacy bundles | Yes | CORE HAPPY-PATH |
 | **verify** | Evidence phase + closeout phase, one invocation | Yes, where a proof mode is declared | CORE HAPPY-PATH |
 | **create-pr** | Opens the PR and surfaces evidence/linkage status | Yes | CORE HAPPY-PATH |
 | **pr-review** | Primary assimilation trigger; nothing merges without it | Yes | CORE HAPPY-PATH |
-| **quickfix** | Lightweight contained-change route; post-implementation entry needs validation | Alternative to specification-led work | CORE HAPPY-PATH (alternate route) |
-| **tasks** | Dependency-ordered task list | Full-spec route only | OPTIONAL ADVANCED |
+| **quickfix** | Legacy contained-change entry and active-record continuation | No new-work route choice; direct use remains supported | OPTIONAL ADVANCED (legacy compatibility) |
+| **tasks** | Dependency-ordered task list | Existing v9.3 bundles or coordination that needs it | OPTIONAL ADVANCED |
 | **clarify** | Targeted questions encoded back into the spec | No | OPTIONAL ADVANCED |
-| **analyze** | Closed-world planning assurance: are the artifacts internally sound? | No — `planning-review` runs it | OPTIONAL ADVANCED (expert drill-down) |
-| **critic** | Open-world planning assurance: is the sound plan wrong about the real system? | No — `planning-review` runs it when applicable | OPTIONAL ADVANCED (expert drill-down) |
-| **planning-review** | Analyze + conditional Critic + Judge → one planning decision | When the specification route declares those gates | CORE HAPPY-PATH (Model First) |
+| **analyze** | Closed-world planning assurance: are the artifacts internally sound? | No — `planning-review` runs it for bundles; on demand for a stated concern on work branches | OPTIONAL ADVANCED (expert drill-down) |
+| **critic** | Open-world planning assurance: is the sound plan wrong about the real system? | No — `planning-review` runs it for bundles when applicable; on demand for a stated concern on work branches | OPTIONAL ADVANCED (expert drill-down) |
+| **planning-review** | Analyze + conditional Critic + Judge → one planning decision; on work branches, Judge alone on demand | Existing required v9.3 gates or a specific concern | OPTIONAL ADVANCED / LEGACY GATE |
 | **checklist** | Custom checklist for a feature | No | OPTIONAL ADVANCED |
 | **closeout** | Re-runs verify's closeout phase alone | **No — verify already does it** | INTERNAL CAPABILITY (advanced recovery entry point) |
 | **address-pr-review** | Works open review findings with commit isolation | Only when a review has open findings | OPTIONAL ADVANCED |

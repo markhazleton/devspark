@@ -10,6 +10,8 @@ source_of_truth:
 last_verified: '2026-10-12'
 ---
 
+<!-- markdownlint-disable MD025 -->
+
 # Product Documentation
 
 The authored public documentation lives in `site/src/`. DocFX builds it using the

@@ -32,12 +32,13 @@ def test_explain_forbids_self_promotion_of_findings() -> None:
     ) in _flat()
 
 
-def test_confirmed_code_defect_has_a_quickfix_handoff() -> None:
+def test_confirmed_code_defect_starts_work_rather_than_a_legacy_route() -> None:
     frontmatter = PROMPT.read_text(encoding="utf-8").split("---", 2)[1]
-    assert "agent: devspark-quickfix" in frontmatter
+    assert "agent: devspark-quickfix" not in frontmatter
+    assert "label: Start Work on a Gap or Defect\n    agent: devspark-specify" in frontmatter
     text = _flat()
     assert (
-        "Explain reports confirmed code defects and offers the Quickfix handoff "
-        "(/devspark-quickfix). It does not modify application code itself."
+        "Explain reports confirmed code defects and offers the Start Work handoff "
+        "(/devspark-specify). It does not modify application code itself."
     ) in text
     assert "Explain edits code only if" not in text

@@ -20,6 +20,10 @@ import json
 import shutil
 import subprocess
 import tempfile
+try:
+    from tests.bash_twin import BASH_EXE
+except ImportError:  # run as a script by test_contract_scripts.py
+    from bash_twin import BASH_EXE
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -37,18 +41,6 @@ def _copy_script_set(destination: Path) -> None:
         shutil.copy2(ROOT / rel_path, target)
 
 
-def _copy_shim_set(destination: Path) -> None:
-    _copy_script_set(destination)
-    for rel_path in (
-        Path("scripts/bash/create-new-feature.sh"),
-        Path("scripts/powershell/create-new-feature.ps1"),
-        Path("templates/spec-template.md"),
-    ):
-        target = destination / rel_path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(ROOT / rel_path, target)
-
-
 def _run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     # Always redirect stdin (even with empty input) so the child process sees
     # a non-interactive/redirected stdin -- otherwise it may inherit this
@@ -59,34 +51,23 @@ def _run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 
 _TEMPLATE_SCRIPT_REPO: Path | None = None
-_TEMPLATE_SHIM_REPO: Path | None = None
 _TEMP_ROOT: tempfile.TemporaryDirectory | None = None
 
 
-def _get_template_repo(*, with_shims: bool) -> Path:
-    global _TEMPLATE_SCRIPT_REPO, _TEMPLATE_SHIM_REPO, _TEMP_ROOT
+def _get_template_repo() -> Path:
+    global _TEMPLATE_SCRIPT_REPO, _TEMP_ROOT
     if _TEMP_ROOT is None:
         _TEMP_ROOT = tempfile.TemporaryDirectory()
-    temp_path = Path(_TEMP_ROOT.name)
-    if with_shims:
-        if _TEMPLATE_SHIM_REPO is None:
-            _TEMPLATE_SHIM_REPO = temp_path / "tpl-shim"
-            _TEMPLATE_SHIM_REPO.mkdir()
-            _copy_shim_set(_TEMPLATE_SHIM_REPO)
-            _init_git_repo(_TEMPLATE_SHIM_REPO)
-        return _TEMPLATE_SHIM_REPO
-    else:
-        if _TEMPLATE_SCRIPT_REPO is None:
-            _TEMPLATE_SCRIPT_REPO = temp_path / "tpl-script"
-            _TEMPLATE_SCRIPT_REPO.mkdir()
-            _copy_script_set(_TEMPLATE_SCRIPT_REPO)
-            _init_git_repo(_TEMPLATE_SCRIPT_REPO)
-        return _TEMPLATE_SCRIPT_REPO
+    if _TEMPLATE_SCRIPT_REPO is None:
+        _TEMPLATE_SCRIPT_REPO = Path(_TEMP_ROOT.name) / "tpl-script"
+        _TEMPLATE_SCRIPT_REPO.mkdir()
+        _copy_script_set(_TEMPLATE_SCRIPT_REPO)
+        _init_git_repo(_TEMPLATE_SCRIPT_REPO)
+    return _TEMPLATE_SCRIPT_REPO
 
 
-def _setup_repo(repo_root: Path, *, with_shims: bool = False) -> None:
-    tpl = _get_template_repo(with_shims=with_shims)
-    shutil.copytree(tpl, repo_root, dirs_exist_ok=True)
+def _setup_repo(repo_root: Path) -> None:
+    shutil.copytree(_get_template_repo(), repo_root, dirs_exist_ok=True)
 
 
 def _init_git_repo(repo_root: Path) -> None:
@@ -124,7 +105,7 @@ def _pwsh(cwd: Path, *, type_=None, json_mode=False, dry_run=False, short_name=N
 
 def _bash(cwd: Path, *, type_=None, json_mode=False, dry_run=False, short_name=None,
           yes=False, number=None, description=None) -> subprocess.CompletedProcess[str]:
-    args: list[str] = ["bash", "scripts/bash/new-branch.sh"]
+    args: list[str] = [BASH_EXE, "scripts/bash/new-branch.sh"]
     if type_ is not None:
         args += ["--type", type_]
     if json_mode:
@@ -142,28 +123,8 @@ def _bash(cwd: Path, *, type_=None, json_mode=False, dry_run=False, short_name=N
     return _run(args, cwd)
 
 
-def _pwsh_shim(cwd: Path, *, short_name: str, description: str) -> subprocess.CompletedProcess[str]:
-    return _run(
-        [
-            "pwsh", "-NoProfile", "-File", "scripts/powershell/create-new-feature.ps1",
-            "-Json", f"-ShortName:{short_name}", description,
-        ],
-        cwd,
-    )
-
-
-def _bash_shim(cwd: Path, *, short_name: str, description: str) -> subprocess.CompletedProcess[str]:
-    return _run(
-        [
-            "bash", "scripts/bash/create-new-feature.sh",
-            "--json", "--short-name", short_name, description,
-        ],
-        cwd,
-    )
-
-
 def _has_bash() -> bool:
-    return shutil.which("bash") is not None
+    return BASH_EXE is not None
 
 
 def _has_pwsh() -> bool:
@@ -180,13 +141,13 @@ def _test_type_tagged_naming_and_padding(runner) -> None:
         repo_root = Path(temp_dir)
         _setup_repo(repo_root)
 
-        result = runner(repo_root, type_="spec", json_mode=True, dry_run=True,
+        result = runner(repo_root, type_="work", json_mode=True, dry_run=True,
                          short_name="user-auth", description="Add user auth")
         check(result.returncode == 0, f"expected success, got {result.returncode}: {result.stderr}")
         data = json.loads(result.stdout)
-        check(data["BRANCH_NAME"] == "001-spec-user-auth", f"unexpected branch name: {data['BRANCH_NAME']}")
+        check(data["BRANCH_NAME"] == "001-work-user-auth", f"unexpected branch name: {data['BRANCH_NAME']}")
         check(data["NUMBER"] == "001", f"expected 3-digit padding, got {data['NUMBER']}")
-        check(data["TYPE"] == "spec", "type should be echoed back")
+        check(data["TYPE"] == "work", "type should be echoed back")
         check(data["SWITCHED"] is False, "dry-run must never switch")
         check(data["ARTIFACT_PATH"] == "", "dry-run must not scaffold an artifact")
 
@@ -207,6 +168,12 @@ def _test_invalid_type_errors(runner) -> None:
         result = runner(repo_root, type_="bogus", json_mode=True, dry_run=True, description="Some description")
         check(result.returncode == 1, f"expected exit 1 for invalid type, got {result.returncode}")
 
+        # New work never scaffolds a full-spec or quick-spec bundle.
+        for retired in ("spec", "quick"):
+            result = runner(repo_root, type_=retired, json_mode=True, dry_run=True, description="Some description")
+            check(result.returncode == 1, f"expected exit 1 for retired type {retired}, got {result.returncode}")
+            check("type must be one of: fix, work" in result.stderr, f"unexpected error for {retired}: {result.stderr}")
+
 
 def _test_dry_run_no_switch(runner) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -214,7 +181,7 @@ def _test_dry_run_no_switch(runner) -> None:
         _setup_repo(repo_root)
 
         before = subprocess.run(["git", "branch", "--show-current"], cwd=repo_root, capture_output=True, text=True).stdout.strip()
-        result = runner(repo_root, type_="quick", json_mode=True, dry_run=True, yes=True, description="Quick idea")
+        result = runner(repo_root, type_="work", json_mode=True, dry_run=True, yes=True, description="Quick idea")
         check(result.returncode == 0, f"dry-run should succeed: {result.stderr}")
         after = subprocess.run(["git", "branch", "--show-current"], cwd=repo_root, capture_output=True, text=True).stdout.strip()
         check(before == after, "dry-run must never change the current branch")
@@ -237,7 +204,7 @@ def _test_legacy_backward_compat_counted(runner) -> None:
         subprocess.run(["git", "commit", "-m", "seed legacy"], cwd=repo_root, check=True, capture_output=True, text=True)
         subprocess.run(["git", "checkout", "main"], cwd=repo_root, check=True, capture_output=True, text=True)
 
-        result = runner(repo_root, type_="spec", json_mode=True, dry_run=True, description="New feature")
+        result = runner(repo_root, type_="work", json_mode=True, dry_run=True, description="New feature")
         check(result.returncode == 0, f"expected success: {result.stderr}")
         data = json.loads(result.stdout)
         check(int(data["NUMBER"]) >= 8, f"expected index >= 8 given legacy 007/QF-2026-003, got {data['NUMBER']}")
@@ -277,41 +244,22 @@ def _test_hostile_shortname_produces_valid_ref(runner) -> None:
         check(check_result.returncode == 0, f"composed branch name is not a valid git ref: {branch_name}")
 
 
-def _test_shim_delegates_named_arguments(shim_runner) -> None:
-    # create-new-feature delegates to new-branch; the type/short-name/number it
-    # passes must arrive as *named* parameters. A shell-specific argument
-    # construction that degrades them to positional values is silently swallowed
-    # by new-branch's ValueFromRemainingArguments description parameter, which
-    # then fails the type guard.
-    with tempfile.TemporaryDirectory() as temp_dir:
-        repo_root = Path(temp_dir)
-        _setup_repo(repo_root, with_shims=True)
-
-        result = shim_runner(repo_root, short_name="user-auth", description="Add user auth")
-        check(result.returncode == 0, f"shim delegation failed ({result.returncode}): {result.stderr}")
-        data = json.loads(result.stdout)
-        check(data["BRANCH_NAME"] == "001-spec-user-auth", f"unexpected branch name: {data['BRANCH_NAME']}")
-        check(data["FEATURE_NUM"] == "001", f"expected 3-digit padding, got {data['FEATURE_NUM']}")
-        check(bool(data["SPEC_FILE"]), "shim must report the scaffolded spec path")
-
-
 def main() -> None:
     suites = []
     if _has_pwsh():
-        suites.append(("pwsh", _pwsh, _pwsh_shim))
+        suites.append(("pwsh", _pwsh))
     if _has_bash():
-        suites.append(("bash", _bash, _bash_shim))
+        suites.append(("bash", _bash))
     if not suites:
         raise AssertionError("neither pwsh nor bash is available to exercise new-branch contract tests")
 
-    for label, runner, shim_runner in suites:
+    for label, runner in suites:
         _test_type_tagged_naming_and_padding(runner)
         _test_invalid_type_errors(runner)
         _test_dry_run_no_switch(runner)
         _test_legacy_backward_compat_counted(runner)
         _test_branch_safety_no_switch_without_confirmation(runner)
         _test_hostile_shortname_produces_valid_ref(runner)
-        _test_shim_delegates_named_arguments(shim_runner)
         print(f"new-branch contract validated ({label}).")
 
 

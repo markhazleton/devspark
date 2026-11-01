@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -238,3 +239,66 @@ def test_validator_preserves_explicit_legacy_closure_provenance(tmp_path):
     assert finding["verification"] is None
     assert finding["provenance"]["kind"] == "legacy"
     assert validator.validate(review.read_text(encoding="utf-8")) == []
+
+
+def _apply(review, tmp_path, event):
+    inspect = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "inspect", str(review), "--json"],
+        capture_output=True, text=True, timeout=30,
+    )
+    event_path = tmp_path / "event.json"
+    event_path.write_text(json.dumps(event), encoding="utf-8")
+    result = subprocess.run(
+        [sys.executable, str(STATE_ENGINE), "apply", str(review), "--event", str(event_path),
+         "--expected-digest", json.loads(inspect.stdout)["digest"], "--repo-root", str(tmp_path), "--json"],
+        capture_output=True, text=True, timeout=30, stdin=subprocess.DEVNULL,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    return json.loads(result.stdout)
+
+
+def _accepted_blocker_review(tmp_path):
+    review = tmp_path / "pr-7.md"
+    review.write_bytes(MODERN_FIXTURE.read_bytes())
+    _apply(review, tmp_path, {
+        "operation": "disposition", "finding_id": "H-01",
+        "disposition": {
+            "kind": "accepted", "reason": "Synthetic authorized disposition.",
+            "authorized_by": "review-owner", "capture_reference": "synthetic-decision-1",
+        },
+    })
+    return review
+
+
+def test_unmet_required_condition_is_a_valid_reason_for_request_changes(tmp_path):
+    review = _accepted_blocker_review(tmp_path)
+    derived = _apply(review, tmp_path, {
+        "operation": "record",
+        "finding": {
+            "finding_id": "M-01", "aliases": [], "severity": "medium", "category": "PRD3", "blocking": False,
+            "description": "Synthetic non-blocking note.", "expected_outcome": "Note is addressed.",
+            "evidence": ["synthetic"], "recommended_action": "Address the note.", "execution_mode": "manual",
+            "status": "open", "outcome": "", "provenance": "native", "remediation": None,
+            "verification": None, "disposition": None, "reopen_reason": None,
+        },
+        "conditions": [{
+            "condition_id": "required-review-check", "result": "fail", "required": True,
+            "evidence": ["Synthetic required check did not pass."], "reason": "Separate unmet obligation.",
+        }],
+    })
+    text = review.read_text(encoding="utf-8")
+
+    assert derived["unresolved_blockers"] == 0
+    assert derived["recommendation"] == "request-changes"
+    assert "REQUEST CHANGES" in text
+    assert validator.validate(text) == []
+
+
+def test_request_changes_without_blocker_or_unmet_condition_stays_invalid(tmp_path):
+    review = _accepted_blocker_review(tmp_path)
+    text = review.read_text(encoding="utf-8")
+    assert validator.validate(text) == []
+    line = re.search(r"^\*\*Recommendation\*\*:.*$", text, re.M).group(0)
+    forced = text.replace(line, "**Recommendation**: ⚠️ REQUEST CHANGES — forced without a basis.", 1)
+
+    assert "rec-without-blocker" in _codes(forced)

@@ -127,6 +127,7 @@ def validate(text: str, digest: dict | None = None) -> list[dict]:
 
     state_engine = None
     state = None
+    unmet_conditions: list = []
     if "review_state" in fm:
         state_engine = _load_review_state_engine()
         try:
@@ -135,6 +136,7 @@ def validate(text: str, digest: dict | None = None) -> list[dict]:
             add(exc.issue["code"], exc.issue["message"])
         else:
             derived = state_engine._derive(state)
+            unmet_conditions = derived["unmet_conditions"]
             try:
                 rendered = state_engine._render_views(body, state)
             except state_engine.StateError as exc:
@@ -191,8 +193,10 @@ def validate(text: str, digest: dict | None = None) -> list[dict]:
             fid for kind, fid, status in rows if kind in ("C", "H", "PRD") and not CLOSED.search(status)
         ]
     rec = recommendation(body)
-    if rec in ("request-changes", "reject") and not blocking_open:
-        add("rec-without-blocker", "REQUEST CHANGES/REJECT needs at least one open blocking finding (C, H or PRD)")
+    # An unmet required review condition is a legitimate, state-engine-derived reason to request changes.
+    if rec in ("request-changes", "reject") and not blocking_open and not unmet_conditions:
+        add("rec-without-blocker",
+            "REQUEST CHANGES/REJECT needs at least one open blocking finding (C, H or PRD) or an unmet required condition")
     if rec == "approve" and blocking_open:
         add("approve-with-blocker", f"APPROVE while blocking findings are open: {', '.join(blocking_open[:5])}")
     immediate = re.search(r"### Immediate Actions[^\n]*\n(.*?)(?=\n### |\n## )", body, re.S)

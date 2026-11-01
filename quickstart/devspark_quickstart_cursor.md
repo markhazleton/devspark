@@ -128,9 +128,10 @@ Before creating anything, check for prior legacy / DevSpark installations:
 
 ### Upgrade cleanup
 
-After refreshing stock files, remove only framework-owned commands absent from the
-canonical manifest. Preserve `.devspark.work/`, `.knowledge/`, `.archive/`, and
-user overrides. Keep `.devspark/VERSION` as the canonical installed-version stamp.
+After the stock files are refreshed, Step 9.5 prunes `.devspark/` to the manifest: any
+framework file the manifest does not list is removed. `.devspark.work/`, `.knowledge/`,
+`.archive/`, and user overrides are preserved. `.devspark/VERSION` is the canonical
+installed-version stamp.
 
 ---
 
@@ -157,7 +158,7 @@ Plan:
   • Install N canonical files from manifest.install → .devspark/ (commands, templates, skills, both script sets) + agents-registry.json  (category `skill` entries are skipped)
   • Generate N command entry points → .cursor/commands/devspark-<cmd>.md
   • Retire 8.x entry points: delete unmodified, quarantine edited, remove orphans (one confirmation)  [Update/Repair; the 8.x classes only when the installed major version is below 9]
-  • Prune any non-canonical .devspark/ entries (manifest.devspark_root)  [Update/Repair]
+  • Prune .devspark/ to the manifest: root entries not in manifest.devspark_root, files not in manifest.install  [Update/Repair]
   • Seed constitution → .knowledge/governance/constitution.md  [if needed]
   • Write VERSION stamp → .devspark/VERSION
   • Update .gitignore
@@ -219,7 +220,7 @@ Execute **only** these steps in order, then skip to Step 11.7 (Initialize and Re
 - **Step 4** — Re-install every file in the manifest `install` array (commands, templates, skills, scripts, registry; not the `skill` category) into its `dest`, overwriting in place
 - **Step 7** — Re-create all command entry point files (overwrite — they are framework files)
 - **Step 7.5** — Retire 8.x entry points (the 8.x classes only when the installed major version is below 9; orphans on every run)
-- **Step 9.5** — Prune any non-canonical `.devspark/` files (uses `manifest.devspark_root`)
+- **Step 9.5** — Prune `.devspark/` to the manifest (root entries via `manifest.devspark_root`, files via `manifest.install`)
 - **Step 10** — Update `.devspark/VERSION` with new version and today's date
 - **Step 11 (review, advisory — never modify `.devspark.work/`)** — Report three staleness signals so the team can act:
   - **Orphaned overrides** — any file in `.devspark.work/commands/`, `.devspark.work/{git-user}/commands/`, `.devspark.work/scripts/bash/`, or `.devspark.work/scripts/powershell/` whose matching stock default no longer exists under `.devspark/` (only `devspark.*.md` command override files mirror stock). Recommend deleting or re-pointing.
@@ -236,7 +237,7 @@ Execute **only** these steps in order, then skip to Step 11.7 (Initialize and Re
 - **Step 4** — Re-install every file in the manifest `install` array whose `dest` is missing or stale, overwriting in place
 - **Step 7** — Re-create all command entry point files (overwrite missing or stale copies)
 - **Step 7.5** — Retire 8.x entry points (the 8.x classes only when the installed major version is below 9; orphans on every run)
-- **Step 9.5** — Prune any non-canonical `.devspark/` files (uses `manifest.devspark_root`)
+- **Step 9.5** — Prune `.devspark/` to the manifest (root entries via `manifest.devspark_root`, files via `manifest.install`)
 - **Step 10** — Re-write `.devspark/VERSION` using the current `LATEST_VERSION` and today's date
 
 ---
@@ -286,7 +287,7 @@ Using the `$manifest` object (PowerShell) / `/tmp/devspark-manifest.json` (bash)
 
   ```bash
   raw_base=$(jq -r .raw_base /tmp/devspark-manifest.json)
-  jq -r '.install[] | select(.category != "skill") | [.source, .dest] | @tsv' /tmp/devspark-manifest.json |
+  jq -r '.install[] | select(.category != "skill") | [.source, .dest] | @tsv' /tmp/devspark-manifest.json | tr -d '\r' |
   while IFS=$'\t' read -r src dest; do
     mkdir -p "$(dirname "$dest")"
     curl -fsS -H 'Cache-Control: no-cache' "$raw_base/$src?cb=$(date +%s%N)" -o "$dest"
@@ -308,7 +309,7 @@ else { Write-Host "All $($items.Count) canonical files present." }
 miss=0
 while IFS= read -r dest; do
   [ -f "$dest" ] || { echo "MISSING: $dest"; miss=$((miss+1)); }
-done < <(jq -r '.install[] | select(.category != "skill") | .dest' /tmp/devspark-manifest.json)
+done < <(jq -r '.install[] | select(.category != "skill") | .dest' /tmp/devspark-manifest.json | tr -d '\r')
 echo "Missing files: $miss"
 ```
 
@@ -431,7 +432,7 @@ Only when creating a new constitution, use the project name, tech stack, and cor
 
 ---
 
-## Step 9.5: Prune Non-Canonical `.devspark/` Files
+## Step 9.5: Prune `.devspark/` to the Manifest
 
 > Runs in **Update** and **Repair** modes. A Fresh Install starts clean, so skip it there.
 
@@ -444,7 +445,9 @@ The canonical DevSpark `.devspark/` layout has **exactly four** root entries:
 
 Anything else at the `.devspark/` **root** is an obsolete framework entry and must be removed. Common offenders: root-level `aliases/`, `memory/`, `prompts/`, `risk-checklists/`, `skills/`, `workflows/`, a scratch `tmp/`, and stray root-level template `.md` files (`spec-template.md`, `plan-template.md`, etc.). The engine resolves atomic prompts, workflows, and aliases under `.devspark/templates/…` — **never** at the `.devspark/` root — so root-level copies are always stale.
 
-Prune with an **allowlist** so only the canonical root entries survive. The allowlist comes from `manifest.devspark_root` (captured in **Step 2**); the four-entry default below is the fallback if the manifest field is absent. This only touches the `.devspark/` root and **never** touches `.devspark.work/`, `.knowledge/`, or `.archive/`:
+Prune in two passes so `.devspark/` holds exactly what the manifest lists. Both passes use the manifest captured in **Step 2**, and neither ever touches `.devspark.work/`, `.knowledge/`, or `.archive/`.
+
+**Pass 1: the `.devspark/` root.** Keep only the root entries in `manifest.devspark_root`; the four-entry default below is the fallback if the manifest field is absent:
 
 ```powershell
 $keep = if ($manifest.devspark_root) { @($manifest.devspark_root) + 'VERSION' | Select-Object -Unique }
@@ -458,7 +461,7 @@ Get-ChildItem .devspark -Force |
 ```
 
 ```bash
-root=$(jq -r '.devspark_root[]?' /tmp/devspark-manifest.json 2>/dev/null | tr '\n' ' ')
+root=$(jq -r '.devspark_root[]?' /tmp/devspark-manifest.json 2>/dev/null | tr -d '\r' | tr '\n' ' ')
 [ -n "$root" ] || root="defaults templates scripts"
 keep=" VERSION $root "
 shopt -s dotglob nullglob
@@ -471,7 +474,52 @@ done
 shopt -u dotglob nullglob
 ```
 
-> Canonical content **under** `.devspark/templates/` (including `templates/skills/`, `templates/prompts/`) is preserved — only the `.devspark/` root is pruned.
+**Pass 2: inside `defaults/`, `templates/`, and `scripts/`.** The manifest `install` array is the complete list of framework files. Delete every file under `.devspark/defaults/`, `.devspark/templates/`, and `.devspark/scripts/` whose path is not a `dest` in `manifest.install`, then remove any directory left empty. This retires files that a release dropped or renamed, so an upgraded install matches a fresh one. Team and personal customizations are not affected: they live in `.devspark.work/`, never in `.devspark/`.
+
+Run Pass 2 only after Step 4 verified that every `dest` exists. If `manifest.install` is absent or empty, skip Pass 2 and report that it was skipped. Never prune against an empty list.
+
+```powershell
+$dests = @($manifest.install | ForEach-Object { $_.dest } | Where-Object { $_ })
+if ($dests.Count -eq 0) {
+  Write-Host "Skipping Pass 2: manifest.install is empty"
+} else {
+  $canonical = [System.Collections.Generic.HashSet[string]]::new([string[]]$dests, [System.StringComparer]::OrdinalIgnoreCase)
+  $repoRoot = (Get-Location).Path
+  foreach ($dir in 'defaults', 'templates', 'scripts') {
+    $base = Join-Path '.devspark' $dir
+    if (-not (Test-Path -LiteralPath $base)) { continue }
+    Get-ChildItem -LiteralPath $base -Recurse -File -Force | ForEach-Object {
+      $rel = [System.IO.Path]::GetRelativePath($repoRoot, $_.FullName).Replace('\', '/')
+      if (-not $canonical.Contains($rel)) {
+        Write-Host "Removing file not in manifest: $rel"
+        Remove-Item -LiteralPath $_.FullName -Force
+      }
+    }
+    Get-ChildItem -LiteralPath $base -Recurse -Directory -Force |
+      Sort-Object { $_.FullName.Length } -Descending |
+      Where-Object { -not (Get-ChildItem -LiteralPath $_.FullName -Force) } |
+      ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force }
+  }
+}
+```
+
+```bash
+if [ "$(jq '.install | length' /tmp/devspark-manifest.json 2>/dev/null || echo 0)" -eq 0 ]; then
+  echo "Skipping Pass 2: manifest.install is empty"
+else
+  jq -r '.install[].dest' /tmp/devspark-manifest.json | tr -d '\r' | LC_ALL=C sort -u > /tmp/devspark-dests.txt
+  for dir in defaults templates scripts; do
+    [ -d ".devspark/$dir" ] || continue
+    find ".devspark/$dir" -type f | LC_ALL=C sort |
+      LC_ALL=C comm -23 - /tmp/devspark-dests.txt |
+      while IFS= read -r f; do
+        echo "Removing file not in manifest: $f"
+        rm -f -- "$f"
+      done
+    find ".devspark/$dir" -mindepth 1 -type d -empty -delete
+  done
+fi
+```
 
 ---
 
@@ -510,13 +558,12 @@ Update, Repair, or Already Current. It is never skipped and never gated behind t
 banner. It is cheap to re-run: if nothing has changed since the last run, it reports that and moves
 on.
 
-Run `python .devspark/scripts/build_knowledge_index.py --repo-root . --check`. If it passes with
-no drift, report "`.knowledge/` index is current" and continue to Step 12. Otherwise, run
-`python .devspark/scripts/build_knowledge_index.py --repo-root .` to regenerate
-`.knowledge/index.json` and `.knowledge/ontology/coverage.json`, resolve every reported gap
-(missing layer docs, unresolved `relations[].object` references, missing
-`constrains`/`constrained_by` reciprocity, a `source_of_truth` path that doesn't exist), and
-report a one-line summary of what was regenerated.
+Run `python .devspark/scripts/build_knowledge_index.py --repo-root . --check`. If it passes, report
+"`.knowledge/` builds" and continue to Step 12. Otherwise, resolve every reported error (missing
+layer docs, unresolved `relations[].object` references, missing `constrains`/`constrained_by`
+reciprocity, a `source_of_truth` path that doesn't exist), re-run `--check`, and report a one-line
+summary of what was fixed. `.knowledge/index.json` and `.knowledge/ontology/coverage.json` are
+optional build output: never regenerate or commit them just to satisfy this step.
 
 `.devspark/scripts/build_knowledge_index.py` is the one authoritative implementation — every
 entry point (this step, CI, `/devspark-explain`, `site-audit`, `release`) resolves to it. If a
@@ -544,6 +591,7 @@ Confirm the installation:
 
 - Check that every file in the manifest `install` array exists at its `dest` (commands in `.devspark/defaults/commands/`, templates and skills in `.devspark/templates/`, both script sets in `.devspark/scripts/`, `agents-registry.json` at the repo root)
 - Check that the expected command entry point files from Step 7 exist in `.cursor/commands/` as `devspark-<cmd>.md`, and that Step 7.5 left no unmodified `devspark.<cmd>.md` there
+- Check that `.devspark/defaults/`, `.devspark/templates/`, and `.devspark/scripts/` contain no file that is missing from the manifest `install` array (Step 9.5, Pass 2)
 - If any expected framework file is missing, stop and run **Repair Mode** before reporting success
 
 - **Upgrade cleanup**: obsolete stock entries removed; `.devspark/VERSION`, project knowledge, temporary work, and user overrides preserved

@@ -24,7 +24,6 @@ def main() -> None:
     plan_template = _read("templates/plan-template.md")
     spec_validation_contract = _read("templates/spec-validation-contract.md")
     preamble = _read("templates/command-preamble-contract.md")
-    implement = _read("templates/commands/implement.md")
     tasks = _read("templates/commands/tasks.md")
     quickfix = _read("templates/commands/quickfix.md")
     tasks_template = _read("templates/tasks-template.md")
@@ -38,8 +37,8 @@ def main() -> None:
     assert "quickfix record" in create_pr.lower()
     assert "advisory-only noise" in create_pr.lower()
     assert "test signal wording" in create_pr.lower()
-    assert "shared specification validation contract" in specify.lower()
-    assert "spec-validation-contract.md" in specify
+    assert "No Plan, Tasks, checklist, specification, or review artifact" in specify
+    assert "does not ask the developer to" in specify
     assert "shared specification validation contract" in clarify.lower()
     assert "spec-validation-contract.md" in clarify
     assert "## 1. Frontmatter Contract" in spec_validation_contract
@@ -49,15 +48,9 @@ def main() -> None:
     assert "gates/" in plan_template
 
     assert "Traceability is strictly one-directional" in preamble
-    assert "code_ref` may\n  name both production and test files" in preamble
-    assert "Every implementation task or checklist item that changes behavior MUST record all affected" in preamble
-    assert "A durable `.knowledge/` node's `source_of_truth` or evidence" in preamble
-    assert "code_ref` includes all production and test files" in implement
-    assert "every affected production-code path, test path, and current `.knowledge/` path" in implement
-    assert "neither durable output may point back" in tasks
-    assert "code_ref` MUST list every affected production-code and test file" in tasks
+    assert "Neither durable output may point back" in tasks
     assert "never reference the temporary quickfix record from a durable file" in quickfix
-    assert "Every generated task ends with `(code_ref: pending | knowledge_ref: pending)`" in tasks_template
+    assert "No back-links" in tasks
     assert "ask targeted clarification questions before proposing a durable update" in explain
     assert "Explain is read-only by default" in explain
     assert "never combine two actions, or an action and a trace save, into one" in explain

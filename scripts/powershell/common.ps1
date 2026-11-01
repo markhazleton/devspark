@@ -356,6 +356,10 @@ function Find-FeatureDirByPrefix {
         return (Join-Path $specsDir $BranchName)
     }
 
+    if ($BranchName -match '^\d{3}-work-') {
+        return (Join-Path $specsDir $BranchName)
+    }
+
     #  (type-aware routing): a NNN-fix-<slug> branch is a quickfix, whose
     # record lives under .devspark.work/quickfixes/, not specs/. Resolve there so
     # FEATURE_DIR-based consumers (create-pr, next-context) do not misroute.
@@ -393,7 +397,9 @@ function Get-FeaturePathsEnv {
     # Quickfix routes resolve FEATURE_DIR to .devspark.work/quickfixes/, but the
     # record file is named after the branch (e.g. 042-fix-null-guard.md), not spec.md.
     $quickfixesDir = Join-Path $repoRoot '.devspark.work/quickfixes'
-    if ($featureDir -eq $quickfixesDir) {
+    if ($currentBranch -match '^\d{3}-work-') {
+        $featureSpec = Join-Path $featureDir 'work.md'
+    } elseif ($featureDir -eq $quickfixesDir) {
         $featureSpec = Join-Path $featureDir "$currentBranch.md"
     } else {
         $featureSpec = Join-Path $featureDir 'spec.md'

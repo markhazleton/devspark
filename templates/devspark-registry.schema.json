@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://dev.makeboldspark.com/schemas/devspark-registry.schema.json",
   "title": "DevSpark Multi-App Registry",
-  "description": "Multi-app registry at .devspark.work/devspark.registry.json. Validated by the /devspark.validate-registry command. Repository facts and team policy remain separate in .devspark.work/devspark.json.",
+  "description": "Multi-app registry at .devspark.work/devspark.registry.json. Validated by the /devspark-validate-registry skill. Repository facts and team policy remain separate in .devspark.work/devspark.json.",
   "type": "object",
   "additionalProperties": true,
   "required": ["version", "mode"],

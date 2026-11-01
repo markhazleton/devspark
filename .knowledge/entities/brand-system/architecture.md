@@ -14,6 +14,8 @@ evidence:
   fallback_reason: Brand package correctness depends on file presence and visual review.
 ---
 
+<!-- markdownlint-disable MD025 -->
+
 # Brand System
 
 The brand system holds durable visual identity assets and implementation-ready

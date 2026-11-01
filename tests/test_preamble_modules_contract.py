@@ -132,7 +132,7 @@ def test_the_core_keeps_the_universal_safety_scope_and_authority_rules() -> None
         "Branch Safety (non-negotiable)",
         "required even under `--auto`",
         "Minimum Sufficient Change",
-        "Complexity is a cost that requires justification.",
+        "Complexity is a cost that requires justification",
     ):
         assert phrase in core, phrase
 

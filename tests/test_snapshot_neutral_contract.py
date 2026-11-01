@@ -30,7 +30,8 @@ NAMED_DELTAS: dict[str, str] = {
     "specify": "stage split: authors the pre-merge mode and the post-deploy obligation as two halves",
     "plan": "stage split preserved in planning",
     "tasks": "post-merge capture rule applies to every tasks derivation",
-    "critic": "deployment rollback concern stays pre-merge and critical beside post-deploy deferrals",
+    "critic": "deployment rollback concern stays pre-merge and critical beside post-deploy deferrals; a closer existing implementation than the planned new mechanism is a Critic finding; report tables project the YAML findings",
+    "planning-review": "adjudication asks first whether the plan reuses the closest existing pattern",
     "workitem-create": "permanent rule: never creates a User Story, is never invoked by another command, and is never a lifecycle dependency",
     "workitem-review": "permanent rule: no handoff to the creating command",
     "next": "terminology: the /devspark-* wildcard names skills, not commands; routing is unchanged",
@@ -38,6 +39,9 @@ NAMED_DELTAS: dict[str, str] = {
     "pr-review": "engineering judgment: challenge accidental complexity and distinguish repeated integration from justified complexity",
     "address-pr-review": "bounded finding closeout and severity/blocking separation: closure follows the recorded review state, and blocking is an explicit field rather than inferred from severity",
     "quickfix": "Code First entry: reconcile an existing diff into the same quickfix record, route to implementation finalization, and keep advisory route guidance from waiving mandatory requirements",
+    "explain": "Knowledge is judged by content against code; no derived-index freshness gate and no date-only finding",
+    "site-audit": "Knowledge completeness checks that the Knowledge builds and reads coverage; a date alone is never a finding",
+    "constitution": "one flow: the handoff starts new work rather than a feature specification",
 }
 
 BASELINE_BODIES = json.loads((snap.BASELINE / "command-bodies.json").read_text(encoding="utf-8"))

@@ -1,6 +1,6 @@
 ---
 name: devspark-specify
-description: "Create or update the feature specification from a natural language feature description."
+description: "Understand new work and start the universal implementation path without choosing a workflow size."
 user-invocable: true
 disable-model-invocation: true
 ---

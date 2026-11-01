@@ -2,6 +2,27 @@
 
 Full per-version detail is in the [CHANGELOG](https://github.com/MarkHazleton/DevSpark/blob/main/CHANGELOG.md). This page summarizes the current line. To adopt a release, run your agent's [quickstart](get-started/quickstart.md) in Update Mode; see [Upgrade](get-started/upgrade.md).
 
+## 9.4.0: 2026-10-31
+
+**One Flow. Assurance as Needed. Deliver Software.** Every change now follows one path: understand, implement and verify, deliver. There is no quickfix, quick-spec or full-spec route to choose.
+
+- **What changed.** `/devspark-specify` starts new work on a `NNN-work-*` branch with no route question and no planning file. `/devspark-next` resumes it in a later session from Git and an optional `work.md` note. `/devspark-implement` changes code, tests and Knowledge together, `/devspark-verify` reports what was proven, and `/devspark-create-pr` delivers.
+- **Planning and assurance on demand.** A plan, a task list, `/devspark-analyze`, `/devspark-critic` or Judge runs only when a specific uncertainty, coordination need or risk justifies it. None of them is a stage, adds a gate or triggers another.
+- **Evidence-based delivery.** `/devspark-next` and `/devspark-create-pr` read the same lifecycle check. Delivery is refused while a required obligation declared in `work.md` is unchecked, or is checked without its authority and a traceable evidence or decision reference. A recorded reference is not proof that the approval behind it is authentic. See [Assurance as needed](get-started/how-it-works.md#assurance-as-needed).
+- **Why it matters.** Small changes no longer pay for a full-spec ceremony, and large ones gain assurance where the risk actually is. Code, tests and current Knowledge remain the durable outcomes.
+- **Install and upgrade.** Run your agent's [quickstart](get-started/quickstart.md), in Update Mode for an existing install. No migration is needed: existing v9.3 full-spec and quick-spec bundles and quickfix records continue on their recorded route.
+- **Behavior changes for automation.** The `create-new-feature` scripts are removed; `new-branch` accepts only `work` and `fix`. `create-pr.ps1` create and update mode now exit `1` on a refusal or failure, as `create-pr.sh` already did. See [Upgrading to 9.4](get-started/upgrade.md#upgrading-to-94).
+- **Known limitations.** Policy kept only outside the repository is not mechanically enforced. The quickstart installs the latest release only, and older releases' packages are not hosted after a newer release deploys.
+
+## 9.3.0: 2026-10-17
+
+Simplifies planning, PR review and Knowledge upkeep, and removes bookkeeping that never caught a defect.
+
+- **Reuse before building.** Planning looks for the closest existing implementation first and records it, and tasks follow the change surface instead of fixed phases. Critic flags a new mechanism when a closer existing one exists.
+- **Evidence-first PR review.** A test run is recorded once as a small evidence record. `/devspark-pr-review` reuses valid evidence for the current commit and environment instead of re-running the same tests, and still runs them when evidence is missing, stale or a repository policy requires independent execution.
+- **Knowledge without bureaucracy.** Per-requirement Knowledge stubs, the coverage validator, `code_ref` / `knowledge_ref` task fields, mandatory regeneration of `index.json` / `coverage.json`, and blocking on a `last_verified` date are gone. Knowledge is checked by content and by whether it builds. Curated Knowledge and graph discovery are unchanged.
+- **No migration needed.** Older artifacts stay readable. See [Upgrade](get-started/upgrade.md#upgrading-to-93).
+
 ## 9.2.0: 2026-10-15
 
 Strengthens PR review and makes release archival dependable.

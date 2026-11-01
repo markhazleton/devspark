@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
 # Unified branch-creation entry point .
-# The single place a DevSpark branch is created, for every route (spec|quick|fix).
+# Work branches establish a safe delivery branch without scaffolding a specification.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,16 +29,17 @@ while [[ $# -gt 0 ]]; do
         --json) JSON=true; shift ;;
         --dry-run) DRY_RUN=true; shift ;;
         --yes) ASSUME_YES=true; shift ;;
-        --help) err "Usage: ./new-branch.sh --type <spec|quick|fix> [--short-name <slug>] [--number N] [--json] [--dry-run] [--yes] <description>"; exit 0 ;;
+        --help) err "Usage: ./new-branch.sh --type <fix|work> [--short-name <slug>] [--number N] [--json] [--dry-run] [--yes] <description>"; exit 0 ;;
         *) DESCRIPTION="${DESCRIPTION:+$DESCRIPTION }$1"; shift ;;
     esac
 done
 
-# Branch type is required and explicit.
+# Branch type is required and explicit. New work never scaffolds a full-spec or quick-spec
+# bundle; existing bundles continue on their own branches.
 TYPE="$(printf '%s' "$TYPE" | tr '[:upper:]' '[:lower:]')"
 case "$TYPE" in
-    spec|quick|fix) ;;
-    *) die "type must be one of: spec, quick, fix" 1 ;;
+    fix|work) ;;
+    *) die "type must be one of: fix, work" 1 ;;
 esac
 
 if [[ -z "$SHORT_NAME" && -z "$DESCRIPTION" ]]; then
@@ -57,6 +58,9 @@ fi
 REPO_ROOT="$(get_repo_root)"
 HAS_GIT=false
 if has_git; then HAS_GIT=true; fi
+if [[ "$TYPE" == "work" && "$HAS_GIT" != true ]]; then
+    die "work branches require a Git repository" 1
+fi
 
 # Derive the global index unless --number overrides it.
 if [[ "$((10#${NUMBER}))" -le 0 ]]; then
@@ -89,11 +93,9 @@ fi
 # Artifact destination by type .
 SPECS_DIR="$REPO_ROOT/.devspark.work/specs"
 QF_DIR="$REPO_ROOT/.devspark.work/quickfixes"
-TEMPLATE_NAME=""
 case "$TYPE" in
-    spec)  ARTIFACT_PATH="$SPECS_DIR/$BRANCH_NAME/spec.md"; TEMPLATE_NAME="spec-template.md" ;;
-    quick) ARTIFACT_PATH="$SPECS_DIR/$BRANCH_NAME/spec.md"; TEMPLATE_NAME="quick-spec-template.md" ;;
-    fix)   ARTIFACT_PATH="$QF_DIR/$BRANCH_NAME.md"; TEMPLATE_NAME="" ;;
+    fix)   ARTIFACT_PATH="$QF_DIR/$BRANCH_NAME.md" ;;
+    work)  ARTIFACT_PATH="$SPECS_DIR/$BRANCH_NAME/work.md" ;;
 esac
 
 SWITCHED=false
@@ -125,23 +127,17 @@ else
             NUMBER="$(get_next_unified_index)"
             FEATURE_NUM="$(printf '%03d' "$((10#$NUMBER))")"
             BRANCH_NAME="${FEATURE_NUM}-${TYPE}-${SLUG}"
-            if [[ "$TYPE" == "fix" ]]; then ARTIFACT_PATH="$QF_DIR/$BRANCH_NAME.md"; else ARTIFACT_PATH="$SPECS_DIR/$BRANCH_NAME/spec.md"; fi
+            if [[ "$TYPE" == "fix" ]]; then ARTIFACT_PATH="$QF_DIR/$BRANCH_NAME.md"
+            else ARTIFACT_PATH="$SPECS_DIR/$BRANCH_NAME/work.md"; fi
             err "[new-branch] retrying with recomputed index: $BRANCH_NAME"
         done
     else
         err "[new-branch] git not detected; scaffolding artifact without a branch"
     fi
 
-    # Scaffold artifact .
-    mkdir -p "$(dirname "$ARTIFACT_PATH")"
-    if [[ -n "$TEMPLATE_NAME" ]]; then
-        if template="$(resolve_template_path "$REPO_ROOT" "$TEMPLATE_NAME")"; then
-            cp "$template" "$ARTIFACT_PATH"
-        else
-            err "[new-branch] template $TEMPLATE_NAME not found; creating empty artifact"
-            : > "$ARTIFACT_PATH"
-        fi
-    else
+    if [[ "$TYPE" == "fix" ]]; then
+        # Minimal quickfix record with the year as metadata; a work branch scaffolds nothing.
+        mkdir -p "$(dirname "$ARTIFACT_PATH")"
         year="$(date +%Y)"
         printf '# Quickfix: %s\n\n**Created**: %s - **Branch**: `%s` - **Year**: %s\n' \
             "$SLUG" "$(date +%Y-%m-%d)" "$BRANCH_NAME" "$year" > "$ARTIFACT_PATH"

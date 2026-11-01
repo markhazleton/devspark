@@ -86,7 +86,6 @@ get_default_doc_taxon() {
         .devspark.work/pr-review/*) echo 'RESEARCH_OR_CONTEXT' ;;
         .devspark.work/audit/*) echo 'RESEARCH_OR_CONTEXT' ;;
         .devspark.work/improvement-loop/*) echo 'RESEARCH_OR_CONTEXT' ;;
-        .knowledge/reference/*) echo 'REFERENCE_DATA' ;;
         .devspark.work/templates/*|.devspark.work/commands/*) echo 'ENGINEERING_PATTERN' ;;
         .devspark.work/scripts/*) echo 'OPERATIONS_RUNBOOK' ;;
         .documentation/*) echo 'AUTHORITATIVE_REFERENCE' ;;
@@ -133,6 +132,8 @@ PY
         local pattern node_type work_type
         while IFS=$'\t' read -r pattern node_type work_type; do
             [[ -n "$pattern" ]] || continue
+            # Registry patterns are globs, so the right-hand side stays unquoted on purpose.
+            # shellcheck disable=SC2053
             if [[ "$normalized_path" == $pattern ]]; then
                 if [[ -n "$node_type" ]]; then
                     printf '%s\n' "$node_type" | tr '[:lower:]' '[:upper:]' | tr '-' '_'
@@ -347,6 +348,11 @@ find_feature_dir_by_prefix() {
         return
     fi
 
+    if [[ "$branch_name" =~ ^[0-9]{3}-work- ]]; then
+        echo "$specs_dir/$branch_name"
+        return
+    fi
+
     # Extract numeric prefix from branch (e.g., "004" from "004-whatever")
     if [[ ! "$branch_name" =~ ^([0-9]{3})- ]]; then
         # If branch doesn't have numeric prefix, fall back to exact match
@@ -399,7 +405,9 @@ get_feature_paths() {
     # Quickfix routes resolve FEATURE_DIR to .devspark.work/quickfixes/, but the
     # record file is named after the branch (e.g. 042-fix-null-guard.md), not spec.md.
     local feature_spec
-    if [[ "$feature_dir" == "$repo_root/.devspark.work/quickfixes" ]]; then
+    if [[ "$current_branch" =~ ^[0-9]{3}-work- ]]; then
+        feature_spec="$feature_dir/work.md"
+    elif [[ "$feature_dir" == "$repo_root/.devspark.work/quickfixes" ]]; then
         feature_spec="$feature_dir/$current_branch.md"
     else
         feature_spec="$feature_dir/spec.md"

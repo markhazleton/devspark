@@ -36,6 +36,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest PyYAML jsonschema
 
+      # The Bash scripts need Bash 4+ (mapfile, associative arrays); macOS ships Bash 3.2.
+      - name: Install Bash 4+ (macOS)
+        if: runner.os == 'macOS'
+        run: brew install bash
+
+      # The release packager needs zip, which Git Bash lacks. (Bash twin tests pick Git Bash
+      # themselves through tests/bash_twin.py.)
+      - name: Install zip (Windows)
+        if: runner.os == 'Windows'
+        run: choco install zip --no-progress -y
+
       - name: Run tests
         run: pytest tests/ -v --tb=short
 

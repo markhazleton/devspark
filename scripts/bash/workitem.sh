@@ -325,6 +325,9 @@ get_fixture_response() {
 CTX_CONFIGURED=""; CTX_PLATFORM=""; CTX_ORG=""; CTX_PROJECT=""; CTX_REPO=""
 CTX_AREA=""; CTX_ITERATION=""; CTX_TYPE=""; CTX_TAGS=""; CTX_REVIEW=""
 
+# Every field of the resolved context is assigned so callers see the whole tuple, even the
+# ones this script does not read (platform, repo, review).
+# shellcheck disable=SC2034
 resolve_context() {
     local fields=()
     mapfile -t fields < <(get_work_tracking_context "$ARG_ORG" "$ARG_PROJECT" "$ARG_AREA")

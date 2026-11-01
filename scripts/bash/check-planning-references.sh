@@ -53,11 +53,6 @@ ALWAYS_EXCLUDED_FILES=("AGENTS.md" "CHANGELOG.md")
 GENERIC_ID_EXCLUDED=("${ALWAYS_EXCLUDED[@]}" "templates/" ".github/" "site/src/")
 [[ "$INCLUDE_TESTS" == false ]] && GENERIC_ID_EXCLUDED+=("tests/")
 ID_PATTERN='\bFR-[0-9]{3}\b|\bT[0-9]{3}\b|\bQF-[0-9]{4}-[0-9]{3}\b'
-# Complements the backward-link checks above: the ephemeral record itself MUST link forward to
-# every completed item's code/knowledge, or the traceability this contract exists for is
-# one-sided. Only tasks.md and quickfix records use this exact marker (quick-spec's Action Plan
-# does not), so this pass targets those two file shapes specifically rather than every tracked file.
-LINKAGE_PATTERN='^- \[[Xx]\].*\(code_ref:[[:space:]]*([^|]+[^| ])[[:space:]]*\|[[:space:]]*knowledge_ref:[[:space:]]*([^)]+[^) ])[[:space:]]*\)[[:space:]]*$'
 
 is_excluded() {
     local path="$1"; shift
@@ -75,16 +70,8 @@ is_excluded_file() {
     return 1
 }
 
-trim() {
-    local value="$1"
-    value="${value#"${value%%[![:space:]]*}"}"
-    value="${value%"${value##*[![:space:]]}"}"
-    printf '%s' "$value"
-}
-
 BRANCH_FINDINGS=()
 ID_FINDINGS=()
-LINKAGE_FINDINGS=()
 
 while IFS= read -r file; do
     is_excluded "$file" "${ALWAYS_EXCLUDED[@]}" && continue
@@ -105,26 +92,8 @@ while IFS= read -r file; do
     fi
 done < <(git ls-files)
 
-# Second pass, deliberately separate from the loop above: tasks.md and quickfix records live
-# under .devspark.work/, which the loop above always skips (it is the ephemeral record's own
-# linkage target list, not a backward-link risk). A completed item left at `pending` is a real
-# gap the same way a leaked reference is -- just the other direction of the same contract.
-while IFS= read -r file; do
-    [[ -z "$file" ]] && continue
-    line_number=0
-    while IFS= read -r line; do
-        line_number=$((line_number + 1))
-        if [[ "$line" =~ $LINKAGE_PATTERN ]]; then
-            coderef="$(trim "${BASH_REMATCH[1]}")"
-            kref="$(trim "${BASH_REMATCH[2]}")"
-            [[ "${coderef,,}" == "pending" ]] && LINKAGE_FINDINGS+=("$file:$line_number:code_ref")
-            [[ "${kref,,}" == "pending" ]] && LINKAGE_FINDINGS+=("$file:$line_number:knowledge_ref")
-        fi
-    done < "$file"
-done < <(git ls-files -- '.devspark.work/specs/*/tasks.md' '.devspark.work/quickfixes/*.md')
-
 OK=true
-[[ ${#BRANCH_FINDINGS[@]} -gt 0 || ${#ID_FINDINGS[@]} -gt 0 || ${#LINKAGE_FINDINGS[@]} -gt 0 ]] && OK=false
+[[ ${#BRANCH_FINDINGS[@]} -gt 0 || ${#ID_FINDINGS[@]} -gt 0 ]] && OK=false
 
 if [[ "$JSON" == true ]]; then
     branch_json="[]"
@@ -147,18 +116,8 @@ if [[ "$JSON" == true ]]; then
         done
         id_json+="]"
     fi
-    linkage_json="[]"
-    if [[ ${#LINKAGE_FINDINGS[@]} -gt 0 ]]; then
-        linkage_json="["
-        for i in "${!LINKAGE_FINDINGS[@]}"; do
-            IFS=: read -r p l f <<< "${LINKAGE_FINDINGS[$i]}"
-            [[ $i -gt 0 ]] && linkage_json+=","
-            linkage_json+="{\"path\":\"$p\",\"line\":$l,\"field\":\"$f\"}"
-        done
-        linkage_json+="]"
-    fi
-    printf '{"contract": 1, "branch": "%s", "branch_findings": %s, "id_findings": %s, "linkage_findings": %s, "ok": %s}\n' \
-        "$BRANCH" "$branch_json" "$id_json" "$linkage_json" "$OK"
+    printf '{"contract": 1, "branch": "%s", "branch_findings": %s, "id_findings": %s, "ok": %s}\n' \
+        "$BRANCH" "$branch_json" "$id_json" "$OK"
 else
     for f in "${BRANCH_FINDINGS[@]+"${BRANCH_FINDINGS[@]}"}"; do
         IFS=: read -r p l m <<< "$f"
@@ -167,10 +126,6 @@ else
     for f in "${ID_FINDINGS[@]+"${ID_FINDINGS[@]}"}"; do
         IFS=: read -r p l m <<< "$f"
         echo "PLANNING-REF: $p:$l references planning identifier '$m'"
-    done
-    for f in "${LINKAGE_FINDINGS[@]+"${LINKAGE_FINDINGS[@]}"}"; do
-        IFS=: read -r p l fd <<< "$f"
-        echo "LINKAGE-GAP: $p:$l is checked off but $fd is still 'pending'"
     done
     [[ "$OK" == true ]] && echo "No planning-artifact references found."
 fi

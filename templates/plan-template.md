@@ -14,10 +14,10 @@ participants:
 # Implementation Plan: [FEATURE]
 
 <!--
-  Design the smallest responsible change against the current implementation. Respect existing
-  architecture, interfaces, compatibility, and governance. Ensure the resulting software remains
-  understandable, testable, maintainable, and reasonably easy to change again. Avoid speculative
-  abstractions and unnecessary extensibility.
+  Design the smallest responsible change against the current implementation. First find the
+  closest existing implementation by behavior and extend it; introduce a new mechanism only when
+  that implementation demonstrably cannot satisfy the requirement. Keep the result understandable,
+  testable and easy to change again. Avoid speculative abstractions and extensibility.
 -->
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
@@ -33,7 +33,10 @@ participants:
 
 ### Decision Summary
 
-[Plan-owned decisions that resolve material implementation questions, with only the rationale needed to explain the choice. When a behavior could be integrated at an existing seam or distributed across call sites, record the chosen boundary and why. Point to `research.md` for evidence when it exists.]
+**Closest existing pattern**: [path or symbol found by behavior, and how this change fits it: reused as-is, extended, or does not fit]
+**New mechanism**: [none | what is new, the requirement or constraint that the existing implementation cannot meet, and the lighter option rejected]
+
+[Plan-owned decisions that resolve material implementation questions, with the rationale needed to explain each. When a behavior could be integrated at an existing seam or distributed across call sites, record the chosen boundary and why. Point to `research.md` for evidence when it exists.]
 
 ### Key Drivers
 
@@ -59,32 +62,7 @@ participants:
 **Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
 **Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
 **Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
-
-## Operating Context and Expected Mechanisms
-
-<!--
-  Just enough to reason proportionately (KISS / YAGNI). Not a capacity model.
-  Expected counts are NOT limits: they set the expected shape of the change.
-  If this plan introduces more than expected, explain why under "Deviations".
--->
-
-```yaml
-operating_context:
-  expected_scale: "[small / bounded / ...]"
-  expected_frequency: "[e.g., a few times a week, per request, nightly]"
-  execution: operator-driven # operator-driven | automated
-  human_review_acceptable: true
-expected_new_mechanisms:
-  states: 0
-  runtime_settings: 0
-  endpoints: 0
-  persistent_stores: 0
-  caches: 0
-  background_workers: 0
-```
-
-**Deviations**: [Each mechanism beyond the expectation above, as its shape, the current requirement, invariant, or demonstrated constraint that forces it, and the least-complex constraint that still suffices. "None" is a good answer.]
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens, or how often the operation runs and whether a human drives it; NEEDS CLARIFICATION if unknown]
 
 ## Expected Change Surface
 

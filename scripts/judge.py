@@ -103,6 +103,7 @@ REQ_RE = re.compile(r"\b(?:FR|SC|NFR|INV)-\d+\b")
 TASK_RE = re.compile(r"\bT\d{2,4}\b")
 RESOLVES_RE = re.compile(r"resolves:\s*([^)]+)\)", re.I)
 UNCHECKED_RE = re.compile(r"^\s*[-*]\s*\[ \]")
+WORK_DIR_RE = re.compile(r"^\d{3}-work-")
 TASK_LINE_RE = re.compile(r"^\s*[-*]\s*\[([ xX])\]")
 
 FUTURE_WORK_SECTIONS = (
@@ -1184,6 +1185,92 @@ def _frontmatter_value(path: Path, key: str) -> str:
     return ""
 
 
+def _markdown_section(text: str, heading: str) -> str:
+    """Body of the first level-2 ``## heading`` section, up to the next level-1 or level-2 heading."""
+    match = re.search(rf"(?ims)^##[ \t]+{re.escape(heading)}[ \t]*\r?\n(.*?)(?=^#{{1,2}}[ \t]|\Z)", text)
+    return match.group(1) if match else ""
+
+
+OBLIGATION_SEGMENT_RE = re.compile(r"\s+(?:—|–|--)\s+")
+OBLIGATION_AUTHORITY_RE = re.compile(r"(?i)\bAuthority:\s*(.+)")
+EVIDENCE_LABEL = r"(?:evidence|references?|ref|approvals?|approved\s+by|decision|proof|verified\s+by|satisfied\s+by)"
+EVIDENCE_CLAUSE_RE = re.compile(rf"(?i)(?<![\w-]){EVIDENCE_LABEL}\s*:\s*([^;()\[\]—–]*)")
+EVIDENCE_CLAUSE_START_RE = re.compile(rf"(?i)[(\[]?\s*(?<![\w-]){EVIDENCE_LABEL}\s*:")
+MARKDOWN_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+EVIDENCE_TOKEN_RE = re.compile(
+    r"https?://\S+"
+    r"|(?:\.{0,2}/)?(?:[\w.-]+/)+[\w-]+\.[A-Za-z0-9]{1,8}\b"
+    r"|\b[\w-]+\.(?:py|ps1|sh|md|json|ya?ml|toml|ts|tsx|js|cs|java|go|rb|sql|txt|log|xml|html)\b"
+    r"|\b(?=[0-9a-f]*\d)[0-9a-f]{7,40}\b"
+    r"|\b[A-Za-z][A-Za-z0-9]*(?:[-_][A-Za-z0-9]+)*[-_#]\d+\b"
+    r"|(?<!\w)[#!]\d+\b"
+)
+
+
+def _obligation_entries(section: str) -> list[tuple[bool, str]]:
+    """Checkbox entries of a Required Obligations section; indented lines continue the entry above."""
+    entries: list[list] = []
+    current = None
+    for line in section.splitlines():
+        mark = TASK_LINE_RE.match(line)
+        if mark:
+            current = [mark.group(1) != " ", line[mark.end():].strip()]
+            entries.append(current)
+        elif current is not None and line[:1].isspace() and line.strip():
+            current[1] += " — " + re.sub(r"^[-*]\s+", "", line.strip())
+        elif line.strip():
+            current = None
+    return [(checked, text) for checked, text in entries]
+
+
+def _has_evidence_reference(entry: str) -> bool:
+    """True when the entry carries a traceable reference beyond the obligation and its authority.
+
+    A reference is a repository path, commit, link, or review/approval/decision identifier, either
+    labelled (``Evidence:``, ``Approval:``, ``Decision:`` ...) or as its own ``—`` segment. Prose and
+    ``<placeholder>`` text are not references. This checks completeness only: it cannot prove the
+    approval behind a reference is authentic.
+    """
+    text = MARKDOWN_LINK_RE.sub(r" \1 ", entry)
+    text = re.sub(r"<[^>]*>", " ", text).replace("`", " ")
+    candidates = [match.group(1) for match in EVIDENCE_CLAUSE_RE.finditer(text)]
+    candidates += [
+        segment for segment in OBLIGATION_SEGMENT_RE.split(text)[1:]
+        if not re.match(r"(?i)\s*Authority:", segment)
+    ]
+    return any(EVIDENCE_TOKEN_RE.search(candidate) for candidate in candidates)
+
+
+def _unsatisfied_obligations(work_text: str) -> list[dict]:
+    """Required Obligations that do not yet satisfy the mechanical delivery check.
+
+    An unchecked entry is unresolved whatever it references. A checked entry counts only while it
+    still names its authority and carries an evidence reference.
+    """
+    unsatisfied = []
+    for checked, entry in _obligation_entries(_markdown_section(work_text, "Required Obligations")):
+        authority_match = OBLIGATION_AUTHORITY_RE.search(entry)
+        authority = ""
+        if authority_match:
+            authority = OBLIGATION_SEGMENT_RE.split(authority_match.group(1))[0]
+            authority = EVIDENCE_CLAUSE_START_RE.split(authority)[0].strip()
+        if checked:
+            gaps = [] if _has_evidence_reference(entry) else ["an evidence reference"]
+            if not authority:
+                gaps.append("its authority")
+            if not gaps:
+                continue
+            missing = " and ".join(gaps)
+        else:
+            missing = "satisfying evidence"
+        unsatisfied.append({
+            "obligation": OBLIGATION_SEGMENT_RE.split(entry)[0].strip()[:200],
+            "authority": authority[:80],
+            "missing": missing,
+        })
+    return unsatisfied
+
+
 def _gate_header(path: Path) -> dict:
     return load_gate(path)["header"] if path.exists() else {}
 
@@ -1225,8 +1312,14 @@ def lifecycle_check(feature_dir: Path, repo_root: Path) -> dict:
     if not feature_dir.exists():
         return {"status": "pass", "failures": [], "warnings": [], "pending_later_phase": [], "note": "planning bundle already finalized"}
 
+    # A universal work directory has no planning bundle: any task list there is coordination,
+    # never a completion gate. Spec bundles keep enforcing their required tasks. The work-branch
+    # name decides, so a file that merely shares a bundle's name never converts the work.
+    universal_work = bool(WORK_DIR_RE.match(feature_dir.name)) or (
+        not (feature_dir / "spec.md").exists() and (feature_dir / "work.md").exists()
+    )
     tasks_path = feature_dir / "tasks.md"
-    if tasks_path.exists():
+    if tasks_path.exists() and not universal_work:
         open_tasks = [
             (TASK_RE.search(line).group(0) if TASK_RE.search(line) else line.strip()[:40])
             for line in tasks_path.read_text(encoding="utf-8").splitlines()
@@ -1234,6 +1327,43 @@ def lifecycle_check(feature_dir: Path, repo_root: Path) -> dict:
         ]
         if open_tasks:
             fail("incomplete-tasks", f"{len(open_tasks)} required task(s) are not complete: {', '.join(open_tasks[:10])}")
+
+    work_path = feature_dir / "work.md"
+    if work_path.exists():
+        try:
+            work_text = work_path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            work_text = ""
+        work_status = re.search(r"(?im)^\*\*Status\*\*:\s*([^<\r\n]+)", work_text)
+        if not work_status or work_status.group(1).strip().lower() != "complete":
+            fail("work-incomplete", "the optional work.md resume note is not marked Complete")
+        open_obligations = _unsatisfied_obligations(work_text)
+        if open_obligations:
+            listed = "; ".join(
+                item["obligation"]
+                + (f" (authority: {item['authority']})" if item["authority"] else "")
+                + ("" if item["missing"] == "satisfying evidence" else f" is checked without {item['missing']}")
+                for item in open_obligations[:5]
+            )
+            message = f"{len(open_obligations)} mandatory obligation(s) lack satisfying evidence: {listed}"
+            if any(item["missing"] != "satisfying evidence" for item in open_obligations):
+                message += (
+                    ". A checked obligation counts only while it names its authority and carries an evidence "
+                    "reference, such as 'Evidence: ' followed by a repository path, commit, review or approval id, or link"
+                )
+            failures.append({
+                "code": "required-obligation-unresolved",
+                "message": message,
+                "obligations": open_obligations,
+            })
+
+    if universal_work:
+        return {
+            "status": "fail" if failures else "pass",
+            "failures": failures,
+            "warnings": warnings,
+            "pending_later_phase": pending_later,
+        }
 
     gates = feature_dir / "gates"
     required = _frontmatter_value(feature_dir / "spec.md", "required_gates")
@@ -1515,7 +1645,7 @@ def resolve_feature(repo_root: Path, explicit: str | None, branch: str | None) -
             branch = res.stdout.strip()
         exact = specs / branch
         match = re.match(r"^(\d{3,})-", branch or "")
-        if (exact / "spec.md").exists():
+        if (exact / "spec.md").exists() or WORK_DIR_RE.match(branch or ""):
             directory = exact
         elif match:
             prefix = match.group(1)
@@ -1525,6 +1655,16 @@ def resolve_feature(repo_root: Path, explicit: str | None, branch: str | None) -
             directory = found[0]
         else:
             return {"status": "error", "message": f"no spec resolves for branch {branch!r}"}
+    if WORK_DIR_RE.match(directory.name):
+        # A universal work branch has no planning bundle to review, even when a file in its directory
+        # shares a bundle's name. Adjudication there is on demand (assurance contract §13) and
+        # writes no gate, so no run id is issued.
+        return {
+            "status": "work-branch",
+            "branch": branch,
+            "feature_dir": str(directory),
+            "message": "no planning bundle on a work branch; adjudicate a specific concern on demand",
+        }
     if not (directory / "spec.md").exists():
         return {"status": "error", "message": f"{directory} has no spec.md"}
     run_id = new_run_id()
@@ -1580,7 +1720,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "resolve":
         root = Path(args.repo_root).resolve() if args.repo_root else Path.cwd()
         result = resolve_feature(root, args.feature_dir, args.branch)
-        return _emit(result, 0 if result["status"] == "ok" else 1)
+        return _emit(result, 0 if result["status"] in ("ok", "work-branch") else 1)
 
     if not args.feature_dir:
         print("--feature-dir is required", file=sys.stderr)

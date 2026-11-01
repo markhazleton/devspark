@@ -6,7 +6,7 @@ layer: business
 source_of_truth:
   - scripts/knowledge_findings.py
   - tests/test_knowledge_findings_schema_contract.py
-last_verified: 2026-09-30
+last_verified: 2026-10-17
 aliases:
   - finding categories
   - finding severity

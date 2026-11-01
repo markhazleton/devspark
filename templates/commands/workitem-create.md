@@ -5,9 +5,9 @@ handoffs:
   - label: Review the Created Item
     agent: devspark-workitem-review
     prompt: Grade the item that was just created against the five-dimension standard
-  - label: Draft the Spec
+  - label: Start the Work
     agent: devspark-specify
-    prompt: Turn the created work item into a full specification
+    prompt: Start work grounded in the created work item
 scripts:
   sh: .devspark/scripts/bash/workitem.sh --operation check --json
   ps: .devspark/scripts/powershell/workitem.ps1 -Operation check -Json

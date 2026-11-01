@@ -1,10 +1,9 @@
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
-"""Create PR proves committed-state Knowledge readiness for the exact HEAD it submits.
+"""Create PR proves the committed Knowledge builds, and nothing mechanical beyond that.
 
-`stale_entities` in `.knowledge/index.json` comes from committed Git history, so a green
-pre-commit regeneration proves nothing about the commit that will be reviewed. These tests build
-real temporary Git repositories with controlled commit dates and drive both the PowerShell and
-Bash Create PR scripts against them.
+Derived index files and `last_verified` dates are not compared or required: a stale date or an
+out-of-date generated file never blocks a PR. These tests build real temporary Git repositories
+and drive both the PowerShell and Bash Create PR scripts against them.
 """
 
 from __future__ import annotations
@@ -29,7 +28,6 @@ TIMEOUT = 180
 
 BASE_DATE = "2026-10-01T09:00:00+00:00"
 WORK_DATE = "2026-10-05T09:00:00+00:00"
-LATER_DATE = "2026-10-09T09:00:00+00:00"
 BRANCH = "001-readiness"
 
 ARCH_PATH = ".knowledge/entities/widget/architecture.md"
@@ -103,35 +101,19 @@ def layer_doc(last_verified: str, source: str = "src/widget.py", extra: str = ""
     )
 
 
-def _entity(repo: Path, entity_id: str, source: str, last_verified: str) -> None:
-    base = repo / ".knowledge/entities" / entity_id
-    _write(base / "_entity.yaml", f"id: {entity_id}\ntype: subsystem\nowner: team-x\n")
-    doc = layer_doc(last_verified, source).replace("Widget", entity_id.capitalize())
-    _write(base / "architecture.md", doc)
-    _write(repo / source, "value = 1\n")
+_TEMPLATES: dict[tuple[str, bool], Path] = {}
 
 
-_TEMPLATES: dict[tuple[str, bool, bool], Path] = {}
-
-
-def build_repo(
-    tmp_path: Path,
-    *,
-    engine_mode: str = "real",
-    track_index: bool = True,
-    with_unrelated_stale: bool = False,
-) -> Path:
+def build_repo(tmp_path: Path, *, engine_mode: str = "real", with_knowledge: bool = True) -> Path:
     """A pushed `main` plus a pushed feature branch with no feature commits yet.
 
     Each distinct shape is built once and copied per test; the copy gets its own origin.
     """
-    key = (engine_mode, track_index, with_unrelated_stale)
+    key = (engine_mode, with_knowledge)
     if key not in _TEMPLATES:
         template = Path(tempfile.mkdtemp(prefix="readiness-template-"))
         atexit.register(shutil.rmtree, template, ignore_errors=True)
-        _build_repo_at(
-            template, engine_mode=engine_mode, track_index=track_index, with_unrelated_stale=with_unrelated_stale
-        )
+        _build_repo_at(template, engine_mode=engine_mode, with_knowledge=with_knowledge)
         _TEMPLATES[key] = template
     template = _TEMPLATES[key]
     shutil.copytree(template / "origin.git", tmp_path / "origin.git")
@@ -141,13 +123,7 @@ def build_repo(
     return repo
 
 
-def _build_repo_at(
-    tmp_path: Path,
-    *,
-    engine_mode: str,
-    track_index: bool,
-    with_unrelated_stale: bool,
-) -> Path:
+def _build_repo_at(tmp_path: Path, *, engine_mode: str, with_knowledge: bool) -> Path:
     repo = tmp_path / "repo"
     repo.mkdir()
     origin = tmp_path / "origin.git"
@@ -162,6 +138,7 @@ def _build_repo_at(
         "scripts/powershell/common.ps1",
         "scripts/powershell/platform.ps1",
         "scripts/powershell/create-pr.ps1",
+        "scripts/judge.py",
     ):
         _write(repo / rel, (ROOT / rel).read_text(encoding="utf-8"))
     engines = {
@@ -172,21 +149,14 @@ def _build_repo_at(
         _write(repo / "scripts/build_knowledge_index.py", engines[engine_mode])
     _write(repo / ".gitignore", "__pycache__/\n")
     _write(repo / "README.md", "readiness fixture\n")
-    _write(repo / "src/other.py", "other = 1\n")
     _write(repo / f".devspark.work/specs/{BRANCH}/spec.md", "---\nclassification: quick-spec\n---\n\n# Quick Spec: Readiness\n")
-    _entity(repo, "widget", "src/widget.py", "2026-10-01")
-    if with_unrelated_stale:
-        _entity(repo, "gadget", "src/gadget.py", "2026-10-01")
-    if engine_mode == "real" and track_index:
-        assert engine(repo).returncode == 0
+    if with_knowledge:
+        base = repo / ".knowledge/entities/widget"
+        _write(base / "_entity.yaml", "id: widget\ntype: subsystem\nowner: team-x\n")
+        _write(base / "architecture.md", layer_doc("2026-10-01"))
+        _write(repo / "src/widget.py", "value = 1\n")
     git(repo, "add", "-A")
     git(repo, "commit", "-q", "-m", "baseline", date=BASE_DATE)
-    if with_unrelated_stale:
-        # Another change already on main made `gadget` stale; this branch never touches it.
-        _write(repo / "src/gadget.py", "value = 2\n")
-        assert engine(repo).returncode == 0
-        git(repo, "add", "-A")
-        git(repo, "commit", "-q", "-m", "gadget changed on main", date="2026-10-03T09:00:00+00:00")
     git(repo, "remote", "add", "origin", str(origin))
     git(repo, "push", "-q", "-u", "origin", "main")
     git(repo, "checkout", "-q", "-b", BRANCH)
@@ -194,37 +164,18 @@ def _build_repo_at(
     return repo
 
 
-def feature_commit(
-    repo: Path,
-    date: str,
-    *,
-    verified: str,
-    source: str = "src/widget.py",
-    regenerate: bool = True,
-    message: str = "feature",
-) -> None:
-    """Change a source and its Knowledge doc, optionally regenerate, then commit and push."""
-    with (repo / source).open("a", encoding="utf-8") as handle:
-        handle.write("value += 1\n")
-    _write(repo / ARCH_PATH, layer_doc(verified))
-    if regenerate:
-        assert engine(repo).returncode == 0
+def commit_and_push(repo: Path, message: str, date: str = WORK_DATE) -> None:
     git(repo, "add", "-A")
     git(repo, "commit", "-q", "-m", message, date=date)
     git(repo, "push", "-q", "origin", BRANCH)
 
 
-def finalize(repo: Path, date: str) -> None:
-    """The developer's remediation: regenerate against committed state, commit, push."""
-    assert engine(repo).returncode == 0
-    git(repo, "add", "-A")
-    if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=repo, check=False).returncode == 0:
-        return  # regeneration was byte-identical; nothing to commit
-    git(repo, "commit", "-q", "-m", "finalize derived knowledge", date=date)
-    git(repo, "push", "-q", "origin", BRANCH)
+def break_the_build(repo: Path) -> None:
+    _write(repo / ARCH_PATH, layer_doc("2026-10-01", source="src/missing.py"))
+    commit_and_push(repo, "cite a file that does not exist")
 
 
-def _run_shell(repo: Path, shell: str, mode: str, env: dict[str, str] | None = None) -> dict:
+def _invoke(repo: Path, shell: str, mode: str, env: dict[str, str] | None = None) -> tuple[dict, int]:
     env = env or _env()
     if shell == "ps":
         cmd = [PWSH, "-NoLogo", "-NoProfile", "-File", "scripts/powershell/create-pr.ps1", "-Mode", mode, "-Json"]
@@ -238,140 +189,88 @@ def _run_shell(repo: Path, shell: str, mode: str, env: dict[str, str] | None = N
         cmd, cwd=repo, env=env, capture_output=True, encoding="utf-8", timeout=TIMEOUT, check=False
     )
     try:
-        return json.loads(done.stdout)
+        return json.loads(done.stdout), done.returncode
     except json.JSONDecodeError as exc:  # pragma: no cover - failure detail
         raise AssertionError(f"{shell} {mode} produced no JSON.\nstdout={done.stdout}\nstderr={done.stderr}") from exc
+
+
+def _run_shell(repo: Path, shell: str, mode: str, env: dict[str, str] | None = None) -> dict:
+    return _invoke(repo, shell, mode, env)[0]
 
 
 def knowledge(repo: Path, shell: str) -> dict:
     return _run_shell(repo, shell, "Preflight")["knowledge"]
 
 
-def blockers(result: dict) -> list[tuple]:
-    return sorted(
-        (b["kind"], b["path"], b["source"], b["source_date"], b["last_verified"]) for b in result["blockers"]
-    )
-
-
 @pytest.mark.parametrize("shell", SHELLS)
-def test_t1_pre_commit_green_then_commit_drifts(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-04", regenerate=True)
-
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "blocked"
-    assert [b["kind"] for b in result["blockers"]] == ["drift"]
-    assert result["index_fresh"] is False
-    assert "DRIFT:" in result["check_output"]
-    assert result["checked_head"] == git(repo, "rev-parse", "HEAD")
-
-
-def test_t1_provisional_check_was_green_before_the_commit(tmp_path: Path) -> None:
+def test_buildable_knowledge_is_ready(tmp_path: Path, shell: str) -> None:
     repo = build_repo(tmp_path)
     with (repo / "src/widget.py").open("a", encoding="utf-8") as handle:
         handle.write("value += 1\n")
-    _write(repo / ARCH_PATH, layer_doc("2026-10-04"))
-    assert engine(repo).returncode == 0
+    commit_and_push(repo, "feature")
+
+    result = knowledge(repo, shell)
+    assert result["readiness"] == "ready"
+    assert result["blockers"] == []
+    assert result["checked_head"] == git(repo, "rev-parse", "HEAD")
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_stale_last_verified_and_a_missing_or_corrupt_index_do_not_block(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    # The cited source changes after `last_verified`, and a hand-edited index disagrees with a fresh build.
+    with (repo / "src/widget.py").open("a", encoding="utf-8") as handle:
+        handle.write("value += 1\n")
+    _write(repo / INDEX_PATH, '{"nodes": []}\n')
+    commit_and_push(repo, "code change and a stale, tracked index")
+
+    assert knowledge(repo, shell)["readiness"] == "ready"
+
+
+def test_engine_check_proves_the_build_and_never_writes(tmp_path: Path) -> None:
+    repo = build_repo(tmp_path)
+    _write(repo / INDEX_PATH, '{"nodes": []}\n')
+    commit_and_push(repo, "drifted derived index")
+    before = (repo / INDEX_PATH).read_bytes()
+
     assert engine(repo, "--check").returncode == 0
-    assert json.loads((repo / INDEX_PATH).read_text(encoding="utf-8"))["stale_entities"] == []
+    assert (repo / INDEX_PATH).read_bytes() == before, "--check must never write"
+    assert git(repo, "status", "--porcelain") == ""
+
+    break_the_build(repo)
+    assert engine(repo, "--check").returncode == 1
 
 
 @pytest.mark.parametrize("shell", SHELLS)
-def test_t2_mechanical_finalization_makes_the_commit_ready(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    assert engine(repo).returncode == 0
-    # Knowledge doc gains a heading after the last regeneration: mechanical drift only.
-    _write(repo / ARCH_PATH, layer_doc("2026-10-01", extra="\n## Behavior\n\nDetails.\n"))
-    git(repo, "add", "-A")
-    git(repo, "commit", "-q", "-m", "doc edit without regeneration", date=BASE_DATE)
-    git(repo, "push", "-q", "origin", BRANCH)
-    assert knowledge(repo, shell)["readiness"] == "blocked"
-
-    finalize(repo, BASE_DATE)
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "ready"
-    assert result["blockers"] == []
-    assert result["index_fresh"] is True
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_t3_stale_touched_entity_blocks_and_regeneration_alone_does_not_clear_it(
-    tmp_path: Path, shell: str
-) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-04")
-    finalize(repo, WORK_DATE)
-
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "blocked"
-    assert result["index_fresh"] is True, "index is mechanically current; the entity itself is stale"
-    assert blockers(result) == [("stale-entity", ARCH_PATH, "src/widget.py", "2026-10-05", "2026-10-04")]
-
-    finalize(repo, WORK_DATE)  # regenerating again must not turn stale into fresh
-    assert knowledge(repo, shell)["readiness"] == "blocked"
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_t4_genuine_reverification_makes_it_ready(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-04")
-    finalize(repo, WORK_DATE)
-    assert knowledge(repo, shell)["readiness"] == "blocked"
-
-    _write(repo / ARCH_PATH, layer_doc("2026-10-05"))  # stands in for a genuine re-verification
-    finalize(repo, WORK_DATE)
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "ready"
-    assert result["stale_untouched_count"] == 0
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_t5_uncited_code_change_needs_no_finalization(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-01", source="src/other.py")
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "ready"
-    assert result["blockers"] == []
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_t6_no_tracked_index_is_not_applicable(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path, track_index=False)
+def test_no_tracked_knowledge_is_not_applicable(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path, with_knowledge=False)
     result = knowledge(repo, shell)
     assert result["readiness"] == "not-applicable"
     assert result["blockers"] == []
-    assert result["index_fresh"] is None
 
 
 @pytest.mark.parametrize("shell", SHELLS)
-def test_t7_missing_engine_is_unknown(tmp_path: Path, shell: str) -> None:
+def test_missing_engine_is_unknown(tmp_path: Path, shell: str) -> None:
     repo = build_repo(tmp_path, engine_mode="none")
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "unknown"
-    assert result["index_fresh"] is None
+    assert knowledge(repo, shell)["readiness"] == "unknown"
 
 
 @pytest.mark.parametrize("shell", SHELLS)
-def test_t7_unsupported_engine_usage_is_unknown(tmp_path: Path, shell: str) -> None:
+def test_unsupported_engine_usage_is_unknown(tmp_path: Path, shell: str) -> None:
     repo = build_repo(tmp_path, engine_mode="exit2")
-    _write(repo / INDEX_PATH, "{}\n")
-    git(repo, "add", "-A")
-    git(repo, "commit", "-q", "-m", "track an index", date=BASE_DATE)
-    git(repo, "push", "-q", "origin", BRANCH)
     result = knowledge(repo, shell)
     assert result["readiness"] == "unknown"
     assert result["blockers"] == []
 
 
 @pytest.mark.parametrize("shell", SHELLS)
-def test_t7_missing_interpreter_is_unknown_not_a_crash(tmp_path: Path, shell: str) -> None:
+def test_missing_interpreter_is_unknown_not_a_crash(tmp_path: Path, shell: str) -> None:
     repo = build_repo(tmp_path)
     tool_dirs = [str(Path(shutil.which(tool)).parent) for tool in ("git", "jq") if shutil.which(tool)]
     minimal = os.pathsep.join(tool_dirs)
     if shutil.which("python3", path=minimal) or shutil.which("python", path=minimal):
         pytest.skip("a Python interpreter shares a directory with git/jq on this machine")
-    env = _env(minimal)
-    result = _run_shell(repo, shell, "Preflight", env)["knowledge"]
+    result = _run_shell(repo, shell, "Preflight", _env(minimal))["knowledge"]
     assert result["readiness"] == "unknown"
     assert result["blockers"] == []
 
@@ -379,10 +278,7 @@ def test_t7_missing_interpreter_is_unknown_not_a_crash(tmp_path: Path, shell: st
 @pytest.mark.parametrize("shell", SHELLS)
 def test_a_build_failure_blocks_with_the_error(tmp_path: Path, shell: str) -> None:
     repo = build_repo(tmp_path)
-    _write(repo / ARCH_PATH, layer_doc("2026-10-01", source="src/missing.py"))
-    git(repo, "add", "-A")
-    git(repo, "commit", "-q", "-m", "cite a file that does not exist", date=BASE_DATE)
-    git(repo, "push", "-q", "origin", BRANCH)
+    break_the_build(repo)
     result = knowledge(repo, shell)
     assert result["readiness"] == "blocked"
     assert [b["kind"] for b in result["blockers"]] == ["build-error"]
@@ -390,136 +286,39 @@ def test_a_build_failure_blocks_with_the_error(tmp_path: Path, shell: str) -> No
 
 
 @pytest.mark.parametrize("shell", SHELLS)
-def test_t8_rebase_to_later_dates_blocks_a_previously_green_branch(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-05")
-    assert knowledge(repo, shell)["readiness"] == "ready"
-
-    git(repo, "rebase", "-q", "--force-rebase", "origin/main", date=LATER_DATE)
-    git(repo, "push", "-q", "--force", "origin", BRANCH)
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "blocked"
-    assert result["checked_head"] == git(repo, "rev-parse", "HEAD")
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_t9_committing_generated_artifacts_converges(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-05")
-    for _ in range(2):
-        finalize(repo, LATER_DATE)  # regenerate and commit again, later than the source commit
-        assert engine(repo, "--check").returncode == 0
-        assert knowledge(repo, shell)["readiness"] == "ready"
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_t10_corrupt_index_is_caught_by_a_read_only_check(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-05")
-    assert knowledge(repo, shell)["readiness"] == "ready"
-
-    payload = json.loads((repo / INDEX_PATH).read_text(encoding="utf-8"))
-    payload["nodes"] = []
-    _write(repo / INDEX_PATH, json.dumps(payload, indent=2) + "\n")
-    git(repo, "add", "-A")
-    git(repo, "commit", "-q", "-m", "corrupt index", date=WORK_DATE)
-    git(repo, "push", "-q", "origin", BRANCH)
-    before = (repo / INDEX_PATH).read_bytes()
-
-    checked = engine(repo, "--check")
-    assert checked.returncode == 1 and "DRIFT:" in checked.stderr
-    assert (repo / INDEX_PATH).read_bytes() == before, "--check must never write"
-    assert git(repo, "status", "--porcelain") == ""
-    assert knowledge(repo, shell)["readiness"] == "blocked"
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_t12_unrelated_stale_entity_is_counted_not_blocking(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path, with_unrelated_stale=True)
-    feature_commit(repo, WORK_DATE, verified="2026-10-05")
-    result = knowledge(repo, shell)
-    assert result["readiness"] == "ready"
-    assert result["stale_untouched_count"] == 1
-    assert result["blockers"] == []
-
-
-@pytest.mark.parametrize("shell", SHELLS)
 @pytest.mark.parametrize("mode", ["Create", "Update"])
-def test_t12_create_and_update_modes_block_identically(tmp_path: Path, shell: str, mode: str) -> None:
+def test_create_and_update_modes_block_identically_and_change_nothing(
+    tmp_path: Path, shell: str, mode: str
+) -> None:
     repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-04")
-    finalize(repo, WORK_DATE)  # mechanically current, but a touched entity is stale
+    break_the_build(repo)
 
     result = _run_shell(repo, shell, mode)
     assert result["error"] is True
-    assert result["message"] == "CREATE PR BLOCKED — KNOWLEDGE RE-VERIFICATION REQUIRED"
-    assert ARCH_PATH in result["details"] and "src/widget.py" in result["details"]
-    assert "2026-10-05" in result["details"] and "2026-10-04" in result["details"]
-    assert result["checked_head"] == git(repo, "rev-parse", "HEAD")
-    assert [b["kind"] for b in result["blockers"]] == ["stale-entity"]
-
-
-@pytest.mark.parametrize("shell", SHELLS)
-def test_drift_failure_is_actionable_and_names_the_stale_lines(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    feature_commit(repo, WORK_DATE, verified="2026-10-04")
-    result = _run_shell(repo, shell, "Create")
-    assert result["message"] == "CREATE PR BLOCKED — COMMITTED KNOWLEDGE FINALIZATION REQUIRED"
+    assert result["message"] == "CREATE PR BLOCKED — KNOWLEDGE CANNOT BE BUILT"
     assert "Committed HEAD: " + git(repo, "rev-parse", "HEAD") in result["details"]
-    assert "STALE:" in result["details"]
-    assert "build_knowledge_index.py --repo-root ." in result["details"]
-    assert "Rerun /devspark.create-pr" in result["details"]
+    assert "does not exist" in result["details"]
+    assert "Rerun /devspark-create-pr" in result["details"]
+    assert [b["kind"] for b in result["blockers"]] == ["build-error"]
     assert git(repo, "status", "--porcelain") == "", "Create PR must not modify the working tree"
     assert git(repo, "rev-parse", "HEAD") == result["checked_head"], "Create PR must not commit"
 
 
-@pytest.mark.parametrize("shell", SHELLS)
-def test_build_failure_message_has_its_own_headline(tmp_path: Path, shell: str) -> None:
-    repo = build_repo(tmp_path)
-    _write(repo / ARCH_PATH, layer_doc("2026-10-01", source="src/missing.py"))
-    git(repo, "add", "-A")
-    git(repo, "commit", "-q", "-m", "cite a file that does not exist", date=BASE_DATE)
-    git(repo, "push", "-q", "origin", BRANCH)
-    result = _run_shell(repo, shell, "Create")
-    assert result["message"] == "CREATE PR BLOCKED — KNOWLEDGE INDEX CANNOT BE BUILT"
-    assert "does not exist" in result["details"]
-
-
 @pytest.mark.skipif(not PWSH or not BASH, reason="both shells required")
-@pytest.mark.parametrize("scenario", ["ready", "drift", "stale", "untouched-stale", "not-applicable"])
-def test_t11_bash_and_powershell_agree(tmp_path: Path, scenario: str) -> None:
-    if scenario == "not-applicable":
-        repo = build_repo(tmp_path, track_index=False)
-    elif scenario == "untouched-stale":
-        repo = build_repo(tmp_path, with_unrelated_stale=True)
-        feature_commit(repo, WORK_DATE, verified="2026-10-05")
-    else:
-        repo = build_repo(tmp_path)
-        if scenario == "ready":
-            feature_commit(repo, WORK_DATE, verified="2026-10-05")
-        elif scenario == "drift":
-            feature_commit(repo, WORK_DATE, verified="2026-10-04")
-        else:
-            feature_commit(repo, WORK_DATE, verified="2026-10-04")
-            finalize(repo, WORK_DATE)
+@pytest.mark.parametrize("scenario", ["ready", "build-error", "not-applicable"])
+def test_bash_and_powershell_agree(tmp_path: Path, scenario: str) -> None:
+    repo = build_repo(tmp_path, with_knowledge=scenario != "not-applicable")
+    if scenario == "build-error":
+        break_the_build(repo)
 
     ps = knowledge(repo, "ps")
     sh = knowledge(repo, "bash")
-    for field in ("readiness", "index_fresh", "stale_untouched_count", "checked_head"):
+    for field in ("readiness", "checked_head"):
         assert ps[field] == sh[field], field
-    assert blockers(ps) == blockers(sh)
-    assert set(ps) == set(sh) == {
-        "index_fresh",
-        "gap_summary",
-        "readiness",
-        "blockers",
-        "stale_untouched_count",
-        "checked_head",
-        "check_output",
-    }
+    assert ps["blockers"] == sh["blockers"]
+    assert set(ps) == set(sh) == {"gap_summary", "readiness", "blockers", "checked_head", "check_output"}
     for blocker in ps["blockers"]:
-        assert set(blocker) == {"kind", "path", "source", "source_date", "last_verified", "message"}
-        assert "\\" not in (blocker["path"] or "")
+        assert set(blocker) == {"kind", "path", "message"}
 
 
 @pytest.mark.skipif(not PWSH, reason="pwsh required")
@@ -544,6 +343,267 @@ def test_powershell_result_reports_checked_head_without_stray_statements() -> No
     assert "checked_head" in result["keys"]
 
 
+WORK_BRANCH = "002-work-delivery"
+OBLIGATION = "- [ ] Privacy review of the export — Authority: Privacy Office"
+
+
+def start_work_branch(repo: Path, status: str = "Complete", obligations: str = "") -> None:
+    """A pushed universal work branch whose optional work.md carries the given status and obligations."""
+    git(repo, "checkout", "-q", "-b", WORK_BRANCH)
+    note = f"# Work: Delivery\n\n**Status**: {status}\n"
+    if obligations:
+        note += f"\n## Required Obligations\n\n{obligations}\n"
+    _write(repo / f".devspark.work/specs/{WORK_BRANCH}/work.md", note)
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "work", date=WORK_DATE)
+    git(repo, "push", "-q", "-u", "origin", WORK_BRANCH)
+
+
+def lifecycle(repo: Path, shell: str) -> dict:
+    return _run_shell(repo, shell, "Preflight")["lifecycle"]
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_preflight_reports_the_lifecycle_check_for_finished_work(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo)
+    assert lifecycle(repo, shell) == {"status": "pass", "failures": [], "pending_later_phase": []}
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+@pytest.mark.parametrize("mode", ["Create", "Update"])
+def test_an_unresolved_obligation_refuses_creation_and_names_its_authority(
+    tmp_path: Path, shell: str, mode: str
+) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo, obligations=OBLIGATION)
+
+    check = lifecycle(repo, shell)
+    assert check["status"] == "fail"
+    assert [f["code"] for f in check["failures"]] == ["required-obligation-unresolved"]
+
+    result = _run_shell(repo, shell, mode)
+    assert result["error"] is True
+    assert result["message"] == "CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED"
+    assert "Committed HEAD: " + git(repo, "rev-parse", "HEAD") in result["details"]
+    assert "authority: Privacy Office" in result["details"]
+    assert "no flag or acknowledgement bypasses it" in result["details"]
+    assert result["obligations"] == [
+        {"obligation": "Privacy review of the export", "authority": "Privacy Office", "missing": "satisfying evidence"}
+    ]
+    assert git(repo, "status", "--porcelain") == "", "Create PR must not modify the working tree"
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_a_checked_obligation_without_an_evidence_reference_still_refuses(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo, obligations=OBLIGATION.replace("[ ]", "[x]"))
+
+    result = _run_shell(repo, shell, "Create")
+    assert result["error"] is True
+    assert result["message"] == "CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED"
+    assert "is checked without an evidence reference" in result["details"]
+    assert "Evidence: " in result["details"]
+    assert result["obligations"][0]["missing"] == "an evidence reference"
+
+
+@pytest.mark.skipif(not PWSH, reason="pwsh required")
+def test_an_in_process_preflight_reports_success_when_the_lifecycle_check_fails(tmp_path: Path) -> None:
+    # Agent terminals call the script in-process and read $LASTEXITCODE, which a nested judge.py run must not leak into.
+    repo = build_repo(tmp_path)
+    start_work_branch(repo, obligations=OBLIGATION)
+    script = "& ./scripts/powershell/create-pr.ps1 -Mode Preflight -Json | Out-Null; exit $LASTEXITCODE"
+    done = subprocess.run(
+        [PWSH, "-NoLogo", "-NoProfile", "-Command", script],
+        cwd=repo, env=_env(), capture_output=True, encoding="utf-8", timeout=TIMEOUT, check=False,
+    )
+    assert done.returncode == 0, done.stderr
+    assert lifecycle(repo, "ps")["status"] == "fail"
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_a_satisfied_obligation_no_longer_refuses(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo, obligations=OBLIGATION.replace("[ ]", "[x]") + " — Evidence: PRIV-0000 approval")
+
+    assert lifecycle(repo, shell)["status"] == "pass"
+    result = _run_shell(repo, shell, "Create")
+    # Creation then stops at the platform check, never at the obligation.
+    assert "OBLIGATION" not in result.get("message", "")
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_other_lifecycle_failures_are_reported_but_left_to_the_prompt(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo, status="In Progress")
+
+    check = lifecycle(repo, shell)
+    assert check["status"] == "fail"
+    assert [f["code"] for f in check["failures"]] == ["work-incomplete"]
+    assert "OBLIGATION" not in _run_shell(repo, shell, "Create").get("message", "")
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_legacy_spec_bundle_reports_lifecycle_without_refusing(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    check = lifecycle(repo, shell)
+    assert check["status"] == "pass"
+    assert "OBLIGATION" not in _run_shell(repo, shell, "Create").get("message", "")
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_a_branch_without_a_work_directory_is_not_applicable(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    git(repo, "checkout", "-q", "-b", "003-work-untracked")
+    git(repo, "push", "-q", "-u", "origin", "003-work-untracked")
+    assert lifecycle(repo, shell)["status"] == "not-applicable"
+
+
+def _stub_dir(repo: Path, name: str, scripts: dict[str, tuple[str, str]]) -> Path:
+    """Host command stubs, one POSIX script and one Windows .cmd per command, placed before the real PATH."""
+    stubs = repo.parent / name
+    stubs.mkdir(exist_ok=True)
+    for command, (posix, windows) in scripts.items():
+        (stubs / command).write_text("#!/bin/sh\n" + posix, encoding="utf-8", newline="\n")
+        (stubs / command).chmod(0o755)
+        (stubs / f"{command}.cmd").write_text("@echo off\r\n" + windows, encoding="utf-8", newline="")
+    return stubs
+
+
+def _env_with(stubs: Path, **extra: str) -> dict[str, str]:
+    env = _env()
+    env["PATH"] = os.pathsep.join([str(stubs), env["PATH"]])
+    env.update(extra)
+    return env
+
+
+def break_the_lifecycle_check(repo: Path, cause: str) -> dict[str, str] | None:
+    """Make judge.py unable to evaluate; returns the environment that reproduces the cause."""
+    if cause == "judge-missing":
+        (repo / "scripts/judge.py").unlink()
+    elif cause == "invalid-output":
+        _write(repo / "scripts/judge.py", "print('not a lifecycle result')\n")
+    if cause != "python-unavailable":
+        git(repo, "add", "-A")
+        commit_and_push_branch(repo, WORK_BRANCH, f"lifecycle check: {cause}")
+        return None
+    failing = ("exit 1\n", "exit /b 1\r\n")
+    return _env_with(_stub_dir(repo, "no-python", {"python3": failing, "python": failing}))
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+@pytest.mark.parametrize("cause", ["judge-missing", "python-unavailable", "invalid-output"])
+@pytest.mark.parametrize("mode", ["Create", "Update"])
+def test_an_unevaluated_obligation_refuses_creation_and_says_why(
+    tmp_path: Path, shell: str, cause: str, mode: str
+) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo, obligations=OBLIGATION)
+    env = break_the_lifecycle_check(repo, cause)
+
+    preflight = _run_shell(repo, shell, "Preflight", env)["lifecycle"]
+    assert preflight == {
+        "status": "unavailable", "reason": cause, "obligations_declared": True, "failures": [], "pending_later_phase": [],
+    }
+
+    result, code = _invoke(repo, shell, mode, env)
+    assert code == 1
+    assert result["error"] is True
+    assert result["message"] == "CREATE PR BLOCKED — LIFECYCLE CHECK UNAVAILABLE"
+    assert result["reason"] == cause
+    assert "Committed HEAD: " + git(repo, "rev-parse", "HEAD") in result["details"]
+    assert "not an obligation that passed" in result["details"]
+    assert "Rerun /devspark-create-pr" in result["details"]
+    assert "organizational policy authorizes a different approval path" in result["details"]
+    assert git(repo, "status", "--porcelain") == "", "Create PR must not modify the working tree"
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+def test_an_unavailable_check_without_declared_obligations_is_reported_not_refused(tmp_path: Path, shell: str) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo)
+    break_the_lifecycle_check(repo, "judge-missing")
+
+    check = lifecycle(repo, shell)
+    assert check["status"] == "unavailable" and check["obligations_declared"] is False
+    # Creation then stops at the platform check, never at the lifecycle check.
+    assert "LIFECYCLE" not in _run_shell(repo, shell, "Create").get("message", "")
+
+
+def commit_and_push_branch(repo: Path, branch: str, message: str) -> None:
+    git(repo, "commit", "-q", "-m", message, date=WORK_DATE)
+    git(repo, "push", "-q", "origin", branch)
+
+
+_PR_VIEW = '{"number":7,"url":"https://example.invalid/pr/7","title":"t","state":"OPEN","isDraft":false}'
+_GH_POSIX = f"""case "$1 $2" in
+  "auth status"|"pr edit") exit 0 ;;
+  "repo view") echo main ;;
+  "pr list") if [ -n "$GH_STUB_PR" ]; then echo '[{_PR_VIEW}]'; else echo '[]'; fi ;;
+  "pr create") echo https://example.invalid/pr/7 ;;
+  "pr view") echo '{_PR_VIEW}' ;;
+  *) exit 1 ;;
+esac
+"""
+_GH_WINDOWS = f"""if "%1 %2"=="auth status" exit /b 0
+if "%1 %2"=="pr edit" exit /b 0
+if "%1 %2"=="repo view" (echo main& exit /b 0)
+if "%1 %2"=="pr create" (echo https://example.invalid/pr/7& exit /b 0)
+if "%1 %2"=="pr view" goto view
+if not "%1 %2"=="pr list" exit /b 1
+if not defined GH_STUB_PR (echo []& exit /b 0)
+echo [{_PR_VIEW}]
+exit /b 0
+:view
+echo {_PR_VIEW}
+exit /b 0
+"""
+
+
+@pytest.mark.parametrize("shell", SHELLS)
+@pytest.mark.parametrize("mode", ["Create", "Update"])
+def test_create_and_update_exit_codes_separate_success_from_refusal(tmp_path: Path, shell: str, mode: str) -> None:
+    """Automation reads the exit code: 0 for a published PR, 1 for any refusal, never a parsed message."""
+    repo = build_repo(tmp_path)
+    start_work_branch(repo)
+    gh = _env_with(
+        _stub_dir(repo, "gh-stub", {"gh": (_GH_POSIX, _GH_WINDOWS)}),
+        DEVSPARK_PLATFORM="github",
+        **({"GH_STUB_PR": "1"} if mode == "Update" else {}),
+    )
+
+    preflight, code = _invoke(repo, shell, "Preflight", gh)
+    assert code == 0 and preflight["creation_supported"] is True and preflight["auth_ok"] is True
+
+    result, code = _invoke(repo, shell, mode, gh)
+    assert code == 0, result
+    assert result["status"] == "ok" and result["action"] == mode.lower() and result["pr_number"] == 7
+
+    _write(repo / f".devspark.work/specs/{WORK_BRANCH}/work.md", f"# Work\n\n**Status**: Complete\n\n## Required Obligations\n\n{OBLIGATION}\n")
+    git(repo, "add", "-A")
+    commit_and_push_branch(repo, WORK_BRANCH, "an obligation appears")
+    result, code = _invoke(repo, shell, mode, gh)
+    assert code == 1
+    assert result["error"] is True and "OBLIGATION" in result["message"]
+
+    (repo / "README.md").write_text("uncommitted\n", encoding="utf-8")
+    result, code = _invoke(repo, shell, mode, gh)
+    assert code == 1
+    assert result["error"] is True and result["message"] == "Working tree has unmanaged changes"
+
+
+@pytest.mark.skipif(not PWSH or not BASH, reason="both shells required")
+@pytest.mark.parametrize(
+    "obligations",
+    ["", OBLIGATION, OBLIGATION.replace("[ ]", "[x]"), OBLIGATION.replace("[ ]", "[x]") + " — Evidence: PRIV-0000"],
+    ids=["none", "open", "checked-without-evidence", "checked-with-evidence"],
+)
+def test_both_shells_report_the_same_lifecycle(tmp_path: Path, obligations: str) -> None:
+    repo = build_repo(tmp_path)
+    start_work_branch(repo, obligations=obligations)
+    assert lifecycle(repo, "ps") == lifecycle(repo, "bash")
+
+
 def _read(rel: str) -> str:
     return (ROOT / rel).read_text(encoding="utf-8")
 
@@ -558,21 +618,23 @@ def test_create_pr_prompt_states_the_readiness_boundary() -> None:
     assert "knowledge.readiness" in text and "blocked" in text
     assert "draft" in text and "--auto" in text and "do not bypass" in text
     assert "no readiness override" in text
-    assert "never regenerates" in text and "last_verified" in text
+    assert "never regenerates" in text
+    assert "builds" in text
+    assert "stale_entities" not in text and "stale-entity" not in text
 
 
 def test_pr_review_knowledge_check_is_read_only_and_head_verified() -> None:
     section = _read("templates/commands/pr-review.md").split("### 6c.", 1)[1].split("### 6d.", 1)[0]
     flat = " ".join(section.replace("`", "").split())
-    assert "--check" in flat
-    assert "git rev-parse HEAD" in flat and "commit SHA" in flat
+    assert "check it out or stop" in flat
     assert "never regenerate" in flat.lower()
-    assert "default (non-`--check`)" not in section
+    assert "--check" not in section
 
 
-def test_implement_marks_git_dependent_generated_knowledge_provisional() -> None:
+def test_implement_does_not_require_regenerating_or_committing_derived_indexes() -> None:
     text = _flat("templates/commands/implement.md")
-    assert "provisional" in text and "Create PR" in text and "committed" in text
+    assert "Regenerate .knowledge/index.json" not in text
+    assert "provisional" not in text
 
 
 @pytest.mark.parametrize(

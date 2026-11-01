@@ -197,7 +197,7 @@ def test_plan_adds_no_auto_repair_or_lifecycle_routing() -> None:
 
 
 @pytest.mark.parametrize("shell", ["pwsh", "bash"])
-def test_generated_requirement_stubs_and_populated_records_remain_compatible(
+def test_setup_plan_writes_an_overview_and_no_requirement_records(
     tmp_path: Path, shell: str
 ) -> None:
     repo = tmp_path / "repo"
@@ -266,24 +266,20 @@ def test_generated_requirement_stubs_and_populated_records_remain_compatible(
     run_setup_plan()
 
     knowledge = feature / "knowledge"
-    generated = knowledge / "fr-001.md"
-    empty_stub = knowledge / "fr-002.md"
-    assert generated.exists() and empty_stub.exists()
-    generated_doc = yaml.safe_load(generated.read_text(encoding="utf-8").split("---", 2)[1])
-    empty_doc = yaml.safe_load(empty_stub.read_text(encoding="utf-8").split("---", 2)[1])
-    for doc, requirement_id in ((generated_doc, "fr-001"), (empty_doc, "fr-002")):
-        assert doc["id"] == requirement_id
-        assert doc["type"] == "requirement"
-        assert doc["status"] == "draft"
-        assert doc["links"]["feature"] == "feature"
-        assert doc["links"]["implemented_by"] == []
+    assert not list(knowledge.glob("fr-*.md")), "no per-requirement records are generated"
+    overview = yaml.safe_load((knowledge / "feature.md").read_text(encoding="utf-8").split("---", 2)[1])
+    assert overview["type"] == "feature"
+    assert overview["links"]["requirements"] == []
+    assert "Requirements" in overview["links"]["spec_sections"]
 
-    authored_content = generated.read_text(encoding="utf-8") + "\nExisting populated record content.\n"
-    generated.write_text(authored_content, encoding="utf-8")
+    # A requirement record authored in a legacy repository is left exactly as written.
+    legacy = knowledge / "fr-001.md"
+    legacy_content = "---\nid: fr-001\ntype: requirement\n---\nLegacy populated record.\n"
+    legacy.write_text(legacy_content, encoding="utf-8")
     run_setup_plan()
 
-    assert generated.read_text(encoding="utf-8") == authored_content
-    assert empty_stub.exists()
+    assert legacy.read_text(encoding="utf-8") == legacy_content
+    assert not (knowledge / "fr-002.md").exists()
 
 
 # ---------------------------------------------------------------- seeded Analyze and Clarify cases

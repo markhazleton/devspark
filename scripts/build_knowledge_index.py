@@ -731,12 +731,12 @@ def validate_entity_layer_doc(
         raise ValueError(f"{path}: source_of_truth must be a non-empty array of paths or object claims")
     validate_source_claims(path, metadata)
     last_verified = metadata.get("last_verified")
-    if not last_verified:
-        raise ValueError(f"{path}: last_verified is required for entity-layer docs")
-    try:
-        verified_date = date.fromisoformat(str(last_verified))
-    except ValueError as exc:
-        raise ValueError(f"{path}: last_verified must be an ISO date (YYYY-MM-DD)") from exc
+    verified_date: date | None = None
+    if last_verified:
+        try:
+            verified_date = date.fromisoformat(str(last_verified))
+        except ValueError as exc:
+            raise ValueError(f"{path}: last_verified must be an ISO date (YYYY-MM-DD)") from exc
     for source in sources:
         if isinstance(source, dict):
             # Object claims are verified by content digest, not commit-date staleness -- see
@@ -752,7 +752,7 @@ def validate_entity_layer_doc(
         if not (root / source).exists():
             raise ValueError(f"{path}: source_of_truth path does not exist: {source}")
         commit_date = _memoized_commit_date(root, source, history)
-        if commit_date is None:
+        if commit_date is None or verified_date is None:
             continue
         try:
             source_date = datetime.fromisoformat(commit_date).date()
@@ -873,7 +873,7 @@ def build_entities(
                     "path": relative,
                     "title": str(metadata.get("title") or node_id),
                     "source_of_truth": metadata["source_of_truth"],
-                    "last_verified": str(metadata["last_verified"]),
+                    **({"last_verified": str(metadata["last_verified"])} if metadata.get("last_verified") else {}),
                     **search_fields(doc_path, metadata, body),
                 }
             )
@@ -1132,8 +1132,8 @@ def knowledge_base_inventory(root: Path) -> dict[str, str]:
 
     Digests are of content, never timestamps: an edit that preserves the modification time still
     changes a digest, and an added or deleted file changes the key set. It covers Knowledge
-    documents, entity definitions, the registry, the committed generated artifacts that
-    `INDEX_FRESH` compares against, and Git history identity. The inventory is returned to the
+    documents, entity definitions, the registry, the committed generated artifacts, and Git
+    history identity. The inventory is returned to the
     caller and never stored.
     """
     inventory: dict[str, str] = {}
@@ -1804,7 +1804,7 @@ def main() -> int:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="Fail if committed index.json/coverage.json are stale; never writes files.",
+        help="Validate that the Knowledge builds; never writes files and never compares generated outputs.",
     )
     parser.add_argument(
         "--fail-on-stale",
@@ -2009,19 +2009,7 @@ def main() -> int:
             )
 
     if args.check:
-        problems = [
-            _drift(output, index),
-            _drift(coverage_output, build_coverage_report(index, args.generated_at)),
-        ]
-        problems = [p for p in problems if p]
-        if problems:
-            for problem in problems:
-                print(f"DRIFT: {problem}", file=sys.stderr)
-            print(
-                "Regenerate with: python3 scripts/build_knowledge_index.py --repo-root .",
-                file=sys.stderr,
-            )
-            return 1
+        # Derived outputs are build artifacts, so --check only proves the Knowledge builds.
         return 1 if (args.fail_on_stale and stale_entities) else 0
 
     payload = json.dumps(index, indent=2, ensure_ascii=False) + "\n"

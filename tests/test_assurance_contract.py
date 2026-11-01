@@ -419,7 +419,7 @@ def validate_scope_authority() -> None:
 
 
 def validate_shift_left_constitution_contract() -> None:
-    specify = _read(ROOT / "templates" / "commands" / "specify.md")
+    specify = " ".join(_read(ROOT / "templates" / "commands" / "specify.md").split())
     clarify = _read(ROOT / "templates" / "commands" / "clarify.md")
     plan = _read(ROOT / "templates" / "commands" / "plan.md")
     analyze = _read(ANALYZE)
@@ -437,7 +437,7 @@ def validate_shift_left_constitution_contract() -> None:
         assert "complete applicable MUST/SHOULD text" in prompt or "complete applicable MUST/SHOULD" in prompt
         assert "embedded exceptions" in prompt or "exceptions" in prompt
         assert "Do not repeat the check for unchanged requirements" in prompt or "Recheck changed requirements only" in prompt
-    assert "before marking the spec ready" in specify
+    assert "before proceeding with the affected behavior" in specify
     assert "Before closing the clarification" in clarify
     assert "In the existing pre-design Constitution Check" in plan
     assert "complete applicable principle text, including embedded exceptions and scope" in plan

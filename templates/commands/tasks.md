@@ -1,15 +1,11 @@
 ---
 source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
-description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.
+description: Coordinate dependency-ordered work when it is useful. Generates tasks.md for existing specification bundles; on work branches identifies deliverables and persists them only when continuity or coordination requires it.
 handoffs:
-  - label: Analyze For Consistency
-    agent: devspark-analyze
-    prompt: Run a project analysis for consistency
-    send: true
-  - label: Run Planning Review
-    agent: devspark-planning-review
-    prompt: Run Planning Review (Analyze, Critic when applicable, and Judge) before implementing
-    send: true
+  - label: Recommend Next Step
+    agent: devspark-next
+    prompt: Recommend the next step for this branch
+    send: false
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json --require-plan
   ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -RequirePlan
@@ -27,23 +23,55 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 **Step 4 of 4** in the authoring chain (`specify → clarify → plan → tasks`).
 
-- **Owns**: a complete, dependency-ordered, story-organized temporary `tasks.md` immediately executable by `/devspark-implement`, including affected current-knowledge updates, tests, and verification. Every task carries empty `code_ref`/`knowledge_ref` placeholders from creation — `/devspark-implement` fills them as it completes each task, so the delta stays validate-able against code, tests, and knowledge for as long as `tasks.md` remains in `.devspark.work/`. `/devspark-release` is the only command that later checks every one is populated before archiving.
+- **Owns**: a complete, dependency-ordered, story-organized temporary `tasks.md` immediately executable by `/devspark-implement`, including affected current-knowledge updates, tests, and verification. A task states the files it changes; `/devspark-implement` records nothing back into it beyond the checkbox.
 - **Does NOT own**: revisiting WHAT/WHY (spec is authoritative); redesigning architecture/stack/contracts (→ `/devspark-plan`); resolving `[NEEDS CLARIFICATION]` (→ `/devspark-clarify`); gate artifacts beyond the opt-in `## Gate Acknowledgements` note (→ `/devspark-analyze`, `/devspark-critic`).
 - **Pre-flight**: if `plan.md` is missing or `spec.md` still contains `[NEEDS CLARIFICATION]` markers, halt and route back to the appropriate earlier step.
+- **Work branches** (`NNN-work-*`, whatever its directory holds): coordination is optional and needs no plan; follow **Work Branch Coordination**. The authoring chain, pre-flight, Derivative Contract and Planning Review handoff above apply only to existing full-spec bundles.
+
+## Work Branch Coordination (no specification)
+
+Tasks here coordinate meaningful deliverables; they are not a workflow stage. Simple or
+single-deliverable work needs no decomposition: say so and continue with `/devspark-implement`.
+
+1. **Establish context** from the developer's request, the branch diff and commits, current code and
+   tests, relevant `.knowledge/`, and `work.md` or `plan.md` when `AVAILABLE_DOCS` lists them. A plan
+   is never required.
+2. **Identify deliverables**: a short dependency-ordered list of independently verifiable outcomes
+   (behaviour, contract, test or Knowledge change), not one entry per file edit. Name each
+   dependency, and the owner when several developers share the branch. A deliverable that needs a
+   material decision nobody has made is surfaced to the developer (who may run `/devspark-plan`),
+   not invented here.
+3. **Coordinate in session** with your agent's built-in task tracking when it exists, and report the
+   list in chat. Write nothing to the repository for this.
+4. **Persist only when justified**: when the list must survive a new session, spans substantial
+   dependencies, or coordinates several developers, record it in `FEATURE_DIR/work.md` under
+   `## Remaining Deliverables` as `- [ ] <outcome> (after: <deliverable>)`, following the resume-note
+   rules of `/devspark-specify` (`**Status**: In Progress` while work remains). Preserve existing
+   entries and check them off rather than regenerating. Do not create `tasks.md`, `spec.md`,
+   `plan.md`, a checklist or a gate artifact, and do not copy the in-session list there unless one
+   of these needs applies.
+5. **Add no process**: no Task IDs, `Implements:` directives or `plan_semantic_hash`; no Analyze,
+   Critic, Judge or Planning Review. Open deliverables are coordination, not a completion gate: the
+   work is done when `/devspark-implement` establishes its outcome and verification.
+6. **Report and hand back**: report the deliverables, where they are tracked, and the next one. The
+   next step is `/devspark-implement`.
 
 ## Definition of Done
 
-Done when: `tasks.md` is a coherent, dependency-ordered projection of the approved Plan with required checklist fields and code/knowledge linkage. Re-runs select re-projection or authorized task remediation from the Plan fingerprint, protect completed work and report the focused-review handoff. A correction need not append a new task or remediation heading. This command stops after writing tasks.md; it does not begin implementation. Chat output: report only the step-6 summary (counts, MVP scope); the task list itself lives in the file.
+Done when: `tasks.md` is a coherent, dependency-ordered projection of the approved Plan with required checklist fields. Re-runs select re-projection or authorized task remediation from the Plan fingerprint, protect completed work and report the focused-review handoff. A correction need not append a new task or remediation heading. This command stops after writing tasks.md; it does not begin implementation. Chat output: report only the step-6 summary (counts, MVP scope); the task list itself lives in the file.
+
+On a work branch, Done when the developer has a dependency-ordered list of deliverables (or a statement that none is needed) tracked where **Work Branch Coordination** places it.
 
 ## Constitution Authority
 
-Load `/.knowledge/governance/constitution.md` before generating tasks. **Non-negotiable** in one specific way: every mandated principle that requires runtime behavior (observability, structured logging, accessibility, security baseline, test coverage, telemetry, audit logging, etc.) MUST have a corresponding task in either the Foundational phase or the relevant user-story phase. If the plan accepted a Constitution Waiver, surface it as a task-section note rather than silently skipping the principle's task.
+Load `/.knowledge/governance/constitution.md` before generating tasks. It is **non-negotiable** in one specific way: a principle that requires runtime behavior (observability, logging, accessibility, security baseline, audit logging, test coverage) needs a task when, and only when, the changed behavior triggers it. Principles the change does not touch generate no tasks. If the plan accepted a Constitution Waiver, surface it as a single note rather than silently skipping the principle.
 
 ## Outline
 
 Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers multi-app scope resolution and the 2-tier override check for scripts. Preamble modules: `convergence`, `provenance`.
 
 1. **Setup**: Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+   If the branch matches `NNN-work-*`, follow **Work Branch Coordination** above instead of steps 2-6.
 
 2. **Load design documents**: Read from FEATURE_DIR:
    - **Required**: plan.md (tech stack, libraries, structure), spec.md (user stories with priorities)
@@ -105,7 +133,7 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    - If the findings carry Analyze/Critic `classification` values and no Judge artifact exists, the route needs Planning Review: recommend `/devspark-planning-review` and stop instead of promoting raw findings to tasks.
    - Present the merged list as one table with an elaborated recommendation per row (not just the stored `recommended_action` one-liner — reason about the actual fix given the current spec/plan/code).
    - Selection: ask which findings to address this round (`all` allowed). **Autonomy override**: under `--auto`/standing autonomy, select only genuinely blocking compatibility work (`blocking-defect`, or `critical`/`showstopper` when no classification exists) and only when the developer's instruction explicitly grants that scope authority. Medium and Low findings are never auto-selected, whatever their `execution_mode`: report them and leave them for the human. A finding's `recommended_action` is evidence, not permission to add machinery beyond the Plan.
-   - For each selected finding, append a task under a new `## Gate Remediation` phase (after Polish) in the existing `tasks.md`: `- [ ] T0NN [P?] Fix <one-line description> in <file path> (resolves: <finding_id>[, <finding_id>...]) (code_ref: pending | knowledge_ref: pending)`. Do not touch already-checked `[X]` tasks or existing phases.
+   - For each selected finding, append a task under a new `## Gate Remediation` phase (after the last existing phase) in the existing `tasks.md`: `- [ ] T0NN [P?] Fix <one-line description> in <file path> (resolves: <finding_id>[, <finding_id>...])`. Do not touch already-checked `[X]` tasks or existing phases.
    - Report the count of tasks appended and recommend `/devspark-implement` to execute them. After remediation tasks are implemented, re-run `/devspark-planning-review` once: it reuses fresh child artifacts and rechecks only what `judge.py children` says is stale. **Assurance should converge based on unresolved risk, not artifact churn** — a changed hash alone is not a reason to loop; stop after one remediation round and one focused recheck, and ask the developer if a third round seems needed.
    - This step is terminal for a re-run: do not fall through to step 4 afterward.
 
@@ -115,18 +143,15 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    - If data-model.md exists: Extract entities and map to user stories
    - If contracts/ exists: Map interface contracts to user stories
    - If research.md exists: Extract decisions for setup tasks
-   - Generate tasks organized by user story (see Task Generation Rules below)
-   - **Enforce constitution-mandated tasks**: for every loaded principle that requires runtime behavior, ensure a concrete task exists in the appropriate phase (Foundational for cross-cutting concerns like logging/auth-baseline; story phase for story-specific obligations). If a Constitution Waiver was recorded in `plan.md`, add a single annotation task referencing it rather than silently omitting the principle.
-   - Validate task completeness (each user story has all needed tasks, independently testable)
+   - Generate tasks from the change surface (see Task Organization below)
+   - **Enforce triggered constitution obligations**: for each loaded principle the changed behavior triggers, ensure a concrete task exists in the relevant group. If a Constitution Waiver was recorded in `plan.md`, add a single annotation task referencing it rather than silently omitting the principle.
+   - Validate task completeness (each group has what it needs and is independently testable)
 
 5. **Generate tasks.md**: Use `/.devspark/templates/tasks-template.md` in installed repos, or `templates/tasks-template.md` in source repos, as the structure. Fill with:
    - Correct feature name from plan.md
-   - Phase 1: Setup tasks (project initialization)
-   - Phase 2: Foundational tasks (blocking prerequisites for all user stories)
-   - Phase 3+: One phase per user story (in priority order from spec.md)
-   - Each phase includes: story goal, independent test criteria, tests (if requested), implementation tasks
-   - Final Phase: verification, current-knowledge consistency, no-planning-reference validation,
-   and retention of the complete `FEATURE_DIR` with populated linkage after every required check passes
+   - Only the phases or groups the change needs (see Task Organization): setup and foundational work only when a blocking prerequisite exists, story groups only when there are independent stories
+   - Each group includes: goal, independent test criteria, tests (if the Tests delta is not `none`), implementation tasks
+   - A final group only for required verification, current-knowledge consistency and no-planning-reference validation, plus retention of the complete `FEATURE_DIR` after every required check passes
    - All tasks must follow the strict checklist format (see Task Generation Rules below)
    - Clear file paths for each task
    - Dependencies only where an edge is not already implied by phase order; `[P]` marks parallel tasks
@@ -135,12 +160,8 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
    **Current knowledge tasks**: for each behavior-bearing change, add a task to update the matching
    `.knowledge/` node selected by `appliesTo`, or create a typed node when durable new behavior has no
    owner. Add affected test tasks in the same story or phase. Do not generate feature, requirement,
-   or task nodes under `.knowledge/`; traceability remains only in this temporary task list. The
-   completed task's `code_ref` MUST list every affected production-code and test file, while
-   `knowledge_ref` MUST list every affected current `.knowledge/` file. Use `n/a` with a brief reason
-   only for a category that was genuinely not changed. This temporary task record is the required
-   traceability map from spec/plan/tasks to the durable delta; neither durable output may point back
-   to this task or its plan/spec.
+   or task nodes under `.knowledge/`. Neither durable output may point back to this task list or
+   its plan/spec.
 
    Keep task descriptions to the implementation or verification delta, exact path, and forcing
    requirement/design/acceptance id. Do not paraphrase requirements, acceptance scenarios, rationale,
@@ -155,7 +176,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 ## Constraints
 
-**CRITICAL**: Tasks MUST be organized by user story to enable independent implementation and testing.
+**CRITICAL**: Every task traces to the Plan's change surface and a forcing source. When the spec has independent user stories, organize by story so each can be implemented and tested alone.
 
 **Tests are a durable pillar, not an option**: every behavior change considers its Tests impact, and the resulting delta is `add`, `update`, `retire` or `none`. Generate test tasks for a delta that is not `none`; never assume every change adds tests. When `qa-acceptance.md` exists, derive the Tests tasks from its scenarios and their regression dispositions.
 
@@ -174,27 +195,21 @@ Every task MUST strictly follow this format:
 1. **Checkbox**: ALWAYS start with `- [ ]` (markdown checkbox)
 2. **Task ID**: Sequential number (T001, T002, T003...) in execution order
 3. **[P] marker**: Include ONLY if task is parallelizable (different files, no dependencies on incomplete tasks)
-4. **[Story] label**: REQUIRED for user story phase tasks only
-   - Format: [US1], [US2], [US3], etc. (maps to user stories from spec.md)
-   - Setup phase: NO story label
-   - Foundational phase: NO story label
-   - User Story phases: MUST have story label
-   - Polish phase: NO story label
+4. **[Story] label**: only when the list is grouped by user story; format `[US1]`, `[US2]` (maps to the spec's user stories)
 5. **Description**: Clear action with exact file path
-6. **Implements directive**: For user-story implementation tasks, append `(Implements: FR-001, FR-003)` naming the functional requirement ID(s) from spec.md that the task satisfies. This makes spec↔task traceability explicit so `/devspark-analyze` can deterministically detect coverage gaps and traceability hallucinations. Omit for Setup/Foundational/Polish tasks that implement no specific requirement. Every `FR-###` in spec.md SHOULD be referenced by at least one task.
-7. **Linkage placeholders**: Every task — including Setup/Foundational/Polish — carries a trailing `(code_ref: pending | knowledge_ref: pending)` marker. `/devspark-implement` overwrites `pending` with every real production-code and test path in `code_ref`, and every real current-knowledge path in `knowledge_ref`, as each task completes (or `n/a` with a one-line reason for a category that genuinely was not changed). Do not pre-fill real paths at generation time — they aren't known until implementation. Never add a reference from those durable files back to `spec.md`, `plan.md`, `tasks.md`, or any other temporary work product.
+6. **Implements directive**: For implementation tasks, append `(Implements: FR-001, FR-003)` naming the functional requirement ID(s) the task satisfies, so `/devspark-analyze` can deterministically detect coverage gaps and traceability hallucinations. Omit for tasks that implement no specific requirement. Every `FR-###` in spec.md SHOULD be referenced by at least one task.
+7. **No back-links**: never add a reference from durable code, tests, or `.knowledge/` back to `spec.md`, `plan.md`, `tasks.md`, or any other temporary work product.
 
 **Examples**:
 
-- ✅ CORRECT: `- [ ] T001 Create project structure per implementation plan (code_ref: pending | knowledge_ref: pending)`
-- ✅ CORRECT: `- [ ] T005 [P] Implement authentication middleware in src/middleware/auth.py (code_ref: pending | knowledge_ref: pending)`
-- ✅ CORRECT: `- [ ] T012 [P] [US1] Create User model in src/models/user.py (Implements: FR-001) (code_ref: pending | knowledge_ref: pending)`
-- ✅ CORRECT: `- [ ] T014 [US1] Implement UserService in src/services/user_service.py (Implements: FR-001, FR-003) (code_ref: pending | knowledge_ref: pending)`
+- ✅ CORRECT: `- [ ] T001 Add the singleton GET/PUT pair to src/api/maintenance_routes.py by copying the closest existing pair (Implements: FR-004)`
+- ✅ CORRECT: `- [ ] T005 [P] Implement authentication middleware in src/middleware/auth.py`
+- ✅ CORRECT: `- [ ] T012 [P] [US1] Create User model in src/models/user.py (Implements: FR-001)`
+- ✅ CORRECT: `- [ ] T014 [US1] Implement UserService in src/services/user_service.py (Implements: FR-001, FR-003)`
 - ❌ WRONG: `- [ ] Create User model` (missing ID and Story label)
 - ❌ WRONG: `T001 [US1] Create model` (missing checkbox)
 - ❌ WRONG: `- [ ] [US1] Create User model` (missing Task ID)
 - ❌ WRONG: `- [ ] T001 [US1] Create model` (missing file path)
-- ❌ WRONG: `- [ ] T001 Create User model in src/models/user.py` (missing `code_ref`/`knowledge_ref` placeholder)
 
 ### Derivative Contract (REQUIRED)
 
@@ -213,34 +228,13 @@ Before reporting, self-check each task: does it cite one forcing source, and doe
 
 ### Task Organization
 
-1. **From User Stories (spec.md)** - PRIMARY ORGANIZATION:
-   - Each user story (P1, P2, P3...) gets its own phase
-   - Map all related components to their story:
-     - Models needed for that story
-     - Services needed for that story
-     - Interfaces/UI needed for that story
-     - Tests specific to that story when its Tests delta is not `none`
-   - Mark story dependencies (most stories should be independent)
+Tasks are derived from the Plan's `expected_change_surface`, not from a fixed phase template.
 
-2. **From Contracts**:
-   - Map each interface contract → to the user story it serves
-   - When the Tests delta is not `none`: each interface contract → contract test task [P] before implementation in that story's phase
+1. **One task per surface entry** (or per small group of entries that change together): the exact path, the delta, and the forcing source. `inspect` entries produce no task. A file outside the surface is explained as justified support; new architecture or scope is a PLANNING GAP.
+2. **Group by user story only when the spec has more than one independently deliverable story.** A single-story or small change is one ordered list with no phase headings and no `[Story]` labels.
+3. **Create Setup, Foundational or Final phases only when real work needs them**: a blocking shared prerequisite, or required verification and current-knowledge updates. Never create an empty phase or a filler task to populate one.
+4. **Reuse before adding.** Extend the existing tests, fixtures and harnesses the Plan names. Running existing regression is a verification task; add a new test only for behavior that no existing test covers.
+5. **Constitution obligations are tasks only when the changed behavior triggers them** (a new endpoint triggers its audit-logging and auth obligations; an unrelated principle does not). An accepted Constitution Waiver is one annotation, not a task per principle.
+6. **Map contracts and data-model entities** to the task or story that needs them; add a contract test only when the Tests delta is not `none`.
 
-3. **From Data Model**:
-   - Map each entity to the user story(ies) that need it
-   - If entity serves multiple stories: Put in earliest story or Setup phase
-   - Relationships → service layer tasks in appropriate story phase
-
-4. **From Setup/Infrastructure**:
-   - Shared infrastructure → Setup phase (Phase 1)
-   - Foundational/blocking tasks → Foundational phase (Phase 2)
-   - Story-specific setup → within that story's phase
-
-### Phase Structure
-
-- **Phase 1**: Setup (project initialization)
-- **Phase 2**: Foundational (blocking prerequisites - MUST complete before user stories)
-- **Phase 3+**: User Stories in priority order (P1, P2, P3...)
-  - Within each story: Tests (if requested) → Models → Services → Endpoints → Integration
-  - Each phase should be a complete, independently testable increment
-- **Final Phase**: Polish & Cross-Cutting Concerns
+Within a story or list: tests, then models, services and endpoints, then integration. Each group is an independently testable increment.

@@ -24,9 +24,7 @@ from build_knowledge_index import (  # noqa: E402
     CanonicalizationError,
     InputsUncertain,
     ObjectClaimError,
-    _drift,
     _git_last_commit_date,
-    build_coverage_report,
     build_index,
     enumerate_claim_states,
     inventory_changes,
@@ -177,16 +175,6 @@ def tokenize(topic: str) -> list[str]:
         and token not in NORMALIZED_STOPWORDS
     )
     return keywords or sorted(token for token in tokens if token[0].isalpha())
-
-
-def index_is_fresh(repo: Path, index: dict[str, Any]) -> bool:
-    output = repo / ".knowledge/index.json"
-    coverage_output = repo / ".knowledge/ontology/coverage.json"
-    problems = [
-        _drift(output, index),
-        _drift(coverage_output, build_coverage_report(index)),
-    ]
-    return not any(problems)
 
 
 def node_haystack(node: dict[str, Any]) -> str:
@@ -600,17 +588,15 @@ def main() -> int:
     except ValueError as exc:
         payload = {
             "REPO_ROOT": str(repo), "TOPIC": topic, "KEYWORDS": keywords,
-            "INDEX_FRESH": False, "ERROR": str(exc),
+            "ERROR": str(exc),
         }
         print(json.dumps(payload, separators=(",", ":")))
         return 1
 
-    fresh = index_is_fresh(repo, index)
     if args.files:
         located = match_file_owners(index, [repo_relative_path(repo, item) for item in args.files])
         payload = {
             "REPO_ROOT": str(repo),
-            "INDEX_FRESH": fresh,
             "FILES": located["files"],
             "UNMAPPED_FILES": located["unmapped_files"],
             "SUMMARY": {
@@ -634,7 +620,6 @@ def main() -> int:
         "REPO_ROOT": str(repo),
         "TOPIC": topic,
         "KEYWORDS": keywords,
-        "INDEX_FRESH": fresh,
         "MATCHED_KNOWLEDGE": matched_nodes,
         "MATCHED_ENTITIES": matched_entities,
         "CANDIDATE_CODE_HITS": code_hits,

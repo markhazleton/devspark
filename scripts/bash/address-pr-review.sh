@@ -361,8 +361,6 @@ if [[ "$PYTHON_READY" != "true" ]]; then
             "Finding $fid has no explicit blocking classification." "line ${native_numbers[i]}" \
             "Install Python/PyYAML and use recover-legacy with a complete interpretation and named authorized reviewer."
         status="${native_statuses[i]}"
-        compat_status=open
-        [[ "$status" == resolved ]] && compat_status=closed
         legacy_nonauto=false
         if [[ "${native_descriptions[i]}" =~ (accepted|deferred|waived|withdrawn|wontfix|won\'t[[:space:]]+fix|already[[:space:]]+fixed[[:space:]]+upstream) ]]; then
             legacy_nonauto=true

@@ -46,11 +46,11 @@ def _changelog_entry(version: str) -> str:
 def test_pyproject_version_matches_version_stamp() -> None:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
     assert project["version"] == _stamp()["version"]
-    assert project["version"] in ("9.0.0", "9.1.0", "9.2.0")
+    assert project["version"] in ("9.0.0", "9.1.0", "9.2.0", "9.3.0", "9.4.0")
 
 
-def test_version_stamp_reads_nine_two_zero() -> None:
-    assert _stamp()["version"] == "9.2.0"
+def test_version_stamp_reads_nine_four_zero() -> None:
+    assert _stamp()["version"] == "9.4.0"
 
 
 def test_version_stamp_carries_no_migration_marker_or_compatibility_field() -> None:
@@ -75,6 +75,21 @@ def test_eight_x_changelog_entries_are_still_present() -> None:
     headings = _changelog_headings()
     for version in ("8.3.0", "8.2.0", "8.1.0", "8.0.0", "7.8.0"):
         assert version in headings, version
+
+
+def test_nine_four_discloses_changes_that_can_break_custom_automation() -> None:
+    headings = _changelog_headings()
+    assert headings.index("9.4.0") < headings.index("9.3.0")
+    entry = _changelog_entry("9.4.0")
+    for disclosure in ("create-new-feature", "new-branch", "create-pr.ps1", "evidence reference"):
+        assert disclosure in entry, disclosure
+
+    upgrade = UPGRADE_PAGE.read_text(encoding="utf-8")
+    match = re.search(r"^## Upgrading to 9\.4\s*\n(.*?)(?=^## |\Z)", upgrade, re.MULTILINE | re.DOTALL)
+    assert match, "upgrade page has no 'Upgrading to 9.4' section"
+    section = match.group(1)
+    for disclosure in ("create-new-feature", "--type work", "create-pr.ps1", "exit `1`", "Authority:"):
+        assert disclosure in section, disclosure
 
 
 def test_upgrade_page_has_an_upgrading_from_eight_x_section() -> None:

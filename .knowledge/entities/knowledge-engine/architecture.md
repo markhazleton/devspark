@@ -7,7 +7,7 @@ source_of_truth:
   - scripts/build_knowledge_index.py
   - templates/schemas/entity-node.schema.json
   - tests/test_knowledge_engine_resolution_contract.py
-last_verified: 2026-10-11
+last_verified: 2026-10-17
 aliases:
   - knowledge index
   - index builder
@@ -39,9 +39,9 @@ retrieve on behalf of an agent. Those belong to adjacent subsystems.
   `.knowledge/`. Nothing else is authoritative.
 - **The in-memory model is the canonical interpretation** of that input. Typing, validation, edge
   materialization, coverage, and ownership resolution happen there and nowhere else.
-- **Serialized artifacts are derived.** They exist for drift checking, inspection, and
-  interoperability, are regenerated rather than edited, and are byte-stable across operating
-  systems.
+- **Serialized artifacts are derived.** They exist for inspection and interoperability, are
+  regenerated rather than edited, and are byte-stable across operating systems. A stale copy never
+  blocks work.
 
 ## Invariants
 

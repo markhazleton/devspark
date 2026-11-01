@@ -1453,6 +1453,26 @@ def test_explicit_feature_dir_wins_over_the_branch(repo):
     assert code == 0 and payload["feature"] == explicit.name
 
 
+def test_a_work_branch_resolves_to_on_demand_adjudication_not_an_error(repo):
+    code, payload = run_cli("resolve", "--repo-root", str(repo), "--branch", "132-work-quote-auth")
+
+    assert code == 0, payload
+    assert payload["status"] == "work-branch"
+    assert payload["feature_dir"].endswith("132-work-quote-auth")
+    assert "run_id" not in payload and "handoff" not in payload
+
+    # The branch type decides: a file named spec.md in a work directory never opens a review run.
+    bundle = repo / ".devspark.work" / "specs" / "140-work-incidental"
+    bundle.mkdir(parents=True)
+    (bundle / "spec.md").write_text("# Spec\n", encoding="utf-8")
+    code, payload = run_cli("resolve", "--repo-root", str(repo), "--branch", "140-work-incidental")
+    assert code == 0 and payload["status"] == "work-branch" and "run_id" not in payload
+
+    explicit = repo / ".devspark.work" / "specs" / "141-work-other"
+    code, payload = run_cli("resolve", "--repo-root", str(repo), "--feature-dir", str(explicit))
+    assert code == 0 and payload["status"] == "work-branch"
+
+
 def test_children_are_told_to_use_the_resolved_feature_instead_of_guessing():
     planning = _read("templates/commands/planning-review.md")
     assert "DEVSPARK_FEATURE" in planning and "FEATURE_DIR" in planning
@@ -1548,7 +1568,232 @@ def test_lifecycle_requires_all_spec_work_to_be_complete(feature, repo):
     assert code == 0, payload
 
 
-def test_lifecycle_blocks_unhandled_routed_obligations_and_uncaptured_future_work(feature, repo):
+def test_lifecycle_blocks_delivery_until_an_existing_work_note_is_complete(feature, repo):
+    (feature / "tasks.md").write_text("- [x] T001 done\n", encoding="utf-8")
+    write_child(feature, repo, "analyze")
+    write_child(feature, repo, "critic")
+    write_judge(feature, repo)
+    work = feature / "work.md"
+    work.write_text("# Work\n\n**Status**: In Progress\n", encoding="utf-8")
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(feature))
+
+    assert code == 1
+    assert "work-incomplete" in {failure["code"] for failure in payload["failures"]}
+
+    work.write_text("# Work\n\n**Status**: Complete\n", encoding="utf-8")
+    code, payload = run_cli("lifecycle", "--feature-dir", str(feature))
+    assert code == 0, payload
+
+
+def test_an_optional_work_branch_plan_adds_no_delivery_gate(repo):
+    work = repo / ".devspark.work" / "specs" / "133-work-catalog"
+    work.mkdir(parents=True)
+    (work / "plan.md").write_text("# Plan\n\n## Decisions\n- Reuse the catalog loader.\n", encoding="utf-8")
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+
+    assert code == 0, payload
+    assert payload["failures"] == []
+    assert judge.verification_state(work)["verify_required"] is False
+
+
+def test_open_work_branch_deliverables_are_coordination_not_a_completion_gate(repo):
+    work = repo / ".devspark.work" / "specs" / "134-work-catalog"
+    work.mkdir(parents=True)
+    (work / "work.md").write_text(
+        "# Work\n\n**Status**: Complete\n\n## Remaining Deliverables\n"
+        "- [x] Loader returns the catalog\n- [ ] Optional cache warm-up (after: Loader returns the catalog)\n",
+        encoding="utf-8",
+    )
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+
+    assert code == 0, payload
+    assert payload["failures"] == []
+
+
+def test_a_task_list_on_a_work_branch_is_coordination_not_a_completion_gate(repo):
+    work = repo / ".devspark.work" / "specs" / "135-work-catalog"
+    work.mkdir(parents=True)
+    (work / "tasks.md").write_text("- [x] T001 loader\n- [ ] T002 optional cache warm-up\n", encoding="utf-8")
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+    assert code == 0, payload
+    assert payload["failures"] == []
+
+    (work / "work.md").write_text("# Work\n\n**Status**: In Progress\n", encoding="utf-8")
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+    assert code == 1
+    assert {f["code"] for f in payload["failures"]} == {"work-incomplete"}
+
+
+def test_a_spec_bundle_task_list_still_gates_completion_but_a_work_directory_never_does(repo):
+    bundle = repo / ".devspark.work" / "specs" / "136-spec-catalog"
+    bundle.mkdir(parents=True)
+    (bundle / "spec.md").write_text("# Spec\n", encoding="utf-8")
+    (bundle / "tasks.md").write_text("- [ ] T001 loader\n", encoding="utf-8")
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(bundle))
+
+    assert code == 1
+    assert "incomplete-tasks" in {f["code"] for f in payload["failures"]}
+
+    # A file named spec.md in a work directory is incidental; the branch type decides.
+    work = repo / ".devspark.work" / "specs" / "138-work-catalog"
+    shutil.copytree(bundle, work)
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+    assert code == 0, payload
+    assert payload["failures"] == []
+
+
+def test_an_open_required_obligation_blocks_delivery_until_satisfied(repo):
+    work = repo / ".devspark.work" / "specs" / "137-work-quote-auth"
+    work.mkdir(parents=True)
+    note = work / "work.md"
+    body = (
+        "# Work\n\n**Status**: Complete\n\n## Material Decisions\n"
+        "- [ ] not an obligation — Basis: src/quote.py @ abc1234\n\n"
+        "## Required Obligations\n"
+        "- {mark} Partner token is validated before quoting — Authority: Constitution Principle III\n\n"
+        "## Remaining Deliverables\n- [ ] Optional cache warm-up\n"
+    )
+    note.write_text(body.format(mark="[ ]"), encoding="utf-8")
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+
+    assert code == 1
+    assert {f["code"] for f in payload["failures"]} == {"required-obligation-unresolved"}
+    assert "Partner token is validated before quoting" in payload["failures"][0]["message"]
+    assert "(authority: Constitution Principle III)" in payload["failures"][0]["message"]
+    assert payload["failures"][0]["obligations"] == [
+        {
+            "obligation": "Partner token is validated before quoting",
+            "authority": "Constitution Principle III",
+            "missing": "satisfying evidence",
+        }
+    ]
+
+    note.write_text(body.format(mark="[x]"), encoding="utf-8")
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+    assert code == 1
+    assert payload["failures"][0]["obligations"][0]["missing"] == "an evidence reference"
+    assert "is checked without an evidence reference" in payload["failures"][0]["message"]
+
+    note.write_text(
+        body.format(mark="[x]").replace("Principle III\n", "Principle III — Evidence: tests/test_quote_auth.py\n"),
+        encoding="utf-8",
+    )
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+    assert code == 0, payload
+    assert payload["failures"] == []
+
+
+OBLIGATION_ENTRY = "Privacy review of the export — Authority: Privacy Office"
+
+
+@pytest.mark.parametrize(
+    ("entries", "missing"),
+    [
+        (["- [ ] " + OBLIGATION_ENTRY], ["satisfying evidence"]),
+        (["- [ ] " + OBLIGATION_ENTRY + " — Evidence: PRIV-0000"], ["satisfying evidence"]),
+        (["- [x] " + OBLIGATION_ENTRY], ["an evidence reference"]),
+        (["- [x] " + OBLIGATION_ENTRY + " — Evidence: PRIV-0000 approval"], []),
+        (["- [x] " + OBLIGATION_ENTRY + " — Evidence:"], ["an evidence reference"]),
+        (["- [x] " + OBLIGATION_ENTRY + " — Evidence: <reference>"], ["an evidence reference"]),
+        (["- [x] " + OBLIGATION_ENTRY + " — Evidence: TBD"], ["an evidence reference"]),
+        (["- [x] " + OBLIGATION_ENTRY + " — reviewed and/or approved by the team"], ["an evidence reference"]),
+        (["- [x] " + OBLIGATION_ENTRY + " — Decision: Privacy Office waiver DEC-2026-014"], []),
+        (["- [x] " + OBLIGATION_ENTRY + " (approval: SR-0)"], []),
+        (["- [x] " + OBLIGATION_ENTRY + " — pinned in commit 0113f2c"], []),
+        (["- [x] " + OBLIGATION_ENTRY + " — [approval](https://example.invalid/reviews/42)"], []),
+        (["- [x] " + OBLIGATION_ENTRY, "  - Evidence: docs/privacy/export-review.md"], []),
+        (["- [x] Review per SEC-POL-7 — Authority: SEC-POL-7"], ["an evidence reference"]),
+        (["- [x] Privacy review of the export — Evidence: PRIV-0000"], ["its authority"]),
+        (
+            [
+                "- [x] " + OBLIGATION_ENTRY + " — Evidence: PRIV-0000",
+                "- [x] Token validated — Authority: Constitution Principle III",
+                "- [ ] Retention approved — Authority: Records Office",
+            ],
+            ["an evidence reference", "satisfying evidence"],
+        ),
+    ],
+    ids=[
+        "unchecked-without-evidence",
+        "unchecked-with-evidence",
+        "checked-without-evidence",
+        "checked-with-reference",
+        "checked-with-empty-reference",
+        "checked-with-placeholder",
+        "checked-with-tbd",
+        "checked-with-prose-only",
+        "authorized-decision-reference",
+        "parenthesized-approval",
+        "commit-reference",
+        "linked-record",
+        "reference-on-a-continuation-line",
+        "authority-identifier-is-not-evidence",
+        "checked-without-authority",
+        "mixed-completion",
+    ],
+)
+def test_a_checked_obligation_needs_an_evidence_reference_and_its_authority(repo, entries, missing):
+    work = repo / ".devspark.work" / "specs" / "140-work-partner-export"
+    work.mkdir(parents=True)
+    (work / "work.md").write_text(
+        "# Work\n\n**Status**: Complete\n\n## Required Obligations\n" + "\n".join(entries) + "\n",
+        encoding="utf-8",
+    )
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+
+    if not missing:
+        assert code == 0, payload
+        assert payload["failures"] == []
+        return
+    assert code == 1
+    (failure,) = payload["failures"]
+    assert failure["code"] == "required-obligation-unresolved"
+    assert [item["missing"] for item in failure["obligations"]] == missing
+
+
+def test_a_long_obligation_is_reported_whole_so_the_refusal_is_actionable(repo):
+    work = repo / ".devspark.work" / "specs" / "139-work-partner-export"
+    work.mkdir(parents=True)
+    obligation = "Security approval of the partner export feed before it is exposed to any partner"
+    (work / "work.md").write_text(
+        "# Work\n\n**Status**: Complete\n\n## Required Obligations\n"
+        f"- [ ] {obligation} — Authority: Security Office\n",
+        encoding="utf-8",
+    )
+
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+
+    assert code == 1
+    assert payload["failures"][0]["obligations"] == [
+        {"obligation": obligation, "authority": "Security Office", "missing": "satisfying evidence"}
+    ]
+    assert f"{obligation} (authority: Security Office)" in payload["failures"][0]["message"]
+
+
+def test_work_notes_without_obligations_and_spec_bundles_are_unaffected(feature, repo):
+    work = repo / ".devspark.work" / "specs" / "138-work-catalog"
+    work.mkdir(parents=True)
+    (work / "work.md").write_text(
+        "# Work\n\n**Status**: Complete\n\n## Material Decisions\n- Reuse the loader — Basis: src/loader.py @ abc1234\n",
+        encoding="utf-8",
+    )
+    code, payload = run_cli("lifecycle", "--feature-dir", str(work))
+    assert code == 0, payload
+
+    (feature / "tasks.md").write_text("- [x] T001 done\n", encoding="utf-8")
+    write_child(feature, repo, "analyze")
+    write_child(feature, repo, "critic")
+    write_judge(feature, repo)
+    code, payload = run_cli("lifecycle", "--feature-dir", str(feature))
+    assert code == 0, payload
+    assert "required-obligation-unresolved" not in {f["code"] for f in payload["failures"]}
     tasks = feature / "tasks.md"
     tasks.write_text("- [x] T001 done\n", encoding="utf-8")
     write_child(feature, repo, "analyze", [afinding("analyze-001")])

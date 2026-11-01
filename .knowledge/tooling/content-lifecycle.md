@@ -73,9 +73,9 @@ requires the entity model to be strictly additive and opt-in.
    `scripts/build_knowledge_index.py`.
 3. **Use the correct home.** Governance in `governance/`; domain entities in `entities/<id>/` with an
    explicit `layer`; validated samples in `reference/`; tooling guidance in `tooling/` (this folder).
-4. **Keep source claims narrow and accurate.** Every entity-layer doc must carry `layer`,
-   `source_of_truth`, and `last_verified`; every source claim must name an existing regular file,
-   not a directory, and object claims must have a unique `(path, profile, region)` tuple. The
+4. **Keep source claims narrow and accurate.** Every entity-layer doc must carry `layer` and
+   `source_of_truth`; `last_verified` is optional. Every source claim must name an existing regular
+   file, not a directory, and object claims must have a unique `(path, profile, region)` tuple. The
    content-drift evaluator reports a missing or directory source as an authoring error rather than
    silently widening the claim. Entity nodes (`_entity.yaml`) declare `id`, `type`, `owner`,
    `relations`, and any justified `coverage_overrides` for layers that don't apply.
@@ -89,9 +89,10 @@ requires the entity model to be strictly additive and opt-in.
 7. **Protect sensitive data.** Use only synthetic examples — never personal, health, authentication,
    financial, or deployment-secret data in prose, samples, or reference files.
 8. **Preserve generated ownership.** Never hand-edit `.knowledge/index.json` or
-   `.knowledge/ontology/coverage.json` — regenerate both via `scripts/build_knowledge_index.py`
-   (wrapped by `scripts/powershell/generate-knowledge-index.ps1` and
-   `scripts/bash/generate-knowledge-index.sh`) after any entity-document change.
+   `.knowledge/ontology/coverage.json`. They are optional build output; when you want fresh copies,
+   regenerate both via `scripts/build_knowledge_index.py` (wrapped by
+   `scripts/powershell/generate-knowledge-index.ps1` and `scripts/bash/generate-knowledge-index.sh`).
+   A stale copy never blocks a change.
 9. **Treat breadth as guidance.** When a document intentionally names several source files, use
   `--breadth-guidance <count>` to surface a non-blocking advisory and review whether the claims
   can be narrowed; do not replace a missing file with its parent directory.

@@ -177,8 +177,9 @@ implementation history. Agents MUST use bounded, evidence-backed current Knowled
 - Knowledge MUST NOT carry ephemeral planning identifiers, and durable content MUST NOT reference
   the temporary planning record that produced it. Traceability flows one way: the temporary record
   cites code, tests, and Knowledge.
-- Derived Knowledge artifacts MUST be regenerated in the same change as their sources, so the
-  generated model matches the authoritative files.
+- Derived Knowledge artifacts (`index.json`, `coverage.json`) are build output. They MAY be
+  regenerated and committed, but a stale or missing copy MUST NOT block a change; the authoritative
+  files are what MUST be correct and buildable.
 - An agent MUST NOT promote an inferred or advisory finding into authoritative Knowledge without
   validation and explicit acceptance.
 - Context supplied to an agent MUST be bounded and provenanced. Injecting the whole corpus, or

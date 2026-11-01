@@ -1,8 +1,8 @@
 # DevSpark
 
 DevSpark is Make Bold Solutions' adaptive software-delivery toolkit for AI-assisted engineering. It gives an
-AI coding assistant enough structure to clarify intent, plan proportionately, implement with current
-knowledge and tests, and review the result without turning planning paperwork into permanent truth.
+AI coding assistant enough structure to understand intent, implement with current knowledge and
+tests, verify the result, and deliver it without turning planning paperwork into permanent truth.
 Its reusable workflows are **skills**: invoke one with a `/devspark-*` slash command, and your
 AI agent follows its prompt instructions. See the [terminology](guides/prompt-lifecycle-mapping.md#terminology).
 
@@ -11,20 +11,27 @@ AI agent follows its prompt instructions. See the [terminology](guides/prompt-li
 <span><strong>Build date</strong> <time data-devspark-build-date>Loading...</time></span>
 </div>
 
-## Find Your Route
+## One Flow
 
-Pick the kind of change, then click any step to see what it does and why it is there. A one-off edit
-needs no planning at all; the routes below add only as much structure as the risk calls for.
+**One Flow. Assurance as Needed. Deliver Software.** DevSpark helps you understand the problem,
+implement the software, verify the outcome, and deliver a reliable change.
 
-<div data-devspark-flow><noscript>Enable JavaScript for the interactive route explorer. The routes are
-one-off (no planning), quickfix, quick spec, and full spec, and all converge on
+Start new work with `/devspark-specify`, or resume with `/devspark-next`. Every change follows the
+same path: understand, implement and verify, then deliver. There is no route to choose. A plan, a
+task list or a focused review is added only when a specific uncertainty or risk justifies it.
+Existing v9.3 specifications continue on their recorded route. Click any step to see what it does
+and why it is there.
+
+<div data-devspark-flow><noscript>Enable JavaScript for the interactive flow explorer. New work starts
+with <code>/devspark-specify</code>; a quickfix record is optional for a diagnosed defect; existing
+v9.3 specifications continue on their route. All of them converge on
 <code>/devspark-implement</code>.</noscript></div>
 
 ## Plan Temporarily, Review the Delta
 
 Plans help produce a change; they are not release evidence or a second source of truth. Git records
 how the repository changed, and `.knowledge/` states how it works now. Code, tests, and current
-knowledge change together, and `/devspark-release` later archives the completed planning bundle.
+knowledge change together, and `/devspark-release` later archives any completed planning record.
 
 ## Start Here
 

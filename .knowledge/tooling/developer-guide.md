@@ -44,8 +44,9 @@ index) as a guided command.
    ---
    ```
 
-3. Run `python scripts/build_knowledge_index.py --repo-root .` to regenerate `index.json` and
-   `.knowledge/ontology/coverage.json`. Fix any validation errors before committing.
+3. Run `python scripts/build_knowledge_index.py --repo-root . --check` to confirm the Knowledge builds
+   (without `--check` it also rewrites the derived `index.json` and `coverage.json`, which are
+   optional build output). Fix any validation errors before committing.
 4. If a layer legitimately doesn't apply (e.g. no external consumers, so no `integration` layer),
    add a `coverage_overrides` entry to `_entity.yaml` with a `justification` instead of leaving it
    silently missing.
@@ -62,7 +63,7 @@ steps 3-4 above afterward.
 ## Keeping `source_of_truth` honest
 
 Legacy string claims remain supported, including their `stale_entities` output and the optional
-`--fail-on-stale` currency check. That date-based signal is advisory during ordinary generation
+`--fail-on-stale` currency check. `last_verified` is optional; when present it must be an ISO date. That date-based signal is advisory during ordinary generation
 and is not proof that behavior changed. Do not clear it by hand-editing a date; use
 `/devspark-explain <topic>` to inspect the cited source and update the knowledge document.
 
@@ -136,7 +137,7 @@ does not suppress a difference it cannot prove non-behavioral.
 4. When the reasoning changes, edit the file in place — do not create a new dated or numbered file
    and do not add version-chain language; sequential filenames and that language are both
    rejected by the builder. Delete the file (git preserves the history) once the decision is moot.
-5. Run the same index regeneration command as below and fix any validation errors.
+5. Run `python scripts/build_knowledge_index.py --repo-root . --check` and fix any validation errors.
 
 ## Making a document discoverable
 
@@ -197,8 +198,8 @@ for the gap between how the author writes and how the reader asks.
 
 ## Regenerating the index
 
-Never hand-edit `.knowledge/index.json` or `.knowledge/ontology/coverage.json` — both are fully
-generated:
+The derived `.knowledge/index.json` and `.knowledge/ontology/coverage.json` are optional build
+output; a stale or missing copy never blocks a change. Never hand-edit them. To refresh them:
 
 ```powershell
 .devspark/scripts/powershell/generate-knowledge-index.ps1

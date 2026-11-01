@@ -26,7 +26,7 @@ trigger:
       - 'v*'
 
 # Validate every PR against main with the same gates as a push build (pytest, ruff,
-# markdownlint, knowledge-index/skill drift, agents-registry validation) so
+# markdownlint, knowledge build/skill drift, agents-registry validation) so
 # drift is caught before merge, not only after. The deploy step below never runs for
 # a PR build (Build.Reason guard) - PRs validate only, they never publish.
 pr:
@@ -80,7 +80,7 @@ steps:
     displayName: 'Verify generated skills are not stale (drift gate)'
 
   - script: python3 scripts/build_knowledge_index.py --repo-root . --check
-    displayName: 'Verify .knowledge index/coverage are not stale (drift gate)'
+    displayName: 'Verify .knowledge builds'
 
   - script: |
       set -euo pipefail

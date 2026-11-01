@@ -88,6 +88,54 @@ if [[ "$HAS_GIT" == "true" ]]; then
     fi
 fi
 
+WORK_BRANCH="false"
+WORK_RECORD_EXISTS="false"
+WORK_STATUS=""
+WORK_COMPLETE="false"
+WORK_HAS_CHANGES="$DIRTY"
+if [[ "$CURRENT_BRANCH" =~ ^[0-9]{3}-work- ]]; then
+    WORK_BRANCH="true"
+    WORK_RECORD="$REPO_ROOT/.devspark.work/specs/$CURRENT_BRANCH/work.md"
+    if [[ -f "$WORK_RECORD" ]]; then
+        WORK_RECORD_EXISTS="true"
+        # Same reading as next-context.ps1 and judge.py: first Status line, case-insensitive, CRLF-safe.
+        WORK_STATUS=$(tr -d '\r' < "$WORK_RECORD" | grep -i -m1 -E '^\*\*status\*\*:' | sed -E 's/^\*\*[^*]+\*\*:[[:space:]]*//; s/<.*$//; s/[[:space:]]+$//')
+        [[ "$(printf '%s' "$WORK_STATUS" | tr '[:upper:]' '[:lower:]')" == "complete" ]] && WORK_COMPLETE="true"
+    fi
+    if [[ "$HAS_GIT" == "true" ]]; then
+        _work_target="origin/$DEFAULT_BRANCH"
+        git rev-parse --verify --quiet "refs/remotes/$_work_target" >/dev/null 2>&1 || _work_target="$DEFAULT_BRANCH"
+        _work_ahead=$(git rev-list --count "$_work_target..HEAD" 2>/dev/null || echo 0)
+        [[ "$_work_ahead" =~ ^[0-9]+$ && "$_work_ahead" -gt 0 ]] && WORK_HAS_CHANGES="true"
+    fi
+fi
+
+# judge.py lifecycle is the single evaluator of delivery blockers; next-context only reads its verdict.
+LIFECYCLE_STATUS=""
+LIFECYCLE_BLOCKERS="[]"
+LIFECYCLE_MESSAGE=""
+OBLIGATION_OPEN="false"
+OBLIGATION_MESSAGE=""
+_work_dir="$REPO_ROOT/.devspark.work/specs/$CURRENT_BRANCH"
+if [[ "$WORK_BRANCH" == "true" && -d "$_work_dir" ]]; then
+    LIFECYCLE_STATUS="unavailable"
+    _lifecycle_py="$SCRIPT_DIR/../judge.py"
+    if [[ -f "$_lifecycle_py" ]] && command -v jq >/dev/null 2>&1; then
+        for _py in python3 python; do
+            command -v "$_py" >/dev/null 2>&1 || continue
+            _lifecycle=$("$_py" "$_lifecycle_py" lifecycle --feature-dir "$_work_dir" 2>/dev/null || true)
+            if jq -e '.status == "pass" or .status == "fail"' <<<"$_lifecycle" >/dev/null 2>&1; then
+                LIFECYCLE_STATUS=$(jq -r '.status' <<<"$_lifecycle" | tr -d '\r')
+                LIFECYCLE_BLOCKERS=$(jq -c '[.failures[].code]' <<<"$_lifecycle" | tr -d '\r')
+                LIFECYCLE_MESSAGE=$(jq -r '[.failures[].message] | join("; ")' <<<"$_lifecycle" | tr -d '\r')
+                OBLIGATION_MESSAGE=$(jq -r '[.failures[] | select(.code == "required-obligation-unresolved") | .message] | join("; ")' <<<"$_lifecycle" | tr -d '\r')
+                [[ -n "$OBLIGATION_MESSAGE" ]] && OBLIGATION_OPEN="true"
+                break
+            fi
+        done
+    fi
+fi
+
 # Spec / quickfix detection for the current branch. The branch name may differ from the spec
 # directory, so resolve by numeric prefix: an exact spec directory wins, a quickfix record for the
 # branch means a quickfix (not a spec), otherwise exactly one spec directory with that prefix is the
@@ -95,7 +143,7 @@ fi
 SPEC_DIR="$REPO_ROOT/.devspark.work/specs/$CURRENT_BRANCH"
 SPEC_AMBIGUOUS="false"
 SPEC_AMBIGUOUS_MATCHES=""
-if [[ ! -f "$SPEC_DIR/spec.md" && "$CURRENT_BRANCH" =~ ^[0-9]{3}- && ! -f "$REPO_ROOT/.devspark.work/quickfixes/$CURRENT_BRANCH.md" ]]; then
+if [[ "$WORK_BRANCH" == "false" && ! -f "$SPEC_DIR/spec.md" && "$CURRENT_BRANCH" =~ ^[0-9]{3}- && ! -f "$REPO_ROOT/.devspark.work/quickfixes/$CURRENT_BRANCH.md" ]]; then
     _prefix="${CURRENT_BRANCH:0:3}"
     _count=0
     _found=""
@@ -113,7 +161,8 @@ if [[ ! -f "$SPEC_DIR/spec.md" && "$CURRENT_BRANCH" =~ ^[0-9]{3}- && ! -f "$REPO
     fi
 fi
 SPEC_EXISTS="false"
-[[ "$SPEC_AMBIGUOUS" == "false" && -f "$SPEC_DIR/spec.md" ]] && SPEC_EXISTS="true"
+# A work branch is never a legacy bundle, even when its directory holds a file named spec.md.
+[[ "$WORK_BRANCH" == "false" && "$SPEC_AMBIGUOUS" == "false" && -f "$SPEC_DIR/spec.md" ]] && SPEC_EXISTS="true"
 SPEC_FEATURE=""
 [[ "$SPEC_EXISTS" == "true" ]] && SPEC_FEATURE=$(basename "$SPEC_DIR")
 
@@ -292,7 +341,7 @@ fi
 # ---- Recommendation ladder ----
 RECOMMENDED="/devspark-specify"
 STATE="unknown"
-REASON="Describe the work to /devspark-specify and it will route you."
+REASON="Describe the work to /devspark-specify to start it on the one implementation path."
 
 if [[ "$CONSTITUTION_EXISTS" == "false" ]]; then
     RECOMMENDED="/devspark-constitution"
@@ -301,15 +350,23 @@ if [[ "$CONSTITUTION_EXISTS" == "false" ]]; then
 elif [[ "$SPEC_AMBIGUOUS" == "true" ]]; then
     RECOMMENDED="resolve"
     STATE="ambiguous-spec"
-    REASON="Branch '$CURRENT_BRANCH' matches more than one spec directory ($SPEC_AMBIGUOUS_MATCHES). Set DEVSPARK_FEATURE to the intended directory name, or remove the duplicate, then re-run /devspark.next."
+    REASON="Branch '$CURRENT_BRANCH' matches more than one spec directory ($SPEC_AMBIGUOUS_MATCHES). Set DEVSPARK_FEATURE to the intended directory name, or remove the duplicate, then re-run /devspark-next."
 elif [[ "$SPEC_EXISTS" == "true" && ( "$JUDGE_VERDICT" == "CONDITIONAL" || "$JUDGE_PENDING_DECISIONS" -gt 0 ) ]]; then
     RECOMMENDED="/devspark-planning-review"
     STATE="review-needs-decision"
     REASON="A human planning decision is pending. Answer it before remediation or implementation, then use /devspark-planning-review --judge-only to record the disposition."
+elif [[ "$WORK_BRANCH" == "true" && ( ( "$WORK_RECORD_EXISTS" == "false" && ( "$DIRTY" == "true" || "$WORK_HAS_CHANGES" == "false" ) ) || ( "$WORK_RECORD_EXISTS" == "true" && "$WORK_COMPLETE" == "false" ) ) ]]; then
+    RECOMMENDED="/devspark-implement"
+    STATE="work-in-progress"
+    if [[ "$WORK_RECORD_EXISTS" == "true" ]]; then
+        REASON="Resume the active work from its saved outcome, decisions, blockers, and next action."
+    else
+        REASON="Continue work on this branch. Recover intent from the request, Git changes, commits, tests, and current Knowledge; record only context that would otherwise be lost."
+    fi
 elif [[ "$IS_DEFAULT_BRANCH" == "true" && "$SPEC_EXISTS" == "false" && "$QUICKFIX_EXISTS" == "false" ]]; then
     RECOMMENDED="/devspark-specify"
     STATE="no-active-work"
-    REASON="You're on '$CURRENT_BRANCH' with no active spec or quickfix. Start with /devspark-specify (unsure of size) or /devspark-quickfix (small, contained fix)."
+    REASON="You're on '$CURRENT_BRANCH' with no active work. Start with /devspark-specify to understand the request and begin implementation without choosing a workflow size."
 elif [[ "$SPEC_EXISTS" == "true" && "$IS_FULL_SPEC" == "true" && "$PLAN_EXISTS" == "false" ]]; then
     RECOMMENDED="/devspark-plan"
     STATE="spec-needs-plan"
@@ -382,11 +439,23 @@ elif [[ "$QUICKFIX_EXISTS" == "true" && "$QUICKFIX_COMPLETE" == "false" && "$PR_
 elif [[ "$DIRTY" == "true" ]]; then
     RECOMMENDED="commit"
     STATE="uncommitted-changes"
-    REASON="You have uncommitted changes on '$CURRENT_BRANCH'. Commit your work (then re-run /devspark.next). If this is a spec route mid-implementation, continue with /devspark-implement."
+    REASON="You have uncommitted changes on '$CURRENT_BRANCH'. Commit your work (then re-run /devspark-next). If this is a spec route mid-implementation, continue with /devspark-implement."
+elif [[ "$WORK_BRANCH" == "true" && "$LIFECYCLE_STATUS" == "fail" ]]; then
+    STATE="delivery-blocked"
+    if [[ "$OBLIGATION_OPEN" == "true" ]]; then
+        RECOMMENDED="resolve-obligation"
+        REASON="The work on '$CURRENT_BRANCH' is committed, but it is not ready for a PR: $LIFECYCLE_MESSAGE. Obtain the satisfying evidence or the named authority's decision, check the entry in work.md with a reference to that evidence, then re-run /devspark-next."
+    else
+        RECOMMENDED="/devspark-implement"
+        REASON="The work on '$CURRENT_BRANCH' is committed, but DevSpark's lifecycle check rejects delivery: $LIFECYCLE_MESSAGE. Resolve these with /devspark-implement, then re-run /devspark-next."
+    fi
 elif [[ "$PR_EXISTS" == "false" ]]; then
     RECOMMENDED="/devspark-create-pr"
     STATE="ready-for-pr"
     REASON="Work is committed on '$CURRENT_BRANCH' and no PR exists yet. Open one with /devspark-create-pr (it will publish the branch and let you optionally run /devspark-verify)."
+    if [[ "$WORK_BRANCH" == "true" && "$WORK_COMPLETE" == "false" ]]; then
+        REASON="Work is committed on '$CURRENT_BRANCH' and no PR exists yet, but a clean branch with commits is not proof the requested change is complete. Confirm the acceptance criteria, applicable verification, and any unresolved obligations, then open a PR with /devspark-create-pr."
+    fi
 elif [[ "$PR_EXISTS" == "true" && "$REVIEW_FILE_EXISTS" == "false" ]]; then
     RECOMMENDED="/devspark-pr-review"
     STATE="pr-needs-review"
@@ -409,6 +478,16 @@ fi
 if [[ -n "$PENDING_GATES" && ! "$RECOMMENDED" =~ (analyze|critic|checklist|verify|constitution|planning-review) ]]; then
     REASON="$REASON Open advisory gates still recommended before merge: $PENDING_GATES."
 fi
+if [[ "$OBLIGATION_OPEN" == "true" && "$STATE" != "delivery-blocked" ]]; then
+    REASON="$REASON Delivery stays blocked until this is resolved: $OBLIGATION_MESSAGE."
+elif [[ "$WORK_BRANCH" == "true" && "$LIFECYCLE_STATUS" == "unavailable" && "$STATE" == "ready-for-pr" ]]; then
+    REASON="$REASON DevSpark could not run its lifecycle check here, so delivery readiness is unconfirmed, not passed."
+    if [[ -f "$_work_dir/work.md" ]] && grep -Eiq $'^##[[:blank:]]+Required Obligations[[:blank:]]*\r?$' "$_work_dir/work.md"; then
+        REASON="$REASON Because work.md declares Required Obligations, /devspark-create-pr will refuse until the check can run: make Python 3.11+ with PyYAML available as python3 or python, and confirm DevSpark's judge.py is installed."
+    else
+        REASON="$REASON /devspark-create-pr runs that check before publishing."
+    fi
+fi
 
 if [[ "$JSON_MODE" == true ]]; then
     cat <<EOF
@@ -430,6 +509,13 @@ if [[ "$JSON_MODE" == true ]]; then
   "SPEC_EXISTS": $SPEC_EXISTS,
   "SPEC_FEATURE": "$SPEC_FEATURE",
   "SPEC_AMBIGUOUS": $SPEC_AMBIGUOUS,
+  "WORK_BRANCH": $WORK_BRANCH,
+  "WORK_RECORD_EXISTS": $WORK_RECORD_EXISTS,
+  "WORK_STATUS": $(printf '%s' "$WORK_STATUS" | jq -R -s '.' 2>/dev/null || echo '""'),
+  "WORK_COMPLETE": $WORK_COMPLETE,
+  "WORK_HAS_CHANGES": $WORK_HAS_CHANGES,
+  "LIFECYCLE_STATUS": "$LIFECYCLE_STATUS",
+  "LIFECYCLE_BLOCKERS": $LIFECYCLE_BLOCKERS,
   "IS_FULL_SPEC": $IS_FULL_SPEC,
   "SPEC_STATUS": "$SPEC_STATUS",
   "PLAN_EXISTS": $PLAN_EXISTS,

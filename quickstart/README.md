@@ -25,7 +25,7 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 
 > ⚠️ **Avoid stale installs.** Webpage-fetch tools cache `dev.makeboldspark.com` URLs aggressively and can hand the agent an **old version** of the guide, manifest, and framework files. Each quickstart now opens with **Step 0**, which forces the agent to re-fetch the guide and every file via cache-busted terminal commands. If your agent appears to install an outdated version, tell it: *"Re-run Step 0 — re-fetch the guide and manifest via a terminal command with a `?cb=<timestamp>` cache-buster, not a webpage fetch."*
 
-After installation, start new work with `/devspark-specify`. It now classifies the request as a one-off fix, quick spec, or full spec and asks the user to confirm the route before artifacts are created.
+After installation, start new work with `/devspark-specify`, or use `/devspark-next` to resume. New work follows one implementation path without choosing Light or Full; active v9.3 specifications continue on their existing route.
 
 DevSpark commands start only when you type them as slash commands, with the leading `/` (for example `/devspark-create-pr`). The agent does not start them on its own, so typing the bare name or asking the agent to "run devspark-create-pr" sends plain text and the command skill never loads.
 

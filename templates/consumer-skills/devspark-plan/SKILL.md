@@ -1,6 +1,6 @@
 ---
 name: devspark-plan
-description: "Execute the implementation planning workflow using the plan template to generate design artifacts."
+description: "Optional — record design decisions when a material uncertainty justifies it. Advisory on a work branch and never a gate; for an existing specification bundle, produces its full planning package."
 user-invocable: true
 disable-model-invocation: true
 ---

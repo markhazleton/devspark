@@ -59,7 +59,7 @@ def test_code_first_preserves_chronology_and_proportionate_knowledge() -> None:
     for instruction in (
         "implementation preceded this review", "never backdate", "actual\n   timestamps",
         "create Knowledge only for lasting engineering value",
-        "knowledge_ref: n/a", "Reuse a matching existing record",
+        "Reuse a matching existing record",
         "Validate already-done\n   items instead of reimplementing them",
         "Do not request fictional `spec.md`, `plan.md`, or `tasks.md`",
         "unrelated changes are already staged, leave the index untouched",

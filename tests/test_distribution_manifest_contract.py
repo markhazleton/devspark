@@ -8,7 +8,9 @@ data paths such as override and default command files stay dotted.
 
 from __future__ import annotations
 
+import re
 import subprocess
+import tomllib
 import zipfile
 from pathlib import Path
 
@@ -114,6 +116,15 @@ def test_md_and_toml_packages_use_hyphenated_entry_points_and_dotted_data(packag
     assert not any(n.startswith(".gemini/commands/devspark.") for n in toml)
     assert ".devspark/defaults/commands/devspark.specify.md" in md
     assert ".devspark/defaults/commands/devspark.specify.md" in toml
+
+
+def test_toml_entry_points_parse_and_keep_the_template_description(package_build) -> None:
+    with zipfile.ZipFile(package_build.zips["gemini"]) as archive:
+        for name in commands():
+            entry = tomllib.loads(archive.read(f".gemini/commands/devspark-{name}.toml").decode("utf-8"))
+            template = (ROOT / "templates" / "commands" / f"{name}.md").read_text(encoding="utf-8")
+            expected = re.search(r"(?m)^description:\s*(.+)$", template).group(1).rstrip("\r")
+            assert entry["description"] == expected, name
 
 
 def test_manifest_installed_and_package_installed_skills_are_byte_identical(package_build, install_index) -> None:

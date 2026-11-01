@@ -16,17 +16,15 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from tests.bash_twin import BASH_EXE, to_bash_path
 
 ROOT = Path(__file__).resolve().parent.parent
 HAS_PWSH = shutil.which("pwsh") is not None
-HAS_BASH = shutil.which("bash") is not None
+HAS_BASH = BASH_EXE is not None
 
 
 def _wsl_path(path: Path) -> str:
-    value = path.as_posix()
-    if len(value) > 1 and value[1] == ":":
-        return f"/mnt/{value[0].lower()}{value[2:]}"
-    return value
+    return to_bash_path(path)
 
 
 def _write(path: Path, content: str = "# stub\n") -> None:
@@ -40,7 +38,7 @@ def _resolve_bash(repo_root: Path) -> str:
         f"resolve_knowledge_engine '{_wsl_path(repo_root)}'"
     )
     result = subprocess.run(
-        ["bash", "-c", script], text=True, capture_output=True, timeout=30
+        [BASH_EXE, "-c", script], text=True, capture_output=True, timeout=30
     )
     return result.stdout.strip()
 

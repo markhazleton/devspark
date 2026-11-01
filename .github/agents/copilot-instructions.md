@@ -188,7 +188,7 @@ The `/devspark-release` command verifies and packages the durable Git delta at r
 4. **CHANGELOG Generation**: Updates release notes from shipped behavior
 5. **Version Calculation**: Determines MAJOR/MINOR/PATCH from the durable change
 6. **Dry Run Mode**: Previews release changes before committing
-7. **Work Retention & Cleanup**: Sweeps `.devspark.work/` retention, archives completed and linkage-verified specs/quickfixes, flags orphaned in-flight state, and backstops current-knowledge currentness. Release is the **sole** command that ever moves anything into `.archive/{YYYY-MM-DD}/`.
+7. **Work Retention & Cleanup**: Sweeps `.devspark.work/` retention, archives completed specs/quickfixes, flags orphaned in-flight state, and backstops current-knowledge currentness. Release is the **sole** command that ever moves anything into `.archive/{YYYY-MM-DD}/`.
 
 **Usage:**
 

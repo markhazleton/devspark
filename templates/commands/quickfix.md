@@ -1,13 +1,14 @@
 ---
 source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
-description: Rapid lightweight fix workflow that bypasses full spec creation while maintaining constitution compliance validation
+description: Optional lightweight WHAT/WHY/HOW record for a defect you have already diagnosed, with targeted constitution checks. /devspark-specify handles fixes too, without a record.
 handoffs:
   - label: View Quickfix History
     agent: devspark-quickfix
     prompt: Show me previous quickfixes with /devspark-quickfix list
-  - label: Upgrade to Full Spec
-    agent: devspark-specify
-    prompt: Create a full specification for this change
+  - label: Review a Material Concern
+    agent: devspark-critic
+    prompt: Challenge only the specific material concern discovered on this quickfix, then return to the fix
+    send: false
 scripts:
   sh: .devspark/scripts/bash/quickfix-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/quickfix-context.ps1 $ARGUMENTS -Json
@@ -23,15 +24,15 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Workflow Position
 
-Alternative entry point to authoring: `[user request] → route decision → { specify → clarify → plan → tasks | quickfix } → implement`. Use **instead of** `/devspark-specify` for bug fixes, config tweaks, docs updates, hotfixes, or minor features under ~4 hours. `/devspark-specify` recommends this command automatically for `one-off-fix` classification.
+Optional entry for a defect you have already diagnosed and want recorded as WHAT/WHY/HOW: `[diagnosed defect] → quickfix → implement → verify`. `/devspark-specify` handles fixes too, without a record, and never routes to this command or asks you to choose; use quickfix when the product-owner record is useful.
 
 Also accepts **Code First** work: `[existing diff] → quickfix review and reconciliation → existing
 implementation finalization`. A completed or partially completed change needs no prior spec,
 plan, or tasks. Both entries use the same quickfix record and existing assurance mechanisms.
 
-- **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches — flat documents, entities, entity layers, or decisions — if any), and complete `code_ref`/`knowledge_ref` linkage on the Validation Checklist. Before checking an item complete, record every affected production-code, test, and current `.knowledge/` path there; never reference the temporary quickfix record from a durable file.
-- **Does NOT own**: multi-file architectural changes, new user-facing features, or API/schema changes (→ `/devspark-specify`); interactive ambiguity resolution (→ `/devspark-clarify`); design artifacts (→ `/devspark-plan`); story-organized task lists (→ `/devspark-tasks`); adversarial risk review (→ `/devspark-critic`, `/devspark-analyze`) — quickfix's lightweight contract deliberately skips both gates entirely rather than running a lighter version of either; escalate to `/devspark-specify` if the change turns out to need them.
-- **If scope expands during implementation**: halt and recommend `/devspark-specify {original problem}` rather than stretching the quickfix.
+- **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches — flat documents, entities, entity layers, or decisions — if any), and the Validation Checklist. Update the affected production code, tests, and current `.knowledge/` content in the same change; never reference the temporary quickfix record from a durable file.
+- **Does NOT own**: multi-file architectural changes, new user-facing features, or API/schema changes (→ `/devspark-specify`); interactive ambiguity resolution (→ `/devspark-clarify`); design artifacts (→ `/devspark-plan`); story-organized task lists (→ `/devspark-tasks`); adversarial risk review (→ `/devspark-critic`, `/devspark-analyze`) — quickfix runs neither as a default gate; when a material concern justifies one, invoke it on this quickfix (it reviews the record in `QUICKFIX-ONLY` scope) and continue the fix.
+- **If scope expands during implementation**: surface the scope decision to the developer (see Route Escalation on Discovered Scope) rather than stretching the quickfix silently. The quickfix keeps its route; it gains only the assurance the concern justifies.
 
 ## Constitution Authority
 
@@ -43,10 +44,10 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
 
 This command enables rapid fixes without full-spec overhead. Its record lives under
 `.devspark.work/quickfixes/` for as long as it takes to reach `/devspark-implement`, which updates
-code, affected tests, and current knowledge, passes required verification, and populates the
-record's `code_ref`/`knowledge_ref` linkage. The record then stays live in `.devspark.work/quickfixes/`
+code, affected tests, and current knowledge, and passes required verification. The record then stays
+live in `.devspark.work/quickfixes/`
 — `/devspark-release` is the only command that later archives it to `.archive/{YYYY-MM-DD}/quickfixes/`
-once it's Complete and linkage-verified.
+once it's Complete.
 
 **Use Cases:**
 
@@ -151,7 +152,7 @@ If ACTION is "complete" and QUICKFIX_ID is provided:
 2. If it does not exist, report that it was already finalized or never existed.
 3. If it exists, do not mark it as completed here. Route to `/devspark-implement`, which owns
   verification and current-knowledge consistency; `/devspark-release` owns archiving the record
-  under `.archive/` once it's Complete and linkage-verified.
+  under `.archive/` once it's Complete.
 4. Stop execution.
 
 #### Action: `create` (Default)
@@ -176,8 +177,8 @@ scope or creating the same quickfix record.
    caller compatibility, regressions, and relevant existing tests. Material risk requires the
    applicable independent assurance, organizational requirements, and authorization even if code
    is already written. Use existing review/verification mechanisms; halt completion or escalate
-   when required assurance is missing. If promotion is needed, document remaining work and current
-   decisions prospectively, never fabricate an earlier specification or approval.
+   when required assurance is missing. If the developer splits separate work out, document remaining
+   work and current decisions prospectively, never fabricate an earlier specification or approval.
 4. **Close validation gaps.** Run the smallest relevant existing tests, add or update appropriate
    regression/edge-case coverage, and rerun after corrections. Use the existing verification
    contract and `/devspark-verify` when applicable. Record exact commands, observed results,
@@ -186,13 +187,12 @@ scope or creating the same quickfix record.
 5. **Reconcile lasting Knowledge only when needed.** Inspect applicable `.knowledge/` owners and
    determine whether the diff changes a durable claim, contract, or operational guidance. Update
    the owning document when necessary; create Knowledge only for lasting engineering value, never
-   to satisfy a documentation checkbox. If no update is needed, explain why in Context Resolution
-   and use `knowledge_ref: n/a` on the relevant checklist items.
+   to satisfy a documentation checkbox. If no update is needed, explain why in Context Resolution.
 6. **Preserve chronology in the existing record.** Create or update the quickfix record now,
    stating that implementation preceded this review, what was already done, and what remains.
    Describe HOW as the observed implementation plus any prospective corrections. Use actual
    timestamps, test results, and approvals; never backdate a planning decision or human approval.
-   Populate `code_ref`/`knowledge_ref` with inspected paths, and check items only after evidence
+   Name the inspected paths in the record, and check items only after evidence
    supports them. Reuse a matching existing record rather than generating another for the same work.
 7. **Finalize through the existing route.** Apply steps 7-9 with branch confirmation and staging
    safety below, then load `/devspark-implement`'s Quickfix Route and Finalize Every Route using
@@ -220,10 +220,8 @@ If the description suggests work beyond the classification limits, warn:
 ```markdown
 Scope Warning: This appears to be a larger change than a typical {CLASSIFICATION}.
 
-Consider upgrading to a full specification:
-
-- Run `/devspark-specify {description}` for proper planning
-- Or continue with quickfix if you're confident it's small
+- If it is one small change, continue with this quickfix
+- If it is new or broader work, start it with `/devspark-specify {description}` instead
 ```
 
 ### 4. Load Constitution (Targeted)
@@ -347,10 +345,10 @@ required_gates: { Leave blank for low risk; otherwise checklist }
 
 ## Validation Checklist
 
-- [ ] Change addresses stated problem (code_ref: pending | knowledge_ref: pending)
-- [ ] No unintended side effects identified (code_ref: pending | knowledge_ref: n/a)
-- [ ] Relevant tests updated/added (if applicable) (code_ref: pending | knowledge_ref: n/a)
-- [ ] Documentation updated (if applicable) (code_ref: n/a | knowledge_ref: pending)
+- [ ] Change addresses stated problem
+- [ ] No unintended side effects identified
+- [ ] Relevant tests updated/added (if applicable)
+- [ ] Documentation updated (if applicable)
 
 ## Gate Acknowledgements
 
@@ -442,7 +440,7 @@ summary: "Targeted constitution check complete"
 
 If scope expands beyond {MAX_EFFORT}:
 
-- Upgrade to full spec: `/devspark-specify {problem statement}`
+- Follow Route Escalation on Discovered Scope: add only the assurance a material concern justifies on this quickfix, and let the developer decide whether separate work starts with `/devspark-specify`
 ````
 
 ## Guidelines
@@ -456,17 +454,14 @@ If during implementation the user mentions scope expansion:
 - "Need to refactor..."
 - Multiple files/modules affected
 
-Recommend upgrading:
+Surface it without converting the route:
 
 ```markdown
 Scope Expansion Detected
 
 Your quickfix may be growing beyond the {CLASSIFICATION} classification.
-Consider upgrading to a full specification for better tracking:
-
-/devspark-specify {original problem statement}
-
-This ensures proper planning and documentation for larger changes.
+  - Same fix, larger than expected: continue here and keep the record accurate
+  - A separate change: finish or set aside this fix, then start that work with /devspark-specify
 ```
 
 ### Route Escalation on Discovered Scope
@@ -485,7 +480,7 @@ The signals above are about effort and what the developer *says*. These are abou
 
 One signal is enough, but only when it is **material** — a genuinely new contract, not a renamed helper. Do not convert routinely; most quickfixes exhibit none of these and finish as quickfixes.
 
-When one fires, state the evidence and hand the decision over:
+A signal never converts the route. It asks for the one activity that resolves its concern, added to this quickfix: `/devspark-critic` to challenge the concern against the real system, `/devspark-analyze` to check the record's internal soundness, or a decision from whoever holds the authority. Then the fix continues. When one fires, state the evidence and hand the decision over:
 
 ```markdown
 Route Escalation Check
@@ -493,9 +488,9 @@ Route Escalation Check
 This change has outgrown the assumptions of the quickfix route.
 Signal: {which signal, and the specific evidence for it}
 
-Continue as quickfix, or promote to a full spec?
-  - Continue: /devspark-quickfix complete {ID} when done
-  - Promote:  /devspark-specify {original problem statement}
+Add the needed assurance and continue, or split out separate work?
+  - Continue: {the one activity this concern needs, e.g. /devspark-critic}, then /devspark-quickfix complete {ID} when done
+  - Split:    keep this fix to its original problem; start the separate change with /devspark-specify
 ```
 
 The developer owns that decision. Record the outcome in the record's Implementation Notes so a later reader can see the route was examined and chosen, not merely inherited.
@@ -503,17 +498,19 @@ The developer owns that decision. Record the outcome in the record's Implementat
 For either entry, choosing to continue does not waive material-risk assurance or authorization.
 Record missing obligations as unresolved and do not finalize until applicable requirements pass.
 
-### Quickfix vs Full Spec Decision Guide
+### Quickfix vs New Work Decision Guide
 
-| Scenario                             | Recommendation    |
-| ------------------------------------ | ----------------- |
-| Single file change, < 50 lines       | Quickfix          |
-| Bug with clear root cause            | Quickfix          |
-| Production issue needing rapid fix   | Quickfix (hotfix) |
-| Multiple files, architectural impact | Full Spec         |
-| New user-facing feature              | Full Spec         |
-| Database schema changes              | Full Spec         |
-| API contract changes                 | Full Spec         |
+Choose at the start. Once a quickfix is under way, discovered scope follows Route Escalation above instead.
+
+| Scenario                             | Recommendation                     |
+| ------------------------------------ | ---------------------------------- |
+| Single file change, < 50 lines       | Quickfix                           |
+| Bug with clear root cause            | Quickfix                           |
+| Production issue needing rapid fix   | Quickfix (hotfix)                  |
+| Multiple files, architectural impact | New work with `/devspark-specify` |
+| New user-facing feature              | New work with `/devspark-specify` |
+| Database schema changes              | New work with `/devspark-specify` |
+| API contract changes                 | New work with `/devspark-specify` |
 
 ### Error Handling
 
