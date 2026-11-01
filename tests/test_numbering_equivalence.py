@@ -20,6 +20,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from tests.bash_twin import BASH_EXE
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -39,7 +40,7 @@ GOLDEN_CASES = [
 
 
 def _has_bash() -> bool:
-    return shutil.which("bash") is not None
+    return BASH_EXE is not None
 
 
 def _has_pwsh() -> bool:
@@ -126,7 +127,7 @@ def _next_number_pwsh(repo_root: Path) -> int:
 
 def _next_number_bash(repo_root: Path) -> int:
     result = subprocess.run(
-        ["bash", "scripts/bash/new-branch.sh", "--type", "fix", "--json", "--dry-run", "probe"],
+        [BASH_EXE, "scripts/bash/new-branch.sh", "--type", "fix", "--json", "--dry-run", "probe"],
         cwd=repo_root,
         text=True,
         capture_output=True,
@@ -141,7 +142,7 @@ def _create_work_branch(repo_root: Path, shell: str) -> dict:
     if shell == "pwsh":
         command = ["pwsh", "-NoProfile", "-File", "scripts/powershell/new-branch.ps1", "-Type", "work", "-Json", "-Yes", "Resume a bug fix"]
     else:
-        command = ["bash", "scripts/bash/new-branch.sh", "--type", "work", "--json", "--yes", "Resume a bug fix"]
+        command = [BASH_EXE, "scripts/bash/new-branch.sh", "--type", "work", "--json", "--yes", "Resume a bug fix"]
     result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
     assert result.returncode == 0, f"work branch creation failed: {result.stderr}"
     return json.loads(result.stdout)
@@ -204,7 +205,7 @@ def test_work_branch_requires_git(shell: str, tmp_path: Path) -> None:
     if shell == "pwsh":
         command = ["pwsh", "-NoProfile", "-File", "scripts/powershell/new-branch.ps1", "-Type", "work", "-Json", "-Yes", "Resume a bug fix"]
     else:
-        command = ["bash", "scripts/bash/new-branch.sh", "--type", "work", "--json", "--yes", "Resume a bug fix"]
+        command = [BASH_EXE, "scripts/bash/new-branch.sh", "--type", "work", "--json", "--yes", "Resume a bug fix"]
     result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
     assert result.returncode != 0
     assert "work branches require a Git repository" in result.stderr
@@ -223,7 +224,7 @@ def _declared_specify_command(shell: str, description: str, confirmed: bool = Tr
     argv = [description if token == "$ARGUMENTS" else token for token in argv]
     if not confirmed:
         argv = [token for token in argv if token not in ("--yes", "-Yes")]
-    return ["pwsh", "-NoProfile", "-File", *argv] if shell == "pwsh" else ["bash", *argv]
+    return ["pwsh", "-NoProfile", "-File", *argv] if shell == "pwsh" else [BASH_EXE, *argv]
 
 
 @pytest.mark.parametrize("shell", ["pwsh", "bash"])

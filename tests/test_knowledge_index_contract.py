@@ -9,18 +9,16 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from tests.bash_twin import BASH_EXE, to_bash_path
 
 ROOT = Path(__file__).resolve().parent.parent
 HAS_PWSH = shutil.which("pwsh") is not None
-HAS_BASH = shutil.which("bash") is not None
+HAS_BASH = BASH_EXE is not None
 FIXED_TIME = "2026-01-01T00:00:00Z"
 
 
 def _wsl_path(path: Path) -> str:
-    value = path.as_posix()
-    if len(value) > 1 and value[1] == ":":
-        return f"/mnt/{value[0].lower()}{value[2:]}"
-    return value
+    return to_bash_path(path)
 
 
 def _node(path: Path, node_id: str = "authentication", node_type: str = "architecture") -> None:
@@ -74,7 +72,7 @@ def _run_bash(repo: Path) -> subprocess.CompletedProcess[str]:
     env = os.environ | {"DEVSPARK_GENERATED_AT": FIXED_TIME}
     return subprocess.run(
         [
-            "bash",
+            BASH_EXE,
             _wsl_path(ROOT / "scripts/bash/generate-knowledge-index.sh"),
             "--repo-root",
             _wsl_path(repo),
@@ -263,7 +261,7 @@ def test_generators_preserve_legacy_stale_entities_and_fail_on_stale_without_opt
     )
     bash_strict = subprocess.run(
         [
-            "bash",
+            BASH_EXE,
             _wsl_path(ROOT / "scripts/bash/generate-knowledge-index.sh"),
             "--repo-root",
             _wsl_path(tmp_path),
@@ -310,7 +308,7 @@ def test_generators_forward_detect_drift_full_inventory_identically(tmp_path: Pa
     )
     bash_result = subprocess.run(
         [
-            "bash",
+            BASH_EXE,
             _wsl_path(ROOT / "scripts/bash/generate-knowledge-index.sh"),
             "--repo-root",
             _wsl_path(tmp_path),

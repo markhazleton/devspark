@@ -15,6 +15,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from tests.bash_twin import BASH_EXE, to_bash_path
 
 ROOT = Path(__file__).resolve().parent.parent
 COMMAND_DOC = ROOT / "templates" / "commands" / "site-audit.md"
@@ -25,11 +26,7 @@ DOCUMENTED_SCOPES = sorted(set(re.findall(r"`--scope=([a-z]+)`", COMMAND_DOC.rea
 
 
 def _wsl_path(path: Path) -> str:
-    """The bash on PATH may be WSL, which cannot read a drive-letter path."""
-    value = path.as_posix()
-    if len(value) > 1 and value[1] == ":":
-        return f"/mnt/{value[0].lower()}{value[2:]}"
-    return value
+    return to_bash_path(path)
 
 
 @pytest.fixture(scope="module")
@@ -68,9 +65,9 @@ def test_powershell_accepts_every_documented_scope(scope: str, sample_repo: Path
 
 @pytest.mark.parametrize("scope", DOCUMENTED_SCOPES)
 def test_bash_accepts_every_documented_scope(scope: str, sample_repo: Path) -> None:
-    if not shutil.which("bash"):
+    if not BASH_EXE:
         pytest.skip("bash is not available")
-    result = _run(["bash", _wsl_path(BASH), f"--scope={scope}", "--summary"], sample_repo)
+    result = _run([BASH_EXE, _wsl_path(BASH), f"--scope={scope}", "--summary"], sample_repo)
     assert result.returncode == 0, f"scope '{scope}' rejected: {result.stderr}"
 
 
@@ -82,9 +79,9 @@ def test_powershell_rejects_an_unknown_scope(sample_repo: Path) -> None:
 
 
 def test_bash_rejects_an_unknown_scope(sample_repo: Path) -> None:
-    if not shutil.which("bash"):
+    if not BASH_EXE:
         pytest.skip("bash is not available")
-    result = _run(["bash", _wsl_path(BASH), "--scope=not-a-scope"], sample_repo)
+    result = _run([BASH_EXE, _wsl_path(BASH), "--scope=not-a-scope"], sample_repo)
     assert result.returncode != 0
 
 
@@ -102,12 +99,12 @@ def test_knowledge_scope_reports_index_currency(sample_repo: Path) -> None:
 
 
 def test_both_twins_report_the_same_knowledge_fields(sample_repo: Path) -> None:
-    if not (shutil.which("pwsh") and shutil.which("bash")):
+    if not (shutil.which("pwsh") and BASH_EXE):
         pytest.skip("both pwsh and bash are required")
     ps_result = _run(
         ["pwsh", "-NoProfile", "-File", str(POWERSHELL), "-Scope", "knowledge"], sample_repo
     )
-    bash_result = _run(["bash", _wsl_path(BASH), "--scope=knowledge"], sample_repo)
+    bash_result = _run([BASH_EXE, _wsl_path(BASH), "--scope=knowledge"], sample_repo)
     assert ps_result.returncode == 0, ps_result.stderr
     assert bash_result.returncode == 0, bash_result.stderr
     ps_knowledge = json.loads(ps_result.stdout)["knowledge"]

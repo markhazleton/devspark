@@ -7,6 +7,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+from tests.bash_twin import BASH_EXE
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -67,8 +68,8 @@ def test_release_context_uses_only_durable_delta() -> None:
         for removed in ("COMPLETED_SPECS", "RECOVERED_COMPLETED_SPECS", "ARCHIVE_RECOVERY_USED", "CONTRIBUTORS"):
             assert removed not in powershell
 
-        if shutil.which("bash"):
-            bash = context(["bash", "scripts/bash/release-context.sh", "--json"], repo)
+        if BASH_EXE:
+            bash = context([BASH_EXE, "scripts/bash/release-context.sh", "--json"], repo)
             for field in (
                 "LAST_TAG",
                 "RELEASE_FROM",

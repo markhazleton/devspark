@@ -20,6 +20,10 @@ import json
 import shutil
 import subprocess
 import tempfile
+try:
+    from tests.bash_twin import BASH_EXE
+except ImportError:  # run as a script by test_contract_scripts.py
+    from bash_twin import BASH_EXE
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -101,7 +105,7 @@ def _pwsh(cwd: Path, *, type_=None, json_mode=False, dry_run=False, short_name=N
 
 def _bash(cwd: Path, *, type_=None, json_mode=False, dry_run=False, short_name=None,
           yes=False, number=None, description=None) -> subprocess.CompletedProcess[str]:
-    args: list[str] = ["bash", "scripts/bash/new-branch.sh"]
+    args: list[str] = [BASH_EXE, "scripts/bash/new-branch.sh"]
     if type_ is not None:
         args += ["--type", type_]
     if json_mode:
@@ -120,7 +124,7 @@ def _bash(cwd: Path, *, type_=None, json_mode=False, dry_run=False, short_name=N
 
 
 def _has_bash() -> bool:
-    return shutil.which("bash") is not None
+    return BASH_EXE is not None
 
 
 def _has_pwsh() -> bool:

@@ -9,18 +9,16 @@ from pathlib import Path
 
 import jsonschema
 import pytest
+from tests.bash_twin import BASH_EXE, to_bash_path
 
 ROOT = Path(__file__).resolve().parent.parent
 CORPUS = json.loads((ROOT / "tests/fixtures/taxonomy-golden-corpus.json").read_text(encoding="utf-8"))
 HAS_PWSH = shutil.which("pwsh") is not None
-HAS_BASH = shutil.which("bash") is not None
+HAS_BASH = BASH_EXE is not None
 
 
 def _wsl_path(path: Path) -> str:
-    value = path.as_posix()
-    if len(value) > 1 and value[1] == ":":
-        return f"/mnt/{value[0].lower()}{value[2:]}"
-    return value
+    return to_bash_path(path)
 
 
 def _powershell_taxon(repo: Path, path: str, content: str = "") -> str:
@@ -47,7 +45,7 @@ def _bash_taxon(repo: Path, path: str, content: str = "") -> str:
         f"'{path}' '{content}'"
     )
     result = subprocess.run(
-        ["bash", "-lc", command], text=True, capture_output=True, cwd=ROOT, timeout=60
+        [BASH_EXE, "-lc", command], text=True, capture_output=True, cwd=ROOT, timeout=60
     )
     assert result.returncode == 0, result.stderr
     return result.stdout.strip()
