@@ -82,7 +82,15 @@ entry in `manifest.json`'s `versions` history — it is not what causes the publ
 Both paths write only to `.devspark/` and to the agent's own entry-point location
 (`.github/skills/` for Copilot). `.devspark.work/`, `.knowledge/`, and `.archive/` are
 repository-owned and must never be touched by install or upgrade (constitution, showstopper
-severity). Migrating between major layouts is always an explicit, separately-run, human-confirmed
+severity).
+
+The manifest is the complete list of what `.devspark/` holds. On Update and Repair, quickstart Step 9.5
+prunes in two passes: root entries not in `manifest.devspark_root`, then every file under
+`.devspark/defaults/`, `.devspark/templates/`, and `.devspark/scripts/` whose path is not a `dest` in
+`manifest.install`, followed by empty directories. Pass 2 runs only after Step 4 verified every `dest`
+and never against an absent or empty `install` array. An upgraded install therefore matches a fresh one,
+and files a release dropped or renamed do not linger. Customizations are unaffected because they live in
+`.devspark.work/`. Migrating between major layouts is always an explicit, separately-run, human-confirmed
 action, never automatic.
 
 Observed host support for the Copilot skills: VS Code Insiders 1.142.0 with the built-in Copilot Chat

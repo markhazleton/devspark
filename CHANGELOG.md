@@ -9,6 +9,16 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **`.devspark/` now matches the manifest exactly after an upgrade.** Quickstart Step 9.5 (Update and Repair) adds a second pass: after pruning root entries not in `manifest.devspark_root`, it deletes every file under `.devspark/defaults/`, `.devspark/templates/` and `.devspark/scripts/` whose path is not a `dest` in `manifest.install`, then removes empty directories. Files a release dropped or renamed, such as `create-new-feature` and `validate-knowledge-coverage`, no longer linger in upgraded repositories. The pass runs only after Step 4 verified every `dest`, and never against an absent or empty `install` array. `.devspark.work/`, `.knowledge/` and `.archive/` are never touched, so customizations are unaffected.
+
+### Fixed
+
+- **Bash quickstart steps on Windows with a native `jq`.** A Windows build of `jq` ends lines with CRLF, and the Bash steps that read its output line by line kept the trailing carriage return. Step 9.5 then failed to match `defaults`, `templates` and `scripts` against `manifest.devspark_root` and deleted all three, the Step 4 install loop wrote each file under a name ending in a carriage return, and Step 4 validation reported every file missing. Those pipelines now strip carriage returns. The PowerShell steps were not affected.
+
 ## [9.4.0] - 2026-10-31
 
 **One Flow. Assurance as Needed. Deliver Software.** DevSpark 9.4 replaces the choice between a quickfix, a quick spec and a full spec with one path: understand, implement and verify, deliver. Start new work with `/devspark-specify` and resume it with `/devspark-next`; neither asks for a route or writes a planning bundle. A plan, a task list, Analyze, Critic or Judge runs only when a specific uncertainty, material risk or mandatory obligation justifies it, and none of them adds a gate or triggers another. Delivery readiness is decided by evidence: `/devspark-verify` reports what was proven, and `/devspark-next` and `/devspark-create-pr` refuse delivery while a declared required obligation lacks its authority and an evidence reference. Code, tests and current Knowledge remain the durable outcomes; an optional `work.md` carries context across sessions only when it would otherwise be lost.
