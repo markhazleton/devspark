@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
-# Unified branch-creation entry point .
-# The single place a DevSpark branch is created, for every route (spec|quick|fix).
+# Unified branch-creation entry point.
+# Work branches establish a safe delivery branch without scaffolding a specification.
 [CmdletBinding(PositionalBinding = $false)]
 param(
     [string]$Type,
@@ -24,16 +24,17 @@ function Write-Err { param([string]$Message) [Console]::Error.WriteLine($Message
 function Exit-WithError { param([string]$Message, [int]$Code) Write-Err "[new-branch] $Message"; exit $Code }
 
 if ($Help) {
-    Write-Err "Usage: ./new-branch.ps1 -Type <spec|quick|fix> [-ShortName <slug>] [-Number N] [-Json] [-DryRun] [-Yes] <description>"
+    Write-Err "Usage: ./new-branch.ps1 -Type <fix|work> [-ShortName <slug>] [-Number N] [-Json] [-DryRun] [-Yes] <description>"
     exit 0
 }
 
 . "$PSScriptRoot/common.ps1"
 
-# Branch type is required and explicit (II. Explicit Over Implied).
-$validTypes = @('spec', 'quick', 'fix')
+# Branch type is required and explicit (II. Explicit Over Implied). New work never scaffolds a
+# full-spec or quick-spec bundle; existing bundles continue on their own branches.
+$validTypes = @('fix', 'work')
 if (-not $Type -or $validTypes -notcontains $Type.ToLower()) {
-    Exit-WithError "type must be one of: spec, quick, fix" 1
+    Exit-WithError "type must be one of: fix, work" 1
 }
 $Type = $Type.ToLower()
 
@@ -54,6 +55,9 @@ if (-not $slug) { Exit-WithError "description did not yield a usable short name"
 
 $repoRoot = Get-RepoRoot
 $hasGit = Test-HasGit
+if ($Type -eq 'work' -and -not $hasGit) {
+    Exit-WithError "work branches require a Git repository" 1
+}
 
 # Derive the global index unless -Number overrides it.
 if ($Number -le 0) { $Number = Get-NextUnifiedIndex } 
@@ -84,9 +88,8 @@ if ($hasGit) {
 $specsDir = Join-Path $repoRoot '.devspark.work/specs'
 $qfDir = Join-Path $repoRoot '.devspark.work/quickfixes'
 switch ($Type) {
-    'spec'  { $artifactPath = Join-Path (Join-Path $specsDir $branchName) 'spec.md'; $templateName = 'spec-template.md' }
-    'quick' { $artifactPath = Join-Path (Join-Path $specsDir $branchName) 'spec.md'; $templateName = 'quick-spec-template.md' }
-    'fix'   { $artifactPath = Join-Path $qfDir "$branchName.md"; $templateName = $null }
+    'fix'   { $artifactPath = Join-Path $qfDir "$branchName.md" }
+    'work'  { $artifactPath = Join-Path (Join-Path $specsDir $branchName) 'work.md' }
 }
 
 $switched = $false
@@ -122,22 +125,16 @@ if ($DryRun) {
             $featureNum = ('{0:000}' -f $Number)
             $branchName = "$featureNum-$Type-$slug"
             if ($Type -eq 'fix') { $artifactPath = Join-Path $qfDir "$branchName.md" }
-            else { $artifactPath = Join-Path (Join-Path $specsDir $branchName) 'spec.md' }
+            else { $artifactPath = Join-Path (Join-Path $specsDir $branchName) 'work.md' }
             Write-Err "[new-branch] retrying with recomputed index: $branchName"
         }
     } else {
         Write-Err "[new-branch] git not detected; scaffolding artifact without a branch"
     }
 
-    # Scaffold the type-appropriate artifact .
-    $artifactDir = Split-Path $artifactPath -Parent
-    New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null
-    if ($templateName) {
-        $template = Resolve-TemplatePath -RepoRoot $repoRoot -TemplateName $templateName
-        if ($template -and (Test-Path $template)) { Copy-Item $template $artifactPath -Force }
-        else { Write-Err "[new-branch] template $templateName not found; creating empty artifact"; New-Item -ItemType File -Path $artifactPath -Force | Out-Null }
-    } else {
-        # fix: minimal quickfix record with the year as metadata .
+    if ($Type -eq 'fix') {
+        # Minimal quickfix record with the year as metadata; a work branch scaffolds nothing.
+        New-Item -ItemType Directory -Path (Split-Path $artifactPath -Parent) -Force | Out-Null
         $year = (Get-Date).Year
         "# Quickfix: $slug`n`n**Created**: $((Get-Date).ToString('yyyy-MM-dd')) - **Branch**: ``$branchName`` - **Year**: $year`n" | Set-Content -Path $artifactPath -Encoding utf8
     }

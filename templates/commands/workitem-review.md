@@ -2,9 +2,9 @@
 source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
 description: Review an Azure DevOps work item against the five-dimension standard and offer individually approvable improvements.
 handoffs:
-  - label: Ground a Spec in This Item
+  - label: Start Work From This Item
     agent: devspark-specify
-    prompt: Draft a spec using the reviewed work item as source evidence
+    prompt: Start work using the reviewed work item as source evidence
 scripts:
   sh: .devspark/scripts/bash/workitem.sh --operation check --json
   ps: .devspark/scripts/powershell/workitem.ps1 -Operation check -Json
@@ -31,7 +31,7 @@ covers multi-app scope resolution and the 2-tier script override. Preamble modul
 ## Lifecycle Position
 
 Standalone. This command requires no spec, no feature branch, and no `.devspark.work/` record, and
-it is not a step in the `specify → plan → tasks → analyze → critic → implement → pr-review` chain.
+it is not a step in the Understand → Implement ↔ Verify → Deliver flow.
 It is usable against any work item at any time, including items that belong to another team.
 
 ## Constitution Authority

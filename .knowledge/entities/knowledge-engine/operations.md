@@ -8,9 +8,9 @@ source_of_truth:
   - tests/test_knowledge_index_determinism_contract.py
   - tests/test_knowledge_integrity_contract.py
   - tests/test_knowledge_drift_performance.py
-last_verified: 2026-10-15
+last_verified: 2026-10-17
 aliases:
-  - index drift check
+  - knowledge build check
   - regenerate knowledge index
   - knowledge integrity
   - integrity finding
@@ -22,24 +22,20 @@ aliases:
 
 How the engine is run, what it guarantees between runs, and how its failures present.
 
-## The drift gate
+## Build check, not a freshness gate
 
-Derived artifacts are committed, so they can fall behind the sources they describe. The engine
-therefore runs in two modes against the same corpus: one regenerates the artifacts, the other
-compares freshly built output against what is committed and reports a difference without writing.
+The engine runs in two modes against the same corpus: one builds and writes the derived artifacts,
+the other builds without writing (`--check`) and fails only when the Knowledge cannot be built.
 
-The comparison deliberately ignores the generation timestamp and nothing else. A run that differs
-only by when it happened is not drift; anything else is.
-
-**Any change to `.knowledge/` is followed by a regeneration in the same change.** Editing a
-document and leaving the artifacts behind produces a failing gate for the next unrelated change,
-which is how a small omission becomes someone else's blocked work.
+The derived artifacts are build output. They may be regenerated and committed, but a stale or
+missing copy never blocks a change, because consumers rebuild the model in memory. Editing a
+document without regenerating the artifacts is not a defect.
 
 ## Determinism is a hard requirement
 
-The same corpus produces byte-identical artifacts on every supported operating system. This is not
-a convenience: the gate compares one machine's output against another's, so any platform-dependent
-ordering turns into a permanent false failure that no content change can resolve.
+The same corpus produces byte-identical artifacts on every supported operating system. Anyone who
+does regenerate and commit them should not see platform-dependent churn, so ordering never depends
+on the operating system.
 
 The known trap is native path comparison. Path objects order differently depending on platform
 flavor, so ordering is taken from slash-normalized strings instead.
@@ -56,12 +52,13 @@ questionable:
 | Missing claimed source path | Build fails |
 | Entity relation to an unknown entity | Build fails |
 | Governance reciprocity broken | Build fails |
-| Claimed evidence newer than `last_verified` | Reported as a staleness finding |
+| Claimed evidence newer than an optional `last_verified` | Reported as an advisory staleness finding |
 | Expected layer absent | Reported in the coverage report |
 
 A failing build stops work; a finding informs it. Staleness is not promoted to a failure by
 default, because a cited file is frequently touched for reasons unrelated to the behavior a
-document describes. A workflow that needs the stricter posture opts into it explicitly.
+document describes. Judge whether the content still matches the code; the date alone is never the
+finding. A workflow that wants the stricter posture opts into it with `--fail-on-stale`.
 
 ## What a finding means
 

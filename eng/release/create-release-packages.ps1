@@ -247,8 +247,9 @@ function Generate-Shims {
         
         switch ($Extension) {
             'toml' {
+                $tomlDescription = $description.Replace('\', '\\').Replace('"', '\"')
                 $shimContent = @"
-description = "$description"
+description = "$tomlDescription"
 
 prompt = """`n## Prompt Resolution
 Determine the current git user by running ``git config user.name``.

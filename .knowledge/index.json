@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-16T02:08:46Z"
+    "at": "2026-10-17T17:45:26Z"
   },
   "roots": [
     {
@@ -453,7 +453,7 @@
         "scripts/explain-context.py",
         "scripts/context-projection.py"
       ],
-      "last_verified": "2026-10-11",
+      "last_verified": "2026-10-17",
       "aliases": [
         "context resolution",
         "retrieval and projection",
@@ -567,7 +567,7 @@
         "scripts/knowledge_findings.py",
         "tests/test_knowledge_findings_schema_contract.py"
       ],
-      "last_verified": "2026-09-30",
+      "last_verified": "2026-10-17",
       "aliases": [
         "finding categories",
         "finding severity",
@@ -623,7 +623,7 @@
         "templates/schemas/entity-node.schema.json",
         "tests/test_knowledge_engine_resolution_contract.py"
       ],
-      "last_verified": "2026-10-11",
+      "last_verified": "2026-10-17",
       "aliases": [
         "knowledge index",
         "index builder",
@@ -652,7 +652,7 @@
         "tests/test_build_knowledge_index_contract.py",
         "tests/test_taxonomy_registry_contract.py"
       ],
-      "last_verified": "2026-10-13",
+      "last_verified": "2026-10-17",
       "aliases": [
         "knowledge document rules",
         "allowed knowledge types",
@@ -714,16 +714,16 @@
         "tests/test_knowledge_integrity_contract.py",
         "tests/test_knowledge_drift_performance.py"
       ],
-      "last_verified": "2026-10-15",
+      "last_verified": "2026-10-17",
       "aliases": [
-        "index drift check",
+        "knowledge build check",
         "regenerate knowledge index",
         "knowledge integrity",
         "integrity finding"
       ],
       "headings": [
         "Knowledge Engine - Operations",
-        "The drift gate",
+        "Build check, not a freshness gate",
         "Determinism is a hard requirement",
         "Build failures versus reported findings",
         "What a finding means",

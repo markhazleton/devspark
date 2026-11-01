@@ -1,6 +1,6 @@
 product: DevSpark
 edition: Make-Bold
-version: 9.2.0
+version: 9.4.0
 installed: 2026-10-15
 method: source-dogfood
 note: Skills are generated from templates/commands/ source files — no .devspark/defaults/ copy needed

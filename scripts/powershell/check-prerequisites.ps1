@@ -101,14 +101,15 @@ if ($PathsOnly) {
 }
 
 # Validate required directories and files
-if (-not (Test-Path $paths.FEATURE_DIR -PathType Container)) {
+if (-not (Test-Path $paths.FEATURE_DIR -PathType Container) -and $paths.CURRENT_BRANCH -notmatch '^\d{3}-work-') {
     Write-Output "ERROR: Feature directory not found: $($paths.FEATURE_DIR)"
     Write-Output "Run /devspark-specify first to create the feature structure."
     exit 1
 }
 
-# Check for plan.md if required (full-spec routes only; quick-spec/quickfix never produce plan.md)
-if ($RequirePlan -and -not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
+# Check for plan.md if required (full-spec routes only; quick-spec/quickfix never produce plan.md).
+# On a work branch planning is optional, so a missing plan never blocks.
+if ($RequirePlan -and -not (Test-Path $paths.IMPL_PLAN -PathType Leaf) -and $paths.CURRENT_BRANCH -notmatch '^\d{3}-work-') {
     Write-Output "ERROR: plan.md not found in $($paths.FEATURE_DIR)"
     Write-Output "Run /devspark-plan first to create the implementation plan."
     exit 1
@@ -138,6 +139,12 @@ if (Test-Path $paths.QUICKSTART) { $docs += 'quickstart.md' }
 # Include tasks.md if requested and it exists
 if ($IncludeTasks -and (Test-Path $paths.TASKS)) { 
     $docs += 'tasks.md' 
+}
+if ($paths.CURRENT_BRANCH -match '^\d{3}-work-' -and (Test-Path $paths.FEATURE_SPEC -PathType Leaf)) {
+    $docs += 'work.md'
+}
+if ($paths.CURRENT_BRANCH -match '^\d{3}-work-' -and (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
+    $docs += 'plan.md'
 }
 
 # Checklist status (M-03: scripts compute, models judge -- exact counts, not LLM arithmetic)

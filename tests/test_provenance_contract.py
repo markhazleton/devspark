@@ -255,9 +255,11 @@ def validate_route_escalation() -> None:
     assert "Do not convert routinely" in body
     assert "most quickfixes exhibit none of these" in body.lower()
 
-    # The decision belongs to the developer, and both options stay open.
-    assert "Continue as quickfix, or promote to a full spec?" in body
+    # The decision belongs to the developer; a signal adds assurance, never converts the route.
+    assert "Add the needed assurance and continue, or split out separate work?" in body
+    assert "A signal never converts the route." in body
     assert "The developer owns that decision." in body
+    assert "Upgrade to Full Spec" not in body
 
     # The pre-existing effort-based mechanism is preserved, not replaced.
     assert "### Scope Creep Detection" in body

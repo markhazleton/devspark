@@ -40,12 +40,6 @@ $script:GenericIdExcludedBase = $script:AlwaysExcluded + @('templates/', '.githu
 $script:GenericIdExcluded = if ($IncludeTests) { $script:GenericIdExcludedBase } else { $script:GenericIdExcludedBase + @('tests/') }
 $script:IdPattern = '\bFR-\d{3}\b|\bT\d{3}\b|\bQF-\d{4}-\d{3}\b'
 
-# Complements the backward-link checks above: the ephemeral record itself MUST link forward to
-# every completed item's code/knowledge, or the traceability this contract exists for is
-# one-sided. Only tasks.md and quickfix records use this exact marker (quick-spec's Action Plan
-# does not), so this pass targets those two file shapes specifically rather than every tracked file.
-$script:LinkageLineRegex = '^- \[[Xx]\].*\(code_ref:\s*(?<coderef>[^|]+?)\s*\|\s*knowledge_ref:\s*(?<kref>[^)]+?)\)\s*$'
-
 function Test-ExcludedPath {
     param([string]$Path, [string[]]$Prefixes)
     foreach ($prefix in $Prefixes) {
@@ -67,7 +61,6 @@ try {
     $files = git ls-files
     $branchFindings = [System.Collections.Generic.List[object]]::new()
     $idFindings = [System.Collections.Generic.List[object]]::new()
-    $linkageFindings = [System.Collections.Generic.List[object]]::new()
 
     foreach ($file in $files) {
         if (Test-ExcludedPath -Path $file -Prefixes $script:AlwaysExcluded) { continue }
@@ -94,32 +87,7 @@ try {
         }
     }
 
-    # Second pass, deliberately separate from the loop above: tasks.md and quickfix records live
-    # under .devspark.work/, which the loop above always skips (it is the ephemeral record's own
-    # linkage target list, not a backward-link risk). A completed item left at `pending` is a real
-    # gap the same way a leaked reference is -- just the other direction of the same contract.
-    $linkageTargets = @(git ls-files -- '.devspark.work/specs/*/tasks.md' '.devspark.work/quickfixes/*.md')
-    foreach ($file in $linkageTargets) {
-        try {
-            $lines = Get-Content -LiteralPath $file -ErrorAction Stop
-        } catch {
-            continue
-        }
-        $lineNumber = 0
-        foreach ($line in $lines) {
-            $lineNumber++
-            $m = [regex]::Match($line, $script:LinkageLineRegex)
-            if (-not $m.Success) { continue }
-            if ($m.Groups['coderef'].Value.Trim().ToLowerInvariant() -eq 'pending') {
-                $linkageFindings.Add([PSCustomObject]@{ path = $file; line = $lineNumber; field = 'code_ref' })
-            }
-            if ($m.Groups['kref'].Value.Trim().ToLowerInvariant() -eq 'pending') {
-                $linkageFindings.Add([PSCustomObject]@{ path = $file; line = $lineNumber; field = 'knowledge_ref' })
-            }
-        }
-    }
-
-    $ok = ($branchFindings.Count -eq 0 -and $idFindings.Count -eq 0 -and $linkageFindings.Count -eq 0)
+    $ok = ($branchFindings.Count -eq 0 -and $idFindings.Count -eq 0)
 
     if ($Json) {
         [PSCustomObject]@{
@@ -127,7 +95,6 @@ try {
             branch          = $Branch
             branch_findings = $branchFindings
             id_findings     = $idFindings
-            linkage_findings = $linkageFindings
             ok              = $ok
         } | ConvertTo-Json -Depth 6
     } else {
@@ -136,9 +103,6 @@ try {
         }
         foreach ($f in $idFindings) {
             Write-Host "PLANNING-REF: $($f.path):$($f.line) references planning identifier '$($f.match)'"
-        }
-        foreach ($f in $linkageFindings) {
-            Write-Host "LINKAGE-GAP: $($f.path):$($f.line) is checked off but $($f.field) is still 'pending'"
         }
         if ($ok) {
             Write-Host 'No planning-artifact references found.'

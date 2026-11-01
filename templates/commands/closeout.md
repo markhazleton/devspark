@@ -7,7 +7,7 @@ handoffs:
     prompt: Open a PR now that the route has converged
   - label: Fix Blocking Defects
     agent: devspark-implement
-    prompt: Address only the blocking defects recorded by closeout, then re-run closeout
+    prompt: Address only the blocking defects recorded by closeout, then re-run verification
     send: true
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json --include-tasks
@@ -24,7 +24,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Optional / Advanced — Not a Step on the Normal Path
 
-**`/devspark-verify` already does this.** Closeout is a lifecycle *phase*, not a lifecycle command, and verify runs it automatically as its second half (`closeout-contract.md` §6). On the ordinary path — specify → plan → implement → verify → create-pr → pr-review — a developer never needs to type this command, and no DevSpark command may recommend it as a routine next step.
+**`/devspark-verify` already does this.** Closeout is a lifecycle *phase*, not a lifecycle command, and verify runs it automatically as its second half (`closeout-contract.md` §6). On the ordinary path — specify → implement ↔ verify → create-pr → pr-review — a developer never needs to type this command, and no DevSpark command may recommend it as a routine next step.
 
 This is the **reassessment entry point**: the same phase, re-run by hand, when the decision has gone stale or the inputs have changed without the evidence needing to be re-gathered. Reach for it when:
 
@@ -34,6 +34,8 @@ This is the **reassessment entry point**: the same phase, re-run by hand, when t
 - an experimental result needs a fresh closeout decision.
 
 If none of those apply and verification has not run at all, run `/devspark-verify` instead — it produces both the evidence and the decision in one interaction.
+
+**Universal work branch** (any `NNN-work-*` branch; a file named `spec.md` in its directory never makes it a legacy bundle): there is no planning bundle to close out and no `gates/closeout.md` to write. Reassess the same three questions as `/devspark-verify`'s *Work Branch Verification* — delivered, verified, eligible (`judge.py lifecycle`) — from the evidence that already exists, without re-running it or writing any document, then recommend `/devspark-create-pr` or `/devspark-implement` for exactly what is missing. Post-deploy requirements stay visible as deferred and never block merge.
 
 ## Workflow Position
 
@@ -78,7 +80,7 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
    a. State the objective in one sentence, in the route's own words — read `FEATURE_DIR/spec.md`, or on the quickfix route the record at the path `FEATURE_SPEC` resolves to (`.devspark.work/quickfixes/<branch>.md`). Do not invent a more flattering objective, and do not substitute "everything the work touched" for the one the route declared.
 
-   b. Collect the existing finding set by reading, not regenerating: `gates/verify.md` (mode statuses, evidence, and its `discovered:` list), `gates/analyze.md`, `gates/critic.md`, `gates/checklist.md`, the route record's unchecked items and `[NEEDS CLARIFICATION]` markers, open threads in `.devspark.work/pr-review/pr-<n>.md`, and anything the user named in `$ARGUMENTS`. A missing declared gate artifact is noted as missing.
+   b. Collect the existing finding set by reading, not regenerating: the prior `gates/closeout.md` (classifications, `accepted_by`, `captured_as`, learning records, criterion outcomes — read it **before** anything replaces it), `gates/verify.md` (mode statuses, evidence, and its `discovered:` list), `gates/analyze.md`, `gates/critic.md`, `gates/checklist.md`, the route record's unchecked items and `[NEEDS CLARIFICATION]` markers, open threads in `.devspark.work/pr-review/pr-<n>.md`, and anything the user named in `$ARGUMENTS`. A missing declared gate artifact is noted as missing.
 
    c. Evaluate each acceptance criterion by its declared kind, citing the evidence that settled it. An undeclared kind reads as `requirement`; a criterion with no evidence either way is `not-satisfied`.
 
@@ -86,9 +88,9 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
    e. Apply the stop condition, then name the regression gate that keeps each claimed outcome true.
 
-   f. Write `FEATURE_DIR/gates/closeout.md` in the contract §7 shape, with `produced_by: closeout`. Replace any prior `closeout.md` rather than appending.
+   f. Write `FEATURE_DIR/gates/closeout.md` in the contract §7 shape, with `produced_by: closeout` and `evaluated_commit` set to the current HEAD. The written artifact replaces the prior one rather than appending, but carries forward every prior finding and criterion outcome whose evidence still applies, with its `accepted_by`/`captured_as`/learning record verbatim (contract §7.1). Never write an `accepted_by` the human did not give.
 
-3. **Account for the evidence this command deliberately did not refresh.** This run reused `gates/verify.md` instead of re-executing it. If the implementation changed materially since that evidence was captured, say so in the `summary` and treat the affected criteria as unsettled — a closeout resting on evidence that no longer describes the code is a decision about a previous version of the work. When the evidence is genuinely stale, the honest recommendation is `/devspark-verify`, not a `complete` decision here.
+3. **Account for the evidence this command deliberately did not refresh.** This run reused `gates/verify.md` instead of re-executing it. Apply the five applicability tests in contract §7.1 (materially changed inputs, changed work, invalidated evidence, a real new defect, an unmet mandatory obligation). If the implementation changed materially since that evidence was captured, say so in the `summary` and treat the affected criteria as unsettled — a closeout resting on evidence that no longer describes the code is a decision about a previous version of the work. When the evidence is genuinely stale, the honest recommendation is `/devspark-verify`, not a `complete` decision here. When none of the five holds, the prior decision stands: say so and leave `closeout.md` untouched rather than re-stamping it.
 
 4. **Report.** Lead with the decision, then the counts per classification, then the blocking defects (if any) by name. Do not restate every classified finding in chat — the gate artifact carries the detail.
 

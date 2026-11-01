@@ -196,12 +196,13 @@ written there; neither is audit evidence.
 9. **Knowledge completeness** (repo-wide structural check, `.knowledge/` in its entirety — this is
    the repo-wide counterpart to `/devspark-pr-review`'s diff-scoped §6c gate): run
    `scripts/build_knowledge_index.py --repo-root . --check` (or the installed-repo path). A non-zero
-   exit means `.knowledge/index.json` and/or `.knowledge/ontology/coverage.json` are stale relative
-   to the source docs — `KNOW1` (HIGH, regenerate before trusting any other knowledge finding in
-   this audit). Then read the regenerated `.knowledge/ontology/coverage.json` in full (every entity,
-   not just diff-touched ones) and flag every reported gap — missing required layer doc, invalid
-   `source_of_truth`, stale `last_verified` — as `KNOW2` (severity by entity criticality, floor
-   MEDIUM).
+   exit means the Knowledge cannot be built — `KNOW1` (HIGH, fix the source before trusting any
+   other knowledge finding in this audit). Derived `index.json`/`coverage.json` files are never
+   compared or required to be committed. Then run the builder once without `--check`, read the
+   resulting `.knowledge/ontology/coverage.json` in full (every entity, not just diff-touched ones)
+   and flag every reported gap — missing required layer doc, invalid `source_of_truth` — as `KNOW2`
+   (severity by entity criticality, floor MEDIUM). A `last_verified` date is never a finding by
+   itself; judge whether the content still matches the code.
 10. **Knowledge/code mapping accuracy** — for every `appliesTo` and `source_of_truth` path cited
     anywhere under `.knowledge/` (flat docs and entities alike), confirm the path still exists in
     the repository **and** does not resolve into `.devspark.work/` or `.archive/`. A reference to a
@@ -226,8 +227,8 @@ written there; neither is audit evidence.
     `.devspark/scripts/knowledge-integrity.py`, or the corresponding
     `scripts/{bash,powershell}/knowledge-integrity.{sh,ps1}` wrapper) rather than reimplementing
     its checks inline. Fold its structured findings into this report by category:
-    `engine-divergence` and `generated-artifact-drift` are `KNOW7` (HIGH — two disagreeing
-    definitions of `.knowledge` truth, or a stale generated artifact, make every other knowledge
+    `engine-divergence` is `KNOW7` (HIGH — two disagreeing
+    definitions of `.knowledge` truth make every other knowledge
     finding in this audit unreliable until resolved), `unreachable-knowledge-root` is `KNOW8`
     (HIGH — a `.knowledge/` directory the canonical index never covers means content sitting
     there is invisible to every command that resolves context through the index), and

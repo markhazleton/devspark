@@ -250,13 +250,10 @@ function Resolve-KnowledgePython {
 }
 
 function New-KnowledgeBlocker {
-    param([string]$Kind, $Path, $Source, $SourceDate, $LastVerified, $Message)
+    param([string]$Kind, $Path, $Message)
     [PSCustomObject]@{
         kind = $Kind
         path = $Path
-        source = $Source
-        source_date = $SourceDate
-        last_verified = $LastVerified
         message = $Message
     }
 }
@@ -264,49 +261,38 @@ function New-KnowledgeBlocker {
 function New-KnowledgeResult {
     param(
         [string]$Readiness,
-        $IndexFresh,
         [string]$Summary,
         [string]$Head,
         [object[]]$Blockers = @(),
-        [int]$StaleUntouchedCount = 0,
         [string]$CheckOutput
     )
     [PSCustomObject]@{
-        index_fresh = $IndexFresh
         gap_summary = if ($Summary) { $Summary } else { $null }
         readiness = $Readiness
         blockers = @($Blockers)
-        stale_untouched_count = $StaleUntouchedCount
         checked_head = $Head
         check_output = if ($CheckOutput) { $CheckOutput } else { $null }
     }
 }
 
-# ConvertFrom-Json turns an ISO date string into [datetime]; blockers carry the original text.
-function ConvertTo-DateText {
-    param($Value)
-    if ($Value -is [datetime]) { return $Value.ToString('yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture) }
-    return [string]$Value
-}
-
-# Committed-state Knowledge readiness for the HEAD being submitted. Read-only: it never
-# regenerates, edits, or commits anything.
+# Read-only: proves the Knowledge at the committed HEAD still builds. It never regenerates,
+# edits, or commits anything, and it does not compare generated files or `last_verified` dates.
 function Get-KnowledgeConsistency {
-    param([string]$RepoRoot, [string]$Head, [string[]]$ChangedPaths = @())
+    param([string]$RepoRoot, [string]$Head)
 
     $engine = Resolve-KnowledgeEngine -RepoRoot $RepoRoot
     if (-not $engine) {
-        return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary 'build_knowledge_index.py not found' -Head $Head
+        return New-KnowledgeResult -Readiness 'unknown' -Summary 'build_knowledge_index.py not found' -Head $Head
     }
 
-    $tracked = @(git -C $RepoRoot ls-tree -r --name-only HEAD -- .knowledge/index.json 2>$null | Where-Object { $_ })
+    $tracked = @(git -C $RepoRoot ls-tree -r --name-only HEAD -- .knowledge 2>$null | Where-Object { $_ })
     if ($tracked.Count -eq 0) {
-        return New-KnowledgeResult -Readiness 'not-applicable' -IndexFresh $null -Summary '.knowledge/index.json is not tracked at HEAD' -Head $Head
+        return New-KnowledgeResult -Readiness 'not-applicable' -Summary 'no .knowledge content is tracked at HEAD' -Head $Head
     }
 
     $python = Resolve-KnowledgePython
     if (-not $python) {
-        return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary 'no usable Python interpreter (python3 or python with PyYAML, 3.11+) found' -Head $Head
+        return New-KnowledgeResult -Readiness 'unknown' -Summary 'no usable Python interpreter (python3 or python with PyYAML, 3.11+) found' -Head $Head
     }
 
     $output = & $python $engine --repo-root $RepoRoot --check 2>&1
@@ -315,45 +301,16 @@ function Get-KnowledgeConsistency {
     $text = $lines -join "`n"
 
     if ($exitCode -eq 0) {
-        $index = Get-Content -LiteralPath (Join-Path $RepoRoot '.knowledge/index.json') -Raw -Encoding utf8 | ConvertFrom-Json
-        $stale = @($index.stale_entities | Where-Object { $_ })
-        $changed = [System.Collections.Generic.HashSet[string]]::new([string[]]@($ChangedPaths))
-        $blockers = @()
-        $untouched = 0
-        foreach ($entry in $stale) {
-            $path = [string]$entry.path
-            $source = ([string]$entry.source).TrimEnd('/')
-            $beneath = @($ChangedPaths | Where-Object { $source -and $_.StartsWith("$source/", [StringComparison]::Ordinal) }).Count -gt 0
-            if ($changed.Contains($path) -or ($source -and $changed.Contains($source)) -or $beneath) {
-                $blockers += New-KnowledgeBlocker -Kind 'stale-entity' -Path $path -Source ([string]$entry.source) `
-                    -SourceDate (ConvertTo-DateText $entry.source_date) -LastVerified (ConvertTo-DateText $entry.last_verified) -Message $null
-            } else {
-                $untouched++
-            }
-        }
-        if ($blockers.Count -gt 0) {
-            return New-KnowledgeResult -Readiness 'blocked' -IndexFresh $true -Summary "$($blockers.Count) touched Knowledge document(s) are stale" `
-                -Head $Head -Blockers $blockers -StaleUntouchedCount $untouched -CheckOutput $text
-        }
-        return New-KnowledgeResult -Readiness 'ready' -IndexFresh $true -Head $Head -StaleUntouchedCount $untouched -CheckOutput $text
+        return New-KnowledgeResult -Readiness 'ready' -Head $Head -CheckOutput $text
     }
 
     if ($exitCode -eq 1) {
         $summary = if ($lines.Count -gt 0) { $lines[0] } else { 'knowledge check failed' }
-        $drift = @($lines | Where-Object { $_.StartsWith('DRIFT:') })
-        if ($drift.Count -gt 0) {
-            $blockers = @($drift | ForEach-Object {
-                $artifact = if ($_ -match 'coverage\.json') { '.knowledge/ontology/coverage.json' } else { '.knowledge/index.json' }
-                New-KnowledgeBlocker -Kind 'drift' -Path $artifact -Source $null -SourceDate $null -LastVerified $null `
-                    -Message 'Generated Knowledge does not match a fresh build of the committed HEAD'
-            })
-        } else {
-            $blockers = @(New-KnowledgeBlocker -Kind 'build-error' -Path $null -Source $null -SourceDate $null -LastVerified $null -Message $lines[-1])
-        }
-        return New-KnowledgeResult -Readiness 'blocked' -IndexFresh $false -Summary $summary -Head $Head -Blockers $blockers -CheckOutput $text
+        $blockers = @(New-KnowledgeBlocker -Kind 'build-error' -Path $null -Message $lines[-1])
+        return New-KnowledgeResult -Readiness 'blocked' -Summary $summary -Head $Head -Blockers $blockers -CheckOutput $text
     }
 
-    return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary "knowledge engine returned an unsupported result (exit $exitCode)" -Head $Head -CheckOutput $text
+    return New-KnowledgeResult -Readiness 'unknown' -Summary "knowledge engine returned an unsupported result (exit $exitCode)" -Head $Head -CheckOutput $text
 }
 
 function Get-KnowledgeBlockedError {
@@ -361,49 +318,18 @@ function Get-KnowledgeBlockedError {
 
     $knowledge = $Preflight.knowledge
     $dash = [string][char]0x2014
-    $kinds = @($knowledge.blockers | ForEach-Object { $_.kind })
     $engineRelative = if (Test-Path (Join-Path $Preflight.repo_root '.devspark/scripts/build_knowledge_index.py')) { '.devspark/scripts/build_knowledge_index.py' } else { 'scripts/build_knowledge_index.py' }
+    $message = "CREATE PR BLOCKED $dash KNOWLEDGE CANNOT BE BUILT"
     $lines = New-Object System.Collections.Generic.List[string]
     $lines.Add("Committed HEAD: $($knowledge.checked_head)")
-
-    if ($kinds -contains 'build-error') {
-        $message = "CREATE PR BLOCKED $dash KNOWLEDGE INDEX CANNOT BE BUILT"
-        $lines.Add('Knowledge index: BUILD ERROR')
-        foreach ($blocker in @($knowledge.blockers | Where-Object { $_.kind -eq 'build-error' })) { $lines.Add("Error: $($blocker.message)") }
-        $lines.Add('Required action:')
-        $lines.Add('1. Fix the reported source or frontmatter problem.')
-        $lines.Add("2. Regenerate the Knowledge index: python $engineRelative --repo-root .")
-        $lines.Add('3. Commit the .knowledge/** changes.')
-        $lines.Add('4. Push.')
-        $lines.Add('5. Rerun /devspark.create-pr.')
-    } elseif ($kinds -contains 'drift') {
-        $message = "CREATE PR BLOCKED $dash COMMITTED KNOWLEDGE FINALIZATION REQUIRED"
-        $lines.Add('Knowledge index: DRIFT')
-        foreach ($line in @($knowledge.check_output -split "`n" | Where-Object { $_.StartsWith('STALE:') })) { $lines.Add($line) }
-        $lines.Add('Required action:')
-        $lines.Add('1. Re-verify any genuinely stale Knowledge before changing last_verified.')
-        $lines.Add("2. Regenerate the Knowledge index: python $engineRelative --repo-root .")
-        $lines.Add('3. Review the resulting derived files.')
-        $lines.Add('4. Commit the .knowledge/** changes.')
-        $lines.Add('5. Push.')
-        $lines.Add('6. Rerun /devspark.create-pr.')
-    } else {
-        $message = "CREATE PR BLOCKED $dash KNOWLEDGE RE-VERIFICATION REQUIRED"
-        $lines.Add('Stale Knowledge touched by this PR:')
-        foreach ($blocker in @($knowledge.blockers)) {
-            $lines.Add("- $($blocker.path)")
-            $lines.Add("  source: $($blocker.source)")
-            $lines.Add("  source date: $($blocker.source_date)")
-            $lines.Add("  last_verified: $($blocker.last_verified)")
-        }
-        $lines.Add('Required action:')
-        $lines.Add('1. Confirm current truth, using /devspark-explain <topic> where appropriate.')
-        $lines.Add('2. Change last_verified only after genuine verification.')
-        $lines.Add("3. Regenerate: python $engineRelative --repo-root .")
-        $lines.Add('4. Commit.')
-        $lines.Add('5. Push.')
-        $lines.Add('6. Rerun /devspark.create-pr.')
-    }
+    $lines.Add('Knowledge: BUILD ERROR')
+    foreach ($blocker in @($knowledge.blockers)) { $lines.Add("Error: $($blocker.message)") }
+    $lines.Add('Required action:')
+    $lines.Add('1. Fix the reported source or frontmatter problem.')
+    $lines.Add("2. Confirm it builds: python $engineRelative --repo-root . --check")
+    $lines.Add('3. Commit the .knowledge/** changes.')
+    $lines.Add('4. Push.')
+    $lines.Add('5. Rerun /devspark-create-pr.')
 
     [PSCustomObject]@{
         error = $true
@@ -411,6 +337,99 @@ function Get-KnowledgeBlockedError {
         details = ($lines -join "`n")
         checked_head = $knowledge.checked_head
         blockers = @($knowledge.blockers)
+    } | ConvertTo-Json -Depth 10 -EscapeHandling EscapeNonAscii
+}
+
+# Reports DevSpark's own lifecycle check (judge.py lifecycle) for the branch's work directory, the
+# same check /devspark-next and /devspark-implement use. It only reads; the rules live in judge.py.
+# When the check cannot run, the result says why and whether work.md declares mandatory obligations,
+# because an obligation that could not be evaluated must never read as one that passed.
+function Get-LifecycleReadiness {
+    param([string]$FeatureDir)
+
+    $result = { param($Status, $Failures = @(), $Pending = @()) [PSCustomObject]@{ status = $Status; failures = @($Failures); pending_later_phase = @($Pending) } }
+    if (-not $FeatureDir -or -not (Test-Path -LiteralPath $FeatureDir -PathType Container)) {
+        return & $result 'not-applicable'
+    }
+    $unavailable = {
+        param($Reason)
+        $workMd = Join-Path $FeatureDir 'work.md'
+        $declared = (Test-Path -LiteralPath $workMd -PathType Leaf) -and
+            ((Get-Content -LiteralPath $workMd -Raw -ErrorAction SilentlyContinue) -match '(?im)^##[ \t]+Required Obligations[ \t]*\r?$')
+        [PSCustomObject]@{ status = 'unavailable'; reason = $Reason; obligations_declared = [bool]$declared; failures = @(); pending_later_phase = @() }
+    }
+    $judge = Join-Path $PSScriptRoot '../judge.py'
+    if (-not (Test-Path -LiteralPath $judge)) {
+        return & $unavailable 'judge-missing'
+    }
+    $python = Resolve-KnowledgePython
+    if (-not $python) {
+        return & $unavailable 'python-unavailable'
+    }
+    try {
+        $parsed = ((& $python $judge lifecycle --feature-dir $FeatureDir 2>$null) -join "`n") | ConvertFrom-Json
+    } catch {
+        return & $unavailable 'invalid-output'
+    }
+    if (-not $parsed -or $parsed.status -notin @('pass', 'fail')) {
+        return & $unavailable 'invalid-output'
+    }
+    return & $result ([string]$parsed.status) $parsed.failures $parsed.pending_later_phase
+}
+
+function Get-LifecycleUnavailableError {
+    param($Preflight, [string]$FeatureName)
+
+    $dash = [string][char]0x2014
+    $reason = [string]$Preflight.lifecycle.reason
+    $cause = switch ($reason) {
+        'judge-missing' { 'DevSpark''s judge.py is not installed beside its scripts' }
+        'python-unavailable' { 'no Python 3.11+ interpreter with PyYAML is available as python3 or python' }
+        default { 'judge.py ran but did not return a lifecycle result' }
+    }
+    $fix = switch ($reason) {
+        'judge-missing' { '1. Restore judge.py by reinstalling or upgrading the DevSpark scripts.' }
+        'python-unavailable' { '1. Make Python 3.11+ with PyYAML available as python3 or python.' }
+        default { "1. Run judge.py lifecycle --feature-dir .devspark.work/specs/$FeatureName to see the error, and fix it." }
+    }
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("Committed HEAD: $($Preflight.remote.local_head)")
+    $lines.Add("work.md declares Required Obligations, but DevSpark could not run its lifecycle check: $cause.")
+    $lines.Add('An obligation that could not be evaluated is not an obligation that passed, so DevSpark will not publish this PR.')
+    $lines.Add('Required action:')
+    $lines.Add($fix)
+    $lines.Add('2. Rerun /devspark-create-pr.')
+    $lines.Add('DevSpark has no override for this. Where organizational policy authorizes a different approval path, follow that path outside DevSpark.')
+
+    [PSCustomObject]@{
+        error = $true
+        message = "CREATE PR BLOCKED $dash LIFECYCLE CHECK UNAVAILABLE"
+        details = ($lines -join "`n")
+        reason = $reason
+    } | ConvertTo-Json -Depth 10 -EscapeHandling EscapeNonAscii
+}
+
+function Get-ObligationBlockedError {
+    param($Preflight)
+
+    $failure = @($Preflight.lifecycle.failures | Where-Object { $_.code -eq 'required-obligation-unresolved' })[0]
+    $dash = [string][char]0x2014
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("Committed HEAD: $($Preflight.remote.local_head)")
+    $lines.Add("Obligation: $($failure.message)")
+    $lines.Add('A mandatory obligation is not the developer''s to waive, and no flag or acknowledgement bypasses it.')
+    $lines.Add('Required action:')
+    $lines.Add('1. Obtain the satisfying evidence, or an explicit decision from the authority the obligation names.')
+    $lines.Add('2. Check the entry under ## Required Obligations in work.md and add a reference to that evidence or decision (Evidence: followed by a repository path, commit, review or approval id, or link).')
+    $lines.Add('3. Commit.')
+    $lines.Add('4. Push.')
+    $lines.Add('5. Rerun /devspark-create-pr.')
+
+    [PSCustomObject]@{
+        error = $true
+        message = "CREATE PR BLOCKED $dash REQUIRED OBLIGATION UNRESOLVED"
+        details = ($lines -join "`n")
+        obligations = @($failure.obligations)
     } | ConvertTo-Json -Depth 10 -EscapeHandling EscapeNonAscii
 }
 
@@ -548,8 +567,8 @@ function Get-CreatePrPreflight {
         } | Where-Object { $_ -ne $null }
     )
 
-    $changedPaths = @($fileChanges | ForEach-Object { $_.path; $_.from } | Where-Object { $_ })
-    $knowledge = Get-KnowledgeConsistency -RepoRoot $repoRoot -Head $localHead -ChangedPaths $changedPaths
+    $knowledge = Get-KnowledgeConsistency -RepoRoot $repoRoot -Head $localHead
+    $lifecycle = Get-LifecycleReadiness -FeatureDir $featureDir
 
     $existingPr = [PSCustomObject]@{ exists = $false; number = $null; url = ''; title = ''; state = ''; draft = $false }
     if ($cliAvailable -and $authOk) {
@@ -636,6 +655,7 @@ function Get-CreatePrPreflight {
         }
         quickfix_record = $quickfixRecord
         knowledge = $knowledge
+        lifecycle = $lifecycle
         existing_pr = $existingPr
     }
 }
@@ -652,6 +672,12 @@ function Invoke-CreateOrUpdatePr {
     }
     if (-not $preflight.prerequisites.branch_pushed_to_remote) {
         return (Get-JsonError -Message 'Current branch is not pushed to remote' -Details $preflight.remote.details)
+    }
+    if (@($preflight.lifecycle.failures | Where-Object { $_.code -eq 'required-obligation-unresolved' }).Count -gt 0) {
+        return (Get-ObligationBlockedError -Preflight $preflight)
+    }
+    if ($preflight.lifecycle.status -eq 'unavailable' -and $preflight.lifecycle.obligations_declared) {
+        return (Get-LifecycleUnavailableError -Preflight $preflight -FeatureName (Split-Path -Leaf $preflight.feature.dir))
     }
     if (-not $preflight.creation_supported) {
         return (Get-JsonError -Message "Automated PR creation is not supported for platform '$($DevSparkPlatform.Name)'" -Details 'Supported: github (gh), azdo (az). Install and authenticate the platform CLI.')
@@ -734,15 +760,27 @@ function Invoke-CreateOrUpdatePr {
     } | ConvertTo-Json -Depth 10)
 }
 
+function Write-CreateOrUpdateResult {
+    param([string]$Json)
+
+    Write-Output $Json
+    # A refused or failed create/update exits non-zero so automation never has to parse the message.
+    $failed = $true
+    try { $failed = [bool]($Json | ConvertFrom-Json).error } catch { }
+    if ($failed) { exit 1 }
+}
+
 switch ($Mode) {
     'Preflight' {
         $output = Get-CreatePrPreflight | ConvertTo-Json -Depth 10
         Write-Output $output
+        # Preflight always succeeds; its lifecycle probe would otherwise leave a non-zero $LASTEXITCODE.
+        exit 0
     }
     'Create' {
-        Write-Output (Invoke-CreateOrUpdatePr -Action Create)
+        Write-CreateOrUpdateResult (Invoke-CreateOrUpdatePr -Action Create)
     }
     'Update' {
-        Write-Output (Invoke-CreateOrUpdatePr -Action Update)
+        Write-CreateOrUpdateResult (Invoke-CreateOrUpdatePr -Action Update)
     }
 }

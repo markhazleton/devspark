@@ -160,9 +160,9 @@ For every concern that would create or retain significant architecture, Judge as
 
 > **What can be removed or simplified while still satisfying every forcing requirement and invariant?**
 
-and then: what current requirement forces this; what demonstrated risk exists; what scale and frequency apply; is the operation autonomous or operator-driven; is human review acceptable; can an existing capability handle it; what simpler remediation exists; and what new failure surface would the mechanism create? Scale, frequency, execution, and review tolerance come from `plan.md`'s `operating_context` when present; never invent them.
+and then: what current requirement forces this; what demonstrated risk exists; what scale and frequency apply; is the operation autonomous or operator-driven; is human review acceptable; can an existing capability handle it; what simpler remediation exists; and what new failure surface would the mechanism create? Scale and frequency come from `plan.md`'s Technical Context; never invent them.
 
-When `plan.md` records `expected_new_mechanisms` and a remediation would introduce a mechanism beyond that shape (for example, a cache where `caches: 0`), ask: **what current requirement or demonstrated constraint forced this deviation?** The deviation may be justified. This is a proportionality signal, not a score, and never an automatic rejection.
+When a remediation would introduce a mechanism beyond what `plan.md`'s Decision Summary records as the closest existing pattern and its `New mechanism` line, ask: **what current requirement or demonstrated constraint forced this?** A new mechanism the plan did not establish may be justified. This is a proportionality signal, not a score, and never an automatic rejection.
 
 Resolution order, lightest first:
 
@@ -177,7 +177,7 @@ Resolution order, lightest first:
 
 Runtime machinery is allowed. It carries the greatest burden of justification. Critic's `least_complex_mitigation` and `mitigation_kind` are evidence for this order, not a decision: Judge may choose a lighter or heavier resolution with a recorded reason.
 
-**Where proportionality is recorded.** Use the existing concern fields; there is no parallel field set. When a concern requires machinery, its `forcing_requirement` names the requirement, invariant or constraint that forces it, its `action` states the least-complex sufficient constraint (what the remediation may add and no more) and why a lighter step from the order above does not suffice. When the remediation would go beyond the shape `plan.md` expects (`expected_new_mechanisms`, `expected_change_surface`), the concern sets `needs_authority: true`: exceeding the approved Plan requires Judge-recorded or explicit human authority, never an implementer's or a Tasks run's own decision.
+**Where proportionality is recorded.** Use the existing concern fields; there is no parallel field set. When a concern requires machinery, its `forcing_requirement` names the requirement, invariant or constraint that forces it, its `action` states the least-complex sufficient constraint (what the remediation may add and no more) and why a lighter step from the order above does not suffice. When the remediation would go beyond the shape `plan.md` expects (its Decision Summary's `New mechanism` and `expected_change_surface`), the concern sets `needs_authority: true`: exceeding the approved Plan requires Judge-recorded or explicit human authority, never an implementer's or a Tasks run's own decision.
 
 ## 11. Scope Authority
 

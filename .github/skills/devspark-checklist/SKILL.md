@@ -1,6 +1,6 @@
 ---
 name: devspark-checklist
-description: "Generate a custom checklist for the current feature based on user requirements."
+description: "For an existing specification, generate a requirements-quality checklist (unit tests for the written requirements). Not used on a work branch."
 user-invocable: true
 disable-model-invocation: true
 ---

@@ -30,6 +30,11 @@
       "lifecycle": "archive-on-release"
     },
     {
+      "pathPattern": ".devspark.work/explain/**",
+      "workProductType": "analysis",
+      "lifecycle": "archive-on-release"
+    },
+    {
       "pathPattern": ".devspark.work/audit/**",
       "workProductType": "audit",
       "lifecycle": "archive-on-release"

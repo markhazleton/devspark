@@ -1,6 +1,6 @@
 ---
 name: devspark-tasks
-description: "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts."
+description: "Coordinate dependency-ordered work when it is useful. Generates tasks.md for existing specification bundles; on work branches identifies deliverables and persists them only when continuity or coordination requires it."
 user-invocable: true
 disable-model-invocation: true
 ---

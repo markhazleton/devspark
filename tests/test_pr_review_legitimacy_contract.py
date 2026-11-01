@@ -234,18 +234,16 @@ def test_claim_targeted_check_is_word_bounded_and_reads_before_promoting(delta: 
     assert "rests on a claim you read" in check
 
 
-def test_last_verified_is_a_claim_not_proof(delta: str) -> None:
-    text = delta.split("**`last_verified`**", 1)[1].split("**No unsupported", 1)[0]
-    assert "not proof that every claim is correct" in text
-    assert "triggers the claim check" in text
-    assert "not itself a defect" in text
+def test_review_does_not_gate_on_derived_index_or_date_freshness(delta: str, prompt: str) -> None:
+    section = _flat(_section(prompt, "### 6c.", "### 6d."))
+    assert "never judge a PR on whether derived index files" in section
+    assert "last_verified" not in delta and "INDEX_FRESH" not in delta
 
 
 def test_negative_knowledge_assertions_require_compared_claims(delta: str) -> None:
     text = delta.split("**No unsupported", 1)[1].split("2. **`PRD1`", 1)[0]
-    for phrase in ("Knowledge matches", "PRD1: none", "operator tables match"):
+    for phrase in ("Knowledge matches", "PRD1: none"):
         assert phrase in text, phrase
-    assert "freshly dated" in text
     assert "claims you actually compared" in text
 
 
@@ -262,8 +260,6 @@ def test_review_resolves_a_small_cited_knowledge_packet_and_qualifies_evidence(
         "read its authoritative source",
         "cite the Knowledge path and heading",
         "concise packet",
-        "`INDEX_FRESH`",
-        "relevant node `source_status`",
         "not current truth",
         "unaccepted projection candidate",
         "Identify durable architectural truths",
@@ -290,11 +286,11 @@ def test_review_context_contract_covers_the_pr_review_prompt() -> None:
     assert "reconcile their existing owner in the same change" in lifecycle
 
 
-def test_prd1_is_semantic_and_leaves_mechanical_freshness_to_create_pr(delta: str) -> None:
+def test_prd1_is_semantic_truth_judged_from_claims_read(delta: str) -> None:
     prd1 = delta.split("2. **`PRD1`", 1)[1].split("3. **`PRD2`", 1)[0]
     assert "material claim you read" in prd1
     assert "relevant to this PR" in prd1
-    assert "`/devspark-create-pr`" in prd1 and "semantic truth" in prd1
+    assert "semantic truth" in prd1
 
 
 def test_prd3_coverage_is_proportionate_to_behavior_and_delegation(delta: str) -> None:
@@ -311,9 +307,8 @@ def test_prd3_coverage_is_proportionate_to_behavior_and_delegation(delta: str) -
 
 def test_knowledge_check_stays_read_only_and_head_verified(prompt: str) -> None:
     section = _flat(_section(prompt, "### 6c.", "### 6d."))
-    assert "--check" in section and "read-only" in section.lower()
     assert "Never regenerate Knowledge during review" in section
-    assert "git rev-parse HEAD" in section
+    assert "check it out or stop" in section
 
 
 def test_pr_review_does_not_load_the_assurance_contract_or_add_machinery(prompt: str) -> None:
@@ -400,16 +395,7 @@ def test_updated_durable_invariant_is_retrieved_without_unrelated_knowledge(
     )
 
     index = explain.build_index(repo)
-    knowledge = repo / ".knowledge"
-    (knowledge / "index.json").write_text(
-        json.dumps(index, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
-    coverage = explain.build_coverage_report(index)
-    coverage_path = knowledge / "ontology" / "coverage.json"
-    coverage_path.parent.mkdir(parents=True)
-    coverage_path.write_text(
-        json.dumps(coverage, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    assert any(node["id"] == "flow-integration" for node in index["nodes"])
 
     monkeypatch.setattr(explain, "repository_root", lambda: repo)
     monkeypatch.setattr(
@@ -420,7 +406,7 @@ def test_updated_durable_invariant_is_retrieved_without_unrelated_knowledge(
     assert explain.main() == 0
     payload = json.loads(capsys.readouterr().out)
     matches = {item["id"]: item for item in payload["MATCHED_KNOWLEDGE"]}
-    assert payload["INDEX_FRESH"] is True
+    assert "INDEX_FRESH" not in payload
     assert "flow-integration" in matches
     assert "models-contract" not in matches
     source_status = matches["flow-integration"]["source_status"][0]

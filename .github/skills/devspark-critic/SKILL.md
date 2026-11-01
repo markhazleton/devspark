@@ -1,6 +1,6 @@
 ---
 name: devspark-critic
-description: "Challenge whether an internally sound plan is wrong about the real system it will run in — unimplementable conditions, absent operational controls, and unexamined assumptions about code, dependencies, and failure."
+description: "On demand for one specific material concern — challenge whether the work is wrong about the real system it will run in, such as unimplementable conditions, absent operational controls, and unexamined assumptions about code, dependencies, and failure. Never a default gate."
 user-invocable: true
 disable-model-invocation: true
 ---

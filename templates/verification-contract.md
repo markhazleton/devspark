@@ -15,7 +15,7 @@ Findings in `gates/verify.md` are **evidence**, not opinions: every claim MUST b
 
 ## 2. Proof Modes
 
-A spec declares which proof mode(s) it requires via `required_gates: verify:<mode>` in its frontmatter (see §3). `/devspark-specify`'s route classification assigns a default mode per route (see `specify.md`); the user or `/devspark-plan` may add or override it explicitly.
+A spec declares which proof mode(s) it requires via `required_gates: verify:<mode>` in its frontmatter (see §3). `/devspark-specify` carries the expected mode into its handoff from the observable change shape (§2.1); the user or `/devspark-plan` may add or override it explicitly. Work without a spec declares nothing: the mode follows from the change shape and is reported as in §2.2.
 
 | Mode                | Use when…                                                                 | Minimum evidence required                                                                                                                                     |
 | -------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,7 +33,7 @@ Ordinary deterministic validation — the test suite, the linters, the type chec
 
 > **Does this change depend on something the test suite cannot observe?**
 
-That is a property of the **change shape**, not of the route label or the authored `risk_level`. Routes named `refactor` and `prompt-change` carry a default mode (see `specify.md`) because their shape is known in advance, but a change on any route can exhibit a verify-sensitive shape, and such a change should receive the matching mode regardless of its route.
+That is a property of the **change shape**, not of the route label or the authored `risk_level`. A behavior-preserving refactor and a prompt or template change carry a known mode (see `specify.md`) because their shape is known in advance, but any change can exhibit a verify-sensitive shape, and such a change should receive the matching mode regardless of its route.
 
 The vocabulary is deliberately small and technology-neutral. Each shape names something the tests can be green about while reality disagrees:
 
@@ -55,7 +55,7 @@ Do not extend this table with repository-specific technologies. If a new shape i
 
 ## 2.2 The Applicability Decision Is Reported, Not Hidden
 
-Whichever command decides whether empirical verification is warranted — `/devspark-specify` at route classification, `/devspark-plan` when the design makes the shape visible, or `/devspark-verify` itself — states the decision and its reason in two lines:
+Whichever command decides whether empirical verification is warranted — `/devspark-specify` when it starts the work, `/devspark-plan` when the design makes the shape visible, or `/devspark-verify` itself — states the decision and its reason in two lines:
 
 ```text
 Empirical verification: REQUIRED (end-to-end)
@@ -132,6 +132,23 @@ discovered:
 ```
 
 The `discovered:` list is the overflow channel for everything the run surfaced that is not a proof result. It never affects any mode's `status`, and it is not a to-do list for this route — the closeout phase classifies each entry (see §6).
+
+## 4.1 Test Evidence Record
+
+Anyone who runs tests for a delta (`/devspark-implement`, `/devspark-verify`, `/devspark-pr-review`) records the run once so the next consumer can reuse it instead of repeating it. Append, newest first, to `FEATURE_DIR/gates/test-evidence.md` (spec and quickfix routes). `/devspark-pr-review` records its own runs in its review file's `## Test Evidence` section, which also serves a PR with no feature directory.
+
+```yaml
+- commit: <full 40-character HEAD SHA the tests ran against>
+  tree: clean | dirty
+  command: <exact command, including every explicit path>
+  result: "<N passed, N failed, N skipped>; exit <code>; failing: <ids or none>"
+  run_at: <ISO-8601 UTC>
+  run_by: implement | verify | pr-review | address-pr-review
+```
+
+A record is **reusable** only when all hold: `exit 0` and `tree: clean`; the command's scope covers what the consumer needs (the changed tests and the code they exercise); the recorded commit still exists; and every path changed since it is a planning or review artifact under `.devspark.work/specs/`, `.devspark.work/quickfixes/` or `.devspark.work/pr-review/` (`git diff --name-only <commit> HEAD`, plus uncommitted changes). A rebase, a merge from the base branch, a dependency change, a different runtime or environment from the recorded run (language version, required services, configuration), or any code, test, data or knowledge edit invalidates it. Reuse is cited by location, never re-recorded as a new run. A record is evidence of what was run, never a substitute for the failing-run output.
+
+A repository policy (constitution, `.devspark.work/templates/`, or a command override) may tighten this, for example by requiring the reviewer's own run for high-risk paths or when CI does not run the tests. Such a policy wins; the default here only removes repetition that no policy requires.
 
 ## 5. Non-Negotiables
 

@@ -13,8 +13,8 @@ You do not need to adopt the complete DevSpark methodology to find out whether i
 1. **Open a disposable branch** in a real repository.
 2. **Send the bootstrap prompt in preview-only mode.** Ask the agent to show the workflow it would run and every file it would create, modify, or delete — without writing anything yet.
 3. **Review every proposed file and instruction** before approving anything. Read the actual skill prompt instructions, not just a summary.
-4. **Select one existing bug or small work item** as the task, and let the agent generate the requirements, plan, and tasks for it.
-5. **Compare the proposed approach with how you would normally handle the task.** Would the specification, plan, or generated tests have caught something you'd have missed? Would they have added time without adding value?
+4. **Select one existing bug or small work item** as the task, and start it with `/devspark-specify`. The agent states the outcome, inspects the relevant code and tests, then implements and verifies on a work branch. A plan, task list or review appears only when the work justifies one.
+5. **Compare the approach with how you would normally handle the task.** Would the outcome check, any assurance it raised, or the tests it added have caught something you'd have missed? Did anything add time without adding value?
 6. **Proceed or stop.** If it helped, continue using it on that task through review and PR. If it didn't, discard the branch — you have lost nothing but the session.
 
 ## What to skip on this first pass
@@ -26,7 +26,7 @@ Do not introduce these on your first evaluation — they add overhead without ch
 - Multi-application monorepo registries
 - The full skill reference
 
-The goal of this page is a single useful experience with the core specify → plan → implement → review loop, not complete understanding of the methodology.
+The goal of this page is a single useful experience with the core understand → implement and verify → deliver loop, not complete understanding of the methodology.
 
 ## Getting the preview
 

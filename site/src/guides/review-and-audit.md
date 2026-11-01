@@ -20,7 +20,7 @@ Typical sequence after `/devspark-implement`: `/devspark-verify`, `/devspark-cre
 
 ## Create a PR
 
-`/devspark-create-pr` believes the work is complete and ready for other people to review. Before it opens or updates a PR, it runs deterministic checks against the pushed HEAD: generated knowledge must match that commit, and no knowledge entity the PR touches may be stale. A known failure stops it. Planning review and closeout results are carried into the description, so a reviewer sees gate acknowledgements without hunting for them.
+`/devspark-create-pr` believes the work is complete and ready for other people to review. Before it opens or updates a PR, it runs one deterministic check against the pushed HEAD: the committed Knowledge must build. A build failure stops it; the derived index files and `last_verified` dates are never compared. Planning review and closeout results are carried into the description, so a reviewer sees gate acknowledgements without hunting for them.
 
 ## PR review
 
@@ -30,6 +30,8 @@ Typical sequence after `/devspark-implement`: `/devspark-verify`, `/devspark-cre
 ```
 
 The review is saved to `.devspark.work/pr-review/pr-{number}.md`. Re-reviewing after new commits replaces the report and its revision log; Git keeps earlier versions. PR review judges a change that already claims readiness, so it is not completion detection.
+
+**Evidence first, tests second.** Before running anything, the review looks for existing test evidence for the reviewed commit: a Test Evidence Record from `/devspark-verify`, CI results for the head SHA, or the author's record in the PR description. A record is reused when it is for the same commit (or only planning and review files changed since), came from a clean tree with exit code 0, ran in the same environment, and covers the changed tests. It re-runs tests only on a named trigger: no valid record, a high-risk change backed only by the author's own evidence, a repository policy that requires independent execution, or behavior no recorded run exercises. Every run or reuse is written into the report's Test Evidence section, so an unverified result is stated as unverified rather than implied.
 
 **Risk-sized reviews.** Context helpers compute review tiers and an auditable rating from the full
 changed-file set before sampling. Knowledge ownership can raise a file's tier; the reviewer may

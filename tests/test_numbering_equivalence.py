@@ -113,7 +113,7 @@ def _build_repo(branches: list[str], spec_dirs: list[str], quickfix_files: list[
 
 def _next_number_pwsh(repo_root: Path) -> int:
     result = subprocess.run(
-        ["pwsh", "-NoProfile", "-File", "scripts/powershell/new-branch.ps1", "-Type", "spec", "-Json", "-DryRun", "probe"],
+        ["pwsh", "-NoProfile", "-File", "scripts/powershell/new-branch.ps1", "-Type", "fix", "-Json", "-DryRun", "probe"],
         cwd=repo_root,
         text=True,
         capture_output=True,
@@ -126,7 +126,7 @@ def _next_number_pwsh(repo_root: Path) -> int:
 
 def _next_number_bash(repo_root: Path) -> int:
     result = subprocess.run(
-        ["bash", "scripts/bash/new-branch.sh", "--type", "spec", "--json", "--dry-run", "probe"],
+        ["bash", "scripts/bash/new-branch.sh", "--type", "fix", "--json", "--dry-run", "probe"],
         cwd=repo_root,
         text=True,
         capture_output=True,
@@ -135,6 +135,16 @@ def _next_number_bash(repo_root: Path) -> int:
     )
     assert result.returncode == 0, f"new-branch.sh failed: {result.stderr}"
     return int(json.loads(result.stdout)["NUMBER"])
+
+
+def _create_work_branch(repo_root: Path, shell: str) -> dict:
+    if shell == "pwsh":
+        command = ["pwsh", "-NoProfile", "-File", "scripts/powershell/new-branch.ps1", "-Type", "work", "-Json", "-Yes", "Resume a bug fix"]
+    else:
+        command = ["bash", "scripts/bash/new-branch.sh", "--type", "work", "--json", "--yes", "Resume a bug fix"]
+    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
+    assert result.returncode == 0, f"work branch creation failed: {result.stderr}"
+    return json.loads(result.stdout)
 
 
 @pytest.mark.skipif(not _has_pwsh(), reason="pwsh not available")
@@ -153,5 +163,116 @@ def test_unified_allocator_matches_golden_case_bash(case_id, branches, spec_dirs
     repo_root = _build_repo(branches, spec_dirs, quickfix_files)
     try:
         assert _next_number_bash(repo_root) == expected, f"{case_id}: expected {expected}"
+    finally:
+        shutil.rmtree(repo_root.parent, ignore_errors=True)
+
+
+@pytest.mark.skipif(not _has_pwsh(), reason="pwsh not available")
+def test_work_branch_creates_no_artifact_pwsh() -> None:
+    repo_root = _build_repo([], [], [])
+    try:
+        result = _create_work_branch(repo_root, "pwsh")
+        assert result["TYPE"] == "work"
+        assert result["BRANCH_NAME"].startswith("001-work-")
+        assert result["SWITCHED"] is True
+        assert not Path(result["ARTIFACT_PATH"]).exists()
+        assert not (repo_root / ".devspark.work" / "specs" / result["BRANCH_NAME"]).exists()
+    finally:
+        shutil.rmtree(repo_root.parent, ignore_errors=True)
+
+
+@pytest.mark.skipif(not _has_bash(), reason="bash not available")
+def test_work_branch_creates_no_artifact_bash() -> None:
+    repo_root = _build_repo([], [], [])
+    try:
+        result = _create_work_branch(repo_root, "bash")
+        assert result["TYPE"] == "work"
+        assert result["BRANCH_NAME"].startswith("001-work-")
+        assert result["SWITCHED"] is True
+        assert not Path(result["ARTIFACT_PATH"]).exists()
+        assert not (repo_root / ".devspark.work" / "specs" / result["BRANCH_NAME"]).exists()
+    finally:
+        shutil.rmtree(repo_root.parent, ignore_errors=True)
+
+
+@pytest.mark.parametrize("shell", ["pwsh", "bash"])
+def test_work_branch_requires_git(shell: str, tmp_path: Path) -> None:
+    repo_root = tmp_path / "no-git-repo"
+    repo_root.mkdir()
+    _copy_script_set(repo_root)
+    (repo_root / "README.md").write_text("# test\n", encoding="utf-8")
+    if shell == "pwsh":
+        command = ["pwsh", "-NoProfile", "-File", "scripts/powershell/new-branch.ps1", "-Type", "work", "-Json", "-Yes", "Resume a bug fix"]
+    else:
+        command = ["bash", "scripts/bash/new-branch.sh", "--type", "work", "--json", "--yes", "Resume a bug fix"]
+    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
+    assert result.returncode != 0
+    assert "work branches require a Git repository" in result.stderr
+
+
+def _declared_specify_command(shell: str, description: str, confirmed: bool = True) -> list[str]:
+    """The exact branch-creation command /devspark-specify declares, mapped onto source paths."""
+    import shlex
+
+    import yaml
+
+    text = (ROOT / "templates" / "commands" / "specify.md").read_text(encoding="utf-8")
+    frontmatter = yaml.safe_load(text.split("---", 2)[1])
+    declared = frontmatter["scripts"]["ps" if shell == "pwsh" else "sh"]
+    argv = shlex.split(declared.replace(".devspark/scripts/", "scripts/"))
+    argv = [description if token == "$ARGUMENTS" else token for token in argv]
+    if not confirmed:
+        argv = [token for token in argv if token not in ("--yes", "-Yes")]
+    return ["pwsh", "-NoProfile", "-File", *argv] if shell == "pwsh" else ["bash", *argv]
+
+
+@pytest.mark.parametrize("shell", ["pwsh", "bash"])
+def test_specify_declares_the_confirmed_noninteractive_branch_flag(shell: str) -> None:
+    command = _declared_specify_command(shell, "probe")
+    assert ("-Yes" if shell == "pwsh" else "--yes") in command
+    assert ("-Type" if shell == "pwsh" else "--type") in command and "work" in command
+
+
+@pytest.mark.parametrize("shell", ["pwsh", "bash"])
+def test_specify_declared_command_creates_the_work_branch_without_a_tty(shell: str) -> None:
+    if shell == "pwsh" and not _has_pwsh():
+        pytest.skip("pwsh not available")
+    if shell == "bash" and not _has_bash():
+        pytest.skip("bash not available")
+    repo_root = _build_repo([], [], [])
+    try:
+        result = subprocess.run(
+            _declared_specify_command(shell, "Start catalog search"),
+            cwd=repo_root, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL,
+        )
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(result.stdout)
+        assert payload["TYPE"] == "work" and payload["SWITCHED"] is True
+        current = subprocess.run(
+            ["git", "branch", "--show-current"], cwd=repo_root, text=True, capture_output=True, timeout=30, check=True
+        ).stdout.strip()
+        assert current == payload["BRANCH_NAME"] and current.startswith("001-work-")
+    finally:
+        shutil.rmtree(repo_root.parent, ignore_errors=True)
+
+
+@pytest.mark.parametrize("shell", ["pwsh", "bash"])
+def test_branch_creation_still_fails_closed_without_confirmation(shell: str) -> None:
+    if shell == "pwsh" and not _has_pwsh():
+        pytest.skip("pwsh not available")
+    if shell == "bash" and not _has_bash():
+        pytest.skip("bash not available")
+    repo_root = _build_repo([], [], [])
+    try:
+        result = subprocess.run(
+            _declared_specify_command(shell, "Start catalog search", confirmed=False),
+            cwd=repo_root, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL,
+        )
+        assert result.returncode != 0
+        assert "refusing to switch branches without confirmation" in result.stderr
+        current = subprocess.run(
+            ["git", "branch", "--show-current"], cwd=repo_root, text=True, capture_output=True, timeout=30, check=True
+        ).stdout.strip()
+        assert current == "main"
     finally:
         shutil.rmtree(repo_root.parent, ignore_errors=True)

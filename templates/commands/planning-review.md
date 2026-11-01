@@ -1,6 +1,6 @@
 ---
 source: "DevSpark — © 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com"
-description: Run Analyze, Critic when applicable, and Judge as one bounded planning review that returns a single planning decision before implementation.
+description: For an existing specification bundle, run Analyze, Critic when applicable, and Judge as one bounded planning decision before implementation. On a work branch, Judge only adjudicates a genuine conflict on demand.
 handoffs:
   - label: Implement
     agent: devspark-implement
@@ -48,7 +48,9 @@ Done when `FEATURE_DIR/gates/judge.md` exists, `judge.sh validate` passes, `guar
 
 ### 1. Resolve the Feature Once
 
-`{SCRIPT}` has resolved the active feature (`FEATURE_DIR`, `feature`, and `handoff`). Do not resolve it again. If it reports an error (ambiguous or unknown), stop and ask the developer which feature — never guess.
+`{SCRIPT}` has resolved the active feature (`FEATURE_DIR`, `feature`, and `handoff`). Do not resolve it again. If it reports an error (ambiguous or unknown), stop and ask the developer which feature — never guess. If it reports `work-branch`, follow **Work Branch Adjudication** below instead of steps 2–7.
+
+**Work Branch Adjudication.** A `NNN-work-*` branch has no planning bundle to review, so nothing runs Analyze and Critic for you here and nothing writes `gates/judge.md`. Judge stays available on demand under assurance-contract.md §13: adjudicate only findings the developer brings that genuinely conflict, or a consequential trade-off between viable options. Apply the `judge-contract.md` principles (§2), classification and resolution vocabulary (§8), reclassification authority (§9) and proportionality (§10) — without its gate artifact, run ids or convergence rounds — and report the §13 result block with `Capability: judge`. When the outcome needs authority the developer does not hold, the disposition is `decision needed` and names who holds it. Record an accepted decision under `work.md` `## Material Decisions` only when it must survive the session, then return to `/devspark-implement`. Running Analyze or Critic never obliges a Judge run.
 
 Every child step below carries this **Planning Review hand-off**: `FEATURE_DIR` is the resolved directory, any script a child runs executes with `DEVSPARK_FEATURE` set to the resolved `feature` name, and `PLANNING_REVIEW_RUN_ID` is the run id `{SCRIPT}` generated once for this run (`run_id`). Every child that runs stamps it into its gate header as `planning_review.run_id`. A child never re-derives the feature from the branch name, which can differ from the spec directory.
 
@@ -79,7 +81,7 @@ Pass **artifacts, not reasoning**, from each child to the next step. After each 
 ### 4. Judge
 
 1. Arm the read-only guard: `{judge helper} guard begin --feature-dir <FEATURE_DIR> --run-id <run_id>`. It first re-verifies the seal; `invalidated` means a child changed after it was sealed, so rerun it.
-2. Adjudicate per `judge-contract.md`: normalize, merge, classify, challenge proportionality (what can be removed or simplified while still satisfying every forcing requirement and invariant), derive dispositions. Work from the two gate artifacts plus the objective and requirement ids. Open another file only to check a cited `evidence:` pointer. A concern that needs a human choice is recorded with `resolution: null`, `needs_authority: true`, and a `decisions_needed` entry, never a made-up resolution.
+2. Adjudicate per `judge-contract.md`. **Ask first whether the plan reuses the closest existing pattern**: read its Decision Summary (`Closest existing pattern`, `New mechanism`) and confirm in the repository that nothing closer exists; a new mechanism without a forcing requirement is a concern. Then normalize, merge, classify, challenge proportionality (what can be removed or simplified while still satisfying every forcing requirement and invariant), derive dispositions. Work from the two gate artifacts plus the objective and requirement ids. Open another file only to check a cited `evidence:` pointer or that closest-pattern claim. A concern that needs a human choice is recorded with `resolution: null`, `needs_authority: true`, and a `decisions_needed` entry, never a made-up resolution.
 3. Write `FEATURE_DIR/gates/judge.md` (replace, never append) in the contract §15 shape, including `planning_review.run_id` and each child's `mode` (`generated` or `reused`) with its run ids. Every concern cites existing child finding ids.
 4. Disarm the guard: `{judge helper} guard end --feature-dir <FEATURE_DIR> --run-id <run_id>`. `violated` means a protected planning artifact (spec, plan, tasks, a child gate) changed during the Judge window: report the files, do not silently revert, and stop. `concurrent-change-detected` means only unprotected files moved (other work in the repository); it cannot be attributed to Judge, so note it and continue.
 5. Run `{judge helper} validate --feature-dir <FEATURE_DIR>`. Fix **only** `judge.md` until it passes. A declared verdict that disagrees with the derived one is an error in `judge.md`.

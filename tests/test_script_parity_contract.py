@@ -184,7 +184,7 @@ def main() -> None:
     ps_check_refs = _read('scripts/powershell/check-planning-references.ps1')
 
     for token in (
-        'branch_findings', 'id_findings', 'linkage_findings', 'PLANNING-REF', 'LINKAGE-GAP',
+        'branch_findings', 'id_findings', 'PLANNING-REF',
     ):
         assert token in bash_check_refs, f'bash check-planning-references.sh missing {token!r}'
         assert token in ps_check_refs, f'ps check-planning-references.ps1 missing {token!r}'

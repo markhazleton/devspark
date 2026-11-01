@@ -47,6 +47,8 @@ The phases are separate on purpose (`closeout-contract.md` §6) — evidence opt
 
 Done when every `verify:<mode>` entry declared in `spec.md`'s `required_gates` has a corresponding `modes:` entry in `gates/verify.md` with real evidence and a `pass`/`fail` status, and `FEATURE_DIR/gates/closeout.md` carries an objective outcome, a classification for every open finding, and an explicit `decision`. If a mode cannot be executed in this environment, the gate records `fail` with the concrete blocker — never a fabricated pass. A `decision: not-complete` is a successful run of this command — it is a correct answer, not a failure to finish.
 
+On a universal work branch, done is different and lighter: the report in *Work Branch Verification* below answers delivered, verified and eligible from evidence actually run, and no gate document is written.
+
 ## Non-Negotiable: Evidence, Not Narration
 
 Every evidence block MUST be the actual command(s) run in this session and their actual output (or a reference to a committed artifact, e.g. a CI log or fixture diff). A description of what *should* happen if the command were run is not evidence and MUST NOT be recorded as a `pass`.
@@ -75,10 +77,12 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
 1. Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS. All paths must be absolute.
 
+   **Universal work branch** (any `NNN-work-*` branch; a file named `spec.md` in its directory never makes it a legacy bundle): follow *Work Branch Verification* below instead of steps 2–7. There are no declared gates to read and no gate documents to write.
+
 2. **Determine required proof modes**: Read `required_gates` from `spec.md`'s YAML frontmatter — or, if this branch has no `spec.md` (quickfix route), from the quickfix record's frontmatter at the path `FEATURE_SPEC` resolves to (`.devspark.work/quickfixes/<branch>.md`). Collect every `verify:<mode>` entry. If none are declared:
    - Check the change against the verify-sensitive shapes in verification contract §2.1. If the delta exhibits one and no mode was declared, say so and offer the indicated mode — an undeclared shape is the gap this check exists to catch, not a reason to proceed silently.
    - If the user explicitly asked for verification anyway, ask which mode applies (offer the table from the verification contract §2) and proceed with that mode for this run only — do not silently skip.
-   - Otherwise, skip steps 3–5 and go straight to the closeout phase (step 6), noting in the report that no proof mode was declared for this route. A route with no required evidence still has an objective and findings to converge, and that is cheap to settle from the artifacts that already exist — it is not a reason to send the developer to another command.
+   - Otherwise, skip steps 3–5 and go to the closeout phase (step 6), noting in the report that no proof mode was declared for this route. A route with no required evidence still has an objective and findings to converge, and that is cheap to settle from the artifacts that already exist — it is not a reason to send the developer to another command. A run with no declared mode supplies no new evidence: if a prior `gates/closeout.md` still applies (contract §7.1), step 6 leaves it untouched.
 
    Report the outcome in the two-line form from verification contract §2.2, whichever way it lands.
 
@@ -120,6 +124,8 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
    execution` on a `.knowledge/` node for this change — record it here, where the actual proof just
    ran, rather than leaving implement to reconstruct which test verified what.
 
+   Append the run of any regression command you executed to `FEATURE_DIR/gates/test-evidence.md` per verification contract §4.1, so `/devspark-pr-review` can reuse it instead of repeating it.
+
    - `status: pass` only if every declared mode's entry is `pass`.
    - `status: fail` if any declared mode is `fail`; `blocking: true` in that case.
    - Ensure `FEATURE_DIR/gates/` exists; replace the prior `verify.md` artifact if present, don't append.
@@ -139,17 +145,21 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
 6. **Classify and decide.** Load `/.devspark/templates/closeout-contract.md` (installed repos) or `templates/closeout-contract.md` (source repos) and run its phase here, in this same invocation. Its §3 (criterion kinds), §4 (classifications), §7 (artifact shape and stop condition), and §8 (scope expansion) are the authority for everything in this step.
 
+   Its §7.1 governs any prior `gates/closeout.md`: read it **before** anything replaces it, carry its decisions forward within their original scope, and re-decide only what has materially changed. This phase never reconstructs a closeout from the evidence alone when one already exists.
+
    a. **State the objective** in one sentence, in the route's own words (the full spec's Rationale Summary → Core Problem, the quick spec's `## Intent`, the quickfix record's problem statement). If the route never stated a checkable objective, say so plainly — do not invent a more flattering one, and do not substitute "everything the work touched" for the objective it declared.
 
-   b. **Collect the existing finding set — read, do not regenerate.** This step's `discovered:` list and mode results; open findings in `gates/analyze.md`, `gates/critic.md`, `gates/checklist.md`; unchecked items, open questions, and `[NEEDS CLARIFICATION]` markers in the route record; open threads in `.devspark.work/pr-review/pr-<n>.md` if a review exists. A missing declared gate artifact is noted as missing — that is a fact about the route's state, not an invitation to produce it now.
+   b. **Collect the existing finding set — read, do not regenerate.** The prior `gates/closeout.md` (classifications, `accepted_by`, `captured_as`, learning records, criterion outcomes); this step's `discovered:` list and mode results; open findings in `gates/analyze.md`, `gates/critic.md`, `gates/checklist.md`; unchecked items, open questions, and `[NEEDS CLARIFICATION]` markers in the route record; open threads in `.devspark.work/pr-review/pr-<n>.md` if a review exists. A missing declared gate artifact is noted as missing — that is a fact about the route's state, not an invitation to produce it now.
 
-   c. **Evaluate each acceptance criterion by its declared kind.** For every `FR-###` and `SC-###` (or the quick/quickfix equivalent), record its `kind` (`requirement` | `invariant` | `hypothesis` | `target`) and `outcome`, citing the evidence that settled it. An undeclared kind reads as `requirement`. A criterion with no evidence either way is `not-satisfied`, not `satisfied`.
+   **Does the prior decision still apply?** Apply the five tests in contract §7.1 to what has changed since it was written. If none holds and this run produced no new mode evidence, **stop here: leave `closeout.md` as it is**, and report that the prior decision stands (with its `generated`/`evaluated_commit`). If one holds, or a mode ran and produced new evidence, continue with steps c–f for the affected criteria and findings only and carry the rest forward unchanged.
+
+   c. **Evaluate each acceptance criterion by its declared kind.** For every `FR-###` and `SC-###` (or the quick/quickfix equivalent), record its `kind` (`requirement` | `invariant` | `hypothesis` | `target`) and `outcome`, citing the evidence that settled it. An undeclared kind reads as `requirement`. A criterion with no evidence either way is `not-satisfied`, not `satisfied` — but a carried-forward outcome whose cited evidence still applies (§7.1) already has evidence.
 
    d. **Classify every open finding** — exactly one of `blocking-defect`, `accepted-limitation`, `deferred-work`, or `learning` each, with the classification-specific record populated (`accepted_by`, `captured_as` pointing at a record that *already exists*, or `original_expectation` + `revised_understanding`). In each `rationale`, name which of the five expansion triggers the finding does or does not hit.
 
    e. **Decide** per contract §7: `complete` requires the objective `achieved` or `resolved-through-learning`, zero `blocking-defect` findings, and an empty `unclassified` list. Then **name the regression gates** — for each outcome being claimed, the test or check that keeps it true (prefer a `test_ref` recorded in step 5). An outcome with no regression gate is worth saying out loud.
 
-   f. **Write `FEATURE_DIR/gates/closeout.md`** in the contract §7 shape with `produced_by: verify`. Replace any prior `closeout.md`; do not append.
+   f. **Write `FEATURE_DIR/gates/closeout.md`** in the contract §7 shape with `produced_by: verify` and `evaluated_commit` set to the current HEAD, only when step 6 reached here. The written artifact replaces the prior one (do not append) but **must contain every carried-forward finding and criterion outcome** from it, with its `accepted_by`/`captured_as`/learning record verbatim — replacing the file never means dropping what it recorded. Never write an `accepted_by` the human did not give.
 
    **Post-deploy requirements.** A criterion declared `stage: post-deploy` (default is `pre-merge`) is recorded `outcome: deferred` with its `evidence_class` and a Deferred Work finding whose `captured_as` is an existing durable record (closeout contract §4.1) that verify never creates. A missing or hypothetical record leaves the finding unclassified and the decision `not-complete`; a high-risk deferral also needs `accepted_by`. Never record it `satisfied` on `automated` or `local-integration` evidence.
 
@@ -157,7 +167,7 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
    **Classify; do not re-discover.** This step reads findings that already exist. It MUST NOT open a new investigation, re-read the codebase hunting for problems, or widen the evidence search — that re-enters the loop this phase exists to stop. If a genuinely new blocking defect is noticed while reading, record it and stop looking.
 
-7. **Report once, for both phases.** Lead with the per-mode outcome, then the closeout summary in the contract §7 shape (objective, counts per classification, unclassified count, regression gates, decision). Do not restate every classified finding in chat — the artifacts carry the detail.
+7. **Report once, for both phases.** Lead with the per-mode outcome (or, with no declared mode, that no new evidence was produced), then the closeout summary in the contract §7 shape (objective, counts per classification, unclassified count, regression gates, decision). If the prior decision stood untouched, say so in one line instead of restating it. Do not restate every classified finding in chat — the artifacts carry the detail.
 
    - `decision: complete` → recommend `/devspark-create-pr`. Name the accepted limitations, deferred work, and learnings as **carried forward, not outstanding** — they are not reasons this route is unfinished. State that the change is ready to deploy, not deployed, and list any open `post-deploy` items with their `captured_as` records.
    - `decision: not-complete` → route to `/devspark-implement` **for the blocking defects only**, and say so explicitly. Re-opening the classified findings on that return trip is the expansion loop.
@@ -168,3 +178,48 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 **Autonomy override**: `--auto` (or a standing autonomy instruction) does not change the evidence requirement — it never authorizes a fabricated pass — and does not relax any classification requirement or soften a Blocking Defect. It only removes confirmation prompts: in step 2, defaulting to the most conservative applicable mode from the verification contract's table; in step 6, recording the standing instruction as `accepted_by`, and recording a deferrable finding with no obvious capture location as a Blocking Defect rather than deferring it to nowhere. `--auto` never promotes a finding into current scope (§8) — that needs a human.
 
 <!-- markdownlint-enable MD029 -->
+
+## Work Branch Verification (no planning bundle)
+
+A universal work branch has no declared `required_gates`, no criteria catalog and no gate documents.
+Verification here is proof in proportion to the change's risk, under the same evidence rule as above.
+Nothing in it is a mandatory step: the developer runs it when they want that proof.
+
+1. **Establish the intended change** in one sentence from the developer's request, the branch delta
+   and its tests, and `work.md` or `plan.md` when either exists. If it was never stated in a
+   checkable way, say so rather than inventing one.
+2. **Choose proof in proportion to risk.** Match the delta against the verify-sensitive shapes in
+   verification contract §2.1 and use each indicated mode; a low-risk change with none of those
+   shapes needs only its own focused and regression tests run. Report the choice in the §2.2
+   two-line form. No declared mode is required.
+3. **Run it** as in step 4 and report three things separately: what was **observed** (the actual
+   commands and output), what was **assumed**, and what **cannot be obtained** here, with the
+   blocker. *Evidence, Not Narration* and *Discovery Is Not Expansion* apply unchanged; a failure
+   that hits an expansion trigger routes to `/devspark-implement`.
+4. **Write no `gates/verify.md` or `gates/closeout.md`**, and do not create `work.md` or any other
+   file to hold this result. Durable proof lives where the work already keeps it: committed tests,
+   and, for a mandatory obligation, its `## Required Obligations` entry in `work.md` checked with a
+   reference to the evidence.
+5. **Answer three questions** in one short report:
+   - **Delivered** — is the intended change implemented?
+   - **Verified** — what evidence shows it works, and what remains unproven?
+   - **Eligible** — when the work directory exists, run `scripts/judge.py lifecycle --feature-dir
+     <FEATURE_DIR>` (installed repos: `.devspark/scripts/bash/judge.sh` or
+     `.devspark/scripts/powershell/judge.ps1`), the same check `/devspark-next` and
+     `/devspark-create-pr` read. Without a work
+     directory, delivered and verified is enough. An unresolved obligation names its authority, and
+     only satisfying evidence or that authority's decision, recorded in `work.md`, clears it.
+
+   A requirement that can only be proven after deployment is named as deferred: it never fails
+   this check before merge, and it is never reported as passed. Keep it visible past this session:
+   leave it stated in an existing `work.md`, or, when it would otherwise be lost, record it there
+   as `/devspark-implement` records any outcome that must survive. `/devspark-create-pr` carries it
+   into the PR's deployment status.
+6. **Route.** When all three hold, mark an existing `work.md` `**Status**: Complete` (as in
+   `/devspark-implement`'s work route) and recommend `/devspark-create-pr`, after the developer
+   commits anything still uncommitted. When code or tests are missing or failing, recommend
+   `/devspark-implement` for exactly that. When only an unresolved obligation remains, name it and
+   its authority: the developer obtains the evidence or the authority's decision and checks the
+   entry with a reference to it, as `/devspark-next`'s `resolve-obligation` describes; more
+   implementation does not clear it. Never recommend `/devspark-closeout` here, and
+   recommend Analyze or Critic only for a specific, named concern.

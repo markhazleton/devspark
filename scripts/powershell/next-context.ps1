@@ -83,7 +83,7 @@ if ($hasGit) {
 $specDir = Join-Path $repoRoot (".devspark.work/specs/" + $currentBranch)
 $specAmbiguous = $false
 $specAmbiguousMatches = ''
-if (-not (Test-Path (Join-Path $specDir 'spec.md')) -and $currentBranch -match '^(\d{3})-' -and -not (Test-Path (Join-Path $repoRoot ".devspark.work/quickfixes/$currentBranch.md"))) {
+if ($currentBranch -notmatch '^\d{3}-work-' -and -not (Test-Path (Join-Path $specDir 'spec.md')) -and $currentBranch -match '^(\d{3})-' -and -not (Test-Path (Join-Path $repoRoot ".devspark.work/quickfixes/$currentBranch.md"))) {
     $specPrefix = $matches[1]
     $specsRoot = Join-Path $repoRoot '.devspark.work/specs'
     $prefixDirs = @()
@@ -97,7 +97,8 @@ if (-not (Test-Path (Join-Path $specDir 'spec.md')) -and $currentBranch -match '
         $specAmbiguousMatches = (($prefixDirs | Select-Object -ExpandProperty Name) -join ', ')
     }
 }
-$specExists = (-not $specAmbiguous) -and (Test-Path (Join-Path $specDir "spec.md"))
+# A work branch is never a legacy bundle, even when its directory holds a file named spec.md.
+$specExists = (-not $specAmbiguous) -and ($currentBranch -notmatch '^\d{3}-work-') -and (Test-Path (Join-Path $specDir "spec.md"))
 $specFeature = if ($specExists) { Split-Path $specDir -Leaf } else { '' }
 
 # Spec authoring sub-state (plan -> tasks -> analyze -> critic -> implement -> verify)
@@ -234,7 +235,7 @@ if ($currentBranch -match '^QF-' -or $currentBranch -match '^\d{3}-fix-') {
     if ($quickfixExists) {
         try {
             $qf = Get-Content $quickfixRecord -Raw -ErrorAction SilentlyContinue
-            if ($qf -match '(?m)^\s*-\s*\*\*Completed\*\*:\s*\S') { $quickfixComplete = $true }
+            if ($qf -match '(?m)^[ \t]*-[ \t]*\*\*Completed\*\*:[ \t]*[^\s]') { $quickfixComplete = $true }
         } catch { $quickfixComplete = $false }
     }
 }
@@ -290,10 +291,60 @@ if (Test-Path $reviewDir) {
     }
 }
 
+# Work branches may carry a minimal resume note only when repository context is insufficient.
+$workBranch = $currentBranch -match '^\d{3}-work-'
+$workDir = Join-Path $repoRoot (".devspark.work/specs/" + $currentBranch)
+$workRecordPath = Join-Path $workDir 'work.md'
+$workRecordExists = $workBranch -and (Test-Path $workRecordPath -PathType Leaf)
+$workStatus = ''
+$workHasChanges = $dirty
+if ($workRecordExists) {
+    try {
+        $workText = Get-Content $workRecordPath -Raw -ErrorAction Stop
+        if ($workText -match '(?m)^\*\*Status\*\*:\s*([^<\r\n]+)') { $workStatus = $matches[1].Trim() }
+    } catch { $workRecordExists = $false }
+}
+# Same reading as next-context.sh and judge.py: case-insensitive comparison to "complete".
+$workComplete = $workRecordExists -and ($workStatus.ToLowerInvariant() -eq 'complete')
+if ($workBranch -and $hasGit) {
+    $targetRef = "origin/$defaultBranch"
+    git rev-parse --verify --quiet "refs/remotes/$targetRef" 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) { $targetRef = $defaultBranch }
+    $ahead = git rev-list --count "$targetRef..HEAD" 2>$null
+    if ($LASTEXITCODE -eq 0 -and $ahead -match '^\d+$' -and [int]$ahead -gt 0) { $workHasChanges = $true }
+}
+
+# judge.py lifecycle is the single evaluator of delivery blockers; next-context only reads its verdict.
+$lifecycleStatus = ''
+$lifecycleBlockers = @()
+$lifecycleMessage = ''
+$obligationOpen = $false
+$obligationMessage = ''
+if ($workBranch -and (Test-Path $workDir -PathType Container)) {
+    $lifecycleStatus = 'unavailable'
+    $lifecyclePy = Join-Path $PSScriptRoot '../judge.py'
+    if (Test-Path $lifecyclePy) {
+        foreach ($py in @('python3', 'python')) {
+            if (-not (Get-Command $py -ErrorAction SilentlyContinue)) { continue }
+            try {
+                $lifecycleData = ((& $py $lifecyclePy lifecycle --feature-dir $workDir 2>$null) -join "`n") | ConvertFrom-Json
+                if ($lifecycleData.status -in @('pass', 'fail')) {
+                    $lifecycleStatus = [string]$lifecycleData.status
+                    $lifecycleBlockers = [string[]]@($lifecycleData.failures | ForEach-Object { [string]$_.code })
+                    $lifecycleMessage = (@($lifecycleData.failures | ForEach-Object { [string]$_.message }) -join '; ')
+                    $obligationOpen = $lifecycleBlockers -contains 'required-obligation-unresolved'
+                    $obligationMessage = (@($lifecycleData.failures | Where-Object { $_.code -eq 'required-obligation-unresolved' } | ForEach-Object { [string]$_.message }) -join '; ')
+                    break
+                }
+            } catch { }
+        }
+    }
+}
+
 # ---- Recommendation ladder ----
 $recommended = "/devspark-specify"
 $state = "unknown"
-$reason = "Describe the work to /devspark-specify and it will route you."
+$reason = "Describe the work to /devspark-specify to start it on the one implementation path."
 
 if (-not $constitutionExists) {
     $recommended = "/devspark-constitution"
@@ -303,17 +354,22 @@ if (-not $constitutionExists) {
 elseif ($specAmbiguous) {
     $recommended = "resolve"
     $state = "ambiguous-spec"
-    $reason = "Branch '$currentBranch' matches more than one spec directory ($specAmbiguousMatches). Set DEVSPARK_FEATURE to the intended directory name, or remove the duplicate, then re-run /devspark.next."
+    $reason = "Branch '$currentBranch' matches more than one spec directory ($specAmbiguousMatches). Set DEVSPARK_FEATURE to the intended directory name, or remove the duplicate, then re-run /devspark-next."
 }
 elseif ($specExists -and ($judgeVerdict -eq "CONDITIONAL" -or $judgePendingDecisions -gt 0)) {
     $recommended = "/devspark-planning-review"
     $state = "review-needs-decision"
     $reason = "A human planning decision is pending. Answer it before remediation or implementation, then use /devspark-planning-review --judge-only to record the disposition."
 }
+elseif ($workBranch -and ((-not $workRecordExists -and ($dirty -or -not $workHasChanges)) -or ($workRecordExists -and -not $workComplete))) {
+    $recommended = "/devspark-implement"
+    $state = "work-in-progress"
+    $reason = if ($workRecordExists) { "Resume the active work from its saved outcome, decisions, blockers, and next action." } else { "Continue work on this branch. Recover intent from the request, Git changes, commits, tests, and current Knowledge; record only context that would otherwise be lost." }
+}
 elseif ($isDefaultBranch -and -not $specExists -and -not $quickfixExists) {
     $recommended = "/devspark-specify"
     $state = "no-active-work"
-    $reason = "You're on '$currentBranch' with no active spec or quickfix. Start with /devspark-specify (unsure of size) or /devspark-quickfix (small, contained fix)."
+    $reason = "You're on '$currentBranch' with no active work. Start with /devspark-specify to understand the request and begin implementation without choosing a workflow size."
 }
 elseif ($specExists -and $isFullSpec -and -not $planExists) {
     $recommended = "/devspark-plan"
@@ -405,12 +461,26 @@ elseif ($quickfixExists -and -not $quickfixComplete -and -not $prExists) {
 elseif ($dirty) {
     $recommended = "commit"
     $state = "uncommitted-changes"
-    $reason = "You have uncommitted changes on '$currentBranch'. Commit your work (then re-run /devspark.next). If this is a spec route mid-implementation, continue with /devspark-implement."
+    $reason = "You have uncommitted changes on '$currentBranch'. Commit your work (then re-run /devspark-next). If this is a spec route mid-implementation, continue with /devspark-implement."
+}
+elseif ($workBranch -and $lifecycleStatus -eq 'fail') {
+    $state = "delivery-blocked"
+    if ($obligationOpen) {
+        $recommended = "resolve-obligation"
+        $reason = "The work on '$currentBranch' is committed, but it is not ready for a PR: $lifecycleMessage. Obtain the satisfying evidence or the named authority's decision, check the entry in work.md with a reference to that evidence, then re-run /devspark-next."
+    }
+    else {
+        $recommended = "/devspark-implement"
+        $reason = "The work on '$currentBranch' is committed, but DevSpark's lifecycle check rejects delivery: $lifecycleMessage. Resolve these with /devspark-implement, then re-run /devspark-next."
+    }
 }
 elseif (-not $prExists) {
     $recommended = "/devspark-create-pr"
     $state = "ready-for-pr"
     $reason = "Work is committed on '$currentBranch' and no PR exists yet. Open one with /devspark-create-pr (it will publish the branch and let you optionally run /devspark-verify)."
+    if ($workBranch -and -not $workComplete) {
+        $reason = "Work is committed on '$currentBranch' and no PR exists yet, but a clean branch with commits is not proof the requested change is complete. Confirm the acceptance criteria, applicable verification, and any unresolved obligations, then open a PR with /devspark-create-pr."
+    }
 }
 elseif ($prExists -and -not $reviewFileExists) {
     $recommended = "/devspark-pr-review"
@@ -437,6 +507,19 @@ elseif ($reviewFileExists) {
 if ($pendingGatesStr -and $recommended -notmatch 'analyze|critic|checklist|verify|constitution|planning-review') {
     $reason = "$reason Open advisory gates still recommended before merge: $pendingGatesStr."
 }
+if ($obligationOpen -and $state -ne 'delivery-blocked') {
+    $reason = "$reason Delivery stays blocked until this is resolved: $obligationMessage."
+}
+elseif ($workBranch -and $lifecycleStatus -eq 'unavailable' -and $state -eq 'ready-for-pr') {
+    $reason = "$reason DevSpark could not run its lifecycle check here, so delivery readiness is unconfirmed, not passed."
+    $lifecycleNote = Join-Path $workDir 'work.md'
+    if ((Test-Path -LiteralPath $lifecycleNote -PathType Leaf) -and ((Get-Content -LiteralPath $lifecycleNote -Raw) -match '(?im)^##[ \t]+Required Obligations[ \t]*\r?$')) {
+        $reason = "$reason Because work.md declares Required Obligations, /devspark-create-pr will refuse until the check can run: make Python 3.11+ with PyYAML available as python3 or python, and confirm DevSpark's judge.py is installed."
+    }
+    else {
+        $reason = "$reason /devspark-create-pr runs that check before publishing."
+    }
+}
 
 $result = [ordered]@{
     REPO_ROOT           = $repoRoot
@@ -454,6 +537,13 @@ $result = [ordered]@{
     BRANCH_PUSHED       = $branchPushed
     BEHIND_TARGET       = $behindTarget
     SPEC_EXISTS         = $specExists
+    WORK_BRANCH         = [bool]$workBranch
+    WORK_RECORD_EXISTS  = [bool]$workRecordExists
+    WORK_STATUS         = $workStatus
+    WORK_COMPLETE       = [bool]$workComplete
+    WORK_HAS_CHANGES    = $workHasChanges
+    LIFECYCLE_STATUS    = $lifecycleStatus
+    LIFECYCLE_BLOCKERS  = [string[]]$lifecycleBlockers
     SPEC_FEATURE        = $specFeature
     SPEC_AMBIGUOUS      = $specAmbiguous
     IS_FULL_SPEC        = $isFullSpec
@@ -496,3 +586,5 @@ else {
     Write-Output "Recommended: $recommended"
     Write-Output "Reason: $reason"
 }
+# Report success explicitly: a lifecycle probe above leaves its own exit status in $LASTEXITCODE.
+exit 0

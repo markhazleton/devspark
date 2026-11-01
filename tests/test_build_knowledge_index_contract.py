@@ -25,7 +25,7 @@ def _entity(
     layers: tuple[str, ...] = ("architecture",),
     overrides: tuple[str, ...] = (),
     source_of_truth: tuple[str, ...] = ("README.md",),
-    last_verified: str = "2099-01-01",
+    last_verified: str | None = "2099-01-01",
 ) -> None:
     entity_dir = tmp_path / ".knowledge" / "entities" / entity_id
     entity_dir.mkdir(parents=True, exist_ok=True)
@@ -48,7 +48,7 @@ def _entity(
                     f"title: {entity_id} {layer}",
                     "source_of_truth:",
                     sources_yaml,
-                    f"last_verified: {last_verified}",
+                    *((f"last_verified: {last_verified}",) if last_verified else ()),
                     "---",
                     "",
                     f"# {entity_id} {layer}",
@@ -285,38 +285,34 @@ def test_removing_final_entity_regenerates_zero_state_coverage(tmp_path: Path) -
     assert coverage["gaps"] == []
 
 
-def test_check_fails_on_stale_coverage_after_final_entity_removed(tmp_path: Path) -> None:
+def test_check_ignores_stale_derived_coverage(tmp_path: Path) -> None:
     _entity(tmp_path, layers=("architecture",))
     assert _generate(tmp_path).returncode == 0
     stale = _coverage(tmp_path)
 
     shutil.rmtree(tmp_path / ".knowledge/entities/widget")
-    # Index regenerated, coverage left at its previous non-zero contents.
     assert _generate(tmp_path).returncode == 0
     (tmp_path / ".knowledge/ontology/coverage.json").write_text(
         json.dumps(stale, indent=2) + "\n", encoding="utf-8"
     )
 
     result = _check(tmp_path)
-    assert result.returncode == 1
-    assert "coverage.json is stale" in result.stderr.replace("\\", "/")
-
-
-def test_check_passes_once_zero_state_coverage_is_regenerated(tmp_path: Path) -> None:
-    _entity(tmp_path, layers=("architecture",))
-    assert _generate(tmp_path).returncode == 0
-    shutil.rmtree(tmp_path / ".knowledge/entities/widget")
-    assert _generate(tmp_path).returncode == 0
-
-    result = _check(tmp_path)
     assert result.returncode == 0, result.stderr
 
 
-def test_check_fails_when_coverage_is_missing_in_a_zero_entity_repo(tmp_path: Path) -> None:
+def test_check_passes_without_any_derived_files_and_writes_none(tmp_path: Path) -> None:
     _write_flat_doc_with_applies_to(tmp_path, "src/widget/**")
     result = _check(tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert not (tmp_path / ".knowledge/index.json").exists()
+    assert not (tmp_path / ".knowledge/ontology/coverage.json").exists()
+
+
+def test_check_still_fails_when_knowledge_cannot_be_built(tmp_path: Path) -> None:
+    _entity(tmp_path, layers=("architecture",))
+    (tmp_path / ".knowledge/entities/widget/_entity.yaml").unlink()
+    result = _check(tmp_path)
     assert result.returncode == 1
-    assert "coverage.json does not exist" in result.stderr.replace("\\", "/")
 
 
 def test_legacy_shim_still_works(tmp_path: Path) -> None:
@@ -369,6 +365,23 @@ def test_current_last_verified_reports_no_staleness(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["stale_entities"] == []
     assert "STALE:" not in result.stderr
+
+
+def test_missing_last_verified_builds_and_is_never_stale(tmp_path: Path) -> None:
+    _entity(tmp_path, last_verified=None)
+    _init_git_repo_with_commit(tmp_path)
+    result = _run(tmp_path)
+    assert result.returncode == 0, result.stderr
+    index = json.loads(result.stdout)
+    assert index["stale_entities"] == []
+    assert _check(tmp_path).returncode == 0
+
+
+def test_invalid_last_verified_still_fails_when_present(tmp_path: Path) -> None:
+    _entity(tmp_path, last_verified="not-a-date")
+    result = _run(tmp_path)
+    assert result.returncode != 0
+    assert "ISO date" in result.stderr
 
 
 def test_fail_on_stale_flag_makes_staleness_blocking(tmp_path: Path) -> None:

@@ -480,13 +480,12 @@ Update, Repair, or Already Current. It is never skipped and never gated behind t
 banner. It is cheap to re-run: if nothing has changed since the last run, it reports that and moves
 on.
 
-Run `python .devspark/scripts/build_knowledge_index.py --repo-root . --check`. If it passes with
-no drift, report "`.knowledge/` index is current" and continue to Step 12. Otherwise, run
-`python .devspark/scripts/build_knowledge_index.py --repo-root .` to regenerate
-`.knowledge/index.json` and `.knowledge/ontology/coverage.json`, resolve every reported gap
-(missing layer docs, unresolved `relations[].object` references, missing
-`constrains`/`constrained_by` reciprocity, a `source_of_truth` path that doesn't exist), and
-report a one-line summary of what was regenerated.
+Run `python .devspark/scripts/build_knowledge_index.py --repo-root . --check`. If it passes, report
+"`.knowledge/` builds" and continue to Step 12. Otherwise, resolve every reported error (missing
+layer docs, unresolved `relations[].object` references, missing `constrains`/`constrained_by`
+reciprocity, a `source_of_truth` path that doesn't exist), re-run `--check`, and report a one-line
+summary of what was fixed. `.knowledge/index.json` and `.knowledge/ontology/coverage.json` are
+optional build output: never regenerate or commit them just to satisfy this step.
 
 `.devspark/scripts/build_knowledge_index.py` is the one authoritative implementation — every
 entry point (this step, CI, `/devspark-explain`, `site-audit`, `release`) resolves to it. If a

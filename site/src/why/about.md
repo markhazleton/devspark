@@ -1,11 +1,10 @@
 # About, Architecture and Controls
 
-DevSpark is an internally developed, optional engineering toolkit maintained in the DevSpark
-development environment. It combines reusable skills, versioned Markdown instructions, templates,
+DevSpark is an open-source, optional engineering toolkit maintained by Make Bold Solutions. It combines reusable skills, versioned Markdown instructions, templates,
 and helper scripts used with an AI coding assistant. Its purpose is to help developers create and
 assess trustworthy software changes—not to require one prescribed specification-first sequence.
 
-DevSpark is not a program, subscription, or mandated DevSpark-wide standard. Adoption is voluntary per
+DevSpark is not a program, subscription, or mandated organization-wide standard. Adoption is voluntary per
 repository; repositories that do not adopt it are unaffected.
 
 ## Current status
@@ -74,12 +73,12 @@ Framework upgrades own `.devspark/`, not the repository's Knowledge, work produc
 
 ## Data handling
 
-The website distributes methodology documentation and framework artifacts; it does not host DevSpark
+The website distributes methodology documentation and framework artifacts; it does not host
 application source or business data. DevSpark itself does not transmit repository content.
 The AI assistant selected by the developer processes context according to its own enterprise
 configuration and approved usage.
 
-Existing DevSpark restrictions still govern what may be submitted to an AI assistant. Do not place
+Existing organizational restrictions still govern what may be submitted to an AI assistant. Do not place
 secrets, credentials, or protected data in specifications, Knowledge, or prompts.
 
 ## Assurance and existing controls
@@ -94,7 +93,7 @@ approval. A second AI model can offer independent reasoning, but it does not rep
 real-world observations when those are required.
 
 Some controls are expressed as prompt instructions and are not automatically enforced by the
-hosting platform. A contributor may bypass optional DevSpark commands; applicable repository CI
+hosting platform. A contributor may bypass optional DevSpark skills; applicable repository CI
 and branch policies are what technically prevent a merge. DevSpark does not auto-approve,
 auto-merge, or auto-deploy.
 
@@ -118,14 +117,14 @@ internally; developers use AI coding assistants under their existing approved ar
 </details>
 
 <details>
-<summary>What if the maintainer leaves DevSpark?</summary>
+<summary>What if the maintainer steps away?</summary>
 
-The source repository is DevSpark-owned. Installed files remain local to their consuming repositories
+The source repository is public on GitHub. Installed files remain local to their consuming repositories
 and do not depend on the maintainer's continued availability.
 </details>
 
 <details>
-<summary>Does adoption create a service dependency DevSpark does not control?</summary>
+<summary>Does adoption create a service dependency you do not control?</summary>
 
 No DevSpark service must remain available for the installed instructions and scripts to run.
 The chosen AI assistant and existing toolchain retain their own dependencies and controls.

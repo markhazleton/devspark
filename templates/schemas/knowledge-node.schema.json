@@ -172,7 +172,7 @@
     },
     {
       "if": { "properties": { "type": { "const": "entity-layer" } }, "required": ["type"] },
-      "then": { "required": ["layer", "source_of_truth", "last_verified"] }
+      "then": { "required": ["layer", "source_of_truth"] }
     },
     {
       "if": { "properties": { "type": { "const": "governance-decision" } }, "required": ["type"] },

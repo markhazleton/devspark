@@ -60,8 +60,8 @@ command -> adapter -> skill -> context scripts -> agent reasoning -> artifact
 ```
 
 - **Slash-commands** (`templates/commands/`) own DevSpark-specific lifecycle behavior:
-  route classification, branch creation, multi-app scoping, artifact placement, and
-  gate enforcement.
+  universal work start/resume, safe branch creation, multi-app scoping, optional artifact placement,
+  and legacy v9.3 gate routing.
 - **Agent Skills** (`templates/skills/`) own portable capability instructions that
   run in any skills-compatible client without DevSpark installed.
 
@@ -89,7 +89,7 @@ DevSpark's core spec-driven flow runs entirely as slash commands — no install,
 
 See [.knowledge/tooling/developer-guide.md](.knowledge/tooling/developer-guide.md) and the command tables below for the full command set.
 
-For one-off work outside a workflow, use `/devspark-specify`. It classifies the request as a one-off fix, a quick spec, a full spec, or specialized intents (`refactor`, `prompt-change`), explains the recommendation, and lets the human confirm the route before proceeding.
+For new work, use `/devspark-specify` (or `/devspark-next` to resume). It establishes the intended outcome and first useful increment, then starts the same implementation path without a Light/Full choice or mandatory planning bundle. A brief `work.md` resume note is created only when material context would otherwise be lost. Active v9.3 specifications continue on their existing route.
 
 **Agent Quickstart** (the only supported install/upgrade path)
 
@@ -140,7 +140,7 @@ This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrad
 | `/devspark-specify` | Define what you want to build (requirements & user stories) |
 | `/devspark-plan` | Create a technical implementation plan |
 | `/devspark-tasks` | Break the plan into actionable task lists |
-| `/devspark-implement` | Update code, tests, and current knowledge; verify; populate code/knowledge linkage so the delta stays validate-able in `.devspark.work/` |
+| `/devspark-implement` | Update code, tests, and current knowledge; verify; record test evidence so the delta stays validate-able in `.devspark.work/` |
 | `/devspark-create-pr` | Draft or update a pull request from the durable delta |
 | `/devspark-update-pr` | Refresh an existing pull request description from the current branch delta |
 
@@ -177,7 +177,7 @@ This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrad
 | `/devspark-upgrade` | Pull latest DevSpark prompts into your project |
 
 `/devspark-release` is the sole command that sweeps `.devspark.work/` retention and archives
-completed, linkage-verified work into `.archive/{YYYY-MM-DD}/`. It runs the `release-archive` script
+completed work into `.archive/{YYYY-MM-DD}/`. It runs the `release-archive` script
 (`plan`, `apply`, `validate`): moves are journaled in a manifest, never overwrite archived files,
 stay resumable, and anything ambiguous is reported for a decision instead of moved.
 

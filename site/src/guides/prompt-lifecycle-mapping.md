@@ -24,28 +24,42 @@ change the user-facing skill names. Directory and file names, including `.devspa
 
 ## At a glance
 
-### Everyday workflow
+### Normal path
+
+Understand, implement and verify, deliver. These are the only skills a typical change needs.
 
 | Skill | Use it to |
 |---|---|
+| `/devspark-specify` | Understand new work and start the single implementation path |
 | `/devspark-next` | Detect where you are and run the single next step |
-| `/devspark-specify` | Start a change; recommends a route and asks you to confirm |
-| `/devspark-quickfix` | Fix a small, contained problem with a lightweight record |
-| `/devspark-clarify`, `/devspark-plan`, `/devspark-tasks` | Refine the spec, design the approach, and break it into tasks |
-| `/devspark-planning-review` | Check a plan before coding: [Planning Review](planning-review.md) |
 | `/devspark-implement` | Change code, tests, and current knowledge together |
 | `/devspark-verify` | Produce proof and close out the work |
-| `/devspark-create-pr`, `/devspark-update-pr`, `/devspark-pr-review`, `/devspark-address-pr-review` | Open, refresh, review, and fix a PR: [Review and Audit](review-and-audit.md) |
+| `/devspark-create-pr`, `/devspark-pr-review`, `/devspark-address-pr-review` | Open, review, and fix a PR: [Review and Audit](review-and-audit.md) |
 | `/devspark-release` | Seal the release and archive finished planning work |
 
-### Planning assurance (usually run through `/devspark-planning-review`)
+### Optional when justified
+
+Use one of these only when a specific uncertainty, coordination need, or risk earns it. None is a stage, and none triggers another.
 
 | Skill | Use it to |
 |---|---|
-| `/devspark-analyze` | Prove the planning artifacts are consistent and that referenced knowledge resolves |
-| `/devspark-critic` | Challenge whether a sound plan is wrong about the real system |
-| `/devspark-checklist` | Test whether the written requirements are clear and complete |
+| `/devspark-plan` | Record a material design or contract decision |
+| `/devspark-tasks` | Coordinate dependencies, parallel ownership, or work that spans sessions |
+| `/devspark-critic` | Challenge one named concern about the real system |
+| `/devspark-analyze` | Check one named consistency or knowledge-reference concern |
+| `/devspark-quickfix` | Keep a WHAT/WHY/HOW record for a defect you have already diagnosed |
+| `/devspark-update-pr` | Refresh an open PR description after more commits |
 | `/devspark-closeout` | Re-decide completion without re-running verification (advanced; `/devspark-verify` normally does this) |
+
+### Existing v9.3 specifications
+
+These keep their recorded behavior for a specification bundle created before v9.4. On a work branch they never create a specification or a gate document.
+
+| Skill | Use it to |
+|---|---|
+| `/devspark-clarify` | Resolve underspecified areas in an existing `spec.md`; on a work branch, ask the material questions in conversation |
+| `/devspark-checklist` | Test whether the written requirements are clear and complete; on a work branch, answer one named concern in conversation |
+| `/devspark-planning-review` | Run the planning gate on an existing full specification; on a work branch, Judge runs only for a genuine conflict: [Planning Review](planning-review.md) |
 
 ### Knowledge and governance
 
@@ -75,30 +89,30 @@ single-app repository that does not turn them on.
 
 DevSpark 9.0 invokes every skill with its full hyphenated slash command, exactly as shown, for example `/devspark-specify`, `/devspark-clarify`, or `/devspark-plan`. GitHub Copilot installs each one as a native Agent Skill (`.github/skills/devspark-<command>/SKILL.md`); other agents install entry points with the same hyphenated names in their own platform directories. Short names and the retired 8.x dotted form are not aliases. See [Upgrading from 8.x](../get-started/upgrade.md#upgrading-from-8x).
 
-Only the invocation format changes. The specification-driven lifecycle and its stages and outcomes remain the same.
+New work follows one start/resume path; existing v9.3 specification bundles retain their recorded stages and obligations.
 
 ## Lifecycle detail
 
 Each skill grouped by lifecycle phase, with what the lifecycle requires of its purpose beyond its
 one-line description.
 
-## Plan & build — produces the ephemeral spec package
+## Universal start and existing planning capabilities
 
 | Skill | Current behavior |
 |---|---|
-| `/devspark-specify` | The artifact it creates is explicitly ephemeral from creation — nothing it writes should assume it will exist after `/devspark-implement` completes. Also does a cheap "Early Knowledge Grounding" check against `.knowledge/` before drafting — surfacing an obvious contradiction here is strictly best-effort and never a gate; `/devspark-analyze`'s `context_resolved` validation remains the authoritative check. |
-| `/devspark-clarify` | Answers get encoded into the spec, applied to every element they affect, and confirmed invariants, constraints and accepted limitations are recorded in the existing sections. The spec still dies with the rest of the package. |
-| `/devspark-plan` | Reads the spec by purpose: only requirements and success criteria authorize work, constraints shape the design, and context informs it without generating tasks. Runs the bounded knowledge traversal and pins the result down as `context_resolved` in the spec package. Projection reaches a maximum of **2 hops** from the lexical seeds and stops earlier when nothing further can materially affect the delta — this is the phase where retrieval complexity gets worked out so `/devspark-implement` never has to. Flat documents, entities, entity layers, and decisions are all first-class entries. Research is question-driven: `research.md`, `data-model.md`, `contracts/` and `quickstart.md` exist only when the change needs them, and running `/devspark-plan` again on an existing Plan revises it in place and never overwrites it (a reset must be requested explicitly); before Planning Review the re-run also reconciles the draft plan with the current spec and records the spec fingerprint it read. |
-| `/devspark-tasks` | Every generated task carries empty `code_ref` / `knowledge_ref` placeholders from the start. `/devspark-tasks` sets up the linkage contract that `/devspark-implement` fills and verify-before-archive later checks. Tasks only operationalizes the Plan: each task cites a forcing source (a requirement, a Plan decision, a verification or constitution obligation, a Knowledge ownership update, or approved Judge remediation), and a task that would add a mechanism the Plan lacks stops as a `PLANNING GAP` routed back to Plan instead of inventing it. |
+| `/devspark-specify` | Starts new work without route classification or a planning bundle. It establishes the outcome, inspects relevant code/tests/Knowledge, performs lightweight assurance discovery, offers work-item grounding only for a developer-named item when tracking is configured, and creates a `work` branch with no file by default. A minimal `work.md` exists only when needed to preserve material context across sessions. DevSpark no longer creates new full-spec or quick-spec bundles; existing bundles continue. |
+| `/devspark-clarify` | Retained for existing v9.3 specifications. On a work branch it asks at most five material questions in conversation, creates no `spec.md`, and records an answer in `work.md` only when it must survive the session. |
+| `/devspark-plan` | Retained for active v9.3 bundles and available on request when a material design or contract decision needs a durable record. Not a new-work prerequisite. |
+| `/devspark-tasks` | Retained for active v9.3 bundles and optional coordination where dependencies or parallel ownership justify a task list. |
 | `/devspark-analyze` | Validates that every id and relation named in `context_resolved` actually resolves against the current knowledge corpus — flat documents, entities, entity layers, and decisions alike. Mechanical, hard-stop — a stale or hallucinated reference fails outright. It also reports a Plan whose mechanism contradicts a decision or declared behavior recorded in the spec, without proposing a redesign. |
-| `/devspark-critic` | Judges whether `context_resolved` is *sufficient* for the delta being planned — not whether it resolves (analyze's job), but whether something the spec obviously touches was never resolved at all. Judges coverage, never which kinds appear. Judgment-based, not a hard stop. |
-| `/devspark-checklist` | Unchanged — an ephemeral planning aid, same lifecycle as the rest of the package. |
-| `/devspark-planning-review` | The normal developer-facing assurance step. Resolves the feature once and hands that identity to every child, runs `/devspark-analyze` always and `/devspark-critic` when a change-shape signal applies, then Judge, and returns one planning decision (`PROCEED` / `CONDITIONAL` / `STOP`) instead of two reports. Judge does not discover — every concern cites an existing child finding — and does not remediate: it writes only `gates/judge.md`, enforced by a read-only guard. Staleness blocks only when it invalidates the evidence for a blocking decision: completing tasks, changing status, appending notes or adding verification evidence never does, while a change to a requirement, the design or the task scope does. A `STOP` is recovered through the owner of the correction: plan-shaped corrections go to `/devspark-plan` in revise mode, then `/devspark-tasks` re-projects, then a focused review runs; task-shaped corrections go to `/devspark-tasks`. |
-| `/devspark-quickfix` | Bypasses the full spec, but still populates a minimal `context_resolved` and task-level `code_ref`/`knowledge_ref` for whatever it touches — "lightweight" means less ceremony, not exemption from the linkage that makes verify-before-archive possible. It skips analyze/critic entirely rather than running a lightened version of either. |
+| `/devspark-critic` | Judges whether `context_resolved` is *sufficient* for the delta being planned — not whether it resolves (analyze's job), but whether something the spec obviously touches was never resolved at all. Judges coverage, never which kinds appear. Also flags a proposed new mechanism when a closer existing implementation would do. Judgment-based, not a hard stop. |
+| `/devspark-checklist` | An ephemeral planning aid for existing v9.3 specifications. On a work branch it writes no checklist file and no gate document; it answers one named concern in conversation. |
+| `/devspark-planning-review` | Retained for active v9.3 bundles or invoked for a specific planning concern. Not a default pre-implementation sequence for new work; existing Judge and freshness behavior is unchanged. |
+| `/devspark-quickfix` | Retained as a direct legacy entry point. `/devspark-next` no longer asks developers to choose it over Specify. |
 
 ### Planning Review in one place
 
-The developer path is `/devspark-specify` → `/devspark-plan` → `/devspark-tasks` → `/devspark-planning-review` → `/devspark-implement` → `/devspark-verify` → `/devspark-create-pr` → `/devspark-pr-review`. Closeout runs inside `/devspark-verify`. Internally, `/devspark-planning-review` runs `/devspark-analyze` + conditional `/devspark-critic` + Judge. Four terms stay separate:
+New work follows `/devspark-specify` → `/devspark-implement` ↔ focused verification → `/devspark-create-pr` → `/devspark-pr-review`. Existing v9.3 bundles retain `/devspark-plan` → `/devspark-tasks` → `/devspark-planning-review` → `/devspark-implement` and all recorded obligations. Closeout remains inside `/devspark-verify`. Judge does not discover or remediate; each adjudicated concern still cites its existing child finding. Four finding terms stay separate:
 
 | Term | Meaning |
 |---|---|
@@ -127,15 +141,15 @@ Tests are a durable pillar beside code and knowledge: every behavior change cons
 
 | Skill | Current behavior |
 |---|---|
-| `/devspark-implement` | Carries the heaviest discipline: (1) consumes `context_resolved` as already-resolved context and takes at most **one additional hop** itself — escalation past that hop is logged and attributable, not silent; (2) updates code and knowledge together in one pass, preferring test evidence over code-only evidence, recording `test_attempted`/`fallback_reason` when it falls back; (3) populates `code_ref`/`knowledge_ref` on every task as it completes it; (4) never writes a spec, task, or plan identifier into code, tests, or `.knowledge/`; (5) never archives the spec package itself — it stays live under `.devspark.work/` with its linkage populated so `/devspark-release` can later verify and archive it. |
+| `/devspark-implement` | Carries the heaviest discipline: (1) consumes `context_resolved` as already-resolved context and takes at most **one additional hop** itself — escalation past that hop is logged and attributable, not silent; (2) updates code and knowledge together in one pass, preferring test evidence over code-only evidence, recording `test_attempted`/`fallback_reason` when it falls back; (3) records each test run so later review can reuse valid evidence instead of re-running it; (4) never writes a spec, task, or plan identifier into code, tests, or `.knowledge/`; (5) never archives the spec package itself — it stays live under `.devspark.work/` so `/devspark-release` can later archive it once it is marked `Complete`. |
 
 ## Validation — carries assimilation forward, enforces the permanent record
 
 | Skill | Current behavior |
 |---|---|
-| `/devspark-pr-review` | The primary assimilation trigger — nothing merges without it. §6 (Durable Delta Consistency) is a strong, ID-tracked blocking gate: `PRD1` code/knowledge contradiction, `PRD2` unsupported knowledge claim introduced by the diff, `PRD3` insufficient test depth, `PRD4` planning-identifier leak, `PRD5` knowledge completeness (significant new/changed behavior touching no `.knowledge/` node at all). Named `PRD` rather than reusing site-audit's `DELTA`/`KNOW` prefixes, since the two skills check the same class of thing at different scope and should never be ambiguous read side by side. §6c separately runs the knowledge-index generator against the diff's touched entities, gates on gap-report failures for those entities, and surfaces — as non-blocking warnings — missing `fallback_reason` entries and contradiction candidates among graph-adjacent objects touched by the diff. |
+| `/devspark-pr-review` | The primary assimilation trigger — nothing merges without it. §6 (Durable Delta Consistency) is a strong, ID-tracked blocking gate: `PRD1` code/knowledge contradiction, `PRD2` unsupported knowledge claim introduced by the diff, `PRD3` insufficient test depth, `PRD4` planning-identifier leak, `PRD5` knowledge completeness (significant new/changed behavior touching no `.knowledge/` node at all). Named `PRD` rather than reusing site-audit's `DELTA`/`KNOW` prefixes, since the two skills check the same class of thing at different scope and should never be ambiguous read side by side. §6c judges the diff's touched entities from content at the PR head commit — a missing required layer doc or a `source_of_truth` that points nowhere blocks — never regenerates Knowledge and never judges derived index files, and surfaces as non-blocking warnings missing `fallback_reason` entries and contradiction candidates among graph-adjacent objects touched by the diff. Testing validation is evidence-first: it reuses a valid Test Evidence Record and runs tests itself only on a named trigger (no valid record, high-risk delta with author-only evidence, a repository policy, or behavior the evidence did not exercise). |
 | `/devspark-address-pr-review` | Unchanged in mechanism (commit isolation between fixes and review-file updates), but fixes remain subject to rule 1 — a fix that patches code must not introduce a spec/task reference to explain what review comment it addresses. Under `--auto` it selects only open critical/high or blocking PR-delta findings; ordinary Medium/Low findings are reported, constitution findings route to `/devspark-evolve-constitution`, and a suggested fix is evidence, so anything beyond the approved Plan's shape stops for explicit authority. |
-| `/devspark-create-pr`, `/devspark-update-pr` | Surface evidence and linkage status in the PR description itself — which tasks have populated `code_ref`/`knowledge_ref`, which evidence entries are test- vs. code-verified — so a human reviewer sees the checklist state without digging for it. |
+| `/devspark-create-pr`, `/devspark-update-pr` | Surface evidence and readiness in the PR description itself — the test evidence record (or why none applies) and the Knowledge readiness result (`ready`, `not-applicable`, `unknown` or `blocked`) — so a human reviewer sees the checklist state without digging for it. |
 | `/devspark-verify` | The evidence mechanism's engine. Its purpose — produce empirical proof-of-change evidence for declared verification modes, not document review — is the `verified_by: execution` discipline in practice: it runs cited tests and produces the pass/fail result written into a knowledge object's or decision's evidence entry. Records a `test_ref: <path>::<test name>` pointer alongside any mode passed via a named test — the citable reference `/devspark-implement` needs, captured where the proof actually ran. Selects its verification modes from the shape of the change rather than applying one fixed depth, and states which shapes it matched. |
 | `/devspark-closeout` | Decides whether the route is finished, and runs automatically inside `/devspark-verify` — it is an optional, advanced re-entry point, not a normal-path step. Applies the convergence rule: a spec completes when its stated objective is resolved and every remaining finding is classified, not when every observation generated along the way has been eliminated. Classifies each open finding as Blocking Defect, Accepted Limitation, Deferred Work, or Learning / Changed Assumption — only the first creates mandatory work inside the active route, and an unclassified finding is itself blocking. Reads each acceptance criterion by its declared kind (`requirement`, `invariant`, `hypothesis`, `target`; undeclared reads as `requirement`), so a disproven hypothesis records as a result rather than a defect — while a failed requirement or violated invariant can never be relabelled into a softer kind once the evidence is in. |
 | `/devspark-site-audit` | Repo-wide, not diff-scoped. Runs the accuracy pass (resolve every `execution`-type evidence entry and re-run its test — existence and accuracy are separate reports) and the contradiction scan, scoped to graph-adjacent objects (same entity, entities sharing a `constrains` decision, objects citing the same evidence) rather than brute-force comparison. Contradiction findings are warnings for human review, always — never a gate. **Also the repo-wide knowledge-completeness owner**: runs `build_knowledge_index.py --check` (stale index/coverage is `KNOW1`), reads the full `ontology/coverage.json` for every entity (`KNOW2`), confirms every `appliesTo`/`source_of_truth` path still exists (`KNOW3` — the knowledge/code mapping-accuracy check), resolves every `relations[].object` and `constrains`/`constrained_by` pair (`KNOW4`), and cross-checks `taxonomy-registry.json` plus central-module coverage (`KNOW5`/`KNOW6`) — the repo-wide counterpart to pr-review's diff-scoped §6c gate. |
@@ -149,7 +163,7 @@ Tests are a durable pillar beside code and knowledge: every behavior change cons
 | `/devspark-constitution` | The constitution is one of three current-truth categories, not documentation, and dependent templates being kept "in sync" includes the `.knowledge/governance/decisions/` contract, not just prose templates. |
 | `/devspark-discover-constitution` | Unchanged in mechanism — discovering implicit patterns is a different activity than maintaining the current-truth categories. |
 | `/devspark-evolve-constitution` | A constitution amendment that contradicts an existing current decision must trigger updating that decision in place, not leaving two governance documents making incompatible claims — the same one-current-file-per-topic rule extended to the constitution/decision boundary. |
-| `/devspark-release` | Confirms, before sealing, that every spec included in the release completed verify-before-archive (task linkage populated) — release is a natural second checkpoint for the same guarantee pr-review already checked once. Also requires a current site-audit knowledge-completeness result (`KNOW1`–`KNOW6` clean) for the window, the same checkpoint pattern applied to the knowledge model itself. |
+| `/devspark-release` | Archives only bundles marked `Complete` and leaves in-flight ones where they are; legacy `code_ref`/`knowledge_ref` fields are ignored. Also requires a current site-audit knowledge result (`KNOW1`–`KNOW6` clean) for the window, and that the `.knowledge/` tree builds (`KNOWLEDGE_BUILDS`). |
 | `/devspark-commit-audit`, `/devspark-repo-story` | Read Git history, not the repo's current-truth layer — naturally exempt from current-truth-only, since Git is explicitly where history is supposed to live. |
 | `/devspark-upgrade` | A framework-version concern, orthogonal to the knowledge model. Mentions `/devspark-migrate-knowledge-entities` as an optional follow-up after a four-root migration, since that migration only moves directories and never touches document content. |
 

@@ -107,52 +107,11 @@ def _validate_template_fallback() -> None:
     ):
         assert token in common, f"template resolver missing fallback path {token!r}"
 
-    ps_create = _read("scripts/powershell/create-new-feature.ps1")
-    bash_create = _read("scripts/bash/create-new-feature.sh")
     ps_plan = _read("scripts/powershell/setup-plan.ps1")
     bash_plan = _read("scripts/bash/setup-plan.sh")
-    ps_new_branch = _read("scripts/powershell/new-branch.ps1")
-    bash_new_branch = _read("scripts/bash/new-branch.sh")
 
-    # create-new-feature.* is now a thin shim that delegates spec.md
-    # scaffolding to new-branch.*, which is where the override -> installed ->
-    # source template-fallback chain actually runs.
-    assert "Resolve-TemplatePath -RepoRoot $repoRoot -TemplateName $templateName" in ps_new_branch
-    assert 'resolve_template_path "$REPO_ROOT" "$TEMPLATE_NAME"' in bash_new_branch
     assert "Resolve-TemplatePath -RepoRoot $paths.REPO_ROOT -TemplateName 'plan-template.md'" in ps_plan
     assert 'resolve_template_path "$REPO_ROOT" "plan-template.md"' in bash_plan
-    assert '"$SCRIPT_DIR/new-branch.ps1"' in ps_create or 'new-branch.ps1' in ps_create
-    assert 'new-branch.sh' in bash_create
-
-
-def _validate_branch_failfast() -> None:
-    ps_create = _read("scripts/powershell/create-new-feature.ps1")
-    bash_create = _read("scripts/bash/create-new-feature.sh")
-
-    # create-new-feature.ps1 delegates branch creation to new-branch.ps1 and
-    # must fail fast (propagating its exit code) rather than writing a spec
-    # after a failed branch creation.
-    assert "if ($exitCode -ne 0) {" in ps_create, "PowerShell create-new-feature missing exit-code check"
-    assert "exit $exitCode" in ps_create
-
-    # Bash must exit non-zero when branch creation fails (unified-delegation
-    # path and the legacy multi-app fallback path both fail closed).
-    assert "Aborting before writing spec" in bash_create
-    assert "exit 1" in bash_create
-    assert "NEW_BRANCH_EXIT" in bash_create and "exit $NEW_BRANCH_EXIT" in bash_create
-
-
-def _validate_metric_accuracy() -> None:
-    ps_create = _read("scripts/powershell/create-new-feature.ps1")
-    bash_create = _read("scripts/bash/create-new-feature.sh")
-
-    # The script must not fabricate a route classification it cannot know.
-    assert "classification = 'full-spec'" not in ps_create, (
-        "PowerShell create-new-feature must not hardcode classification metric"
-    )
-    assert '"classification":"full-spec"' not in bash_create, (
-        "bash create-new-feature must not hardcode classification metric"
-    )
 
 
 def test_rationale_and_task_artifacts_do_not_copy_upstream_prose() -> None:
@@ -182,13 +141,13 @@ def test_rationale_and_task_artifacts_do_not_copy_upstream_prose() -> None:
 
 
 def test_authoring_rechecks_changed_requirements_against_complete_constitution_clauses() -> None:
-    specify = _read("templates/commands/specify.md")
+    specify = _flat(_read("templates/commands/specify.md"))
     clarify = _read("templates/commands/clarify.md")
 
     assert "When introducing or materially changing a requirement" in specify
     assert "complete applicable MUST/SHOULD text, including scope and embedded exceptions" in specify
     assert "Recheck changed requirements only, not settled unchanged content" in specify
-    assert "surface it for owner resolution before marking the spec ready or handing off to Plan" in specify
+    assert "resolve a conflict with its owner before proceeding with the affected behavior" in specify
 
     assert "When an accepted answer materially changes a requirement" in clarify
     assert "complete applicable MUST/SHOULD text, including embedded scope and exceptions" in clarify
@@ -248,6 +207,82 @@ def test_setup_plan_preserves_bytes_until_explicit_reset(tmp_path, shell, existi
     assert plan.read_bytes() == preserved
     assert invoke(reset=True)["PLAN_MODE"] == "reset"
     assert plan.read_bytes() == template.read_bytes()
+
+
+def _setup_plan_command(shell: str) -> list[str]:
+    executable = shutil.which("pwsh") if shell == "pwsh" else (
+        "C:/Program Files/Git/bin/bash.exe" if os.name == "nt" else shutil.which("bash")
+    )
+    if not executable or not Path(executable).exists():
+        pytest.skip(f"{shell} unavailable")
+    script = ROOT / "scripts" / ("powershell/setup-plan.ps1" if shell == "pwsh" else "bash/setup-plan.sh")
+    return [executable, "-NoProfile", "-File", str(script), "-Json"] if shell == "pwsh" else [executable, str(script), "--json"]
+
+
+def _work_branch_repo(tmp_path: Path) -> Path:
+    repo = tmp_path / "repo"
+    (repo / "templates").mkdir(parents=True)
+    (repo / "templates/plan-template.md").write_bytes(b"# Template\n")
+    subprocess.run(["git", "init", "-q", "-b", "003-work-sample", str(repo)], check=True, timeout=15, stdin=subprocess.DEVNULL)
+    # Work branches are created from an existing commit; an unborn HEAD has no branch to resolve.
+    subprocess.run(["git", "-c", "user.email=t@example.com", "-c", "user.name=T", "commit", "-q", "--allow-empty", "-m", "x"],
+                   cwd=repo, check=True, timeout=15, stdin=subprocess.DEVNULL)
+    return repo
+
+
+@pytest.mark.parametrize("shell", ["pwsh", "bash"])
+@pytest.mark.parametrize("note", [False, True])
+def test_setup_plan_on_a_work_branch_needs_no_specification(tmp_path, shell, note):
+    command = _setup_plan_command(shell)
+    repo = _work_branch_repo(tmp_path)
+    feature = repo / ".devspark.work/specs/003-work-sample"
+    if note:
+        feature.mkdir(parents=True)
+        (feature / "work.md").write_text("# Work\n\n**Status**: In Progress\n", encoding="utf-8")
+    env = {k: v for k, v in os.environ.items() if k != "DEVSPARK_FEATURE"}
+
+    def invoke(*extra: str) -> dict:
+        result = subprocess.run(command + list(extra), cwd=repo, env=env, capture_output=True, text=True,
+                                check=True, timeout=20, stdin=subprocess.DEVNULL)
+        return json.loads(result.stdout[result.stdout.index("{"):])
+
+    first = invoke()
+
+    assert first["WORK_BRANCH"] is True
+    assert first["FEATURE_SPEC"] == ""
+    assert (first["WORK_NOTE"] != "") is note
+    if note:
+        assert first["WORK_NOTE"].replace("\\", "/").endswith(".devspark.work/specs/003-work-sample/work.md")
+    assert first["PLAN_EXISTS"] is False and first["PLAN_MODE"] == "create"
+    assert Path(first["IMPL_PLAN"]).name == "plan.md"
+    # Planning is optional: setup creates no plan, spec, task list or knowledge document.
+    assert sorted(path.name for path in feature.iterdir()) == (["work.md"] if note else [])
+
+    authored = b"# Plan\r\n\r\n## Decisions\r\nKeep this.\r\n"
+    (feature / "plan.md").write_bytes(authored)
+    assert invoke()["PLAN_MODE"] == "revise"
+    assert invoke("-Reset" if shell == "pwsh" else "--reset")["PLAN_MODE"] == "reset"
+    # The full-spec template never replaces a work-branch plan; the agent revises it on request.
+    assert (feature / "plan.md").read_bytes() == authored
+
+
+@pytest.mark.parametrize("shell", ["pwsh", "bash"])
+def test_setup_plan_reports_legacy_bundles_as_non_work_branches(tmp_path, shell):
+    command = _setup_plan_command(shell)
+    repo = tmp_path / "repo"
+    shutil.copytree(_get_template_base(), repo)
+    spec = repo / ".devspark.work/specs/001-synthetic/spec.md"
+    spec.write_text("# Spec\n", encoding="utf-8")
+    env = {**os.environ, "DEVSPARK_FEATURE": "001-synthetic"}
+
+    result = subprocess.run(command, cwd=repo, env=env, capture_output=True, text=True, check=True,
+                            timeout=20, stdin=subprocess.DEVNULL)
+    payload = json.loads(result.stdout[result.stdout.index("{"):])
+
+    assert payload["WORK_BRANCH"] is False
+    assert payload["WORK_NOTE"] == ""
+    assert payload["FEATURE_SPEC"].replace("\\", "/").endswith(".devspark.work/specs/001-synthetic/spec.md")
+    assert (spec.parent / "plan.md").read_bytes() == b"# Template\n"
 
 
 def test_delta_oriented_guidance_and_release_separation() -> None:
@@ -310,8 +345,6 @@ def test_engineering_judgment_hardening() -> None:
 def main() -> None:
     _validate_tldr()
     _validate_template_fallback()
-    _validate_branch_failfast()
-    _validate_metric_accuracy()
     test_delta_oriented_guidance_and_release_separation()
     test_engineering_judgment_hardening()
     print("Spec hardening contract validated.")

@@ -78,57 +78,52 @@ a slash command, an agent, and a prompt.
 /devspark-constitution Security-first. TDD required. All public APIs must have documentation.
 ```
 
-### 2b. Create the Spec
+### 2b. Start the Work
 
-Describe **what** you want to build and **why** -- no tech stack yet. Keep it product-focused.
+Describe **what** you want and **why**. Keep it product-focused.
 
 ```text
 /devspark-specify Build a photo album organizer. Albums grouped by date, drag-and-drop reordering, tile-based photo previews.
 ```
 
-`/devspark-specify` is route-aware. It recommends one-off-fix, quick-spec, full-spec, refactor, or prompt-change, explains why, and asks you to confirm before it creates artifacts.
+`/devspark-specify` establishes the outcome and the first useful increment, checks whether any
+material risk or mandatory obligation needs assurance, and creates a work branch. There is no route
+to choose and no planning file by default; a short `work.md` resume note appears only when intent or
+decisions would otherwise be lost. Use the same command for features, fixes, and refactors. In a
+later session, `/devspark-next` resumes where you left off.
 
 > Anti-pattern: `/devspark-specify Build a React app with Redux and PostgreSQL for photo management` -- this locks you into a solution before the problem is fully understood.
 
-### 2c. Refine the Spec (Optional)
-
-Ask about user needs and constraints, not implementation details.
-
-```text
-/devspark-clarify Focus on security and performance requirements.
-```
-
-> Anti-pattern: `/devspark-clarify Should we use WebSockets or SSE?` -- save technology choices for the plan phase.
-
-### 2d. Create the Implementation Plan
-
-**Now** provide your tech stack. The plan translates product requirements into architecture.
-
-```text
-/devspark-plan Use Vite with vanilla HTML/CSS/JS. Images stored locally, metadata in SQLite.
-```
-
-### 2e. Generate Tasks and Implement
+### 2c. Implement and Verify
 
 The slash-command examples on this page use the DevSpark 9.0 convention, `/devspark-<command>`. If your repository still has 8.x installed, see [Upgrading from 8.x](upgrade.md#upgrading-from-8x).
 
 ```text
-/devspark-tasks
-```
-
-Optionally validate first with `/devspark-analyze` or `/devspark-critic`, then:
-
-```text
 /devspark-implement
+/devspark-verify
 ```
+
+`/devspark-implement` changes code, tests, and current knowledge together. `/devspark-verify`
+produces executable proof and decides whether the work is finished; repeat both until it is.
+
+### 2d. Add Assurance Only When It Earns Its Place (Optional)
+
+None of these is a required step, and none of them triggers another:
+
+- `/devspark-plan Use Vite with vanilla HTML/CSS/JS. Images stored locally, metadata in SQLite.`
+  records design decisions when a material uncertainty justifies it. Implementation may follow it but never requires it.
+- `/devspark-tasks` persists dependency-ordered deliverables when work spans sessions or people.
+- `/devspark-critic` or `/devspark-analyze` examines one specific concern, then returns to implementation.
+
+Existing v9.3 specifications keep their recorded route (plan, tasks, planning review); `/devspark-next` resolves them.
 
 ---
 
 ## Step 3: Review and Release
 
-After implementation verification passes, draft the PR and review the durable delta — the planning
-bundle stays live under `.devspark.work/` with its linkage populated until `/devspark-release` later
-archives it under `.archive/{YYYY-MM-DD}/`:
+After `/devspark-verify` decides the work is finished, draft the PR and review the durable delta. Any
+planning record stays live under `.devspark.work/` until `/devspark-release` later archives it under
+`.archive/{YYYY-MM-DD}/`:
 
 ```text
 /devspark-create-pr
@@ -147,7 +142,7 @@ and generate release notes:
 /devspark-release
 ```
 
-See [How It Works](how-it-works.md) for route selection, finalization, and
+See [How It Works](how-it-works.md) for the one flow, finalization, and
 delta-based review.
 
 ---

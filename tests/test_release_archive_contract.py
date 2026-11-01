@@ -139,11 +139,42 @@ def test_completed_spec_moves_with_every_associated_artifact(repo: Path) -> None
     assert {entry["path"]: entry["sha256"] for entry in spec["files"]} == before
 
 
+def test_completed_conditional_work_note_archives_with_its_bundle(repo: Path) -> None:
+    work = repo / WORK / "specs" / "003-work-complaint"
+    write(work / "work.md", "# Work: Complaint behavior\n\n**Status**: Complete\n\n## Intended Outcome\nThe requested behavior works.\n")
+    commit(repo, "complete bundle-free work")
+
+    _, plan = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+    assert f"{WORK}/specs/003-work-complaint" in {item["original"] for item in plan["TO_ARCHIVE"]}
+
+    code, payload = apply(repo)
+
+    assert code == 0 and payload["OK"] is True
+    assert not work.exists()
+    assert (archived_root(repo) / "specs" / "003-work-complaint" / "work.md").is_file()
+
+
 def test_legend_prose_does_not_block_a_completed_spec(repo: Path) -> None:
     _, payload = engine(repo, "plan", "--version", VERSION, "--date", DATE)
 
     originals = [item["original"] for item in payload["TO_ARCHIVE"]]
     assert f"{WORK}/specs/001-shipped" in originals
+
+
+def test_passing_closeout_gate_counts_as_completion_despite_stale_status(repo: Path) -> None:
+    base = repo / WORK / "specs" / "005-closed"
+    write(base / "spec.md", "# Closed\n\n**Status**: Draft\n")
+    write(base / "tasks.md", COMPLETE_TASKS)
+    write(base / "gates" / "closeout.md", "---\nstatus: pass\ndecision: complete\n---\n")
+    write(repo / WORK / "specs" / "006-failed" / "spec.md", "# Failed\n\n**Status**: Draft\n")
+    write(repo / WORK / "specs" / "006-failed" / "gates" / "closeout.md", "---\nstatus: fail\ndecision: complete\n---\n")
+    commit(repo, "closed spec with stale status")
+
+    _, payload = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+
+    originals = [item["original"] for item in payload["TO_ARCHIVE"]]
+    assert f"{WORK}/specs/005-closed" in originals
+    assert f"{WORK}/specs/006-failed" not in originals
 
 
 def test_non_spec_work_products_are_archived_when_eligible(repo: Path) -> None:
@@ -250,8 +281,6 @@ def test_journaled_file_edited_after_the_crash_is_a_collision(repo: Path) -> Non
 
 def test_missing_completion_evidence_is_reported_not_archived(repo: Path) -> None:
     write(repo / WORK / "specs" / "003-orphan" / "spec.md", "# Orphan\n\n**Status**: Draft\n")
-    write(repo / WORK / "specs" / "004-unlinked" / "spec.md", "# Unlinked\n\n**Status**: Complete\n")
-    write(repo / WORK / "specs" / "004-unlinked" / "tasks.md", "- [x] T001 Done code_ref: pending | knowledge_ref: pending\n")
     write(repo / WORK / "explain" / "topic.md", "# Saved explanation\n")
     commit(repo, "ambiguous work")
 
@@ -262,10 +291,20 @@ def test_missing_completion_evidence_is_reported_not_archived(repo: Path) -> Non
     assert "orphaned" in decisions[f"{WORK}/specs/003-orphan"]["reason"]
     assert decisions[f"{WORK}/specs/003-orphan"]["action"]
     assert "uncategorized" in decisions[f"{WORK}/explain"]["reason"]
-    blocked = {item["path"]: item["blockers"] for item in payload["IN_FLIGHT"]}
-    assert any("unpopulated linkage" in blocker for blocker in blocked[f"{WORK}/specs/004-unlinked"])
-    for name in ("specs/003-orphan/spec.md", "specs/004-unlinked/spec.md", "explain/topic.md"):
+    for name in ("specs/003-orphan/spec.md", "explain/topic.md"):
         assert (repo / WORK / name).is_file()
+
+
+def test_legacy_unpopulated_linkage_does_not_block_archiving(repo: Path) -> None:
+    write(repo / WORK / "specs" / "004-legacy" / "spec.md", "# Legacy\n\n**Status**: Complete\n")
+    write(repo / WORK / "specs" / "004-legacy" / "tasks.md", "- [x] T001 Done code_ref: pending | knowledge_ref: pending\n")
+    commit(repo, "legacy linkage")
+
+    code, _ = apply(repo)
+
+    assert code == 0
+    assert (archived_root(repo) / "specs" / "004-legacy" / "spec.md").is_file()
+    assert not (repo / WORK / "specs" / "004-legacy").exists()
 
 
 def test_untracked_files_in_a_completed_spec_need_a_decision(repo: Path) -> None:

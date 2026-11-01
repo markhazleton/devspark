@@ -38,7 +38,7 @@ Analyze owns, exclusively:
 - terminology drift and wording precision
 - task dependency and ordering validity
 - missing task anchors; tasks citing requirement ids that do not exist
-- completed tasks with no supporting linkage
+- completed tasks with no supporting evidence of work
 - identifier and field names contradicting a declared contract or schema
 - Spec/Plan Rationale Summary completeness and spec→plan Core-Problem alignment; Tasks remain a
   derivative action list and do not repeat rationale
@@ -284,3 +284,27 @@ The reason is one line. Applicability is a routing decision, not another risk es
 7. Assurance passes are bounded: discovery, remediation, recheck, stop.
 8. Findings classify under one convergence model — `closeout-contract.md`. There is no capability-specific taxonomy.
 9. Analyze and Critic discover; Planning Review's Judge phase (`judge-contract.md`) adjudicates scope. The developer reads one planning decision, not two reports.
+
+## 13. Assurance on Demand (work branches)
+
+A `NNN-work-*` branch has no planning bundle and no gate table. Analyze, Critic and Judge remain available there as independent capabilities, run when a **specific concern** justifies one — on the developer's request, or recommended by `/devspark-implement`'s lightweight assurance discovery. Each keeps its lane (§2–§4); only the inputs and outputs shrink.
+
+- **Trigger.** One stated concern: a material uncertainty, a material risk, or an applicable mandatory obligation. No concern, no run. Running one capability never runs another; at most it recommends the next smallest activity, and the developer chooses.
+- **Inputs.** The concern, the developer's request, the current diff, relevant code, tests and declared contracts, applicable `.knowledge/` and the constitution, and the optional `work.md` and `plan.md`. No specification, task list, frontmatter, or semantic fingerprint is required.
+- **Scope.** The concern, not the whole change. Analyze checks whether the recorded intent, plan decisions, declared contracts and existing tests contradict one another on it. Critic challenges it against the real system with inspected evidence (§3.1). Judge adjudicates only genuinely conflicting findings or a consequential trade-off, applying the `judge-contract.md` principles without its planning-review machinery.
+- **Result.** Reported to the developer, one block per concern:
+
+  ```text
+  Concern:     <the specific question>
+  Capability:  analyze | critic | judge
+  Evidence:    <paths, contracts, tests and commands actually inspected>
+  Outcome:     <findings with their classification, or "no material issue found">
+  Disposition: continue | pause affected work | decision needed: <question, and who holds the authority>
+  ```
+
+  A stated verdict still uses §9 and maps directly: `PROCEED` → continue, `STOP` → pause the affected work, `CONDITIONAL` → decision needed. Advisory findings are reported and classified; they never block.
+- **No artifact by default.** Write no `gates/*.md` file and no `tasks.md`. Control returns to `/devspark-implement`.
+- **Persistence only for continuity**, in the optional `work.md`:
+  - `## Material Decisions` — `- <accepted decision> — Basis: <evidence paths or contracts> @ <commit>`, only when the decision must survive the session. It stays settled until its basis changes (`git diff <commit> -- <basis paths>` is not empty) or new evidence contradicts it. Unrelated files, bookkeeping and checkbox edits never reopen it.
+  - `## Required Obligations` — `- [ ] <obligation> — Authority: <constitution principle, policy, or contract>`, only for an applicable mandatory control (security, privacy, safety, contractual, organizational). Check it only when satisfying evidence exists, and reference that evidence or the authority's decision in the entry: `- [x] <obligation> — Authority: <authority> — Evidence: <reference>`, where the reference is a repository path, commit, review or approval id, or link. `judge.py lifecycle` fails delivery while an entry stays unchecked, or is checked without its authority or a reference; prose and placeholders are not references. The check confirms a reference is recorded, not that the approval behind it is authentic.
+- **Authority.** The developer may decline a recommendation, never an applicable mandatory obligation. A decision that needs authority goes to the named person; an assurance result never stands in for it. A policy that exists only outside the repository is not mechanically enforced — surface it as a decision.

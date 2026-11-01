@@ -59,7 +59,7 @@
         "review_on_specify": {
           "type": "boolean",
           "default": true,
-          "description": "When false, /devspark.specify never offers a work-item review."
+          "description": "When false, /devspark-specify never offers a work-item review."
         }
       }
     },

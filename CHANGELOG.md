@@ -9,7 +9,117 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [9.4.0] - 2026-10-31
+
+**One Flow. Assurance as Needed. Deliver Software.** DevSpark 9.4 replaces the choice between a quickfix, a quick spec and a full spec with one path: understand, implement and verify, deliver. Start new work with `/devspark-specify` and resume it with `/devspark-next`; neither asks for a route or writes a planning bundle. A plan, a task list, Analyze, Critic or Judge runs only when a specific uncertainty, material risk or mandatory obligation justifies it, and none of them adds a gate or triggers another. Delivery readiness is decided by evidence: `/devspark-verify` reports what was proven, and `/devspark-next` and `/devspark-create-pr` refuse delivery while a declared required obligation lacks its authority and an evidence reference. Code, tests and current Knowledge remain the durable outcomes; an optional `work.md` carries context across sessions only when it would otherwise be lost.
+
+Existing v9.3 full-spec bundles, quick-spec bundles and quickfix records continue unchanged, and no migration is needed. See [Upgrading to 9.4](site/src/get-started/upgrade.md#upgrading-to-94).
+
+**Changes that can affect custom automation**:
+
+- `scripts/{powershell,bash}/create-new-feature.*` are removed, and `new-branch` accepts only `--type work` and `--type fix`.
+- `create-pr.ps1` create and update mode now exit `1` on a refusal or failure, matching `create-pr.sh`.
+- `create-pr` create and update mode refuse an unresolved required obligation, and refuse when the lifecycle check cannot run while obligations are declared.
+- A checked required obligation now needs an evidence reference.
+
+**Known limitations**:
+
+- A recorded evidence reference proves that a reference exists, not that the approval behind it is authentic. Policy kept only outside the repository is not mechanically enforced.
+- `next-context` does not read `DEVSPARK_PLATFORM`; it detects the platform from the remote.
+- `/devspark-implement` and `/devspark-explain` name some helper scripts by their source path (`scripts/…`); an installed repository has them under `.devspark/scripts/`, so run them from there.
+- Older releases' packages are not hosted after a newer release deploys; the quickstart always installs the latest release.
+
+### Added
+
+- **Universal start and resume path**: `/devspark-specify` starts `NNN-work-*` branches without a specification or workflow-size choice; `/devspark-implement` resumes those branches from repository evidence and an optional minimal `work.md` when continuity needs it. Existing v9.3 spec and quickfix routes remain supported.
+  - The start keeps the existing safeguards: work-item grounding (offered only when tracking is configured and the developer names an item, with tracker text kept in its untrusted-data envelope and scope left to the developer), verification expectations (snapshot-neutral refactors, golden and end-to-end proof for prompt changes, §2.1 verify-sensitive shapes), and branch-safety confirmation. After that confirmation the declared script runs non-interactively with `--yes`/`-Yes`; numbering collision checks still apply.
+  - `/devspark-next` reads the `work.md` status case-insensitively in both shells (new `WORK_COMPLETE` field), routes a finished note with uncommitted changes to commit, and, for a committed work branch with no finished note, recommends `/devspark-create-pr` only with an explicit reminder that Git state is not proof of completion; `--auto` stops there for confirmation.
+- **Optional planning on work branches**: `/devspark-plan` runs on `NNN-work-*` branches without a specification. `setup-plan` (both shells) reports `WORK_BRANCH` and `WORK_NOTE`, returns an empty `FEATURE_SPEC`, and neither copies the full-spec plan template nor refreshes the spec knowledge document there. The agent writes a concise advisory `plan.md` only when the developer asks or a material uncertainty justifies one. `check-prerequisites` lists that plan in `AVAILABLE_DOCS`, and `/devspark-implement` follows it when present but never requires it. A plan adds no tasks, gates, Analyze, Critic, Judge or Planning Review, and the branch stays on the work route in `/devspark-next`.
+- **Optional task coordination on work branches**: `/devspark-tasks` runs on `NNN-work-*` branches without a specification or plan; `check-prerequisites --require-plan` (both shells) no longer blocks there. Simple work needs no decomposition. Otherwise the agent identifies a few dependency-ordered deliverables, tracks them with its built-in task tracking, and records them as `## Remaining Deliverables` in the optional `work.md` only when cross-session continuity, substantial dependencies or multi-developer coordination justify it. No work-branch `tasks.md` is written, and open deliverables are not a completion gate. `/devspark-implement` follows that list when present and never requires it.
+- The `/devspark-plan` and `/devspark-tasks` handoffs no longer auto-send to Tasks, Checklist, Analyze or Planning Review. Both offer a single "Recommend Next Step" handoff to `/devspark-next`, which still routes legacy bundles from plan to tasks to Planning Review.
+- **Assurance on demand on work branches** (assurance contract §13): `/devspark-analyze`, `/devspark-critic`, and Judge through `/devspark-planning-review` each run independently on a `NNN-work-*` branch for one stated concern, with no specification, task list or gate file. Each reports a compact Concern / Capability / Evidence / Outcome / Disposition result and returns to `/devspark-implement`, which applies the disposition (continue, pause affected work, or decision needed). One capability never chains another.
+  - `judge.py resolve` reports `work-branch` (exit 0, no run id) instead of an error there.
+  - An accepted decision that must survive the session goes under `## Material Decisions` in the optional `work.md`, with its basis and commit. It is reconsidered only when that basis changes.
+  - An applicable mandatory control goes under `## Required Obligations`, naming its authority. `judge.py lifecycle` fails with `required-obligation-unresolved` while one stays unchecked, so `/devspark-implement` finalization and `/devspark-create-pr` block delivery. Policy that exists only outside the repository is not mechanically enforced.
+  - `/devspark-critic` handoffs are no longer auto-sent, and it offers "Return to Implementation".
+- **Evidence-based delivery readiness in `/devspark-next`**: on a `NNN-work-*` branch both `next-context` shells run `judge.py lifecycle` and report `LIFECYCLE_STATUS` and `LIFECYCLE_BLOCKERS`. Committed work that fails the check routes to the new `delivery-blocked` state instead of `ready-for-pr`. An unresolved required obligation recommends `resolve-obligation`, naming the obligation and its authority, and `--auto` stops there. Other lifecycle failures return to `/devspark-implement`. Work still in progress or uncommitted keeps its route with a note that delivery stays blocked. The `required-obligation-unresolved` failure now names each obligation's authority and lists them in an `obligations` field. Spec and quickfix bundles route as before.
+- **Delivery readiness in `/devspark-create-pr`, `/devspark-verify` and `/devspark-closeout`**: the `create-pr` preflight (both shells) reports the same `judge.py lifecycle` check as `lifecycle` (`pass`, `fail`, `unavailable` or `not-applicable`), so the prompt reads it instead of running Judge separately.
+  - Create and update mode now refuse an unresolved required obligation with `CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED`, naming the committed HEAD and each obligation's authority. It clears only when the `work.md` entry is checked with a reference to the evidence or the authority's decision. Previously the prompt let the agent proceed and record the decision in the PR. Other lifecycle failures do not refuse.
+  - A lifecycle check that cannot run is reported as `unavailable` with a `reason` (`judge-missing`, `python-unavailable`, `invalid-output`) and `obligations_declared`, and is never treated as a pass. When `work.md` declares `## Required Obligations`, create and update mode refuse with `CREATE PR BLOCKED — LIFECYCLE CHECK UNAVAILABLE` and the recovery step for that reason. DevSpark has no override; an approval path that organizational policy authorizes is followed outside DevSpark. Without declared obligations the check is reported as unconfirmed and does not refuse. `/devspark-next` says the same in its `REASON`.
+  - On a `NNN-work-*` branch `/devspark-verify` chooses proof in proportion to risk, reports what was observed, assumed and unobtainable, and answers delivered, verified and eligible. It writes no `gates/verify.md` or `gates/closeout.md`. `/devspark-closeout` reassesses the same questions without a document. Post-deploy requirements stay visible as deferred and never block merge. Verify keeps them stated in `work.md`, and `/devspark-create-pr` lists them under deployment status, as it already did for a full-spec closeout's deferred items.
+  - `/devspark-implement` offers an optional "Run Verification" handoff. `/devspark-create-pr` no longer recommends Analyze or Critic just because gate artifacts are absent.
+
+### Changed
+
+- DevSpark no longer creates a **new** full-spec or quick-spec bundle; new work starts on the universal route. Existing full-spec and quick-spec bundles continue unchanged through `/devspark-next` and `/devspark-implement`.
+- The public site, quickstart, and home-page explorer now describe one flow (understand, implement and verify, deliver) instead of a Quickfix, Quick spec, or Full spec route choice. The Skill Catalog groups skills as the normal path, optional when justified, and existing v9.3 specifications. Troubleshooting no longer asks you to size a fix, and its `/devspark-next` diagram shows the work-branch states with v9.3 bundles as a separate branch.
+- The `plan`, `analyze`, `critic`, `planning-review`, `clarify`, `checklist`, and `quickfix` descriptions now say when each applies: optional, on demand for one concern, or for an existing specification.
+- Handoffs that pointed at a specification route now start or continue the work: `/devspark-constitution`, `/devspark-workitem-create`, and `/devspark-workitem-review` offer `/devspark-specify` to start work rather than a full specification; `/devspark-explain` offers one "Start Work on a Gap or Defect" handoff to `/devspark-specify` instead of separate specify and `/devspark-quickfix` handoffs; `/devspark-next` no longer names `/devspark-quickfix` as a dispatch target, which its script never recommends; `/devspark-clarify` offers a return to implementation; `/devspark-checklist` no longer chains into `/devspark-analyze`; and `/devspark-critic` sends spec showstoppers to `/devspark-clarify` because `/devspark-specify` cannot revise an existing spec.
+- **A checked required obligation now needs an evidence reference.** `judge.py lifecycle` fails a `## Required Obligations` entry in `work.md` with `required-obligation-unresolved` while it is unchecked, or checked without its `Authority:` or a traceable reference to the satisfying evidence or authorized decision: a repository path, commit, review or approval id, or link, either labelled (`Evidence:`, `Approval:`, `Decision:` and similar) or as its own `—` segment, on the entry or an indented line under it. Prose and `<placeholder>` text do not count. Each listed obligation now carries a `missing` field, and the message says what is missing. `/devspark-next`, `/devspark-verify`, `/devspark-closeout` and `/devspark-create-pr` receive the same result because they all read this check. It confirms that a reference is recorded, not that the approval behind it is authentic. Spec bundles, tasks and planning checklists are unaffected.
+
+### Fixed
+
+- On a work branch, `/devspark-clarify` no longer treats `work.md` as a spec (the prerequisite check resolves `FEATURE_SPEC` to it) and `/devspark-checklist` no longer writes `gates/checklist.md`. Both answer the concern in conversation and return to implementation.
+- The `/devspark-pr-review` "Address Current Findings" handoff now opens `/devspark-address-pr-review`; it re-ran the review instead.
+- `/devspark-next` and `/devspark-create-pr` messages now name `/devspark-next` and `/devspark-create-pr` rather than the retired 8.x dotted form, and the config and registry schema descriptions use the hyphenated names.
+- `create-pr.ps1` create and update mode now exit `1` when they refuse or fail (`error: true`), matching `create-pr.sh`, and exit `0` only on `status: ok`. Previously every PowerShell refusal, including the knowledge and obligation blocks, exited `0`. The JSON output is unchanged; a PowerShell caller that treated exit `0` as "the script ran" must now read the JSON on a non-zero exit too.
+- The Gemini and Qwen packages now escape quotes and backslashes in a command's TOML `description`. `devspark-explain.toml` was invalid TOML (its description contains quotes), so those agents could not load `/devspark-explain`. Both packagers are fixed.
+- `next-context.ps1` no longer reads a quickfix record's blank `- **Completed**:` field as complete. Its pattern crossed into the next line, so in PowerShell every newly created quickfix routed to `/devspark-create-pr` instead of `/devspark-implement`. It now reads the field on its own line, as `next-context.sh` already did.
+- `next-context.ps1` and `create-pr.ps1 -Mode Preflight` now exit `0` explicitly. Run in-process, as agent terminals do, they left the nested lifecycle check's exit status in `$LASTEXITCODE`, so a failing lifecycle check made a successful run look like a script failure.
+- Agent-observed gaps in the work-route prompts are closed:
+  - `/devspark-verify` routes an unresolved obligation to its authority's evidence, not to more implementation, and names the installed `judge` wrapper.
+  - `/devspark-implement` runs **Finalize Every Route** after completing work-route work, names the files the developer needs to commit, and no longer asks a work branch to record traceability in a planning record it does not have.
+  - `/devspark-specify` says how to get the proposed branch name before confirmation (a dry run).
+  - `/devspark-next` lists `uncommitted-changes` and drops the retired `one-off-fix` choice.
+  - The verification contract no longer cites a route classification that `/devspark-specify` no longer performs.
+- The `/devspark-closeout` "Fix Blocking Defects" handoff now says to re-run verification after the fix, not closeout, which no command may recommend as a routine step.
+- `judge.py lifecycle` now reports a required obligation's text in full, up to 200 characters, rather than cutting it at 60 characters mid-word. That text appears in the `/devspark-next` and `/devspark-create-pr` refusals.
+- `/devspark-quickfix` no longer offers an "Upgrade to Full Spec" handoff to `/devspark-specify`, which can no longer create a full-spec bundle. A material scope signal now adds only the assurance its concern needs to the same quickfix (a "Review a Material Concern" handoff to `/devspark-critic`, not auto-sent), and the developer decides whether genuinely separate work starts with `/devspark-specify`.
+- `judge.py lifecycle` no longer fails a universal work directory (no `spec.md`) with `incomplete-tasks` because of an unchecked `tasks.md`; on that route a task list is coordination. Spec bundles still enforce required tasks, and every other lifecycle check is unchanged.
+- A file named `spec.md` in a `NNN-work-*` directory no longer turns the work into a legacy full-spec. Before, `/devspark-next` (both shells) routed it through the spec ladder and could recommend Tasks or Planning Review, and `judge.py lifecycle` read `required_gates` from that file and treated a `tasks.md` there as a completion gate. `judge.py resolve` also issued a review run id. The branch name now decides: `next-context`, `judge.py lifecycle` and `judge.py resolve` treat every `NNN-work-*` directory as universal work, and `/devspark-implement` checks the branch before reading `spec.md`, and `/devspark-critic` no longer reads its frontmatter there. Legacy branches are unaffected.
+
+- `/devspark-analyze` no longer passes `--require-tasks`, which made its documented `QUICKFIX-ONLY`, `SPEC-ONLY` and `SPEC+PLAN` tiers unreachable. It now degrades as its own tier table describes.
+- `pr-review-validate.py` no longer rejects `request-changes` with `rec-without-blocker` when the shared review-state engine derived it from an unmet required condition. A recommendation with neither an open blocker nor an unmet required condition is still rejected, and disposition rules are unchanged.
+- `/devspark-verify` and `/devspark-closeout` now read the prior `gates/closeout.md` before replacing it and carry forward its decisions (including a human `accepted_by`) within their original scope. An optional Verify that supplies no new evidence leaves a still-applicable closeout untouched instead of rewriting it as `not-complete`. A materially changed input, changed work, invalidated evidence, a real defect, or an unmet mandatory obligation still reassesses the affected items (closeout contract §7.1). `evaluated_commit` is a new optional closeout field; older artifacts and pre-contract specs are read as written and are never reclassified or waived.
+
+### Removed
+
+- `scripts/{powershell,bash}/create-new-feature.*`. No command has called them since `/devspark-specify` moved to `new-branch --type work`. A team override that still calls them should be rebuilt on the current stock `/devspark-specify`.
+- `new-branch` types `spec` and `quick`. New work never scaffolds a full-spec or quick-spec bundle, so `new-branch` accepts `work` and `fix` only and exits `1` with `type must be one of: fix, work` otherwise. Existing `NNN-spec-*` and `NNN-quick-*` branches still resolve and are still counted by the allocator.
+
+## [9.3.0] - 2026-10-17
+
+### Added
+
+- **Closest-existing-pattern discovery**: Planning looks for the nearest existing implementation before proposing anything new, and `plan.md` records `Closest existing pattern` and `New mechanism`. Tasks derive from the change surface rather than fixed phases. Critic raises a finding when a closer existing implementation than the planned new mechanism exists, and Planning Review adjudicates reuse first.
+- **Test evidence record**: `gates/test-evidence.md` records `commit`, `tree`, `command`, `result`, `run_at` and `run_by` for a test run (verification contract §4.1), with reuse and invalidation rules. Repository risk policy and independent-verification requirements always take precedence.
+
+### Changed
+
+- **Evidence-first PR review**: `/devspark-pr-review` inspects recorded evidence before deciding to run tests, reuses valid evidence for the current commit and environment, escalates to execution on stated triggers, and reports a `Test Evidence` section. Implement and Verify record their runs to the evidence file.
+- **Knowledge checks are build validation**: `build_knowledge_index.py --check` confirms the Knowledge builds and no longer compares `index.json` / `coverage.json`; `--fail-on-stale` remains an opt-in. `/devspark-create-pr` readiness is `ready`, `not-applicable`, `unknown` or `blocked` (a build error), returned as `{gap_summary, readiness, blockers, checked_head, check_output}`. `/devspark-release` context reports `KNOWLEDGE_BUILDS` in place of `KNOWLEDGE_INDEX_PRESENT` / `KNOWLEDGE_INDEX_CURRENT`.
+- **Content over dates**: `/devspark-explain` and `/devspark-site-audit` judge Knowledge against the code. A `last_verified` date is never a finding by itself, and `last_verified` is optional on entity-layer documents (an ISO date when present). Constitution Principle X and the Knowledge Framework Contract now treat derived index files as optional build output.
+- **Release archiving no longer needs linkage**: A `Complete` spec or quickfix is archive-eligible without populated `code_ref` / `knowledge_ref`. `check-planning-references` no longer emits `linkage_findings`; branch and identifier leak detection is unchanged.
+
+### Fixed
+
+- **Release archival recognizes a passing closeout gate**: A spec whose `gates/closeout.md` records `status: pass` and `decision: complete` is treated as complete even when `spec.md` still carries a stale Status line.
+
+### Removed
+
+- Per-requirement Knowledge stubs (`knowledge/fr-NNN.md`) generated by `setup-plan`, and the `validate-knowledge-coverage` scripts.
+- `code_ref` / `knowledge_ref` task and checklist fields from the Tasks, Implement and Quickfix guidance.
+- The derived-index regeneration step in Implement, the derived-index and `last_verified` drift gates in `/devspark-create-pr`, `/devspark-pr-review` and the `generated-artifact-drift` check in `knowledge-integrity.py`.
+
+### Migration
+
+Forward-only; no conversion script and no rewrite of existing specifications. Older stubs and `code_ref` / `knowledge_ref` suffixes remain readable and are ignored. CI that compared `index.json` / `coverage.json` should use `build_knowledge_index.py --check`. Copies of the removed `validate-knowledge-coverage` scripts left in an existing `.devspark/scripts/` are unused and can be deleted. See [Upgrade](site/src/get-started/upgrade.md).
+
+### Known limitations
+
+- Command and contract text shrank only modestly (commands about 84.3k to 81.6k words, -3%; `pr-review` about 9.8k to 8.1k, -17%; contracts roughly unchanged at 15.7k). The simplification is mainly in removed mechanisms and checks, not shorter prompts. The report template no longer hand-writes Action Items and Findings Detail, which the state engine renders from `review_state`.
+- The Spec 160 reuse replay was a single run per arm. ArrowSpark 016, Triage 044 and the `_etag` replay were not run.
+- Judge states and seals, Analyze, Verify and Closeout consolidation are deferred: Judge has many consumers across commands and tests.
 
 ## [9.2.0] - 2026-10-15
 
@@ -1333,17 +1443,17 @@ until it is rebuilt. `explain` regenerates it automatically.
   `advanced-capabilities.md`, and `evidence.md` ("Operational Experience"). Updated
   `about.md` with a "Current Status" section and `toc.yml` navigation to match.
 - **Operational Experience backed by real git-history data.** Replaced placeholder usage
-  claims with numbers pulled directly from the `Triage` and `MyDEVSPARKHealth.AI` repositories'
+  claims with numbers pulled directly from two adopter repositories'
   git history (specs, quickfixes, decisions, PR review reports, releases, deployment
   cadence), recorded with method/definition/limitations in
-  `.documentation/data/evidence-triage.json` and `.documentation/data/evidence-mydevsparkhealth-ai.json`,
+  `.documentation/data/` evidence files,
   and summarized on `.documentation/evidence.md`. `docfx.json` now publishes `data/**` as a
   site resource so those files are linkable from the built site.
 
 ### Removed
 
 - **All GitHub Actions workflows and GitHub-hosting conventions.** This repository's only
-  remote is Azure DevOps and it publishes exclusively to the internal DEVSPARK Azure Static Web
+  remote is Azure DevOps and it publishes exclusively to an Azure Static Web
   App, so `docs.yml`, `lint.yml`, `release.yml`, `tests.yml`, `shim-drift.yml`, the
   GitHub-release helper scripts (`create-github-release`, `get-next-version`,
   `generate-release-notes`, `check-release-exists`, `update-version`), `CODEOWNERS`,

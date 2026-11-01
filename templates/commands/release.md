@@ -30,9 +30,9 @@ to be stamped with internally. Its sources are code, current `.knowledge/`, test
 results, Git history, merged PR metadata, and existing user-facing documentation.
 
 `/devspark-implement` deliberately leaves every completed spec and quickfix record live in
-`.devspark.work/` — its populated `code_ref`/`knowledge_ref` linkage is what lets anyone validate the
-delta against code, tests, and knowledge for as long as it stays there, which can span more than one
-sprint. Release is what eventually archives it, and also runs the maintenance sweep: work-product
+`.devspark.work/` so the delta can be validated against code, tests, and knowledge for as long as it
+stays there, which can span more than one sprint. Release is what eventually archives it, and also
+runs the maintenance sweep: work-product
 retention, orphaned in-flight state, current-knowledge backstop checks, and leaked-planning-identifier
 scans all run here.
 
@@ -62,7 +62,8 @@ scans all run here.
 3. Verify the delta:
    - required tests, lint, builds, and declared release gates pass;
    - changed behavior and current `.knowledge/` are complete and mutually consistent;
-   - `.knowledge/index.json` is current;
+   - the Knowledge builds (`python3 scripts/build_knowledge_index.py --repo-root . --check`;
+     `KNOWLEDGE_BUILDS` in the release context). Derived index files are not compared or regenerated;
    - `.knowledge/` structural completeness and knowledge/code mapping accuracy are clean — require a
      current `/devspark-site-audit` result (full scope, or at least `--scope=knowledge`) covering
      this release window with no open `KNOW1`–`KNOW6` findings. Re-run site-audit's knowledge scope
@@ -76,8 +77,10 @@ scans all run here.
      `plan` writes nothing. It reports `TO_ARCHIVE`, `IN_FLIGHT`, `NEEDS_DECISION` (orphaned
      bundles, untracked files, uncategorized work areas), `COLLISIONS`, and `STALE_REFERENCES`.
    - Show the plan and put every `NEEDS_DECISION` entry to the user. Never archive, delete, or
-     reclassify one of them on your own, and never edit a bundle's status or linkage to make it
-     eligible: eligibility rests on completion evidence that already exists.
+     reclassify one of them on your own, and never edit a bundle's status to make it
+     eligible: eligibility rests on completion evidence that already exists. A spec is complete
+     when `spec.md` says `Status: Complete` or `gates/closeout.md` records `status: pass` with
+     `decision: complete`.
    - After the user confirms the plan, run the same command with `apply` instead
      of `plan` (`--dry-run` still never writes). It journals every move in
      `.archive/{YYYY-MM-DD}/release/archive-manifest-{version}.json`
@@ -96,19 +99,15 @@ scans all run here.
    `ORPHAN_CANDIDATES` lists bundles whose branch no longer exists. Treat those as the decision, and
    spot-check rather than re-derive them:
    - A bundle is **archive-eligible** when its own completion marker reads `Complete` (`spec.md`
-     `**Status**`, or the quickfix record's completion marker) and every task/action-plan/checklist
-     item's `code_ref`/`knowledge_ref` is populated (real path(s), or an explained `n/a`) — the same
-     linkage `/devspark-implement` populated and left in place. The `code_ref`/`knowledge_ref` legend
-     text in a spec's prose does not count as unpopulated linkage; only checklist/task items and
-     standalone linkage fields do.
+     `**Status**`, or the quickfix record's completion marker). Legacy `code_ref`/`knowledge_ref`
+     fields, populated or not, are ignored.
    - Every archive-eligible bundle moves into `.archive/{YYYY-MM-DD}/` (preserving its relative path
      minus the `.devspark.work/` prefix, e.g. `.devspark.work/specs/042-foo/` →
      `.archive/{YYYY-MM-DD}/specs/042-foo/`), whole and intact — plan, tasks, research, checklists,
      gates, contracts, `context_resolved`, and any other file in the bundle. No copy is left under
      `.devspark.work/`, and nothing moves to `.knowledge/`.
-   - A bundle that is **not yet** `Complete`, or is `Complete` but still has an unpopulated
-     `code_ref`/`knowledge_ref` marker, stays exactly where it is — spanning more than one release
-     window is normal, not an error. Report it as still in flight; never archive it.
+   - A bundle that is **not yet** `Complete` stays exactly where it is — spanning more than one
+     release window is normal, not an error. Report it as still in flight; never archive it.
    - Separately, flag a bundle whose branch is stale, merged, or deleted but that never reached
      `Complete` — this is orphaned, abandoned in-flight state, not a normal rollover. Surface it for
      human disposition; never archive it automatically.
@@ -140,7 +139,7 @@ scans all run here.
 11. Show the exact commit, version, and tag plan, including the archive already applied in step 4.
     Require explicit confirmation before the release commit, tags, pushes, or publication;
     `--dry-run` never writes.
-12. Re-run `release-archive validate` and the release gates (Knowledge index and integrity, package
+12. Re-run `release-archive validate` and the release gates (Knowledge build and integrity, package
     checks) against the post-archive workspace. Create the release commit — archive moves, release
     note, version metadata — only after success, create the tag only when authorized, and report
     publication status from the host.

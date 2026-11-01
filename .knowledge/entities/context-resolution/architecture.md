@@ -6,7 +6,7 @@ layer: architecture
 source_of_truth:
   - scripts/explain-context.py
   - scripts/context-projection.py
-last_verified: 2026-10-11
+last_verified: 2026-10-17
 aliases:
   - context resolution
   - retrieval and projection

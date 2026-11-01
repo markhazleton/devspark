@@ -90,9 +90,8 @@ ambiguous.
 The current repository ships a work-product schema that uses the reserved term. Recommended
 disposition, in preference order:
 
-1. **Retire it.** The durable traceability it provides is already carried by task linkage
-   (`code_ref` / `knowledge_ref`), which this contract sanctions and which release verifies. No
-   command prompt invokes the work-product validators today.
+1. **Retire it.** Durable traceability is carried by the temporary planning record citing code,
+   tests, and Knowledge. No command prompt invokes the work-product validators today.
 2. **Rename it** if a consuming team depends on the format — to a name that does not use the word
    Knowledge — preserving behavior at a documented framework-version boundary per Principle I.
 
@@ -124,9 +123,9 @@ not change the behavior of any existing script.
 - The in-memory model produced by the shared builder is the **canonical interpretation** of those
   files. Validation, typing, edge materialization, coverage, and ownership resolution happen there
   and only there.
-- `index.json` and `coverage.json` are **derived deterministic artifacts**, used for CI drift
-  checking, inspection, diagnostics, and interoperability. They are regenerated, never hand-edited,
-  and byte-stable across operating systems.
+- `index.json` and `coverage.json` are **derived deterministic artifacts**, used for inspection,
+  diagnostics, and interoperability. They are regenerated, never hand-edited, and byte-stable
+  across operating systems.
 
 The invariant is **one authoritative corpus, one canonical interpretation of it** — not "every
 consumer loads the same JSON file". A consumer MAY rebuild the model through the shared builder
@@ -134,8 +133,9 @@ instead of reading the serialized artifacts, and that satisfies this contract. W
 NOT do is parse `.knowledge/` frontmatter itself, apply its own typing or validation rules, or
 construct its own notion of an edge. Exactly one implementation interprets the corpus.
 
-A repository MUST keep its serialized artifacts current. Any change to `.knowledge/` is followed by
-a regeneration in the same change; the drift check is a blocking gate.
+The serialized artifacts are build output, not authority. Regenerating them is optional and a stale
+or missing copy never blocks a change; the check that matters is that the Knowledge builds
+(`build_knowledge_index.py --check`).
 
 ## 5. Two supply workflows
 
@@ -411,9 +411,8 @@ misleading context selection — it is worse than a missing mapping, because it 
 Each mapping form carries its own currency mechanism: a path mapping is current relative to the
 newest change to the artifacts it claims; a pinned content claim is current relative to a retained
 canonical baseline. Both are `source_of_truth`. A surface that reports on either MUST say which
-mechanism it evaluated, because "stale" otherwise names three unrelated conditions — derived
-artifacts out of date, a currency date older than its sources, and a pinned claim whose content
-moved.
+mechanism it evaluated, because "stale" otherwise names unrelated conditions — a currency date
+older than its sources, and a pinned claim whose content moved.
 
 ### 9.1 Ownership is not applicability
 
@@ -797,7 +796,7 @@ job safely. Prefer **small and sufficient** over **large and possibly useful**.
 | Specify | Canonical retrieval for early conflict and current-behavior grounding. A reduced method is acceptable and is declared; a private search is not. |
 | Clarify | Consult selected Knowledge where an ambiguity turns on current behavior or architecture. |
 | Plan (when used) | Authoritative Context Resolution for a specification route: retrieval → projection → judgment → `context_resolved`. |
-| Tasks (when used) | Carry `knowledge_ref` from resolved context, and create Knowledge-maintenance tasks when durable truth will change. |
+| Tasks (when used) | Name the Knowledge paths a task changes in its description, and create Knowledge-maintenance tasks when durable truth will change. |
 | Analyze | Validate that referenced Knowledge exists and that context provenance is legitimate. A nonexistent or unreachable reference is a hard stop. |
 | Critic | Judge sufficiency of the working set. Not graph completeness. |
 | Implement (planned route) | Consume Plan's `context_resolved`; take at most one logged additional hop; update Code, Tests, and Knowledge together when durable truth changes. |

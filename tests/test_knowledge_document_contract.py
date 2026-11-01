@@ -227,7 +227,7 @@ def test_full_lifecycle_generates_knowledge_docs(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(not HAS_PWSH, reason="pwsh not available")
 def test_json_contract_unchanged_on_writer_failure(tmp_path: Path) -> None:
-    """A writer failure inside create-new-feature must not change its JSON/exit code.
+    """A writer failure must not change a calling script's JSON contract or exit code.
 
     This simulates the isolation by calling New-KnowledgeDocument against an
     unwritable path (as in test_writer_failure_is_isolated) and confirming the
@@ -249,73 +249,6 @@ def test_json_contract_unchanged_on_writer_failure(tmp_path: Path) -> None:
     payload = json.loads(result.stdout.strip().splitlines()[-1])
     assert payload["contract"] == 1
     assert payload["BRANCH_NAME"] == "sample"
-
-
-# --- Coverage report detects orphaned tasks and unimplemented requirements -----------
-
-
-def _run_coverage_powershell(feature_dir: Path, tmp_path: Path) -> dict:
-    script_path = ROOT / "scripts" / "powershell" / "validate-knowledge-coverage.ps1"
-    result = _run_ps(
-        f"& '{script_path}' -Json -Feature '{feature_dir}'",
-        tmp_path,
-    )
-    assert result.returncode == 0, result.stderr
-    return json.loads(result.stdout.strip().splitlines()[-1])
-
-
-@pytest.mark.skipif(not HAS_PWSH, reason="pwsh not available")
-def test_coverage_report_detects_orphans_powershell(tmp_path: Path) -> None:
-    feature_dir = tmp_path / "005-sample"
-    feature_dir.mkdir()
-    script = f". '{ROOT / 'scripts' / 'powershell' / 'common.ps1'}'; " + (
-        # fr-001 has an implementing task; fr-002 does not (unimplemented)
-        "New-KnowledgeDocument -FeatureDir '" + str(feature_dir) + "' -Id 'fr-001' -Type 'requirement' -Title 'A' -Status 'draft' -Links @{ feature='feature'; implemented_by=@('task-001') } -GeneratedBy 'setup-plan'; "
-        + "New-KnowledgeDocument -FeatureDir '" + str(feature_dir) + "' -Id 'fr-002' -Type 'requirement' -Title 'B' -Status 'draft' -Links @{ feature='feature'; implemented_by=@() } -GeneratedBy 'setup-plan'; "
-        # task-001 implements fr-001; task-002 implements nothing (orphan)
-        + "New-KnowledgeDocument -FeatureDir '" + str(feature_dir) + "' -Id 'task-001' -Type 'task' -Title 'T1' -Status 'draft' -Links @{ feature='feature'; implements=@('fr-001') } -GeneratedBy 'devspark.tasks'; "
-        + "New-KnowledgeDocument -FeatureDir '" + str(feature_dir) + "' -Id 'task-002' -Type 'task' -Title 'T2' -Status 'draft' -Links @{ feature='feature'; implements=@() } -GeneratedBy 'devspark.tasks'"
-    )
-    result = _run_ps(script, tmp_path)
-    assert result.returncode == 0, result.stderr
-
-    report = _run_coverage_powershell(feature_dir, tmp_path)
-    assert report["ok"] is False
-    assert report["orphan_tasks"] == ["task-002"]
-    assert report["unimplemented_requirements"] == ["fr-002"]
-
-
-@pytest.mark.skipif(not HAS_PWSH, reason="pwsh not available")
-def test_coverage_report_clean_when_fully_linked(tmp_path: Path) -> None:
-    feature_dir = tmp_path / "005-sample"
-    feature_dir.mkdir()
-    script = f". '{ROOT / 'scripts' / 'powershell' / 'common.ps1'}'; " + (
-        "New-KnowledgeDocument -FeatureDir '" + str(feature_dir) + "' -Id 'fr-001' -Type 'requirement' -Title 'A' -Status 'draft' -Links @{ feature='feature'; implemented_by=@('task-001') } -GeneratedBy 'setup-plan'; "
-        + "New-KnowledgeDocument -FeatureDir '" + str(feature_dir) + "' -Id 'task-001' -Type 'task' -Title 'T1' -Status 'draft' -Links @{ feature='feature'; implements=@('fr-001') } -GeneratedBy 'devspark.tasks'"
-    )
-    result = _run_ps(script, tmp_path)
-    assert result.returncode == 0, result.stderr
-
-    report = _run_coverage_powershell(feature_dir, tmp_path)
-    assert report["ok"] is True
-    assert report["orphan_tasks"] == []
-    assert report["unimplemented_requirements"] == []
-
-
-@pytest.mark.skipif(not HAS_PWSH, reason="pwsh not available")
-def test_coverage_report_no_findings_before_tasks_exist(tmp_path: Path) -> None:
-    """A requirement with no tasks yet (before /devspark.tasks has run) is not a finding."""
-    feature_dir = tmp_path / "005-sample"
-    feature_dir.mkdir()
-    script = f". '{ROOT / 'scripts' / 'powershell' / 'common.ps1'}'; " + (
-        "New-KnowledgeDocument -FeatureDir '" + str(feature_dir) + "' -Id 'fr-001' -Type 'requirement' -Title 'A' -Status 'draft' -Links @{ feature='feature'; implemented_by=@() } -GeneratedBy 'setup-plan'"
-    )
-    result = _run_ps(script, tmp_path)
-    assert result.returncode == 0, result.stderr
-
-    report = _run_coverage_powershell(feature_dir, tmp_path)
-    assert report["ok"] is True
-    assert report["unimplemented_requirements"] == []
 
 
 # --- PR #61822 H-01: titles containing quotes must not corrupt the YAML frontmatter ---------
@@ -627,7 +560,7 @@ def _feature_links(feature_doc: str) -> dict:
 def test_overview_references_present_spec_sections(tmp_path: Path, shell: str) -> None:
     payload, feature_doc = _run_setup_plan(tmp_path, shell, "spec-full.md")
     links = _feature_links(feature_doc)
-    assert links["requirements"] == ["fr-001"]
+    assert links["requirements"] in ([], None)
     assert links["spec_sections"] == _SPEC_SECTION_NAMES
     assert links["spec_sections_absent"] in ([], None)
     # References only: no prose from the spec is copied into the overview.

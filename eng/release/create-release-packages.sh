@@ -146,6 +146,15 @@ generate_shims() {
   local agent=$1 ext=$2 arg_format=$3 output_dir=$4
   mkdir -p "$output_dir"
   awk -v ext="$ext" -v arg_format="$arg_format" -v outdir="$output_dir" '
+    function toml_escape(s,   out, i, c) {
+      out = ""
+      for (i = 1; i <= length(s); i++) {
+        c = substr(s, i, 1)
+        if (c == "\\" || c == "\"") out = out "\\"
+        out = out c
+      }
+      return out
+    }
     FNR == 1 {
       name = FILENAME
       sub(/.*\//, "", name)
@@ -167,7 +176,7 @@ generate_shims() {
     FNR > 1 && /^---/ {
       outfile = outdir "/devspark-" name "." ext
       if (ext == "toml") {
-        print "description = \"" desc "\"\n\nprompt = \"\"\"" > outfile
+        print "description = \"" toml_escape(desc) "\"\n\nprompt = \"\"\"" > outfile
         print "## Prompt Resolution\n" > outfile
         print "Determine the current git user by running `git config user.name`." > outfile
         print "Normalize to a folder-safe slug: lowercase, replace spaces with hyphens, strip non-alphanumeric/hyphen chars.\n" > outfile

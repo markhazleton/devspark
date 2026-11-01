@@ -53,7 +53,7 @@ Codex discovers `AGENTS.md` from global and project scopes, then merges files fr
 
 ## Invoke DevSpark Skills in Codex
 
-Codex prompts work best when they include goal, context, constraints, and done criteria. DevSpark skills force that shape by turning vague requests into explicit artifacts.
+Codex prompts work best when they include goal, context, constraints, and done criteria. DevSpark skills give that shape to a request without turning it into paperwork.
 
 Use this pattern:
 
@@ -66,18 +66,17 @@ and existing successful-login behavior is unchanged.
 Then continue:
 
 ```text
-/devspark-plan Use the existing auth service and current test framework.
-/devspark-tasks
 /devspark-implement
+/devspark-verify
 ```
 
-For ambiguous work, ask Codex to plan before coding:
+For ambiguous work, ask Codex to record decisions before coding. This is optional and adds no gate:
 
 ```text
-/devspark-plan Read the current spec and plan files. Identify unknowns before implementation.
+/devspark-plan Identify the unknowns in the lockout design and record the decisions before implementation.
 ```
 
-For narrow fixes, let `/devspark-specify` route the work. It can recommend one-off-fix, quick-spec, full-spec, refactor, or prompt-change and ask for confirmation before artifacts are created.
+Use the same `/devspark-specify` start for narrow fixes, features, and refactors. It does not ask you to choose a route; it adds only the assurance a specific risk justifies.
 
 ## Use The Right Reasoning Level
 
@@ -109,15 +108,17 @@ Avoid pasting entire directories into one prompt. Ask Codex to read the relevant
 
 The best DevSpark and Codex workflow is evidence-driven:
 
-Run the route [How It Works](how-it-works.md) picks for the change. For a full spec:
+Every change follows the same flow:
 
-1. `/devspark-specify`, `/devspark-plan`, `/devspark-tasks` define the outcome and approach.
-2. `/devspark-planning-review` checks the plan before code is written.
-3. `/devspark-implement` changes code, tests, and current knowledge, and leaves the linked planning
-   bundle under `.devspark.work/`. `/devspark-release` later archives it.
-4. `/devspark-verify` produces proof and closes out the work.
-5. `/devspark-create-pr`, `/devspark-pr-review`, and `/devspark-address-pr-review` review the durable result.
-6. `/devspark-release` verifies the Git delta and updates release notes.
+1. `/devspark-specify` (or `/devspark-next` to resume) establishes the outcome and first increment.
+   Add `/devspark-plan`, `/devspark-tasks`, or a focused `/devspark-critic` only when a specific
+   uncertainty or risk justifies it. An existing v9.3 specification keeps its recorded route,
+   including `/devspark-planning-review`.
+2. `/devspark-implement` changes code, tests, and current knowledge, and leaves the planning record,
+   if any, under `.devspark.work/`. `/devspark-release` later archives it.
+3. `/devspark-verify` produces proof and closes out the work.
+4. `/devspark-create-pr`, `/devspark-pr-review`, and `/devspark-address-pr-review` review the durable result.
+5. `/devspark-release` verifies the Git delta and updates release notes.
 
 Tell Codex exactly what verification is required before it stops:
 

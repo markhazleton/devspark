@@ -131,14 +131,15 @@ if $PATHS_ONLY; then
 fi
 
 # Validate required directories and files
-if [[ ! -d "$FEATURE_DIR" ]]; then
+if [[ ! -d "$FEATURE_DIR" && ! "$CURRENT_BRANCH" =~ ^[0-9]{3}-work- ]]; then
     echo "ERROR: Feature directory not found: $FEATURE_DIR" >&2
     echo "Run /devspark-specify first to create the feature structure." >&2
     exit 1
 fi
 
-# Check for plan.md if required (full-spec routes only; quick-spec/quickfix never produce plan.md)
-if $REQUIRE_PLAN && [[ ! -f "$IMPL_PLAN" ]]; then
+# Check for plan.md if required (full-spec routes only; quick-spec/quickfix never produce plan.md).
+# On a work branch planning is optional, so a missing plan never blocks.
+if $REQUIRE_PLAN && [[ ! -f "$IMPL_PLAN" && ! "$CURRENT_BRANCH" =~ ^[0-9]{3}-work- ]]; then
     echo "ERROR: plan.md not found in $FEATURE_DIR" >&2
     echo "Run /devspark-plan first to create the implementation plan." >&2
     exit 1
@@ -168,6 +169,12 @@ fi
 # Include tasks.md if requested and it exists
 if $INCLUDE_TASKS && [[ -f "$TASKS" ]]; then
     docs+=("tasks.md")
+fi
+if [[ "$CURRENT_BRANCH" =~ ^[0-9]{3}-work- && -f "$FEATURE_SPEC" ]]; then
+    docs+=("work.md")
+fi
+if [[ "$CURRENT_BRANCH" =~ ^[0-9]{3}-work- && -f "$IMPL_PLAN" ]]; then
+    docs+=("plan.md")
 fi
 
 # Checklist status (M-03: scripts compute, models judge -- exact counts, not LLM arithmetic)

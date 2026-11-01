@@ -17,7 +17,6 @@ from typing import Any
 
 CATEGORIES = {
     "engine-divergence",
-    "generated-artifact-drift",
     "taxonomy-mismatch",
     "missing-mapping",
     "broad-mapping",
@@ -127,7 +126,6 @@ def validate_finding(finding: dict[str, Any]) -> list[str]:
 # Hard structural failures block CI; everything else is advisory (never a mandatory build gate).
 HARD_FAILURE_CATEGORIES = {
     "engine-divergence",
-    "generated-artifact-drift",
     "dangling-reference",
     "unreachable-knowledge-root",
     "missing-mapping",

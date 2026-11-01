@@ -118,49 +118,51 @@ const DEVSPARK_FLOW_TAGS = { req: "Required", rec: "Recommended", opt: "Optional
 
 const DEVSPARK_FLOW_ROUTES = [
   {
-    id: "quickfix",
-    title: "Bug, config, docs, hotfix",
-    sub: "Quickfix \u00b7 about 4 hours or less, one area",
-    skips: "/devspark-specify, /devspark-plan, /devspark-tasks, /devspark-planning-review",
-    gates: "Advisory only; you decide on any concern",
-    escalate: "Switch to a full spec if the fix needs a new contract, public API or schema change, or a security or governance change.",
+    id: "work",
+    title: "New work or a change",
+    sub: "One flow \u00b7 features, fixes, refactors",
+    skips: "No route to choose. Plan, tasks and reviews are optional and never run by default.",
+    gates: "/devspark-verify, scaled to the change, plus any required obligation the work declares",
+    escalate: "Nothing to switch. Add a plan, a task list or a focused review only when a specific uncertainty or risk justifies it.",
     steps: [
-      { cmd: "/devspark-quickfix", tag: "req", why: "Creates a lightweight record and runs targeted checks.",
-        detail: "Classifies the work (bug-fix, hotfix, config-change, docs-update, minor-feature) and checks only the constitution principles that apply." },
+      { cmd: "/devspark-specify", tag: "req", why: "Starts the work: the outcome, the first useful increment, and a quick assurance check.",
+        detail: "Creates a work branch and no file by default. A short work.md resume note appears only when context would otherwise be lost. In a later session, /devspark-next resumes it." },
+      { cmd: "/devspark-plan", tag: "opt", why: "Records decisions when a material uncertainty justifies it.",
+        detail: "Advisory. Implementation does not require a plan, and writing one triggers no review." },
+      { cmd: "/devspark-tasks", tag: "opt", why: "Coordinates dependencies across sessions or people.",
+        detail: "Only when the agent's own task tracking is not enough. A task list adds no completion gate." },
+      { cmd: "/devspark-critic", tag: "opt", why: "Challenges one specific material concern.",
+        detail: "Not a default gate. /devspark-analyze, /devspark-critic and Judge do not trigger each other." },
+      { cmd: "/devspark-implement", tag: "req", why: "Changes code, tests and current knowledge together.",
+        detail: "Implement and verify repeat until the change is proven." },
+    ],
+  },
+  {
+    id: "quickfix",
+    title: "A defect you have already diagnosed",
+    sub: "Quickfix record \u00b7 optional WHAT/WHY/HOW",
+    skips: "Everything except the record and its targeted constitution check",
+    gates: "Targeted checks, then /devspark-verify",
+    escalate: "No route switch. If the fix grows, keep going and add only the assurance a specific concern justifies.",
+    steps: [
+      { cmd: "/devspark-quickfix", tag: "req", why: "Turns the investigation into a lightweight record and runs targeted checks.",
+        detail: "Optional: /devspark-specify handles fixes too. Use quickfix when you want the WHAT/WHY/HOW record for a product owner." },
       { cmd: "/devspark-implement", tag: "req", why: "Makes the fix and finalizes the record.",
         detail: "Owns code, tests and current knowledge together. The record stays live until release archives it." },
     ],
   },
   {
-    id: "quickspec",
-    title: "Small feature, clear criteria",
-    sub: "Quick-spec \u00b7 needs acceptance criteria, no design",
-    skips: "/devspark-plan, /devspark-tasks, /devspark-planning-review",
-    gates: "/devspark-verify, scaled to the change",
-    escalate: "Re-run /devspark-specify as a full spec if scope grows past what the quick-spec describes.",
-    steps: [
-      { cmd: "/devspark-specify", tag: "req", why: "Confirms the quick-spec route and writes a compact spec.",
-        detail: "Recommends a route, asks you to confirm it, then drafts the intent and acceptance criteria." },
-      { cmd: "/devspark-implement", tag: "req", why: "Goes straight from spec to code.",
-        detail: "No plan, tasks or planning review. Code, tests and current knowledge change together." },
-    ],
-  },
-  {
-    id: "fullspec",
-    title: "New feature, API or schema, refactor",
-    sub: "Full spec \u00b7 cross-cutting or high-risk",
-    skips: "nothing",
+    id: "legacy",
+    title: "Continue an existing v9.3 spec",
+    sub: "Legacy bundles only \u00b7 not for new work",
+    skips: "Nothing; the bundle keeps its recorded route",
     gates: "/devspark-planning-review, then /devspark-verify",
-    escalate: "Already the heaviest route.",
+    escalate: "New work never starts here; /devspark-specify starts the one flow.",
     steps: [
-      { cmd: "/devspark-specify", tag: "req", why: "Defines what and why, with acceptance criteria.",
-        detail: "Creates the branch and the spec, and asks you to confirm the route before anything is written." },
-      { cmd: "/devspark-clarify", tag: "rec", why: "Up to five targeted questions on vague points.",
-        detail: "Cheaper than rework after planning. Skip it when the spec is already unambiguous." },
-      { cmd: "/devspark-plan", tag: "req", why: "Produces the design and the context the work depends on.",
+      { cmd: "/devspark-next", tag: "req", why: "Resolves the existing bundle and names its next step.",
+        detail: "A bundle with spec.md keeps its v9.3 route; nothing is migrated." },
+      { cmd: "/devspark-plan", tag: "req", why: "Produces the design the bundle depends on.",
         detail: "Includes the Context Resolution section that planning review checks later." },
-      { cmd: "/devspark-checklist", tag: "opt", why: "Quality-checks the written requirements.",
-        detail: "Worth it for risky or ambiguous specs; safe to skip otherwise." },
       { cmd: "/devspark-tasks", tag: "req", why: "Breaks the plan into dependency-ordered tasks.",
         detail: "Each task carries code and knowledge linkage so nothing is lost at release." },
       { cmd: "/devspark-planning-review", tag: "rec", why: "/devspark-analyze, /devspark-critic and Judge run as one step with one decision.",
@@ -185,8 +187,8 @@ const DEVSPARK_FLOW_TAIL = [
       { cls: "ok", text: "complete: go on to the pull request" },
       { cls: "bad", text: "not-complete: /devspark-implement for open defects only, then /devspark-verify again" },
     ] },
-  { cmd: "/devspark-create-pr", tag: "req", why: "Opens a spec-aware pull request.",
-    detail: "A not-complete closeout blocks this step." },
+  { cmd: "/devspark-create-pr", tag: "req", why: "Opens the pull request for the committed work.",
+    detail: "A not-complete closeout or an unresolved required obligation blocks this step." },
   { cmd: "/devspark-pr-review", tag: "rec", why: "Constitution-aware review of the pull request.",
     detail: "Findings are saved with the commit they were reviewed against." },
   { cmd: "Open findings?", tag: "dec", why: "Fix them, then review again.",
@@ -211,14 +213,14 @@ function applyDevSparkFlow() {
   if (!root || root.dataset.devsparkFlowReady) return;
   root.dataset.devsparkFlowReady = "1";
 
-  const state = { route: DEVSPARK_FLOW_ROUTES[2], showOptional: true, active: null, timer: null };
+  const state = { route: DEVSPARK_FLOW_ROUTES[0], showOptional: true, active: null, timer: null };
   const buttons = [];
 
   root.textContent = "";
   root.classList.add("devspark-flow");
 
   const ask = _devsparkMake("div", "devspark-flow__ask");
-  ask.appendChild(_devsparkMake("p", "devspark-flow__q", "What are you changing?"));
+  ask.appendChild(_devsparkMake("p", "devspark-flow__q", "Where are you starting?"));
   const choices = _devsparkMake("div", "devspark-flow__choices");
   ask.appendChild(choices);
 

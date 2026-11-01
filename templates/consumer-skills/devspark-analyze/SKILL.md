@@ -1,6 +1,6 @@
 ---
 name: devspark-analyze
-description: "Non-destructive cross-artifact consistency, coverage, and traceability analysis across spec.md, plan.md, and tasks.md. The closed-world half of planning assurance — proves the planning artifacts are internally sound; /devspark-critic challenges whether that sound plan is wrong about the real system."
+description: "On demand for one specific concern — non-destructive check that recorded intent, plan decisions, contracts and tests agree (spec.md, plan.md and tasks.md for an existing specification bundle). Never a default gate; /devspark-critic challenges whether the work is wrong about the real system."
 user-invocable: true
 disable-model-invocation: true
 ---

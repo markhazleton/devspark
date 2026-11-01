@@ -1,6 +1,6 @@
 ---
 name: devspark-quickfix
-description: "Rapid lightweight fix workflow that bypasses full spec creation while maintaining constitution compliance validation"
+description: "Optional lightweight WHAT/WHY/HOW record for a defect you have already diagnosed, with targeted constitution checks. /devspark-specify handles fixes too, without a record."
 user-invocable: true
 disable-model-invocation: true
 ---

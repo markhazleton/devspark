@@ -25,7 +25,7 @@ Each node names its source of truth and cites evidence:
 - **Executable evidence:** a test that is rerun and currently passes.
 - **Inspection evidence:** a reviewed code path, with the reason a test was not used.
 
-`appliesTo` patterns, evidence entries, and `last_verified` metadata connect a statement to the code that supports it. The generated `.knowledge/index.json` and ontology coverage report make these links machine-readable and expose invalid paths, broken governance links, and stale metadata.
+`appliesTo` patterns, evidence entries, and an optional `last_verified` date connect a statement to the code that supports it. The Knowledge index is built in memory from the Markdown, so discovery never depends on a committed file. The optional derived `.knowledge/index.json` and ontology coverage report make these links machine-readable and expose invalid paths, broken governance links, and stale metadata, but a stale or missing copy never blocks a change.
 
 ### Content-drift detection (optional)
 
@@ -43,7 +43,7 @@ Reports contain paths and digests, never source bodies.
 
 | Skill | Knowledge question | Scope |
 |---|---|---|
-| `/devspark-implement` | What must change together with the code? | Updates affected nodes, regenerates the index, populates linkage |
+| `/devspark-implement` | What must change together with the code? | Updates the affected nodes in the same change; checks that Knowledge still builds |
 | `/devspark-explain` | Is this one topic documented accurately? | One topic; detects and repairs drift |
 | `/devspark-pr-review` | Does this diff contradict or under-document knowledge? | The diff (`PRD1` to `PRD5`) |
 | `/devspark-site-audit` | Is the whole knowledge model consistent? | The repository (`DELTA`, `KNOW1` to `KNOW6`) |
@@ -63,11 +63,11 @@ PR review and site audit are described in [Review and Audit](review-and-audit.md
 1. It resolves the topic against the knowledge index and source tree.
 2. It checks matched knowledge against the code and tests it describes, using the same `DELTA` and `KNOW1` to `KNOW4` finding codes as site audit, scoped to the topic.
 3. It answers in prose, citing `path:line` for every nontrivial claim.
-4. Missing or drifted knowledge is reported, not automatically promoted into work. When the developer requests a correction or draft, it clarifies ambiguous ownership or intent, shows the proposed update, and writes only after that update's own explicit approval. It then regenerates the index and re-verifies.
+4. Missing or drifted knowledge is reported, not automatically promoted into work. When the developer requests a correction or draft, it clarifies ambiguous ownership or intent, shows the proposed update, and writes only after that update's own explicit approval. It then re-checks that the Knowledge builds and re-verifies.
 
 `--dry-run` only proposes and never writes, which suits CI or chained agents. Output has three sections: **Answer**, **Findings**, and an **Agent Summary** JSON block. Saving a run to `.devspark.work/explain/<topic>-<date>.md` needs a separate approval, never bundled with the Knowledge update; the trace is replaceable work, not durable truth.
 
-Explain documents existing behavior only. It never creates a planning record or new code; confirmed code defects are offered to `/devspark-quickfix`, and unimplemented behavior to `/devspark-specify`. If the index is stale it regenerates it once and retries. Durable knowledge may cite durable code and tests only, never a spec, plan, task, `.devspark.work/`, or `.archive/` path.
+Explain documents existing behavior only. It never creates a planning record or new code; confirmed code defects are offered to `/devspark-quickfix`, and unimplemented behavior to `/devspark-specify`. Explain builds the index in memory on every run, so there is no stale index to repair; if the Knowledge does not build it reports the error first. Durable knowledge may cite durable code and tests only, never a spec, plan, task, `.devspark.work/`, or `.archive/` path.
 
 ## Practical rule
 

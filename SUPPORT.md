@@ -8,7 +8,7 @@ This project uses GitHub issues to track bugs and feature requests. Please searc
 
 For help or questions about using this project, please:
 
-- Open a [GitHub issue](https://dev.azure.com/example-org/HealthSource/_workitems/create/Issue) for bug reports, feature requests, or questions about the Spec-Driven Development methodology
+- Open a [GitHub issue](https://github.com/MarkHazleton/DevSpark/issues) for bug reports, feature requests, or questions about the Spec-Driven Development methodology
 - Review the [README](./README.md) for getting started instructions and troubleshooting tips
 
 ## Project Status

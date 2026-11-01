@@ -313,71 +313,51 @@ resolve_knowledge_python() {
     return 1
 }
 
-# Args: readiness, index_fresh (JSON literal), summary, head, blockers (JSON array), untouched count, check output.
+# Args: readiness, summary, head, blockers (JSON array), check output.
 knowledge_result_json() {
-    jq -n --arg readiness "$1" --argjson index_fresh "$2" --arg summary "$3" --arg head "$4" \
-        --argjson blockers "$5" --argjson untouched "$6" --arg output "$7" \
-        '{index_fresh: $index_fresh, gap_summary: (if $summary == "" then null else $summary end), readiness: $readiness, blockers: $blockers, stale_untouched_count: $untouched, checked_head: $head, check_output: (if $output == "" then null else $output end)}'
+    jq -n --arg readiness "$1" --arg summary "$2" --arg head "$3" \
+        --argjson blockers "$4" --arg output "$5" \
+        '{gap_summary: (if $summary == "" then null else $summary end), readiness: $readiness, blockers: $blockers, checked_head: $head, check_output: (if $output == "" then null else $output end)}'
 }
 
-# Committed-state Knowledge readiness for the HEAD being submitted. Read-only: it never
-# regenerates, edits, or commits anything.
+# Read-only: proves the Knowledge at the committed HEAD still builds. It never regenerates,
+# edits, or commits anything, and it does not compare generated files or `last_verified` dates.
 collect_knowledge_json() {
-    local repo_root="$1" head="$2" changed_json="$3"
-    local engine python tracked check_output check_exit summary blockers_json parsed_json untouched
+    local repo_root="$1" head="$2"
+    local engine python tracked check_output check_exit summary blockers_json
     engine=$(resolve_knowledge_engine "$repo_root")
     if [[ -z "$engine" ]]; then
-        knowledge_result_json unknown null "build_knowledge_index.py not found" "$head" '[]' 0 ""
+        knowledge_result_json unknown "build_knowledge_index.py not found" "$head" '[]' ""
         return 0
     fi
-    tracked=$(git -C "$repo_root" ls-tree -r --name-only HEAD -- .knowledge/index.json 2>/dev/null || true)
+    tracked=$(git -C "$repo_root" ls-tree -r --name-only HEAD -- .knowledge 2>/dev/null || true)
     if [[ -z "$tracked" ]]; then
-        knowledge_result_json not-applicable null ".knowledge/index.json is not tracked at HEAD" "$head" '[]' 0 ""
+        knowledge_result_json not-applicable "no .knowledge content is tracked at HEAD" "$head" '[]' ""
         return 0
     fi
     if ! python=$(resolve_knowledge_python); then
-        knowledge_result_json unknown null "no usable Python interpreter (python3 or python with PyYAML, 3.11+) found" "$head" '[]' 0 ""
+        knowledge_result_json unknown "no usable Python interpreter (python3 or python with PyYAML, 3.11+) found" "$head" '[]' ""
         return 0
     fi
 
     check_output=$("$python" "$engine" --repo-root "$repo_root" --check 2>&1) && check_exit=0 || check_exit=$?
 
     if [[ "$check_exit" -eq 0 ]]; then
-        parsed_json=$(jq -c --argjson changed "$changed_json" '
-            def touched: . as $e | (($e.source // "") | sub("/+$"; "")) as $s
-                | any($changed[]; . == $e.path or ($s != "" and (. == $s or startswith($s + "/"))));
-            (.stale_entities // []) as $stale
-            | {
-                blockers: [$stale[] | select(touched) | {kind: "stale-entity", path: .path, source: .source, source_date: .source_date, last_verified: .last_verified, message: null}],
-                untouched: ([$stale[] | select(touched | not)] | length)
-            }' "$repo_root/.knowledge/index.json")
-        blockers_json=$(jq -c '.blockers' <<< "$parsed_json")
-        untouched=$(jq -r '.untouched' <<< "$parsed_json")
-        if [[ "$blockers_json" != "[]" ]]; then
-            summary="$(jq 'length' <<< "$blockers_json") touched Knowledge document(s) are stale"
-            knowledge_result_json blocked true "$summary" "$head" "$blockers_json" "$untouched" "$check_output"
-        else
-            knowledge_result_json ready true "" "$head" '[]' "$untouched" "$check_output"
-        fi
+        knowledge_result_json ready "" "$head" '[]' "$check_output"
         return 0
     fi
 
     if [[ "$check_exit" -eq 1 ]]; then
         summary=$(printf '%s\n' "$check_output" | head -n 1)
         blockers_json=$(printf '%s\n' "$check_output" | jq -R -s -c '
-            split("\n") | map(select(startswith("DRIFT:")))
-            | map({kind: "drift", path: (if contains("coverage.json") then ".knowledge/ontology/coverage.json" else ".knowledge/index.json" end), source: null, source_date: null, last_verified: null, message: "Generated Knowledge does not match a fresh build of the committed HEAD"})')
-        if [[ "$blockers_json" == "[]" ]]; then
-            blockers_json=$(printf '%s\n' "$check_output" | jq -R -s -c '
-                split("\n") | map(gsub("\\s+$"; "") | select(length > 0))
-                | (.[-1] // "knowledge check failed") as $message
-                | [{kind: "build-error", path: null, source: null, source_date: null, last_verified: null, message: $message}]')
-        fi
-        knowledge_result_json blocked false "$summary" "$head" "$blockers_json" 0 "$check_output"
+            split("\n") | map(gsub("\\s+$"; "") | select(length > 0))
+            | (.[-1] // "knowledge check failed") as $message
+            | [{kind: "build-error", path: null, message: $message}]')
+        knowledge_result_json blocked "$summary" "$head" "$blockers_json" "$check_output"
         return 0
     fi
 
-    knowledge_result_json unknown null "knowledge engine returned an unsupported result (exit $check_exit)" "$head" '[]' 0 "$check_output"
+    knowledge_result_json unknown "knowledge engine returned an unsupported result (exit $check_exit)" "$head" '[]' "$check_output"
 }
 
 knowledge_blocked_error() {
@@ -391,45 +371,105 @@ knowledge_blocked_error() {
     else
         engine_rel="scripts/build_knowledge_index.py"
     fi
+    message="CREATE PR BLOCKED — KNOWLEDGE CANNOT BE BUILT"
     details="Committed HEAD: $head"
-
-    if [[ "$(jq '[.blockers[].kind] | index("build-error") != null' <<< "$knowledge_json")" == "true" ]]; then
-        message="CREATE PR BLOCKED — KNOWLEDGE INDEX CANNOT BE BUILT"
-        details+=$'\nKnowledge index: BUILD ERROR'
-        while IFS= read -r line; do details+=$'\n'"Error: $line"; done < <(jq -r '.blockers[] | select(.kind == "build-error") | .message' <<< "$knowledge_json")
-        details+=$'\nRequired action:'
-        details+=$'\n1. Fix the reported source or frontmatter problem.'
-        details+=$'\n2. Regenerate the Knowledge index: python '"$engine_rel"$' --repo-root .'
-        details+=$'\n3. Commit the .knowledge/** changes.'
-        details+=$'\n4. Push.'
-        details+=$'\n5. Rerun /devspark.create-pr.'
-    elif [[ "$(jq '[.blockers[].kind] | index("drift") != null' <<< "$knowledge_json")" == "true" ]]; then
-        message="CREATE PR BLOCKED — COMMITTED KNOWLEDGE FINALIZATION REQUIRED"
-        details+=$'\nKnowledge index: DRIFT'
-        while IFS= read -r line; do details+=$'\n'"$line"; done < <(jq -r '(.check_output // "") | split("\n") | map(select(startswith("STALE:"))) | .[]' <<< "$knowledge_json")
-        details+=$'\nRequired action:'
-        details+=$'\n1. Re-verify any genuinely stale Knowledge before changing last_verified.'
-        details+=$'\n2. Regenerate the Knowledge index: python '"$engine_rel"$' --repo-root .'
-        details+=$'\n3. Review the resulting derived files.'
-        details+=$'\n4. Commit the .knowledge/** changes.'
-        details+=$'\n5. Push.'
-        details+=$'\n6. Rerun /devspark.create-pr.'
-    else
-        message="CREATE PR BLOCKED — KNOWLEDGE RE-VERIFICATION REQUIRED"
-        details+=$'\nStale Knowledge touched by this PR:'
-        while IFS= read -r line; do details+=$'\n'"$line"; done < <(jq -r '.blockers[] | "- \(.path)\n  source: \(.source)\n  source date: \(.source_date)\n  last_verified: \(.last_verified)"' <<< "$knowledge_json")
-        details+=$'\nRequired action:'
-        details+=$'\n1. Confirm current truth, using /devspark-explain <topic> where appropriate.'
-        details+=$'\n2. Change last_verified only after genuine verification.'
-        details+=$'\n3. Regenerate: python '"$engine_rel"$' --repo-root .'
-        details+=$'\n4. Commit.'
-        details+=$'\n5. Push.'
-        details+=$'\n6. Rerun /devspark.create-pr.'
-    fi
+    details+=$'\nKnowledge: BUILD ERROR'
+    while IFS= read -r line; do details+=$'\n'"Error: $line"; done < <(jq -r '.blockers[] | .message' <<< "$knowledge_json")
+    details+=$'\nRequired action:'
+    details+=$'\n1. Fix the reported source or frontmatter problem.'
+    details+=$'\n2. Confirm it builds: python '"$engine_rel"$' --repo-root . --check'
+    details+=$'\n3. Commit the .knowledge/** changes.'
+    details+=$'\n4. Push.'
+    details+=$'\n5. Rerun /devspark-create-pr.'
 
     jq -n --arg message "$message" --arg details "$details" --arg head "$head" \
         --argjson blockers "$(jq -c '.blockers' <<< "$knowledge_json")" \
         '{error: true, message: $message, details: $details, checked_head: $head, blockers: $blockers}'
+}
+
+# Reports DevSpark's own lifecycle check (judge.py lifecycle) for the branch's work directory, the
+# same check /devspark-next and /devspark-implement use. It only reads; the rules live in judge.py.
+# When the check cannot run, the result says why and whether work.md declares mandatory obligations,
+# because an obligation that could not be evaluated must never read as one that passed.
+lifecycle_unavailable_json() {
+    local feature_dir="$1" reason="$2" declared=false
+    if [[ -f "$feature_dir/work.md" ]] && grep -Eiq $'^##[[:blank:]]+Required Obligations[[:blank:]]*\r?$' "$feature_dir/work.md"; then
+        declared=true
+    fi
+    jq -n --arg reason "$reason" --argjson declared "$declared" \
+        '{status: "unavailable", reason: $reason, obligations_declared: $declared, failures: [], pending_later_phase: []}'
+}
+
+collect_lifecycle_json() {
+    local feature_dir="$1" judge python output
+    if [[ -z "$feature_dir" || ! -d "$feature_dir" ]]; then
+        jq -n '{status: "not-applicable", failures: [], pending_later_phase: []}'
+        return 0
+    fi
+    judge="$SCRIPT_DIR/../judge.py"
+    if [[ ! -f "$judge" ]]; then
+        lifecycle_unavailable_json "$feature_dir" "judge-missing"
+        return 0
+    fi
+    if ! python=$(resolve_knowledge_python); then
+        lifecycle_unavailable_json "$feature_dir" "python-unavailable"
+        return 0
+    fi
+    output=$("$python" "$judge" lifecycle --feature-dir "$feature_dir" 2>/dev/null | tr -d '\r') || true
+    if jq -e '.status == "pass" or .status == "fail"' <<< "$output" >/dev/null 2>&1; then
+        jq -c '{status: .status, failures: (.failures // []), pending_later_phase: (.pending_later_phase // [])}' <<< "$output"
+    else
+        lifecycle_unavailable_json "$feature_dir" "invalid-output"
+    fi
+}
+
+lifecycle_unavailable_error() {
+    local preflight_json="$1"
+    local reason head feature_name cause fix details
+    reason=$(jq -r '.lifecycle.reason // ""' <<< "$preflight_json")
+    head=$(jq -r '.remote.local_head' <<< "$preflight_json")
+    feature_name=$(basename "$(jq -r '.feature.dir // ""' <<< "$preflight_json")")
+    case "$reason" in
+        judge-missing)
+            cause="DevSpark's judge.py is not installed beside its scripts"
+            fix="1. Restore judge.py by reinstalling or upgrading the DevSpark scripts." ;;
+        python-unavailable)
+            cause="no Python 3.11+ interpreter with PyYAML is available as python3 or python"
+            fix="1. Make Python 3.11+ with PyYAML available as python3 or python." ;;
+        *)
+            cause="judge.py ran but did not return a lifecycle result"
+            fix="1. Run judge.py lifecycle --feature-dir .devspark.work/specs/$feature_name to see the error, and fix it." ;;
+    esac
+    details="Committed HEAD: $head"
+    details+=$'\n'"work.md declares Required Obligations, but DevSpark could not run its lifecycle check: $cause."
+    details+=$'\nAn obligation that could not be evaluated is not an obligation that passed, so DevSpark will not publish this PR.'
+    details+=$'\nRequired action:'
+    details+=$'\n'"$fix"
+    details+=$'\n2. Rerun /devspark-create-pr.'
+    details+=$'\nDevSpark has no override for this. Where organizational policy authorizes a different approval path, follow that path outside DevSpark.'
+
+    jq -n --arg message "CREATE PR BLOCKED — LIFECYCLE CHECK UNAVAILABLE" --arg details "$details" --arg reason "$reason" \
+        '{error: true, message: $message, details: $details, reason: $reason}'
+}
+
+obligation_blocked_error() {
+    local preflight_json="$1"
+    local failure head details
+    failure=$(jq -c '[.lifecycle.failures[] | select(.code == "required-obligation-unresolved")][0]' <<< "$preflight_json")
+    head=$(jq -r '.remote.local_head' <<< "$preflight_json")
+    details="Committed HEAD: $head"
+    details+=$'\n'"Obligation: $(jq -r '.message' <<< "$failure")"
+    details+=$'\nA mandatory obligation is not the developer\'s to waive, and no flag or acknowledgement bypasses it.'
+    details+=$'\nRequired action:'
+    details+=$'\n1. Obtain the satisfying evidence, or an explicit decision from the authority the obligation names.'
+    details+=$'\n2. Check the entry under ## Required Obligations in work.md and add a reference to that evidence or decision (Evidence: followed by a repository path, commit, review or approval id, or link).'
+    details+=$'\n3. Commit.'
+    details+=$'\n4. Push.'
+    details+=$'\n5. Rerun /devspark-create-pr.'
+
+    jq -n --arg message "CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED" --arg details "$details" \
+        --argjson obligations "$(jq -c '.obligations // []' <<< "$failure")" \
+        '{error: true, message: $message, details: $details, obligations: $obligations}'
 }
 
 collect_preflight() {
@@ -439,7 +479,7 @@ collect_preflight() {
     local spec_exists=false plan_exists=false tasks_exists=false
     local spec_title="" classification="" risk_level="" required_gates="" recommended_next_step=""
     local tasks_total=0 tasks_completed=0 tasks_incomplete=0
-    local diff_ref lines_summary changed_files_count file_changes_json commit_log_json existing_pr_json checklists_json gate_artifacts_json gate_acknowledgements_json quickfix_json knowledge_json
+    local diff_ref lines_summary changed_files_count file_changes_json commit_log_json existing_pr_json checklists_json gate_artifacts_json gate_acknowledgements_json quickfix_json knowledge_json lifecycle_json
     local existing_pr=false existing_pr_number="" existing_pr_url="" existing_pr_title="" existing_pr_state="" existing_pr_draft=false
 
     repo_root=$(get_repo_root)
@@ -554,8 +594,8 @@ collect_preflight() {
         jq -R 'split("") | if length >= 4 then {hash: .[0], subject: .[1], author: .[2], date: .[3]} else empty end' | \
         jq -s '.' 2>/dev/null || printf '[]\n')
 
-    changed_paths_json=$(printf '%s' "$file_changes_json" | jq -c '[.[] | .path, (.from // empty)]')
-    knowledge_json=$(collect_knowledge_json "$repo_root" "$local_head" "$changed_paths_json")
+    knowledge_json=$(collect_knowledge_json "$repo_root" "$local_head")
+    lifecycle_json=$(collect_lifecycle_json "$feature_dir")
 
     if [[ "$cli_available" == true && "$auth_ok" == true ]]; then
         if [[ "$DEVSPARK_PLATFORM_NAME" == "azdo" ]]; then
@@ -629,6 +669,7 @@ collect_preflight() {
         --argjson gate_acknowledgements "$gate_acknowledgements_json" \
         --argjson quickfix_record "$quickfix_json" \
         --argjson knowledge "$knowledge_json" \
+        --argjson lifecycle "$lifecycle_json" \
         '{
             repo_root: $repo_root,
             current_branch: $current_branch,
@@ -679,6 +720,7 @@ collect_preflight() {
             },
             quickfix_record: $quickfix_record,
             knowledge: $knowledge,
+            lifecycle: $lifecycle,
             existing_pr: {
                 exists: $existing_pr,
                 number: (if $existing_pr then $existing_pr_number else null end),
@@ -705,6 +747,14 @@ run_create_or_update() {
     fi
     if [[ "$(echo "$preflight_json" | jq -r '.knowledge.readiness')" == "blocked" ]]; then
         knowledge_blocked_error "$preflight_json"
+        return 1
+    fi
+    if jq -e '[.lifecycle.failures[] | select(.code == "required-obligation-unresolved")] | length > 0' <<< "$preflight_json" >/dev/null; then
+        obligation_blocked_error "$preflight_json"
+        return 1
+    fi
+    if jq -e '.lifecycle.status == "unavailable" and .lifecycle.obligations_declared == true' <<< "$preflight_json" >/dev/null; then
+        lifecycle_unavailable_error "$preflight_json"
         return 1
     fi
 

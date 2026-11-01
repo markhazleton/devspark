@@ -204,13 +204,13 @@ blockquote {
 
 /* Interactive route explorer (home page) */
 :root {
+  --devspark-route-work: #2563eb;
   --devspark-route-quickfix: #0f9d6b;
-  --devspark-route-quickspec: #2563eb;
-  --devspark-route-fullspec: #7c3aed;
+  --devspark-route-legacy: #7c3aed;
 }
 
 .devspark-flow {
-  --route-c: var(--devspark-route-fullspec);
+  --route-c: var(--devspark-route-work);
   --flow-card: #ffffff;
   --flow-ink: #0f172a;
   --flow-muted: #475569;
@@ -244,7 +244,7 @@ blockquote {
 }
 
 .devspark-flow__choice {
-  --c: var(--devspark-route-fullspec);
+  --c: var(--devspark-route-work);
   text-align: left;
   background: var(--flow-card);
   color: var(--flow-ink);
@@ -259,9 +259,9 @@ blockquote {
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
+.devspark-flow__choice--work { --c: var(--devspark-route-work); }
 .devspark-flow__choice--quickfix { --c: var(--devspark-route-quickfix); }
-.devspark-flow__choice--quickspec { --c: var(--devspark-route-quickspec); }
-.devspark-flow__choice--fullspec { --c: var(--devspark-route-fullspec); }
+.devspark-flow__choice--legacy { --c: var(--devspark-route-legacy); }
 
 .devspark-flow__choice:hover {
   transform: translateY(-2px);

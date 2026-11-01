@@ -197,7 +197,7 @@ def test_schema_tooling_contradiction_detected(tmp_path: Path) -> None:
 
 
 def test_stable_finding_identity_across_repeated_scans(tmp_path: Path) -> None:
-    _write_doc(tmp_path, ".knowledge/governance/one.md", node_type="architecture")
+    _write_doc(tmp_path, ".knowledge/architecture/one.md", extra={"type": "not-a-real-type"})
 
     _code1, payload1 = _run(tmp_path)
     _code2, payload2 = _run(tmp_path)
@@ -208,13 +208,12 @@ def test_stable_finding_identity_across_repeated_scans(tmp_path: Path) -> None:
     assert ids1  # sanity: the fixture actually produced findings to compare
 
 
-def test_artifact_drift_reports_missing_index(tmp_path: Path) -> None:
+def test_missing_derived_index_is_not_a_finding(tmp_path: Path) -> None:
     _write_doc(tmp_path, ".knowledge/architecture/one.md")
 
     code, payload = _run(tmp_path)
-    drift = _findings_by_category(payload, "generated-artifact-drift")
-    assert any(f["subject"] == "index.json" for f in drift)
-    assert code == 1
+    assert _findings_by_category(payload, "generated-artifact-drift") == []
+    assert code == 0
 
 
 def test_every_emitted_finding_validates_against_shared_schema(tmp_path: Path) -> None:

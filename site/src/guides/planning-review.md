@@ -14,7 +14,7 @@ It resolves the feature once, runs `/devspark-analyze` always and `/devspark-cri
 | `CONDITIONAL` | Proceed, with the listed conditions recorded |
 | `STOP` | Fix the plan first; the report names the owner of each correction |
 
-Planning review applies to full specs. Quickfix and quick-spec routes skip it.
+Planning review applies to an existing v9.3 full specification. Quickfix records, quick specs, and new work on a work branch skip it: new work runs `/devspark-analyze` or `/devspark-critic` only for a specific concern, and Judge only when findings genuinely conflict. Neither triggers the other.
 
 ## What each part asks
 
