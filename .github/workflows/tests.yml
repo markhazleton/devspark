@@ -36,6 +36,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest PyYAML jsonschema
 
+      # The Bash scripts need Bash 4+ (mapfile, associative arrays); macOS ships Bash 3.2.
+      - name: Install Bash 4+ (macOS)
+        if: runner.os == 'macOS'
+        run: brew install bash
+
+      # Bash twins run under Git Bash on Windows. Put it ahead of the WSL launcher in
+      # System32, and add zip, which the release packager needs and Git Bash lacks.
+      - name: Use Git Bash and install zip (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          "C:\Program Files\Git\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          choco install zip --no-progress -y
+
       - name: Run tests
         run: pytest tests/ -v --tb=short
 

@@ -68,10 +68,8 @@ fi
 
 # Quickfix branch and record naming flows
 # through the unified allocator + slug normalizer (same ones new-branch.sh
-# uses), producing NNN-fix-<slug> instead of the legacy QF-YYYY-NNN. The year
-# is retained only as metadata inside the record body. Legacy QF-YYYY-NNN records remain readable via the
+# uses), producing NNN-fix-<slug> instead of the legacy QF-YYYY-NNN. Legacy QF-YYYY-NNN records remain readable via the
 # unified allocator's scan of both formats.
-YEAR=$(date +%Y)
 SLUG_SOURCE="${DESCRIPTION:-quickfix}"
 SLUG=$(clean_branch_name "$SLUG_SOURCE")
 SLUG=$(printf '%s' "$SLUG" | tr '-' '\n' | grep -v '^$' | head -4 | tr '\n' '-' | sed 's/-$//')

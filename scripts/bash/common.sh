@@ -86,7 +86,6 @@ get_default_doc_taxon() {
         .devspark.work/pr-review/*) echo 'RESEARCH_OR_CONTEXT' ;;
         .devspark.work/audit/*) echo 'RESEARCH_OR_CONTEXT' ;;
         .devspark.work/improvement-loop/*) echo 'RESEARCH_OR_CONTEXT' ;;
-        .knowledge/reference/*) echo 'REFERENCE_DATA' ;;
         .devspark.work/templates/*|.devspark.work/commands/*) echo 'ENGINEERING_PATTERN' ;;
         .devspark.work/scripts/*) echo 'OPERATIONS_RUNBOOK' ;;
         .documentation/*) echo 'AUTHORITATIVE_REFERENCE' ;;
@@ -133,6 +132,8 @@ PY
         local pattern node_type work_type
         while IFS=$'\t' read -r pattern node_type work_type; do
             [[ -n "$pattern" ]] || continue
+            # Registry patterns are globs, so the right-hand side stays unquoted on purpose.
+            # shellcheck disable=SC2053
             if [[ "$normalized_path" == $pattern ]]; then
                 if [[ -n "$node_type" ]]; then
                     printf '%s\n' "$node_type" | tr '[:lower:]' '[:upper:]' | tr '-' '_'

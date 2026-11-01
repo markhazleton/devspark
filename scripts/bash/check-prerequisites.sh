@@ -58,6 +58,8 @@ for arg in "$@"; do
             PATHS_ONLY=true
             ;;
         --timeout-seconds=*)
+            # Accepted for parity with check-prerequisites.ps1 -TimeoutSeconds; neither script waits.
+            # shellcheck disable=SC2034
             TIMEOUT_SECONDS="${arg#*=}"
             ;;
         --help|-h)
