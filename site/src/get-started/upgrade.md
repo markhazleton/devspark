@@ -15,6 +15,10 @@ Use the agent-specific [quickstart](quickstart.md) as the canonical manifest-dri
 
 The manifest is the complete list of framework files. After an Update or Repair, `.devspark/defaults/`, `.devspark/templates/` and `.devspark/scripts/` hold exactly the files the manifest lists, so an upgraded install matches a fresh one. Files that a release dropped or renamed are removed. Customizations are never affected, because they live in `.devspark.work/`.
 
+## Upgrading to 9.4.1
+
+Run your agent's [quickstart](quickstart.md) in Update Mode. Step 9.5 then removes framework files the manifest no longer lists, such as the `create-new-feature` and `validate-knowledge-coverage` scripts left behind by earlier upgrades, and reports each file it removes. Nothing outside `.devspark/` changes. If a team script or CI step still calls a removed file, rebuild it on the current stock script or keep a copy as an override in `.devspark.work/scripts/`.
+
 ## Upgrading to 9.4
 
 DevSpark 9.4 needs no conversion script, and existing work is never migrated into the new format. Run your agent's [quickstart](quickstart.md) in Update Mode, or install it fresh. Afterwards:
