@@ -109,6 +109,7 @@ one-line description.
 | `/devspark-checklist` | An ephemeral planning aid for existing v9.3 specifications. On a work branch it writes no checklist file and no gate document; it answers one named concern in conversation. |
 | `/devspark-planning-review` | Retained for active v9.3 bundles or invoked for a specific planning concern. Not a default pre-implementation sequence for new work; existing Judge and freshness behavior is unchanged. |
 | `/devspark-quickfix` | Retained as a direct legacy entry point. `/devspark-next` no longer asks developers to choose it over Specify. |
+| `/devspark-roadmap` | Optional product-direction planning. It maintains right-sized Prospective Specs but never starts delivery or adds a gate. |
 
 ### Planning Review in one place
 

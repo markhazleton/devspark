@@ -31,7 +31,8 @@ WORK = ".devspark.work"
 ARCHIVE = ".archive"
 DEFAULT_SWEPT_CATEGORIES = ("audit", "metrics", "pr-review", "telemetry")
 # Directories under .devspark.work/ that hold live framework configuration or pre-spec backlog.
-LIVE_DIRECTORIES = {"commands", "scripts", "extensions", "intake", "drafts", "releases"}
+LIVE_DIRECTORIES = {"commands", "scripts", "extensions", "intake", "drafts", "releases", "roadmap"}
+ROADMAP = "roadmap"
 MAX_FILE_BYTES = 1_000_000
 REPORT_LIMIT = 200
 
@@ -52,6 +53,29 @@ def load_release_context():
 
 
 RC = load_release_context()
+
+
+def roadmap_in_use(repo: Path) -> bool:
+    """A default roadmap folder or a `roadmap` section in devspark.json; otherwise release runs exactly as before."""
+    if (repo / WORK / ROADMAP).is_dir():
+        return True
+    try:
+        data = json.loads((repo / WORK / "devspark.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return isinstance(data, dict) and "roadmap" in data
+
+
+def load_roadmap_checker():
+    """Loaded only when a roadmap is in use, so a repository without one runs exactly as before."""
+    path = Path(__file__).with_name("roadmap-check.py")
+    spec = importlib.util.spec_from_file_location("devspark_roadmap_check", path)
+    if spec is None or spec.loader is None:
+        raise ArchiveError(f"cannot load the roadmap checker at {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def run_git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -176,10 +200,11 @@ def write_manifest(path: Path, data: dict[str, object]) -> bool:
 class Inventory:
     """Everything the release needs to know about the workspace, computed once."""
 
-    def __init__(self, repo: Path, version: str, date: str) -> None:
+    def __init__(self, repo: Path, version: str, date: str, include_roadmap: bool = False) -> None:
         self.repo = repo
         self.version = version
         self.date = date
+        self.include_roadmap = include_roadmap
         self.archive_root = f"{ARCHIVE}/{date}"
         self.manifest_file = manifest_path(repo, date, version or "unversioned")
         self.journal = read_manifest(self.manifest_file) if version else {"items": []}
@@ -193,6 +218,15 @@ class Inventory:
         self.retained: list[str] = []
         self.collisions: list[dict[str, str]] = []
         self.already_archived: list[str] = []
+        self.roadmap_completed: list[str] = []
+        self.roadmap_checker = None
+        self.roadmap_root: Path | None = None
+        self.roadmap_external = False
+        self.roadmap_error = ""
+        self.roadmap_notice = ""
+        self.roadmap_area = ""
+        self.roadmap_relink: list[str] = []
+        self.roadmap_relinked: list[str] = []
         self.build()
 
     def destination(self, original: str) -> str:
@@ -203,7 +237,9 @@ class Inventory:
         in_window: bool | None = (commit in self.window) if (commit and self.last_tag) else None
         return {"last_commit": commit, "in_release_window": in_window}
 
-    def unit(self, kind: str, original: str, files: list[Path], hashes: dict[str, str] | None = None) -> dict[str, object]:
+    def unit(
+        self, kind: str, original: str, files: list[Path], hashes: dict[str, str] | None = None, archived: str = ""
+    ) -> dict[str, object]:
         root = self.repo / original
         entries = []
         for path in files:
@@ -212,7 +248,7 @@ class Inventory:
         return {
             "kind": kind,
             "original": original,
-            "archived": self.destination(original),
+            "archived": archived or self.destination(original),
             "is_file": root.is_file(),
             "files": entries,
             **self.origin_evidence(original),
@@ -246,6 +282,10 @@ class Inventory:
         self.collect_resumable(journaled)
         for unit_candidate in self.candidates(set(journaled)):
             self.classify(unit_candidate)
+        try:
+            self.collect_roadmap(set(journaled))
+        except Exception as error:  # noqa: BLE001 - an unusable roadmap must never block the release
+            self.roadmap_error = f"roadmap skipped, nothing in it was changed: {error}"
         self.collect_retained()
         self.to_archive.sort(key=lambda item: str(item["original"]))
         self.resuming.sort(key=lambda item: str(item["original"]))
@@ -304,7 +344,7 @@ class Inventory:
                 found.append(("work-product", rel(self.repo, path), path))
         return found
 
-    def classify(self, candidate: tuple[str, str, Path]) -> None:
+    def classify(self, candidate: tuple[str, str, Path], archived: str = "", roadmap_status: str = "") -> None:
         kind, original, path = candidate
         files = files_under(path)
         if not files:
@@ -332,9 +372,74 @@ class Inventory:
                 }
             )
             return
-        unit = self.unit(kind, original, files)
+        unit = self.unit(kind, original, files, archived=archived)
+        if kind == "prospective-spec":
+            unit["roadmap_status"] = roadmap_status
         if self.check_collisions(unit):
             self.to_archive.append(unit)
+
+    def collect_roadmap(self, skip: set[str]) -> None:
+        """Resolved Prospective Specs staged in the roadmap's specs/complete/. They are reported on every
+        run and archived only when the release was asked to include them. Any roadmap problem is reported
+        and skipped: planning never blocks a release."""
+        if not roadmap_in_use(self.repo):
+            return
+        checker = load_roadmap_checker()
+        root, source = checker.resolve_root(self.repo, "")
+        self.roadmap_checker, self.roadmap_root = checker, root
+        if not checker.inside(root, self.repo):
+            self.roadmap_external = True
+            self.roadmap_notice = (
+                f"the roadmap at {root.as_posix()} is outside this repository; release never reads, moves or "
+                "rewrites it. Archive its completed Prospective Specs from the planning repository when its owner authorizes it."
+            )
+            return
+        if self.repo / WORK in root.parents:
+            self.roadmap_area = root.relative_to(self.repo / WORK).parts[0]
+        complete = root / "specs" / "complete"
+        if not complete.is_dir():
+            return
+        roadmap = checker.Roadmap(self.repo, root, source)
+        items = {item["_path"]: item for item in roadmap.items}
+        errors = {finding["path"] for finding in roadmap.findings if finding["severity"] == "error"}
+        ready: list[tuple[str, Path, str]] = []
+        for path in sorted(complete.glob("*.md"), key=lambda p: p.as_posix()):
+            original = rel(self.repo, path)
+            if path.name.lower() == "readme.md" or original in skip:
+                continue
+            item = items.get(path)
+            if not roadmap.safe(path):
+                reason = "a symbolic link or a file outside the roadmap root; release never follows or moves it"
+            elif item is None or item["path"] in errors or item["status"] not in checker.RESOLVED:
+                reason = "a staged Prospective Spec is not a cleanly resolved roadmap item"
+            else:
+                self.roadmap_completed.append(original)
+                ready.append((original, path, f"{self.archive_root}/{ROADMAP}/{rel(root, path)}"))
+                continue
+            self.needs_decision.append(
+                {"path": original, "reason": reason, "action": "run roadmap-check, correct the item, then rerun"}
+            )
+        if not (self.include_roadmap and ready):
+            return
+        statuses = {path: str(items[path]["status"]) for _, path, _ in ready}
+        relinks = checker.archive_relinks(
+            roadmap, {path: self.repo / archived for _, path, archived in ready}, self.version, statuses=statuses
+        )
+        documents = sorted(rel(self.repo, path) for path in relinks)
+        dirty = git_lines(self.repo, "status", "--porcelain", "--", *documents, *(original for original, _, _ in ready))
+        if dirty:
+            for original, _, _ in ready:
+                self.needs_decision.append(
+                    {
+                        "path": original,
+                        "reason": "roadmap files this archival would move or relink have uncommitted changes",
+                        "action": "commit or discard the roadmap changes, then rerun; the rest of the release is unaffected",
+                    }
+                )
+            return
+        self.roadmap_relink = documents
+        for original, path, archived in ready:
+            self.classify(("prospective-spec", original, path), archived=archived, roadmap_status=statuses[path])
 
     def collect_retained(self) -> None:
         work = self.repo / WORK
@@ -345,7 +450,7 @@ class Inventory:
                 self.retained += [
                     rel(self.repo, p) for p in files_under(child) if is_operational_file(p.name)
                 ]
-            elif child.is_file() or name in LIVE_DIRECTORIES or (child / "commands").is_dir():
+            elif child.is_file() or name in LIVE_DIRECTORIES or name == self.roadmap_area or (child / "commands").is_dir():
                 self.retained.append(rel(self.repo, child))
             else:
                 self.needs_decision.append(
@@ -414,10 +519,57 @@ def result_payload(inventory: Inventory, command: str) -> dict[str, object]:
         "NEEDS_DECISION": sorted(inventory.needs_decision, key=lambda item: item["path"]),
         "RETAINED": sorted(inventory.retained),
         "COLLISIONS": inventory.collisions,
+        "ROADMAP_COMPLETED": inventory.roadmap_completed,
+        "ROADMAP_INCLUDED": inventory.include_roadmap,
+        "ROADMAP_ROOT": roadmap_display(inventory),
+        "ROADMAP_EXTERNAL": inventory.roadmap_external,
+        "ROADMAP_RELINK": inventory.roadmap_relink,
+        "ROADMAP_NOTICE": inventory.roadmap_notice,
+        "ROADMAP_ERROR": inventory.roadmap_error,
         "STALE_REFERENCES": stale,
         "STALE_REFERENCES_TRUNCATED": truncated,
         "READY": not inventory.collisions,
     }
+
+
+def roadmap_display(inventory: Inventory) -> str:
+    root = inventory.roadmap_root
+    if root is None:
+        return ""
+    return root.as_posix() if inventory.roadmap_external else rel(inventory.repo, root)
+
+
+def relink_roadmap(inventory: Inventory, journal: dict[str, object]) -> list[str]:
+    """Point live roadmap links at the archived copies of the Prospective Specs this release journaled.
+
+    Computed from the journal, including each resolved status captured before the moves, so an
+    interrupted apply finishes the same links and live Delivered records without reading archived items.
+    """
+    checker, root = inventory.roadmap_checker, inventory.roadmap_root
+    if checker is None or root is None or inventory.roadmap_external or inventory.roadmap_error:
+        return []
+    repo = inventory.repo
+    archived = {
+        repo / str(item["original"]): repo / str(item["archived"])
+        for item in journal["items"]  # type: ignore[union-attr]
+        if item.get("kind") == "prospective-spec"
+    }
+    if not archived:
+        return []
+    statuses = {
+        repo / str(item["original"]): str(item.get("roadmap_status", "unknown"))
+        for item in journal["items"]  # type: ignore[union-attr]
+        if item.get("kind") == "prospective-spec"
+    }
+    try:
+        roadmap = checker.Roadmap(repo, root, "release")
+        rewrites = checker.archive_relinks(roadmap, archived, inventory.version, statuses=statuses)
+        for path, text in rewrites.items():
+            checker.write_text(root, path, text)
+    except Exception as error:  # noqa: BLE001 - the archive is complete; links are reported, never a release blocker
+        inventory.roadmap_error = f"archived Prospective Specs, but roadmap links were not rewritten: {error}"
+        return []
+    return sorted(rel(repo, path) for path in rewrites)
 
 
 def stage(repo: Path, paths: list[str]) -> None:
@@ -459,6 +611,8 @@ def apply_plan(inventory: Inventory) -> list[str]:
                 original.rmdir()
         touched += [str(unit["original"]), str(unit["archived"])]
     touched.append(rel(repo, inventory.manifest_file))
+    inventory.roadmap_relinked = relink_roadmap(inventory, journal)
+    touched += inventory.roadmap_relinked
     stage(repo, touched)
     return [str(unit["original"]) for unit in units]
 
@@ -518,6 +672,11 @@ def print_report(payload: dict[str, object]) -> None:
         print(f"  COLLISION: {item['path']} -> {item['archived']} ({item['reason']})")
     for item in payload.get("PROBLEMS", []):  # type: ignore[union-attr]
         print(f"  PROBLEM: {item}")
+    for key in ("ROADMAP_NOTICE", "ROADMAP_ERROR"):
+        if payload.get(key):
+            print(f"  roadmap: {payload[key]}")
+    for item in payload.get("ROADMAP_RELINKED", []):  # type: ignore[union-attr]
+        print(f"  roadmap relinked: {item}")
     stale = payload.get("STALE_REFERENCES", [])
     if stale:
         print(f"  stale references to moved paths: {len(stale)}")  # type: ignore[arg-type]
@@ -532,6 +691,7 @@ def main() -> int:
     parser.add_argument("--repo-root", default="")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--include-roadmap", action="store_true", help="also archive resolved Prospective Specs from the repository's roadmap specs/complete/ (never an external roadmap)")
     args, _ = parser.parse_known_args()
 
     repo = Path(args.repo_root).resolve() if args.repo_root else RC.repository_root()
@@ -546,7 +706,7 @@ def main() -> int:
             payload = validate_archive(repo, version, date)
             code = 0 if payload["OK"] else 1
         else:
-            inventory = Inventory(repo, version, date)
+            inventory = Inventory(repo, version, date, include_roadmap=args.include_roadmap)
             payload = result_payload(inventory, args.command)
             code = 0
             if args.command == "apply":
@@ -554,6 +714,8 @@ def main() -> int:
                     code = 2
                 elif not args.dry_run:
                     payload["MOVED"] = apply_plan(inventory)
+                    payload["ROADMAP_RELINKED"] = inventory.roadmap_relinked
+                    payload["ROADMAP_ERROR"] = inventory.roadmap_error
                     verified = validate_archive(repo, version, date)
                     payload["VALIDATION"] = verified
                     payload["OK"] = verified["OK"]

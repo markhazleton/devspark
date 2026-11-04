@@ -99,6 +99,30 @@ When both hold, offer the review and act on the answer:
 
 Make the offer before `## Start Safely`, so the item can still inform the branch name.
 
+## Prospective Spec Context
+
+This applies **only when the developer explicitly names a Prospective Spec** from an optional roadmap
+(an id such as `ps-004`, or a PS path). Otherwise skip it silently: never search for a roadmap or a
+matching PS, and never mention roadmaps.
+
+Run `.devspark/scripts/bash/roadmap-check.sh locate <id> --json` (or
+`.devspark/scripts/powershell/roadmap-check.ps1 locate <id> -Json`), adding `--root <path>` when the
+developer gave a roadmap location. Read the PS at `ITEM.path` (relative to `ROADMAP_ROOT`) as intake
+context: its outcome, current reality, scope and standalone boundary, future-health expectations,
+dependencies, decisions, and completion expectations. Verify its current-reality claims against the
+repository; code and Git evidence outrank a stale planning claim. Then continue with the normal
+workflow below.
+
+- When `ITEM` is missing or ambiguous, or `DEPENDENCIES` include an item that is not `complete`, report
+  it in one line and let the developer decide. It is context, not a gate.
+- When the outcome looks larger than one independently shippable increment, say so and suggest
+  `/devspark-roadmap` to right-size it. Do not split it here.
+- Do not edit the roadmap or the PS. Recording delivery progress is `/devspark-roadmap`'s job.
+- The PS id is planning traceability. It may appear in the branch description, `work.md`, a commit
+  message, or the pull request description, but never in shipped code, tests, or `.knowledge/`. Pass
+  the PS id and title (for example `ps-004 storage format v2`), not its path or `--root`, as the branch
+  description in `## Start Safely`.
+
 ## Governance and Verification
 
 If `.knowledge/governance/constitution.md` exists, apply this check. When introducing or materially

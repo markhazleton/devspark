@@ -23,6 +23,17 @@
       "type": "string",
       "description": "Azure DevOps repository name (used when platform is azdo)."
     },
+    "roadmap": {
+      "type": "object",
+      "description": "Optional roadmap settings. A roadmap is never required; absence keeps /devspark-roadmap inert.",
+      "additionalProperties": false,
+      "properties": {
+        "root": {
+          "type": "string",
+          "description": "Roadmap location, relative to the repository root or absolute. Defaults to .devspark.work/roadmap. A location outside the repository is an explicit write authorization for /devspark-roadmap and is never archived by this repository's release."
+        }
+      }
+    },
     "policies": {
       "type": "object",
       "additionalProperties": true,

@@ -25,7 +25,7 @@ DevSpark ownership follows four roots:
 - `.knowledge/` contains current authoritative truth plus published user-facing guidance (`.knowledge/guides/`)
 - `.archive/` is the landing place for all old work products, grouped by release
 
-The collection includes 38 active commands.
+The collection includes 39 active commands.
 
 | File                       | Command                           | Purpose                                                                                          |
 | -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -43,6 +43,7 @@ The collection includes 38 active commands.
 | `commit-audit.md`          | `/devspark-commit-audit`          | Analyze commit history for workflow, hygiene, and delivery signals                               |
 | `quickfix.md`              | `/devspark-quickfix`              | Lightweight bug fix workflow                                                                     |
 | `release.md`               | `/devspark-release`               | Verify the durable Git delta, sweep `.devspark.work/` retention, and archive completed work        |
+| `roadmap.md`               | `/devspark-roadmap`               | Maintain optional product direction and right-sized Prospective Specs                             |
 | `evolve-constitution.md`   | `/devspark-evolve-constitution`   | Propose constitution amendments                                                                  |
 | `repo-story.md`            | `/devspark-repo-story`            | Narrative from commit history                                                                    |
 | `critic.md`                | `/devspark-critic`                | Adversarial risk analysis                                                                        |

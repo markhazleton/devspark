@@ -9,6 +9,12 @@ All notable changes to DevSpark are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Optional roadmap planning.** `/devspark-roadmap` records product direction and right-sized Prospective Specs without adding a delivery stage or gate. Its structural checker validates, locates, and safely repairs roadmap records; `/devspark-specify` reads a Prospective Spec only when named, and `/devspark-release` can archive resolved items with explicit approval.
+
 ## [9.4.1] - 2026-11-01
 
 **An upgraded install now matches a fresh one.** The quickstart's Update and Repair modes remove framework files that the release manifest no longer lists, and the Bash steps work on Windows with a native `jq`. No action is needed beyond running Update Mode.

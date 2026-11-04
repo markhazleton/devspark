@@ -107,7 +107,7 @@ def _commands() -> list[str]:
 
 def test_every_command_has_exactly_one_skill_and_no_agent_or_prompt_shims() -> None:
     commands = set(_commands())
-    assert len(commands) == 38
+    assert len(commands) == 39
     assert {p.name for p in SKILLS.glob("devspark-*") if p.is_dir()} == {f"devspark-{c}" for c in commands}
     assert list((ROOT / ".github" / "agents").glob("devspark.*")) == []
     assert list((ROOT / ".github" / "prompts").glob("devspark.*")) == []

@@ -6,7 +6,7 @@
     <h3><em>A structured development process for AI coding assistants.<br/>Just markdown files — no install required.</em></h3>
 </div>
 
-> **Not a program. Not a subscription.** Copy 38 active slash-command prompts and helper templates/scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
+> **Not a program. Not a subscription.** Copy 39 active slash-command prompts and helper templates/scripts into your project and your AI coding assistant gets a repeatable workflow — from requirements through release. Works with Claude, Copilot, Cursor, Gemini, and [14 more](#supported-ai-agents).
 
 **Docs & install (no repo access required):** [https://dev.makeboldspark.com](https://dev.makeboldspark.com)
 
@@ -17,7 +17,7 @@
 ```text
 devspark/
 ├── agents-registry.json  ← Canonical metadata for supported agent integrations
-├── templates/commands/   ← 38 prompt files (38 active commands)
+├── templates/commands/   ← 39 prompt files (39 active commands)
 ├── scripts/              ← Context-gathering scripts (PowerShell + Bash)
 └── site/
   ├── src/              ← Authored public-site pages and media
@@ -157,6 +157,7 @@ This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrad
 | `/devspark-planning-review` | Analyze + conditional Critic + Judge: one bounded planning decision |
 | `/devspark-verify` | Empirical proof gate for declared verification modes |
 | `/devspark-release` | Verify the durable Git delta, sweep `.devspark.work/` retention, and archive completed work into `.archive/{YYYY-MM-DD}/` |
+| `/devspark-roadmap` | Optionally set product direction and maintain right-sized Prospective Specs |
 | `/devspark-evolve-constitution` | Propose constitution amendments |
 | `/devspark-repo-story` | Generate narrative from commit history |
 | `/devspark-commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |

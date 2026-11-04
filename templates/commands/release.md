@@ -91,6 +91,28 @@ scans all run here.
      journaled file is in the archive with its recorded hash and none remains under `.devspark.work/`.
    - Resolve every `STALE_REFERENCES` entry (a tracked file outside `.archive/` that still names a
      moved path) by updating it to the archived path or removing it.
+   - **Optional roadmap.** When `ROADMAP_COMPLETED` is non-empty, the repository's roadmap (the
+     configured `roadmap.root`, default `.devspark.work/roadmap/`; `ROADMAP_ROOT` names it) has
+     resolved Prospective Specs (`complete` or `dropped`) staged in `specs/complete/`. Offer to
+     archive them with this release; never archive them without that agreement. When the user agrees,
+     add `--include-roadmap` to `plan` and `apply`, which journals them in the same manifest under
+     `.archive/{YYYY-MM-DD}/roadmap/specs/complete/` and then rewrites each live roadmap link to an
+     archived item so it points at the archived copy (`ROADMAP_RELINK` previews the files,
+     `ROADMAP_RELINKED` reports them). Existing prose stays as written apart from moved link targets;
+     do not edit these links by hand. Every archived item also gets one permanent `## Delivered` line
+     in `roadmap.md`, with its link and explicit `complete;` or `dropped;` status, even if another
+     roadmap file already links to it. The status is captured from the live item in the release
+     journal before the move, so interrupted runs can finish the record without reading archived
+     planning content. The checker uses only the live Delivered records: a recorded `complete` item
+     still satisfies dependencies, while a dropped or unknown item does not. A bare archive link or
+     an older journal without status remains `unknown`; confirm its status from current delivery
+     evidence rather than opening the archive. A staged item that is malformed, not resolved, a
+     symbolic link, or that would relink a roadmap file with uncommitted changes appears in
+     `NEEDS_DECISION` instead and stays in place. Everything else under the roadmap root is live
+     planning and stays. A roadmap outside this repository (`ROADMAP_EXTERNAL`) is never read,
+     archived, or rewritten here; relay `ROADMAP_NOTICE` and leave its archival to an authorized run
+     in the planning repository. `ROADMAP_ERROR` means the roadmap was skipped unchanged. No
+     roadmap, or declining the offer, changes nothing else, and the roadmap never blocks a release.
    - The script reads `.archive/` only to refuse an overwrite and to resume this release's own
      manifest; no command, release included, scans or lists archived history for any other purpose.
 
@@ -117,7 +139,7 @@ scans all run here.
    no age, count, or eligibility check for these categories, unlike specs/quickfixes in step 4. A file
    that is not tracked by Git is reported in `NEEDS_DECISION` instead of moved, and nothing is ever
    deleted outright. Operational files stay: `devspark.json`, `devspark.user.json`, `README.md`,
-   `commands/`, `scripts/`, `extensions/`, `intake/`, and dotfiles. A top-level work area with no
+  `commands/`, `scripts/`, `extensions/`, `intake/`, `roadmap/`, and dotfiles. A top-level work area with no
    taxonomy lifecycle is reported for a decision, never guessed at. (`.devspark.work/runs/`
    no longer exists — it was tied to the now-removed CLI; ignore any leftover copy as stray, not a
    category to sweep.)

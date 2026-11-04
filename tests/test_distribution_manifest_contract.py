@@ -53,7 +53,7 @@ def test_index_still_maps_every_command_to_its_dotted_default(install_index) -> 
     assert command_rows == {
         (f"templates/commands/{n}.md", f".devspark/defaults/commands/devspark.{n}.md") for n in commands()
     }
-    assert len(command_rows) == 38
+    assert len(command_rows) == 39
 
 
 def test_index_categories_are_a_known_closed_set(install_index) -> None:
@@ -69,7 +69,7 @@ def test_index_installs_each_consumer_skill_into_the_skills_directory(install_in
         )
         for n in commands()
     }
-    assert len(skill_rows) == 38
+    assert len(skill_rows) == 39
 
 
 def test_index_never_places_consumer_skills_under_the_templates_data_tree(install_index) -> None:

@@ -42,7 +42,7 @@ def generated(generated_repos) -> dict[str, Path]:
 
 def test_one_skill_folder_per_stock_command() -> None:
     cmds = commands()
-    assert len(cmds) == 38
+    assert len(cmds) == 39
     folders = {p.name for p in CONSUMER_SKILLS.glob("devspark-*") if p.is_dir()}
     assert folders == {f"devspark-{c}" for c in cmds}
     for command in cmds:
@@ -89,7 +89,7 @@ def test_consumer_skill_contains_no_forbidden_content(command: str) -> None:
 @BOTH_SHELLS
 def test_generator_twins_emit_identical_consumer_skills(generated: dict[str, Path]) -> None:
     outputs = {shell: tree_bytes(repo / "templates" / "consumer-skills") for shell, repo in generated.items()}
-    assert len(outputs["bash"]) == 38, sorted(outputs["bash"])
+    assert len(outputs["bash"]) == 39, sorted(outputs["bash"])
     assert outputs["bash"] == outputs["pwsh"]
     for command in commands():
         committed = consumer_skill(command)
