@@ -1,6 +1,6 @@
 [project]
 name = "devspark-tooling"
-version = "9.4.1"
+version = "9.5.0"
 description = "DevSpark repo tooling — dev/test/lint dependencies for the prompt-first lifecycle framework (no installable package; quickstart is the only install/upgrade path)."
 authors = [{ name = "Make Bold Solutions" }]
 keywords = ["devspark", "ai-agents", "sdd"]

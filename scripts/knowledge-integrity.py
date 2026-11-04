@@ -220,7 +220,7 @@ def check_build_failure(repo: Path, error: ValueError) -> list[dict[str, Any]]:
 
 def check_root_reachability(repo: Path, index: dict[str, Any]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    excluded = {".git", ".devspark.work", ".archive", ".devspark", "node_modules", "__pycache__", ".venv", "venv"}
+    excluded = {".git", ".devspark.work", ".archive", ".devspark", "_site", "node_modules", "__pycache__", ".venv", "venv"}
     indexed_prefixes = {str(node.get("path", "")).rsplit("/.knowledge/", 1)[0] for node in index.get("nodes", [])}
     for candidate in sorted(repo.rglob(".knowledge"), key=primary_engine.stable_path_sort_key):
         if not candidate.is_dir() or any(part in excluded for part in candidate.relative_to(repo).parts):

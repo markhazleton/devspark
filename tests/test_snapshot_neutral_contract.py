@@ -42,6 +42,7 @@ NAMED_DELTAS: dict[str, str] = {
     "explain": "Knowledge is judged by content against code; no derived-index freshness gate and no date-only finding",
     "site-audit": "Knowledge completeness checks that the Knowledge builds and reads coverage; a date alone is never a finding",
     "constitution": "one flow: the handoff starts new work rather than a feature specification",
+    "roadmap": "optional roadmap planning command added; absent from the baseline and inert without a roadmap",
 }
 
 BASELINE_BODIES = json.loads((snap.BASELINE / "command-bodies.json").read_text(encoding="utf-8"))

@@ -2,6 +2,15 @@
 
 Full per-version detail is in the [CHANGELOG](https://github.com/MarkHazleton/DevSpark/blob/main/CHANGELOG.md). This page summarizes the current line. To adopt a release, run your agent's [quickstart](get-started/quickstart.md) in Update Mode; see [Upgrade](get-started/upgrade.md).
 
+## 9.5.0: 2026-11-04
+
+Optional roadmap planning gives teams a place to record product direction and right-sized Prospective Specs without adding a delivery stage or gate.
+
+- **Plan direction.** `/devspark-roadmap` creates and maintains a roadmap, reviews dependencies and future health, and compares delivery evidence with the intended outcomes.
+- **Keep delivery explicit.** `/devspark-specify` reads a Prospective Spec only when you name it. `/devspark-release` can archive resolved items only with your agreement; roadmap problems never block a release.
+- **Knowledge integrity.** Generated DocFX `_site` output is not reported as a second Knowledge root.
+- **Install and upgrade.** Run your agent's [quickstart](get-started/quickstart.md) in Update Mode. No migration is needed.
+
 ## 9.4.1: 2026-11-01
 
 An upgraded install now matches a fresh one.

@@ -11,9 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.5.0] - 2026-11-04
+
 ### Added
 
 - **Optional roadmap planning.** `/devspark-roadmap` records product direction and right-sized Prospective Specs without adding a delivery stage or gate. Its structural checker validates, locates, and safely repairs roadmap records; `/devspark-specify` reads a Prospective Spec only when named, and `/devspark-release` can archive resolved items with explicit approval.
+
+### Fixed
+
+- **Generated site output is not treated as a second Knowledge root.** The integrity scan ignores DocFX `_site` output while continuing to detect independent project `.knowledge/` roots.
 
 ## [9.4.1] - 2026-11-01
 
