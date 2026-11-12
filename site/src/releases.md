@@ -2,6 +2,25 @@
 
 Full per-version detail is in the [CHANGELOG](https://github.com/MarkHazleton/DevSpark/blob/main/CHANGELOG.md). This page summarizes the current line. To adopt a release, run your agent's [quickstart](get-started/quickstart.md) in Update Mode; see [Upgrade](get-started/upgrade.md).
 
+## 9.5.2: 2026-11-12
+
+**Shorter re-reviews.** No migration is needed.
+
+- **Re-review is terminal.** An existing review checks each pending correction's prerequisites first, then evaluates the corrections and only the intervening changes that affect the PR, records the result and stops. It does not restart discovery, Knowledge retrieval or architecture exploration.
+- **Question-driven Knowledge in review.** Review starts from changed-path ownership and retrieves more Knowledge only to answer a specific contract or ownership question. Each `PRD` finding blocks under its own rule.
+- **Upgrade.** Run the quickstart in Update Mode. See [Upgrading to 9.5.2](get-started/upgrade.md#upgrading-to-952).
+
+## 9.5.1: 2026-11-05
+
+**Keep reviews focused and finish changes sooner.** This patch corrects scope expansion and repeated verification in the existing workflow.
+
+- **Preserve intent.** Specify carries acceptance evidence, exclusions and explicit operating assumptions through implementation and PR delivery. Review concerns must connect to reachable behavior, and required approvals must name an applicable authority.
+- **Finish the review.** Re-review checks corrections and substantive new changes. Settled decisions reopen only with invalidating evidence; extra investigation answers a specific question and stops when answered.
+- **Keep fixes bounded.** `address-pr-review all` selects the current actionable findings. It does not absorb unrelated discoveries or turn optional advice into new work.
+- **Reuse valid evidence.** Validate fixes together, let qualifying broader runs satisfy narrower checks, and assess freshness from relevant changes. Baseline debt and environment failures are distinguished from regressions; required gates still apply.
+- **Upgrade deliberately.** No migration is needed. Run the quickstart in Update Mode, then reconcile conflicting team or personal overrides. See [Upgrading to 9.5.1](get-started/upgrade.md#upgrading-to-951) and [Review and Audit](guides/review-and-audit.md).
+- **Validation limits.** Prompt-contract checks cover these rules; live-agent adherence and review-time improvements have not been measured against a production PR.
+
 ## 9.5.0: 2026-11-04
 
 Optional roadmap planning gives teams a place to record product direction and right-sized Prospective Specs without adding a delivery stage or gate.

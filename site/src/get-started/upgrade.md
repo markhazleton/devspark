@@ -15,6 +15,29 @@ Use the agent-specific [quickstart](quickstart.md) as the canonical manifest-dri
 
 The manifest is the complete list of framework files. After an Update or Repair, `.devspark/defaults/`, `.devspark/templates/` and `.devspark/scripts/` hold exactly the files the manifest lists, so an upgraded install matches a fresh one. Files that a release dropped or renamed are removed. Customizations are never affected, because they live in `.devspark.work/`.
 
+## Upgrading to 9.5.2
+
+Run your agent's [quickstart](quickstart.md) in Update Mode. No migration is required.
+
+Team overrides of `pr-review` that restart full discovery on every re-review now diverge from the
+stock prompt, which continues an existing review as a terminal UPDATE. Reconcile them deliberately.
+
+## Upgrading to 9.5.1
+
+Run your agent's [quickstart](quickstart.md) in Update Mode. No migration is required. This patch
+updates the stock scope, review, remediation and evidence-reuse instructions; existing mandatory
+gates and independent-review requirements remain in force.
+
+Team and personal command overrides in `.devspark.work/` are preserved and can shadow the new stock
+instructions. Compare overrides for `pr-review` and `address-pr-review`, and any team test policy,
+with the updated defaults. Reconcile requirements for every review dimension, per-fix test reruns,
+automatic HIGH test failures or blanket evidence invalidation after merges. Keep deliberate
+repository requirements explicit rather than silently removing them. Also carry explicit operating
+assumptions through customized Specify, Implement and Create PR prompts.
+
+See [Review and Audit](../guides/review-and-audit.md) for the resulting workflow. A single-user,
+single-environment scope applies when explicitly declared; it is not a new default for every project.
+
 ## Upgrading to 9.4.1
 
 Run your agent's [quickstart](quickstart.md) in Update Mode. Step 9.5 then removes framework files the manifest no longer lists, such as the `create-new-feature` and `validate-knowledge-coverage` scripts left behind by earlier upgrades, and reports each file it removes. Nothing outside `.devspark/` changes. If a team script or CI step still calls a removed file, rebuild it on the current stock script or keep a copy as an override in `.devspark.work/scripts/`.

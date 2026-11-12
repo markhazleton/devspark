@@ -13,6 +13,10 @@ AI agent follows its prompt instructions. See the [terminology](guides/prompt-li
 
 ## One Flow
 
+Version 9.5.2 makes PR re-review a bounded, terminal update. Read the
+[release notes](releases.md#952-2026-11-12) and
+[upgrade guidance](get-started/upgrade.md#upgrading-to-952).
+
 **One Flow. Assurance as Needed. Deliver Software.** DevSpark helps you understand the problem,
 implement the software, verify the outcome, and deliver a reliable change.
 

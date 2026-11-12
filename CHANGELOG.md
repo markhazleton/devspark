@@ -11,6 +11,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.5.2] - 2026-11-12
+
+**PR re-review stops sooner.** An existing PR review continues as a bounded, terminal update instead of restarting discovery.
+
+### Fixed
+
+- **Re-review is terminal.** An existing PR review checks each pending correction's prerequisites (correction commit, author context, a distinct evaluator, available proof) before any proof; a correction missing one stays pending with the gap named. It then evaluates the corrections and only those intervening changes with a demonstrated effect on the PR, records, validates and stops. It never falls back into initial-review discovery, Knowledge retrieval or architecture exploration.
+- **Review Knowledge stays question-driven.** PR review starts from changed-path ownership. Broader Knowledge retrieval and relationship projection answer only a specific unresolved contract or ownership question. Each `PRD` finding blocks under its own stated rule, not by prefix. PR review judges the Tests delta from the durable diff and does not read the acceptance artifact.
+
+### Upgrade Notes
+
+- Run your agent's quickstart in Update Mode. No migration, new command, schema or dependency is required. See [Upgrading to 9.5.2](site/src/get-started/upgrade.md#upgrading-to-952).
+
+## [9.5.1] - 2026-11-05
+
+**Keep reviews focused and finish changes sooner.** Scope and operating assumptions carry from Specify through implementation and PR delivery. Reviews follow the changed behavior, remediation stays with the selected findings, and verification reuses qualifying evidence without weakening required gates.
+
+### Fixed
+
+- **Scope survives handoff.** Specify carries the requested outcome, acceptance evidence, exclusions, target environment, supported users, configuration and decision owner into implementation and the PR summary. A smaller increment cannot silently omit requested work. Behavioral concerns need evidence of a scenario reachable within those assumptions; additional approval requirements must cite an applicable policy or instruction and its actual authority.
+- **Reviews converge.** Existing reviews resume with submitted corrections and substantive intervening changes. Reopening a settled finding requires evidence invalidating its original basis. Extra investigation answers a specific question about the change and stops when answered; commands finish required recording and handoff without a final improvement sweep.
+- **Remediation stays selected.** `/devspark-address-pr-review all` selects the current actionable findings, not unrelated discoveries made later. Necessary supporting edits and regressions caused by the corrections remain covered. Optional advice creates no automatic ticket, plan or approval cycle.
+- **Verification avoids duplicate work.** Fixes are validated as a batch. A qualifying broader run satisfies narrower checks when coverage, execution authority, environment and freshness match. Evidence is invalidated by relevant changes, not merely a merge or new commit. Test failures are classified as regressions, environment failures, baseline debt or unresolved causes instead of automatically becoming HIGH findings. Mandatory gates and independent-review requirements remain binding.
+
+### Upgrade Notes
+
+- Run your agent's quickstart in Update Mode. No migration, new command, schema or dependency is required.
+- Team and personal overrides are preserved. Reconcile overrides that still require every review dimension, unconditional test reruns or automatic HIGH findings; updating stock prompts does not replace these policies. See [Upgrading to 9.5.1](site/src/get-started/upgrade.md#upgrading-to-951).
+- Contract tests validate the prompt rules. Live-agent adherence has not been measured against a production PR; this release does not claim a measured review-time improvement.
+
 ## [9.5.0] - 2026-11-04
 
 ### Added
