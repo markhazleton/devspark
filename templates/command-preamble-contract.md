@@ -185,6 +185,29 @@ preamble_modules:
 
 Minimum Sufficient Change applies to governance as well as implementation. This is reasoning, not a gate. Plan records the decision once (closest pattern, fit, new mechanism), Tasks derives from the change surface, and Critic and Judge challenge a new mechanism rather than count it. When an authorized bounded correction crosses the original scope boundary, follow convergence §10; human authorization never waives a required check or its actual result.
 
+**Operating assumptions.** Honor the developer's explicit target environment, supported users,
+configuration and decision owner. Carry these boundaries through implementation, verification and
+review. A declared single-environment, single-user change does not require multi-environment
+portability, tenant isolation, speculative scale or future consumers. Do not assume these limits
+when they were not stated; use relevant repository evidence and ask only when an unknown affects
+the requested outcome. Single user does not imply single execution: establish whether retries,
+scheduled jobs or overlapping requests actually occur before raising a concurrency concern.
+Require a concrete scenario reachable within the declared operating assumptions and evidence of
+its consequence before treating a behavioral concern as a defect. If evidence contradicts an
+assumption, show that conflict to the developer rather than silently expanding or ignoring scope.
+
+**Approval authority.** The developer decides ordinary scope and implementation choices within
+their authority. Do not invent external approvers, stakeholder sign-offs or review boards from
+job titles, domain terminology or hypothetical organizational practice. Any additional required
+approval must cite an existing applicable policy, contract or explicit instruction, explain its
+applicability to this change, and identify the authority it actually names. Repository access alone
+neither establishes nor removes that authority. If a genuinely required authority is unavailable
+or unspecified, report the exact requirement and missing decision to the developer; do not invent
+an approval path, contact outsiders or claim approval. A recommendation is not a required sign-off.
+Existing applicable mandatory controls remain binding, and authorization already given is not
+requested again. These boundaries belong in existing handoffs or conditional resume context,
+not a new checklist, scope document or approval gate.
+
 ## 14. Reusing Already-Loaded Artifacts
 
 When the current context already holds the **full, unchanged** content of an artifact this command needs (the constitution, `spec.md`, `plan.md`, `tasks.md`, a contract), use it from context instead of loading it again.

@@ -172,11 +172,9 @@ def test_closeout_and_verification_regression_gates_are_unchanged() -> None:
 # -- PR review ---------------------------------------------------------------
 
 
-def test_pr_review_verifies_planned_delta_proportionately() -> None:
+def test_pr_review_judges_the_tests_delta_from_the_durable_diff_not_the_plan() -> None:
     review = _flat("templates/commands/pr-review.md")
-    assert "Planned Tests delta" in review
-    assert "each planned `update` or `retire` was applied" in review
-    assert "source diff for repository-owned tests" in review
-    assert "durable reference for externally owned ones" in review
-    assert "Do not require a new permanent test for a `none` disposition" in review
-    assert "Never execute manual QA, require deployment, invent scenarios" in review
+    assert ARTIFACT not in review
+    assert "Planned Tests delta" not in review
+    assert "Unjustified test removal" in review
+    assert "`PRD3` — Insufficient test depth" in review

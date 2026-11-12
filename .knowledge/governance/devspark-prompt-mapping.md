@@ -62,6 +62,41 @@ violation by the developer.
 ### Planning Review in one place
 
 For new work, the default path is *specify → implement ↔ verify → create-pr → pr-review*.
+
+Scope starts in Specify with the requested outcome, observable acceptance evidence and material
+exclusions. Its handoff carries all three to Implement, which preserves them in delivery context
+and the PR description. A smaller increment needs authorization when it would omit part of the
+requested outcome. Neither tracker context nor adjacent improvements add acceptance criteria.
+The optional resume note retains these boundaries only when they would otherwise be lost; no
+separate scope artifact is required, and PR review never needs to recover a planning bundle.
+
+Explicit operating assumptions travel with that scope: target environment, supported users,
+configuration and decision owner. They constrain acceptance and review without becoming assumed
+defaults for other projects. Behavioral findings require evidence of a reachable scenario under
+those assumptions; a single user can still have overlapping execution when the actual system
+permits it. Contradictory evidence is surfaced to the developer. Additional approval requirements
+must cite an applicable policy, contract or instruction and its actual authority; job titles or
+repository access alone do not create or remove approval obligations. Optional recommendations
+never become required sign-offs merely by appearing in review handoff notes.
+
+Review investigates the delta and directly affected contracts. An existing review resumes with
+corrections and substantive intervening changes, including changed exposure through unchanged
+helpers; a bookkeeping-only update checks evidence validity and stops. Remediation validates a
+batch, reusing qualifying evidence before running checks. A broader run can satisfy narrower
+coverage under the same execution authority and environment. Merge/rebase events alone do not
+invalidate evidence: relevant changes do, and uncertain impact requires a rerun. Failure attribution
+distinguishes regressions, environment failures, baseline debt and unresolved causes; an unmet
+mandatory gate remains unmet regardless of attribution. Repository overrides may require stronger
+execution guarantees and are not rewritten by framework upgrades.
+
+Follow-up investigation answers a specific unresolved question about the active change and stops
+when that question is settled. Inspecting a dependency does not expand review to its whole design.
+Reopening a decision requires its original basis and new evidence or an authorized scope change
+that invalidates it. Address-PR-review fixes the findings selected at invocation, including necessary
+supporting edits and regressions from those corrections; `all` does not absorb later unrelated
+discoveries. Optional advice creates no automatic work item or approval cycle. Commands stop after
+their required proof, recording and handoff rather than launching a final improvement sweep.
+
 Implementation and verification may iterate. Existing v9.3 specification bundles keep their
 current *plan → tasks → planning-review → implement* behavior and are not migrated. No synthetic
 planning bundle or historical approval is created solely to reconstruct a new-work journey.
@@ -212,7 +247,7 @@ artifacts is not detected by `tasks_plan_state`. `test_edge_state_truth_table`,
 
 ## Acceptance planning and ownership
 
-When independent acceptance validation is warranted, **plan** creates one conditional, ephemeral `qa-acceptance.md` in the spec bundle; **tasks** derives only pre-PR Tests work from it; **implement** applies the planned durable Tests delta (add, update or retire; a durable manual-regression reference where planned); **analyze** checks scenario trace validity, scope and uncovered external success criteria; **critic** challenges scenario quality and proportionality; **pr-review** verifies planned `update`/`retire` proportionately without running QA. No new command, stage or gate is involved.
+When independent acceptance validation is warranted, **plan** creates one conditional, ephemeral `qa-acceptance.md` in the spec bundle; **tasks** derives only pre-PR Tests work from it; **implement** applies the planned durable Tests delta (add, update or retire; a durable manual-regression reference where planned); **analyze** checks scenario trace validity, scope and uncovered external success criteria; **critic** challenges scenario quality and proportionality. **pr-review** does not read the artifact; it judges the Tests delta from the durable diff (`PRD3`, removed tests). No new command, stage or gate is involved.
 
 Ownership split: the spec owns defining and preparing acceptance; QA operations own post-deployment execution. Post-deployment QA is not required to complete, close out or make the spec archive-ready. A post-deployment failure creates new work and does not reopen the spec.
 
@@ -226,7 +261,7 @@ Ownership split: the spec owns defining and preparing acceptance; QA operations 
 
 | Command | Current behavior |
 |---|---|
-| **pr-review** | The primary assimilation trigger — nothing merges without it. §6 tracks durable-delta consistency as ID-tracked blocking findings (`PRD1` code/knowledge contradiction, `PRD2` unsupported knowledge claim, `PRD3` insufficient test depth, `PRD4` planning-identifier leak — rule 1 enforced here, `PRD5` knowledge completeness for architecturally significant behavior). §6c runs `build_knowledge_index.py` against the diff's touched entities, gates on gap-report failures (blocking, same tier as a constitution violation), and surfaces two non-blocking warnings: a code-only evidence entry missing `fallback_reason`, and contradiction candidates scoped to graph-adjacent objects (same entity, entities sharing a `constrains` decision, objects citing the same `source_of_truth`) — never brute-force pairwise comparison. §6d consumes the route's closeout decision rather than restarting discovery: an unclassified finding, an unresolved blocking defect, a laundered requirement/invariant, or counts that contradict the findings list are `PRD6` (blocking); a documented accepted limitation, deferred item, or learning is converged and must not be reopened. A genuine new defect still reopens the work; the mere availability of a better approach never does. A missing closeout artifact is a note, not a finding. PR-specific state is authoritative in the existing review file; the review-state engine derives report views, and UPDATE evaluates the original concern and correction in one bounded pass before writing the outcome. This is local recommendation state, not hosted approval. |
+| **pr-review** | The primary assimilation trigger — nothing merges without it. §6 tracks durable-delta consistency as ID-tracked findings (`PRD1` code/knowledge contradiction, `PRD2` unsupported knowledge claim, `PRD3` insufficient test depth, `PRD4` planning-identifier leak — rule 1 enforced here, `PRD5` knowledge completeness for architecturally significant behavior); each blocks under its own stated rule, not by prefix. Knowledge beyond the changed paths' owners is retrieved only to answer a specific unresolved contract or ownership question. §6c judges the diff's touched entities from content at the PR head commit without moving HEAD — a missing required layer doc or a `source_of_truth` that points nowhere blocks, same tier as a constitution violation — never regenerates Knowledge, and surfaces two non-blocking warnings: a code-only evidence entry missing `fallback_reason`, and contradiction candidates scoped to graph-adjacent objects (same entity, entities sharing a `constrains` decision, objects citing the same `source_of_truth`) — never brute-force pairwise comparison. §6d consumes the route's closeout decision rather than restarting discovery: an unclassified finding, an unresolved blocking defect, a laundered requirement/invariant, or counts that contradict the findings list are `PRD6` (blocking); a documented accepted limitation, deferred item, or learning is converged and must not be reopened. A genuine new defect still reopens the work; the mere availability of a better approach never does. A missing closeout artifact is a note, not a finding. PR-specific state is authoritative in the existing review file; the review-state engine derives report views. UPDATE is a terminal path: it checks each pending correction's prerequisites before proof, evaluates the corrections and only those intervening changes with a demonstrated effect on the PR, records, validates and stops without initial-review discovery. This is local recommendation state, not hosted approval. |
 | **address-pr-review** | Commit isolation between fixes and review-file updates, unchanged in mechanism. Explicitly enforces rule 1 on its own fixes: a fix that patches code must not introduce a spec/task/plan/PR-thread reference to "explain" what review comment it addresses — that context belongs in the commit message or the review file. Its helper derives eligibility per finding from status, severity and blocking evidence (ids `C`, `H`, `M`, `L`, `CON` and `PRD{N}`): `--auto` selects only open critical/high or blocking PR-delta findings with no accepted, deferred or withdrawn disposition, reports ordinary Medium/Low and non-blocking PRD findings, and routes `CON` findings to `evolve-constitution`. A single already-authorized finding is selected deterministically; pending reviewer verification remains blocking and is never author-auto-eligible. Remediation beyond the approved Plan's shape stops for explicit authority. |
 | **create-pr / update-pr** | Both surface evidence and linkage status directly in the PR description/delta: whether each touched `.knowledge/` node cites a test-verified (`verified_by: execution`) or code-only claim, and flag a code-only entry with no `fallback_reason` as a reviewer note (non-blocking) — the same signal `pr-review` §6c checks mechanically, visible here without digging. |
 | **verify** | The evidence mechanism's engine, installed as a skill. Runs in two phases in one invocation. **Evidence phase**: runs the declared proof mode(s) from `spec.md`'s `required_gates`, writes `gates/verify.md`, and records a `test_ref` pointer for any mode that passed via a named, committed test — the citable evidence `implement` needs to record `verified_by: execution` on a knowledge object or decision. Observations surfaced during the run that are not proof results go to a `discovered:` list and never change a mode's status. **Closeout phase**: classifies every open finding against `templates/closeout-contract.md`, evaluates each acceptance criterion by its declared kind, and writes the completion decision to `gates/closeout.md` with `produced_by: verify`. It never tells the developer to go run a closeout command — the decision was just made. A route with no declared proof mode skips the evidence phase and still converges. |

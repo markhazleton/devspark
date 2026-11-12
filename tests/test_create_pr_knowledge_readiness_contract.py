@@ -626,7 +626,9 @@ def test_create_pr_prompt_states_the_readiness_boundary() -> None:
 def test_pr_review_knowledge_check_is_read_only_and_head_verified() -> None:
     section = _read("templates/commands/pr-review.md").split("### 6c.", 1)[1].split("### 6d.", 1)[0]
     flat = " ".join(section.replace("`", "").split())
-    assert "check it out or stop" in flat
+    assert "git show <head-sha>:<path>" in flat
+    assert "never move HEAD" in flat
+    assert "check it out" not in flat
     assert "never regenerate" in flat.lower()
     assert "--check" not in section
 

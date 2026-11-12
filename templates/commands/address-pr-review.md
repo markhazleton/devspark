@@ -68,13 +68,20 @@ actionable or pending work.
    `auto_eligible: true`. Report other findings with their supplied `reason` and leave them
    untouched; optional/nonblocking findings, risk acceptance, ambiguous recovery, and constitution
    routing retain their existing authorization requirements.
-3. Build an internal todo list with one item per selected finding.
+3. Build an internal todo list with one item per selected finding. Freeze those finding IDs and
+   their required outcomes for this invocation: `all` means the actionable findings selected now,
+   not every concern discovered later. Necessary supporting edits and regressions caused by the
+   selected corrections stay within the existing authorization; the file list is not a hard limit.
+   Do not add adjacent refactors or newly discovered unrelated findings to the batch. Report them
+   briefly only when useful, and obtain explicit authorization before adding separate work.
 
 ### Phase 2 — Fix loop (per finding)
 
 For each selected finding:
 
-1. Read the cited file/lines and confirm the issue.
+1. Read the cited file/lines and confirm the issue. Investigate only questions needed to settle
+   that finding's original expectation. Do not reopen a settled disposition without the new
+   evidence required by convergence §10.
 2. If the finding cites a lint rule, complexity metric, or code smell, state in one sentence the behavioral intent behind it (command-preamble-contract.md §9) before writing the fix — do not react to the bare metric alone.
 3. A finding's suggested fix is evidence, not an architecture mandate. Choose the lightest sufficient remediation, in this order: clarify, remove, reuse something that exists, change an operational detail, make a small local change, and only then add machinery. If the fix needs something beyond the approved Plan's shape (a new state, endpoint, persisted record, cache, dependency, runtime setting, pattern or rollback design), stop and ask for explicit authority; `--auto` never grants it. Show the diff for any alternative to the suggested fix, and confirm the fix addresses that intent (e.g., genuinely lowers branching/responsibility, genuinely names and surfaces an error) rather than merely satisfying the check mechanically.
 4. **Rule 1 check**: the fix stays subject to the same one-way reference gate `/devspark-pr-review` §6 enforces — do not introduce a spec ID, task ID, plan reference, or PR-thread ID into code or `.knowledge/` to "explain" what review comment this addresses. A commit message or the review file itself is the right place for that context, never a durable comment.
@@ -84,10 +91,18 @@ For each selected finding:
 
 ### Phase 3 — Validate
 
-1. Re-run the **locked pytest scope** from the review file `Stats` table (reuse the same command; do not pick a new scope).
-2. Re-run project-specific validators explicitly recorded in the review file.
-3. If any validation fails, return to Phase 2.
-4. Do not continue until validations pass.
+1. After the selected fixes are ready, validate the batch once. Use the review's recorded commands
+   as evidence of prior coverage, not a permanent minimum scope. Select the narrowest checks that
+   cover the corrections and directly affected contracts, subject to explicit repository policy.
+   Apply verification-contract.md §4.1 before running: reuse valid evidence, and let a qualifying
+   broader run satisfy narrower checks without executing both. Record the reason for changed scope.
+2. Include project-specific validators explicitly recorded in the review file; either cite valid
+   evidence or run them. Replacing test scope does not silently drop a required validator.
+3. If validation fails, return to Phase 2 only for a failure attributable to the selected fixes.
+   Otherwise report the baseline debt, environment failure, or unresolved attribution and the
+   unmet gate; do not expand remediation or retry silently.
+4. Do not continue until required validations pass. Author validation does not replace the
+   independent verification of the original concern in Phase 5.
 
 ### Phase 4 — Commit code fixes (isolation gate #1)
 

@@ -188,6 +188,10 @@ then branch name.
 Build the body from the preflight JSON (keep total under 4,000 characters):
 
 - **Summary** — resulting behavior and user impact inferred from code, tests, knowledge, and commits
+- Include material exclusions and explicit operating assumptions (target environment, supported
+  users, configuration and decision owner) from the developer's delivery handoff in that summary.
+  If they are absent, do not invent them or recover planning files; ask only when an unknown
+  materially affects the claim of readiness.
 - **Changes** — file list from `diff.file_changes` (status + path) and `diff.lines_summary`
 - **Code/Knowledge Consistency** — whether changed behavior is accurately represented by current
   `.knowledge/`, including any gap requiring reviewer attention

@@ -45,8 +45,14 @@ and nothing the change does not need.
 
 ## Understand
 
-1. Treat the user's request as the source of intent. Identify the desired outcome and what observable
-   behavior would demonstrate the first useful increment. Do not write a requirements catalog.
+1. Treat the user's request as the source of intent. Identify the desired outcome, the observable
+   acceptance evidence, and material exclusions for the first useful increment. A smaller increment
+   must still satisfy the requested outcome unless the developer authorizes splitting it. Derive
+   obligations from that request and applicable contracts; adjacent improvements and future
+   possibilities are not acceptance criteria. Carry explicit operating assumptions (target
+   environment, supported users, configuration and decision owner) under preamble §13; do not
+   turn missing details into a questionnaire or invent additional supported environments or users.
+   Do not write a requirements catalog.
 2. Inspect only relevant existing code, tests, contracts, and `.knowledge/`. Reuse repository
    patterns. If the user names an issue or work item, use it as source context through
    `## Work-Item Grounding`; do not guess or search for a matching item.
@@ -178,7 +184,7 @@ When a material decision, unresolved blocker, intended outcome, or next action w
 lost between sessions, create or update only
 `.devspark.work/specs/<branch>/work.md`. Keep it short and limited to:
 
-- Intended outcome
+- Intended outcome, acceptance evidence, material exclusions and explicit operating assumptions
 - Material decisions, each with the basis it rests on (evidence paths or contracts and a commit)
   when it came from on-demand assurance
 - Unresolved blockers
@@ -199,8 +205,9 @@ information instead of fabricating it or silently creating a full-spec.
 
 ## Handoff
 
-Hand off to `/devspark-implement` with the original request, observed repository facts, acceptance
-evidence for the first increment, any material decision already authorized, any invariant, the
+Hand off to `/devspark-implement` with the original request, observed repository facts, the intended
+outcome, acceptance evidence, material exclusions and explicit operating assumptions for the first
+increment, any material decision already authorized, any invariant, the
 verification expectations above, and any mandatory or recommended assurance concern. Do not generate Analyze, Critic, or Judge artifacts here.
 
 Report the branch and next action. No Plan, Tasks, checklist, specification, or review artifact is

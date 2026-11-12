@@ -14,11 +14,32 @@ Generating findings is easy; recognizing that work is finished is not. A command
 
 A finding creates mandatory work **inside the active route** only when it demonstrates one of five **expansion triggers**: failure of the stated objective, an unresolved requirement, a violated invariant, a correctness defect, or a regression caused by this change. Every other finding is classified — **Accepted Limitation**, **Deferred Work**, or **Learning / Changed Assumption** — and the route converges.
 
-This binds every command that produces findings (`/devspark-analyze`, `/devspark-critic`, `/devspark-verify`, `/devspark-checklist`, `/devspark-explain`, `/devspark-site-audit`, `/devspark-pr-review`) and every command that consumes them (`/devspark-implement`, `/devspark-create-pr`). A finding command still reports everything it sees — reporting is not expansion. What it MUST NOT do is convert a non-triggering observation into required work on its own authority, or imply the route is unfinished because observations remain.
+This binds every command that produces findings (`/devspark-analyze`, `/devspark-critic`, `/devspark-verify`, `/devspark-checklist`, `/devspark-explain`, `/devspark-site-audit`, `/devspark-pr-review`) and every command that consumes them (`/devspark-implement`, `/devspark-create-pr`). Investigate only within the command's declared scope: for PR review, the delta and directly affected contracts; for site audit, the requested audit scope. Report material observations encountered there without searching for unrelated debt. An expansion trigger must connect to the active objective, changed behavior, or an applicable mandatory obligation; finding an unrelated correctness defect does not make it current work. What a command MUST NOT do is convert a non-triggering observation into required work on its own authority, or imply the route is unfinished because observations remain.
 
 **Timing matters.** Before implementation begins, a gate that reshapes the spec is *authoring*, not expansion — `/devspark-analyze` and `/devspark-critic` exist precisely to change the plan while changing it is still cheap, and a finding that tightens a requirement there is the system working. The expansion rule binds from the moment implementation starts: after that point, a non-triggering observation is classified and carried, not folded into the route.
 
 Authoring is still not automatic. Before implementation, a finding enters the plan only through Planning Review's Judge dispositions (`judge-contract.md` §11): a finding is evidence, not automatically work, and a risk does not prescribe its remediation. Discovery alone does not expand current scope in the authoring phase either.
+
+### Bounded investigation and completion
+
+- **Question before expansion.** Before an additional search, read, probe or test run, identify the
+  unresolved question about the active change and what evidence would settle it. Keep this reasoning
+  internal; no investigation ledger or extra artifact is required. Stop tracing when the question
+  is answered. Reading a dependency does not authorize an audit of that dependency. Applicable
+  mandatory checks are valid reasons to investigate; uncertainty without a specific question is not.
+- **Settled decisions stay settled.** Preserve exclusions, accepted limitations and resolved
+  findings. To reopen one, name its original basis, the specific new evidence or authorized scope
+  change that invalidates it, and the affected conclusion. A new reviewer, a new preference or a
+  changed path without a relevant semantic change is not sufficient. Record any justified change
+  through the existing decision or finding mechanism; never silently discard the earlier decision.
+- **Optional advice stays cheap.** Omit low-value suggestions. Report a useful adjacent observation
+  briefly without automatically creating a ticket, plan or approval cycle. Existing classification
+  and capture requirements still apply to formal findings and mandatory obligations; omitting
+  optional advice must never hide an unresolved blocker.
+- **Stop at the command's completion condition.** Once the requested outcome and required checks
+  are satisfied, perform the existing recording and handoff steps and stop. Do not add a final
+  discovery sweep, cleanup pass or search for improvements. If evidence remains insufficient,
+  report the precise unresolved question and coverage limit instead of claiming completion.
 
 ### Human-authorized bounded correction
 

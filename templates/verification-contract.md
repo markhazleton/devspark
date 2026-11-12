@@ -146,7 +146,25 @@ Anyone who runs tests for a delta (`/devspark-implement`, `/devspark-verify`, `/
   run_by: implement | verify | pr-review | address-pr-review
 ```
 
-A record is **reusable** only when all hold: `exit 0` and `tree: clean`; the command's scope covers what the consumer needs (the changed tests and the code they exercise); the recorded commit still exists; and every path changed since it is a planning or review artifact under `.devspark.work/specs/`, `.devspark.work/quickfixes/` or `.devspark.work/pr-review/` (`git diff --name-only <commit> HEAD`, plus uncommitted changes). A rebase, a merge from the base branch, a dependency change, a different runtime or environment from the recorded run (language version, required services, configuration), or any code, test, data or knowledge edit invalidates it. Reuse is cited by location, never re-recorded as a new run. A record is evidence of what was run, never a substitute for the failing-run output.
+A record is **reusable** only when all hold: `exit 0` and `tree: clean`; the command's scope covers
+what the consumer needs (the changed tests and the code they exercise); the recorded commit still
+exists; the required execution authority and runtime/environment match; and intervening changes
+do not invalidate that evidence. Compare the recorded commit with HEAD plus staged and unstaged
+changes and relevant untracked inputs. Apply the same rule to direct edits, merges and rebases:
+
+- Only planning/review bookkeeping changed: reuse, unless it changes the required proof itself.
+- A tested behavior, dependency, test, shared fixture, configuration, or environment changed:
+  this invalidates it for affected checks. Run those checks again. When impact cannot be bounded,
+  rerun the recorded scope rather than assuming independence.
+- Other changes: reuse only with a concrete explanation of why they cannot affect the recorded
+  coverage. A different commit SHA or a merge event alone is not invalidation. Unchanged source
+  text alone is not proof of independence from changed callers or dependencies.
+
+A qualifying broader run satisfies narrower checks when coverage, execution authority, environment,
+and freshness all match. A role label alone does not establish independent execution. Preserve
+failed and skipped results; an exit-zero run that skipped required coverage does not satisfy it.
+Reuse is cited by location, never re-recorded as a new run. A record is evidence of what was run,
+never a substitute for the failing-run output.
 
 A repository policy (constitution, `.devspark.work/templates/`, or a command override) may tighten this, for example by requiring the reviewer's own run for high-risk paths or when CI does not run the tests. Such a policy wins; the default here only removes repetition that no policy requires.
 

@@ -31,7 +31,24 @@ Typical sequence after `/devspark-implement`: `/devspark-verify`, `/devspark-cre
 
 The review is saved to `.devspark.work/pr-review/pr-{number}.md`. Re-reviewing after new commits replaces the report and its revision log; Git keeps earlier versions. PR review judges a change that already claims readiness, so it is not completion detection.
 
-**Evidence first, tests second.** Before running anything, the review looks for existing test evidence for the reviewed commit: a Test Evidence Record from `/devspark-verify`, CI results for the head SHA, or the author's record in the PR description. A record is reused when it is for the same commit (or only planning and review files changed since), came from a clean tree with exit code 0, ran in the same environment, and covers the changed tests. It re-runs tests only on a named trigger: no valid record, a high-risk change backed only by the author's own evidence, a repository policy that requires independent execution, or behavior no recorded run exercises. Every run or reuse is written into the report's Test Evidence section, so an unverified result is stated as unverified rather than implied.
+**Evidence first, tests second.** Before running anything, the review looks for existing test evidence: a Test Evidence Record from `/devspark-verify`, CI results, or the author's record in the PR description. Reuse requires a clean-tree successful run, sufficient coverage, matching environment and execution authority, and no intervening change affecting that evidence. A merge alone does not invalidate it; uncertain impact requires a rerun. A qualifying broader run can satisfy narrower checks. Tests run only on a named trigger: no valid record, a high-risk change backed only by the author's evidence, a policy requiring independent execution, or behavior no recorded run exercises. Required skipped tests remain unverified, and failed-run evidence is preserved.
+
+**Bounded follow-up.** An existing review continues as a terminal UPDATE. It inspects the recorded
+state and checks each pending correction's prerequisites (correction commit, author context, a
+distinct evaluator, available proof) before any proof; a correction missing one stays pending with
+the gap named. It then evaluates the corrections and only those intervening changes with a
+demonstrated effect on the PR; incoming target-branch commits are not audited for their own sake.
+UPDATE never falls back into initial-review discovery, Knowledge retrieval or architecture
+exploration. With no pending correction or relevant change, the reviewer checks evidence
+validity, refreshes the report and stops. Fixes are validated as a batch rather than repeating the
+original test command for every finding. Baseline debt and environment failures are distinguished
+from product regressions; that distinction never waives a required gate.
+
+**Keep the fix batch fixed.** `/devspark-address-pr-review all` selects the current actionable
+findings, not a growing list of later discoveries. Supporting edits and regressions caused by the
+fixes are covered; unrelated improvements need separate authorization. Reopening a settled finding
+requires evidence invalidating its original basis. Extra investigation must answer a specific
+question about the change, and the workflow stops after required checks, recording and handoff.
 
 **Risk-sized reviews.** Context helpers compute review tiers and an auditable rating from the full
 changed-file set before sampling. Knowledge ownership can raise a file's tier; the reviewer may
@@ -40,7 +57,15 @@ and full report forms. A deterministic validator checks report metadata, finding
 and risk consistency. Calibration compares recorded outcomes by producer version; it does not
 prove reviewer quality.
 
-**Durable-delta gates.** Each produces a tracked finding ID and blocks:
+**Declare the operating boundaries.** For example: "Target the existing development environment,
+one operator and the current configuration; I own scope decisions. Multi-user support and other
+environments are out of scope." Specify carries those assumptions into implementation and the PR
+summary. Review findings must connect to scenarios reachable within them. Contradictory system
+evidence is surfaced, not ignored; one operator can still trigger overlapping jobs. External
+sign-offs require a cited applicable policy or instruction and its actual authority. Review must
+not invent approvers or convert optional coordination advice into a completion requirement.
+
+**Durable-delta gates.** Each produces a tracked finding ID and blocks when validated under its own rule:
 
 | ID | Blocks on |
 |---|---|

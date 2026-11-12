@@ -11,6 +11,34 @@ def _read(path: str) -> str:
     return " ".join((ROOT / path).read_text(encoding="utf-8").split())
 
 
+def test_operating_limits_are_explicit_preserved_and_not_universal_defaults() -> None:
+    preamble = _read("templates/command-preamble-contract.md")
+    operating = preamble.split("**Operating assumptions.**", 1)[1].split("**Approval authority.**", 1)[0]
+    assert "single-environment, single-user" in operating
+    assert "Do not assume these limits when they were not stated" in operating
+    assert "Single user does not imply single execution" in operating
+    assert "If evidence contradicts an assumption" in operating
+    for command in ("specify", "implement", "create-pr"):
+        text = _read(f"templates/commands/{command}.md")
+        assert "explicit operating assumptions" in text, command
+        for boundary in ("target environment", "supported users", "configuration", "decision owner"):
+            assert boundary in text, (command, boundary)
+
+
+def test_approval_requires_actual_authority_not_invented_stakeholders() -> None:
+    preamble = _read("templates/command-preamble-contract.md")
+    authority = preamble.split("**Approval authority.**", 1)[1].split("## 14.", 1)[0]
+    for rule in (
+        "Do not invent external approvers",
+        "must cite an existing applicable policy, contract or explicit instruction",
+        "Repository access alone neither establishes nor removes that authority",
+        "A recommendation is not a required sign-off",
+        "Existing applicable mandatory controls remain binding",
+        "authorization already given is not requested again",
+    ):
+        assert rule in authority
+
+
 def test_existing_authority_does_not_require_a_second_approval() -> None:
     convergence = _read("templates/preamble/convergence.md")
     implement = _read("templates/commands/implement.md")
@@ -18,6 +46,50 @@ def test_existing_authority_does_not_require_a_second_approval() -> None:
     assert "**Already authorized**" in convergence
     assert "do not ask for approval that the existing decision already grants" in convergence
     assert "After explicit authorization for a bounded correction" in implement
+
+
+def test_investigation_stops_at_the_question_and_command_completion() -> None:
+    convergence = _read("templates/preamble/convergence.md")
+    for rule in (
+        "Before an additional search, read, probe or test run",
+        "what evidence would settle it",
+        "Stop tracing when the question is answered",
+        "Reading a dependency does not authorize an audit of that dependency",
+        "no investigation ledger or extra artifact is required",
+        "Do not add a final discovery sweep",
+        "coverage limit instead of claiming completion",
+    ):
+        assert rule in convergence
+    implement = _read("templates/commands/implement.md")
+    assert "do not add a cleanup pass or search for adjacent improvements" in implement
+
+
+def test_reopening_requires_invalidating_evidence_and_optional_advice_stays_optional() -> None:
+    convergence = _read("templates/preamble/convergence.md")
+    for rule in (
+        "name its original basis",
+        "new evidence or authorized scope change that invalidates it",
+        "a changed path without a relevant semantic change is not sufficient",
+        "without automatically creating a ticket, plan or approval cycle",
+        "must never hide an unresolved blocker",
+    ):
+        assert rule in convergence
+    review = _read("templates/commands/pr-review.md")
+    assert "a different reviewer or preference is not new evidence" in review
+    assert "smallest necessary correction" in review
+
+
+def test_remediation_all_does_not_grow_with_adjacent_discoveries() -> None:
+    remediation = _read("templates/commands/address-pr-review.md")
+    for rule in (
+        "Freeze those finding IDs and their required outcomes for this invocation",
+        "`all` means the actionable findings selected now",
+        "regressions caused by the selected corrections",
+        "the file list is not a hard limit",
+        "Do not add adjacent refactors or newly discovered unrelated findings to the batch",
+        "obtain explicit authorization before adding separate work",
+    ):
+        assert rule in remediation
 
 
 def test_human_authorized_bounded_correction_continues_in_the_existing_feature() -> None:

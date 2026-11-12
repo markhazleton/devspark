@@ -46,11 +46,11 @@ def _changelog_entry(version: str) -> str:
 def test_pyproject_version_matches_version_stamp() -> None:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
     assert project["version"] == _stamp()["version"]
-    assert project["version"] in ("9.0.0", "9.1.0", "9.2.0", "9.3.0", "9.4.0", "9.4.1", "9.5.0")
+    assert project["version"] in ("9.0.0", "9.1.0", "9.2.0", "9.3.0", "9.4.0", "9.4.1", "9.5.0", "9.5.1", "9.5.2")
 
 
-def test_version_stamp_reads_nine_five_zero() -> None:
-    assert _stamp()["version"] == "9.5.0"
+def test_version_stamp_reads_nine_five_two() -> None:
+    assert _stamp()["version"] == "9.5.2"
 
 
 def test_version_stamp_carries_no_migration_marker_or_compatibility_field() -> None:

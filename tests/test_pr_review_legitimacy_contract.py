@@ -74,6 +74,19 @@ def test_consumer_trace_is_required_for_behavioral_medium_and_above(legitimacy: 
     assert "Not exhaustive tracing" in trace
 
 
+def test_findings_and_handoffs_cannot_invent_operating_conditions_or_approvers(legitimacy: str) -> None:
+    for rule in (
+        "concrete scenario reachable in the supported environment",
+        "evidence it can occur",
+        "Hypothetical tenants, environments, scale or future consumers do not establish a defect",
+        "never recover a planning bundle",
+        "Applicable mandatory controls still bind even without a runtime failure",
+        "Do not manufacture an external sign-off or coordination task there",
+        "an optional recommendation stays explicitly optional",
+    ):
+        assert rule in legitimacy
+
+
 def test_nearest_falsifying_evidence_is_sought_and_a_defeated_concern_is_dropped(legitimacy: str) -> None:
     trace = legitimacy.split("**Consumer trace**", 1)[1].split("**Attribution**", 1)[0]
     assert "would prove the concern wrong" in trace
@@ -159,6 +172,77 @@ def test_duplicate_review_updates_guideline_is_gone_but_iteration_detection_rema
     assert "### Review Updates" not in prompt
     assert "**Iteration Detection**" in prompt
     assert "`➡️ Carried`" in prompt  # status vocabulary still defined once, in the finding format
+
+
+def test_followup_review_stops_without_discovery_but_checks_new_exposure(prompt: str) -> None:
+    iteration = _flat(_section(prompt, "**Iteration Detection**", "**PR Number Detection**"))
+    for safeguard in (
+        "existing review of this PR",
+        "no correction is pending and no relevant behavior changed",
+        "refresh the report, and stop",
+        "incoming changes and merge conflict resolutions",
+        "Review new substantive changes in that intervening delta",
+        "new callers, inputs, permissions, or configuration",
+        "Preserve existing governed accepted/deferred/withdrawn decisions",
+    ):
+        assert safeguard in iteration
+
+
+def test_update_is_a_terminal_path_that_checks_prerequisites_before_proof(prompt: str) -> None:
+    flat = _flat(prompt)
+    assert flat.index("Choose the route (Iteration Detection below) before investigating") < flat.index(
+        "Initial-review execution limits"
+    )
+    iteration = _flat(_section(prompt, "**Iteration Detection**", "**PR Number Detection**"))
+    assert "UPDATE is a terminal path" in iteration
+    fall_through = iteration.split("Do not fall through into", 1)[1].split("No final discovery sweep", 1)[0]
+    for excluded in (
+        "§1b–§6d",
+        "Knowledge retrieval or projection",
+        "durable-learning harvest",
+        "architectural exploration",
+        "unrelated quality checks",
+    ):
+        assert excluded in fall_through, excluded
+    assert "If the engine fails or rejects the record, report its diagnostic and stop" in iteration
+    assert iteration.index("**Prerequisites before proof.**") < iteration.index("**Evaluate.**")
+    assert "never invent an identity, evidence, or approval" in iteration
+    assert "If findings await verification and none can proceed, report the missing prerequisites" in iteration
+    assert "leave `reviewed_commit` at the previous evaluated commit, and stop" in iteration
+    assert "a merge-only update records its new head only after this bounded check completes" in iteration
+    assert "Only after this bounded evaluation completes, set `reviewed_commit` to that head" in iteration
+    assert "a finding left pending in step 2 gets no verification event" in iteration
+    assert "matter only through a demonstrated effect" in iteration
+    assert "do not audit incoming commits" in iteration
+    existing = _flat(_section(prompt, "#### Handle Existing Reviews", "#### Report Forms"))
+    assert "An existing file means the UPDATE path" in existing
+    assert "explicitly requested a fresh full review" in existing
+
+
+def test_findings_may_rest_on_non_constitution_expectations(prompt: str) -> None:
+    authority = _flat(_section(prompt, "### Constitution Authority", "### Evidence-Based Feedback"))
+    assert "another legitimate expectation under §4C" in authority
+    assert "Use `CON` only when the constitution itself should change" in authority
+    flat = _flat(prompt)
+    assert "If a concern is not in the constitution, flag it LOW" not in flat
+    assert "flagged as a `CON` candidate" not in flat
+    assert "Extract all core principles" not in flat
+
+
+def test_prd_prefix_alone_does_not_block(delta: str, prompt: str) -> None:
+    assert "the `PRD` prefix alone does not block" in delta
+    assert "strong, blocking gate" not in delta.lower()
+    assert "every open one belongs in the Immediate Actions" not in delta
+    assert "every unresolved blocking `PRD{N}` finding" in delta
+    assert "including each open `PRD{N}`" not in _flat(prompt)
+
+
+def test_report_validation_recovery_is_bounded(prompt: str) -> None:
+    section = _flat(_section(prompt, "### 9. Write Review File", "### 10. Output Summary to User"))
+    assert "make one targeted correction through the state engine and validate once more" in section
+    assert "report the diagnostic, state that the review file is unvalidated" in section
+    assert "Do not repair framework scripts or templates, change product code" in section
+    assert "Never silently skip this required check" in section
 
 
 def test_accidental_complexity_review_evaluates_proportionality_and_preserves_guarantees(prompt: str) -> None:
@@ -247,27 +331,30 @@ def test_negative_knowledge_assertions_require_compared_claims(delta: str) -> No
     assert "claims you actually compared" in text
 
 
-def test_review_resolves_a_small_cited_knowledge_packet_and_qualifies_evidence(
-    delta: str, prompt: str
-) -> None:
-    retrieval = delta.split("**Build the review's applicable Knowledge context.**", 1)[1].split(
+def test_review_resolves_further_knowledge_only_for_an_open_question(delta: str, prompt: str) -> None:
+    retrieval = delta.split("**Resolve further Knowledge only for an open question.**", 1)[1].split(
         "**Claim-targeted check.**", 1
     )[0]
     for requirement in (
         "canonical `explain-context.py` topic retrieval",
         "accepted relationships",
+        "only to answer a specific unresolved contract or ownership question",
+        "name the question and stop when it is answered",
+        "Neither the report form nor an empty owner lookup alone decides this",
+        "an unmapped, materially new contract may still need it",
         "retain only candidates",
-        "read its authoritative source",
+        "read each retained source",
         "cite the Knowledge path and heading",
-        "concise packet",
         "not current truth",
         "unaccepted projection candidate",
-        "Identify durable architectural truths",
-        "recommend updating that owner in this Delta",
-        "Do not copy source code, test details, ephemeral history",
     ):
         assert requirement in retrieval, requirement
+    for obsolete in ("concise packet", "Carry durable learning forward", "Build the review's applicable Knowledge context"):
+        assert obsolete not in delta, obsolete
+    prd5 = delta.split("6. **`PRD5`", 1)[1].split("7. ", 1)[0]
+    assert "do not copy source code, test details, ephemeral history" in prd5
     report = _flat(_section(prompt, "## Applicable Knowledge", "## Security"))
+    assert "Only when Knowledge was consulted to settle a finding or an open question" in report
     assert "applicable invariants" in report
     assert "Cite each authoritative `.knowledge/` path and heading" in report
     assert "Omit unrelated candidates" in report
@@ -282,8 +369,10 @@ def test_review_context_contract_covers_the_pr_review_prompt() -> None:
     )[0]
     assert "templates/commands/pr-review.md" in frontmatter
     assert "canonical topic retrieval" in lifecycle
-    assert "cite the applicable invariants in the review" in lifecycle
-    assert "reconcile their existing owner in the same change" in lifecycle
+    assert "only to answer a specific unresolved contract or ownership question" in lifecycle
+    assert "cite the invariants a finding or decision relied on" in lifecycle
+    assert "existing owner is reconciled in the same change" in lifecycle
+    assert "A focused update evaluates corrections only" in lifecycle
 
 
 def test_prd1_is_semantic_truth_judged_from_claims_read(delta: str) -> None:
@@ -308,7 +397,9 @@ def test_prd3_coverage_is_proportionate_to_behavior_and_delegation(delta: str) -
 def test_knowledge_check_stays_read_only_and_head_verified(prompt: str) -> None:
     section = _flat(_section(prompt, "### 6c.", "### 6d."))
     assert "Never regenerate Knowledge during review" in section
-    assert "check it out or stop" in section
+    assert "git show <head-sha>:<path>" in section
+    assert "never move HEAD to reach it" in section
+    assert "check it out" not in section
 
 
 def test_pr_review_does_not_load_the_assurance_contract_or_add_machinery(prompt: str) -> None:
