@@ -30,6 +30,7 @@ The collection includes 39 active commands.
 | File                       | Command                           | Purpose                                                                                          |
 | -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `specify.md`               | `/devspark-specify`               | Define requirements and user stories                                                             |
+| `roadmap.md`               | `/devspark-roadmap`               | Optional: plan product direction as right-sized Prospective Specs; never required                |
 | `plan.md`                  | `/devspark-plan`                  | Create technical implementation plan                                                             |
 | `tasks.md`                 | `/devspark-tasks`                 | Generate actionable task list                                                                    |
 | `implement.md`             | `/devspark-implement`             | Execute tasks to build the feature                                                               |
@@ -43,7 +44,6 @@ The collection includes 39 active commands.
 | `commit-audit.md`          | `/devspark-commit-audit`          | Analyze commit history for workflow, hygiene, and delivery signals                               |
 | `quickfix.md`              | `/devspark-quickfix`              | Lightweight bug fix workflow                                                                     |
 | `release.md`               | `/devspark-release`               | Verify the durable Git delta, sweep `.devspark.work/` retention, and archive completed work        |
-| `roadmap.md`               | `/devspark-roadmap`               | Maintain optional product direction and right-sized Prospective Specs                             |
 | `evolve-constitution.md`   | `/devspark-evolve-constitution`   | Propose constitution amendments                                                                  |
 | `repo-story.md`            | `/devspark-repo-story`            | Narrative from commit history                                                                    |
 | `critic.md`                | `/devspark-critic`                | Adversarial risk analysis                                                                        |
@@ -76,6 +76,7 @@ The collection includes 39 active commands.
 | `checklist-template.md`       | Template structure for quality checklists                          |
 | `spec-validation-contract.md` | Shared validation contract for spec structure and required content |
 | `agent-file-template.md`      | Template for agent configuration files                             |
+| `roadmap-template.md`         | Optional roadmap and Prospective Spec shapes for `/devspark-roadmap` |
 | `vscode-settings.json`        | Recommended VS Code settings                                       |
 
 The stock spec, quick-spec, plan, and tasks templates include optional
