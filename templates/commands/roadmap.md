@@ -81,19 +81,22 @@ without `--root`, rerun the script with `--root <path>` rather than guessing.
 
 When `PRESENT` is `false` and the request is not to establish a roadmap, say that no roadmap exists at
 `ROADMAP_ROOT`, note that one is optional, and stop.
+When a configured external roadmap is absent, report the missing location and stop even for an
+establish request. The developer can explicitly choose that location with `--root` to authorize
+establishing it; never recreate a missing shared checkout automatically.
 
 ## Requests
 
 Interpret the request and do only what it needs. One request may combine several of these.
 
-**Establish or revise the roadmap.** Create or update `roadmap.md` from the template: direction,
-current baseline, themes, and decisions. Assess the existing application first so the baseline is
-factual, citing paths, commits, and observed behavior. Propose the direction and themes; write them
-once the developer agrees.
+**Establish or revise the roadmap.** Create or update `ROADMAP_FILE` under `ROADMAP_ROOT` (normally
+`roadmap.md`) from the template: direction, current baseline, themes, and decisions. Assess the
+existing application first so the baseline is factual, citing paths, commits, and observed behavior.
+Propose the direction and themes; write them once the developer agrees.
 
 **Add a Prospective Spec.** Use `NEXT_ID` from the script output; ids are permanent and never reused.
 Create `specs/<id>-<slug>.md` from the template with `status: proposed`, link it from the relevant
-theme in `roadmap.md`, and keep it concise. A PS records the outcome, current reality, scope and
+theme in `ROADMAP_FILE`, and keep it concise. A PS records the outcome, current reality, scope and
 standalone shipping boundary, future health, dependencies and decisions, and completion expectations.
 It never contains implementation tasks, file-by-file plans, test inventories, line-level
 instructions, or status audits.
@@ -123,16 +126,17 @@ which related technical debt it should leave cleaner, and which credible future 
 close off. Do not create refactoring quotas, speculative abstractions, architecture scores, or debt
 approval gates.
 
-**Recommend what is ready.** `UNBLOCKED` lists `proposed` and `ready` items whose dependencies are
-complete, or recorded as complete in the live roadmap's Delivered section (`ARCHIVED` maps historical
-ids to `complete`, `dropped`, or `unknown`). An archive link alone has unknown status and never
+**Recommend what is ready.** `UNBLOCKED` lists `proposed` and `ready` items with no recorded
+`blockers` whose dependencies are complete, or recorded as complete in the live overview's Delivered
+section (`ARCHIVED` maps historical ids to `complete`, `dropped`, or `unknown`). An archive link alone has unknown status and never
 satisfies a dependency. Confirm unknown status from current code and Git delivery evidence, then
 record the developer-approved status in Delivered; never read the archived copy.
 Combine it with the roadmap's themes and current evidence to recommend a next PS and say why. The
 developer chooses.
 
-**Review progress and drift.** Compare each affected PS with local delivery evidence: branches,
-commits, merged history, code, tests, and current Knowledge. Distinguish:
+**Review progress and drift.** Compare each affected PS with delivery evidence: branches, commits,
+merged history, code, tests, and current Knowledge. For a shared roadmap, inspect the affected
+repository or repositories; if they are unavailable, report the missing evidence. Distinguish:
 
 - **Tracking drift**: recorded status or `delivery` references disagree with the evidence;
 - **Product drift**: what was delivered, or what is being prioritized, diverges from the intended
@@ -150,9 +154,10 @@ only, not every observation.
 
 **Resolve an item.** With the developer's confirmation, set `status: complete` (citing at least one
 `delivery` reference) or `status: dropped` (keeping the reason in the PS), then run the repair below to
-stage it under `specs/complete/`. Resolved items stay there until `/devspark-release` offers to archive
-them; archival repoints this roadmap's links at the archived copies, so never edit them by hand. An
-external roadmap is archived only from its own planning repository.
+stage it under `specs/complete/`, unless the layout preserves paths. Staged items stay there until
+`/devspark-release` offers to archive them; archival
+repoints this roadmap's links at the archived copies, so never edit them by hand. An external roadmap
+is archived only from its own planning repository.
 
 ## Structural Check
 
@@ -162,9 +167,8 @@ misplaced items, and obvious tracking disagreements such as a complete item with
 reference. Report errors and warnings plainly. Run the check again after any roadmap edit.
 
 Mechanical findings marked `repairable` (item placement, and links broken by a move) can be fixed with
-`roadmap-check repair` (`.devspark/scripts/bash/roadmap-check.sh repair --json`, or
-`.devspark/scripts/powershell/roadmap-check.ps1 repair -Json`, adding the same `--root` when one was
-given). It plans the repairs and writes nothing. Show the plan; only after the developer authorizes it,
+`roadmap-check repair` using the same resolved script as the check (team override if present), adding
+the same `--root` when one was given. It plans the repairs and writes nothing. Show the plan; only after the developer authorizes it,
 run it again with `--apply` (`-Apply`). Repair never advances a status, rewrites a decision,
 reprioritizes, changes application files, or writes outside the roadmap root. Fix everything else by
 hand, with the developer, or leave it reported.

@@ -136,6 +136,37 @@ def test_default_location_reports_items_unblocked_work_and_next_id(repo: Path) -
     assert payload["NEXT_ID"] == "ps-004"
 
 
+def test_non_spec_blockers_are_visible_and_excluded_from_unblocked(repo: Path) -> None:
+    root = repo / ROADMAP
+    prospective(root, "ps-001", "held", blockers=["A named consumer must approve the contract"])
+    prospective(root, "ps-002", "open")
+
+    code, payload = check(repo, "check")
+    _, located = check(repo, "locate", "ps-001")
+
+    assert code == 0 and payload["UNBLOCKED"] == ["ps-002"]
+    assert located["ITEM"]["blockers"] == ["A named consumer must approve the contract"]
+
+
+@pytest.mark.parametrize("blockers", ["not a list", [""], [1]])
+def test_malformed_blockers_are_an_error(repo: Path, blockers: object) -> None:
+    prospective(repo / ROADMAP, "ps-001", "held", blockers=blockers)
+
+    code, payload = check(repo, "check")
+
+    assert code == 1 and "malformed-metadata" in codes(payload, "error")
+    assert payload["UNBLOCKED"] == []
+
+
+def test_locate_returns_failure_for_an_invalid_item(repo: Path) -> None:
+    prospective(repo / ROADMAP, "ps-001", "invalid", status="unknown")
+
+    code, payload = check(repo, "locate", "ps-001")
+
+    assert code == 1 and payload["OK"] is False and payload["ITEM"]["id"] == "ps-001"
+    assert "invalid-status" in codes(payload, "error")
+
+
 def test_next_id_never_reuses_an_archived_id_recorded_in_roadmap_history(repo: Path) -> None:
     root = repo / ROADMAP
     write(root / "roadmap.md", "# Roadmap\n\n## Delivered\n\n- ps-007 Reports — delivered in 1.0.0\n")
@@ -170,6 +201,101 @@ def test_explicit_root_argument_wins_over_configuration(repo: Path, tmp_path: Pa
 
     assert payload["ROOT_SOURCE"] == "argument" and payload["EXTERNAL"] is True
     assert [item["id"] for item in payload["ITEMS"]] == ["ps-001"]
+
+
+def legacy_roadmap(root: Path) -> None:
+    write(
+        root / ".devspark-roadmap.json",
+        json.dumps({
+            "overview": "00-roadmap.md",
+            "legacy_ids": True,
+            "supporting_files": {"specs/complete/PS-07-intake.md": "PS-07"},
+        }),
+    )
+    write(root / "00-roadmap.md", "# Roadmap\n\nReserved legacy item PS-42.\n")
+    write(root / "specs/complete/PS-07-main.md", "---\nid: ps-007\ntitle: Base\nstatus: complete\ndelivery: [main]\n---\n")
+    write(root / "specs/complete/PS-07-intake.md", "# Supporting intake\n\n[Primary](PS-07-main.md)\n")
+    write(root / "specs/complete/PS-24-retired.md", "---\nid: ps-024\ntitle: Retired\nstatus: dropped\n---\n")
+    write(root / "specs/PS-25-next.md", "---\nid: PS-25\ntitle: Next\nstatus: proposed\ndepends_on: [PS-07]\n---\n")
+
+
+def test_legacy_layout_preserves_paths_and_resolves_ids_and_supporting_records(repo: Path) -> None:
+    root = repo / ROADMAP
+    legacy_roadmap(root)
+    before = tree(repo)
+
+    code, payload = check(repo, "check")
+
+    assert code == 0 and payload["FINDINGS"] == []
+    assert payload["ROADMAP_FILE"] == "00-roadmap.md"
+    assert [item["id"] for item in payload["ITEMS"]] == ["ps-007", "ps-024", "ps-025"]
+    assert payload["UNBLOCKED"] == ["ps-025"] and payload["NEXT_ID"] == "ps-043"
+    assert payload["SUPPORTING"] == [{"path": "specs/complete/PS-07-intake.md", "id": "ps-007"}]
+    for reference in ("PS-07", "ps-007", "specs/complete/PS-07-main.md", "specs/complete/PS-07-intake.md"):
+        located_code, located = check(repo, "locate", reference)
+        assert located_code == 0 and located["ITEM"]["path"] == "specs/complete/PS-07-main.md"
+        assert located["REQUESTED_SUPPORTING"] == ("specs/complete/PS-07-intake.md" if reference.endswith("intake.md") else "")
+    assert check(repo, "locate", "PS-25")[1]["DEPENDENCIES"] == {"ps-007": "complete"}
+    assert check(repo, "repair", "--apply")[1]["REPAIRS"] == []
+    assert tree(repo) == before
+
+
+def test_legacy_id_aliases_do_not_hide_a_duplicate(repo: Path) -> None:
+    root = repo / ROADMAP
+    legacy_roadmap(root)
+    prospective(root, "ps-007", "another")
+
+    code, payload = check(repo, "check")
+
+    assert code == 1 and "duplicate-id" in codes(payload, "error")
+    assert check(repo, "locate", "PS-07")[1]["ITEM"] is None
+
+
+def test_preserved_paths_are_not_moved_when_status_changes(repo: Path) -> None:
+    root = repo / ROADMAP
+    legacy_roadmap(root)
+    config = root / ".devspark-roadmap.json"
+    layout = json.loads(config.read_text(encoding="utf-8"))
+    layout["preserve_paths"] = True
+    write(config, json.dumps(layout))
+    prospective(root, "ps-026", "finished", "complete", delivery=["main"])
+    prospective(root, "ps-027", "reopened", folder="specs/complete")
+    before = tree(repo)
+
+    code, payload = check(repo, "repair", "--apply")
+
+    assert code == 0 and payload["PRESERVE_PATHS"] is True and payload["FINDINGS"] == [] and payload["REPAIRS"] == []
+    assert tree(repo) == before
+
+
+@pytest.mark.parametrize(
+    "layout",
+    [
+        {"overview": "../roadmap.md"},
+        {"legacy_ids": "yes"},
+        {"preserve_paths": "yes"},
+        {"supporting_files": {"specs/../outside.md": "ps-007"}},
+        {"supporting_files": {"specs/missing.md": "ps-007"}},
+    ],
+)
+def test_invalid_roadmap_layout_is_reported_without_writes(repo: Path, layout: dict) -> None:
+    root = repo / ROADMAP
+    write(root / ".devspark-roadmap.json", json.dumps(layout))
+    before = tree(repo)
+
+    code, payload = check(repo, "check")
+
+    assert code == 2 and payload["OK"] is False and payload["ERROR"]
+    assert tree(repo) == before
+
+
+def test_layout_config_that_is_a_directory_is_an_error(repo: Path) -> None:
+    config = repo / ROADMAP / ".devspark-roadmap.json"
+    config.mkdir(parents=True)
+
+    code, payload = check(repo, "check")
+
+    assert code == 2 and "regular file" in payload["ERROR"]
 
 
 @pytest.mark.parametrize("root", [".", ".."])
@@ -482,7 +608,7 @@ def test_locate_reports_the_item_and_its_dependency_status(repo: Path) -> None:
         assert payload["DEPENDENCIES"] == {"ps-001": "complete", "ps-002": "active"}
 
     code, missing = check(repo, "locate", "ps-099")
-    assert code == 1 and missing["ITEM"] is None and "not found" in missing["ERROR"]
+    assert code == 1 and missing["OK"] is False and missing["ITEM"] is None and "not found" in missing["ERROR"]
 
 
 # Wrappers --------------------------------------------------------------------------------------------
@@ -506,6 +632,28 @@ def test_powershell_wrapper_matches_the_engine(repo: Path) -> None:
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == direct
+
+
+@pytest.mark.parametrize(
+    ("script", "command"),
+    [("roadmap-check.ps1", "check"), ("release-archive.ps1", "plan")],
+)
+def test_powershell_wrappers_report_missing_python(repo: Path, tmp_path: Path, script: str, command: str) -> None:
+    pwsh = shutil.which("pwsh")
+    if not pwsh:
+        pytest.skip("pwsh is not installed")
+
+    result = subprocess.run(
+        [pwsh, "-NoProfile", "-File", str(ROOT / "scripts" / "powershell" / script), command, "-Json"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        timeout=TIMEOUT,
+        env={**os.environ, "PATH": str(tmp_path)},
+    )
+
+    assert result.returncode == 2
+    assert "Python is required" in result.stderr
 
 
 def test_bash_wrapper_matches_the_engine(repo: Path) -> None:
@@ -600,6 +748,23 @@ def test_release_archives_resolved_items_when_included(release_repo: Path) -> No
     assert archived.read_bytes() == content and not staged.exists()
     assert (root / "roadmap.md").is_file() and (root / "specs" / "ps-002-next.md").is_file()
     assert validate_code == 0 and validated["OK"] is True
+
+
+def test_release_leaves_the_roadmap_alone_when_the_archive_is_outside_the_repository(release_repo: Path, tmp_path: Path) -> None:
+    root = resolved_roadmap(release_repo)
+    store = tmp_path / "store"
+    store.mkdir()
+    staged = f"{ROADMAP}/specs/complete/ps-001-base.md"
+    before = tree(root)
+
+    code, applied = release(release_repo, "apply", "--include-roadmap", "--archive-root", str(store))
+
+    assert code == 0 and applied["ARCHIVE_EXTERNAL"] is True
+    assert applied["ROADMAP_COMPLETED"] == [staged] and applied["ROADMAP_INCLUDED"] is True
+    assert "inside this repository" in applied["ROADMAP_NOTICE"]
+    assert applied["ROADMAP_RELINK"] == [] and applied["ROADMAP_RELINKED"] == []
+    assert staged not in {item["original"] for item in applied["TO_ARCHIVE"]}
+    assert tree(root) == before and not list(store.rglob("ps-001-base.md"))
 
 
 def test_release_leaves_an_unclean_staged_item_for_a_decision(release_repo: Path) -> None:
@@ -806,6 +971,54 @@ def test_release_never_touches_an_external_roadmap(release_repo: Path, tmp_path:
     assert applied["ROADMAP_COMPLETED"] == [] and applied["ROADMAP_RELINKED"] == []
     assert "planning repository" in applied["ROADMAP_NOTICE"]
     assert tree(external) == before
+
+
+def test_legacy_release_relinks_supporting_files_and_external_consumers_see_archived_status(
+    release_repo: Path, tmp_path: Path
+) -> None:
+    root = release_repo / ROADMAP
+    legacy_roadmap(root)
+    write(root / "00-roadmap.md", "# Roadmap\n\n[Base](specs/complete/PS-07-main.md)\n")
+    commit(release_repo, "legacy shared roadmap")
+
+    code, applied = release(release_repo, "apply", "--include-roadmap")
+
+    assert code == 0 and applied["OK"] is True
+    assert not (root / "specs/complete/PS-07-main.md").exists()
+    support = root / "specs/complete/PS-07-intake.md"
+    assert support.is_file() and ".archive/" in support.read_text(encoding="utf-8")
+    assert f"{ROADMAP}/specs/complete/PS-07-intake.md" not in {
+        item["original"] for item in applied["TO_ARCHIVE"]
+    }
+    checked_code, checked = check(release_repo, "check")
+    assert checked_code == 0 and checked["ARCHIVED"] == {"ps-007": "complete", "ps-024": "dropped"}
+    assert checked["UNBLOCKED"] == ["ps-025"]
+
+    consumer_dir = tmp_path / "consumer"
+    consumer_dir.mkdir()
+    consumer = new_repo(consumer_dir)
+    write(consumer / WORK / "devspark.json", json.dumps({"roadmap": {"root": os.path.relpath(root, consumer)}}))
+    external_code, external = check(consumer, "locate", "PS-25")
+    assert external_code == 0 and external["EXTERNAL"] is True
+    assert external["DEPENDENCIES"] == {"ps-007": "complete"}
+    assert external["UNBLOCKED"] == ["ps-025"] and external["FINDINGS"] == []
+
+
+def test_release_preserves_all_published_roadmap_paths(release_repo: Path) -> None:
+    root = release_repo / ROADMAP
+    legacy_roadmap(root)
+    config = root / ".devspark-roadmap.json"
+    layout = json.loads(config.read_text(encoding="utf-8"))
+    layout["preserve_paths"] = True
+    write(config, json.dumps(layout))
+    commit(release_repo, "published roadmap")
+    before = tree(root)
+
+    code, applied = release(release_repo, "apply", "--include-roadmap")
+
+    assert code == 0 and applied["ROADMAP_COMPLETED"] == [] and applied["ROADMAP_RELINKED"] == []
+    assert "preserves published paths" in applied["ROADMAP_NOTICE"]
+    assert tree(root) == before
 
 
 def test_release_defers_roadmap_archival_over_uncommitted_roadmap_changes(release_repo: Path) -> None:

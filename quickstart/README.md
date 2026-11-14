@@ -23,6 +23,8 @@ Install DevSpark into any repository by pointing your AI agent at the right quic
 4. The agent detects the current OS (for plan preview only), then pulls and installs the full DevSpark framework payload — **both** PowerShell and Bash script sets are always installed regardless of OS
 5. For upgrades, re-run the same quickstart guide URL — it detects the existing install and runs a manifest-driven [Update Mode](https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_copilot.md)
 
+**Requirements:** Git and one of the agents above. On Windows the PowerShell scripts need PowerShell 7+ (`pwsh`); Windows PowerShell 5.1 is not supported. macOS and Linux run the Bash scripts.
+
 > ⚠️ **Avoid stale installs.** Webpage-fetch tools cache `dev.makeboldspark.com` URLs aggressively and can hand the agent an **old version** of the guide, manifest, and framework files. Each quickstart now opens with **Step 0**, which forces the agent to re-fetch the guide and every file via cache-busted terminal commands. If your agent appears to install an outdated version, tell it: *"Re-run Step 0 — re-fetch the guide and manifest via a terminal command with a `?cb=<timestamp>` cache-buster, not a webpage fetch."*
 
 After installation, start new work with `/devspark-specify`, or use `/devspark-next` to resume. New work follows one implementation path without choosing Light or Full; active v9.3 specifications continue on their existing route.
@@ -59,7 +61,7 @@ Follow the instructions at https://dev.makeboldspark.com/raw/quickstart/devspark
 - **`.devspark/`** — Framework files (stock prompts, templates, both PowerShell and Bash scripts). Safe to delete or upgrade.
 - **`.devspark.work/`** — Temporary plans, gates, configuration, registries, and overrides.
 - **`.knowledge/`** — Current authoritative technical and governance truth, plus published user-facing guidance under `.knowledge/guides/`.
-- **`.archive/`** — Landing place for all old work products, grouped by release.
+- **`.archive/`** — Landing place for all old work products, grouped by release. A team that keeps its history in another repository sets `archive.root` in `.devspark.work/devspark.json` to an existing folder outside this one.
 - **`agents-registry.json`** — Shared agent metadata used by context-generation and packaging workflows.
 - **Agent entry points** — Platform-specific files that wire `/devspark-*` commands to personal, team, and stock prompt resolution. For GitHub Copilot they are native Agent Skills under `.github/skills/`; upgrades retire the 8.x dotted entry points once, safely, with edited files quarantined.
 

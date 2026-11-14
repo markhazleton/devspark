@@ -36,10 +36,10 @@ from knowledge_findings import validate_finding  # noqa: E402
 
 _GIT_BASH = r"C:\Program Files\Git\bin\bash.exe"
 _BASH = _GIT_BASH if Path(_GIT_BASH).exists() else shutil.which("bash")
-_PWSH = shutil.which("pwsh") or shutil.which("powershell")
+_PWSH = shutil.which("pwsh")
 
 requires_bash = pytest.mark.skipif(_BASH is None, reason="bash not available")
-requires_pwsh = pytest.mark.skipif(_PWSH is None, reason="pwsh/powershell not available")
+requires_pwsh = pytest.mark.skipif(_PWSH is None, reason="pwsh not available")
 
 
 # --- Command wiring: installed command -> resolved canonical prompt -> discovery tooling -------

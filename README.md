@@ -116,7 +116,7 @@ Recommended review loop: `specify → implement → pr-review → address-pr-rev
 
 ### What's new in 9.0
 
-- **One command convention: `/devspark-<command>`.** All 38 commands install as native GitHub Copilot Agent Skills (`.github/skills/devspark-<command>/SKILL.md`). The dotted `/devspark.<command>` form from 8.x is retired with no aliases, fallback, or compatibility mode.
+- **One command convention: `/devspark-<command>`.** All 39 commands install as native GitHub Copilot Agent Skills (`.github/skills/devspark-<command>/SKILL.md`). The dotted `/devspark.<command>` form from 8.x is retired with no aliases, fallback, or compatibility mode.
 - **Safe upgrade from 8.x.** The upgrade shows the 8.x entry points it will retire and asks once. Unmodified managed files are deleted, edited ones are preserved byte-for-byte in `.devspark.work/migration/8.x-entry-points/`, and your team and personal customizations in `.devspark.work/` are never touched. Re-running the upgrade changes nothing.
 - **Same customization precedence.** Developer, then team, then distributed default, resolved by the same rule as before.
 - **Tested with.** VS Code Insiders 1.142.0 and its built-in Copilot Chat, local Windows. Typed text after `/devspark-<command>` is passed to the skill as the command's input. Older builds were not tested.
@@ -137,6 +137,7 @@ This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrad
 | Command | Purpose |
 |---------|---------|
 | `/devspark-constitution` | Establish project principles and guidelines |
+| `/devspark-roadmap` | Optional: plan product direction as right-sized Prospective Specs; never required |
 | `/devspark-specify` | Define what you want to build (requirements & user stories) |
 | `/devspark-plan` | Create a technical implementation plan |
 | `/devspark-tasks` | Break the plan into actionable task lists |
@@ -157,7 +158,6 @@ This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrad
 | `/devspark-planning-review` | Analyze + conditional Critic + Judge: one bounded planning decision |
 | `/devspark-verify` | Empirical proof gate for declared verification modes |
 | `/devspark-release` | Verify the durable Git delta, sweep `.devspark.work/` retention, and archive completed work into `.archive/{YYYY-MM-DD}/` |
-| `/devspark-roadmap` | Optionally set product direction and maintain right-sized Prospective Specs |
 | `/devspark-evolve-constitution` | Propose constitution amendments |
 | `/devspark-repo-story` | Generate narrative from commit history |
 | `/devspark-commit-audit` | Analyze commit history for workflow, hygiene, and delivery signals |
@@ -180,7 +180,9 @@ This is a breaking release. See [Upgrading from 8.x](site/src/get-started/upgrad
 `/devspark-release` is the sole command that sweeps `.devspark.work/` retention and archives
 completed work into `.archive/{YYYY-MM-DD}/`. It runs the `release-archive` script
 (`plan`, `apply`, `validate`): moves are journaled in a manifest, never overwrite archived files,
-stay resumable, and anything ambiguous is reported for a decision instead of moved.
+stay resumable, and anything ambiguous is reported for a decision instead of moved. A team that keeps
+release history in a separate repository sets `archive.root` in `.devspark.work/devspark.json` (or
+passes `--archive-root`) to an existing folder outside this one.
 
 ### Multi-App (Optional)
 
@@ -311,6 +313,7 @@ Install each agent from your organization-approved software channel; DevSpark in
 ## Prerequisites
 
 - **Any OS** (Linux / macOS / Windows)
+- On Windows, PowerShell 7+ (`pwsh`, for example `winget install Microsoft.PowerShell`) to run the helper scripts. Windows PowerShell 5.1 is not supported; macOS and Linux run the Bash scripts.
 - A [supported AI coding agent](#supported-ai-agents)
 - Git (recommended)
 

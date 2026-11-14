@@ -11,7 +11,7 @@ The roadmap is not a project-management system, a second delivery lifecycle, or 
 Use a roadmap when:
 
 - you are planning more than one change toward a larger goal, and want to agree the order and boundaries first;
-- several people need a shared picture of what comes next and why;
+- several people, or several repositories, need a shared picture of what comes next and why;
 - you want to check, later, whether what you shipped still matches what you meant to ship.
 
 Skip it when you already know the one change you want. Run `/devspark-specify` directly.
@@ -59,7 +59,7 @@ Ask in plain language. Each step below is one prompt; the agent proposes, and wr
    /devspark-roadmap is ps-001 right-sized?
    ```
 
-4. **Pick what to start.** The agent lists items whose dependencies are delivered and recommends one, with reasons. You choose.
+4. **Pick what to start.** The agent lists items whose dependencies are delivered and that have no recorded blockers, and recommends one, with reasons. You choose.
 
    ```text
    /devspark-roadmap what is ready to start?
@@ -115,7 +115,7 @@ The command finds the roadmap in this order:
 
 A location outside the repository (a separate planning repository or folder) is used only when you name it with `--root` or configure it. That explicit choice is what allows the command to write there; it never searches for a nearby planning folder. If you mention a location without `--root`, the agent re-runs the check with `--root` rather than guessing.
 
-If there is no roadmap at the resolved location, the command says so, notes that a roadmap is optional, and stops, unless you asked it to establish one.
+If there is no roadmap at the resolved location, the command says so, notes that a roadmap is optional, and stops, unless you asked it to establish one. A **configured** roadmap outside the repository that is missing (for example, the shared planning repository is not checked out beside yours) is reported and the command stops, even for an establish request. It never recreates a missing shared checkout. Check out the planning repository, or name a location with `--root` if you really mean to create a roadmap there.
 
 ## What you can ask
 
@@ -123,7 +123,7 @@ One request can combine several of these.
 
 | Request | Example | What happens |
 |---|---|---|
-| Establish or revise | `establish a roadmap for this application` | Assesses the application, proposes direction and themes, writes `roadmap.md` after you agree |
+| Establish or revise | `establish a roadmap for this application` | Assesses the application, proposes direction and themes, writes the roadmap overview after you agree |
 | Add a PS | `add a Prospective Spec for exporting reports` | Creates `specs/<id>-<slug>.md` as `proposed` and links it from its theme |
 | Right-size a PS | `is ps-004 right-sized?` | Applies the right-sizing test; proposes a merge or split; marks `ready` only when you accept |
 | Dependencies and future health | `what does ps-004 depend on?` | Explains delivered prerequisites, debt it should leave cleaner, and options it must not close off |
@@ -148,6 +148,7 @@ title: Export tasks as CSV
 status: proposed        # proposed | ready | active | complete | dropped
 order: 10               # optional; lower comes first
 depends_on: []          # ids of delivered prerequisites, e.g. [ps-001]
+blockers: []            # optional non-PS prerequisites or decisions, in plain language
 delivery: []            # branch, commit, or pull request references once delivery starts
 ---
 
@@ -177,6 +178,13 @@ Keep it short. A PS never contains task lists, file-by-file plans, test inventor
 
 Ids are permanent and never reused. The agent takes the next free id from the structural check, so do not pick one by hand.
 
+### Dependencies and blockers
+
+- `depends_on` lists other Prospective Specs that must be delivered first.
+- `blockers` lists anything else that genuinely stops the work today, described in plain language: a decision not yet made, an access request, another team's change. For example: `blockers: ["Security sign-off on the export format"]`.
+
+Record only blockers that are actually outstanding, and remove each one when it is resolved. An item with a blocker is not offered as ready to start. If part of the work can begin anyway, describe that portion in the PS rather than inventing a gate.
+
 ## Right-sizing
 
 The test is one question:
@@ -202,9 +210,11 @@ An **undersized** PS usually depends on unfinished work; the agent proposes merg
 | `complete` | Delivery evidence shows the outcome shipped (merged, at minimum) | `specs/complete/` |
 | `dropped` | Intentionally not pursued; the reason stays in the PS | `specs/complete/` |
 
+A roadmap that [preserves published paths](#sharing-one-roadmap-across-repositories) keeps every item where it is, whatever its status.
+
 Planning status is not delivery evidence. Merged is not necessarily deployed, deployed is not necessarily activated, and a complete capability may legitimately ship inactive. When code and Git disagree with the roadmap, code and Git win.
 
-**What counts as ready to start.** The check lists `proposed` and `ready` items whose dependencies are complete, either live in `specs/complete/` or recorded as complete in the roadmap's Delivered section. A dropped or unknown dependency does not count.
+**What counts as ready to start.** The check lists `proposed` and `ready` items with no recorded `blockers` whose dependencies are complete, either live in the roadmap or recorded as complete in its Delivered section. A dropped or unknown dependency does not count.
 
 ## From roadmap to delivery
 
@@ -217,7 +227,9 @@ When you want to build a PS, start it yourself:
 You can also name the PS file, and add the same `--root` you used for the roadmap. Specify then:
 
 - reads the PS as intake context and checks its "current reality" against the code;
-- tells you, in one line, if the PS is missing, ambiguous, or depends on something not yet complete, and lets you decide; this is context, not a gate;
+- also reads a supporting document, if that is what you named, while treating its primary PS as the item;
+- tells you if the PS is missing, ambiguous, has open blockers, or depends on something not yet complete, and lets you decide; this is context, not a gate;
+- tells you if the PS is already `complete` or `dropped`, instead of offering to deliver it again, and lets you choose any distinct follow-on;
 - suggests `/devspark-roadmap` to right-size it if the outcome looks bigger than one shippable increment;
 - carries on with the normal workflow and creates the work branch, using the PS id and title (for example `ps-001 export tasks as CSV`) as the branch description.
 
@@ -229,7 +241,7 @@ Specify only reads a roadmap when you name a PS. Otherwise it never looks for on
 
 ## Reviewing progress and drift
 
-A progress review compares each affected PS with local delivery evidence: branches, commits, merged history, code, tests, and current Knowledge. It separates two kinds of drift:
+A progress review compares each affected PS with delivery evidence: branches, commits, merged history, code, tests, and current Knowledge. For a shared roadmap it inspects the repository or repositories the item affects, and reports any it cannot reach as missing evidence. It separates two kinds of drift:
 
 - **Tracking drift.** The recorded status or `delivery` references disagree with the evidence, for example a `ready` item that already has a merged pull request.
 - **Product drift.** What was delivered, or what is being prioritized, has moved away from the intended outcomes and direction.
@@ -239,8 +251,8 @@ For each, the agent shows the evidence and recommends a correction. It records o
 ## Resolving and archiving
 
 1. **Resolve.** With your confirmation, the agent sets `status: complete` (citing at least one `delivery` reference) or `status: dropped` (keeping the reason in the PS).
-2. **Stage.** A structural repair moves the file to `specs/complete/` and fixes links to it. Staged items stay there until a release.
-3. **Archive with a release.** When resolved items are staged, `/devspark-release` offers to archive them. Only if you agree does it move them to `.archive/{YYYY-MM-DD}/roadmap/specs/complete/` with the rest of the release, repoint roadmap links at the archived copies, and add one permanent line per item to the `## Delivered` section of `roadmap.md`:
+2. **Stage.** A structural repair moves the file to `specs/complete/` and fixes links to it, unless the roadmap preserves published paths. Staged items stay there until a release.
+3. **Archive with a release.** When resolved items are staged, `/devspark-release` offers to archive them. Only if you agree does it move them to `.archive/{YYYY-MM-DD}/roadmap/specs/complete/` with the rest of the release, repoint roadmap links at the archived copies, and add one permanent line per item to the `## Delivered` section of the roadmap overview (normally `roadmap.md`):
 
    ```markdown
    - [ps-001-export-tasks](<path to archived copy>) — complete; archived with release 1.4.0
@@ -248,7 +260,50 @@ For each, the agent shows the evidence and recommends a correction. It records o
 
 Do not edit these links by hand. The Delivered line is what keeps a dependency on an archived item satisfied: `complete` still counts, `dropped` does not. A bare archive link with no status is `unknown`; confirm its status from current code and Git history, then record it in Delivered. Nothing ever reads the archived copy.
 
-A staged item that is malformed, not resolved, a symbolic link, or would relink a roadmap file with uncommitted changes is left in place and listed for your decision. A roadmap outside the repository is never archived from a consumer repository; archive it from its own planning repository. The roadmap never blocks a release.
+The roadmap stays in place, untouched, when:
+
+- a staged item is malformed, not resolved, a symbolic link, or would relink a roadmap file with uncommitted changes (it is listed for your decision);
+- the roadmap preserves published paths;
+- the roadmap is outside the repository; archive it from its own planning repository;
+- the release archive is outside the repository (`archive.root`), because a link to a file outside the repository would break for everyone else.
+
+The roadmap never blocks a release.
+
+## Sharing one roadmap across repositories
+
+When several repositories deliver toward one product, keep one roadmap in a planning repository and point each delivering repository at it, rather than copying it.
+
+1. **Point at the shared roadmap.** In each delivering repository, set `roadmap.root` in `.devspark.work/devspark.json` to the shared folder, for example `"../planning/roadmap"` when the planning repository is checked out beside yours. Every developer needs that checkout in the same relative place.
+2. **Keep ownership in the planning repository.** The roadmap, its layout, and its archival belong to the planning repository. A delivering repository never archives or rewrites it during a release.
+3. **Review across repositories.** A progress review inspects the repositories each item affects. Have them checked out, or the review reports the missing evidence.
+
+### Keeping an existing layout
+
+An existing roadmap does not have to be reorganized to fit the default layout. Add an optional `.devspark-roadmap.json` at the roadmap root:
+
+```json
+{
+  "overview": "00-roadmap.md",
+  "legacy_ids": true,
+  "preserve_paths": true,
+  "supporting_files": {
+    "specs/complete/PS-07-intake.md": "ps-007"
+  }
+}
+```
+
+| Setting | Effect |
+|---|---|
+| `overview` | The overview file to use instead of `roadmap.md`. It must be a Markdown file directly in the roadmap root. |
+| `legacy_ids` | Accepts existing two-digit, case-insensitive ids and file names: `PS-07` and `ps-007` are the same item. New items still get the next `ps-NNN` id. |
+| `preserve_paths` | Keeps every item at its published path, whatever its status. Repair does not move items, and release does not archive them. |
+| `supporting_files` | Links an existing supplementary document to its primary item, without counting it as an item or archiving it. Each file must already exist directly in `specs/` or `specs/complete/`. |
+
+Every primary item still needs the standard metadata, and no two primary files may share an id. An invalid layout file is reported, never silently ignored. With `--json`, the check reports the overview it chose as `ROADMAP_FILE`, path preservation as `PRESERVE_PATHS`, and supporting documents in `SUPPORTING`.
+
+### Team script override
+
+If a delivering repository needs its own way to reach the checker (for example, to run the copy in a shared checkout), put an override at `.devspark.work/scripts/bash/roadmap-check.sh` or `.devspark.work/scripts/powershell/roadmap-check.ps1`. `/devspark-roadmap` and `/devspark-specify` use the override when present, and fall back to `.devspark/scripts/` otherwise.
 
 ## The structural check
 
@@ -262,11 +317,11 @@ Every `/devspark-roadmap` request starts with a deterministic check, and runs it
 ```
 
 ```powershell
-.devspark/scripts/powershell/roadmap-check.ps1 check
-.devspark/scripts/powershell/roadmap-check.ps1 repair -Apply
+pwsh .devspark/scripts/powershell/roadmap-check.ps1 check
+pwsh .devspark/scripts/powershell/roadmap-check.ps1 repair -Apply
 ```
 
-Add `--root <path>` (`-Root <path>`) for a roadmap elsewhere, and `--json` (`-Json`) for machine-readable output. The exit code is `0` when there are no errors, `1` when there is at least one error, and `2` for a usage error. Warnings never fail the check.
+The PowerShell scripts need PowerShell 7 (`pwsh`), and both versions need Python. Add `--root <path>` (`-Root <path>`) for a roadmap elsewhere, and `--json` (`-Json`) for machine-readable output. The exit code is `0` when there are no errors, `1` when there is at least one error, and `2` for a usage error. Warnings never fail the check.
 
 Sample output for a completed item that has not yet been staged:
 
@@ -293,13 +348,14 @@ And the repair plan for it:
 | `misplaced-item` | error | A status and folder disagree. Repairable: run `repair`. |
 | `broken-link` | error | A local link points nowhere. Repairable when a move caused it; otherwise fix the link. |
 | `duplicate-id`, `invalid-id`, `id-filename-mismatch` | error | Each file needs a unique `ps-NNN` id that matches the start of its file name. |
-| `missing-field`, `malformed-metadata`, `invalid-status` | error | Fix the YAML metadata. `id`, `title`, and `status` are required. |
+| `missing-field`, `malformed-metadata`, `invalid-status` | error | Fix the YAML metadata. `id`, `title`, and `status` are required; `blockers` must be a list of non-empty descriptions. |
 | `missing-dependency`, `dependency-cycle` | error | A `depends_on` id does not exist, or items depend on each other in a loop. |
+| `orphaned-supporting-file` | error | A `supporting_files` entry names an item that does not exist. |
 | `conflicting-archived-status` | error | Delivered records the same id as both complete and dropped. Keep the correct one. |
 | `unsafe-path` | error | A symbolic link, or a path outside the roadmap root. It is never read or written. |
 | `complete-without-delivery` | warning | Add the branch, commit, or pull request that delivered it. |
 | `status-behind-delivery` | warning | A `proposed` or `ready` item already has delivery references; confirm its status. |
-| `unresolved-delivery-ref` | warning | A recorded commit hash is not in this repository. |
+| `unresolved-delivery-ref` | warning | A recorded commit hash is not in the repository you ran the check from. Expected when a shared roadmap's work landed in another repository. |
 | `depends-on-dropped` | warning | A prerequisite was dropped; rethink the dependency. |
 | `unknown-dependency-status` | warning | A prerequisite was archived without a recorded status; confirm it from evidence and record it in Delivered. |
 | `unsupported-field` | warning | The metadata has a key the roadmap does not use. |
@@ -322,10 +378,12 @@ The roadmap command plans; it never delivers. It may read anything relevant (sou
 | Symptom | Cause and fix |
 |---|---|
 | "No roadmap exists at …" | Nothing is at the resolved location. That is fine; a roadmap is optional. Ask to establish one, or pass `--root` if it lives elsewhere. |
+| The configured shared roadmap is reported missing | The planning repository is not checked out where `roadmap.root` expects it. Check it out there; the command will not recreate it. |
 | The agent will not write to my planning folder | A location outside the repository must be named with `--root` or set in `roadmap.root`. |
-| An item I finished is not listed as ready for its dependants | The prerequisite is not `complete` in `specs/complete/` or in Delivered. Resolve it, or record its status in Delivered. |
-| Release did not archive my roadmap | You declined the offer, nothing was staged in `specs/complete/`, or the roadmap is outside the repository. Archive an external roadmap from its own repository. |
+| An item is not listed as ready to start | A dependency is not `complete` (live or in Delivered), or the item still has `blockers`. Resolve the dependency, or remove blockers that no longer apply. |
+| Release did not archive my roadmap | You declined the offer, nothing was staged in `specs/complete/`, the layout preserves paths, the roadmap is outside the repository, or the release archive is outside the repository. |
 | Specify ignored my roadmap | Specify reads a roadmap only when you name a PS, for example `/devspark-specify ps-001`. |
+| A PowerShell script stops because it requires version 7.0 | You ran it in Windows PowerShell 5.1. Run it with `pwsh`, or use the Bash script. |
 
 ## Related
 

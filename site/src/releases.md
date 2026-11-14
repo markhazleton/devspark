@@ -2,6 +2,16 @@
 
 Full per-version detail is in the [CHANGELOG](https://github.com/MarkHazleton/DevSpark/blob/main/CHANGELOG.md). This page summarizes the current line. To adopt a release, run your agent's [quickstart](get-started/quickstart.md) in Update Mode; see [Upgrade](get-started/upgrade.md).
 
+## 9.6.0: 2026-11-14
+
+**Shared roadmaps without bridges; archives that live elsewhere.** No migration is needed.
+
+- **Shared roadmaps keep their published paths.** An optional `.devspark-roadmap.json` names the overview file, accepts existing two-digit, case-insensitive ids (`legacy_ids`), keeps items in place (`preserve_paths`) and links supplementary documents to their primary item (`supporting_files`). Consumer repositories point `roadmap.root` at the shared root and use the stock prompts. See the [roadmap guide](guides/roadmap-guide.md).
+- **Archive outside the repository.** `archive.root` or `--archive-root` sends the release archive to an existing folder owned by another repository; files are copied and hash-checked before the original is removed.
+- **PR risk shows its Knowledge source.** The Stats Risk row reports whether Knowledge was applied, absent or unreadable and where it came from, and an empty Knowledge no longer marks every file unmapped.
+- **PowerShell 7.** Every PowerShell helper script declares `#requires -Version 7.0`.
+- **Upgrade.** Run the quickstart in Update Mode. See [Upgrading to 9.6.0](get-started/upgrade.md#upgrading-to-960).
+
 ## 9.5.2: 2026-11-12
 
 **Shorter re-reviews.** No migration is needed.

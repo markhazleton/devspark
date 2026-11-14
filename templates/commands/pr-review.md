@@ -186,6 +186,11 @@ do not re-derive tiers, flags, or the score by reading paths.
   `promoted_by` names the domain or integration entity (from `.knowledge/`) that made a file P0
 - `risk.rating`, `risk.risk_score`, `risk.factors[]` — the auditable floor for risk; an
   `unmapped_production` factor means changed production code no knowledge node claims (a PRD5 lead)
+- `risk.knowledge` — `status` (`applied`, `absent`, or `unreadable`), `source` (`live`, `index`,
+  `provided`, or `none`), and `claim_count`. Anything other than `applied` means the tiers came from
+  path patterns alone, so a missing `promoted_by` or `unmapped_production` is not evidence that the PR
+  touches no Knowledge-owned code. Say so in the Executive Summary; when `unreadable`, report it as a
+  Knowledge tooling problem rather than a PR defect.
 - `risk.report_form` — `short`, `standard`, or `full` (see §7 Report Forms)
 - `risk.tables.changed_files` and `risk.tables.test_files` — ready-made markdown, paste verbatim
 
@@ -682,7 +687,7 @@ review_state:
 | Commits | [COUNT] |
 | Lines | +[ADDITIONS] −[DELETIONS] |
 | Tiers (P0/P1/P2/P3) | [from `risk.tier_counts`] |
-| Risk | [rating] ([risk_score]) — [factor names from `risk.factors`] |
+| Risk | [rating] ([risk_score]) — [factor names from `risk.factors`]; Knowledge [`risk.knowledge.status`] ([`risk.knowledge.source`]) |
 
 ## Executive Summary
 

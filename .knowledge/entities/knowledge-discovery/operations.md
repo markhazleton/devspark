@@ -7,7 +7,7 @@ source_of_truth:
   - scripts/powershell/discover-knowledge.ps1
   - scripts/bash/discover-knowledge.sh
   - tests/test_knowledge_discovery_contract.py
-last_verified: 2026-09-30
+last_verified: 2026-11-12
 aliases:
   - run discovery
   - discovery scope
@@ -40,7 +40,8 @@ property that makes it worth trusting.
 The subsystem is invoked through a matched pair of shell entry points, one per supported
 environment. They accept the same arguments, apply the same scoping, and emit the same structured
 output. **The pair changes together, always** - an option added to one and not the other means the
-same documented instruction produces different results depending on who runs it.
+same documented instruction produces different results depending on who runs it. The PowerShell
+entry point requires PowerShell 7 or later.
 
 ## Result posture
 
@@ -48,5 +49,5 @@ Analysis completing successfully is reported as success whether or not findings 
 Findings are information, not an error condition, and treating their presence as a failure would
 push people toward narrowing scope until the report is empty.
 
-A non-zero result means the run could not be performed - an unreadable corpus, an invalid scope -
-and not that the corpus has problems.
+A non-zero result means the run could not be performed - an unreadable corpus, an invalid apply
+request - and not that the corpus has problems.

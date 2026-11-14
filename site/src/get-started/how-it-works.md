@@ -47,7 +47,7 @@ and the **prompt** supplies its instructions. See [Terminology](../guides/prompt
 | `.knowledge/` | Repository team | Current technical and governance truth, plus published guidance under `.knowledge/guides/` | Current state only |
 | `.archive/` | Repository team | Old work products, grouped by release | Write-only; no skill reads it |
 
-`.archive/` is the only archive root. Do not create ADR, rationale, or completed-plan trees elsewhere; use Git history when prior state matters.
+Inside the repository, `.archive/` is the only archive root. A team that keeps release history in another repository can instead set `archive.root` in `.devspark.work/devspark.json` to an existing folder outside this one. Do not create ADR, rationale, or completed-plan trees elsewhere; use Git history when prior state matters.
 
 ## What each stage owns
 
@@ -66,7 +66,7 @@ Checked boxes do not make a plan complete; a consistent durable repository and p
 
 **After implementation.** `/devspark-verify` produces proof and closes out the work. PR creation, PR review, and site audit then judge the Git diff, current code, test evidence, current knowledge, and the constitution, not prose written earlier. See [Review and Audit](../guides/review-and-audit.md).
 
-**At release.** `/devspark-release` derives the release from the previous tag through HEAD, verifies the durable delta, writes notes, and is the sole skill that archives bundles marked `Complete` under `.archive/{YYYY-MM-DD}/` with a journaled, non-overwriting archive step, and reports anything ambiguous for a decision. A bundle can stay live across more than one release.
+**At release.** `/devspark-release` derives the release from the previous tag through HEAD, verifies the durable delta, writes notes, and is the sole skill that archives bundles marked `Complete` under `.archive/{YYYY-MM-DD}/` (or the same dated folder under a configured `archive.root`) with a journaled, non-overwriting archive step, and reports anything ambiguous for a decision. With an `archive.root` outside the repository, each file is copied and hash-checked before the original is removed, and a bundle with uncommitted changes waits for a decision. A bundle can stay live across more than one release.
 
 Knowledge is mutated in place, never archived; Git keeps earlier versions. For what counts as knowledge and how it stays current, see [Knowledge](../guides/knowledge-management.md) and [Philosophy](../why/philosophy.md).
 

@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import runpy
 import shutil
 import subprocess
 import sys
@@ -385,14 +386,234 @@ def test_next_development_cycle_starts_cleanly_after_archival(repo: Path) -> Non
     assert sorted(path.name for path in (repo / WORK / "specs").iterdir()) == [".gitkeep", "002-active", "003-next"]
 
 
-def test_powershell_wrapper_matches_the_engine(repo: Path) -> None:
+# Archive location ------------------------------------------------------------------------------------
+
+
+@pytest.fixture
+def store(tmp_path: Path) -> Path:
+    folder = tmp_path / "store"
+    folder.mkdir()
+    return folder
+
+
+def external(repo: Path, store: Path, command: str = "apply", *extra: str) -> tuple[int, dict[str, object]]:
+    return engine(repo, command, "--version", VERSION, "--date", DATE, "--archive-root", str(store), *extra)
+
+
+def test_the_archive_defaults_to_the_repository(repo: Path) -> None:
+    _, payload = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+
+    assert payload["ARCHIVE_ROOT"] == f".archive/{DATE}"
+    assert payload["ARCHIVE_EXTERNAL"] is False and payload["ARCHIVE_SOURCE"] == "default"
+    assert payload["ARCHIVE_NOTICE"] == ""
+
+
+def test_an_external_archive_receives_the_move(repo: Path, store: Path) -> None:
+    before = tree(repo / WORK / "specs" / "001-shipped")
+    dated = store.resolve() / DATE
+
+    _, plan = external(repo, store, "plan")
+    code, payload = external(repo, store)
+
+    planned = next(item for item in plan["TO_ARCHIVE"] if item["original"].endswith("001-shipped"))
+    assert planned["archived"] == f"{dated.as_posix()}/specs/001-shipped"
+    assert code == 0 and payload["OK"] is True
+    assert payload["ARCHIVE_EXTERNAL"] is True and payload["ARCHIVE_SOURCE"] == "argument"
+    assert payload["ARCHIVE_ROOT"] == dated.as_posix() and "outside this repository" in payload["ARCHIVE_NOTICE"]
+    assert tree(store / DATE / "specs" / "001-shipped") == before
+    assert not (repo / WORK / "specs" / "001-shipped").exists() and not (repo / ".archive").exists()
+    assert not list(store.rglob("*.partial"))
+
+    manifest = json.loads((store / DATE / "release" / f"archive-manifest-{VERSION}.json").read_text(encoding="utf-8"))
+    spec = next(item for item in manifest["items"] if item["original"].endswith("001-shipped"))
+    assert manifest["location"] == "external" and manifest["archive_root"] == DATE
+    assert spec["archived"] == f"{DATE}/specs/001-shipped"
+    staged = git(repo, "diff", "--cached", "--name-status").splitlines()
+    assert len([line for line in staged if line.startswith("D")]) >= len(before)
+    assert not [line for line in staged if line.startswith(("A", "R"))]
+
+
+def test_the_external_journal_stays_valid_when_the_archive_is_cloned_elsewhere(repo: Path, store: Path, tmp_path: Path) -> None:
+    external(repo, store)
+    code, validated = external(repo, store, "validate")
+    assert code == 0 and validated["OK"] is True and validated["ARCHIVED"] >= 8
+
+    cloned = tmp_path / "store-clone"
+    store.rename(cloned)
+    code, validated = external(repo, cloned, "validate")
+    assert code == 0 and validated["OK"] is True
+
+    write(cloned / DATE / "specs" / "001-shipped" / "plan.md", "# Rewritten history\n")
+    code, validated = external(repo, cloned, "validate")
+    assert code == 1 and any("differs from the journal" in problem for problem in validated["PROBLEMS"])
+
+
+def test_the_archive_root_comes_from_devspark_json_and_the_argument_overrides_it(repo: Path, store: Path, tmp_path: Path) -> None:
+    other = tmp_path / "other"
+    other.mkdir()
+    write(repo / WORK / "devspark.json", '{"version": 1, "archive": {"root": "../store"}}\n')
+    commit(repo, "configure the archive")
+
+    _, configured = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+    _, overridden = external(repo, other, "plan")
+
+    assert (configured["ARCHIVE_SOURCE"], configured["ARCHIVE_ROOT"]) == ("config", (store.resolve() / DATE).as_posix())
+    assert (overridden["ARCHIVE_SOURCE"], overridden["ARCHIVE_ROOT"]) == ("argument", (other.resolve() / DATE).as_posix())
+
+
+def test_a_folder_inside_the_repository_archive_is_allowed(repo: Path) -> None:
+    code, payload = engine(repo, "apply", "--version", VERSION, "--date", DATE, "--archive-root", ".archive/team-a")
+
+    dated = repo / ".archive" / "team-a" / DATE
+    assert code == 0 and payload["OK"] is True and payload["ARCHIVE_EXTERNAL"] is False
+    assert payload["ARCHIVE_ROOT"] == f".archive/team-a/{DATE}"
+    assert (dated / "specs" / "001-shipped" / "spec.md").is_file()
+    manifest = json.loads((dated / "release" / f"archive-manifest-{VERSION}.json").read_text(encoding="utf-8"))
+    spec = next(item for item in manifest["items"] if item["original"].endswith("001-shipped"))
+    assert spec["archived"] == f".archive/team-a/{DATE}/specs/001-shipped"
+
+
+@pytest.mark.parametrize(
+    ("root", "reason"),
+    [
+        (".", "repository root or above"),
+        ("..", "repository root or above"),
+        (".devspark.work/archive", "outside .archive/"),
+        (".devspark/archive", "outside .archive/"),
+        (".knowledge/archive", "outside .archive/"),
+        (".git/archive", "outside .archive/"),
+        ("docs/archive", "outside .archive/"),
+        ("../nowhere", "not an existing folder"),
+        ("../file.txt", "not an existing folder"),
+    ],
+)
+def test_unsafe_archive_roots_are_refused_before_anything_moves(repo: Path, tmp_path: Path, root: str, reason: str) -> None:
+    write(tmp_path / "file.txt", "not a folder\n")
+    source = tree(repo / WORK / "specs" / "001-shipped")
+
+    code, payload = engine(repo, "apply", "--version", VERSION, "--date", DATE, "--archive-root", root)
+
+    assert code == 2 and payload["OK"] is False and reason in payload["ERROR"]
+    assert tree(repo / WORK / "specs" / "001-shipped") == source
+    assert not (repo / ".archive").exists() and not (tmp_path / "nowhere").exists()
+
+
+@pytest.mark.parametrize("config", ['{"archive": {"root": 5}}', '{"archive": {"root": "  "}}', '{"archive": "../store"}'])
+def test_a_malformed_archive_setting_is_refused(repo: Path, config: str) -> None:
+    write(repo / WORK / "devspark.json", config)
+    commit(repo, "malformed archive setting")
+
+    code, payload = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+
+    assert code == 2 and "'archive" in payload["ERROR"]
+
+
+@pytest.mark.parametrize("config", ["{", '{"archive": {}}', '{"version": 1}'])
+def test_an_unset_or_unreadable_archive_setting_uses_the_default(repo: Path, config: str) -> None:
+    write(repo / WORK / "devspark.json", config)
+    commit(repo, "no usable archive setting")
+
+    code, payload = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+
+    assert code == 0 and payload["ARCHIVE_SOURCE"] == "default" and payload["ARCHIVE_ROOT"] == f".archive/{DATE}"
+
+
+def test_an_occupied_external_destination_is_a_collision(repo: Path, store: Path) -> None:
+    occupied = store / DATE / "specs" / "001-shipped" / "spec.md"
+    write(occupied, "Earlier evidence that must survive.\n")
+    source = tree(repo / WORK / "specs" / "001-shipped")
+
+    code, payload = external(repo, store)
+
+    assert code == 2 and payload["OK"] is False
+    assert payload["COLLISIONS"][0]["archived"] == occupied.resolve().as_posix()
+    assert occupied.read_text(encoding="utf-8") == "Earlier evidence that must survive.\n"
+    assert tree(repo / WORK / "specs" / "001-shipped") == source
+    assert not (store / DATE / "release").exists()
+
+
+def test_an_external_move_interrupted_after_the_copy_resumes(repo: Path, store: Path) -> None:
+    external(repo, store)
+    archived = store / DATE / "specs" / "001-shipped"
+    original = repo / WORK / "specs" / "001-shipped"
+    expected = tree(archived)
+    # One file crashed after its copy was published but before the original went; another died mid-copy.
+    for name in ("plan.md", "gates/verify.md"):
+        target = original / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(archived / name, target)
+    (archived / "gates" / "verify.md").unlink()
+    write(archived / "gates" / "verify.md.partial", "half a file")
+
+    _, plan = engine(repo, "plan", "--version", VERSION, "--archive-root", str(store))
+    assert [item["original"] for item in plan["RESUMING"]] == [f"{WORK}/specs/001-shipped"]
+
+    code, payload = engine(repo, "apply", "--version", VERSION, "--archive-root", str(store))
+
+    assert code == 0 and payload["OK"] is True
+    assert not original.exists()
+    assert tree(archived) == expected
+
+
+def test_an_unwritable_external_archive_stops_before_anything_moves(repo: Path, store: Path) -> None:
+    write(store / DATE, "a file where the dated folder belongs\n")
+    source = tree(repo / WORK / "specs" / "001-shipped")
+
+    code, payload = external(repo, store)
+
+    assert code == 2 and "nothing was moved" in payload["ERROR"]
+    assert tree(repo / WORK / "specs" / "001-shipped") == source
+    assert (repo / WORK / "quickfixes" / "QF-2026-001.md").is_file()
+
+
+def test_a_copy_that_does_not_match_the_plan_leaves_the_original(tmp_path: Path) -> None:
+    module = runpy.run_path(str(ROOT / "scripts" / "release-archive.py"), run_name="release_archive_unit")
+    source = tmp_path / "source.md"
+    write(source, "content\n")
+    destination = tmp_path / "store" / DATE / "source.md"
+
+    with pytest.raises(module["ArchiveError"], match="no longer matches the plan"):
+        module["relocate"](source, destination, "0" * 64, True)
+
+    assert source.read_text(encoding="utf-8") == "content\n"
+    assert not destination.exists() and not list(tmp_path.rglob("*.partial"))
+
+
+def test_uncommitted_changes_defer_a_bundle_bound_for_an_external_archive(repo: Path, store: Path) -> None:
+    write(repo / WORK / "specs" / "001-shipped" / "plan.md", "# Edited, not committed\n")
+
+    code, payload = external(repo, store)
+
+    assert code == 0
+    decision = next(item for item in payload["NEEDS_DECISION"] if item["path"].endswith("001-shipped"))
+    assert "uncommitted" in decision["reason"] and decision["action"]
+    assert (repo / WORK / "specs" / "001-shipped" / "plan.md").read_text(encoding="utf-8") == "# Edited, not committed\n"
+    assert not (store / DATE / "specs" / "001-shipped").exists()
+    assert (store / DATE / "quickfixes" / "QF-2026-001.md").is_file()
+
+    _, inside = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+    assert f"{WORK}/specs/001-shipped" in {item["original"] for item in inside["TO_ARCHIVE"]}
+
+
+def test_a_dry_run_with_an_external_archive_writes_nothing(repo: Path, store: Path) -> None:
+    snapshot = (tree(repo / WORK), git(repo, "status", "--porcelain"))
+
+    code, payload = external(repo, store, "apply", "--dry-run")
+
+    assert code == 0 and payload["TO_ARCHIVE"]
+    assert (tree(repo / WORK), git(repo, "status", "--porcelain")) == snapshot
+    assert list(store.iterdir()) == []
+
+
+def test_powershell_wrapper_matches_the_engine(repo: Path, store: Path) -> None:
     pwsh = shutil.which("pwsh")
     if not pwsh:
         pytest.skip("pwsh is not installed")
-    _, direct = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+    _, direct = engine(repo, "plan", "--version", VERSION, "--date", DATE, "--archive-root", str(store))
+    assert direct["ARCHIVE_EXTERNAL"] is True
 
     result = subprocess.run(
-        [pwsh, "-NoProfile", "-File", "scripts/powershell/release-archive.ps1", "plan", "--version", VERSION, "--date", DATE, "-Json"],
+        [pwsh, "-NoProfile", "-File", "scripts/powershell/release-archive.ps1", "plan", "--version", VERSION, "--date", DATE, "--archive-root", str(store), "-Json"],
         cwd=repo,
         capture_output=True,
         text=True,
@@ -403,17 +624,18 @@ def test_powershell_wrapper_matches_the_engine(repo: Path) -> None:
     assert json.loads(result.stdout) == direct
 
 
-def test_bash_wrapper_matches_the_engine(repo: Path) -> None:
+def test_bash_wrapper_matches_the_engine(repo: Path, store: Path) -> None:
     bash = bash_path()
     if not bash:
         pytest.skip("bash is not installed")
     probe = subprocess.run([bash, "-c", "command -v python3"], capture_output=True, text=True, timeout=TIMEOUT)
     if probe.returncode != 0:
         pytest.skip("this bash has no python3")
-    _, direct = engine(repo, "plan", "--version", VERSION, "--date", DATE)
+    _, direct = engine(repo, "plan", "--version", VERSION, "--date", DATE, "--archive-root", str(store))
+    assert direct["ARCHIVE_EXTERNAL"] is True
 
     result = subprocess.run(
-        [bash, "scripts/bash/release-archive.sh", "plan", "--version", VERSION, "--date", DATE, "--json"],
+        [bash, "scripts/bash/release-archive.sh", "plan", "--version", VERSION, "--date", DATE, "--archive-root", str(store), "--json"],
         cwd=repo,
         capture_output=True,
         text=True,

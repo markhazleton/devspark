@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#requires -Version 7.0
 # Build repository history context for /devspark.repo-story
 # Usage:
 #   .\repo-story-context.ps1 [-Output <path>] [-Months 12] [-Scope full] [-CompareBaseline YYYY-MM] [-Stdout]

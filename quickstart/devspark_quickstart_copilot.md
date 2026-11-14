@@ -101,7 +101,7 @@ Throughout this guide, wherever a step says "Fetch … from `https://dev.makebol
 
 ## Step 1: Gather Project Context
 
-Detect the current OS to determine the active runtime for the plan preview — **both** script sets (PowerShell and Bash) are always installed regardless of OS.
+Detect the current OS to determine the active runtime for the plan preview — **both** script sets (PowerShell and Bash) are always installed regardless of OS. The PowerShell scripts run on PowerShell 7+ (`pwsh`); Windows PowerShell 5.1 is not supported.
 
 **OS detection** (in priority order):
 

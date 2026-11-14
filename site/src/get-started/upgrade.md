@@ -15,6 +15,21 @@ Use the agent-specific [quickstart](quickstart.md) as the canonical manifest-dri
 
 The manifest is the complete list of framework files. After an Update or Repair, `.devspark/defaults/`, `.devspark/templates/` and `.devspark/scripts/` hold exactly the files the manifest lists, so an upgraded install matches a fresh one. Files that a release dropped or renamed are removed. Customizations are never affected, because they live in `.devspark.work/`.
 
+## Upgrading to 9.6.0
+
+Run your agent's [quickstart](quickstart.md) in Update Mode. No migration, new command, schema or
+dependency is required.
+
+- **Shared roadmaps.** A repository that sets `roadmap.root` to a shared roadmap now works with the
+  stock `/devspark-roadmap`, `/devspark-specify` and `/devspark-release`. If the roadmap keeps
+  existing paths or two-digit ids, its owner adds `.devspark-roadmap.json`; see the
+  [roadmap guide](../guides/roadmap-guide.md). Team overrides that only bridged to the source checker
+  can be deleted after the upgrade.
+- **PowerShell 7.** Every PowerShell helper script declares `#requires -Version 7.0`. Automation
+  that ran the thin Python wrappers from Windows PowerShell 5.1 must use `pwsh` or the Bash twin.
+- **Archive outside the repository.** Setting `archive.root` is optional. Keep the same root for every
+  run of one release, and commit the archived files in the repository that owns that folder.
+
 ## Upgrading to 9.5.2
 
 Run your agent's [quickstart](quickstart.md) in Update Mode. No migration is required.

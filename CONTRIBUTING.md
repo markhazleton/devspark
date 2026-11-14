@@ -13,6 +13,7 @@ These are one time installations required to be able to test your changes locall
 1. Install [Python 3.11+](https://www.python.org/downloads/)
 1. Install [uv](https://docs.astral.sh/uv/) for package management
 1. Install [Git](https://git-scm.com/downloads)
+1. On Windows, install [PowerShell 7+](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows) (`pwsh`) — the PowerShell scripts and their tests need it. Windows PowerShell 5.1 is not supported: every script under `scripts/powershell/` declares `#requires -Version 7.0` and stops with a version error on 5.1
 1. Have an [AI coding agent available](README.md#-supported-ai-agents)
 1. Install [`jq`](https://jqlang.org/download/) if you plan to run the bash-variant script tests locally (e.g. `tests/test_knowledge_document_contract.py`'s `*_bash` tests, and `add_devspark_metric` in `scripts/bash/common.sh`) — these tests skip cleanly without it, but won't exercise the bash code paths
 1. If you're editing `scripts/bash/*.sh` on a Mac, see [scripts/README.md](scripts/README.md#bash-version-constraint) — those scripts must stay compatible with macOS's bash 3.2, not just whatever `bash` is first on your `PATH`

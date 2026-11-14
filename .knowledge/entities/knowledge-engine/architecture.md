@@ -7,7 +7,7 @@ source_of_truth:
   - scripts/build_knowledge_index.py
   - templates/schemas/entity-node.schema.json
   - tests/test_knowledge_engine_resolution_contract.py
-last_verified: 2026-10-17
+last_verified: 2026-11-12
 aliases:
   - knowledge index
   - index builder

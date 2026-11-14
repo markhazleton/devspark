@@ -10,7 +10,9 @@ script resolution).
 ## Layout and Parity
 
 - `bash/` — POSIX Bash implementations
-- `powershell/` — PowerShell 7+ implementations
+- `powershell/` — PowerShell 7+ implementations. Every script declares
+  `#requires -Version 7.0`, so Windows PowerShell 5.1 stops with a version
+  error instead of a parse error.
 
 Constitution §VI (Platform Parity) requires every `bash/<name>.sh` to have a
 matching `powershell/<name>.ps1` with equivalent behavior, and vice versa.

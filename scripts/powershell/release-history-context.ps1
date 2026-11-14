@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#requires -Version 7.0
 # Compatibility adapter: v4 release history is the durable Git delta.
 param(
     [string]$BaseRef = '',

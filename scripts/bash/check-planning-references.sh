@@ -47,7 +47,7 @@ ALWAYS_EXCLUDED_FILES=("AGENTS.md" "CHANGELOG.md")
 # a generated shim's example command invocation, or this repo's own tests asserting spec/task/
 # quickfix numbering and parsing behavior) -- excluded only from the generic-ID-pattern tier
 # below, never from the exact-branch-name tier, since a real feature's own branch name should
-# never legitimately appear in either. tests/ is deliberately excluded by default to keep the
+# never legitimately appear in either. A tests/ directory at any depth is excluded by default to keep the
 # routine gate low-noise; pass --include-tests for a stricter, human-reviewed audit pass, since a
 # real leak can hide in a test file's own comment/docstring rather than its fixture data.
 GENERIC_ID_EXCLUDED=("${ALWAYS_EXCLUDED[@]}" "templates/" ".github/" "site/src/")
@@ -78,6 +78,7 @@ while IFS= read -r file; do
     is_excluded_file "$file" && continue
     in_generic_scope=true
     is_excluded "$file" "${GENERIC_ID_EXCLUDED[@]}" && in_generic_scope=false
+    [[ "$INCLUDE_TESTS" == false && "$file" == *"/tests/"* ]] && in_generic_scope=false
 
     if [[ -n "$BRANCH" ]]; then
         while IFS=: read -r line_number _; do

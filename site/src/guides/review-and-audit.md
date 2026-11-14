@@ -52,7 +52,12 @@ question about the change, and the workflow stops after required checks, recordi
 
 **Risk-sized reviews.** Context helpers compute review tiers and an auditable rating from the full
 changed-file set before sampling. Knowledge ownership can raise a file's tier; the reviewer may
-escalate but never lower the supplied floor. Low, medium, and high risk select short, standard,
+escalate but never lower the supplied floor. The ownership claims are built from the working tree's
+current `.knowledge/`, falling back to the committed `.knowledge/index.json` only when that build is
+unavailable. The report's Stats Risk row shows whether Knowledge was `applied`, `absent` or
+`unreadable` and where it came from. When it was not applied, tiers come from path patterns alone, so
+an unmapped file is not evidence that the PR avoids Knowledge-owned code; `unreadable` is reported as
+a Knowledge tooling problem, not a PR defect. Low, medium, and high risk select short, standard,
 and full report forms. A deterministic validator checks report metadata, findings, recommendation,
 and risk consistency. Calibration compares recorded outcomes by producer version; it does not
 prove reviewer quality.

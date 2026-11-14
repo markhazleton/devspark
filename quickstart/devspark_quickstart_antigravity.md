@@ -101,7 +101,7 @@ Throughout this guide, wherever a step says "Fetch … from `https://dev.makebol
 
 ## Step 1: Gather Project Context
 
-No install-critical questions are needed before proceeding — **both** script sets (PowerShell and Bash) are always installed regardless of OS. Detect the current OS to display in the plan preview.
+No install-critical questions are needed before proceeding — **both** script sets (PowerShell and Bash) are always installed regardless of OS. The PowerShell scripts run on PowerShell 7+ (`pwsh`); Windows PowerShell 5.1 is not supported. Detect the current OS to display in the plan preview.
 
 **OS detection** (in priority order):
 

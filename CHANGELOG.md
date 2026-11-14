@@ -11,6 +11,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The planning-reference checker excludes generic IDs in nested `tests/` directories by default, just as it does for a root `tests/` directory. `--include-tests` / `-IncludeTests` and branch-name checks still scan them.
+
+## [9.6.0] - 2026-11-14
+
+**Shared roadmaps that keep their published paths, an archive that can live outside the repository, clearer PR-risk evidence, and a declared PowerShell 7 floor.** A consumer repository can plan from an existing shared roadmap without a bridge override, `/devspark-release` can archive into a folder owned by another repository, `/devspark-pr-review` says where its Knowledge came from, and the PowerShell helper scripts state the PowerShell version they need.
+
+### Added
+
+- **Existing shared roadmaps keep their published paths.** An optional `.devspark-roadmap.json` in the roadmap root names its `overview` file, accepts existing two-digit, case-insensitive ids and filenames with `legacy_ids` (`PS-07` and `ps-007` are the same item; new items still use the reported `ps-NNN` id), keeps every item in place with `preserve_paths` (repair never moves items and release never archives them), and associates supplementary documents with their primary item through `supporting_files`. Invalid layout configuration is reported, not ignored. The checker reports `ROADMAP_FILE`, `PRESERVE_PATHS`, `SUPPORTING` and `REQUESTED_SUPPORTING`. A consumer repository sets `roadmap.root` to the shared root; the layout stays owned by the planning repository. `/devspark-specify` reads a requested supporting document alongside its primary item, reports `blockers` and does not offer a `complete` or `dropped` item as new work. Prospective Specs gain an optional `blockers` list.
+- **Roadmap guide.** The documentation site has a guide to planning with `/devspark-roadmap`, including shared roadmaps.
+
+- **`archive.root` and `--archive-root` for `/devspark-release`.** A team that keeps release history in a separate repository can set `archive.root` in `.devspark.work/devspark.json`, or pass `--archive-root <path>` to `release-archive plan`, `apply` and `validate` (the argument wins). The root is `.archive/`, a folder inside it, or an existing folder outside the repository. Any other folder inside the repository is refused, because scans and Knowledge tooling would read archived history as live content, and the script never creates the folder. Without either setting nothing changes: the default path, journal strings and manifest bytes are identical to before. For an outside root, each file is copied, hash-checked against the plan, and only then removed, so an interruption leaves the original in place and `apply` resumes. A bundle with uncommitted changes waits in `NEEDS_DECISION`, because Git cannot recover what leaves the repository. `--include-roadmap` leaves the roadmap in place (`ROADMAP_NOTICE` explains), because a link to a file outside the repository would break for everyone else. The report adds `ARCHIVE_EXTERNAL`, `ARCHIVE_SOURCE` and `ARCHIVE_NOTICE`; the files written outside the repository are committed by the repository that owns that folder.
+- **PR risk reports where its Knowledge came from.** The `pr-risk` digest has a `knowledge` object with `status` (`applied`, `absent` or `unreadable`), `source` (`live`, `index`, `provided` or `none`), `claim_count`, and a `generated_at` or `detail` where one applies. `/devspark-pr-review` shows it in the Stats Risk row, so a missing or empty Knowledge input is visible instead of silent.
+
+### Changed
+
+- **PR risk reads current Knowledge first.** It builds the claims from the working tree with the Knowledge engine and falls back to the committed `.knowledge/index.json` only when that build is unavailable. This adds roughly a second to a review.
+- **Helper scripts declare PowerShell 7.** Every script in `scripts/powershell/` now declares `#requires -Version 7.0`, so Windows PowerShell 5.1 stops with PowerShell's own version message instead of a parse error. The README, CONTRIBUTING and the quickstarts state the requirement, and the tests look for `pwsh` only.
+
+### Fixed
+
+- **An empty Knowledge no longer flags every file as unmapped.** PR risk applies Knowledge only when it yields claims; otherwise it reports `absent` and leaves the unmapped-file signal alone.
+
+### Upgrade Notes
+
+- Run your agent's quickstart in Update Mode. No migration, new command, schema or dependency is required.
+- PowerShell 7 (`pwsh`) is the supported host for the PowerShell scripts; most already needed it because they share `common.ps1`, which uses PowerShell 7 syntax. The thin wrappers that only forward to Python (`judge`, `context-projection`, `discover-knowledge`, `explain-context`, `knowledge-benchmark`, `knowledge-integrity`, `release-archive` and `roadmap-check`) may have started under Windows PowerShell 5.1 before. If your automation runs them from 5.1, run it with `pwsh` or use the Bash twin.
+- A team that bridged a shared roadmap with overrides of `devspark.roadmap.md`, `devspark.specify.md` or `devspark.release.md`, or of the `roadmap-check` and `release-archive` scripts, that only call the source checker can delete them after upgrading; the stock prompts and scripts read the shared layout.
+- Setting `archive.root` is optional. Keep the same archive root for every run of one release, since its journal lives there. Governance proposals that `/devspark-constitution` archives still go to the repository's `.archive/`.
+
 ## [9.5.2] - 2026-11-12
 
 **PR re-review stops sooner.** An existing PR review continues as a bounded, terminal update instead of restarting discovery.

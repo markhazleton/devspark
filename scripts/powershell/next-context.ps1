@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#requires -Version 7.0
 # Next-step router context script.
 # Detects the current lifecycle state locally (git + filesystem, best-effort gh)
 # and recommends the single next DevSpark command to run.

@@ -268,7 +268,7 @@ Ownership split: the spec owns defining and preparing acceptance; QA operations 
 | **closeout** | **Optional / advanced — not on the normal path.** Re-runs verify's closeout phase alone, against the identical contract, producing the identical artifact with `produced_by: closeout`. Exists for reassessment: work continued after verify ran, a limitation was accepted later, a human wants to re-decide completion without paying for re-verification, or an experimental result needs a fresh decision. Explicitly accounts for the evidence it did **not** refresh — stale evidence is reported as stale and routes back to `/devspark-verify` rather than producing a `complete` decision about a previous version of the work. No command recommends it as a routine next step. |
 | **site-audit** | The one repo-wide, non-diff-scoped audit command — there is no separate `audit` command. Resolves `execution`-type evidence entries by re-running their cited tests (a separate accuracy pass from the existence-only coverage matrix), and runs the same graph-adjacent contradiction scan as `pr-review` §6c (same entity, same `constrains` decision, same `source_of_truth`) repo-wide instead of diff-scoped. Contradiction findings are always non-blocking warnings for human review. |
 | **explain** | Topic-scoped, read-only by default: grounds its answer and DELTA/KNOW findings in current code and tests. Discovery does not create work. Only a developer-requested Knowledge correction or draft may be written, after its own explicit approval, followed by a Knowledge build check and focused re-verification. Saving a trace requires a separate approval; neither action is bundled with the other. Confirmed code defects route to Quickfix, genuinely missing behavior to Specify. Explain never implements code or creates a planning record. |
-| **release** | Is the **sole** command that ever moves anything from `.devspark.work/` into `.archive/{YYYY-MM-DD}/`: it sweeps `.devspark.work/specs/` and `.devspark.work/quickfixes/` for bundles that are `Complete` and archives them, unconditionally moves every other categorized `.devspark.work/` artifact (`pr-review/`, `audit/`, `metrics/`, `telemetry/`) into the same release archive folder — no age, count, or eligibility check for these, unlike specs/quickfixes — flags (but never auto-archives) orphaned in-flight state whose branch is stale/merged/deleted but never reached `Complete`, runs a lighter non-blocking backstop check of `.knowledge/` for obsolete/duplicate/historical content and decision docs whose `constrains`/`constrained_by` pointers have drifted, and is a second, window-wide checkpoint for the same guarantee `pr-review` checks per-diff (the Knowledge builds, a current `site-audit` knowledge-scope result with no open `KNOW1`–`KNOW6` findings for the window). |
+| **release** | Is the **sole** command that ever moves anything from `.devspark.work/` into `.archive/{YYYY-MM-DD}/` (or the same dated folder under `archive.root` when a team keeps its archive outside the repository; those files are copied and hash-checked before the original is removed, a bundle with uncommitted changes is deferred for a decision, and the roadmap stays in place): it sweeps `.devspark.work/specs/` and `.devspark.work/quickfixes/` for bundles that are `Complete` and archives them, unconditionally moves every other categorized `.devspark.work/` artifact (`pr-review/`, `audit/`, `metrics/`, `telemetry/`) into the same release archive folder — no age, count, or eligibility check for these, unlike specs/quickfixes — flags (but never auto-archives) orphaned in-flight state whose branch is stale/merged/deleted but never reached `Complete`, runs a lighter non-blocking backstop check of `.knowledge/` for obsolete/duplicate/historical content and decision docs whose `constrains`/`constrained_by` pointers have drifted, and is a second, window-wide checkpoint for the same guarantee `pr-review` checks per-diff (the Knowledge builds, a current `site-audit` knowledge-scope result with no open `KNOW1`–`KNOW6` findings for the window). |
 | **taskstoissues** | Already fully aligned without any change needed — its entire purpose is explaining why ephemeral tasks don't get exported as durable records, which is rule 1 stated as a user-facing explanation rather than an enforcement mechanism. |
 
 ## Script-first merge and PR review helpers
@@ -283,10 +283,14 @@ boundaries offline.
 **pr-risk.py** computes per-file review tiers, delta classes, an auditable `risk_score` and rating,
 and `report_form` (`short`, `standard`, `full`) from the full changed-file set before the context
 scripts sample it. Existing Knowledge ownership can promote domain or integration files to P0;
-`unmapped_production` is a completeness lead, not proof of a defect. Tiers and rating are floors:
-the reviewer may escalate, never lower them. Rendered changed-file and test tables are consumed
-by PR Review rather than reconstructed. The risk and Knowledge contracts are covered by
-`tests/test_pr_risk_contract.py` and `tests/test_pr_risk_knowledge_contract.py`.
+`unmapped_production` is a completeness lead, not proof of a defect. The claims come from a live
+in-memory build of `.knowledge/`, so nothing has to be generated or committed first; a prebuilt
+`.knowledge/index.json` is only the fallback when the live build fails. The digest's `knowledge`
+object reports `applied`, `absent`, or `unreadable` with the source and claim count, so a missing
+Knowledge input is visible rather than silent; a Knowledge input with no claims applies nothing.
+Tiers and rating are floors: the reviewer may escalate, never lower them. Rendered changed-file and
+test tables are consumed by PR Review rather than reconstructed. The risk and Knowledge contracts
+are covered by `tests/test_pr_risk_contract.py` and `tests/test_pr_risk_knowledge_contract.py`.
 
 **pr-review-validate.py** checks only deterministic report consistency: metadata versus body,
 recommendation versus open blockers, and risk floors; with a Git range it also checks the digest,
@@ -366,6 +370,7 @@ bundles. A core-path entry is guidance, not a new constitutional obligation.
 |---|---|---|---|
 | **next** | Detects lifecycle state and dispatches the single next step | No — but it makes every other row optional to memorize | CORE HAPPY-PATH (the zero-knowledge entry point) |
 | **specify** | Understands new work and starts a bundle-free `work` branch | Yes, for new work | CORE HAPPY-PATH |
+| **roadmap** | Optional product direction as right-sized Prospective Specs; writes only inside its planning root and never starts delivery | No — inert without a roadmap; `specify` reads a Prospective Spec only when one is named | OPTIONAL ADVANCED |
 | **plan** | Design artifacts + bounded `.knowledge/` traversal | Existing v9.3 bundles; otherwise on request | OPTIONAL ADVANCED |
 | **implement** | Starts or resumes work; also executes legacy bundles | Yes | CORE HAPPY-PATH |
 | **verify** | Evidence phase + closeout phase, one invocation | Yes, where a proof mode is declared | CORE HAPPY-PATH |

@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#requires -Version 7.0
 #
 # Deterministic backstop for command-preamble-contract.md §0: durable code, tests, and
 # .knowledge/ must never reference the ephemeral planning bundle that produced them. Prose
@@ -33,7 +34,7 @@ $script:AlwaysExcludedFiles = @('AGENTS.md', 'CHANGELOG.md')
 # a generated shim's example command invocation, or this repo's own tests asserting spec/task/
 # quickfix numbering and parsing behavior) -- excluded only from the generic-ID-pattern tier
 # below, never from the exact-branch-name tier, since a real feature's own branch name should
-# never legitimately appear in either. tests/ is deliberately excluded by default to keep the
+# never legitimately appear in either. A tests/ directory at any depth is excluded by default to keep the
 # routine gate low-noise; pass -IncludeTests for a stricter, human-reviewed audit pass, since a
 # real leak can hide in a test file's own comment/docstring rather than its fixture data.
 $script:GenericIdExcludedBase = $script:AlwaysExcluded + @('templates/', '.github/', 'site/src/')
@@ -66,6 +67,7 @@ try {
         if (Test-ExcludedPath -Path $file -Prefixes $script:AlwaysExcluded) { continue }
         if ($script:AlwaysExcludedFiles -contains $file) { continue }
         $inGenericScope = -not (Test-ExcludedPath -Path $file -Prefixes $script:GenericIdExcluded)
+        if (-not $IncludeTests -and $file.Contains('/tests/')) { $inGenericScope = $false }
 
         try {
             $lines = Get-Content -LiteralPath $file -ErrorAction Stop

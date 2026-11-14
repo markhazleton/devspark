@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#requires -Version 7.0
 # Quickfix context gathering script
 # Supports rapid bug fixes and small features without full spec overhead
 

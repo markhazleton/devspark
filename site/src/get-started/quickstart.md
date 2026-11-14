@@ -7,6 +7,8 @@ There are two ways to start:
 
 Both paths install the same files using the same bootstrap step below — the difference is what you do with them afterward. Nothing below writes to your repository until the agent has shown you what it plans to do and you have approved it (see **Preview before you trust**, at the end of Step 1).
 
+**Requirements.** Git and a supported AI agent. On Windows the helper scripts need PowerShell 7+ (`pwsh`); Windows PowerShell 5.1 is not supported and stops with a version error. macOS and Linux run the Bash scripts.
+
 ## Step 1: Bootstrap DevSpark
 
 Open a chat with your AI agent inside the target repository and paste the bootstrap prompt for your agent:
@@ -17,7 +19,7 @@ Open a chat with your AI agent inside the target repository and paste the bootst
 @workspace Follow the instructions at https://dev.makeboldspark.com/raw/quickstart/devspark_quickstart_copilot.md
 ```
 
-Copilot loads DevSpark as native Agent Skills, each invoked with a `/devspark-<command>` slash command. Acceptance was observed in VS Code Insiders 1.142.0 with the built-in Copilot Chat, running locally on Windows: typing `/devspark` lists each of the 38 skills once, and text typed after the slash command (for example `/devspark-specify add a login page`) is passed as input to the skill. Older VS Code builds were not tested.
+Copilot loads DevSpark as native Agent Skills, one for each of the 39 commands, each invoked with a `/devspark-<command>` slash command. Acceptance was observed in VS Code Insiders 1.142.0 with the built-in Copilot Chat, running locally on Windows: typing `/devspark` lists each skill once, and text typed after the slash command (for example `/devspark-specify add a login page`) is passed as input to the skill. Older VS Code builds were not tested.
 
 ### Claude Code
 

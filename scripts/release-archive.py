@@ -10,19 +10,26 @@ Commands:
 Eligibility is decided by release-context.py's classifier (one definition, not a second one). This
 script only performs the move the release contract describes: deterministic, never overwriting
 archived evidence, and resumable after an interruption.
+
+The archive is this repository's `.archive/` unless `archive.root` in .devspark.work/devspark.json (or
+--archive-root) names an existing folder outside the repository, for teams that keep history elsewhere.
+Files bound for an external archive are copied and hash-checked before the original is removed.
 """
 
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime
 import hashlib
 import importlib.util
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-[0-9A-Za-z.-]+)?$")
@@ -134,11 +141,85 @@ def validate_version(repo: Path, version: str, resuming: bool) -> None:
         raise ArchiveError(f"version {version} is not newer than the previous release {last_tag}")
 
 
-def archive_date_for(repo: Path, version: str, explicit: str) -> str:
+@dataclass(frozen=True)
+class ArchiveLocation:
+    """Where release writes: this repository's `.archive/`, or an existing folder outside it.
+
+    The journal records paths relative to the repository for `.archive/`, so its manifest keeps its
+    shape, and relative to the archive folder for an external one, so the journal survives a re-clone.
+    """
+
+    root: Path
+    repo: Path
+    external: bool
+    source: str
+
+    def locate(self, recorded: str) -> Path:
+        return (self.root if self.external else self.repo) / recorded
+
+    def record(self, path: Path) -> str:
+        return rel(self.root if self.external else self.repo, path)
+
+    def show(self, path: Path) -> str:
+        return path.as_posix() if self.external else rel(self.repo, path)
+
+
+def configured_archive_root(repo: Path) -> str:
+    config = repo / WORK / "devspark.json"
+    if not config.is_file():
+        return ""
+    try:
+        data = json.loads(config.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        print(f"release-archive: warning: {config.as_posix()} is not valid JSON ({error}); using the default archive", file=sys.stderr)
+        return ""
+    section = data.get("archive") if isinstance(data, dict) else None
+    if section is None:
+        return ""
+    if not isinstance(section, dict):
+        raise ArchiveError("devspark.json 'archive' must be an object")
+    if "root" not in section:
+        return ""
+    root = section["root"]
+    if not isinstance(root, str) or not root.strip():
+        raise ArchiveError("devspark.json 'archive.root' must be a non-empty string")
+    return root.strip()
+
+
+def resolve_archive_root(repo: Path, explicit: str) -> ArchiveLocation:
+    """The archive folder: --archive-root, else `archive.root`, else `.archive/`.
+
+    It is `.archive/` (or a folder inside it) or an existing folder outside the repository. Any other
+    folder inside the repository would put history where scans and Knowledge tooling read it as live content.
+    """
+    if explicit:
+        value, source = explicit, "argument"
+    else:
+        value = configured_archive_root(repo)
+        source = "config" if value else "default"
+        value = value or ARCHIVE
+    base = repo.resolve()
+    path = Path(os.path.expanduser(value))
+    resolved = (path if path.is_absolute() else repo / path).resolve()
+    if resolved == base or base.is_relative_to(resolved):
+        raise ArchiveError(f"archive root {value!r} must be a dedicated archive folder, not the repository root or above it")
+    if resolved.is_relative_to(base):
+        if resolved != base / ARCHIVE and not resolved.is_relative_to(base / ARCHIVE):
+            raise ArchiveError(
+                f"archive root {value!r} is inside this repository but outside {ARCHIVE}/, where scans and Knowledge "
+                f"tooling would read archived history as live content; use {ARCHIVE}/ or a folder outside the repository"
+            )
+        return ArchiveLocation(repo / resolved.relative_to(base), repo, False, source)
+    if not resolved.is_dir():
+        raise ArchiveError(f"archive root {value!r} is not an existing folder; create it, or clone the repository that holds it, then rerun")
+    return ArchiveLocation(resolved, repo, True, source)
+
+
+def archive_date_for(location: ArchiveLocation, version: str, explicit: str) -> str:
     if explicit and not DATE.match(explicit):
         raise ArchiveError(f"--date '{explicit}' must be YYYY-MM-DD")
     existing = sorted(
-        path.parent.parent.name for path in repo.glob(f"{ARCHIVE}/*/release/archive-manifest-{version}.json")
+        path.parent.parent.name for path in location.root.glob(f"*/release/archive-manifest-{version}.json")
     )
     if len(existing) > 1:
         raise ArchiveError(f"release {version} has manifests in more than one archive folder: {', '.join(existing)}")
@@ -170,8 +251,8 @@ def is_operational_file(name: str) -> bool:
     return name.startswith(".") or name.lower() == "readme.md"
 
 
-def manifest_path(repo: Path, date: str, version: str) -> Path:
-    return repo / ARCHIVE / date / "release" / f"archive-manifest-{version}.json"
+def manifest_path(location: ArchiveLocation, date: str, version: str) -> Path:
+    return location.root / date / "release" / f"archive-manifest-{version}.json"
 
 
 def read_manifest(path: Path) -> dict[str, object]:
@@ -197,18 +278,31 @@ def write_manifest(path: Path, data: dict[str, object]) -> bool:
     return True
 
 
+def uncommitted_paths(repo: Path) -> set[str]:
+    """Tracked workspace files that differ from HEAD, staged or not."""
+    result = run_git(repo, "status", "--porcelain=v1", "-z", "--no-renames", "--untracked-files=no", "--", WORK)
+    if result.returncode != 0:
+        return set()
+    return {entry[3:] for entry in result.stdout.split("\0") if len(entry) > 3}
+
+
 class Inventory:
     """Everything the release needs to know about the workspace, computed once."""
 
-    def __init__(self, repo: Path, version: str, date: str, include_roadmap: bool = False) -> None:
+    def __init__(
+        self, repo: Path, version: str, date: str, location: ArchiveLocation, include_roadmap: bool = False
+    ) -> None:
         self.repo = repo
         self.version = version
         self.date = date
+        self.location = location
         self.include_roadmap = include_roadmap
-        self.archive_root = f"{ARCHIVE}/{date}"
-        self.manifest_file = manifest_path(repo, date, version or "unversioned")
+        self.archive_root = location.record(location.root / date)
+        self.manifest_file = manifest_path(location, date, version or "unversioned")
         self.journal = read_manifest(self.manifest_file) if version else {"items": []}
         self.tracked = tracked_paths(repo)
+        # Content that leaves the repository must match what Git already holds.
+        self.uncommitted = uncommitted_paths(repo) if location.external else set()
         self.last_tag = RC.git(repo, "describe", "--tags", "--abbrev=0")
         self.window = set(git_lines(repo, "rev-list", f"{self.last_tag}..HEAD")) if self.last_tag else set()
         self.to_archive: list[dict[str, object]] = []
@@ -255,7 +349,7 @@ class Inventory:
         }
 
     def file_destination(self, unit: dict[str, object], relative: str) -> Path:
-        base = self.repo / str(unit["archived"])
+        base = self.location.locate(str(unit["archived"]))
         return base if unit["is_file"] else base / relative
 
     def check_collisions(self, unit: dict[str, object]) -> bool:
@@ -267,7 +361,7 @@ class Inventory:
                 self.collisions.append(
                     {
                         "path": str(unit["original"]) if unit["is_file"] else f"{unit['original']}/{entry['path']}",
-                        "archived": rel(self.repo, destination),
+                        "archived": self.location.show(destination),
                         "reason": "a different file already exists at the archive destination; nothing was overwritten",
                     }
                 )
@@ -372,6 +466,16 @@ class Inventory:
                 }
             )
             return
+        changed = sorted(item for item in self.uncommitted if item == original or item.startswith(f"{original}/"))
+        if changed:
+            self.needs_decision.append(
+                {
+                    "path": original,
+                    "reason": f"{len(changed)} file(s) have uncommitted changes, and the archive is outside this repository, so Git would not keep what leaves it (e.g. {changed[0]})",
+                    "action": "commit the changes, then rerun",
+                }
+            )
+            return
         unit = self.unit(kind, original, files, archived=archived)
         if kind == "prospective-spec":
             unit["roadmap_status"] = roadmap_status
@@ -400,12 +504,15 @@ class Inventory:
         if not complete.is_dir():
             return
         roadmap = checker.Roadmap(self.repo, root, source)
+        if roadmap.preserve_paths:
+            self.roadmap_notice = "the roadmap layout preserves published paths; its Prospective Specs remain in place"
+            return
         items = {item["_path"]: item for item in roadmap.items}
         errors = {finding["path"] for finding in roadmap.findings if finding["severity"] == "error"}
         ready: list[tuple[str, Path, str]] = []
         for path in sorted(complete.glob("*.md"), key=lambda p: p.as_posix()):
             original = rel(self.repo, path)
-            if path.name.lower() == "readme.md" or original in skip:
+            if path.name.lower() == "readme.md" or original in skip or path in roadmap.supporting:
                 continue
             item = items.get(path)
             if not roadmap.safe(path):
@@ -420,6 +527,13 @@ class Inventory:
                 {"path": original, "reason": reason, "action": "run roadmap-check, correct the item, then rerun"}
             )
         if not (self.include_roadmap and ready):
+            return
+        if self.location.external:
+            self.roadmap_notice = (
+                "roadmap archival needs the archive inside this repository, and the archive root is outside it, so the "
+                "resolved Prospective Specs stay in specs/complete/ and nothing in the roadmap was changed; "
+                f"rerun with --archive-root {ARCHIVE} to archive them"
+            )
             return
         statuses = {path: str(items[path]["status"]) for _, path, _ in ready}
         relinks = checker.archive_relinks(
@@ -499,19 +613,23 @@ def result_payload(inventory: Inventory, command: str) -> dict[str, object]:
         return {
             "kind": unit["kind"],
             "original": unit["original"],
-            "archived": unit["archived"],
+            "archived": inventory.location.show(inventory.location.locate(str(unit["archived"]))),
             "files": len(unit["files"]),  # type: ignore[arg-type]
             "last_commit": unit["last_commit"],
             "in_release_window": unit["in_release_window"],
         }
 
+    location = inventory.location
     return {
         "COMMAND": command,
         "RELEASE_VERSION": inventory.version,
         "RELEASE_FROM": inventory.last_tag,
         "ARCHIVE_DATE": inventory.date,
-        "ARCHIVE_ROOT": inventory.archive_root,
-        "MANIFEST": rel(inventory.repo, inventory.manifest_file) if inventory.version else "",
+        "ARCHIVE_ROOT": location.show(location.root / inventory.date),
+        "ARCHIVE_EXTERNAL": location.external,
+        "ARCHIVE_SOURCE": location.source,
+        "ARCHIVE_NOTICE": archive_notice(inventory),
+        "MANIFEST": location.show(inventory.manifest_file) if inventory.version else "",
         "TO_ARCHIVE": [summary(unit) for unit in inventory.to_archive],
         "RESUMING": [summary(unit) for unit in inventory.resuming],
         "ALREADY_ARCHIVED": sorted(inventory.already_archived),
@@ -532,6 +650,16 @@ def result_payload(inventory: Inventory, command: str) -> dict[str, object]:
     }
 
 
+def archive_notice(inventory: Inventory) -> str:
+    location = inventory.location
+    if not location.external:
+        return ""
+    return (
+        f"archived files are written to {location.show(location.root / inventory.date)}, outside this repository; "
+        "commit them in the repository that owns that folder. This repository's commit records only their removal."
+    )
+
+
 def roadmap_display(inventory: Inventory) -> str:
     root = inventory.roadmap_root
     if root is None:
@@ -546,11 +674,11 @@ def relink_roadmap(inventory: Inventory, journal: dict[str, object]) -> list[str
     interrupted apply finishes the same links and live Delivered records without reading archived items.
     """
     checker, root = inventory.roadmap_checker, inventory.roadmap_root
-    if checker is None or root is None or inventory.roadmap_external or inventory.roadmap_error:
+    if checker is None or root is None or inventory.roadmap_external or inventory.roadmap_error or inventory.location.external:
         return []
     repo = inventory.repo
     archived = {
-        repo / str(item["original"]): repo / str(item["archived"])
+        repo / str(item["original"]): inventory.location.locate(str(item["archived"]))
         for item in journal["items"]  # type: ignore[union-attr]
         if item.get("kind") == "prospective-spec"
     }
@@ -577,8 +705,42 @@ def stage(repo: Path, paths: list[str]) -> None:
         run_git(repo, "add", "-A", "--", *paths[start : start + 100])
 
 
+def relocate(source: Path, destination: Path, expected: str, external: bool) -> None:
+    """Move one file into the archive.
+
+    An external archive can sit on another volume or share, so its bytes are copied, hash-checked and
+    published under their final name before the original is removed. An interruption leaves the original
+    in place, and the journal resumes the move.
+    """
+    if not external:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.exists():
+            source.unlink()
+        else:
+            os.replace(source, destination)
+        return
+    partial = destination.with_name(destination.name + ".partial")
+    try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if not destination.exists():
+            shutil.copyfile(source, partial)
+            if sha256_of(partial) != expected:
+                raise ArchiveError(f"{source.name} no longer matches the plan (it changed or was damaged while copying); the original was kept")
+            os.replace(partial, destination)
+        source.unlink()
+    except OSError as error:
+        reason = error.strerror or type(error).__name__
+        raise ArchiveError(
+            f"could not move {source.name} into the archive ({reason}); the original was kept. Fix the cause and rerun apply to resume"
+        ) from error
+    finally:
+        with contextlib.suppress(OSError):
+            partial.unlink(missing_ok=True)
+
+
 def apply_plan(inventory: Inventory) -> list[str]:
     repo = inventory.repo
+    location = inventory.location
     units = [*inventory.resuming, *inventory.to_archive]
     known = {str(item["original"]): item for item in inventory.journal["items"]}  # type: ignore[index]
     for unit in units:
@@ -590,38 +752,43 @@ def apply_plan(inventory: Inventory) -> list[str]:
         "release_from": inventory.last_tag,
         "items": [known[key] for key in sorted(known)],
     }
-    write_manifest(inventory.manifest_file, journal)
+    if location.external:
+        journal["location"] = "external"
+    try:
+        write_manifest(inventory.manifest_file, journal)
+    except OSError as error:
+        reason = error.strerror or type(error).__name__
+        raise ArchiveError(f"cannot write the release journal to the archive ({reason}); nothing was moved") from error
 
     touched: list[str] = []
     for unit in units:
         original = repo / str(unit["original"])
         for entry in unit["files"]:  # type: ignore[union-attr]
             source = original if unit["is_file"] else original / entry["path"]
-            destination = inventory.file_destination(unit, entry["path"])
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            if destination.exists():
-                source.unlink()
-            else:
-                os.replace(source, destination)
+            relocate(source, inventory.file_destination(unit, entry["path"]), str(entry["sha256"]), location.external)
         if original.is_dir():
             for directory in sorted((p for p in original.rglob("*") if p.is_dir()), key=lambda p: p.as_posix(), reverse=True):
                 if not any(directory.iterdir()):
                     directory.rmdir()
             if not any(original.iterdir()):
                 original.rmdir()
-        touched += [str(unit["original"]), str(unit["archived"])]
-    touched.append(rel(repo, inventory.manifest_file))
+        touched.append(str(unit["original"]))
+        if not location.external:
+            touched.append(str(unit["archived"]))
+    if not location.external:
+        touched.append(rel(repo, inventory.manifest_file))
     inventory.roadmap_relinked = relink_roadmap(inventory, journal)
     touched += inventory.roadmap_relinked
     stage(repo, touched)
     return [str(unit["original"]) for unit in units]
 
 
-def validate_archive(repo: Path, version: str, date: str) -> dict[str, object]:
-    path = manifest_path(repo, date, version)
+def validate_archive(location: ArchiveLocation, version: str, date: str) -> dict[str, object]:
+    repo = location.repo
+    path = manifest_path(location, date, version)
     problems: list[str] = []
     if not path.is_file():
-        return {"COMMAND": "validate", "RELEASE_VERSION": version, "OK": False, "PROBLEMS": [f"no manifest at {rel(repo, path)}"], "ARCHIVED": 0, "STALE_REFERENCES": []}
+        return {"COMMAND": "validate", "RELEASE_VERSION": version, "OK": False, "PROBLEMS": [f"no manifest at {location.show(path)}"], "ARCHIVED": 0, "STALE_REFERENCES": []}
     manifest = read_manifest(path)
     if manifest.get("release") != version:
         problems.append(f"manifest records release {manifest.get('release')!r}, expected {version!r}")
@@ -633,20 +800,21 @@ def validate_archive(repo: Path, version: str, date: str) -> dict[str, object]:
         for entry in item["files"]:
             count += 1
             was_file = bool(item["is_file"])
-            target = repo / archived if was_file else repo / archived / entry["path"]
+            target = location.locate(archived) if was_file else location.locate(archived) / entry["path"]
             source = repo / original if was_file else repo / original / entry["path"]
             if not target.is_file():
-                problems.append(f"missing from archive: {rel(repo, target)}")
+                problems.append(f"missing from archive: {location.show(target)}")
             elif sha256_of(target) != entry["sha256"]:
-                problems.append(f"archived content differs from the journal: {rel(repo, target)}")
+                problems.append(f"archived content differs from the journal: {location.show(target)}")
             if source.exists():
                 problems.append(f"still present in the workspace: {rel(repo, source)}")
     stale, truncated = find_stale_references(repo, tracked_paths(repo), originals, ())
     return {
         "COMMAND": "validate",
         "RELEASE_VERSION": version,
-        "ARCHIVE_ROOT": f"{ARCHIVE}/{date}",
-        "MANIFEST": rel(repo, path),
+        "ARCHIVE_ROOT": location.show(location.root / date),
+        "ARCHIVE_EXTERNAL": location.external,
+        "MANIFEST": location.show(path),
         "ARCHIVED": count,
         "PROBLEMS": problems,
         "STALE_REFERENCES": stale,
@@ -675,6 +843,8 @@ def print_report(payload: dict[str, object]) -> None:
     for key in ("ROADMAP_NOTICE", "ROADMAP_ERROR"):
         if payload.get(key):
             print(f"  roadmap: {payload[key]}")
+    if payload.get("ARCHIVE_NOTICE"):
+        print(f"  archive: {payload['ARCHIVE_NOTICE']}")
     for item in payload.get("ROADMAP_RELINKED", []):  # type: ignore[union-attr]
         print(f"  roadmap relinked: {item}")
     stale = payload.get("STALE_REFERENCES", [])
@@ -689,6 +859,7 @@ def main() -> int:
     parser.add_argument("--version", default="")
     parser.add_argument("--date", default="")
     parser.add_argument("--repo-root", default="")
+    parser.add_argument("--archive-root", default="", help="archive folder: .archive/ or a folder inside it, or an existing folder outside the repository (overrides archive.root in devspark.json)")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--include-roadmap", action="store_true", help="also archive resolved Prospective Specs from the repository's roadmap specs/complete/ (never an external roadmap)")
@@ -699,14 +870,15 @@ def main() -> int:
     try:
         if args.command != "plan" and not version:
             raise ArchiveError(f"'{args.command}' needs --version (the release being prepared)")
-        date = archive_date_for(repo, version, args.date) if version else (args.date or datetime.date.today().isoformat())
+        location = resolve_archive_root(repo, args.archive_root)
+        date = archive_date_for(location, version, args.date) if version else (args.date or datetime.date.today().isoformat())
         if version:
-            validate_version(repo, version, resuming=manifest_path(repo, date, version).is_file())
+            validate_version(repo, version, resuming=manifest_path(location, date, version).is_file())
         if args.command == "validate":
-            payload = validate_archive(repo, version, date)
+            payload = validate_archive(location, version, date)
             code = 0 if payload["OK"] else 1
         else:
-            inventory = Inventory(repo, version, date, include_roadmap=args.include_roadmap)
+            inventory = Inventory(repo, version, date, location, include_roadmap=args.include_roadmap)
             payload = result_payload(inventory, args.command)
             code = 0
             if args.command == "apply":
@@ -716,7 +888,7 @@ def main() -> int:
                     payload["MOVED"] = apply_plan(inventory)
                     payload["ROADMAP_RELINKED"] = inventory.roadmap_relinked
                     payload["ROADMAP_ERROR"] = inventory.roadmap_error
-                    verified = validate_archive(repo, version, date)
+                    verified = validate_archive(location, version, date)
                     payload["VALIDATION"] = verified
                     payload["OK"] = verified["OK"]
                     code = 0 if verified["OK"] else 1

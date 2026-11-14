@@ -84,6 +84,13 @@ When the check cannot run (`judge-missing`, `python-unavailable`, or `invalid-ou
 
 Type the full hyphenated slash command, for example `/devspark-specify`. In GitHub Copilot, DevSpark skills are installed as native Agent Skills under `.github/skills/`. Short names and the retired dotted 8.x form are not recognized. If a skill appears twice, run the [upgrade](../get-started/upgrade.md#upgrading-from-8x) to retire the leftover 8.x entry points. A personal skill with the same name in your user profile is outside the repository, and DevSpark does not touch it.
 
+## A helper script stops with a version error on Windows
+
+DevSpark's PowerShell helper scripts declare `#requires -Version 7.0`. Windows PowerShell 5.1 stops
+them before they run, with PowerShell's message that the script requires version 7.0. Install
+PowerShell 7 (`winget install Microsoft.PowerShell`) and run the agent's terminal with `pwsh`, or use
+the Bash script under `.devspark/scripts/bash/`. macOS and Linux use the Bash scripts.
+
 ## Related
 
 - [Review and Audit](review-and-audit.md): `/devspark-create-pr`, `/devspark-pr-review`, and `/devspark-address-pr-review`.

@@ -28,10 +28,12 @@ import yaml
 DEFAULT_ROOT = ".devspark.work/roadmap"
 STATUSES = ("proposed", "ready", "active", "complete", "dropped")
 RESOLVED = {"complete", "dropped"}
-FIELDS = {"id", "title", "status", "order", "depends_on", "delivery"}
+FIELDS = {"id", "title", "status", "order", "depends_on", "blockers", "delivery"}
 REQUIRED = ("id", "title", "status")
 ID = re.compile(r"^ps-(\d{3,})$")
 FILENAME = re.compile(r"^(ps-\d{3,})(?:-[a-z0-9][a-z0-9-]*)?\.md$")
+LEGACY_ID = re.compile(r"^ps-(\d{2,})$", re.I)
+LEGACY_FILENAME = re.compile(r"^(ps-\d{2,})(?:-[a-z0-9][a-z0-9-]*)?\.md$", re.I)
 FRONTMATTER = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)", re.S)
 LINK = re.compile(r"(?<!!)\[[^\]\n]*\]\(([^)\s]+)\)")
 DELIVERED = re.compile(r"^- \[[^\]\n]*\]\(([^)\s]+)\) — (complete|dropped|unknown); archived(?: with release [^\r\n]+)?[ \t]*\r?$", re.M)
@@ -130,6 +132,82 @@ def as_list(value: object) -> list[str] | None:
     return None
 
 
+def canonical_id(value: str, legacy: bool) -> str:
+    match = LEGACY_ID.fullmatch(value) if legacy else None
+    return f"ps-{int(match.group(1)):03d}" if match else value
+
+
+def roadmap_layout(root: Path) -> tuple[Path, bool, bool, dict[Path, str]]:
+    config = root / ".devspark-roadmap.json"
+    if config.is_symlink():
+        raise UsageError("roadmap layout configuration must not be a symbolic link")
+    if not config.exists():
+        return root / "roadmap.md", False, False, {}
+    if not config.is_file():
+        raise UsageError("roadmap layout configuration must be a regular file")
+    try:
+        layout = json.loads(read_text(config))
+    except (OSError, ValueError) as error:
+        raise UsageError(f"invalid roadmap layout configuration: {error}") from error
+    allowed = {"overview", "legacy_ids", "preserve_paths", "supporting_files"}
+    if not isinstance(layout, dict) or set(layout) - allowed:
+        raise UsageError("roadmap layout has unsupported fields or is not an object")
+    overview = layout.get("overview", "roadmap.md")
+    if (
+        not isinstance(overview, str)
+        or not overview.endswith(".md")
+        or Path(overview).name != overview
+        or "\\" in overview
+    ):
+        raise UsageError("roadmap overview must be a Markdown filename directly inside the roadmap root")
+    legacy = layout.get("legacy_ids", False)
+    if not isinstance(legacy, bool):
+        raise UsageError("roadmap layout legacy_ids must be a boolean")
+    preserve_paths = layout.get("preserve_paths", False)
+    if not isinstance(preserve_paths, bool):
+        raise UsageError("roadmap layout preserve_paths must be a boolean")
+
+    def item_path(value: object) -> Path:
+        if not isinstance(value, str) or "\\" in value:
+            raise UsageError("roadmap layout item paths must be relative Markdown paths")
+        parts = value.split("/")
+        if (
+            len(parts) not in (2, 3)
+            or parts[0] != "specs"
+            or (len(parts) == 3 and parts[1] != "complete")
+            or not parts[-1].endswith(".md")
+            or parts[-1] in (".", "..", "README.md")
+        ):
+            raise UsageError(f"roadmap layout item path {value!r} must be a file in specs/ or specs/complete/")
+        path = root.joinpath(*parts)
+        if path.is_symlink() or not inside(path, root) or not path.is_file():
+            raise UsageError(f"roadmap layout item {value!r} must be an existing regular file inside the roadmap root")
+        return path
+
+    declared = layout.get("supporting_files", {})
+    if not isinstance(declared, dict) or any(not isinstance(value, str) for value in declared.values()):
+        raise UsageError("roadmap layout supporting_files must map paths to Prospective Spec ids")
+    supporting: dict[Path, str] = {}
+    for name, identity in declared.items():
+        path = item_path(name)
+        identity = canonical_id(identity, legacy)
+        if not ID.fullmatch(identity):
+            raise UsageError(f"supporting file {name!r} must name a valid Prospective Spec id")
+        supporting[path] = identity
+    return root / overview, legacy, preserve_paths, supporting
+
+
+def planning_repository(repo: Path, root: Path) -> Path:
+    if inside(root, repo) or not root.is_dir():
+        return repo
+    try:
+        result = git(root, "rev-parse", "--show-toplevel")
+    except (OSError, subprocess.SubprocessError):
+        return repo
+    candidate = Path(result.stdout.strip()).resolve() if result.returncode == 0 and result.stdout.strip() else repo
+    return candidate if inside(root, candidate) else repo
+
+
 class Roadmap:
     """One read of the roadmap root; every command works from this snapshot."""
 
@@ -139,10 +217,12 @@ class Roadmap:
         self.source = source
         self.specs = root / "specs"
         self.complete = self.specs / "complete"
+        self.overview, self.legacy_ids, self.preserve_paths, self.supporting = roadmap_layout(root)
+        self.archive = planning_repository(repo, root) / ".archive"
         self.items: list[dict[str, object]] = []
         self.findings: list[dict[str, object]] = []
         self.archived: dict[str, str] = {}
-        self.present = (root / "roadmap.md").is_file() or self.specs.is_dir()
+        self.present = self.overview.is_file() or self.specs.is_dir()
         if self.present:
             self.load()
             self.check()
@@ -157,21 +237,23 @@ class Roadmap:
         return not path.is_symlink() and inside(path, self.root)
 
     def documents(self) -> list[Path]:
-        overview = self.root / "roadmap.md"
-        found = [overview] if overview.is_file() and self.safe(overview) else []
-        return found + [item["_path"] for item in self.items]  # type: ignore[misc]
+        found = [self.overview] if self.overview.is_file() and self.safe(self.overview) else []
+        return found + [item["_path"] for item in self.items] + list(self.supporting)  # type: ignore[misc]
+
+    def filename_id(self, filename: str) -> str:
+        match = (LEGACY_FILENAME if self.legacy_ids else FILENAME).fullmatch(filename)
+        return canonical_id(match.group(1), self.legacy_ids) if match else ""
 
     def candidates(self) -> list[Path]:
         paths: list[Path] = []
         for folder in (self.specs, self.complete):
             if folder.is_dir():
-                paths += [p for p in folder.glob("*.md") if p.is_file() and p.name.lower() != "readme.md"]
+                paths += [p for p in folder.glob("*.md") if p.is_file() and p.name.lower() != "readme.md" and p not in self.supporting]
         return sorted(paths, key=lambda p: p.as_posix())
 
     def load(self) -> None:
-        overview = self.root / "roadmap.md"
-        if overview.is_file() and not self.safe(overview):
-            self.finding("unsafe-path", "error", overview, "is a symbolic link or resolves outside the roadmap root; it is never read or written")
+        if self.overview.is_file() and not self.safe(self.overview):
+            self.finding("unsafe-path", "error", self.overview, "is a symbolic link or resolves outside the roadmap root; it is never read or written")
         for path in self.candidates():
             if not self.safe(path):
                 self.finding("unsafe-path", "error", path, "is a symbolic link or resolves outside the roadmap root; it is never read or written")
@@ -199,11 +281,10 @@ class Roadmap:
         missing = [key for key in REQUIRED if not str(meta.get(key) or "").strip()]
         if missing:
             self.finding("missing-field", "error", path, f"missing required metadata: {', '.join(missing)}")
-        identity = str(meta.get("id") or "").strip()
+        identity = canonical_id(str(meta.get("id") or "").strip(), self.legacy_ids)
         if identity and not ID.match(identity):
             self.finding("invalid-id", "error", path, f"id '{identity}' must look like ps-NNN")
-        name = FILENAME.match(path.name)
-        if identity and (not name or name.group(1) != identity):
+        if identity and self.filename_id(path.name) != identity:
             self.finding("id-filename-mismatch", "error", path, f"file name must start with its id '{identity}'")
         status = str(meta.get("status") or "").strip().lower()
         if status and status not in STATUSES:
@@ -214,16 +295,21 @@ class Roadmap:
             order = None
         depends = as_list(meta.get("depends_on"))
         delivery = as_list(meta.get("delivery"))
+        blockers = meta.get("blockers", [])
         if depends is None:
             self.finding("malformed-metadata", "error", path, "depends_on must be a list of ids")
         if delivery is None:
             self.finding("malformed-metadata", "error", path, "delivery must be a list of references")
+        if not isinstance(blockers, list) or not all(isinstance(value, str) and value.strip() for value in blockers):
+            self.finding("malformed-metadata", "error", path, "blockers must be a list of non-empty descriptions")
+            blockers = []
         return {
             "id": identity,
             "title": str(meta.get("title") or "").strip(),
             "status": status,
             "order": order,
-            "depends_on": depends or [],
+            "depends_on": [canonical_id(value, self.legacy_ids) for value in (depends or [])],
+            "blockers": blockers,
             "delivery": delivery or [],
             "path": display(path, self.root),
             "_path": path,
@@ -240,6 +326,9 @@ class Roadmap:
                 paths = ", ".join(str(item["path"]) for item in group)
                 for item in group:
                     self.finding("duplicate-id", "error", item["_path"], f"id {identity} is used by more than one file: {paths}")  # type: ignore[arg-type]
+        for path, identity in self.supporting.items():
+            if identity not in by_id and identity not in self.archived:
+                self.finding("orphaned-supporting-file", "error", path, f"supporting file refers to missing item {identity}")
         for item in self.items:
             path: Path = item["_path"]  # type: ignore[assignment]
             for dependency in item["depends_on"]:  # type: ignore[union-attr]
@@ -255,7 +344,7 @@ class Roadmap:
                 elif all(other["status"] == "dropped" for other in by_id[dependency]) and item["status"] not in RESOLVED:
                     self.finding("depends-on-dropped", "warning", path, f"depends on {dependency}, which was dropped")
             wanted = self.complete if item["status"] in RESOLVED else self.specs
-            if item["status"] in STATUSES and path.parent != wanted:
+            if item["status"] in STATUSES and path.parent != wanted and not self.preserve_paths:
                 where = "specs/complete/" if wanted == self.complete else "specs/"
                 self.finding("misplaced-item", "error", path, f"a {item['status']} item belongs in {where}", repairable=True)
             self.check_tracking(item, path)
@@ -313,21 +402,20 @@ class Roadmap:
         Archived files are never opened. A bare history link has unknown status, even when its target
         exists. The overview retains each resolved id after any referring Prospective Spec is archived.
         """
-        archive = self.repo / ".archive"
         found: dict[str, str] = {}
         for document in self.documents():
             for target, _ in local_links(read_text(document)):
-                name = FILENAME.match(Path(target).name)
-                if name and inside(document.parent / target, archive):
-                    found.setdefault(name.group(1), "unknown")
-        overview = self.root / "roadmap.md"
+                identity = self.filename_id(Path(target).name)
+                if identity and inside(document.parent / target, self.archive):
+                    found.setdefault(identity, "unknown")
+        overview = self.overview
         if overview in self.documents():
             records: dict[str, set[str]] = {}
             for match in DELIVERED.finditer(delivered_section(read_text(overview))):
                 target, status = match.groups()
-                name = FILENAME.match(Path(target).name)
-                if name and inside(overview.parent / target, archive):
-                    records.setdefault(name.group(1), set()).add(status)
+                identity = self.filename_id(Path(target).name)
+                if identity and inside(overview.parent / target, self.archive):
+                    records.setdefault(identity, set()).add(status)
             for identity, statuses in records.items():
                 found[identity] = next(iter(statuses)) if len(statuses) == 1 else "unknown"
                 if len(statuses) > 1:
@@ -335,11 +423,10 @@ class Roadmap:
         return found
 
     def check_links(self) -> None:
-        archive = self.repo / ".archive"
         for document in self.documents():
             for target, _ in local_links(read_text(document)):
                 resolved = (document.parent / target).resolve()
-                if inside(resolved, archive):
+                if inside(resolved, self.archive):
                     continue  # traceability into release history, which no command reads
                 if not resolved.exists():
                     fixable = resolved.name in self.locations()
@@ -359,6 +446,7 @@ class Roadmap:
             for item in self.items
             if item["status"] in ("proposed", "ready")
             and item["path"] not in broken
+            and not item["blockers"]
             and all(status.get(d) == "complete" or (d not in status and self.archived.get(d) == "complete") for d in item["depends_on"])  # type: ignore[union-attr]
         ]
 
@@ -366,9 +454,10 @@ class Roadmap:
         """One past the highest id in use or recorded in roadmap history, so an archived id is never reused."""
         found = [m.group(1) for item in self.items if (m := ID.match(str(item["id"])))]
         found += [identity[3:] for identity in self.archived]
-        overview = self.root / "roadmap.md"
+        overview = self.overview
         if overview.is_file() and self.safe(overview):
-            found += re.findall(r"\bps-(\d{3,})\b", read_text(overview))
+            pattern = r"\bps-(\d{2,})\b" if self.legacy_ids else r"\bps-(\d{3,})\b"
+            found += re.findall(pattern, read_text(overview), re.I if self.legacy_ids else 0)
         width = max([3, *(len(number) for number in found)])
         return f"ps-{(max(int(number) for number in found) + 1 if found else 1):0{width}d}"
 
@@ -378,6 +467,8 @@ class Roadmap:
             "COMMAND": command,
             "REPO_ROOT": self.repo.as_posix(),
             "ROADMAP_ROOT": self.root.as_posix(),
+            "ROADMAP_FILE": display(self.overview, self.root),
+            "PRESERVE_PATHS": self.preserve_paths,
             "ROOT_SOURCE": self.source,
             "EXTERNAL": not inside(self.root, self.repo),
             "PRESENT": self.present,
@@ -385,6 +476,7 @@ class Roadmap:
             "FINDINGS": sorted(self.findings, key=lambda f: (str(f["path"]), str(f["code"]), str(f["message"]))),
             "UNBLOCKED": self.unblocked() if self.present else [],
             "ARCHIVED": dict(sorted(self.archived.items())),
+            "SUPPORTING": [{"path": display(path, self.root), "id": identity} for path, identity in sorted(self.supporting.items())],
             "NEXT_ID": self.next_id(),
             "OK": not errors,
         }
@@ -502,7 +594,7 @@ def archive_relinks(
         updated = LINK.sub(relink, text)
         if updated != text:
             rewrites[document] = updated
-    overview = roadmap.root / "roadmap.md"
+    overview = roadmap.overview
     if archived:
         guard(roadmap.root, overview)
         text = rewrites.get(overview, read_text(overview) if overview.is_file() else "# Roadmap\n")
@@ -569,20 +661,32 @@ def main() -> int:
         code = 0 if payload["OK"] else 1
         if args.command == "locate":
             identity = args.id.strip().lower()
+            requested_supporting = ""
             if identity.endswith(".md"):
-                name = FILENAME.match(Path(identity).name)
-                identity = name.group(1) if name else identity
+                name = Path(identity).name
+                supporting = [path for path in roadmap.supporting if path.name.lower() == name]
+                if len(supporting) == 1:
+                    requested_supporting = display(supporting[0], root)
+                    identity = roadmap.supporting[supporting[0]]
+                else:
+                    identity = roadmap.filename_id(name) or identity
+            identity = canonical_id(identity, roadmap.legacy_ids)
             if not identity:
                 raise UsageError("locate needs a Prospective Spec id, for example ps-001")
             matches = [i for i in payload["ITEMS"] if i["id"] == identity]  # type: ignore[union-attr]
             status = {i["id"]: i["status"] for i in payload["ITEMS"]}  # type: ignore[union-attr]
             item = matches[0] if len(matches) == 1 else None
             payload["ITEM"] = item
+            payload["SUPPORTING"] = [
+                entry for entry in payload["SUPPORTING"] if entry["id"] == identity  # type: ignore[union-attr]
+            ]
+            payload["REQUESTED_SUPPORTING"] = requested_supporting
             payload["DEPENDENCIES"] = {
                 d: status.get(d, roadmap.archived.get(d, "missing")) for d in (item or {}).get("depends_on", [])
             }
             payload["FINDINGS"] = [f for f in payload["FINDINGS"] if item and f["path"] == item["path"]]  # type: ignore[union-attr]
-            code = 0 if item else 1
+            payload["OK"] = item is not None and not any(f["severity"] == "error" for f in payload["FINDINGS"])  # type: ignore[union-attr]
+            code = 0 if payload["OK"] else 1
             if len(matches) > 1:
                 payload["ERROR"] = f"{identity} is not unique in this roadmap"
             elif not item:

@@ -22,7 +22,8 @@ step 1.
 ## Purpose
 
 Release seals the verified delta between the previous release and HEAD, and is the **sole** command
-that ever moves anything from `.devspark.work/` into `.archive/{YYYY-MM-DD}/`. `{YYYY-MM-DD}` is
+that ever moves anything from `.devspark.work/` into `.archive/{YYYY-MM-DD}/` (or the same dated
+folder under the archive root a team has configured; see step 4). `{YYYY-MM-DD}` is
 always *this release's own cut date* (today, the date this run tags) — never an individual swept
 artifact's own internal date, timestamp, or filename stamp. Every artifact swept in steps 4–5 goes
 into the one archive folder for the release being cut right now, regardless of what date it happens
@@ -42,6 +43,7 @@ scans all run here.
 | ------------------- | -------------------------------------------------------------------------------------------- |
 | `{version}`         | Use the explicit semantic version                                                            |
 | `--from <ref>`      | Override the release-window base ref                                                         |
+| `--archive-root`    | Archive to this folder instead of `archive.root` (see Archive location in step 4)            |
 | `--scope=work`      | Evaluate `.devspark.work/` retention and archiving only; skip the version/CHANGELOG workflow |
 | `--scope=knowledge` | Evaluate current-knowledge currentness and code/knowledge consistency only                   |
 | `--scope=scan`      | Report candidates only; make no changes                                                      |
@@ -76,6 +78,26 @@ scans all run here.
      (PowerShell: `.devspark/scripts/powershell/release-archive.ps1 plan --version {version} -Json`).
      `plan` writes nothing. It reports `TO_ARCHIVE`, `IN_FLIGHT`, `NEEDS_DECISION` (orphaned
      bundles, untracked files, uncategorized work areas), `COLLISIONS`, and `STALE_REFERENCES`.
+   - **Archive location.** The archive is `.archive/` in this repository unless the team keeps its
+     history elsewhere: `archive.root` in `.devspark.work/devspark.json`, or `--archive-root <path>`
+     on `plan`, `apply`, and `validate` (the argument wins; `ARCHIVE_SOURCE` reports `argument`,
+     `config`, or `default`). The root is `.archive/` itself, a folder inside it, or an **existing**
+     folder outside the repository, such as a clone of a separate archive repository. Any other
+     folder inside the repository is refused, because scans and Knowledge tooling would read the
+     archived history as live content; the script never creates the folder. Keep the same root for
+     every run of one release, since its journal lives there. Paths below name the default
+     `.archive/`; under another root, read `ARCHIVE_ROOT` in its place. When `ARCHIVE_EXTERNAL` is
+     true:
+     - reported paths are absolute, and each file is copied, hash-checked against the plan, and only
+       then removed from `.devspark.work/`, so an interruption leaves the original in place and
+       `apply` resumes the move;
+     - the archived files belong to the other folder, so this repository's release commit records
+       only their removal. Relay `ARCHIVE_NOTICE` and have the folder's owner commit the archive
+       there;
+     - a bundle with uncommitted changes is listed in `NEEDS_DECISION` until it is committed, because
+       Git could not recover what leaves the repository;
+     - `--include-roadmap` leaves the roadmap untouched, and `ROADMAP_NOTICE` says why: a link to a
+       file outside the repository would break for everyone else.
    - Show the plan and put every `NEEDS_DECISION` entry to the user. Never archive, delete, or
      reclassify one of them on your own, and never edit a bundle's status to make it
      eligible: eligibility rests on completion evidence that already exists. A spec is complete
@@ -100,8 +122,11 @@ scans all run here.
      an archived item so it points at the archived copy (`ROADMAP_RELINK` previews the files,
      `ROADMAP_RELINKED` reports them). Existing prose stays as written apart from moved link targets;
      do not edit these links by hand. Every archived item also gets one permanent `## Delivered` line
-     in `roadmap.md`, with its link and explicit `complete;` or `dropped;` status, even if another
-     roadmap file already links to it. The status is captured from the live item in the release
+     in the selected roadmap overview (normally `roadmap.md`; the roadmap checker reports its
+     `ROADMAP_FILE`), with its link and
+     explicit `complete;` or `dropped;` status, even if another roadmap file already links to it.
+     Supporting files stay in place. A layout that preserves published paths keeps every Prospective
+     Spec in place and reports `ROADMAP_NOTICE`. The status is captured from the live item in the release
      journal before the move, so interrupted runs can finish the record without reading archived
      planning content. The checker uses only the live Delivered records: a recorded `complete` item
      still satisfies dependencies, while a dropped or unknown item does not. A bare archive link or
@@ -111,9 +136,10 @@ scans all run here.
      in `NEEDS_DECISION` instead and stays in place. Everything else under the roadmap root is live
      planning and stays. A roadmap outside this repository (`ROADMAP_EXTERNAL`) is never read,
      archived, or rewritten here; relay `ROADMAP_NOTICE` and leave its archival to an authorized run
-     in the planning repository. `ROADMAP_ERROR` means the roadmap was skipped unchanged. No
+     in the planning repository. `ROADMAP_ERROR` means the roadmap was skipped unchanged. An archive
+     outside this repository also leaves the roadmap in place (see Archive location). No
      roadmap, or declining the offer, changes nothing else, and the roadmap never blocks a release.
-   - The script reads `.archive/` only to refuse an overwrite and to resume this release's own
+   - The script reads the archive only to refuse an overwrite and to resume this release's own
      manifest; no command, release included, scans or lists archived history for any other purpose.
 
    The classification behind `plan` is the release context's: `ARCHIVE_ELIGIBLE` lists the bundles
@@ -154,9 +180,10 @@ scans all run here.
 8. Generate user-facing CHANGELOG and release notes from the release delta. Do not mention archived
    spec, task, quickfix, feature, or requirement identifiers.
 9. Write operational release output — including a summary of what was archived (cite the manifest),
-   what retention swept, and every artifact left for a decision — directly to `.archive/{YYYY-MM-DD}/release/`. Release output is never staged under
-   `.devspark.work/`, even temporarily: `.archive/` is the only place any of this release's output
-   lives once the run completes.
+   what retention swept, and every artifact left for a decision — directly to the archive's
+   `{YYYY-MM-DD}/release/` folder (`.archive/{YYYY-MM-DD}/release/` by default; `ARCHIVE_ROOT` names
+   it). Release output is never staged under `.devspark.work/`, even temporarily: the archive is the
+   only place any of this release's output lives once the run completes.
 10. Bump source version files and the `.devspark/VERSION` stamp where applicable.
 11. Show the exact commit, version, and tag plan, including the archive already applied in step 4.
     Require explicit confirmation before the release commit, tags, pushes, or publication;
@@ -170,8 +197,9 @@ Git is the sole history for `.knowledge/`: release never archives it, only corre
 deletes it. `.devspark.work/` retained work products and archive-eligible specs/quickfixes are the
 one exception — those move to `.archive/{YYYY-MM-DD}/` per steps 4–5 above, never deleted
 outright; orphaned planning bundles wait for an explicit owner decision. No DevSpark command,
-release included, reads, lists, or globs `.archive/` afterward beyond the script's own scoped
-reads in step 4; a human decides when an entry there is safe to remove, outside any DevSpark command.
+release included, reads, lists, or globs the archive (`.archive/` or the configured root) afterward
+beyond the script's own scoped reads in step 4; a human decides when an entry there is safe to
+remove, outside any DevSpark command.
 
 Where you are: release sealed, `.devspark.work/` swept
 Next: monitor for the next release window

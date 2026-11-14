@@ -13,9 +13,11 @@ AI agent follows its prompt instructions. See the [terminology](guides/prompt-li
 
 ## One Flow
 
-Version 9.5.2 makes PR re-review a bounded, terminal update. Read the
-[release notes](releases.md#952-2026-11-12) and
-[upgrade guidance](get-started/upgrade.md#upgrading-to-952).
+Version 9.6.0 lets a repository plan from an existing shared roadmap without bridge overrides, can
+archive releases into another repository, and shows where PR-risk Knowledge came from. Read the
+[release notes](releases.md#960-2026-11-14) and
+[upgrade guidance](get-started/upgrade.md#upgrading-to-960), especially if your automation runs the
+PowerShell scripts from Windows PowerShell 5.1.
 
 **One Flow. Assurance as Needed. Deliver Software.** DevSpark helps you understand the problem,
 implement the software, verify the outcome, and deliver a reliable change.

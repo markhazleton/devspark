@@ -142,7 +142,8 @@ DevSpark uses a strict four-root ownership model:
 - `.devspark.work/` holds temporary plans, operations, configuration, and overrides
 - `.knowledge/` holds current authoritative technical and governance truth, plus published
   user-facing guidance under `.knowledge/guides/`
-- `.archive/` holds the landing place for all old work products, grouped by release
+- `.archive/` holds the landing place for all old work products, grouped by release; `archive.root`
+  in `.devspark.work/devspark.json` can name an existing folder outside the repository instead
 
 Platform-specific directories (`.claude/`, `.github/`, `.cursor/`, etc.) contain only thin shims plus hydrated agent context.
 
@@ -258,7 +259,7 @@ The `/devspark-release` command verifies and packages the durable Git delta at r
 4. **CHANGELOG Generation**: Updates release notes from shipped behavior
 5. **Version Calculation**: Determines MAJOR/MINOR/PATCH from the durable change
 6. **Dry Run Mode**: Previews release changes before committing
-7. **Work Retention & Cleanup**: Sweeps `.devspark.work/` retention, archives completed specs/quickfixes, flags orphaned in-flight state, and backstops current-knowledge currentness. Release is the **sole** command that ever moves anything into `.archive/{YYYY-MM-DD}/`.
+7. **Work Retention & Cleanup**: Sweeps `.devspark.work/` retention, archives completed specs/quickfixes, flags orphaned in-flight state, and backstops current-knowledge currentness. Release is the **sole** command that ever moves anything into `.archive/{YYYY-MM-DD}/` (or the same dated folder under `archive.root`).
 
 **Usage:**
 

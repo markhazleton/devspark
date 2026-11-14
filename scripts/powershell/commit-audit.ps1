@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#requires -Version 7.0
 # Build commit-history audit context for /devspark.commit-audit
 # Usage:
 #   .\commit-audit.ps1 [-Json] [-Scope full] [-Since YYYY-MM-DD] [-Until YYYY-MM-DD] [-Branch NAME]

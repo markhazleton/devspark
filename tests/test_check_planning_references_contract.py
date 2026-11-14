@@ -25,11 +25,11 @@ ROOT = Path(__file__).resolve().parent.parent
 PS1 = ROOT / "scripts" / "powershell" / "check-planning-references.ps1"
 SH = ROOT / "scripts" / "bash" / "check-planning-references.sh"
 
-_PWSH = shutil.which("pwsh") or shutil.which("powershell")
+_PWSH = shutil.which("pwsh")
 _GIT_BASH = r"C:\Program Files\Git\bin\bash.exe"
 _BASH = _GIT_BASH if Path(_GIT_BASH).exists() else shutil.which("bash")
 
-requires_pwsh = pytest.mark.skipif(_PWSH is None, reason="pwsh/powershell not available")
+requires_pwsh = pytest.mark.skipif(_PWSH is None, reason="pwsh not available")
 requires_bash = pytest.mark.skipif(_BASH is None, reason="bash not available")
 
 
@@ -157,6 +157,48 @@ def test_generic_id_in_tests_excluded_by_default_included_with_flag(tmp_path: Pa
     for result in (ps_strict, bash_strict):
         assert result["ok"] is False
         assert any(f["match"] == "FR-007" for f in result["id_findings"])
+
+
+@requires_pwsh
+@requires_bash
+def test_nested_tests_exclude_generic_ids_but_still_check_branch(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    test_dir = tmp_path / "app" / "tests"
+    test_dir.mkdir(parents=True)
+    (test_dir / "test_widget.py").write_text(
+        "# FR-007 feature/example\n", encoding="utf-8"
+    )
+    _add(tmp_path)
+
+    for default, strict in (
+        (_run_pwsh(tmp_path, "-Branch", "feature/example"),
+         _run_pwsh(tmp_path, "-Branch", "feature/example", "-IncludeTests")),
+        (_run_bash(tmp_path, "--branch", "feature/example"),
+         _run_bash(tmp_path, "--branch", "feature/example", "--include-tests")),
+    ):
+        assert default["id_findings"] == []
+        assert default["branch_findings"] == [
+            {"path": "app/tests/test_widget.py", "line": 1, "match": "feature/example"}
+        ]
+        assert strict["branch_findings"] == default["branch_findings"]
+        assert strict["id_findings"] == [
+            {"path": "app/tests/test_widget.py", "line": 1, "match": "FR-007"}
+        ]
+
+
+@requires_pwsh
+@requires_bash
+def test_nested_tests_prefix_does_not_exclude_other_directories(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    directory = tmp_path / "app" / "tests_extra"
+    directory.mkdir(parents=True)
+    (directory / "widget.py").write_text("# FR-007\n", encoding="utf-8")
+    _add(tmp_path)
+
+    for result in (_run_pwsh(tmp_path), _run_bash(tmp_path)):
+        assert result["id_findings"] == [
+            {"path": "app/tests_extra/widget.py", "line": 1, "match": "FR-007"}
+        ]
 
 
 @requires_pwsh

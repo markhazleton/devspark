@@ -24,6 +24,36 @@ specs/
 `ps-NNN` identifiers are permanent and never reused. `scripts/roadmap-check.py check` reports the next
 free id.
 
+### Existing shared roadmaps
+
+An existing roadmap can keep its published paths without maintaining a second copy. Place an optional
+`.devspark-roadmap.json` in its root:
+
+```json
+{
+  "overview": "00-roadmap.md",
+  "legacy_ids": true,
+  "preserve_paths": true,
+  "supporting_files": {
+    "specs/complete/PS-07-intake.md": "ps-007"
+  }
+}
+```
+
+`overview` names a Markdown file directly in the root. `legacy_ids` accepts existing two-digit,
+case-insensitive IDs and filenames: `PS-07` and `ps-007` identify the same item. New items still use
+the reported `ps-NNN` ID. `preserve_paths` keeps every item's published path regardless of status;
+repair will not move items and release will not archive them. Each primary item needs the standard
+YAML metadata below; two primary files may not share an ID. A `supporting_files` entry associates an
+existing supplementary document with its primary item without counting or archiving it. Supporting
+files must already exist directly in `specs/` or `specs/complete/`. Invalid layout configuration is
+reported, not ignored.
+
+The checker reports the selected overview as `ROADMAP_FILE`, path preservation as `PRESERVE_PATHS`,
+supporting documents in `SUPPORTING`, and an explicitly requested supporting document as
+`REQUESTED_SUPPORTING`. A consumer repository can set
+`roadmap.root` to the shared root; the layout and roadmap remain owned by the planning repository.
+
 ## `roadmap.md`
 
 ```markdown
@@ -76,6 +106,7 @@ title: <outcome in a few words>
 status: proposed        # proposed | ready | active | complete | dropped
 order: 10               # optional; lower comes first
 depends_on: []          # ids of delivered prerequisites, e.g. [ps-001]
+blockers: []            # optional non-PS prerequisites or decisions, described in plain language
 delivery: []            # branch, commit, or pull request references once delivery starts
 ---
 
@@ -125,4 +156,5 @@ Git keeps its history.
 
 Planning status is not delivery evidence. Merged is not necessarily deployed, deployed is not
 necessarily activated, and a complete capability may legitimately ship inactive. Code and Git evidence
-take precedence over a stale planning claim.
+take precedence over a stale planning claim. Record only actual outstanding blockers, remove them when
+resolved, and describe independently startable portions in the item rather than inventing a gate.

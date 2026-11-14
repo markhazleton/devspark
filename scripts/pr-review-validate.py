@@ -109,7 +109,7 @@ def recompute_digest(repo_root: Path, diff_range: str) -> dict | None:
         sum(s.get("added", 0) for s in stats.values()),
         sum(s.get("deleted", 0) for s in stats.values()),
         stats,
-        engine.load_knowledge(repo_root),
+        engine.resolve_knowledge(repo_root),
     )
 
 

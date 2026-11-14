@@ -7,8 +7,11 @@ Prints one JSON object: per-file tier, delta_class and line counts, risk flags, 
 risk_score/rating, a report_form (short/standard/full) and pre-rendered markdown tables.
 Tiers are a floor: the reviewer may escalate, never lower.
 With --range, per-file line counts and change type come from git; without it they are omitted.
-When `.knowledge/index.json` exists, default-tier files owned by a domain or integration entity are
-promoted to P0 and unclaimed production files add a small score factor.
+Knowledge claims come from a live in-memory build of `.knowledge/` (nothing is written), falling back
+to a prebuilt `.knowledge/index.json`. When claims exist, default-tier files owned by a domain or
+integration entity are promoted to P0 and unclaimed production files add a small score factor. The
+digest's `knowledge` object says whether claims were applied and where they came from, so a missing
+or unreadable Knowledge input is never silent.
 Repos may prepend patterns via `.devspark.work/devspark.json` -> `pr_risk.tier_patterns`
 ({"P0": [regex, ...], ...}).
 """
@@ -17,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import importlib.util
 import json
 import re
 import subprocess
@@ -74,6 +78,8 @@ REPORT_FORM = {"low": "short", "medium": "standard", "high": "full"}
 CRITICAL_ENTITY_TYPES = {"domain", "integration"}
 TABLE_ROW_CAP = 40
 CHANGE_TYPES = {"A": "Added", "M": "Modified", "D": "Deleted"}
+# The engine that ships beside this script, so the claims always match this script's version.
+KNOWLEDGE_ENGINE = Path(__file__).resolve().with_name("build_knowledge_index.py")
 
 
 def git_stats(repo_root: Path, diff_range: str) -> dict[str, dict]:
@@ -167,15 +173,8 @@ def classify(path: str, tier_patterns: list[tuple[str, str]]) -> dict[str, str]:
     }
 
 
-def load_knowledge(repo_root: Path) -> dict | None:
-    """Claims and entity types from a prebuilt `.knowledge/index.json`; None when absent or unreadable."""
-    index_path = repo_root / ".knowledge" / "index.json"
-    if not index_path.is_file():
-        return None
-    try:
-        index = json.loads(index_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
+def _claims(index: dict) -> dict:
+    """Claims and entity types from a Knowledge index payload."""
     claims: list[tuple[str, str | None]] = []
     for node in index.get("nodes", []):
         for key in ("appliesTo", "source_of_truth"):
@@ -185,6 +184,88 @@ def load_knowledge(repo_root: Path) -> dict | None:
                     claims.append((pattern, node.get("entity")))
     types = {e.get("id"): e.get("type") for e in index.get("entities", [])}
     return {"claims": claims, "entity_types": types}
+
+
+def load_knowledge(repo_root: Path) -> dict | None:
+    """Claims and entity types from a prebuilt `.knowledge/index.json`; None when absent or unreadable."""
+    index_path = repo_root / ".knowledge" / "index.json"
+    if not index_path.is_file():
+        return None
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(index, dict):
+        return None
+    loaded = {**_claims(index), "source": "index"}
+    generated_at = (index.get("generated") or {}).get("at")
+    if generated_at:
+        loaded["generated_at"] = str(generated_at)
+    return loaded
+
+
+def _live_index(repo_root: Path) -> dict:
+    """Index built in memory by the Knowledge engine; no file is written."""
+    spec = importlib.util.spec_from_file_location("build_knowledge_index", KNOWLEDGE_ENGINE)
+    if spec is None or spec.loader is None:
+        raise ImportError(KNOWLEDGE_ENGINE.name)
+    engine = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(engine)
+    return engine.build_index(repo_root)
+
+
+def resolve_knowledge(repo_root: Path) -> dict:
+    """Knowledge claims for the digest and where they came from.
+
+    A live build of `.knowledge/` is preferred, so nothing has to be generated or committed before
+    a review; a prebuilt `.knowledge/index.json` is the fallback. The result always has a `source`
+    (`live`, `index`, or `none`). With no claims it says why: `detail` explains, and `status` is
+    `unreadable` when Knowledge exists but could not be read.
+    """
+    if not (repo_root / ".knowledge").is_dir():
+        return {"claims": [], "entity_types": {}, "source": "none", "detail": "no .knowledge/ directory"}
+
+    reason = "knowledge engine not found"
+    if KNOWLEDGE_ENGINE.is_file():
+        try:
+            live = {**_claims(_live_index(repo_root)), "source": "live"}
+        except Exception as exc:  # any engine failure degrades to the prebuilt index, visibly
+            reason = f"live build failed ({type(exc).__name__}); run build_knowledge_index.py --check"
+        else:
+            if not live["claims"]:
+                live["detail"] = ".knowledge/ holds no claims"
+            return live
+
+    prebuilt = load_knowledge(repo_root)
+    if prebuilt is None:
+        return {
+            "claims": [],
+            "entity_types": {},
+            "source": "none",
+            "status": "unreadable",
+            "detail": f"{reason}; .knowledge/index.json is missing or unreadable",
+        }
+    prebuilt["detail"] = f"{reason}; used the prebuilt index"
+    return prebuilt
+
+
+def _knowledge_provenance(knowledge: dict | None) -> dict:
+    """The digest's statement about its Knowledge input: applied, absent, or unreadable."""
+    knowledge = knowledge or {}
+    claims = knowledge.get("claims") or []
+    if claims:
+        status = "applied"
+    else:
+        status = "unreadable" if knowledge.get("status") == "unreadable" else "absent"
+    provenance = {
+        "status": status,
+        "source": knowledge.get("source") or ("provided" if claims else "none"),
+        "claim_count": len(claims),
+    }
+    for key in ("generated_at", "detail"):
+        if knowledge.get(key):
+            provenance[key] = knowledge[key]
+    return provenance
 
 
 def _claim_matches(pattern: str, path: str) -> bool:
@@ -217,7 +298,9 @@ def build_digest(
     files = [classify(p, tier_patterns) for p in paths]
     for f in files:
         f.update((stats or {}).get(f["path"], {}))
-    if knowledge:
+    # A Knowledge input without claims cannot say a file is unclaimed, so it applies nothing.
+    applied = bool(knowledge and knowledge.get("claims"))
+    if applied:
         apply_knowledge(files, knowledge)
 
     tier_counts = {t: 0 for t in TIER_ORDER}
@@ -233,7 +316,7 @@ def build_digest(
     flags["production_without_tests"] = bool(production) and not tests
     non_doc_files = len(files) - tier_counts["P3"]
     flags["large_diff"] = (lines_added + lines_deleted) >= LARGE_DIFF_LINES or non_doc_files >= LARGE_DIFF_NON_DOC_FILES
-    flags["unmapped_production"] = bool(knowledge) and any(
+    flags["unmapped_production"] = applied and any(
         not f["claimed"] and f["tier"] != "P3" for f in production
     )
 
@@ -269,6 +352,7 @@ def build_digest(
         "rating": rating,
         "report_form": REPORT_FORM[rating],
         "factors": factors,
+        "knowledge": _knowledge_provenance(knowledge),
         "tables": render_tables(files),
     }
 
@@ -289,7 +373,7 @@ def main(argv: list[str] | None = None) -> int:
         args.lines_added,
         args.lines_deleted,
         git_stats(repo_root, args.diff_range) if args.diff_range else None,
-        load_knowledge(repo_root),
+        resolve_knowledge(repo_root),
     )
     json.dump(digest, sys.stdout, separators=(",", ":"))
     sys.stdout.write("\n")

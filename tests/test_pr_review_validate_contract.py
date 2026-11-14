@@ -132,6 +132,31 @@ def test_review_template_runs_the_validator_after_writing():
     assert "pr-review-validate.py" in text
 
 
+def test_recomputed_digest_resolves_knowledge_the_way_the_generator_does(tmp_path):
+    def git(*args):
+        subprocess.run(["git", *args], cwd=tmp_path, check=True, capture_output=True, timeout=30)
+
+    doc = tmp_path / ".knowledge" / "architecture" / "overview.md"
+    doc.parent.mkdir(parents=True)
+    doc.write_text("---\nappliesTo:\n  - src/known/**\n---\n# Overview\n", encoding="utf-8")
+    git("init", "-q")
+    git("config", "user.email", "t@example.com")
+    git("config", "user.name", "Test User")
+    git("add", ".")
+    git("commit", "-qm", "base")
+    handler = tmp_path / "src" / "handlers" / "x.py"
+    handler.parent.mkdir(parents=True)
+    handler.write_text("x = 1\n", encoding="utf-8")
+    git("add", ".")
+    git("commit", "-qm", "change")
+    # A P0 file no Knowledge claims, with no tests: 3 + 3 + 1 reaches the high threshold only
+    # when the live Knowledge claims are applied.
+    digest = validator.recompute_digest(tmp_path, "HEAD~1...HEAD")
+    assert digest["knowledge"]["source"] == "live"
+    assert digest["flags"]["unmapped_production"] is True
+    assert digest["rating"] == "high"
+
+
 def test_validator_checks_all_derived_views_for_modern_records(tmp_path):
     review = tmp_path / "pr-7.md"
     review.write_bytes(MODERN_FIXTURE.read_bytes())

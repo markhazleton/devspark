@@ -7,7 +7,7 @@ source_of_truth:
   - scripts/powershell/workitem.ps1
   - scripts/bash/workitem.sh
   - tests/test_workitem_contract.py
-last_verified: 2026-10-13
+last_verified: 2026-11-12
 aliases:
   - work item boundary
   - work tracking integration
@@ -41,9 +41,10 @@ from "the remote system said no" by parsing error text.
 
 ## Propose then apply
 
-Writes are two-phase. A proposal is built and returned for inspection; applying it is a separate,
-explicitly confirmed call. An agent never composes and commits a remote change in one step, which
-is what keeps a human in the loop on anything leaving the repository.
+Updates and creations are two-phase. A proposal is built and returned for inspection; applying it
+is a separate, explicitly confirmed call. A comment has no proposal of its own and is posted only by
+an explicitly confirmed call. An agent never commits a remote change without that confirmation,
+which is what keeps a human in the loop on anything leaving the repository.
 
 ## Concurrency is refused, not resolved
 
@@ -64,9 +65,9 @@ external record is never a reason to make one. Existing items may be read, refer
 
 ## Credentials
 
-The script authenticates for the duration of a call and never persists a credential. Emitted output
-and diagnostics are scrubbed of anything resembling a token or secret before leaving the process,
-and the cleanup runs on every exit path including failure.
+The script uses the caller's signed-in Azure CLI session and never obtains or persists a
+credential. Diagnostics captured from the CLI are scrubbed of anything resembling a token or secret
+before they reach the result, and temporary files are removed on every exit path including failure.
 
 A boundary that writes a credential to disk turns one leaked artifact into standing access to the
 tracking system.
@@ -76,7 +77,8 @@ tracking system.
 Two entry points, one per supported environment, accepting the same operations and emitting the
 same record shape. **They change together, always.** Divergence means a documented instruction
 behaves differently depending on which environment ran it, and that difference surfaces as
-inconsistent remote state rather than as a local error.
+inconsistent remote state rather than as a local error. The PowerShell entry point requires
+PowerShell 7 or later.
 
 ## Offline verification
 

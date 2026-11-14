@@ -107,7 +107,7 @@ Ask only the install-critical question before proceeding:
 
 1. **AI agent** — Which AI agent are you using? (Copilot, Claude Code, Cursor, Windsurf, Gemini CLI, Codex, Roo Code, Amazon Q, or other)
 
-Wait for the answer before continuing. **Both** script sets (PowerShell and Bash) are always installed regardless of OS — no need to ask for a script preference.
+Wait for the answer before continuing. **Both** script sets (PowerShell and Bash) are always installed regardless of OS — no need to ask for a script preference. The PowerShell scripts run on PowerShell 7+ (`pwsh`); Windows PowerShell 5.1 is not supported.
 
 ### Agent Directory Mapping
 

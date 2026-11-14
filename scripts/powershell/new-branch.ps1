@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 # DevSpark - (c) 2026 Make Bold Solutions. Source: https://dev.makeboldspark.com
+#requires -Version 7.0
 # Unified branch-creation entry point.
 # Work branches establish a safe delivery branch without scaffolding a specification.
 [CmdletBinding(PositionalBinding = $false)]
